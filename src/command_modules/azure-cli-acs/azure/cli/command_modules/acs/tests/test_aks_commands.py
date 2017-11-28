@@ -3,31 +3,34 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import tempfile
 import unittest
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, JMESPathCheck,
-                               JMESPathCheckExists)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, RoleBasedServicePrincipalPreparer,
+                               JMESPathCheck, JMESPathCheckExists)
 
 # flake8: noqa
 
 class AzureKubernetesServiceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
-    def test_aks_create_default_service(self, resource_group, resource_group_location):
+
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_default_service(self, resource_group, resource_group_location, sp_name, sp_password):
         # the simplest aks create scenario
-        loc = resource_group_location
-        # override loc to westus2
-        loc = 'westus2'
-        ssh_pubkey_file = self.generate_ssh_keys()
+        ssh_pubkey_file = self.generate_ssh_keys().replace('\\', '\\\\')
         aks_name = self.create_random_name('cliakstest', 16)
         dns_prefix = self.create_random_name('cliaksdns', 16)
 
         # create
-        ssh_pubkey_file = ssh_pubkey_file.replace('\\', '\\\\')
-        create_cmd = 'aks create -g {} -n {} --dns-name-prefix {} --ssh-key-value {} -l {}'
-        self.cmd(create_cmd.format(resource_group, aks_name, dns_prefix, ssh_pubkey_file, loc), checks=[
-            JMESPathCheckExists('properties.fqdn'),
-            JMESPathCheck('properties.provisioningState', 'Succeeded')
+        create_cmd = 'aks create -g {} -n {} --dns-name-prefix {} --ssh-key-value {} -l {} ' \
+                     '--service-principal {} --client-secret {}'
+        self.cmd(
+            create_cmd.format(resource_group, aks_name, dns_prefix, ssh_pubkey_file,
+                              resource_group_location, sp_name, sp_password),
+            checks=[
+                JMESPathCheckExists('properties.fqdn'),
+                JMESPathCheck('properties.provisioningState', 'Succeeded')
         ])
 
         # show
@@ -36,9 +39,28 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             JMESPathCheck('name', aks_name),
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('properties.agentPoolProfiles[0].count', 3),
-            JMESPathCheck('properties.agentPoolProfiles[0].vmSize', 'Standard_D2_v2'),
+            JMESPathCheck('properties.agentPoolProfiles[0].vmSize', 'Standard_D1_v2'),
             JMESPathCheck('properties.dnsPrefix', dns_prefix)
         ])
+
+        # get-credentials
+        fd, temp_path = tempfile.mkstemp()
+        try:
+            self.cmd('aks get-credentials -g {} -n {} -f {}'.format(resource_group, aks_name, temp_path))
+        finally:
+            os.close(fd)
+            os.remove(temp_path)
+
+        # get-credentials to stdout
+        self.cmd('aks get-credentials -g {} -n {} -f -'.format(resource_group, aks_name))
+
+        # get-credentials without directory in path
+        temp_path = 'kubeconfig.tmp'
+        try:
+            self.cmd('aks get-credentials -g {} -n {} -f {}'.format(resource_group, aks_name, temp_path))
+            self.assertGreater(os.path.getsize(temp_path), 0)
+        finally:
+            os.remove(temp_path)
 
         # scale-up
         self.cmd('aks scale -g {} -n {} --node-count 5'.format(resource_group, aks_name), checks=[
@@ -50,23 +72,24 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             JMESPathCheck('properties.agentPoolProfiles[0].count', 5)
         ])
 
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
-    def test_aks_create_with_upgrade(self, resource_group, resource_group_location):
-        loc = resource_group_location
-        # override loc to westus2
-        loc = 'westus2'
-        ssh_pubkey_file = self.generate_ssh_keys()
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    @RoleBasedServicePrincipalPreparer()
+    def test_aks_create_with_upgrade(self, resource_group, resource_group_location, sp_name, sp_password):
+        ssh_pubkey_file = self.generate_ssh_keys().replace('\\', '\\\\')
         aks_name = self.create_random_name('cliakstest', 16)
         dns_prefix = self.create_random_name('cliaksdns', 16)
         original_k8s_version = '1.7.7'
 
         # create
-        ssh_pubkey_file = ssh_pubkey_file.replace('\\', '\\\\')
-        create_cmd = 'aks create -g {} -n {} --dns-name-prefix {} --ssh-key-value {} --kubernetes-version {} -l {}'
-        self.cmd(create_cmd.format(resource_group, aks_name, dns_prefix, ssh_pubkey_file, original_k8s_version, loc),
-                 checks=[
-                     JMESPathCheckExists('properties.fqdn'),
-                     JMESPathCheck('properties.provisioningState', 'Succeeded')])
+        create_cmd = 'aks create -g {} -n {} --dns-name-prefix {} --ssh-key-value {} --kubernetes-version {} -l {} ' \
+                     '--service-principal {} --client-secret {}'
+        self.cmd(
+            create_cmd.format(resource_group, aks_name, dns_prefix, ssh_pubkey_file, original_k8s_version,
+                              resource_group_location, sp_name, sp_password),
+            checks=[
+                JMESPathCheckExists('properties.fqdn'),
+                JMESPathCheck('properties.provisioningState', 'Succeeded')
+        ])
 
         # show
         self.cmd('aks show -g {} -n {}'.format(resource_group, aks_name), checks=[
@@ -74,7 +97,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             JMESPathCheck('name', aks_name),
             JMESPathCheck('resourceGroup', resource_group),
             JMESPathCheck('properties.agentPoolProfiles[0].count', 3),
-            JMESPathCheck('properties.agentPoolProfiles[0].vmSize', 'Standard_D2_v2'),
+            JMESPathCheck('properties.agentPoolProfiles[0].vmSize', 'Standard_D1_v2'),
             JMESPathCheck('properties.dnsPrefix', dns_prefix),
             JMESPathCheck('properties.provisioningState', 'Succeeded'),
             JMESPathCheck('properties.kubernetesVersion', '1.7.7')
