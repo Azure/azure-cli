@@ -5,6 +5,7 @@ Release History
 
 2.0.21
 ++++++
+* add korea south and korea central to preview regions
 * add `az aks install-connector` and `az aks remove-connector` commands
 
 2.0.20

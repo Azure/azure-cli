@@ -75,10 +75,6 @@ helps['aks install-cli'] = """
     type: command
     short-summary: Download and install kubectl, the Kubernetes command line tool.
 """
-helps['aks wait'] = """
-    type: command
-    short-summary: Wait for a Kubernetes cluster to reach a desired state.
-"""
 helps['aks install-connector'] = """
     type: command
     short-summary: Deploy the ACI-Connector to a AKS cluster.
@@ -102,4 +98,8 @@ helps['aks remove-connector'] = """
           text: az aks remove-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector
         - name: Undeploy the ACI-Connector on an AKS cluster using the graceful mode
           text: az aks remove-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector --graceful
+"""
+helps['aks wait'] = """
+    type: command
+    short-summary: Wait for a Kubernetes cluster to reach a desired state.
 """
