@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, JMESPathCheck, record_only
+from azure.cli.testsdk import ScenarioTest, record_only
 
 
 class AzureBillingServiceScenarioTest(ScenarioTest):
@@ -26,8 +26,10 @@ class AzureBillingServiceScenarioTest(ScenarioTest):
         self.assertTrue(invoices_list)
         self._validate_invoice(invoices_list[0], False)
         # get
-        invoice_name = invoices_list[0]['name']
-        invoice = self.cmd('billing invoice show -n {}'.format(invoice_name)).get_output_in_json()
+        self.kwargs.update({
+            'invoice_name': invoices_list[0]['name']
+        })
+        invoice = self.cmd('billing invoice show -n {invoice_name}').get_output_in_json()
         self._validate_invoice(invoice, True)
 
     @record_only()
@@ -49,4 +51,7 @@ class AzureBillingServiceScenarioTest(ScenarioTest):
         self.assertTrue(periods_list)
         # get
         period_name = periods_list[0]['name']
-        self.cmd('billing period show -n {}'.format(period_name), checks=JMESPathCheck('name', period_name))
+        self.kwargs.update({
+            'period_name': period_name
+        })
+        self.cmd('billing period show -n {period_name}', checks=self.check('name', period_name))
