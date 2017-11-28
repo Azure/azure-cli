@@ -157,7 +157,7 @@ class _DateAPIFormat(object):
         return False
 
 
-def supported_api_version(api_profile, resource_type, min_api=None, max_api=None):
+def supported_api_version(api_profile, resource_type, min_api=None, max_api=None, operation_group=None):
     """
     Returns True if current API version for the resource type satisfies min/max range.
     To compare profile versions, set resource type to None.
@@ -170,6 +170,8 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
         raise ValueError('At least a min or max version must be specified')
     api_version_str = get_api_version(api_profile, resource_type) \
         if isinstance(resource_type, ResourceType) else api_profile
+    if isinstance(api_version_str, SDKProfile):
+        api_version_str = api_version_str.profile.get(operation_group, api_version_str.default_api_version)
     api_version = _DateAPIFormat(api_version_str)
     if min_api and api_version < _DateAPIFormat(min_api):
         return False
