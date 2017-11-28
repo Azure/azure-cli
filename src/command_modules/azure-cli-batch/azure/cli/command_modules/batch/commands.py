@@ -3,14 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import cli_command
 from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 from azure.cli.core.sdk.util import CliCommandType
 
 from azure.cli.command_modules.batch import _client_factory as factories
-from azure.cli.command_modules.batch._command_type import cli_batch_data_plane_command
 from azure.cli.command_modules.batch._validators import (
     validate_pool_settings, validate_cert_settings)
+from azure.cli.command_modules.batch._exception_handler import batch_exception_handler
 from azure.cli.command_modules.batch._format import (
     job_list_table_format,
     task_create_table_format,
@@ -19,29 +18,6 @@ from azure.cli.command_modules.batch._format import (
     application_list_table_format,
     account_keys_renew_table_format)
 
-COMMON_IGNORE = [
-    'job_preparation_task',
-    'job_release_task',
-    'auto_pool_specification',
-    'on_task_failure',
-    'job_specification.constraints',
-    'job_specification.metadata',
-    'job_manager_task.kill_job_on_completion',
-    'job_manager_task.run_exclusive',
-    'job_manager_task.constraints',
-    'job_manager_task.allow_low_priority_node',
-    'virtual_machine_configuration.windows_configuration',
-    'virtual_machine_configuration.os_disk',
-    'virtual_machine_configuration.container_configuration',
-    'virtual_machine_configuration.license_type',
-    'task_scheduling_policy',
-    'container_settings',
-    'user_identity',
-    'network_configuration',
-    'target_os_version',
-    'auto_scale_evaluation_interval',
-    'enable_auto_scale'
-]
 
 def _operation(name):
     return "".join(x.title() for x in name.split('_')) + "Operations"
@@ -50,147 +26,144 @@ def _operation(name):
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
 def load_command_table(self, _):
 
-    if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
-        data_path = 'azure.batch.operations.{}_operations#{}.'
-        custom_path = 'azure.cli.command_modules.batch.custom#{}.'
-        mgmt_path = 'azure.mgmt.batch.operations.{}_operations#{}.'
+    data_path = 'azure.batch.operations.{}_operations#{}.'
+    mgmt_path = 'azure.mgmt.batch.operations.{}_operations#{}.'
 
-        def get_data_type(name):
-            factory = getattr(factories, "{}_client_factory".format(name))
-            return CliCommandType(
-                operations_tmpl=data_path.format(name, _operation(name)),
-                client_factory=factory
-            )
+    def get_data_type(name):
+        factory = getattr(factories, "{}_client_factory".format(name))
+        return CliCommandType(
+            operations_tmpl=data_path.format(name, _operation(name)) + "{}",
+            client_factory=factory,
+            exception_handler=batch_exception_handler
+        )
 
-        def get_mgmt_type(name, factory):
-            factory = getattr(factories, "mgmt_{}_client_factory".format(name))
-            return CliCommandType(
-                operations_tmpl=mgmt_path.format(name, _operation(name)),
-                client_factory=factory
-            )
+    def get_mgmt_type(name):
+        factory = getattr(factories, "mgmt_{}_client_factory".format(name))
+        return CliCommandType(
+            operations_tmpl=mgmt_path.format(name, _operation(name)) + "{}",
+            client_factory=factory,
+            exception_handler=batch_exception_handler
+        )
 
-        # Mgmt Account Operations
-        with self.command_group('batch account', get_mgmt_type('batch_account')) as g:
-            g.custom_command('list', 'list_accounts', table_transformer=account_list_table_format))
-            g.command('show', 'get')
-            g.custom_command('create', 'create_account', no_wait_param='no_wait')
-            g.custom_command('set', 'update_account')
-            g.command('delete', 'delete', no_wait_param='no_wait', confirmation=True)
-            g.custom_command('login', 'login_account')
-            g.command('autostorage-keys sync', 'synchronize_auto_storage_keys')
-            g.command('keys list', 'get_keys', table_transformer=account_keys_list_table_format)
-            g.command('keys renew', 'regenerate_key', table_transformer=account_keys_renew_table_format)
+    # Mgmt Account Operations
+    with self.command_group('batch account', get_mgmt_type('batch_account')) as g:
+        g.custom_command('list', 'list_accounts', table_transformer=account_list_table_format)
+        g.command('show', 'get')
+        g.custom_command('create', 'create_account', no_wait_param='no_wait')
+        g.custom_command('set', 'update_account')
+        g.command('delete', 'delete', no_wait_param='no_wait', confirmation=True)
+        g.custom_command('login', 'login_account')
+        g.command('autostorage-keys sync', 'synchronize_auto_storage_keys')
+        g.command('keys list', 'get_keys', table_transformer=account_keys_list_table_format)
+        g.command('keys renew', 'regenerate_key', table_transformer=account_keys_renew_table_format)
 
-        with self.command_group('batch application', get_mgmt_type('application')) as g:
-            g.command('list', 'list', table_transformer=application_list_table_format)
-            g.command('show', 'get')
-            g.command('create', 'create')
-            g.custom_command('set', 'update_application')
-            g.command('delete', 'delete', confirmation=True)
+    with self.command_group('batch application', get_mgmt_type('application')) as g:
+        g.command('list', 'list', table_transformer=application_list_table_format)
+        g.command('show', 'get')
+        g.command('create', 'create')
+        g.custom_command('set', 'update_application')
+        g.command('delete', 'delete', confirmation=True)
 
-        with self.command_group('batch application package', get_mgmt_type('application_package'))as g:
-            g.custom_command('create', 'create_application_package')
-            g.command('delete', 'delete', confirmation=True)
-            g.command('show', 'get')
-            g.command('activate', 'activate')
+    with self.command_group('batch application package', get_mgmt_type('application_package'))as g:
+        g.custom_command('create', 'create_application_package')
+        g.command('delete', 'delete', confirmation=True)
+        g.command('show', 'get')
+        g.command('activate', 'activate')
 
-        with self.command_group('batch location quotas', get_mgmt_type('location')) as g:
-            g.command('show', 'get_quotas')
+    with self.command_group('batch location quotas', get_mgmt_type('location')) as g:
+        g.command('show', 'get_quotas')
 
 
-        # Data Plane Commands
-        with self.command_group('batch application summary', get_data_type('application')) as g:
-            g.batch_command('list', 'list')
-            g.batch_command('show', 'get')
+    # Data Plane Commands
+    with self.command_group('batch application summary', get_data_type('application')) as g:
+        g.batch_command('list', 'list')
+        g.batch_command('show', 'get')
 
-        with self.command_group('batch pool node-agent-skus', get_data_type('account')) as g:
-            g.batch_command('list', 'list_node_agent_skus')
+    with self.command_group('batch pool node-agent-skus', get_data_type('account')) as g:
+        g.batch_command('list', 'list_node_agent_skus')
 
-        with self.command_group('batch certificate', get_data_type('certificate')) as g:
-            g.custom_command('create', 'create_certificate')
-            g.custom_command('delete', 'delete_certificate', confirmation=True)
-            g.batch_command('show', 'get', validator=validate_cert_settings)
-            g.batch_command('list', 'list')
+    with self.command_group('batch certificate', get_data_type('certificate')) as g:
+        g.custom_command('create', 'create_certificate')
+        g.custom_command('delete', 'delete_certificate', confirmation=True)
+        g.batch_command('show', 'get', validator=validate_cert_settings)
+        g.batch_command('list', 'list')
 
-        pool_type = get_data_type('pool')
-        with self.command_group('batch pool', pool_type) as g:
-            g.batch_command('usage-metrics list', 'list_usage_metrics')
-            g.batch_command('all-statistics show', 'get_all_lifetime_statistics')
-            g.batch_command('create', 'add',
-                            validator=validate_pool_settings,
-                            ignore=COMMON_IGNORE,
-                            silent=['pool.virtual_machine_configuration.image_reference'])
-            g.batch_command('list', 'list')
-            g.batch_command('delete', 'delete')
-            g.batch_command('show', 'get')
-            g.batch_command('set', 'patch', ignore=COMMON_IGNORE)
-            g.custom_command('reset', 'update_pool')
-            g.batch_command('autoscale disable', 'disable_auto_scale')
-            g.batch_command('autoscale enable', 'enable_auto_scale')
-            g.batch_command('autoscale evaluate', 'evaluate_auto_scale')
-            g.custom_command('resize', 'resize_pool')
-            g.batch_command('os upgrade', 'upgrade_os')
+    pool_type = get_data_type('pool')
+    with self.command_group('batch pool', pool_type) as g:
+        g.batch_command('usage-metrics list', 'list_usage_metrics')
+        g.batch_command('all-statistics show', 'get_all_lifetime_statistics')
+        g.batch_command('create', 'add', validator=validate_pool_settings)
+        g.batch_command('list', 'list')
+        g.batch_command('delete', 'delete')
+        g.batch_command('show', 'get')
+        g.batch_command('set', 'patch')
+        g.custom_command('reset', 'update_pool')
+        g.batch_command('autoscale disable', 'disable_auto_scale')
+        g.batch_command('autoscale enable', 'enable_auto_scale')
+        g.batch_command('autoscale evaluate', 'evaluate_auto_scale')
+        g.custom_command('resize', 'resize_pool')
+        g.batch_command('os upgrade', 'upgrade_os')
 
-        with self.command_group('batch node', pool_type) as g:
-            g.batch_command('delete', 'remove_nodes')
+    with self.command_group('batch node', pool_type) as g:
+        g.batch_command('delete', 'remove_nodes')
 
-        with self.command_group('batch job', get_data_type('job')) as g:
-            g.batch_command('all-statistics show', 'get_all_lifetime_statistics')
-            g.batch_command('create', 'add', ignore=COMMON_IGNORE)
-            g.batch_command('delete', 'delete')
-            g.batch_command('show', 'get')
-            g.batch_command('set', 'patch', flatten=2)
-            g.batch_command('reset', 'update', flatten=2)
-            g.custom_command('list', 'list_job', table_transformer=job_list_table_format)
-            g.batch_command('disable', 'disable')
-            g.batch_command('enable', 'enable')
-            g.batch_command('stop', 'terminate')
-            g.batch_command('prep-release-status list', 'list_preparation_and_release_task_status')
-            g.batch_command('task-counts show', 'get_task_counts')
+    with self.command_group('batch job', get_data_type('job')) as g:
+        g.batch_command('all-statistics show', 'get_all_lifetime_statistics')
+        g.batch_command('create', 'add')
+        g.batch_command('delete', 'delete')
+        g.batch_command('show', 'get')
+        g.batch_command('set', 'patch', flatten=2)
+        g.batch_command('reset', 'update', flatten=2)
+        g.custom_command('list', 'list_job', table_transformer=job_list_table_format)
+        g.batch_command('disable', 'disable')
+        g.batch_command('enable', 'enable')
+        g.batch_command('stop', 'terminate')
+        g.batch_command('prep-release-status list', 'list_preparation_and_release_task_status')
+        g.batch_command('task-counts show', 'get_task_counts')
 
-        with self.command_group('batch job-schedule', get_data_type('job_schedule')) as g:
-            g.batch_command('create', 'add', ignore=COMMON_IGNORE)
-            g.batch_command('delete', 'delete')
-            g.batch_command('show', 'get')
-            g.batch_command('set', 'patch', ignore=COMMON_IGNORE)
-            g.batch_command('reset', 'update', ignore=COMMON_IGNORE)
-            g.batch_command('disable', 'disable')
-            g.batch_command('enable', 'enable')
-            g.batch_command('stop', 'terminate')
-            g.batch_command('list', 'list')
+    with self.command_group('batch job-schedule', get_data_type('job_schedule')) as g:
+        g.batch_command('create', 'add')
+        g.batch_command('delete', 'delete')
+        g.batch_command('show', 'get')
+        g.batch_command('set', 'patch')
+        g.batch_command('reset', 'update')
+        g.batch_command('disable', 'disable')
+        g.batch_command('enable', 'enable')
+        g.batch_command('stop', 'terminate')
+        g.batch_command('list', 'list')
 
-        with self.command_group('batch task', get_data_type('task')) as g:
-            g.custom_command('create', 'create_task', table_transformer=task_create_table_format)
-            g.batch_command('list', 'list')
-            g.batch_command('delete', 'delete')
-            g.batch_command('show', 'get')
-            g.batch_command('reset', 'update')
-            g.batch_command('reactivate', 'reactivate')
-            g.batch_command('stop', 'terminate')
-            g.batch_command('subtask list', 'list_subtasks')
+    with self.command_group('batch task', get_data_type('task')) as g:
+        g.custom_command('create', 'create_task', table_transformer=task_create_table_format)
+        g.batch_command('list', 'list')
+        g.batch_command('delete', 'delete')
+        g.batch_command('show', 'get')
+        g.batch_command('reset', 'update')
+        g.batch_command('reactivate', 'reactivate')
+        g.batch_command('stop', 'terminate')
+        g.batch_command('subtask list', 'list_subtasks')
 
-        file_type = get_data_type('file')
-        with self.command_group('batch task file', file_type) as g:
-            g.batch_command('delete', 'delete_from_task')
-            g.batch_command('download', 'get_from_task')
-            g.batch_command('show', 'get_properties_from_task')
-            g.batch_command('list', 'list_from_task')
+    file_type = get_data_type('file')
+    with self.command_group('batch task file', file_type) as g:
+        g.batch_command('delete', 'delete_from_task')
+        g.batch_command('download', 'get_from_task')
+        g.batch_command('show', 'get_properties_from_task')
+        g.batch_command('list', 'list_from_task')
 
-        with self.command_group('batch node file', file_type) as g:
-            g.batch_command('delete', 'delete_from_compute_node')
-            g.batch_command('download', 'get_from_compute_node')
-            g.batch_command('show', 'get_properties_from_compute_node')
-            g.batch_command('list', 'list_from_compute_node')
+    with self.command_group('batch node file', file_type) as g:
+        g.batch_command('delete', 'delete_from_compute_node')
+        g.batch_command('download', 'get_from_compute_node')
+        g.batch_command('show', 'get_properties_from_compute_node')
+        g.batch_command('list', 'list_from_compute_node')
 
-        with self.command_group('batch node', get_data_type('compute_node')) as g:
-            g.batch_command('user create', 'add_user')
-            g.batch_command('user delete', 'delete_user')
-            g.batch_command('user reset', 'update_user')
-            g.batch_command('show', 'get')
-            g.batch_command('list', 'list')
-            g.batch_command('reboot', 'reboot')
-            g.batch_command('reimage', 'reimage')
-            g.batch_command('scheduling disable', 'disable_scheduling')
-            g.batch_command('scheduling enable', 'enable_scheduling')
-            g.batch_command('remote-login-settings show', 'get_remote_login_settings')
-            g.batch_command('remote-desktop download', 'get_remote_deskop')
+    with self.command_group('batch node', get_data_type('compute_node')) as g:
+        g.batch_command('user create', 'add_user')
+        g.batch_command('user delete', 'delete_user')
+        g.batch_command('user reset', 'update_user')
+        g.batch_command('show', 'get')
+        g.batch_command('list', 'list')
+        g.batch_command('reboot', 'reboot')
+        g.batch_command('reimage', 'reimage')
+        g.batch_command('scheduling disable', 'disable_scheduling')
+        g.batch_command('scheduling enable', 'enable_scheduling')
+        g.batch_command('remote-login-settings show', 'get_remote_login_settings')
+        g.batch_command('remote-desktop download', 'get_remote_desktop')
