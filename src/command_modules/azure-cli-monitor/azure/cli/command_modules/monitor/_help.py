@@ -12,8 +12,6 @@ helps['monitor'] = """
     short-summary: Manage the Azure Monitor Service.
 """
 
-# region Alerts
-
 helps['monitor alert'] = """
     type: group
     short-summary: Manage metric-based alert rules.
@@ -126,10 +124,6 @@ helps['monitor alert list-incidents'] = """
     short-summary: List all incidents for an alert rule.
     """
 
-# endregion
-
-# region Metrics
-
 helps['monitor metrics'] = """
     type: group
     short-summary: View Azure resource metrics.
@@ -137,12 +131,70 @@ helps['monitor metrics'] = """
 
 helps['monitor metrics list'] = """
     type: command
-    short-summary: List metric values for a resource.
+    short-summary: List the metric values for a resource.
+    parameters:
+        - name: --aggregation
+          type: string
+          short-summary: The list of aggregation types (space separated) to retrieve.
+        - name: --interval
+          type: string
+          short-summary: The interval of the metric query. In ISO 8601 duration format, eg "PT1M"
+        - name: --start-time
+          type: string
+          short-summary: The start time of the query. In ISO format with explicit indication of timezone,
+                         1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to 1 Hour prior to the current time.
+        - name: --end-time
+          type: string
+          short-summary: The end time of the query. In ISO format with explicit indication of timezone,
+                         1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to current time.
+        - name: --filter
+          type: string
+          short-summary: A string used to reduce the set of metric data returned. eg. "BlobType eq '*'"
+        - name: --metadata
+          short-summary: Returns the metadata values instead of metric data
+        - name: --dimension
+          type: string
+          short-summary: The list of dimensions (space separated) the metrics are queried into.
+    examples:
+        - name: List a VM's CPU usage for the past hour
+          text: >
+              az monitor metrics list --resource <resource id> --metric "Percentage CPU"
+        - name: List success E2E latency of a storage account and split the data series based on API name
+          text: >
+              az monitor metrics list --resource <resource id> --metric SuccessE2ELatency \\
+                                      --dimension ApiName
+        - name: List success E2E latency of a storage account and split the data series based on both API name and geo type
+          text: >
+              az monitor metrics list --resource <resource id> --metric SuccessE2ELatency \\
+                                      --dimension ApiName GeoType
+        - name: List success E2E latency of a storage account and split the data series based on both API name and geo type using "--filter" parameter
+          text: >
+              az monitor metrics list --resource <resource id> --metric SuccessE2ELatency \\
+                                      --filter "ApiName eq '*' and GeoType eq '*'"
+        - name: List success E2E latency of a storage account and split the data series based on both API name and geo type. Limits the api name to 'DeleteContainer'
+          text: >
+              az monitor metrics list --resource <resource id> --metric SuccessE2ELatency \\
+                                      --filter "ApiName eq 'DeleteContainer' and GeoType eq '*'"
+              Filter string reference: https://docs.microsoft.com/en-us/rest/api/monitor/metrics/list
+        - name: List transactions of a storage account per day since 2017-01-01
+          text: >
+              az monitor metrics list --resource <resource id> --metric Transactions \\
+                                      --start-time 2017-01-01T00:00:00Z \\
+                                      --interval PT24H
+        - name: List the metadata values for a storage account under transaction metric's api name dimension since 2017
+          text: >
+              az monitor metrics list --resource <resource id> --metric Transactions \\
+                                      --filter "ApiName eq '*'" \\
+                                      --start-time 2017-01-01T00:00:00Z
 """
 
 helps['monitor metrics list-definitions'] = """
     type: command
-    short-summary: List metric definitions for a resource.
+    short-summary: Lists the metric definitions for the resource.
+    parameters:
+        - name: --metric-names
+          type: string
+          short-summary: The list of the metrics definitions to be shown.
 """
 
 # endregion
@@ -172,6 +224,10 @@ helps['monitor diagnostic-settings create'] = """
                 - name: --logs
                   type: string
                   short-summary: JSON encoded list of logs settings. Use @{file} to load from a file.
+                - name: --event-hub-name
+                  type: string
+                  short-summary: The name of the event hub. If none is specified, the default event hub will be
+                                 selected.
                 - name: --metrics
                   type: string
                   short-summary: JSON encoded list of metric settings. Use @{file} to load from a file.
