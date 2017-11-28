@@ -199,7 +199,7 @@ def get_client_class(resource_type):
     return _get_attr(resource_type.import_prefix, '#' + resource_type.client_name)
 
 
-def get_versioned_sdk_path(api_profile, resource_type, operation_group):
+def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
     """ Patch the unversioned sdk path to include the appropriate API version for the
         resource type in question.
         e.g. Converts azure.mgmt.storage.operations.storage_accounts_operations to
