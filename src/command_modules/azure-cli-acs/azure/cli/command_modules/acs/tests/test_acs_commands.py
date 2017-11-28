@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import tempfile
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer,
@@ -11,24 +12,20 @@ from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer,
 # flake8: noqa
 
 class AzureContainerServiceScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
-    def test_acs_create_default_service(self, resource_group, resource_group_location):
-        loc = resource_group_location
-        # override loc to westus2
-        loc = 'westus2'
-        ssh_pubkey_file = self.generate_ssh_keys()
 
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
+    def test_acs_create_default_service(self, resource_group, resource_group_location):
+        ssh_pubkey_file = self.generate_ssh_keys().replace('\\', '\\\\')
         acs_name = self.create_random_name('cliacstest', 16)
         dns_prefix = self.create_random_name('cliacsdns', 16)
 
         # create
-        ssh_pubkey_file = ssh_pubkey_file.replace('\\', '\\\\')
         create_cmd = 'acs create -g {} -n {} --dns-prefix {} --ssh-key-value {} -l {}'
-        self.cmd(create_cmd.format(resource_group, acs_name, dns_prefix, ssh_pubkey_file, loc),
+        self.cmd(create_cmd.format(resource_group, acs_name, dns_prefix, ssh_pubkey_file, resource_group_location),
                  checks=[JMESPathCheck('properties.outputs.masterFQDN.value',
-                                       '{}mgmt.{}.cloudapp.azure.com'.format(dns_prefix, loc)),
+                                       '{}mgmt.{}.cloudapp.azure.com'.format(dns_prefix, resource_group_location)),
                          JMESPathCheck('properties.outputs.agentFQDN.value',
-                                       '{}agent.{}.cloudapp.azure.com'.format(dns_prefix, loc))])
+                                       '{}agent.{}.cloudapp.azure.com'.format(dns_prefix, resource_group_location))])
 
         # show
         self.cmd('acs show -g {} -n {}'.format(resource_group, acs_name), checks=[
@@ -50,7 +47,7 @@ class AzureContainerServiceScenarioTest(ScenarioTest):
     # the length is set to avoid following error:
     # Resource name k8s-master-ip-cliacstestgae47e-clitestdqdcoaas25vlhygb2aktyv4-c10894mgmt-D811C917
     # is invalid. The name can be up to 80 characters long.
-    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest')
+    @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
     def test_acs_create_kubernetes(self, resource_group, sp_name, sp_password):
         acs_name = self.create_random_name('acs', 14)
@@ -59,6 +56,7 @@ class AzureContainerServiceScenarioTest(ScenarioTest):
               '--client-secret {} --ssh-key-value {}'
         self.cmd(cmd.format(resource_group, acs_name, sp_name, sp_password, ssh_pubkey_file),
                  checks=[JMESPathCheck('properties.provisioningState', 'Succeeded')])
+
 
     @classmethod
     def generate_ssh_keys(cls):
