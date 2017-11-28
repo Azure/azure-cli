@@ -82,7 +82,7 @@ def _mock_get_mgmt_service_client(client_type,
     if api_version:
         client_kwargs['api_version'] = api_version
     if sdk_profile:
-        client_kwargs['profile'] = sdk_profile        
+        client_kwargs['profile'] = sdk_profile
     if kwargs:
         client_kwargs.update(kwargs)
 
