@@ -2234,6 +2234,16 @@ class VMZoneScenarioTest(ScenarioTest):
         table_output = set(result.output.splitlines()[2].split())
         self.assertTrue(set([resource_group, resource_group_location, disk_name, zones]).issubset(table_output))
 
+    def test_list_skus_contains_zone_info(self):
+        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = 2048
+        # we pick eastus2 as it is one of 3 regions so far with zone support
+        location = 'eastus2'
+        result = self.cmd('vm list-skus -otable -l {} -otable'.format(location))
+        self.assertTrue(next(l for l in result.output.splitlines() if '1,2,3' in l).split()[-1] == '1,2,3')
+
 
 class VMRunCommandScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()

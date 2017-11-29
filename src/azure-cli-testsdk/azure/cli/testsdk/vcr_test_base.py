@@ -69,6 +69,7 @@ def _mock_get_mgmt_service_client(client_type,
                                   api_version=None,
                                   base_url_bound=None,
                                   resource=CLOUD.endpoints.active_directory_resource_id,
+                                  sdk_profile=None,
                                   **kwargs):
     # version of _get_mgmt_service_client to use when recording or playing tests
     profile = Profile()
@@ -80,6 +81,8 @@ def _mock_get_mgmt_service_client(client_type,
         client_kwargs = {'base_url': CLOUD.endpoints.resource_manager}
     if api_version:
         client_kwargs['api_version'] = api_version
+    if sdk_profile:
+        client_kwargs['profile'] = sdk_profile
     if kwargs:
         client_kwargs.update(kwargs)
 

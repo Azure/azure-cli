@@ -18,18 +18,20 @@ API_PROFILES = {
 }
 
 
-def get_api_version(resource_type):
+def get_api_version(resource_type, operation_group=None, as_sdk_profile=False):
     """ Get the current API version for a given resource_type.
 
     :param resource_type: The resource type.
     :type resource_type: ResourceType.
+    :param str operation_group: The operation group.
+    :param bool as_sdk_profile: Return SDKProfile instance.
     :returns:  str -- The API version.
     """
     from azure.cli.core._profile import CLOUD
-    return _sdk_get_api_version(CLOUD.profile, resource_type)
+    return _sdk_get_api_version(CLOUD.profile, resource_type, operation_group, as_sdk_profile)
 
 
-def supported_api_version(resource_type, min_api=None, max_api=None):
+def supported_api_version(resource_type, min_api=None, max_api=None, operation_group=None):
     """ Method to check if the current API version for a given resource_type is supported.
         If resource_type is set to None, the current profile version will be used as the basis of
         the comparison.
@@ -37,14 +39,15 @@ def supported_api_version(resource_type, min_api=None, max_api=None):
     :param resource_type: The resource type.
     :type resource_type: ResourceType.
     :param min_api: The minimum API that is supported (inclusive). Omit for no minimum constraint.
-    "type min_api: str
+    :type min_api: str
     :param max_api: The maximum API that is supported (inclusive). Omit for no maximum constraint.
-    "type max_api: str
+    :type max_api: str
+    :param str operation_group: The operation group.
     :returns:  bool -- True if the current API version of resource_type satisfies the
                        min/max constraints. False otherwise.
     """
     from azure.cli.core._profile import CLOUD
-    return _sdk_supported_api_version(CLOUD.profile, resource_type, min_api, max_api)
+    return _sdk_supported_api_version(CLOUD.profile, resource_type, min_api, max_api, operation_group)
 
 
 def get_sdk(resource_type, *attr_args, **kwargs):
@@ -53,6 +56,7 @@ def get_sdk(resource_type, *attr_args, **kwargs):
             checked - A boolean specifying if this method should suppress/check import exceptions
                       or not. By default, None is returned.
             mod - A string specifying the submodule that all attr_args should be prefixed with.
+            rt - A string specifying the operation group name we want models.
 
         Example usage:
             Get a single SDK model.
@@ -68,6 +72,11 @@ def get_sdk(resource_type, *attr_args, **kwargs):
                                       'File',
                                       'Directory',
                                       mod='file.models')
+
+            VirtualMachine = get_sdk(resource_type,
+                                     'VirtualMachine',
+                                     mod='models',
+                                     rt='virtual_machines')
 
     :param resource_type: The resource type.
     :type resource_type: ResourceType.

@@ -10,7 +10,7 @@ import azure.cli.core._debug as _debug
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 from azure.cli.core.application import APPLICATION
-from azure.cli.core.profiles._shared import get_client_class
+from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import get_api_version, get_sdk, ResourceType
 
 logger = azlogging.get_az_logger(__name__)
@@ -21,15 +21,19 @@ ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
 def get_mgmt_service_client(client_or_resource_type, subscription_id=None, api_version=None,
                             **kwargs):
+    sdk_profile = None
     if isinstance(client_or_resource_type, ResourceType):
         # Get the versioned client
         client_type = get_client_class(client_or_resource_type)
-        api_version = api_version or get_api_version(client_or_resource_type)
+        api_version = api_version or get_api_version(client_or_resource_type, as_sdk_profile=True)
+        if isinstance(api_version, SDKProfile):
+            sdk_profile = api_version.profile
+            api_version = api_version.default_api_version
     else:
         # Get the non-versioned client
         client_type = client_or_resource_type
     client, _ = _get_mgmt_service_client(client_type, subscription_id=subscription_id,
-                                         api_version=api_version, **kwargs)
+                                         api_version=api_version, sdk_profile=sdk_profile, **kwargs)
     return client
 
 
@@ -72,6 +76,7 @@ def _get_mgmt_service_client(client_type,
                              api_version=None,
                              base_url_bound=True,
                              resource=CLOUD.endpoints.active_directory_resource_id,
+                             sdk_profile=None,
                              **kwargs):
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
     profile = Profile()
@@ -82,6 +87,8 @@ def _get_mgmt_service_client(client_type,
         client_kwargs = {'base_url': CLOUD.endpoints.resource_manager}
     if api_version:
         client_kwargs['api_version'] = api_version
+    if sdk_profile:
+        client_kwargs['profile'] = sdk_profile
     if kwargs:
         client_kwargs.update(kwargs)
 
