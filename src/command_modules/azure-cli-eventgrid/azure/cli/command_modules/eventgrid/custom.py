@@ -3,7 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.core.azlogging as azlogging
+from six.moves.urllib.parse import quote  # pylint: disable=import-error
+from knack.log import get_logger
+
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.mgmt.eventgrid.models import (
     EventSubscription,
@@ -11,9 +13,9 @@ from azure.mgmt.eventgrid.models import (
     EventHubEventSubscriptionDestination,
     EventSubscriptionFilter)
 
-from six.moves.urllib.parse import quote  # pylint: disable=import-error
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
+
 EVENTGRID_NAMESPACE = "Microsoft.EventGrid"
 RESOURCES_NAMESPACE = "Microsoft.Resources"
 RESOURCE_TYPE_SUBSCRIPTIONS = "subscriptions"
@@ -33,6 +35,7 @@ def cli_topic_list(
 
 
 def cli_eventgrid_event_subscription_topic_create(
+        cmd,
         client,
         resource_group_name,
         topic_name,
@@ -45,6 +48,7 @@ def cli_eventgrid_event_subscription_topic_create(
         is_subject_case_sensitive=False,
         labels=None):
     return _event_subscription_create(
+        cmd.cli_ctx,
         client,
         resource_group_name,
         EVENTGRID_NAMESPACE,
@@ -61,11 +65,13 @@ def cli_eventgrid_event_subscription_topic_create(
 
 
 def cli_eventgrid_event_subscription_topic_get(
+        cmd,
         client,
         resource_group_name,
         topic_name,
         event_subscription_name):
     return _event_subscription_get(
+        cmd.cli_ctx,
         client,
         resource_group_name,
         EVENTGRID_NAMESPACE,
@@ -75,11 +81,13 @@ def cli_eventgrid_event_subscription_topic_get(
 
 
 def cli_eventgrid_event_subscription_topic_get_full_url(
+        cmd,
         client,
         resource_group_name,
         topic_name,
         event_subscription_name):
     return _event_subscription_get_full_url(
+        cmd.cli_ctx,
         client,
         resource_group_name,
         EVENTGRID_NAMESPACE,
@@ -89,11 +97,13 @@ def cli_eventgrid_event_subscription_topic_get_full_url(
 
 
 def cli_eventgrid_event_subscription_topic_delete(
+        cmd,
         client,
         resource_group_name,
         topic_name,
         event_subscription_name):
     _event_subscription_delete(
+        cmd.cli_ctx,
         client,
         resource_group_name,
         EVENTGRID_NAMESPACE,
@@ -103,6 +113,7 @@ def cli_eventgrid_event_subscription_topic_delete(
 
 
 def cli_eventgrid_event_subscription_resource_create(
+        cmd,
         client,
         resource_group_name,
         provider_namespace,
@@ -117,6 +128,7 @@ def cli_eventgrid_event_subscription_resource_create(
         is_subject_case_sensitive=False,
         labels=None):
     return _event_subscription_create(
+        cmd.cli_ctx,
         client,
         resource_group_name,
         provider_namespace,
@@ -133,6 +145,7 @@ def cli_eventgrid_event_subscription_resource_create(
 
 
 def cli_eventgrid_event_subscription_resource_get(
+        cmd,
         client,
         resource_group_name,
         provider_namespace,
@@ -140,6 +153,7 @@ def cli_eventgrid_event_subscription_resource_get(
         resource_name,
         event_subscription_name):
     return _event_subscription_get(
+        cmd.cli_ctx,
         client,
         resource_group_name,
         provider_namespace,
@@ -149,6 +163,7 @@ def cli_eventgrid_event_subscription_resource_get(
 
 
 def cli_eventgrid_event_subscription_resource_get_full_url(
+        cmd,
         client,
         resource_group_name,
         provider_namespace,
@@ -156,6 +171,7 @@ def cli_eventgrid_event_subscription_resource_get_full_url(
         resource_name,
         event_subscription_name):
     return _event_subscription_get_full_url(
+        cmd.cli_ctx,
         client,
         resource_group_name,
         provider_namespace,
@@ -165,6 +181,7 @@ def cli_eventgrid_event_subscription_resource_get_full_url(
 
 
 def cli_eventgrid_event_subscription_resource_delete(
+        cmd,
         client,
         resource_group_name,
         provider_namespace,
@@ -172,6 +189,7 @@ def cli_eventgrid_event_subscription_resource_delete(
         resource_name,
         event_subscription_name):
     _event_subscription_delete(
+        cmd.cli_ctx,
         client,
         resource_group_name,
         provider_namespace,
@@ -181,6 +199,7 @@ def cli_eventgrid_event_subscription_resource_delete(
 
 
 def cli_eventgrid_event_subscription_arm_create(
+        cmd,
         client,
         event_subscription_name,
         endpoint,
@@ -191,9 +210,10 @@ def cli_eventgrid_event_subscription_arm_create(
         subject_ends_with=None,
         is_subject_case_sensitive=False,
         labels=None):
-    resource_type, resource_name = _get_arm_resource_info(resource_group_name)
+    resource_type, resource_name = _get_arm_resource_info(cmd.cli_ctx, resource_group_name)
 
     return _event_subscription_create(
+        cmd.cli_ctx,
         client,
         resource_group_name,
         RESOURCES_NAMESPACE,
@@ -210,12 +230,14 @@ def cli_eventgrid_event_subscription_arm_create(
 
 
 def cli_eventgrid_event_subscription_arm_get(
+        cmd,
         client,
         event_subscription_name,
         resource_group_name=None):
-    resource_type, resource_name = _get_arm_resource_info(resource_group_name)
+    resource_type, resource_name = _get_arm_resource_info(cmd.cli_ctx, resource_group_name)
 
     return _event_subscription_get(
+        cmd.cli_ctx,
         client,
         resource_group_name,
         RESOURCES_NAMESPACE,
@@ -225,12 +247,14 @@ def cli_eventgrid_event_subscription_arm_get(
 
 
 def cli_eventgrid_event_subscription_arm_get_full_url(
+        cmd,
         client,
         event_subscription_name,
         resource_group_name=None):
-    resource_type, resource_name = _get_arm_resource_info(resource_group_name)
+    resource_type, resource_name = _get_arm_resource_info(cmd.cli_ctx, resource_group_name)
 
     return _event_subscription_get_full_url(
+        cmd.cli_ctx,
         client,
         resource_group_name,
         RESOURCES_NAMESPACE,
@@ -240,12 +264,14 @@ def cli_eventgrid_event_subscription_arm_get_full_url(
 
 
 def cli_eventgrid_event_subscription_arm_delete(
+        cmd,
         client,
         event_subscription_name,
         resource_group_name=None):
-    resource_type, resource_name = _get_arm_resource_info(resource_group_name)
+    resource_type, resource_name = _get_arm_resource_info(cmd.cli_ctx, resource_group_name)
 
     _event_subscription_delete(
+        cmd.cli_ctx,
         client,
         resource_group_name,
         RESOURCES_NAMESPACE,
@@ -332,6 +358,7 @@ def resource_event_subscription_list_internal(
 
 
 def _event_subscription_create(
+        cli_ctx,
         client,
         resource_group_name,
         provider_namespace,
@@ -345,7 +372,7 @@ def _event_subscription_create(
         subject_ends_with,
         is_subject_case_sensitive,
         labels):
-    scope = _get_scope(resource_group_name, provider_namespace, resource_type, resource_name)
+    scope = _get_scope(cli_ctx, resource_group_name, provider_namespace, resource_type, resource_name)
     if endpoint_type.lower() == WEBHOOK_DESTINATION.lower():
         destination = WebHookEventSubscriptionDestination(endpoint)
     elif endpoint_type.lower() == EVENTHUB_DESTINATION.lower():
@@ -367,46 +394,50 @@ def _event_subscription_create(
 
 
 def _event_subscription_get(
+        cli_ctx,
         client,
         resource_group_name,
         provider_namespace,
         resource_type,
         resource_name,
         event_subscription_name):
-    scope = _get_scope(resource_group_name, provider_namespace, resource_type, resource_name)
+    scope = _get_scope(cli_ctx, resource_group_name, provider_namespace, resource_type, resource_name)
     retrieved_event_subscription = client.get(scope, event_subscription_name)
     return retrieved_event_subscription
 
 
 def _event_subscription_get_full_url(
+        cli_ctx,
         client,
         resource_group_name,
         provider_namespace,
         resource_type,
         resource_name,
         event_subscription_name):
-    scope = _get_scope(resource_group_name, provider_namespace, resource_type, resource_name)
+    scope = _get_scope(cli_ctx, resource_group_name, provider_namespace, resource_type, resource_name)
     full_endpoint_url = client.get_full_url(scope, event_subscription_name)
     return full_endpoint_url
 
 
 def _event_subscription_delete(
+        cli_ctx,
         client,
         resource_group_name,
         provider_namespace,
         resource_type,
         resource_name,
         event_subscription_name):
-    scope = _get_scope(resource_group_name, provider_namespace, resource_type, resource_name)
+    scope = _get_scope(cli_ctx, resource_group_name, provider_namespace, resource_type, resource_name)
     client.delete(scope, event_subscription_name)
 
 
 def _get_scope(
+        cli_ctx,
         resource_group_name,
         provider_namespace,
         resource_type,
         resource_name):
-    subscription_id = get_subscription_id()
+    subscription_id = get_subscription_id(cli_ctx)
 
     if provider_namespace == RESOURCES_NAMESPACE:
         if resource_group_name:
@@ -430,12 +461,12 @@ def _get_scope(
     return scope
 
 
-def _get_arm_resource_info(resource_group_name):
+def _get_arm_resource_info(cli_ctx, resource_group_name):
     if resource_group_name:
         resource_type = RESOURCE_TYPE_RESOURCE_GROUPS
         resource_name = resource_group_name
     else:
         resource_type = RESOURCE_TYPE_SUBSCRIPTIONS
-        resource_name = get_subscription_id()
+        resource_name = get_subscription_id(cli_ctx)
 
     return resource_type, resource_name
