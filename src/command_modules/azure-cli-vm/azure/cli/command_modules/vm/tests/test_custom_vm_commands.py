@@ -30,7 +30,7 @@ NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, Instance
                            'VirtualMachineExtension', 'ImageReference', 'DiskCreateOptionTypes',
                            'VirtualMachineScaleSetVMProfile', 'VirtualMachineScaleSetOSProfile', 'LinuxConfiguration',
                            'CachingTypes',
-                           mod='models')
+                           mod='models', operation_group="virtual_machines")  # FIXME split into loading by RT
 
 
 class Test_Vm_Custom(unittest.TestCase):

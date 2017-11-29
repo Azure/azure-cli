@@ -74,10 +74,15 @@ for scope in ['vm', 'disk', 'snapshot', 'image']:
     register_cli_argument(scope, 'tags', tags_type)
 register_cli_argument('vm', 'name', arg_type=name_arg_type)
 
-with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') as c:
+with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30', operation_group='virtual_machines') as c:
     c.register_cli_argument('vm', 'zone', zone_type)
+
+with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30', operation_group='disks') as c:
     c.register_cli_argument('disk', 'zone', zone_type, options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
+
+with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30', operation_group='virtual_machine_scale_sets') as c:
     c.register_cli_argument('vmss', 'zones', zones_type)
+
 
 for item in ['show', 'list']:
     register_cli_argument('vm {}'.format(item), 'show_details', action='store_true', options_list=('--show-details', '-d'), help='show public ip address, FQDN, and power states. command will run slow')
@@ -112,7 +117,7 @@ register_cli_argument('vm availability-set create', 'platform_update_domain_coun
 register_cli_argument('vm availability-set create', 'platform_fault_domain_count', type=int, help='Fault Domain count.')
 register_cli_argument('vm availability-set create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
 
-with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview') as c:
+with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview', operation_group='availability_sets') as c:
     c.register_cli_argument('vm availability-set create', 'unmanaged', action='store_true', help='contained VMs should use unmanaged disks')
 
 register_cli_argument('vm user', 'username', options_list=('--username', '-u'), help='The user name')
@@ -302,7 +307,7 @@ register_cli_argument('vmss create', 'nsg', help='reference to an existing Netwo
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:
     c.register_cli_argument('vmss create', 'load_balancer_sku', help='SKU when creating a new Load Balancer.', arg_group='Network Balancer', options_list=['--lb-sku'], default='Basic')  # **model_choice_list(ResourceType.MGMT_NETWORK, 'LoadBalancerSkuName'))
 
-with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') as c:
+with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30', operation_group='virtual_machine_scale_sets') as c:
     c.register_cli_argument('vmss create', 'public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules", arg_group='Network')
     c.register_cli_argument('vmss create', 'vm_domain_name', help="domain name of VM instances, once configured, the FQDN is 'vm<vm-index>.<vm-domain-name>.<..rest..>'", arg_group='Network')
     c.register_cli_argument('vmss create', 'dns_servers', nargs='+', help="space separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6", arg_group='Network')

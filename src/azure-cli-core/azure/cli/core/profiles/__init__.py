@@ -18,20 +18,22 @@ API_PROFILES = {
 }
 
 
-def get_api_version(resource_type, operation_group=None, as_sdk_profile=False):
+def get_api_version(resource_type, as_sdk_profile=False):
     """ Get the current API version for a given resource_type.
 
     :param resource_type: The resource type.
     :type resource_type: ResourceType.
     :param str operation_group: The operation group.
     :param bool as_sdk_profile: Return SDKProfile instance.
-    :returns:  str -- The API version.
+    :returns: The API version
+     Can return a tuple<operation_group, str> if the resource_type supports SDKProfile.
+    :rtype: str or tuple[str]
     """
     from azure.cli.core._profile import CLOUD
-    return _sdk_get_api_version(CLOUD.profile, resource_type, operation_group, as_sdk_profile)
+    return _sdk_get_api_version(CLOUD.profile, resource_type, as_sdk_profile)
 
 
-def supported_api_version(resource_type, min_api=None, max_api=None, operation_group=None):
+def supported_api_version(resource_type, min_api=None, max_api=None):
     """ Method to check if the current API version for a given resource_type is supported.
         If resource_type is set to None, the current profile version will be used as the basis of
         the comparison.
@@ -42,12 +44,12 @@ def supported_api_version(resource_type, min_api=None, max_api=None, operation_g
     :type min_api: str
     :param max_api: The maximum API that is supported (inclusive). Omit for no maximum constraint.
     :type max_api: str
-    :param str operation_group: The operation group.
-    :returns:  bool -- True if the current API version of resource_type satisfies the
-                       min/max constraints. False otherwise.
+    :returns: True if the current API version of resource_type satisfies the min/max constraints. False otherwise.
+     Can return a tuple<operation_group, bool> if the resource_type supports SDKProfile.
+    :rtype: bool or tuple[bool]
     """
     from azure.cli.core._profile import CLOUD
-    return _sdk_supported_api_version(CLOUD.profile, resource_type, min_api, max_api, operation_group)
+    return _sdk_supported_api_version(CLOUD.profile, resource_type, min_api, max_api)
 
 
 def get_sdk(resource_type, *attr_args, **kwargs):
@@ -76,7 +78,7 @@ def get_sdk(resource_type, *attr_args, **kwargs):
             VirtualMachine = get_sdk(resource_type,
                                      'VirtualMachine',
                                      mod='models',
-                                     rt='virtual_machines')
+                                     operation_group='virtual_machines')
 
     :param resource_type: The resource type.
     :type resource_type: ResourceType.

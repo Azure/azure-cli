@@ -45,10 +45,11 @@ BLACKLISTED_MODS = ['context', 'shell', 'documentdb', 'component']
 
 
 class VersionConstraint(object):
-    def __init__(self, resource_type, min_api=None, max_api=None):
+    def __init__(self, resource_type, min_api=None, max_api=None, operation_group=None):
         self._type = resource_type
         self._min_api = min_api
         self._max_api = max_api
+        self._operation_group = operation_group
 
     def __enter__(self):
         return self
@@ -57,7 +58,8 @@ class VersionConstraint(object):
         pass
 
     def register_cli_argument(self, *args, **kwargs):
-        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+        is_supported = supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api)
+        if (isinstance(is_supported, tuple) and getattr(is_supported, self._operation_group)) or is_supported:
             register_cli_argument(*args, **kwargs)
         else:
             from azure.cli.core.commands.parameters import ignore_type
@@ -66,11 +68,13 @@ class VersionConstraint(object):
             register_cli_argument(*args, **kwargs)
 
     def register_extra_cli_argument(self, *args, **kwargs):
-        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+        is_supported = supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api)
+        if (isinstance(is_supported, tuple) and getattr(is_supported, self._operation_group)) or is_supported:
             register_extra_cli_argument(*args, **kwargs)
 
     def cli_command(self, *args, **kwargs):
-        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+        is_supported = supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api)
+        if (isinstance(is_supported, tuple) and getattr(is_supported, self._operation_group)) or is_supported:
             cli_command(*args, **kwargs)
 
 
@@ -529,7 +533,13 @@ def get_op_handler(operation):
     import types
 
     for rt in ResourceType:
-        if operation.startswith(rt.import_prefix):
+        if operation.startswith(rt.import_prefix+".operations."):
+            subs = operation[len(rt.import_prefix+".operations."):]
+            operation_group = subs[:subs.index('_operations')]
+            operation = operation.replace(
+                rt.import_prefix,
+                get_versioned_sdk_path(CLOUD.profile, rt, operation_group=operation_group))
+        elif operation.startswith(rt.import_prefix):
             operation = operation.replace(rt.import_prefix,
                                           get_versioned_sdk_path(CLOUD.profile, rt))
     try:
