@@ -389,7 +389,7 @@ def k8s_install_connector(client, name, resource_group_name, name_aks, resource_
         raise CLIError('Could not deploy the ACI Chart: {}'.format(err))
 
 def k8s_uninstall_connector(client, name, name_aks, resource_group_name_aks,
-                            gracefull=False, linux=True, windows=False):
+                            graceful=False, linux=True, windows=False):
     """Undeploy the ACI-Connector from an AKS cluster.
     :param name_aks: The name of the AKS cluster. The name is case insensitive.
     :type name_aks: str
@@ -397,9 +397,9 @@ def k8s_uninstall_connector(client, name, name_aks, resource_group_name_aks,
     :type resource_group_name_aks: str
     :param name: The name for the ACI Connector
     :type name: str
-    :param gracefull: Mention if you want to drain/uncordon your aci-connector to move your applications
+    :param graceful: Mention if you want to drain/uncordon your aci-connector to move your applications
     running on ACI to your others nodes. Default : False
-    :type gracefull: bool
+    :type graceful: bool
     :param windows: Os type target will be Windows for the connector
     :type windows: bool
     :param linux: Os type target will be Linux for the connector
@@ -417,8 +417,8 @@ def k8s_uninstall_connector(client, name, name_aks, resource_group_name_aks,
     aks_get_credentials(client, resource_group_name_aks, name_aks, admin=False, path=browse_path)
     # Validate if the RG exists
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    if gracefull:
-        logger.warning('Gracefull option selected, will try to drain the node first')
+    if graceful:
+        logger.warning('Graceful option selected, will try to drain the node first')
         kubectl_not_installed = "Error : Kubectl not detected, please verify if it is installed."
         try:
             p = Popen(["kubectl"], stdout=PIPE, stderr=PIPE)
