@@ -20,8 +20,10 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
+
 def cli_main(cli, args):
     return cli.invoke(args)
+
 
 az_cli = AzCli(cli_name='az',
                config_dir=GLOBAL_CONFIG_DIR,
@@ -38,7 +40,7 @@ try:
     telemetry.start()
 
     exit_code = cli_main(az_cli, sys.argv[1:])
-    
+
     if exit_code and exit_code != 0:
         telemetry.set_failure()
     else:
