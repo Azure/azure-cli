@@ -4,7 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import register_cli_argument
-from azure.cli.core.commands.parameters import resource_group_name_type
+from azure.cli.core.commands.parameters import \
+    (resource_group_name_type, enum_choice_list)
 from azure.cli.core.util import CLIError
 
 
@@ -37,7 +38,8 @@ register_cli_argument(
     'advisor recommendation list',
     'category',
     options_list=('--category', '-c'),
-    help='Name of recommendation category (Cost, HighAvailability, Performance or Security).'
+    help='Name of recommendation category.',
+    **enum_choice_list(['Cost', 'HighAvailability', 'Performance', 'Security'])
 )
 
 register_cli_argument(
@@ -80,8 +82,8 @@ register_cli_argument(
     'advisor configuration set',
     'low_cpu_threshold',
     options_list=('--low-cpu-threshold', '-l'),
-    type=int,
-    help='Value for low CPU threshold (5, 10, 15 or 20).'
+    help='Value for low CPU threshold.',
+    **enum_choice_list(['5', '10', '15', '20'])
 )
 
 register_cli_argument(
