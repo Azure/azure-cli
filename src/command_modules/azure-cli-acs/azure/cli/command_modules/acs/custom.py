@@ -1270,15 +1270,15 @@ def aks_browse(client, resource_group_name, name, disable_browser=False):
     aks_get_credentials(client, resource_group_name, name, admin=False, path=browse_path)
     # find the dashboard pod's name
     try:
-        drain_node = subprocess.check_output(
+        dashboard_pod = subprocess.check_output(
             ["kubectl", "get", "pods", "--kubeconfig", browse_path, "--namespace", "kube-system", "--output", "name",
              "--selector", "k8s-app=kubernetes-dashboard"],
             universal_newlines=True)
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not find dashboard pod: {}'.format(err))
-    if drain_node:
+    if dashboard_pod:
         # remove the "pods/" prefix from the name
-        drain_node = str(drain_node)[5:].strip()
+        dashboard_pod = str(dashboard_pod)[5:].strip()
     else:
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
     # launch kubectl port-forward locally to access the remote dashboard
@@ -1287,7 +1287,7 @@ def aks_browse(client, resource_group_name, name, disable_browser=False):
     if not disable_browser:
         wait_then_open_async(proxy_url)
     subprocess.call(["kubectl", "--kubeconfig", browse_path, "--namespace", "kube-system",
-                     "port-forward", drain_node, "8001:9090"])
+                     "port-forward", dashboard_pod, "8001:9090"])
 
 
 def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disable=too-many-locals
