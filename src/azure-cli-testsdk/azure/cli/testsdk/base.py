@@ -26,6 +26,7 @@ from .utilities import find_recording_dir
 
 logger = logging.getLogger('azure.cli.testsdk')
 
+
 class CheckerMixin(object):
 
     def _apply_kwargs(self, val):

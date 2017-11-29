@@ -36,7 +36,6 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
             return {self.parameter_name: self.dev_setting_name,
                     self.parameter_name_for_location: self.dev_setting_location}
 
-
         template = 'az group create --location {} --name {} --tag use=az-test'
         execute(self.cli_ctx, template.format(self.location, name))
         self.test_class_instance.kwargs[self.key] = name
