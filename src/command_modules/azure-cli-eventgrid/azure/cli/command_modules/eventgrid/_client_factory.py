@@ -4,19 +4,19 @@
 # --------------------------------------------------------------------------------------------
 
 
-def cf_eventgrid(**_):
+def cf_eventgrid(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.eventgrid import EventGridManagementClient
-    return get_mgmt_service_client(EventGridManagementClient)
+    return get_mgmt_service_client(cli_ctx, EventGridManagementClient)
 
 
-def topics_factory(_):
-    return cf_eventgrid().topics
+def topics_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).topics
 
 
-def event_subscriptions_factory(_):
-    return cf_eventgrid().event_subscriptions
+def event_subscriptions_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).event_subscriptions
 
 
-def topic_types_factory(_):
-    return cf_eventgrid().topic_types
+def topic_types_factory(cli_ctx, _):
+    return cf_eventgrid(cli_ctx).topic_types
