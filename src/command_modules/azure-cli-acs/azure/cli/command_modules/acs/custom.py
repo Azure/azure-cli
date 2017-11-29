@@ -310,6 +310,98 @@ def k8s_install_cli(client_version='latest', install_location=None):
     except IOError as ex:
         raise CLIError('Connection error while attempting to download client ({})'.format(ex))
 
+def k8s_install_connector(client, name, resource_group_name, name_aks, resource_group_name_aks,
+                          location=None, service_principal=None, client_secret=None):
+    """Deploy the ACI-Connector to a AKS cluster
+    :param name_aks: The name of the AKS cluster. The name is case insensitive.
+    :type name_aks: str
+    :param resource_group_name_aks: The name of the resource group where the AKS cluster is deployed.
+    :type resource_group_name_aks: str
+    :param name: The name for the ACI Connector
+    :type name: str
+    :param resource_group_name: The name of the resource group where to deploy the ACI instances.
+    :type resource_group_name: str
+    :param location:
+    :type location: str
+    :param service_principal: The service principal used for ACI authentication
+    to Azure APIs. If not specified, it is created for you and stored in the
+    ${HOME}/.azure directory.
+    :type service_principal: str
+    :param client_secret: The secret associated with the service principal. If
+    --service-principal is specified, then secret should also be specified. If
+    --service-principal is not specified, the secret is auto-generated for you
+    and stored in ${HOME}/.azure/ directory.
+    :type client_secret: str
+    """
+    from subprocess import PIPE, Popen
+    helm_not_installed = "Error : Helm not detected, please verify if it is installed."
+    # Check if Helm is installed locally
+    try:
+        p = Popen(["helm"], stdout=PIPE, stderr=PIPE)
+    except OSError:
+        raise CLIError(helm_not_installed)
+    # Get the credentials from a AKS instance
+    _, browse_path = tempfile.mkstemp()
+    aks_get_credentials(client, resource_group_name_aks, name_aks, admin=False, path=browse_path)
+    subscription_id = _get_subscription_id()
+    dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
+    # Validate if the RG exists
+    groups = _resource_client_factory().resource_groups
+    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
+    rgkaci = groups.get(resource_group_name)
+    # Auto assign the location
+    if location is None:
+        location = rgkaci.location  # pylint:disable=no-member
+    # Ensure that the SPN exists
+    principal_obj = _ensure_service_principal(service_principal, client_secret, subscription_id,
+                                              dns_name_prefix, location, name)
+    client_secret = principal_obj.get("client_secret")
+    service_principal = principal_obj.get("service_principal")
+    # Get the TenantID
+    profile = Profile()
+    _, _, tenant_id = profile.get_login_credentials()
+    # Official chart URL to install
+    chart_url = "https://github.com/Azure/aci-connector-k8s/raw/master/charts/aci-connector.tgz"
+    logger.warning('Deploying the aci-connector using Helm')
+    try:
+        subprocess.call(["helm", "install", chart_url, "--name", name, "--set", "env.azureClientId=" + 
+                         service_principal + ",env.azureClientKey=" + client_secret + ",env.azureSubscriptionId=" + 
+                         subscription_id + ",env.azureTenantId=" + tenant_id + ",env.aciResourceGroup=" + rgkaci.name + ",env.aciRegion=" + location])
+    except subprocess.CalledProcessError as err:
+        raise CLIError('Could not deploy the ACI Chart: {}'.format(err))
+    
+def k8s_uninstall_connector(client, name, name_aks, resource_group_name_aks, gracefull=False):
+    """Undeploy the ACI-Connector from an AKS cluster.
+    :param name_aks: The name of the AKS cluster. The name is case insensitive.
+    :type name_aks: str
+    :param resource_group_name_aks: The name of the resource group where the AKS cluster is deployed.
+    :type resource_group_name_aks: str
+    :param name: The name for the ACI Connector
+    :type name: str
+    :param gracefull: Mention if you want to drain/uncordon your aci-connector to move your applications
+    running on ACI to your others nodes. Default : False
+    :type gracefull: bool
+    """
+    from subprocess import PIPE, Popen
+    helm_not_installed = "Error : Helm not detected, please verify if it is installed."
+    # Check if Helm is installed locally
+    try:
+        p = Popen(["helm"], stdout=PIPE, stderr=PIPE)
+    except OSError:
+        raise CLIError(helm_not_installed)
+    # Get the credentials from a AKS instance
+    _, browse_path = tempfile.mkstemp()
+    aks_get_credentials(client, resource_group_name_aks, name_aks, admin=False, path=browse_path)
+    # Validate if the RG exists
+    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
+    if gracefull:
+        #Drain
+        pass
+    logger.warning('Undeploying the aci-connector using Helm')
+    try:
+        subprocess.call(["helm", "del", "--name", name, "--purge"])
+    except subprocess.CalledProcessError as err:
+        raise CLIError('Could not deploy the ACI Chart: {}'.format(err))
 
 def _build_service_principal(client, name, url, client_secret):
     # use get_progress_controller
