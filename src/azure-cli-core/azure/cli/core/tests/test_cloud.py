@@ -18,6 +18,7 @@ from azure.cli.core.cloud import (Cloud,
                                   remove_cloud,
                                   get_active_cloud_name,
                                   update_cloud,
+                                  cloud_is_registered,
                                   AZURE_PUBLIC_CLOUD,
                                   KNOWN_CLOUDS,
                                   update_cloud,
@@ -201,6 +202,11 @@ class TestCloud(unittest.TestCase):
             config.config_parser.read(config_file)
             for kc in KNOWN_CLOUDS:
                 get_cloud(cli, kc.name)
+
+    def test_cloud_is_registered(self):
+        cli = TestCli()
+        self.assertTrue(cloud_is_registered(cli, AZURE_PUBLIC_CLOUD.name))
+        self.assertFalse(cloud_is_registered(cli, 'MyUnknownCloud'))
 
 
 if __name__ == '__main__':

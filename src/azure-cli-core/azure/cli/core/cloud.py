@@ -236,6 +236,10 @@ def _get_cloud(cli_ctx, cloud_name):
     return next((x for x in get_clouds(cli_ctx) if x.name == cloud_name), None)
 
 
+def cloud_is_registered(cli_ctx, cloud_name):
+    return bool(_get_cloud(cli_ctx, cloud_name))
+
+
 def get_custom_clouds(cli_ctx):
     known_cloud_names = [c.name for c in KNOWN_CLOUDS]
     return [c for c in get_clouds(cli_ctx) if c.name not in known_cloud_names]
