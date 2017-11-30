@@ -342,7 +342,7 @@ def attach_managed_data_disk(resource_group_name, vm_name, disk,
     vm = get_vm(resource_group_name, vm_name)
     DataDisk, ManagedDiskParameters, DiskCreateOption = get_sdk(ResourceType.MGMT_COMPUTE, 'DataDisk',
                                                                 'ManagedDiskParameters', 'DiskCreateOptionTypes',
-                                                                mod='models', operation_group='disks')
+                                                                mod='models', operation_group='virtual_machines')
 
     # pylint: disable=no-member
     if lun is None:
