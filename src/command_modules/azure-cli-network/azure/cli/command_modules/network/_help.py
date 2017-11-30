@@ -672,7 +672,7 @@ helps['network dns record-set list'] = """
 helps['network asg'] = """
     type: group
     short-summary: Manage application security groups.
-    long-summary: You can configure network security as a natural extension of an application’s structure, ASG allows
+    long-summary: You can configure network security as a natural extension of an application's structure, ASG allows
      you to group virtual machines and define network security policies based on those groups. You can specify an
       application security group as the source and destination in a NSG security rule. For more information
        visit https://docs.microsoft.com/en-us/azure/virtual-network/create-network-security-group-preview
@@ -681,7 +681,7 @@ helps['network asg'] = """
 helps['network asg create'] = """
     type: command
     short-summary: Create an application security group.
-    long-summary: You can configure network security as a natural extension of an application’s structure, ASG
+    long-summary: You can configure network security as a natural extension of an application's structure, ASG
      allows you to group virtual machines and define network security policies based on those groups. You can
       specify an application security group as the source and destination in a NSG security rule. For more
        information visit https://docs.microsoft.com/en-us/azure/virtual-network/create-network-security-group-preview
@@ -1797,9 +1797,9 @@ helps['network vnet update'] = """
     short-summary: Update a virtual network.
     long-summary: To learn more about managing virtual networks, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-network
     examples:
-        - name: Update a specific virtual network’s DNS server
+        - name: Update a specific virtual network's DNS server
           text: >
-            az network vnet update -n myVNet -g myResourceGroup -–dns-servers 10.2.0.8
+            az network vnet update -n myVNet -g myResourceGroup --dns-servers 10.2.0.8
 """
 # endregion
 
@@ -1850,7 +1850,7 @@ helps['network vnet subnet show'] = """
     long-summary: To learn more about subnets, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-subnet
     examples:
         - name: Show subnets associated to a specific virtual network
-          text: az network vnet subnet show -n mySubnet– vnet-name myVNet -g myResourceGroup
+          text: az network vnet subnet show -n mySubnet --vnet-name myVNet -g myResourceGroup
 """
 
 helps['network vnet subnet update'] = """
@@ -1864,7 +1864,7 @@ helps['network vnet subnet update'] = """
             - az network vnet list-endpoint-services
     examples:
         - name: Associate a network security group to a subnet
-          text: az network vnet subnet update -n mySubnet –vnet-name myVNet -g myResourceGroup –network-security-group myNSG
+          text: az network vnet subnet update -n mySubnet --vnet-name myVNet -g myResourceGroup --network-security-group myNSG
 """
 
 helps['network vnet list-endpoint-services'] = """
@@ -1897,7 +1897,6 @@ helps['network vnet peering create'] = """
             \\n\\n vnet2Id=$(az network vnet show --resource-group myResourceGroup --name myVnet2 --query id --out tsv)
             \\n\\n az network vnet peering create --name myVnet1ToMyVnet2 --resource-group myResourceGroup --vnet-name myVnet1 --remote-vnet-id $vnet2Id --allow-vnet-access
             \\n\\n az network vnet peering create --name myVnet2ToMyVnet1 --resource-group myResourceGroup --vnet-name myVnet2 --remote-vnet-id $vnet1Id --allow-vnet-access
-
         - name: Create a virtual network peering between virtual networks in different regions
           text: >
             az network vnet create --name myVnet1 --resource-group myResourceGroup --location westcentralus --address-prefix 10.0.0.0/16
@@ -2198,7 +2197,7 @@ helps['network watcher troubleshooting show'] = """
     long-summary: For more information on configuring troubleshooting, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-troubleshoot-manage-cli
     examples:
         - name: Show the results or status of a troubleshooting operation
-          text: az network watcher troubleshooting show  --resource resourcename –-resource-group resourcegroupname –resource-type vnetGateway
+          text: az network watcher troubleshooting show  --resource resourcename --resource-group resourcegroupname --resource-type vnetGateway
 """
 
 helps['network watcher test-ip-flow'] = """
@@ -2339,7 +2338,7 @@ helps['network watcher packet-capture show'] = """
     long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
     examples:
         - name: Show a packet capture session.
-          text: az network watcher packet-capture show --location myresourcegroup –n mypacketcapture
+          text: az network watcher packet-capture show --location myresourcegroup -n mypacketcapture
 """
 
 helps['network watcher packet-capture show-status'] = """
@@ -2347,7 +2346,7 @@ helps['network watcher packet-capture show-status'] = """
     long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
     examples:
         - name: Show the status of a packet capture session.
-          text: az network watcher packet-capture show-status --location myresourcegroup –n mypacketcapture
+          text: az network watcher packet-capture show-status --location myresourcegroup -n mypacketcapture
 """
 
 helps['network watcher packet-capture stop'] = """
@@ -2355,7 +2354,7 @@ helps['network watcher packet-capture stop'] = """
     long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
     examples:
         - name: Stop a running packet capture session.
-          text: az network watcher packet-capture stop --location myresourcegroup –n mypacketcapture
+          text: az network watcher packet-capture stop --location myresourcegroup -n mypacketcapture
 """
 
 
