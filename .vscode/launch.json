@@ -5,7 +5,6 @@
             "name": "Integrated Terminal/Console",
             "type": "python",
             "request": "launch",
-            "stopOnEntry": true,
             "pythonPath": "${config:python.pythonPath}",
             "program": "${workspaceRoot}/src/azure-cli/azure/cli/__main__.py",
             "cwd": "${workspaceRoot}",
@@ -15,7 +14,24 @@
             "console": "integratedTerminal",
             "debugOptions": [
                 "WaitOnAbnormalExit",
-                "WaitOnNormalExit"
+                "WaitOnNormalExit",
+                "RedirectOutput"
+            ]
+        },
+        {
+            "name": "Azure CLI Tests",
+            "type": "python",
+            "request": "launch",
+            "pythonPath": "${config:python.pythonPath}",
+            "program": "${workspaceRoot}/tools/automation/tests/run.py",
+            "cwd": "${workspaceRoot}",
+            "args": [
+            ],
+            "console": "integratedTerminal",
+            "debugOptions": [
+                "WaitOnAbnormalExit",
+                "WaitOnNormalExit",
+                "RedirectOutput"
             ]
         },
         {

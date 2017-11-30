@@ -13,11 +13,13 @@ from json import loads
 import requests
 
 from knack.util import CLIError
-from azure.cli.core.prompting import prompt, prompt_pass, NoTTYException
+from knack.prompting import prompt, prompt_pass, NoTTYException
+from knack.log import get_logger
 
+from ._client_factory import cf_acr_registries
 from ._constants import MANAGED_REGISTRY_SKU
 from ._utils import get_registry_by_name
-from .credential import acr_credential_show
+from .credential import _get_acr_credentials
 
 
 logger = get_logger(__name__)
@@ -110,7 +112,8 @@ def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, p
     return access_token
 
 
-def _get_credentials(registry_name,
+def _get_credentials(cli_ctx,
+                     registry_name,
                      resource_group_name,
                      username,
                      password,
@@ -126,7 +129,7 @@ def _get_credentials(registry_name,
     :param str repository: Repository for which the access token is requested
     :param str permission: The requested permission on the repository, '*' or 'pull'
     """
-    registry, _ = get_registry_by_name(registry_name, resource_group_name)
+    registry, _ = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
     login_server = registry.login_server
 
     # 1. if username was specified, verify that password was also specified
@@ -151,7 +154,8 @@ def _get_credentials(registry_name,
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
     if not password:
         try:
-            cred = acr_credential_show(registry_name)
+            client = cf_acr_registries(cli_ctx)
+            cred = _get_acr_credentials(cli_ctx, client, registry_name)
             username = cred.username
             password = cred.passwords[0].value
             return login_server, username, password
@@ -170,7 +174,8 @@ def _get_credentials(registry_name,
                 'Please specify both username and password in non-interactive mode.')
 
 
-def get_login_credentials(registry_name,
+def get_login_credentials(cli_ctx,
+                          registry_name,
                           resource_group_name,
                           username,
                           password):
@@ -180,14 +185,16 @@ def get_login_credentials(registry_name,
     :param str username: The username used to log into the container registry
     :param str password: The password used to log into the container registry
     """
-    return _get_credentials(registry_name,
+    return _get_credentials(cli_ctx,
+                            registry_name,
                             resource_group_name,
                             username,
                             password,
                             only_refresh_token=True)
 
 
-def get_access_credentials(registry_name,
+def get_access_credentials(cli_ctx,
+                           registry_name,
                            resource_group_name,
                            username,
                            password,
@@ -201,7 +208,8 @@ def get_access_credentials(registry_name,
     :param str repository: Repository for which the access token is requested
     :param str permission: The requested permission on the repository, '*' or 'pull'
     """
-    return _get_credentials(registry_name,
+    return _get_credentials(cli_ctx,
+                            registry_name,
                             resource_group_name,
                             username,
                             password,
