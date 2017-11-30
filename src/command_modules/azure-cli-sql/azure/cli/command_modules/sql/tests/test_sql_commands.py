@@ -15,7 +15,8 @@ from azure.cli.testsdk import (
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
-    StorageAccountPreparer)
+    StorageAccountPreparer,
+    TestCli)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
@@ -45,13 +46,13 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = 'az sql server create -l {} -g {} -n {} -u {} -p {}'
-        execute(template.format(self.location, group, name, self.admin_user, self.admin_password))
+        execute(TestCli(), template.format(self.location, group, name, self.admin_user, self.admin_password))
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete:
             group = self._get_resource_group(**kwargs)
-            execute('az sql server delete -g {} -n {} --yes --no-wait'.format(group, name))
+            execute(TestCli(), 'az sql server delete -g {} -n {} --yes --no-wait'.format(group, name))
 
     def _get_resource_group(self, **kwargs):
         try:

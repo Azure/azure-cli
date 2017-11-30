@@ -32,8 +32,6 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
 
-from knack.util import CLIError
-
 # url parse package has different names in Python 2 and 3. 'six' package works cross-version.
 from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error
 
@@ -47,8 +45,8 @@ from ._util import (
 
 
 # Determines server location
-def get_server_location(server_name, resource_group_name):
-    server_client = get_sql_servers_operations(None)
+def _get_server_location(cli_ctx, server_name, resource_group_name):
+    server_client = get_sql_servers_operations(cli_ctx, None)
     # pylint: disable=no-member
     return server_client.get(
         server_name=server_name,
@@ -78,19 +76,20 @@ class ClientAuthenticationType(Enum):
     active_directory_integrated = 'ADIntegrated'
 
 
-def _get_server_dns_suffx():
+def _get_server_dns_suffx(cli_ctx):
     # Allow dns suffix to be overridden by environment variable for testing purposes
     from os import getenv
-    return getenv('_AZURE_CLI_SQL_DNS_SUFFIX', default=get_active_cloud().suffixes.sql_server_hostname)
+    return getenv('_AZURE_CLI_SQL_DNS_SUFFIX', default=get_active_cloud(cli_ctx).suffixes.sql_server_hostname)
 
 
 def db_show_conn_str(
+        cmd,
         client_provider,
         database_name='<databasename>',
         server_name='<servername>',
         auth_type=ClientAuthenticationType.sql_password.value):
 
-    server_suffix = _get_server_dns_suffx()
+    server_suffix = _get_server_dns_suffx(cmd.cli_ctx)
 
     conn_str_props = {
         'server': server_name,
@@ -182,14 +181,15 @@ def db_show_conn_str(
 
 # Helper class to bundle up database identity properties
 class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
-    def __init__(self, database_name, server_name, resource_group_name):
+    def __init__(self, cli_ctx, database_name, server_name, resource_group_name):
         self.database_name = database_name
         self.server_name = server_name
         self.resource_group_name = resource_group_name
+        self.cli_ctx = cli_ctx
 
     def id(self):
         return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(
-            quote(get_subscription_id()),
+            quote(get_subscription_id(self.cli_ctx)),
             quote(self.resource_group_name),
             quote(self.server_name),
             quote(self.database_name))
@@ -198,13 +198,15 @@ class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
 # Creates a database or datawarehouse. Wrapper function which uses the server location so that
 # the user doesn't need to specify location.
 def _db_dw_create(
+        cli_ctx,
         client,
         db_id,
         raw,
         kwargs):
 
     # Determine server location
-    kwargs['location'] = get_server_location(
+    kwargs['location'] = _get_server_location(
+        cli_ctx,
         server_name=db_id.server_name,
         resource_group_name=db_id.resource_group_name)
 
@@ -220,6 +222,7 @@ def _db_dw_create(
 # Creates a database. Wrapper function which uses the server location so that the user doesn't
 # need to specify location.
 def db_create(
+        cmd,
         client,
         database_name,
         server_name,
@@ -234,14 +237,16 @@ def db_create(
                        ' `az sql dw create`.')
 
     return _db_dw_create(
+        cmd.cli_ctx,
         client,
-        DatabaseIdentity(database_name, server_name, resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         raw,
         kwargs)
 
 
 # Common code for special db create modes.
 def _db_create_special(
+        cli_ctx,
         client,
         source_db,
         dest_db,
@@ -249,7 +254,8 @@ def _db_create_special(
         kwargs):
 
     # Determine server location
-    kwargs['location'] = get_server_location(
+    kwargs['location'] = _get_server_location(
+        cli_ctx,
         server_name=dest_db.server_name,
         resource_group_name=dest_db.resource_group_name)
 
@@ -267,6 +273,7 @@ def _db_create_special(
 
 # Copies a database. Wrapper function to make create mode more convenient.
 def db_copy(
+        cmd,
         client,
         database_name,
         server_name,
@@ -285,15 +292,17 @@ def db_copy(
     kwargs['create_mode'] = 'Copy'
 
     return _db_create_special(
+        cmd.cli_ctx,
         client,
-        DatabaseIdentity(database_name, server_name, resource_group_name),
-        DatabaseIdentity(dest_name, dest_server_name, dest_resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, dest_name, dest_server_name, dest_resource_group_name),
         raw,
         kwargs)
 
 
 # Copies a replica. Wrapper function to make create mode more convenient.
 def db_create_replica(
+        cmd,
         client,
         database_name,
         server_name,
@@ -312,9 +321,10 @@ def db_create_replica(
 
     # Replica must have the same database name as the source db
     return _db_create_special(
+        cmd.cli_ctx,
         client,
-        DatabaseIdentity(database_name, server_name, resource_group_name),
-        DatabaseIdentity(database_name, partner_server_name, partner_resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, database_name, partner_server_name, partner_resource_group_name),
         raw,
         kwargs)
 
@@ -322,6 +332,7 @@ def db_create_replica(
 # Creates a database from a database point in time backup or deleted database backup.
 # Wrapper function to make create mode more convenient.
 def db_restore(
+        cmd,
         client,
         database_name,
         server_name,
@@ -343,10 +354,11 @@ def db_restore(
     kwargs['create_mode'] = 'Restore' if is_deleted else 'PointInTimeRestore'
 
     return _db_create_special(
+        cmd.cli_ctx,
         client,
-        DatabaseIdentity(database_name, server_name, resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         # Cross-server restore is not supported. So dest server/group must be the same as source.
-        DatabaseIdentity(dest_name, server_name, resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, dest_name, server_name, resource_group_name),
         raw,
         kwargs)
 
@@ -606,14 +618,14 @@ def db_update(
 # because if it was a command line parameter then the customer would need to specify storage
 # resource group just to update some unrelated property, which is annoying and makes no sense to
 # the customer.
-def _find_storage_account_resource_group(name):
+def _find_storage_account_resource_group(cli_ctx, name):
     storage_type = 'Microsoft.Storage/storageAccounts'
     classic_storage_type = 'Microsoft.ClassicStorage/storageAccounts'
 
     query = "name eq '{}' and (resourceType eq '{}' or resourceType eq '{}')".format(
         name, storage_type, classic_storage_type)
 
-    client = get_mgmt_service_client(ResourceManagementClient)
+    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
     resources = list(client.resources.list(filter=query))
 
     if not resources:
@@ -639,11 +651,12 @@ def _get_storage_account_name(storage_endpoint):
 
 # Gets storage account key by querying storage ARM API.
 def _get_storage_endpoint(
+        cli_ctx,
         storage_account,
         resource_group_name):
 
     # Get storage account
-    client = get_mgmt_service_client(StorageManagementClient)
+    client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
     account = client.storage_accounts.get_properties(
         resource_group_name=resource_group_name,
         account_name=storage_account)
@@ -660,12 +673,13 @@ def _get_storage_endpoint(
 
 # Gets storage account key by querying storage ARM API.
 def _get_storage_key(
+        cli_ctx,
         storage_account,
         resource_group_name,
         use_secondary_key):
 
     # Get storage keys
-    client = get_mgmt_service_client(StorageManagementClient)
+    client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
     keys = client.storage_accounts.list_keys(
         resource_group_name=resource_group_name,
         account_name=storage_account)
@@ -677,6 +691,7 @@ def _get_storage_key(
 
 # Common code for updating audit and threat detection policy
 def _db_security_policy_update(
+        cli_ctx,
         instance,
         enabled,
         storage_account,
@@ -692,8 +707,8 @@ def _db_security_policy_update(
     if storage_endpoint:
         instance.storage_endpoint = storage_endpoint
     if storage_account:
-        storage_resource_group = _find_storage_account_resource_group(storage_account)
-        instance.storage_endpoint = _get_storage_endpoint(storage_account, storage_resource_group)
+        storage_resource_group = _find_storage_account_resource_group(cli_ctx, storage_account)
+        instance.storage_endpoint = _get_storage_endpoint(cli_ctx, storage_account, storage_resource_group)
 
     # Set storage access key
     if storage_account_access_key:
@@ -710,9 +725,10 @@ def _db_security_policy_update(
         # function, but at least we tried.
         if not storage_account:
             storage_account = _get_storage_account_name(instance.storage_endpoint)
-            storage_resource_group = _find_storage_account_resource_group(storage_account)
+            storage_resource_group = _find_storage_account_resource_group(cli_ctx, storage_account)
 
         instance.storage_account_access_key = _get_storage_key(
+            cli_ctx,
             storage_account,
             storage_resource_group,
             use_secondary_key)
@@ -720,6 +736,7 @@ def _db_security_policy_update(
 
 # Update audit policy. Custom update function to apply parameters to instance.
 def db_audit_policy_update(
+        cmd,
         instance,
         state=None,
         storage_account=None,
@@ -735,6 +752,7 @@ def db_audit_policy_update(
 
     # Set storage-related properties
     _db_security_policy_update(
+        cmd.cli_ctx,
         instance,
         enabled,
         storage_account,
@@ -754,6 +772,7 @@ def db_audit_policy_update(
 
 # Update threat detection policy. Custom update function to apply parameters to instance.
 def db_threat_detection_policy_update(
+        cmd,
         instance,
         state=None,
         storage_account=None,
@@ -771,6 +790,7 @@ def db_threat_detection_policy_update(
 
     # Set storage-related properties
     _db_security_policy_update(
+        cmd.cli_ctx,
         instance,
         enabled,
         storage_account,
@@ -802,6 +822,7 @@ def db_threat_detection_policy_update(
 # Creates a datawarehouse. Wrapper function which uses the server location so that the user doesn't
 # need to specify location.
 def dw_create(
+        cmd,
         client,
         database_name,
         server_name,
@@ -814,8 +835,9 @@ def dw_create(
 
     # Create
     return _db_dw_create(
+        cmd.cli_ctx,
         client,
-        DatabaseIdentity(database_name, server_name, resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         raw,
         kwargs)
 
@@ -859,6 +881,7 @@ def dw_update(
 # Creates an elastic pool. Wrapper function which uses the server location so that the user doesn't
 # need to specify location.
 def elastic_pool_create(
+        cmd,
         client,
         server_name,
         resource_group_name,
@@ -866,7 +889,8 @@ def elastic_pool_create(
         **kwargs):
 
     # Determine server location
-    kwargs['location'] = get_server_location(
+    kwargs['location'] = _get_server_location(
+        cmd.cli_ctx,
         server_name=server_name,
         resource_group_name=resource_group_name)
 
@@ -1015,12 +1039,13 @@ def server_update(
 
 
 def server_ad_admin_set(
+        cmd,
         client,
         resource_group_name,
         server_name,
         **kwargs):
 
-    profile = Profile()
+    profile = Profile(cmd.cli_ctx)
     sub = profile.get_subscription()
     kwargs['tenant_id'] = sub['tenantId']
 
@@ -1192,33 +1217,3 @@ def encryption_protector_update(
             server_key_name=key_name
         )
     )
-
-
-#####
-#           sql server vnet-rule
-#####
-
-# Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
-
-
-def validate_subnet(namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
-
-    subnet = namespace.virtual_network_subnet_id
-    subnet_is_id = is_valid_resource_id(subnet)
-    vnet = namespace.vnet_name
-
-    if (subnet_is_id and not vnet) or (not subnet and not vnet):
-        pass
-    elif subnet and not subnet_is_id and vnet:
-        namespace.virtual_network_subnet_id = resource_id(
-            subscription=get_subscription_id(),
-            resource_group=namespace.resource_group_name,
-            namespace='Microsoft.Network',
-            type='virtualNetworks',
-            name=vnet,
-            child_type_1='subnets',
-            child_name_1=subnet)
-    else:
-        raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
-    delattr(namespace, 'vnet_name')
