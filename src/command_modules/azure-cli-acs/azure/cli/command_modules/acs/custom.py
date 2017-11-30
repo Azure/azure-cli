@@ -333,10 +333,6 @@ def k8s_install_connector(client, name, resource_group, connector_name,
     --service-principal is not specified, the secret is auto-generated for you
     and stored in ${HOME}/.azure/ directory.
     :type client_secret: str
-    :param chart_url: URL to the chart,
-    :type chart_url: str
-    :param os_type: Os type target.
-    :type os_type: str
     """
     from subprocess import PIPE, Popen
     helm_not_installed = "Helm not detected, please verify if it is installed."
@@ -390,11 +386,6 @@ def k8s_uninstall_connector(client, name, connector_name, resource_group,
     :type resource_group: str
     :param connector_name: The name for the ACI Connector
     :type connector_name: str
-    :param graceful: Mention if you want to drain/uncordon your aci-connector to move your applications
-    running on ACI to your others nodes.
-    :type graceful: bool
-    :param os_type: Os type target.
-    :type os_type: str
     """
     from subprocess import PIPE, Popen
     helm_not_installed = "Error : Helm not detected, please verify if it is installed."

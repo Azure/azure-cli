@@ -72,7 +72,7 @@ name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
 orchestratorTypes = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
 
-aci_conector_os_type = ['Windows', 'Linux', 'Both']
+aci_connector_os_type = ['Windows', 'Linux', 'Both']
 
 aci_connector_chart_url = 'https://github.com/Azure/aci-connector-k8s/raw/master/charts/aci-connector.tgz'
 
@@ -186,7 +186,7 @@ register_cli_argument('aks install-cli', 'install_location', options_list=('--in
                       default=_get_default_install_location('kubectl'))
 register_cli_argument('aks install-cli', 'client_version', options_list=('--client-version',),
                       validator=validate_k8s_client_version)
-register_cli_argument('aks install-connector', 'os_type', help='The OS type of the connector', **enum_choice_list(aci_conector_os_type))
+register_cli_argument('aks install-connector', 'os_type', help='The OS type of the connector', **enum_choice_list(aci_connector_os_type))
 register_cli_argument('aks install-connector', 'chart_url', help='URL to the chart', default=aci_connector_chart_url)
-register_cli_argument('aks remove-connector', 'os_type', help='The OS type of the connector', **enum_choice_list(aci_conector_os_type))
-register_cli_argument('aks remove-connector', 'graceful', help='Mention if you want to drain/uncordon your aci-connector to move your applications', default=False)
+register_cli_argument('aks remove-connector', 'os_type', help='The OS type of the connector', **enum_choice_list(aci_connector_os_type))
+register_cli_argument('aks remove-connector', 'graceful', help='Mention if you want to drain/uncordon your aci-connector to move your applications', action='store_true')
