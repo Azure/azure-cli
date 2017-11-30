@@ -95,6 +95,8 @@ def transform_sku_for_table_output(skus):
         order_dict['resourceType'] = k['resourceType']
         order_dict['locations'] = str(k['locations']) if len(k['locations']) > 1 else k['locations'][0]
         order_dict['name'] = k['name']
+        if k.get('locationInfo'):
+            order_dict['zones'] = ','.join(sorted(k['locationInfo'][0].get('zones', [])))
         order_dict['size'] = k['size']
         order_dict['tier'] = k['tier']
         if k['capabilities']:
