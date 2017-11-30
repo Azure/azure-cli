@@ -65,6 +65,7 @@ logger = azlogging.get_az_logger(__name__)
 
 # pylint:disable=too-many-lines
 
+ACI_CONNECTOR_OS_TYPE = ['Windows', 'Linux', 'Both']
 
 def which(binary):
     pathVar = os.getenv('PATH')
@@ -334,18 +335,14 @@ def k8s_install_connector(client, name, resource_group, connector_name,
     and stored in ${HOME}/.azure/ directory.
     :type client_secret: str
     :param chart_url: URL to the chart,
-    Default: https://github.com/Azure/aci-connector-k8s/raw/master/charts/aci-connector.tgz
     :type chart_url: str
-    :param os_type: Os type target, could be Windows, Linux or Both.
+    :param os_type: Os type target.
     :type os_type: str
     """
     from subprocess import PIPE, Popen
-    helm_not_installed = "Error : Helm not detected, please verify if it is installed."
+    helm_not_installed = "Helm not detected, please verify if it is installed."
     image_tag = 'latest'
-    if chart_url is None:
-        url_chart = "https://github.com/Azure/aci-connector-k8s/raw/master/charts/aci-connector.tgz"
-    else:
-        url_chart = chart_url
+    url_chart = chart_url
     # Check if Helm is installed locally
     try:
         Popen(["helm"], stdout=PIPE, stderr=PIPE)
@@ -395,9 +392,9 @@ def k8s_uninstall_connector(client, name, connector_name, resource_group,
     :param connector_name: The name for the ACI Connector
     :type connector_name: str
     :param graceful: Mention if you want to drain/uncordon your aci-connector to move your applications
-    running on ACI to your others nodes. Default : False
+    running on ACI to your others nodes.
     :type graceful: bool
-    :param os_type: Os type target, could be Windows, Linux or Both.
+    :param os_type: Os type target.
     :type os_type: str
     """
     from subprocess import PIPE, Popen
@@ -414,7 +411,7 @@ def k8s_uninstall_connector(client, name, connector_name, resource_group,
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     if graceful:
         logger.warning('Graceful option selected, will try to drain the node first')
-        kubectl_not_installed = "Error : Kubectl not detected, please verify if it is installed."
+        kubectl_not_installed = "Kubectl not detected, please verify if it is installed."
         try:
             Popen(["kubectl"], stdout=PIPE, stderr=PIPE)
         except OSError:
