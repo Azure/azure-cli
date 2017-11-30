@@ -1220,7 +1220,7 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
         streaming_url += ('/' + provider.lstrip('/'))
 
     client = web_client_factory(cmd.cli_ctx)
-    user, password = _get_site_credential(client, resource_group_name, name)
+    user, password = _get_site_credential(client, resource_group_name, name, slot)
     t = threading.Thread(target=_get_log, args=(streaming_url, user, password))
     t.daemon = True
     t.start()
@@ -1238,8 +1238,11 @@ def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot
     logger.warning('Downloaded logs to %s', log_file)
 
 
-def _get_site_credential(client, resource_group_name, name):
-    creds = client.web_apps.list_publishing_credentials(resource_group_name, name)
+def _get_site_credential(client, resource_group_name, name, slot=None):
+    if slot:
+        creds = client.web_apps.list_publishing_credentials_slot(resource_group_name, name, slot)
+    else:
+        creds = client.web_apps.list_publishing_credentials(resource_group_name, name)
     creds = creds.result()
     return (creds.publishing_user_name, creds.publishing_password)
 
@@ -1605,7 +1608,7 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
 
 def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
     client = web_client_factory(cmd.cli_ctx)
-    user_name, password = _get_site_credential(client, resource_group_name, name)
+    user_name, password = _get_site_credential(client, resource_group_name, name, slot)
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     zip_url = scm_url + '/api/zipdeploy'
 
