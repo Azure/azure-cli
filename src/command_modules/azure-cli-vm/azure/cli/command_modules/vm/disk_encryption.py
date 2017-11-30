@@ -409,7 +409,7 @@ def encrypt_vmss(resource_group_name, vmss_name,  # pylint: disable=too-many-loc
     # pylint: disable=no-member
     UpgradeMode, VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = get_sdk(
         ResourceType.MGMT_COMPUTE, 'UpgradeMode', 'VirtualMachineScaleSetExtension',
-        'VirtualMachineScaleSetExtensionProfile', mod='models')
+        'VirtualMachineScaleSetExtensionProfile', mod='models', operation_group='virtual_machine_scale_sets')
 
     compute_client = _compute_client_factory()
     vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
