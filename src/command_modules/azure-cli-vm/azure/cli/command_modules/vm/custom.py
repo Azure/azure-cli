@@ -41,12 +41,12 @@ logger = azlogging.get_az_logger(__name__)
 _MSI_PORT = 50342
 _MSI_EXTENSION_VERSION = '1.0'
 
-CachingTypes, VirtualHardDisk, VirtualMachineScaleSet, VirtualMachineCaptureParameters, \
+CachingTypes, VirtualMachineScaleSet, VirtualMachineCaptureParameters, \
     VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = get_sdk(
         ResourceType.MGMT_COMPUTE,
-        'CachingTypes', 'VirtualHardDisk', 'VirtualMachineScaleSet', 'VirtualMachineCaptureParameters',
+        'CachingTypes', 'VirtualMachineScaleSet', 'VirtualMachineCaptureParameters',
         'VirtualMachineScaleSetExtension', 'VirtualMachineScaleSetExtensionProfile',
-        mod='models')
+        mod='models', operation_group='virtual_machines')
 
 
 def get_resource_group_location(resource_group_name):
@@ -303,7 +303,7 @@ def create_managed_disk(resource_group_name, disk_name, location=None,
                         source_blob_uri=None, source_disk=None, source_snapshot=None,
                         source_storage_account_id=None, no_wait=False, tags=None, zone=None):
     Disk, CreationData, DiskCreateOption = get_sdk(ResourceType.MGMT_COMPUTE, 'Disk', 'CreationData',
-                                                   'DiskCreateOption', mod='models')
+                                                   'DiskCreateOption', mod='models', operation_group='disks')
 
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -342,7 +342,7 @@ def attach_managed_data_disk(resource_group_name, vm_name, disk,
     vm = get_vm(resource_group_name, vm_name)
     DataDisk, ManagedDiskParameters, DiskCreateOption = get_sdk(ResourceType.MGMT_COMPUTE, 'DataDisk',
                                                                 'ManagedDiskParameters', 'DiskCreateOptionTypes',
-                                                                mod='models')
+                                                                mod='models', operation_group='virtual_machines')
 
     # pylint: disable=no-member
     if lun is None:
@@ -378,7 +378,8 @@ def detach_data_disk(resource_group_name, vm_name, disk_name):
 def attach_managed_data_disk_to_vmss(resource_group_name, vmss_name, size_gb, lun=None,
                                      caching=None):
     DiskCreateOptionTypes, VirtualMachineScaleSetDataDisk = get_sdk(ResourceType.MGMT_COMPUTE, 'DiskCreateOptionTypes',
-                                                                    'VirtualMachineScaleSetDataDisk', mod='models')
+                                                                    'VirtualMachineScaleSetDataDisk', mod='models',
+                                                                    operation_group='virtual_machine_scale_sets')
     client = _compute_client_factory()
     vmss = client.virtual_machine_scale_sets.get(resource_group_name,
                                                  vmss_name)
@@ -418,7 +419,7 @@ def create_snapshot(resource_group_name, snapshot_name, location=None, size_gb=N
                     source_blob_uri=None, source_disk=None, source_snapshot=None, source_storage_account_id=None,
                     tags=None):
     Snapshot, CreationData, DiskCreateOption = get_sdk(ResourceType.MGMT_COMPUTE, 'Snapshot', 'CreationData',
-                                                       'DiskCreateOption', mod='models')
+                                                       'DiskCreateOption', mod='models', operation_group='disks')
 
     location = location or get_resource_group_location(resource_group_name)
     if source_blob_uri:
@@ -443,14 +444,14 @@ def create_snapshot(resource_group_name, snapshot_name, location=None, size_gb=N
 
 def _get_sku_object(sku):
     if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
-        DiskSku = get_sdk(ResourceType.MGMT_COMPUTE, 'DiskSku', mod='models')
+        DiskSku = get_sdk(ResourceType.MGMT_COMPUTE, 'DiskSku', mod='models', operation_group='disks')
         return DiskSku(sku)
     return sku
 
 
 def _set_sku(instance, sku):
     if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
-        instance.sku = get_sdk(ResourceType.MGMT_COMPUTE, 'DiskSku', mod='models')(sku)
+        instance.sku = get_sdk(ResourceType.MGMT_COMPUTE, 'DiskSku', mod='models', operation_group='disks')(sku)
     else:
         instance.account_type = sku
 
@@ -482,7 +483,7 @@ def grant_snapshot_access(resource_group_name, snapshot_name, duration_in_second
 
 
 def _grant_access(resource_group_name, name, duration_in_seconds, is_disk):
-    AccessLevel = get_sdk(ResourceType.MGMT_COMPUTE, 'AccessLevel', mod='models')
+    AccessLevel = get_sdk(ResourceType.MGMT_COMPUTE, 'AccessLevel', mod='models', operation_group='disks')
     client = _compute_client_factory()
     op = client.disks if is_disk else client.snapshots
     return op.grant_access(resource_group_name, name, AccessLevel.read, duration_in_seconds)
@@ -504,7 +505,7 @@ def create_image(resource_group_name, name, source, os_type=None, data_disk_sour
                  os_disk=None, data_disks=None, tags=None):
     ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource, OperatingSystemStateTypes = get_sdk(
         ResourceType.MGMT_COMPUTE, 'ImageOSDisk', 'ImageDataDisk', 'ImageStorageProfile', 'Image', 'SubResource',
-        'OperatingSystemStateTypes', mod='models')
+        'OperatingSystemStateTypes', mod='models', operation_group='virtual_machines')
 
     if source_virtual_machine:
         location = location or get_resource_group_location(resource_group_name)
@@ -542,8 +543,10 @@ def create_image(resource_group_name, name, source, os_type=None, data_disk_sour
 def attach_unmanaged_data_disk(resource_group_name, vm_name, new=False, vhd_uri=None, lun=None,
                                disk_name=None, size_gb=1023, caching=None):
     ''' Attach an unmanaged disk'''
-    DataDisk, DiskCreateOptionTypes = get_sdk(ResourceType.MGMT_COMPUTE, 'DataDisk',
-                                              'DiskCreateOptionTypes', mod='models')
+    DataDisk, DiskCreateOptionTypes, VirtualHardDisk = get_sdk(ResourceType.MGMT_COMPUTE, 'DataDisk',
+                                                               'DiskCreateOptionTypes', 'VirtualHardDisk',
+                                                               mod='models',
+                                                               operation_group='virtual_machines')
     if not new and not disk_name:
         raise CLIError('Pleae provide the name of the existing disk to attach')
     create_option = DiskCreateOptionTypes.empty if new else DiskCreateOptionTypes.attach
@@ -693,7 +696,8 @@ def _reset_windows_admin(vm_instance, resource_group_name, username, password, n
     client = _compute_client_factory()
     VirtualMachineExtension = get_sdk(ResourceType.MGMT_COMPUTE,
                                       "VirtualMachineExtension",
-                                      mod='models')
+                                      mod='models',
+                                      operation_group='virtual_machine_extensions')
 
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
         vm_instance.resources, _WINDOWS_ACCESS_EXT)
@@ -727,7 +731,8 @@ def _update_linux_access_extension(vm_instance, resource_group_name, protected_s
 
     VirtualMachineExtension = get_sdk(ResourceType.MGMT_COMPUTE,
                                       "VirtualMachineExtension",
-                                      mod='models')
+                                      mod='models',
+                                      operation_group='virtual_machine_extensions')
 
     # pylint: disable=no-member
     instance_name = _get_extension_instance_name(vm_instance.instance_view,
@@ -803,7 +808,8 @@ def enable_boot_diagnostics(resource_group_name, vm_name, storage):
     DiagnosticsProfile, BootDiagnostics = get_sdk(ResourceType.MGMT_COMPUTE,
                                                   "DiagnosticsProfile",
                                                   "BootDiagnostics",
-                                                  mod='models')
+                                                  mod='models',
+                                                  operation_group='virtual_machines')
 
     boot_diag = BootDiagnostics(True, storage_uri)
     if vm.diagnostics_profile is None:
@@ -904,7 +910,8 @@ def set_extension(
 
     VirtualMachineExtension = get_sdk(ResourceType.MGMT_COMPUTE,
                                       "VirtualMachineExtension",
-                                      mod='models')
+                                      mod='models',
+                                      operation_group='virtual_machine_extensions')
     # pylint: disable=no-member
     instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name)
     # pylint: disable=no-member
@@ -1038,7 +1045,8 @@ def set_vmss_diagnostics_extension(
                                 no_auto_upgrade)
 
     result = LongRunningOperation()(poller)
-    UpgradeMode = get_sdk(ResourceType.MGMT_COMPUTE, "UpgradeMode", mod='models')
+    UpgradeMode = get_sdk(ResourceType.MGMT_COMPUTE, "UpgradeMode", mod='models',
+                          operation_group='virtual_machine_scale_sets')
     if vmss.upgrade_policy.mode == UpgradeMode.manual:
         poller2 = update_vmss_instances(resource_group_name, vmss_name, ['*'])
         LongRunningOperation()(poller2)
@@ -1286,7 +1294,8 @@ def vm_open_port(resource_group_name, vm_name, port, priority=900, network_secur
 
 
 def _build_nic_list(nic_ids):
-    NetworkInterfaceReference = get_sdk(ResourceType.MGMT_COMPUTE, 'NetworkInterfaceReference', mod='models')
+    NetworkInterfaceReference = get_sdk(ResourceType.MGMT_COMPUTE, 'NetworkInterfaceReference', mod='models',
+                                        operation_group='virtual_machines')
     nic_list = []
     if nic_ids:
         # pylint: disable=no-member
@@ -1307,7 +1316,8 @@ def _get_existing_nics(vm):
 
 
 def _update_vm_nics(vm, nics, primary_nic):
-    NetworkProfile = get_sdk(ResourceType.MGMT_COMPUTE, 'NetworkProfile', mod='models')
+    NetworkProfile = get_sdk(ResourceType.MGMT_COMPUTE, 'NetworkProfile', mod='models',
+                             operation_group='virtual_machines')
 
     if primary_nic:
         try:
@@ -2121,7 +2131,8 @@ def get_vm_format_secret(secrets, certificate_store=None):
 def add_vm_secret(resource_group_name, vm_name, keyvault, certificate, certificate_store=None):
     from ._vm_utils import create_keyvault_data_plane_client, get_key_vault_base_url
     VaultSecretGroup, SourceVault, VaultCertificate = get_sdk(ResourceType.MGMT_COMPUTE, 'VaultSecretGroup',
-                                                              'SourceVault', 'VaultCertificate', mod='models')
+                                                              'SourceVault', 'VaultCertificate', mod='models',
+                                                              operation_group='virtual_machines')
     vm = get_vm(resource_group_name, vm_name)
 
     if '://' not in certificate:  # has a cert name rather a full url?
@@ -2183,7 +2194,8 @@ def remove_vm_secret(resource_group_name, vm_name, keyvault, certificate=None):
 
 def assign_vm_identity(resource_group_name, vm_name, identity_role=DefaultStr('Contributor'),
                        identity_role_id=None, identity_scope=None, port=None):
-    VirtualMachineIdentity = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualMachineIdentity', mod='models')
+    VirtualMachineIdentity = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualMachineIdentity', mod='models',
+                                     operation_group='virtual_machines')
     from azure.cli.core.commands.arm import assign_implict_identity
     client = _compute_client_factory()
 
@@ -2211,7 +2223,8 @@ def assign_vm_identity(resource_group_name, vm_name, identity_role=DefaultStr('C
 def assign_vmss_identity(resource_group_name, vmss_name, identity_role=DefaultStr('Contributor'),
                          identity_role_id=None, identity_scope=None, port=None):
     VirtualMachineScaleSetIdentity, UpgradeMode = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualMachineScaleSetIdentity',
-                                                          'UpgradeMode', mod='models')
+                                                          'UpgradeMode', mod='models',
+                                                          operation_group='virtual_machine_scale_sets')
     from azure.cli.core.commands.arm import assign_implict_identity
     client = _compute_client_factory()
 
@@ -2268,7 +2281,8 @@ def list_skus(location=None):
 
 def run_command_invoke(resource_group_name, vm_name, command_id, scripts=None, parameters=None):
     RunCommandInput, RunCommandInputParameter = get_sdk(ResourceType.MGMT_COMPUTE, 'RunCommandInput',
-                                                        'RunCommandInputParameter', mod='models')
+                                                        'RunCommandInputParameter', mod='models',
+                                                        operation_group='virtual_machines')
 
     parameters = parameters or []
     run_command_input_parameters = []
