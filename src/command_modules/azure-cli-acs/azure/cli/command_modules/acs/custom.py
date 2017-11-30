@@ -404,7 +404,7 @@ def k8s_uninstall_connector(client, name, name_aks, resource_group,
     helm_not_installed = "Error : Helm not detected, please verify if it is installed."
     # Check if Helm is installed locally
     try:
-        p = Popen(["helm"], stdout=PIPE, stderr=PIPE)
+        Popen(["helm"], stdout=PIPE, stderr=PIPE)
     except OSError:
         raise CLIError(helm_not_installed)
     # Get the credentials from a AKS instance
