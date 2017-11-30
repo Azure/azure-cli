@@ -311,14 +311,14 @@ def k8s_install_cli(client_version='latest', install_location=None):
         raise CLIError('Connection error while attempting to download client ({})'.format(ex))
 
 
-def k8s_install_connector(client, name, resource_group, name_aks,
+def k8s_install_connector(client, name, resource_group, connector_name,
                           location=None, service_principal=None, client_secret=None,
                           chart_url=None, os_type='Linux'):
     """Deploy the ACI-Connector to a AKS cluster
-    :param name_aks: The name of the AKS cluster. The name is case insensitive.
-    :type name_aks: str
-    :param name: The name for the ACI Connector
+    :param name: The name of the AKS cluster. The name is case insensitive.
     :type name: str
+    :param connector_name: The name for the ACI Connector
+    :type connector_name: str
     :param resource_group: Name of the resource group where the AKS is located and where
     the ACI connector will be mapped.
     :type resource_group: str
@@ -360,12 +360,12 @@ def k8s_install_connector(client, name, resource_group, name_aks,
         location = rgkaci.location  # pylint:disable=no-member
     # Get the credentials from a AKS instance
     _, browse_path = tempfile.mkstemp()
-    aks_get_credentials(client, resource_group, name_aks, admin=False, path=browse_path)
+    aks_get_credentials(client, resource_group, name, admin=False, path=browse_path)
     subscription_id = _get_subscription_id()
-    dns_name_prefix = _get_default_dns_prefix(name, resource_group, subscription_id)
+    dns_name_prefix = _get_default_dns_prefix(connector_name, resource_group, subscription_id)
     # Ensure that the SPN exists
     principal_obj = _ensure_service_principal(service_principal, client_secret, subscription_id,
-                                              dns_name_prefix, location, name)
+                                              dns_name_prefix, location, connector_name)
     client_secret = principal_obj.get("client_secret")
     service_principal = principal_obj.get("service_principal")
     # Get the TenantID
@@ -377,7 +377,7 @@ def k8s_install_connector(client, name, resource_group, name_aks,
         image_tag = 'canary'
     logger.warning('Deploying the aci-connector using Helm')
     try:
-        subprocess.call(["helm", "install", url_chart, "--name", name, "--set", "env.azureClientId=" +
+        subprocess.call(["helm", "install", url_chart, "--name", connector_name, "--set", "env.azureClientId=" +
                          service_principal + ",env.azureClientKey=" + client_secret + ",env.azureSubscriptionId=" +
                          subscription_id + ",env.azureTenantId=" + tenant_id + ",env.aciResourceGroup=" + rgkaci.name +
                          ",env.aciRegion=" + location + ",image.tag=" + image_tag])
@@ -385,15 +385,15 @@ def k8s_install_connector(client, name, resource_group, name_aks,
         raise CLIError('Could not deploy the ACI Chart: {}'.format(err))
 
 
-def k8s_uninstall_connector(client, name, name_aks, resource_group,
+def k8s_uninstall_connector(client, name, connector_name, resource_group,
                             graceful=False, os_type='Linux'):
     """Undeploy the ACI-Connector from an AKS cluster.
-    :param name_aks: The name of the AKS cluster. The name is case insensitive.
-    :type name_aks: str
+    :param name: The name of the AKS cluster. The name is case insensitive.
+    :type name: str
     :param resource_group: The name of the resource group where the AKS cluster is deployed.
     :type resource_group: str
-    :param name: The name for the ACI Connector
-    :type name: str
+    :param connector_name: The name for the ACI Connector
+    :type connector_name: str
     :param graceful: Mention if you want to drain/uncordon your aci-connector to move your applications
     running on ACI to your others nodes. Default : False
     :type graceful: bool
@@ -409,7 +409,7 @@ def k8s_uninstall_connector(client, name, name_aks, resource_group,
         raise CLIError(helm_not_installed)
     # Get the credentials from a AKS instance
     _, browse_path = tempfile.mkstemp()
-    aks_get_credentials(client, resource_group, name_aks, admin=False, path=browse_path)
+    aks_get_credentials(client, resource_group, name, admin=False, path=browse_path)
     # Validate if the RG exists
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     if graceful:
@@ -442,7 +442,7 @@ def k8s_uninstall_connector(client, name, name_aks, resource_group,
 
     logger.warning('Undeploying the aci-connector using Helm')
     try:
-        subprocess.call(["helm", "del", name, "--purge"])
+        subprocess.call(["helm", "del", connector_name, "--purge"])
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not deploy the ACI Chart: {}'.format(err))
 
