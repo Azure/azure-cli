@@ -4,12 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
-from ._factory import get_acr_service_client
+from ._client_factory import get_acr_service_client
 
 
 def validate_registry_name(namespace):
     if namespace.registry_name:
-        client = get_acr_service_client().registries
+        client = get_acr_service_client(namespace.cmd.cli_ctx).registries
         registry_name = namespace.registry_name
 
         result = client.check_name_availability(registry_name)
