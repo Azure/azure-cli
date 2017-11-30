@@ -21,6 +21,7 @@ from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, 
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
+from azure.cli.core._profile import Profile
 
 from knack.util import CLIError
 from knack.log import get_logger
@@ -78,25 +79,37 @@ def update_account(cmd, client, resource_group_name, account_name,
 
 
 def login_account(cmd, client, resource_group_name, account_name, shared_key_auth=False):
-
     account = client.get(resource_group_name=resource_group_name,
                          account_name=account_name)
-    if not cmd.cli_ctx.config_parser.has_section('batch'):
-        cmd.cli_ctx.config_parser.add_section('batch')
-    cmd.cli_ctx.config_parser.set('batch', 'account', account.name)
-    cmd.cli_ctx.config_parser.set('batch', 'endpoint',
-                                'https://{}/'.format(account.account_endpoint))
+    cmd.cli_ctx.config.set_value('batch', 'account', account.name)
+    cmd.cli_ctx.config.set_value('batch', 'endpoint',
+                           'https://{}/'.format(account.account_endpoint))
 
     if shared_key_auth:
         keys = client.get_keys(resource_group_name=resource_group_name,
                                account_name=account_name)
-        cmd.cli_ctx.config_parser.set('batch', 'auth_mode', 'shared_key')
-        cmd.cli_ctx.config_parser.set('batch', 'access_key', keys.primary)
+        cmd.cli_ctx.config.set_value('batch', 'auth_mode', 'shared_key')
+        cmd.cli_ctx.config.set_value('batch', 'access_key', keys.primary)
+        response = {
+            'account': account.name,
+            'endpoint': 'https://{}/'.format(account.account_endpoint),
+            'primaryKey': keys.primary,
+            'secondaryKey': keys.secondary
+        }
     else:
-        cmd.cli_ctx.config_parser.set('batch', 'auth_mode', 'aad')
-        cmd.cli_ctx.config_parser.remove_option('batch', 'access_key')
-
-    set_global_config(cmd.cli_ctx.config_parser)
+        cmd.cli_ctx.config.set_value('batch', 'auth_mode', 'aad')
+        resource = cmd.cli_ctx.cloud.endpoints.batch_resource_id
+        profile = Profile(cmd.cli_ctx)
+        creds, subscription, tenant = profile.get_raw_token(resource=resource)
+        response = {
+            'tokenType': creds[0],
+            'accessToken': creds[1],
+            'expiresOn': creds[2]['expiresOn'],
+            'subscription': subscription,
+            'tenant': tenant,
+            'resource': resource
+        }
+    return response
 
 
 @transfer_doc(ApplicationUpdateParameters)
