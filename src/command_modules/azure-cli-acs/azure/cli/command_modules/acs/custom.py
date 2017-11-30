@@ -310,6 +310,7 @@ def k8s_install_cli(client_version='latest', install_location=None):
     except IOError as ex:
         raise CLIError('Connection error while attempting to download client ({})'.format(ex))
 
+
 def k8s_install_connector(client, name, resource_group, name_aks,
                           location=None, service_principal=None, client_secret=None,
                           chart_url=None, os_type='Linux'):
@@ -383,6 +384,7 @@ def k8s_install_connector(client, name, resource_group, name_aks,
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not deploy the ACI Chart: {}'.format(err))
 
+
 def k8s_uninstall_connector(client, name, name_aks, resource_group,
                             graceful=False, os_type='Linux'):
     """Undeploy the ACI-Connector from an AKS cluster.
@@ -414,7 +416,7 @@ def k8s_uninstall_connector(client, name, name_aks, resource_group,
         logger.warning('Graceful option selected, will try to drain the node first')
         kubectl_not_installed = "Error : Kubectl not detected, please verify if it is installed."
         try:
-            p = Popen(["kubectl"], stdout=PIPE, stderr=PIPE)
+            Popen(["kubectl"], stdout=PIPE, stderr=PIPE)
         except OSError:
             raise CLIError(kubectl_not_installed)
         try:
@@ -443,6 +445,7 @@ def k8s_uninstall_connector(client, name, name_aks, resource_group,
         subprocess.call(["helm", "del", name, "--purge"])
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not deploy the ACI Chart: {}'.format(err))
+
 
 def _build_service_principal(client, name, url, client_secret):
     # use get_progress_controller
