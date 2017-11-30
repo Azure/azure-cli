@@ -6,9 +6,12 @@
 
 from automation.verify.doc_source_map import verify_doc_source_map
 from automation.verify.default_modules import verify_default_modules
+import automation.verify.verify_packages
+import automation.verify.verify_commands
+import automation.verify.verify_dependencies
 
 
-def verify_license(args):
+def verify_license(_):
     import sys
     import os
     from automation.utilities.path import get_repo_root
@@ -43,7 +46,8 @@ def verify_license(args):
 
 def init_args(root):
     parser = root.add_parser('verify')
-    sub_parser = parser.add_subparsers()
+    parser.set_defaults(func=lambda _: parser.print_help())
+    sub_parser = parser.add_subparsers(title='sub commands')
 
     license_verify = sub_parser.add_parser('license', help='Verify license headers.')
     license_verify.set_defaults(func=verify_license)
@@ -54,3 +58,7 @@ def init_args(root):
     def_modules = sub_parser.add_parser('default-modules', help='Verify default modules.')
     def_modules.add_argument('build_folder', help='The path to the folder contains all wheel files.')
     def_modules.set_defaults(func=verify_default_modules)
+
+    automation.verify.verify_packages.init(sub_parser)
+    automation.verify.verify_commands.init(sub_parser)
+    automation.verify.verify_dependencies.init(sub_parser)

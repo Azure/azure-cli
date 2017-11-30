@@ -30,7 +30,8 @@ DEPENDENCIES = [
     'nose>=1.3.7',
     'readme_renderer>=17.2',
     'six>=1.10.0',
-    'tabulate>=0.7.7'
+    'tabulate>=0.7.7',
+    'pytest'
 ]
 
 setup(
@@ -47,7 +48,8 @@ setup(
         'automation.style',
         'automation.tests',
         'automation.setup',
-        'automation.coverage'
+        'automation.coverage',
+        'automation.verify'
     ],
     entry_points={
         'console_scripts': [

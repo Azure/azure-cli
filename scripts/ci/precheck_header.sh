@@ -13,6 +13,8 @@ azdev verify document-map
 echo "Verify readme history"
 python -m automation.tests.verify_readme_history
 
-echo "Verify package versions"
-python -m automation.tests.verify_package_versions
+if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+    echo "Verify package versions"
+    python -m automation.tests.verify_package_versions
+fi
 
