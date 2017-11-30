@@ -3,8 +3,8 @@
 Release History
 ===============
 
-unreleased
-++++++++++
+3.1.8
++++++
 * Converted to Knack framework
 * `az batch login` command now returns authentication details.
 
