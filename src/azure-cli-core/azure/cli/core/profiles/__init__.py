@@ -23,7 +23,6 @@ def get_api_version(resource_type, as_sdk_profile=False):
 
     :param resource_type: The resource type.
     :type resource_type: ResourceType.
-    :param str operation_group: The operation group.
     :param bool as_sdk_profile: Return SDKProfile instance.
     :returns: The API version
      Can return a tuple<operation_group, str> if the resource_type supports SDKProfile.
@@ -58,7 +57,7 @@ def get_sdk(resource_type, *attr_args, **kwargs):
             checked - A boolean specifying if this method should suppress/check import exceptions
                       or not. By default, None is returned.
             mod - A string specifying the submodule that all attr_args should be prefixed with.
-            rt - A string specifying the operation group name we want models.
+            operation_group - A string specifying the operation group name we want models.
 
         Example usage:
             Get a single SDK model.
