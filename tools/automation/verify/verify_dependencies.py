@@ -5,15 +5,18 @@
 
 """Verify package dependency compatibility (with support for allowed exceptions). """
 
-from __future__ import print_function
-
 import subprocess
 import sys
 
 ALLOWED_ERRORS = []
 
 
-def verify_dependencies():
+def init(root):
+    parser = root.add_parser('dependencies', help='Run pip check')
+    parser.set_defaults(func=verify_dependencies)
+
+
+def verify_dependencies(_):
     try:
         subprocess.check_output(['pip', 'check'], stderr=subprocess.STDOUT, universal_newlines=True)
     except subprocess.CalledProcessError as err:
@@ -23,15 +26,10 @@ def verify_dependencies():
             if not any(a in msg for a in ALLOWED_ERRORS):
                 errors.append(msg)
         if errors:
-            print('Dependency compatibility errors found!', file=sys.stderr)
-            print('\n'.join(errors), file=sys.stderr)
+            sys.stderr.write('Dependency compatibility errors found!\n')
+            sys.stderr.write('\n'.join(errors))
             sys.exit(1)
         else:
-            print("'pip check' returned exit code {} but the errors are allowable.".format(err.returncode),
-                  file=sys.stderr)
-            print("Full output from pip follows:", file=sys.stderr)
-            print(err.output, file=sys.stderr)
-
-
-if __name__ == '__main__':
-    verify_dependencies()
+            sys.stderr.write("'pip check' returned exit code {} but the errors are allowable.\n".format(err.returncode))
+            sys.stderr.write("Full output from pip follows:\n")
+            sys.stderr.write(err.output + '\n')

@@ -11,9 +11,9 @@ import automation.style
 
 
 def main():
-    parser = argparse.ArgumentParser(prog='Azure CLI build tools')
+    parser = argparse.ArgumentParser(prog='azdev')
 
-    sub_parser = parser.add_subparsers(title='azure cli tools sub commands')
+    sub_parser = parser.add_subparsers(title='sub commands')
     automation.verify.init_args(sub_parser)
     automation.clibuild.init_args(sub_parser)
     automation.style.init_args(sub_parser)
