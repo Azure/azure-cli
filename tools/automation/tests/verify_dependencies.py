@@ -10,8 +10,8 @@ from __future__ import print_function
 import subprocess
 import sys
 
-ALLOWED_ERRORS = [
-]
+ALLOWED_ERRORS = []
+
 
 def verify_dependencies():
     try:
@@ -27,9 +27,11 @@ def verify_dependencies():
             print('\n'.join(errors), file=sys.stderr)
             sys.exit(1)
         else:
-            print("'pip check' returned exit code {} but the errors are allowable.".format(err.returncode), file=sys.stderr)
+            print("'pip check' returned exit code {} but the errors are allowable.".format(err.returncode),
+                  file=sys.stderr)
             print("Full output from pip follows:", file=sys.stderr)
             print(err.output, file=sys.stderr)
+
 
 if __name__ == '__main__':
     verify_dependencies()

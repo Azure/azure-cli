@@ -13,8 +13,7 @@ def verify_license(args):
     import os
     from automation.utilities.path import get_repo_root
 
-    license_header = \
-"""# --------------------------------------------------------------------------------------------
+    license_header = """# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -39,13 +38,13 @@ def verify_license(args):
         sys.stderr.write("Error: The following files don't have the required license headers: \n{}".format(
             '\n'.join(files_without_header)))
 
-        sys.exit(1)    
+        sys.exit(1)
 
 
 def init_args(root):
     parser = root.add_parser('verify')
     sub_parser = parser.add_subparsers()
-    
+
     license_verify = sub_parser.add_parser('license', help='Verify license headers.')
     license_verify.set_defaults(func=verify_license)
 

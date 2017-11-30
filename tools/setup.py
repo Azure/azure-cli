@@ -49,12 +49,12 @@ setup(
         'automation.setup',
         'automation.coverage'
     ],
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'azdev=automation.__main__:main',
-            'check_style=automation.style.run:main',
+            'check_style=automation.style:legacy_entry',
             'run_tests=automation.tests.run:main'
-            ]
+        ]
     },
     install_requires=DEPENDENCIES
 )

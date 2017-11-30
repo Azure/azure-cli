@@ -61,7 +61,7 @@ def _valid_wheel(wheel_path):
     # these files shouldn't exist in the wheel
     print('Verifying {}'.format(wheel_path))
     bad_files = ['azure/__init__.py', 'azure/cli/__init__.py', 'azure/cli/command_modules/__init__.py']
-    wheel_zip=zipfile.ZipFile(wheel_path)
+    wheel_zip = zipfile.ZipFile(wheel_path)
     whl_file_list = wheel_zip.namelist()
     if any(f in whl_file_list for f in bad_files):
         return False
@@ -89,7 +89,8 @@ def verify_packages(built_packages_dir):
     all_modules = automation_path.get_all_module_paths()
     all_command_modules = automation_path.get_command_modules_paths(include_prefix=True)
 
-    modules_missing_manifest_in = [name for name, path in all_modules if not os.path.isfile(os.path.join(path, 'MANIFEST.in'))]
+    modules_missing_manifest_in = [name for name, path in all_modules if
+                                   not os.path.isfile(os.path.join(path, 'MANIFEST.in'))]
     if modules_missing_manifest_in:
         print_heading('Error: The following modules are missing the MANIFEST.in file.')
         print(modules_missing_manifest_in)
@@ -138,8 +139,8 @@ def verify_packages(built_packages_dir):
 
     print('Installed command modules', installed_command_modules)
 
-    missing_modules = set([name for name, fullpath in all_command_modules]) - set(installed_command_modules) - \
-                      EXCLUDE_MODULES
+    missing_modules = set([name for name, fullpath in all_command_modules]) - set(
+        installed_command_modules) - EXCLUDE_MODULES
 
     if missing_modules:
         print_heading('Error: The following modules were not installed successfully', f=sys.stderr)
@@ -165,6 +166,7 @@ def verify_packages(built_packages_dir):
 
 if __name__ == '__main__':
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument('build_folder', help='The path to the folder contains all wheel files.')
 
