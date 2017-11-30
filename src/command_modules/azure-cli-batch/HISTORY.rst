@@ -3,6 +3,11 @@
 Release History
 ===============
 
+unreleased
+++++++++++
+* Converted to Knack framework
+* `az batch login` command now returns authentication details.
+
 3.1.7
 +++++
 * Fixed bug in pool create command when a resource ID was used with the --image flag.
