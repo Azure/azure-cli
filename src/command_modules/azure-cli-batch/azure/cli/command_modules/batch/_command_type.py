@@ -463,13 +463,11 @@ class AzureBatchDataPlaneCommand(object):
             from msrest.exceptions import ValidationError, ClientRequestError
             from azure.batch.models import BatchErrorException
             from knack.util import CLIError
-            from azure.cli.core.commands import _user_confirmed
-
-            if self._cancel_operation(kwargs, az_config, _user_confirmed):
-                raise CLIError('Operation cancelled.')
+            from knack.commands import CLICommand
+            cmd = kwargs.pop('cmd')
 
             try:
-                client = self.client_factory(kwargs)
+                client = self.client_factory(cmd.cli_ctx, kwargs)
                 self._build_options(kwargs)
 
                 stream_output = kwargs.pop('destination', None)
@@ -547,22 +545,11 @@ class AzureBatchDataPlaneCommand(object):
             'description_loader': self.description_loader,
             'table_transformer': self.table_transformer,
             'confirmation': self.confirmation,
-            'validator': self.validator,
+            #'validator': self.validator,
             'client_factory': self.client_factory
         }
         args.update(self.merged_kwargs)
         return args
-
-    def _cancel_operation(self, kwargs, config, user):
-        """Whether to cancel the current operation because user
-        declined the confirmation prompt.
-        :param dict kwargs: The request arguments.
-        :returns: bool
-        """
-        return not (not self.confirmation or
-                    kwargs.get(CONFIRM_PARAM_NAME) or
-                    config.getboolean('core', 'disable_confirm_prompt', fallback=False) or
-                    user(self.confirmation, kwargs))
 
     def _build_parameters(self, path, kwargs, param, value):
         """Recursively build request parameter dictionary from command line args.
@@ -811,6 +798,7 @@ class AzureBatchDataPlaneCommand(object):
                                              action='store_true',
                                              help=docstring)))
         auth_group_name = 'Batch Account'
+        args.append(('cmd', CLICommandArgument('cmd', action=IgnoreAction)))
         args.append(('account_name', CLICommandArgument(
             'account_name', options_list=['--account-name'], required=False, default=None,
             validator=validators.validate_client_parameters, arg_group=auth_group_name,

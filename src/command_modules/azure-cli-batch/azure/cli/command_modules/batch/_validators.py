@@ -96,7 +96,7 @@ def resource_file_format(value):
 
 # COMMAND NAMESPACE VALIDATORS
 
-def validate_required_parameter(cmd, namespace, parser):
+def validate_required_parameter(namespace, parser):
     """Validates required parameters in Batch complex objects"""
     if not parser.done:
         parser.parse(namespace)
@@ -110,7 +110,7 @@ def storage_account_id(cmd, namespace):
     if (namespace.storage_account and not
             ('/providers/Microsoft.ClassicStorage/storageAccounts/' in namespace.storage_account or
              '/providers/Microsoft.Storage/storageAccounts/' in namespace.storage_account)):
-        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE)
+        storage_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_STORAGE)
         acc = storage_client.storage_accounts.get_properties(namespace.resource_group_name,
                                                              namespace.storage_account)
         if not acc:
@@ -133,7 +133,7 @@ def keyvault_id(cmd, namespace):
         kv_name = namespace.keyvault
         kv_rg = namespace.resource_group_name
     try:
-        keyvault_client = get_mgmt_service_client(KeyVaultManagementClient)
+        keyvault_client = get_mgmt_service_client(cmd.cli_ctx, KeyVaultManagementClient)
         vault = keyvault_client.vaults.get(kv_rg, kv_name)
         if not vault:
             raise ValueError("KeyVault named '{}' not found in the resource group '{}'.".
@@ -144,12 +144,12 @@ def keyvault_id(cmd, namespace):
         raise ValueError('Invalid KeyVault reference: {}\n{}'.format(namespace.keyvault, exp))
 
 
-def application_enabled(cmd, amespace):
+def application_enabled(cmd, namespace):
     """Validates account has auto-storage enabled"""
     from azure.mgmt.batch import BatchManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-    client = get_mgmt_service_client(BatchManagementClient)
+    client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
     acc = client.batch_account.get(namespace.resource_group_name, namespace.account_name)
     if not acc:
         raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
@@ -228,7 +228,7 @@ def validate_file_destination(cmd, namespace):
 # CUSTOM REQUEST VALIDATORS
 
 
-def validate_pool_settings(cmd, namespace, parser):
+def validate_pool_settings(namespace, parser):
     """Custom parsing to enfore that either PaaS or IaaS instances are configured
     in the add pool request body.
     """
@@ -270,25 +270,25 @@ def validate_cert_settings(cmd, namespace):
     namespace.thumbprint_algorithm = 'sha1'
 
 
-def validate_client_parameters(namespace):
+def validate_client_parameters(cmd, namespace):
     """Retrieves Batch connection parameters from environment variables"""
     from azure.mgmt.batch import BatchManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
     # simply try to retrieve the remaining variables from environment variables
     if not namespace.account_name:
-        namespace.account_name = az_config.get('batch', 'account', None)
+        namespace.account_name = cmd.cli_ctx.config.get('batch', 'account', None)
     if not namespace.account_key:
-        namespace.account_key = az_config.get('batch', 'access_key', None)
+        namespace.account_key = cmd.cli_ctx.config.get('batch', 'access_key', None)
     if not namespace.account_endpoint:
-        namespace.account_endpoint = az_config.get('batch', 'endpoint', None)
+        namespace.account_endpoint = cmd.cli_ctx.config.get('batch', 'endpoint', None)
 
     # if account name is specified but no key, attempt to query if we use shared key auth
     if namespace.account_name and namespace.account_endpoint and not namespace.account_key:
-        if az_config.get('batch', 'auth_mode', 'shared_key') == 'shared_key':
+        if cmd.cli_ctx.config.get('batch', 'auth_mode', 'shared_key') == 'shared_key':
             endpoint = urlsplit(namespace.account_endpoint)
             host = endpoint.netloc
-            client = get_mgmt_service_client(BatchManagementClient)
+            client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
             acc = next((x for x in client.batch_account.list()
                         if x.name == namespace.account_name and x.account_endpoint == host), None)
             if acc:
@@ -305,6 +305,6 @@ def validate_client_parameters(namespace):
         if not namespace.account_endpoint:
             raise ValueError("Specify batch endpoint in command line or environment variable.")
 
-    if az_config.get('batch', 'auth_mode', 'shared_key') == 'aad':
+    if cmd.cli_ctx.config.get('batch', 'auth_mode', 'shared_key') == 'aad':
         namespace.account_key = None
 

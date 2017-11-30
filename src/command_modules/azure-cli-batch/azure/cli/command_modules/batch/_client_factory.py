@@ -62,7 +62,7 @@ def batch_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, BatchManagementClient)
 
 
-def batch_data_service_factory(cli_ctx, **kwargs):
+def batch_data_service_factory(cli_ctx, kwargs):
     import azure.batch.batch_service_client as batch
     import azure.batch.batch_auth as batchauth
 

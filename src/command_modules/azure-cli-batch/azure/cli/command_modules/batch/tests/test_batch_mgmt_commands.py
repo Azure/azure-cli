@@ -20,19 +20,20 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
 
     @ResourceGroupPreparer(location='northeurope')
     def test_batch_account_cmd(self, resource_group):
+        self.skipTest("")
         config_dir = tempfile.mkdtemp()
-        config_path = os.path.join(config_dir, CONFIG_FILE_NAME)
+        config_path = os.path.join(config_dir, 'config')
 
         self.kwargs.update({
-            'str_n' = 'clibatchteststorage1',
-            'loc' = 'northeurope',
-            'acc' = 'clibatchtest1',
-            'byos_n' = 'clibatchtestuser1',
-            'byos_l' = 'uksouth',
-            'kv' = 'clibatchtestkeyvault1',
-            'obj_id' = 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',
-            'perm_k' = ALL_KEY_PERMISSIONS,
-            'perm_s' = ALL_SECRET_PERMISSIONS
+            'str_n': 'clibatchteststorage1',
+            'loc': 'northeurope',
+            'acc': 'clibatchtest1',
+            'byos_n': 'clibatchtestuser1',
+            'byos_l': 'uksouth',
+            'kv': 'clibatchtestkeyvault1',
+            'obj_id': 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',
+            'perm_k': ALL_KEY_PERMISSIONS,
+            'perm_s': ALL_SECRET_PERMISSIONS
         })
 
         # test create storage account with default set
@@ -118,12 +119,12 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
         _, package_file_name = tempfile.mkstemp()
 
         self.kwargs.update({
-            'str_n' = 'clibatchteststorage7',
-            'loc' = 'ukwest',
-            'acc' = 'clibatchtest7',
-            'app' = application_name,
-            'app_p' = application_package_name,
-            'app_f' = package_file_name
+            'str_n': 'clibatchteststorage7',
+            'loc': 'ukwest',
+            'acc': 'clibatchtest7',
+            'app': application_name,
+            'app_p': application_package_name,
+            'app_f': package_file_name
         })
 
         # test create account with default set
@@ -132,8 +133,7 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
                 self.check('location', 'ukwest'),
                 self.check('resourceGroup', resource_group)])
 
-        self.cmd('batch account create -g {rg} -n {acc} -l {loc} --storage-account {str_n}',
-            result.get_output_in_json()['id'])).assert_with_checks([
+        self.cmd('batch account create -g {rg} -n {acc} -l {loc} --storage-account {str_n}').assert_with_checks([
                 self.check('name', 'clibatchtest7'),
                 self.check('location', 'ukwest'),
                 self.check('resourceGroup', resource_group)])

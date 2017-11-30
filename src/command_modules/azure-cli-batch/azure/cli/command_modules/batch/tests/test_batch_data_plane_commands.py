@@ -24,8 +24,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         create_cert_file_path = self._get_test_data_file('batchtest.cer')
         cert_thumbprint = '59833fd835f827e9ec693a4c82435a6360cc6271'
         self.kwargs.update({
-            'cert' = cert_thumbprint,
-            'cert_f' = create_cert_file_path
+            'cert': cert_thumbprint,
+            'cert_f': create_cert_file_path
         })
 
         # test create certificate with default set
@@ -55,9 +55,9 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.set_account_info(batch_account_name, resource_group)
         is_playback = os.path.exists(self.recording_file)
         self.kwargs.update({
-            'p_id' = 'xplatCreatedPool',
-            'c_file' = self._get_test_data_file('batchCreatePool.json'),
-            'u_file' = self._get_test_data_file('batchUpdatePool.json')
+            'p_id': 'xplatCreatedPool',
+            'c_file': self._get_test_data_file('batchCreatePool.json'),
+            'u_file': self._get_test_data_file('batchUpdatePool.json')
         })
 
         self.batch_cmd('batch pool create --json-file "{c_file}"')
@@ -99,7 +99,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('targetDedicatedNodes', 5),
             self.check('targetLowPriorityNodes', 3)])
 
-        self.batch_cmd('batch pool reset --pool-id {p_id} --json-file "{u_file}"'.assert_with_checks([
+        self.batch_cmd('batch pool reset --pool-id {p_id} --json-file "{u_file}"').assert_with_checks([
             self.check('allocationState', 'steady'),
             self.check('id', 'xplatCreatedPool'),
             self.check('startTask.commandLine', "cmd /c echo updated")])
@@ -120,10 +120,10 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
     def test_batch_job_list_cmd(self, resource_group, batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
-            'j_id' = 'xplatJob',
-            'js_id' = 'xplatJobScheduleJobTests'
-            'j_file' = self._get_test_data_file('batchCreateJob.json'),
-            'js_file' = self._get_test_data_file('batchCreateJobScheduleForJobTests.json')
+            'j_id': 'xplatJob',
+            'js_id': 'xplatJobScheduleJobTests',
+            'j_file': self._get_test_data_file('batchCreateJob.json'),
+            'js_file': self._get_test_data_file('batchCreateJobScheduleForJobTests.json')
         })
 
         self.batch_cmd('batch job-schedule create --json-file "{js_file}"')
@@ -148,11 +148,11 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
     def test_batch_task_create_cmd(self, resource_group, batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
-            'j_id' = 'xplatJobForTaskTests',
-            't_id' = 'xplatTask'
-            'j_file' = self._get_test_data_file('batchCreateJobForTaskTests.json'),
-            't_file' = self._get_test_data_file('batchCreateTask.json'),
-            'ts_file' = self._get_test_data_file('batchCreateMultiTasks.json')
+            'j_id': 'xplatJobForTaskTests',
+            't_id': 'xplatTask',
+            'j_file': self._get_test_data_file('batchCreateJobForTaskTests.json'),
+            't_file': self._get_test_data_file('batchCreateTask.json'),
+            'ts_file': self._get_test_data_file('batchCreateMultiTasks.json')
         })
 
         self.batch_cmd('batch job create --json-file "{j_file}"')
@@ -189,8 +189,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
     def test_batch_jobs_and_tasks(self, resource_group, batch_account_name):
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
-            'p_id' = 'xplatJobForTaskTests',
-            'j_id' = "cli-test-job-1",
+            'p_id': 'xplatJobForTaskTests',
+            'j_id': "cli-test-job-1",
         })
 
         # test create paas pool using parameters
@@ -239,10 +239,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('metadata[0].value', 'value')])
 
         # test filter/header argument
-        with self.assertRaises(CLIError):
-            self.batch_cmd('batch job reset --job-id {j_id} --pool-id {p_id} '
-                           '--on-all-tasks-complete terminateJob '
-                           '--if-unmodified-since {start}')
+        self.batch_cmd('batch job reset --job-id {j_id} --pool-id {p_id} --on-all-tasks-complete '
+                        'terminateJob --if-unmodified-since {start}', expect_failure=True)
 
         # test reset job
         self.batch_cmd('batch job reset --job-id {j_id} --pool-id {p_id}  '
@@ -257,7 +255,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         # TODO: test task commands
 
     @ResourceGroupPreparer()
-    @BatchAccountPreparer(location='westeurope')
+    @BatchAccountPreparer(location='koreacentral')
     def test_batch_pools_and_nodes(self, resource_group, batch_account_name):  # pylint:disable=too-many-statements
         self.set_account_info(batch_account_name, resource_group)
         self.kwargs.update({
@@ -375,10 +373,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('state', 'deleting')])
 
         # test app package reference
-        with self.assertRaises(CLIError):
-            self.batch_cmd('batch pool create --id app_package_test --vm-size small --os-family 4 '
-                           '--application-package-references does-not-exist')
-        with self.assertRaises(CLIError):
-            self.batch_cmd('batch pool set --pool-id {pool_p} --application-package-references does-not-exist')
+        self.batch_cmd('batch pool create --id app_package_test --vm-size small --os-family 4 '
+                        '--application-package-references does-not-exist', expect_failure=True)
+        self.batch_cmd('batch pool set --pool-id {pool_p} --application-package-references does-not-exist', expect_failure=True)
 
         # TODO: Test node commands

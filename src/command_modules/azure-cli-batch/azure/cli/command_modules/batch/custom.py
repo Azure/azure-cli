@@ -21,7 +21,6 @@ from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, 
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
-import azure.cli.core.azlogging as azlogging
 
 from knack.util import CLIError
 from knack.log import get_logger
@@ -42,14 +41,14 @@ def transfer_doc(source_func, *additional_source_funcs):
 
 # Mgmt custom commands
 
-def list_accounts(client, resource_group_name=None):
+def list_accounts(cmd, client, resource_group_name=None):
     acct_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list(acct_list)
 
 
 @transfer_doc(AutoStorageBaseProperties)
-def create_account(client,
+def create_account(cmd, client,
                    resource_group_name, account_name, location, tags=None, storage_account=None,
                    keyvault=None, keyvault_url=None, no_wait=False):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
@@ -68,7 +67,7 @@ def create_account(client,
 
 
 @transfer_doc(AutoStorageBaseProperties)
-def update_account(client, resource_group_name, account_name,
+def update_account(cmd, client, resource_group_name, account_name,
                    tags=None, storage_account=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
@@ -78,30 +77,30 @@ def update_account(client, resource_group_name, account_name,
                          auto_storage=properties)
 
 
-def login_account(client, resource_group_name, account_name, shared_key_auth=False):
+def login_account(cmd, client, resource_group_name, account_name, shared_key_auth=False):
 
     account = client.get(resource_group_name=resource_group_name,
                          account_name=account_name)
-    if not az_config.config_parser.has_section('batch'):
-        az_config.config_parser.add_section('batch')
-    az_config.config_parser.set('batch', 'account', account.name)
-    az_config.config_parser.set('batch', 'endpoint',
+    if not cmd.cli_ctx.config_parser.has_section('batch'):
+        cmd.cli_ctx.config_parser.add_section('batch')
+    cmd.cli_ctx.config_parser.set('batch', 'account', account.name)
+    cmd.cli_ctx.config_parser.set('batch', 'endpoint',
                                 'https://{}/'.format(account.account_endpoint))
 
     if shared_key_auth:
         keys = client.get_keys(resource_group_name=resource_group_name,
                                account_name=account_name)
-        az_config.config_parser.set('batch', 'auth_mode', 'shared_key')
-        az_config.config_parser.set('batch', 'access_key', keys.primary)
+        cmd.cli_ctx.config_parser.set('batch', 'auth_mode', 'shared_key')
+        cmd.cli_ctx.config_parser.set('batch', 'access_key', keys.primary)
     else:
-        az_config.config_parser.set('batch', 'auth_mode', 'aad')
-        az_config.config_parser.remove_option('batch', 'access_key')
+        cmd.cli_ctx.config_parser.set('batch', 'auth_mode', 'aad')
+        cmd.cli_ctx.config_parser.remove_option('batch', 'access_key')
 
-    set_global_config(az_config.config_parser)
+    set_global_config(cmd.cli_ctx.config_parser)
 
 
 @transfer_doc(ApplicationUpdateParameters)
-def update_application(client,
+def update_application(cmd, client,
                        resource_group_name, account_name, application_id, allow_updates=None,
                        display_name=None, default_version=None):
     parameters = ApplicationUpdateParameters(allow_updates=allow_updates,
@@ -113,9 +112,9 @@ def update_application(client,
                          parameters=parameters)
 
 
-def _upload_package_blob(package_file, url):
+def _upload_package_blob(ctx, package_file, url):
     """Upload the location file to storage url provided by autostorage"""
-    BlockBlobService = get_sdk(ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
+    BlockBlobService = get_sdk(ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
 
     uri = urlsplit(url)
     # in uri path, it always start with '/', so container name is at second block
@@ -139,11 +138,11 @@ def _upload_package_blob(package_file, url):
 
 
 @transfer_doc(ApplicationPackageOperations.create)
-def create_application_package(client,
+def create_application_package(cmd, client,
                                resource_group_name, account_name, application_id, version,
                                package_file):
     # create application if not exist
-    mgmt_client = get_mgmt_service_client(BatchManagementClient)
+    mgmt_client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
     try:
         mgmt_client.application.get(resource_group_name, account_name, application_id)
     except Exception:  # pylint:disable=broad-except
@@ -153,7 +152,7 @@ def create_application_package(client,
 
     # upload binary as application package
     logger.info('Uploading %s to storage blob %s...', package_file, result.storage_url)
-    _upload_package_blob(package_file, result.storage_url)
+    _upload_package_blob(cmd.cli_ctx, package_file, result.storage_url)
 
     # activate the application package
     client.activate(resource_group_name, account_name, application_id, version, "zip")
@@ -164,7 +163,7 @@ def create_application_package(client,
 
 
 @transfer_doc(CertificateAddParameter)
-def create_certificate(client, certificate_file, thumbprint, password=None):
+def create_certificate(cmd, client, certificate_file, thumbprint, password=None):
     thumbprint_algorithm = 'sha1'
     certificate_format = 'pfx' if password else 'cer'
     with open(certificate_file, "rb") as f:
@@ -177,7 +176,7 @@ def create_certificate(client, certificate_file, thumbprint, password=None):
     return client.get(thumbprint_algorithm, thumbprint)
 
 
-def delete_certificate(client, thumbprint, abort=False):
+def delete_certificate(cmd, client, thumbprint, abort=False):
     thumbprint_algorithm = 'sha1'
     if abort:
         return client.cancel_deletion(thumbprint_algorithm, thumbprint)
@@ -186,7 +185,7 @@ def delete_certificate(client, thumbprint, abort=False):
 
 
 @transfer_doc(PoolResizeParameter)
-def resize_pool(client, pool_id, target_dedicated_nodes=None, target_low_priority_nodes=None,
+def resize_pool(cmd, client, pool_id, target_dedicated_nodes=None, target_low_priority_nodes=None,
                 resize_timeout=None, node_deallocation_option=None,
                 if_match=None, if_none_match=None, if_modified_since=None,
                 if_unmodified_since=None, abort=False):
@@ -209,7 +208,7 @@ def resize_pool(client, pool_id, target_dedicated_nodes=None, target_low_priorit
 
 
 @transfer_doc(PoolUpdatePropertiesParameter, StartTask)
-def update_pool(client,
+def update_pool(cmd, client,
                 pool_id, json_file=None, start_task_command_line=None, certificate_references=None,
                 application_package_references=None, metadata=None,
                 start_task_environment_settings=None, start_task_wait_for_success=None,
@@ -251,7 +250,7 @@ def update_pool(client,
     return client.get(pool_id)
 
 
-def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redefined-builtin
+def list_job(cmd, client, job_schedule_id=None, filter=None,  # pylint: disable=redefined-builtin
              select=None, expand=None):
     if job_schedule_id:
         option1 = JobListFromJobScheduleOptions(filter=filter,
@@ -267,7 +266,7 @@ def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redef
 
 
 @transfer_doc(TaskAddParameter, TaskConstraints)
-def create_task(client,
+def create_task(cmd, client,
                 job_id, json_file=None, task_id=None, command_line=None, resource_files=None,
                 environment_settings=None, affinity_info=None, max_wall_clock_time=None,
                 retention_time=None, max_task_retry_count=None,
