@@ -5,6 +5,7 @@ Release History
 
 2.0.19
 ++++++
+* show zone information on `az vm list-skus -otable`
 * Update the storage multiapi package reference
 
 2.0.18
