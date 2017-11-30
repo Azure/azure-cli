@@ -2,10 +2,12 @@
 
 Release History
 ===============
+
 2.0.22
 ++++++
 * Minor fixes
 * Modified the AZURE_US_GOV_CLOUD's AAD authority endpoint from login.microsoftonline.com to login.microsoftonline.us.
+* Introduce SDKProfile to support azure-mgmt-compute 3.1.0rc1 and integrated profile support.
 
 2.0.21
 ++++++
