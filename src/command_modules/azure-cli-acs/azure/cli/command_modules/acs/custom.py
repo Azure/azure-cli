@@ -369,7 +369,7 @@ def k8s_install_connector(client, name, resource_group, connector_name,
     profile = Profile()
     _, _, tenant_id = profile.get_login_credentials()
     # Check if we want the windows connector
-    if (os_type == 'Windows') or (os_type == 'Both'):
+    if (os_type == 'windows') or (os_type == 'both'):
         # The current connector will deploy two connectors, one for Windows and another one for Linux
         image_tag = 'canary'
     logger.warning('Deploying the aci-connector using Helm')
@@ -417,7 +417,7 @@ def k8s_uninstall_connector(client, name, connector_name, resource_group,
         except OSError:
             raise CLIError(kubectl_not_installed)
         try:
-            if (os_type == 'Windows') or (os_type == 'Both'):
+            if (os_type == 'windows') or (os_type == 'both'):
                 drain_node = subprocess.check_output(
                     ["kubectl", "drain", "aci-connector-0", "--force"],
                     universal_newlines=True)
