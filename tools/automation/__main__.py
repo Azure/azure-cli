@@ -7,6 +7,8 @@ import argparse
 import sys
 import automation.verify
 import automation.clibuild
+import automation.style
+
 
 def main():
     parser = argparse.ArgumentParser(prog='Azure CLI build tools')
@@ -14,6 +16,7 @@ def main():
     sub_parser = parser.add_subparsers(title='azure cli tools sub commands')
     automation.verify.init_args(sub_parser)
     automation.clibuild.init_args(sub_parser)
+    automation.style.init_args(sub_parser)
 
     if sys.argv[1:]:
         args = parser.parse_args()
@@ -24,4 +27,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
