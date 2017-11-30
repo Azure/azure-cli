@@ -65,7 +65,6 @@ logger = azlogging.get_az_logger(__name__)
 
 # pylint:disable=too-many-lines
 
-ACI_CONNECTOR_OS_TYPE = ['Windows', 'Linux', 'Both']
 
 def which(binary):
     pathVar = os.getenv('PATH')
