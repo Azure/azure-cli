@@ -533,8 +533,8 @@ def get_op_handler(operation):
     import types
 
     for rt in ResourceType:
-        if operation.startswith(rt.import_prefix+".operations."):
-            subs = operation[len(rt.import_prefix+".operations."):]
+        if operation.startswith(rt.import_prefix + ".operations."):
+            subs = operation[len(rt.import_prefix + ".operations."):]
             operation_group = subs[:subs.index('_operations')]
             operation = operation.replace(
                 rt.import_prefix,

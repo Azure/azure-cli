@@ -805,7 +805,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         }
     }
 
-    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30').virtual_machine_scale_sets: # pylint: disable=no-member
+    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30').virtual_machine_scale_sets:  # pylint: disable=no-member
         if dns_servers:
             nic_config['properties']['dnsSettings'] = {'dnsServers': dns_servers}
 
