@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.core.sdk.util import CliCommandType
+from azure.cli.core.commands import CliCommandType
 from ._client_factory import (topics_factory, event_subscriptions_factory, topic_types_factory)
 
 
