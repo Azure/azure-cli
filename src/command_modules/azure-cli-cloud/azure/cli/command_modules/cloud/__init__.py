@@ -6,7 +6,7 @@
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.util import shell_safe_json_parse
 from azure.cli.core.profiles import API_PROFILES
-from azure.cli.core.sdk.util import CliCommandType
+from azure.cli.core.commands import CliCommandType
 
 from azure.cli.command_modules.cloud._completers import (
     get_cloud_name_completion_list, get_custom_cloud_name_completion_list)

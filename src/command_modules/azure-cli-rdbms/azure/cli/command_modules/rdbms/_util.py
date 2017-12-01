@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.sdk.util import _ParametersContext
+from azure.cli.core.commands import AzArgumentContext
 
 
-class _PolyParametersContext(_ParametersContext):
+class _PolyParametersContext(AzArgumentContext):
 
     def __init__(self, command_loader, scope, **kwargs):
         super(_PolyParametersContext, self).__init__(command_loader, scope)
@@ -18,7 +18,10 @@ class _PolyParametersContext(_ParametersContext):
         from knack.arguments import ignore_type
 
         # Remove the validator and store it into a list
-        arg = _get_cli_argument(self._commmand, argument_name)
+        arg = self.command_loader.argument_registry.arguments[self.command_scope].get(argument_name, None)
+        if not arg:  # when the argument context scope is N/A
+            return
+
         self.validators.append(arg.settings['validator'])
         if argument_name == 'parameters':
             from .validators import get_combined_validator

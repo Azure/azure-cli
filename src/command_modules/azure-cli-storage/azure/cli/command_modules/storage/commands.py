@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.sdk.util import CliCommandType
+from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 #from azure.cli.command_modules.storage._command_type import cli_storage_data_plane_command

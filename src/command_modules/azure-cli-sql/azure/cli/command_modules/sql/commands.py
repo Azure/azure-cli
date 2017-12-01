@@ -5,7 +5,7 @@
 
 from azure.cli.core.commands import cli_command
 from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
-from azure.cli.core.sdk.util import (
+from azure.cli.core.commands import (
     create_service_adapter,
     ServiceGroup)
 from ._util import (

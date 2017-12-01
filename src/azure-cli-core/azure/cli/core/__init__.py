@@ -93,7 +93,7 @@ class MainCommandsLoader(CLICommandsLoader):
             loaders = self.cmd_to_loader_map[cmd_name]
             for loader in loaders:
                 loader.command_table = self.command_table
-                loader._update_command_definitions()
+                loader._update_command_definitions()  # pylint: disable=protected-access
 
     def load_command_table(self, args):
         from importlib import import_module
@@ -200,7 +200,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 loader.load_arguments(command)  # this adds entries to the argument registries
                 self.argument_registry.arguments.update(loader.argument_registry.arguments)
                 self.extra_argument_registry.update(loader.extra_argument_registry)
-                loader._update_command_definitions()
+                loader._update_command_definitions()  # pylint: disable=protected-access
 
 
 class AzCommandsLoader(CLICommandsLoader):
@@ -208,8 +208,7 @@ class AzCommandsLoader(CLICommandsLoader):
     def __init__(self, cli_ctx=None, min_profile=None, max_profile='latest',
                  command_group_cls=None, argument_context_cls=None,
                  **kwargs):
-        from azure.cli.core.commands import AzCliCommand
-        from azure.cli.core.sdk.util import _CommandGroup, _ParametersContext
+        from azure.cli.core.commands import AzCliCommand, AzCommandGroup, AzArgumentContext
 
         super(AzCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                command_cls=AzCliCommand,
@@ -217,22 +216,21 @@ class AzCommandsLoader(CLICommandsLoader):
         self.min_profile = min_profile
         self.max_profile = max_profile
         self.module_kwargs = kwargs
-        self._command_group_cls = command_group_cls or _CommandGroup
-        self._argument_context_cls = argument_context_cls or _ParametersContext
+        self._command_group_cls = command_group_cls or AzCommandGroup
+        self._argument_context_cls = argument_context_cls or AzArgumentContext
 
     def _update_command_definitions(self):
         master_arg_registry = self.cli_ctx.invocation.commands_loader.argument_registry
         master_extra_arg_registry = self.cli_ctx.invocation.commands_loader.extra_argument_registry
-        for command_name, command in self.command_table.items():
-            for argument_name in command.arguments:
-                overrides = master_arg_registry.get_cli_argument(command_name, argument_name)
-                command.update_argument(argument_name, overrides)
 
+        for command_name, command in self.command_table.items():
             # Add any arguments explicitly registered for this command
             for argument_name, argument_definition in master_extra_arg_registry[command_name].items():
                 command.arguments[argument_name] = argument_definition
-                command.update_argument(argument_name,
-                                        master_arg_registry.get_cli_argument(command_name, argument_name))
+
+            for argument_name in command.arguments:
+                overrides = master_arg_registry.get_cli_argument(command_name, argument_name)
+                command.update_argument(argument_name, overrides)
 
     def _apply_doc_string(self, dest, command_kwargs):
         doc_string_source = command_kwargs.get('doc_string_source', None)

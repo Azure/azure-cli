@@ -11,7 +11,7 @@ import azure.cli.command_modules.billing._help  # pylint: disable=unused-import
 class BillingCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core.sdk.util import CliCommandType
+        from azure.cli.core.commands import CliCommandType
         billing_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.billing.custom#{}')
         super(BillingCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=billing_custom,
                                                     min_profile="2017-03-10-profile")

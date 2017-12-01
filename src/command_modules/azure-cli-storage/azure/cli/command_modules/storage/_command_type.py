@@ -3,12 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.sdk.util import _CommandGroup
+from azure.cli.core.commands import AzCommandGroup
 
 from azure.cli.command_modules.storage._validators import validate_client_parameters
 
 
-class _StorageCommandGroup(_CommandGroup):
+class _StorageCommandGroup(AzCommandGroup):
 
     def data_plane_command(self, name, method_name=None, command_type=None, **kwargs):
         """ Registers an Azure CLI Storage Data Plane command. These commands always include the

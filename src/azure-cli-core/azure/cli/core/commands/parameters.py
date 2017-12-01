@@ -143,6 +143,7 @@ def get_enum_type(data, default=None):
     except AttributeError:
         choices = data
 
+    # pylint: disable=too-few-public-methods
     class DefaultAction(argparse.Action):
 
         def __call__(self, parser, args, values, option_string=None):

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.sdk.util import ParametersContext
+from azure.cli.core.commands import ParametersContext
 from azure.cli.core.util import get_json_object
 
 from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument
