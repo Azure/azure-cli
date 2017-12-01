@@ -314,26 +314,6 @@ def k8s_install_cli(client_version='latest', install_location=None):
 def k8s_install_connector(client, name, resource_group, connector_name,
                           location=None, service_principal=None, client_secret=None,
                           chart_url=None, os_type='Linux'):
-    """Deploy the ACI-Connector to a AKS cluster
-    :param name: The name of the AKS cluster. The name is case insensitive.
-    :type name: str
-    :param connector_name: The name for the ACI Connector
-    :type connector_name: str
-    :param resource_group: Name of the resource group where the AKS is located and where
-    the ACI connector will be mapped.
-    :type resource_group: str
-    :param location:
-    :type location: str
-    :param service_principal: The service principal used for ACI authentication
-    to Azure APIs. If not specified, it is created for you and stored in the
-    ${HOME}/.azure directory.
-    :type service_principal: str
-    :param client_secret: The secret associated with the service principal. If
-    --service-principal is specified, then secret should also be specified. If
-    --service-principal is not specified, the secret is auto-generated for you
-    and stored in ${HOME}/.azure/ directory.
-    :type client_secret: str
-    """
     from subprocess import PIPE, Popen
     helm_not_installed = "Helm not detected, please verify if it is installed."
     image_tag = 'latest'
@@ -379,14 +359,6 @@ def k8s_install_connector(client, name, resource_group, connector_name,
 
 def k8s_uninstall_connector(client, name, connector_name, resource_group,
                             graceful=False, os_type='Linux'):
-    """Undeploy the ACI-Connector from an AKS cluster.
-    :param name: The name of the AKS cluster. The name is case insensitive.
-    :type name: str
-    :param resource_group: The name of the resource group where the AKS cluster is deployed.
-    :type resource_group: str
-    :param connector_name: The name for the ACI Connector
-    :type connector_name: str
-    """
     from subprocess import PIPE, Popen
     helm_not_installed = "Error : Helm not detected, please verify if it is installed."
     # Check if Helm is installed locally
