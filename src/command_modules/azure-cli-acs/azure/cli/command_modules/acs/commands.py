@@ -109,6 +109,10 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
                 table_transformer=aks_get_versions_table_format)
     cli_command(__name__, 'aks install-cli',
                 'azure.cli.command_modules.acs.custom#k8s_install_cli')
+    cli_command(__name__, 'aks install-connector',
+                'azure.cli.command_modules.acs.custom#k8s_install_connector', _aks_client_factory)
+    cli_command(__name__, 'aks remove-connector',
+                'azure.cli.command_modules.acs.custom#k8s_uninstall_connector', _aks_client_factory)
     cli_command(__name__, 'aks list',
                 'azure.cli.command_modules.acs.custom#aks_list', _aks_client_factory,
                 table_transformer=aks_list_table_format)

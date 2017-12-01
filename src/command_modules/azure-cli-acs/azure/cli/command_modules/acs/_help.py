@@ -79,3 +79,27 @@ helps['aks wait'] = """
     type: command
     short-summary: Wait for a Kubernetes cluster to reach a desired state.
 """
+helps['aks install-connector'] = """
+    type: command
+    short-summary: Deploy the ACI-Connector to a AKS cluster.
+    examples:
+        - name: Install the ACI-Connector to an AKS Cluster.
+          text: az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector
+        - name: Install the ACI-Connector for Windows to an AKS Cluster.
+          text: az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector --os-type Windows
+        - name: Install the ACI-Connector for Windows and Linux to an AKS Cluster.
+          text: az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector --os-type Both
+        - name: Install the ACI-Connector using specific SPN.
+          text: az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector --service-principal <SPN_ID> --client-secret <SPN_SECRET>
+        - name: Install the ACI-Connector from a specific custom chart.
+          text: az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector --chart-url <CustomURL>
+"""
+helps['aks remove-connector'] = """
+    type: command
+    short-summary: Undeploy the ACI-Connector from an AKS cluster.
+    examples:
+        - name: Undeploy the ACI-Connector on an AKS cluster.
+          text: az aks remove-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector
+        - name: Undeploy the ACI-Connector on an AKS cluster using the graceful mode
+          text: az aks remove-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector --graceful
+"""
