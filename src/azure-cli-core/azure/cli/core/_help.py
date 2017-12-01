@@ -32,11 +32,11 @@ You can change your telemetry settings with `az configure`.
 """
 
 WELCOME_MESSAGE = r"""
-    /\\
-   /  \\    _____   _ _ __ ___
-  / /\ \\  |_  / | | | \'__/ _ \\
- / ____ \\  / /| |_| | | |  __/
-/_/    \_\\/___|\__,_|_|  \___|
+     /\\
+    /  \\    _____   _ _  ___ _
+   / /\ \\  |_  / | | | \'__/ _\
+  / ____ \\  / /| |_| | | |  __/
+ /_/    \_\\/___|\__,_|_|  \___|
 
 
 Welcome to the cool new Azure CLI!
