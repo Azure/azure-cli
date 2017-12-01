@@ -1220,7 +1220,7 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
         streaming_url += ('/' + provider.lstrip('/'))
 
     client = web_client_factory(cmd.cli_ctx)
-    user, password = _get_site_credential(client, resource_group_name, name, slot)
+    user, password = _get_site_credential(resource_group_name, name, slot)
     t = threading.Thread(target=_get_log, args=(streaming_url, user, password))
     t.daemon = True
     t.start()
@@ -1233,12 +1233,12 @@ def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     url = scm_url.rstrip('/') + '/dump'
     client = web_client_factory(cmd.cli_ctx)
-    user_name, password = _get_site_credential(client, resource_group_name, name)
+    user_name, password = _get_site_credential(resource_group_name, name)
     _get_log(url, user_name, password, log_file)
     logger.warning('Downloaded logs to %s', log_file)
 
 
-def _get_site_credential(client, resource_group_name, name, slot=None):
+def _get_site_credential(resource_group_name, name, slot=None):
     creds = _generic_site_operation(resource_group_name, name, 'list_publishing_credentials', slot)
     creds = creds.result()
     return (creds.publishing_user_name, creds.publishing_password)
@@ -1603,10 +1603,9 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     return client.list_geo_regions(full_sku, linux_workers_enabled)
 
 
-def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
-    client = web_client_factory(cmd.cli_ctx)
-    user_name, password = _get_site_credential(client, resource_group_name, name, slot)
-    scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+def enable_zip_deploy(resource_group_name, name, src, slot=None):
+    user_name, password = _get_site_credential(resource_group_name, name, slot)
+    scm_url = _get_scm_url(resource_group_name, name, slot)
     zip_url = scm_url + '/api/zipdeploy'
 
     import urllib3
