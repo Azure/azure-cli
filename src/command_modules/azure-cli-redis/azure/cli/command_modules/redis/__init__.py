@@ -11,7 +11,7 @@ from azure.cli.command_modules.redis._help import helps  # pylint: disable=unuse
 class RedisCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core.sdk.util import CliCommandType
+        from azure.cli.core.commands import CliCommandType
         from azure.cli.command_modules.redis._client_factory import cf_redis
         redis_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.redis.custom#{}',

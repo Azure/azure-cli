@@ -6,7 +6,7 @@
 from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 
 if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
-    from azure.cli.core.sdk.util import ServiceGroup, create_service_adapter
+    from azure.cli.core.commands import ServiceGroup, create_service_adapter
     from ._client_factory import (cf_alert_rules, cf_metrics, cf_metric_def, cf_alert_rule_incidents, cf_log_profiles,
                                   cf_autoscale, cf_diagnostics, cf_activity_log, cf_action_groups,
                                   cf_activity_log_alerts, cf_event_categories)

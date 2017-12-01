@@ -7,7 +7,7 @@
 from collections import OrderedDict
 
 from azure.cli.core.profiles import PROFILE_TYPE
-from azure.cli.core.sdk.util import CliCommandType
+from azure.cli.core.commands import CliCommandType
 
 from azure.cli.core.util import empty_on_404
 

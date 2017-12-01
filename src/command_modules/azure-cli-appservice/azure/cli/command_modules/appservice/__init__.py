@@ -11,7 +11,7 @@ import azure.cli.command_modules.appservice._help  # pylint: disable=unused-impo
 class AppserviceCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core.sdk.util import CliCommandType
+        from azure.cli.core.commands import CliCommandType
         appservice_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.appservice.custom#{}')
         super(AppserviceCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                        custom_command_type=appservice_custom)

@@ -11,7 +11,7 @@ import azure.cli.command_modules.role._help  # pylint: disable=unused-import
 class RoleCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core.sdk.util import CliCommandType
+        from azure.cli.core.commands import CliCommandType
         role_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.role.custom#{}')
         super(RoleCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=role_custom)
 

@@ -11,7 +11,7 @@ import azure.cli.command_modules.rdbms._help  # pylint: disable=unused-import
 class RdbmsCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core.sdk.util import CliCommandType
+        from azure.cli.core.commands import CliCommandType
         from azure.cli.command_modules.rdbms._util import _PolyParametersContext
         rdbms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.custom#{}')
         super(RdbmsCommandsLoader, self).__init__(cli_ctx=cli_ctx,

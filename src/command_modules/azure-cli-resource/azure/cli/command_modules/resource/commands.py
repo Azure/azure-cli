@@ -9,7 +9,7 @@ from collections import OrderedDict
 
 from azure.cli.core.util import empty_on_404
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.sdk.util import CliCommandType
+from azure.cli.core.commands import CliCommandType
 
 from azure.cli.command_modules.resource._client_factory import (
     cf_resource_groups, cf_providers, cf_features, cf_tags, cf_deployments,

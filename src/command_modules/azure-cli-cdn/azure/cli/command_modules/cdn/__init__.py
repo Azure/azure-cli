@@ -11,7 +11,7 @@ from azure.cli.core import AzCommandsLoader
 class CdnCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core.sdk.util import CliCommandType
+        from azure.cli.core.commands import CliCommandType
         cdn_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.cdn.custom#{}')
         super(CdnCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                 min_profile='2017-03-10-profile',

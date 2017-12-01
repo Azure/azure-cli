@@ -11,7 +11,7 @@ import azure.cli.command_modules.resource._help  # pylint: disable=unused-import
 class ResourceCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core.sdk.util import CliCommandType
+        from azure.cli.core.commands import CliCommandType
         resource_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.resource.custom#{}')
         super(ResourceCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                      custom_command_type=resource_custom)

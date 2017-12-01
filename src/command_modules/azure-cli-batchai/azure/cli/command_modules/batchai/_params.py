@@ -7,7 +7,7 @@ from enum import Enum
 from azure.cli.command_modules.vm._actions import get_vm_sizes
 from azure.cli.core.commands.parameters import (
     ignore_type, location_type, resource_group_name_type, enum_choice_list, get_one_of_subscription_locations)
-from azure.cli.core.sdk.util import ParametersContext
+from azure.cli.core.commands import ParametersContext
 from azure.mgmt.storage.models import SkuName
 
 
