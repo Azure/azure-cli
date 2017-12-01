@@ -3,11 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import uuid
-from azure.cli.core.commands.arm import parse_resource_id
+import os
+from msrestazure.tools import parse_resource_id
 from azure.cli.core.commands import LongRunningOperation
 import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 from .custom import set_vm, _compute_client_factory, get_vmss_instance_view
+from ._vm_utils import create_keyvault_data_plane_client, get_key_vault_base_url
 logger = azlogging.get_az_logger(__name__)
 
 _DATA_VOLUME_TYPE = 'DATA'
@@ -15,13 +17,13 @@ _STATUS_ENCRYPTED = 'Encrypted'
 
 vm_extension_info = {
     'Linux': {
-        'publisher': 'Microsoft.Azure.Security',
-        'name': 'AzureDiskEncryptionForLinux',
+        'publisher': os.environ.get('ADE_TEST_EXTENSION_PUBLISHER') or 'Microsoft.Azure.Security',
+        'name': os.environ.get('ADE_TEST_EXTENSION_NAME') or 'AzureDiskEncryptionForLinux',
         'version': '0.1'
     },
     'Windows': {
-        'publisher': 'Microsoft.Azure.Security',
-        'name': 'AzureDiskEncryption',
+        'publisher': os.environ.get('ADE_TEST_EXTENSION_PUBLISHER') or 'Microsoft.Azure.Security',
+        'name': os.environ.get('ADE_TEST_EXTENSION_NAME') or 'AzureDiskEncryption',
         'version': '1.1'
     }
 }
@@ -47,7 +49,8 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
                key_encryption_keyvault=None,
                key_encryption_key=None,
                key_encryption_algorithm='RSA-OAEP',
-               volume_type=None):
+               volume_type=None,
+               encrypt_format_all=False):
     '''
     Enable disk encryption on OS disk, Data disks, or both
     :param str aad_client_id: Client ID of AAD app with permissions to write secrets to KeyVault
@@ -93,7 +96,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     sequence_version = uuid.uuid4()
 
     # retrieve keyvault details
-    disk_encryption_keyvault_url = _get_key_vault_base_url(
+    disk_encryption_keyvault_url = get_key_vault_base_url(
         (parse_resource_id(disk_encryption_keyvault))['name'])
 
     # disk encryption key itself can be further protected, so let us verify
@@ -110,7 +113,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
         'AADClientCertThumbprint': aad_client_cert_thumbprint,
         'KeyVaultURL': disk_encryption_keyvault_url,
         'VolumeType': volume_type,
-        'EncryptionOperation': 'EnableEncryption',
+        'EncryptionOperation': 'EnableEncryption' if not encrypt_format_all else 'EnableEncryptionFormatAll',
         'KeyEncryptionKeyURL': key_encryption_key,
         'KeyEncryptionAlgorithm': key_encryption_algorithm,
         'SequenceVersion': sequence_version,
@@ -209,8 +212,8 @@ def decrypt_vm(resource_group_name, vm_name, volume_type=None, force=False):
         if vm.storage_profile.data_disks:
             raise CLIError("VM has data disks, please specify --volume-type")
 
-    # sequence_version should be incremented since encryptions occurred before
     extension = vm_extension_info[os_type]
+    # sequence_version should be incremented since encryptions occurred before
     sequence_version = uuid.uuid4()
 
     # 2. update the disk encryption extension
@@ -314,21 +317,9 @@ def _is_linux_vm(os_type):
 
 
 def _get_keyvault_key_url(keyvault_name, key_name):
-    from azure.cli.core._profile import Profile
-
-    def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile().get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
-
-    from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
-    client = KeyVaultClient(KeyVaultAuthentication(get_token))
-    result = client.get_key(_get_key_vault_base_url(keyvault_name), key_name, '')
+    client = create_keyvault_data_plane_client()
+    result = client.get_key(get_key_vault_base_url(keyvault_name), key_name, '')
     return result.key.kid  # pylint: disable=no-member
-
-
-def _get_key_vault_base_url(vault_name):
-    from azure.cli.core._profile import CLOUD
-    suffix = CLOUD.suffixes.keyvault_dns
-    return 'https://{}{}'.format(vault_name, suffix)
 
 
 def _check_encrypt_is_supported(image_reference, volume_type):
@@ -439,7 +430,7 @@ def encrypt_vmss(resource_group_name, vmss_name,  # pylint: disable=too-many-loc
                 logger.warning(message)
 
     # retrieve keyvault details
-    disk_encryption_keyvault_url = _get_key_vault_base_url((parse_resource_id(disk_encryption_keyvault))['name'])
+    disk_encryption_keyvault_url = get_key_vault_base_url((parse_resource_id(disk_encryption_keyvault))['name'])
 
     # disk encryption key itself can be further protected, so let us verify
     if key_encryption_key:

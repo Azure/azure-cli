@@ -199,7 +199,6 @@ class Profile(object):
                 'isMRRT': True,
                 'accessToken': tokens[decoded_tokens.index(t)],
                 'tokenType': 'Bearer',
-                'oid': t['oid']
             })
 
         # merging with existing cached ones
@@ -324,8 +323,8 @@ class Profile(object):
                   x[_ENVIRONMENT_NAME] == active_cloud.name]
 
         if len(result) != 1:
-            raise CLIError("The subscription of '{}' does not exist or has more than"
-                           " one match in cloud '{}'.".format(subscription, active_cloud.name))
+            raise CLIError("The subscription of '{}' {} in cloud '{}'.".format(
+                subscription, "doesn't exist" if not result else 'has more than one match', active_cloud.name))
 
         for s in subscriptions:
             s[_IS_DEFAULT_SUBSCRIPTION] = False

@@ -39,6 +39,7 @@ def make_zone_file(json_obj):
         "ns":      [ ns records ],
         "a":       [ a records ],
         "aaaa":    [ aaaa records ]
+        "caa":     [ caa records ]
         "cname":   [ cname records ]
         "mx":      [ mx records ]
         "ptr":     [ ptr records ]

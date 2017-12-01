@@ -1,549 +1,656 @@
 interactions:
 - request:
+    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['50']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.21]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_dns_zone_import_export000001?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001","name":"cli_dns_zone_import_export000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['328']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:30 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
     body: '{"location": "global"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
       Content-Length: ['22']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [80b3f390-9ccc-11e7-afcd-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com","name":"myzone.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-0e69-8f42d930d301","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":5000,"nameServers":["ns1-07.azure-dns.com.","ns2-07.azure-dns.net.","ns3-07.azure-dns.org.","ns4-07.azure-dns.info."],"numberOfRecordSets":2}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com","name":"myzone.com","type":"Microsoft.Network\/dnszones","etag":"00000002-0000-0000-cd62-387c9159d301","location":"global","tags":{},"properties":{"maxNumberOfRecordSets":5000,"nameServers":["ns1-04.azure-dns.com.","ns2-04.azure-dns.net.","ns3-04.azure-dns.org.","ns4-04.azure-dns.info."],"numberOfRecordSets":2,"zoneType":"Public"}}'}
     headers:
-      Cache-Control: [private]
-      Content-Length: ['477']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:01 GMT']
-      ETag: [00000002-0000-0000-0e69-8f42d930d301]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [private]
+      content-length: ['540']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:31 GMT']
+      etag: [00000002-0000-0000-cd62-387c9159d301]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
-    body: '{"name": "myptr", "properties": {"PTRRecords": [{"ptrdname": "contoso.com"}],
-      "TTL": 3600}, "type": "ptr"}'
+    body: '{"properties": {"TTL": 60, "caaRecords": [{"tag": "issue", "value": "ca1.contoso.com",
+      "flags": 0}, {"tag": "iodef", "value": "mailto:test@contoso.com", "flags": 128}]}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
-      Content-Length: ['106']
+      Content-Length: ['169']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [819308fe-9ccc-11e7-93c6-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/PTR/myptr?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/CAA/caa1?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/PTR\/myptr","name":"myptr","type":"Microsoft.Network\/dnszones\/PTR","etag":"72ac06a3-bf0e-4e65-b451-0fc8d4aded04","properties":{"fqdn":"myptr.myzone.com.","TTL":3600,"PTRRecords":[{"ptrdname":"contoso.com"}]}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/CAA\/caa1","name":"caa1","type":"Microsoft.Network\/dnszones\/CAA","etag":"b1edf985-3a0c-484b-bd76-ef2300287562","properties":{"fqdn":"caa1.myzone.com.","TTL":60,"caaRecords":[{"flags":0,"tag":"issue","value":"ca1.contoso.com"},{"flags":128,"tag":"iodef","value":"mailto:test@contoso.com"}]}}'}
     headers:
-      Cache-Control: [private]
-      Content-Length: ['374']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:01 GMT']
-      ETag: [72ac06a3-bf0e-4e65-b451-0fc8d4aded04]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [private]
+      content-length: ['499']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:32 GMT']
+      etag: [b1edf985-3a0c-484b-bd76-ef2300287562]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
+    status: {code: 201, message: Created}
+- request:
+    body: '{"properties": {"TTL": 3600, "NSRecords": [{"nsdname": "ns.contoso.com."}]}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
+      Connection: [keep-alive]
+      Content-Length: ['76']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/NS/myns?api-version=2017-09-01
+  response:
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/NS\/myns","name":"myns","type":"Microsoft.Network\/dnszones\/NS","etag":"6f9ddf8e-40c2-4609-a014-1e21b0bc217e","properties":{"fqdn":"myns.myzone.com.","TTL":3600,"NSRecords":[{"nsdname":"ns.contoso.com."}]}}'}
+    headers:
+      cache-control: [private]
+      content-length: ['414']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:34 GMT']
+      etag: [6f9ddf8e-40c2-4609-a014-1e21b0bc217e]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
+    status: {code: 201, message: Created}
+- request:
+    body: '{"properties": {"TTL": 3600, "TXTRecords": [{"value": ["hi"]}]}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
+      Connection: [keep-alive]
+      Content-Length: ['64']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/TXT/mytxtrs?api-version=2017-09-01
+  response:
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/TXT\/mytxtrs","name":"mytxtrs","type":"Microsoft.Network\/dnszones\/TXT","etag":"587d8698-cc79-476c-ad63-c51c4a0a6572","properties":{"fqdn":"mytxtrs.myzone.com.","TTL":3600,"TXTRecords":[{"value":["hi"]}]}}'}
+    headers:
+      cache-control: [private]
+      content-length: ['413']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:35 GMT']
+      etag: [587d8698-cc79-476c-ad63-c51c4a0a6572]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
+    status: {code: 201, message: Created}
+- request:
+    body: '{"properties": {"TTL": 3600, "ARecords": [{"ipv4Address": "10.0.0.10"}]}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
+      Connection: [keep-alive]
+      Content-Length: ['73']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/A/manuala?api-version=2017-09-01
+  response:
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/A\/manuala","name":"manuala","type":"Microsoft.Network\/dnszones\/A","etag":"1a0b9f18-608d-4b14-80d5-8d6d45862daf","properties":{"fqdn":"manuala.myzone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.10"}]}}'}
+    headers:
+      cache-control: [private]
+      content-length: ['418']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:36 GMT']
+      etag: [1a0b9f18-608d-4b14-80d5-8d6d45862daf]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
+    status: {code: 201, message: Created}
+- request:
+    body: '{"properties": {"TTL": 3600, "PTRRecords": [{"ptrdname": "myptrdname"}]}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
+      Connection: [keep-alive]
+      Content-Length: ['73']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/PTR/myname?api-version=2017-09-01
+  response:
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/PTR\/myname","name":"myname","type":"Microsoft.Network\/dnszones\/PTR","etag":"60e66822-7000-40a5-a5c8-a36e0e76512e","properties":{"fqdn":"myname.myzone.com.","TTL":3600,"PTRRecords":[{"ptrdname":"myptrdname"}]}}'}
+    headers:
+      cache-control: [private]
+      content-length: ['419']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:38 GMT']
+      etag: [60e66822-7000-40a5-a5c8-a36e0e76512e]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [820874a8-9ccc-11e7-b209-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/SOA/@?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/SOA/@?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/SOA\/@","name":"@","type":"Microsoft.Network\/dnszones\/SOA","etag":"5b65232b-97f9-42c0-a9cc-f387b4c5fef9","properties":{"fqdn":"myzone.com.","TTL":3600,"SOARecord":{"email":"azuredns-hostmaster.microsoft.com","expireTime":2419200,"host":"ns1-07.azure-dns.com.","minimumTTL":300,"refreshTime":3600,"retryTime":300,"serialNumber":1}}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/SOA\/@","name":"@","type":"Microsoft.Network\/dnszones\/SOA","etag":"e60c5008-63f0-4a21-9663-cecb9c3179e6","properties":{"fqdn":"myzone.com.","TTL":3600,"SOARecord":{"email":"azuredns-hostmaster.microsoft.com","expireTime":2419200,"host":"ns1-04.azure-dns.com.","minimumTTL":300,"refreshTime":3600,"retryTime":300,"serialNumber":1}}}'}
     headers:
-      Cache-Control: [private]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:02 GMT']
-      ETag: [5b65232b-97f9-42c0-a9cc-f387b4c5fef9]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      content-length: ['497']
+      cache-control: [private]
+      content-length: ['540']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:39 GMT']
+      etag: [e60c5008-63f0-4a21-9663-cecb9c3179e6]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"name": "@", "properties": {"SOARecord": {"expireTime": 2419200, "retryTime":
-      300, "host": "ns1-07.azure-dns.com.", "refreshTime": 3600, "minimumTTL": 300,
-      "email": "azuredns-hostmaster.microsoft.com.", "serialNumber": 1}, "TTL": 3600},
-      "type": "soa"}'
+    body: '{"properties": {"SOARecord": {"email": "azuredns-hostmaster.microsoft.com.",
+      "retryTime": 300, "minimumTTL": 300, "host": "ns1-04.azure-dns.com.", "expireTime":
+      2419200, "refreshTime": 3600, "serialNumber": 1}, "TTL": 3600}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
-      Content-Length: ['252']
+      Content-Length: ['224']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [825086da-9ccc-11e7-a773-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/SOA/@?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/SOA/@?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/SOA\/@","name":"@","type":"Microsoft.Network\/dnszones\/SOA","etag":"472f9813-d14e-4857-84a5-bdd7a6841fc5","properties":{"fqdn":"myzone.com.","TTL":3600,"SOARecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"ns1-07.azure-dns.com.","minimumTTL":300,"refreshTime":3600,"retryTime":300,"serialNumber":1}}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/SOA\/@","name":"@","type":"Microsoft.Network\/dnszones\/SOA","etag":"75855135-a1e9-41fa-904b-ab87f6b387e3","properties":{"fqdn":"myzone.com.","TTL":3600,"SOARecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"ns1-04.azure-dns.com.","minimumTTL":300,"refreshTime":3600,"retryTime":300,"serialNumber":1}}}'}
     headers:
-      Cache-Control: [private]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:04 GMT']
-      ETag: [472f9813-d14e-4857-84a5-bdd7a6841fc5]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      content-length: ['498']
+      cache-control: [private]
+      content-length: ['541']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:41 GMT']
+      etag: [75855135-a1e9-41fa-904b-ab87f6b387e3]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"name": "mytxt2", "properties": {"TXTRecords": [{"value": ["abc def"]},
-      {"value": ["foo bar"]}], "TTL": 7200}, "type": "txt"}'
+    body: '{"properties": {"TTL": 7200, "TXTRecords": [{"value": ["abc def"]}, {"value":
+      ["foo bar"]}]}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
-      Content-Length: ['126']
+      Content-Length: ['93']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [833b854c-9ccc-11e7-86cd-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/TXT/mytxt2?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/TXT/mytxt2?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/TXT\/mytxt2","name":"mytxt2","type":"Microsoft.Network\/dnszones\/TXT","etag":"381f6147-5026-4aa1-b987-eeaf8063127c","properties":{"fqdn":"mytxt2.myzone.com.","TTL":7200,"TXTRecords":[{"value":["abc
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/TXT\/mytxt2","name":"mytxt2","type":"Microsoft.Network\/dnszones\/TXT","etag":"592b6d59-05f0-40da-9b9f-93077d29954f","properties":{"fqdn":"mytxt2.myzone.com.","TTL":7200,"TXTRecords":[{"value":["abc
         def"]},{"value":["foo bar"]}]}}'}
     headers:
-      Cache-Control: [private]
-      Content-Length: ['394']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:05 GMT']
-      ETag: [381f6147-5026-4aa1-b987-eeaf8063127c]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [private]
+      content-length: ['437']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:42 GMT']
+      etag: [592b6d59-05f0-40da-9b9f-93077d29954f]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
-    body: '{"name": "mya", "properties": {"ARecords": [{"ipv4Address": "10.0.1.0"},
-      {"ipv4Address": "10.0.1.1"}], "TTL": 0}, "type": "a"}'
+    body: '{"properties": {"TTL": 3600, "TXTRecords": [{"value": ["manualtxt"]}]}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
-      Content-Length: ['126']
+      Content-Length: ['71']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [83e55088-9ccc-11e7-9321-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/A/mya?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/TXT/myname2?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/A\/mya","name":"mya","type":"Microsoft.Network\/dnszones\/A","etag":"9fe141b6-0ce4-4f66-90b1-5c27243d00da","properties":{"fqdn":"mya.myzone.com.","TTL":0,"ARecords":[{"ipv4Address":"10.0.1.0"},{"ipv4Address":"10.0.1.1"}]}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/TXT\/myname2","name":"myname2","type":"Microsoft.Network\/dnszones\/TXT","etag":"060202a0-b139-4b36-bf79-b7a064cc71d1","properties":{"fqdn":"myname2.myzone.com.","TTL":3600,"TXTRecords":[{"value":["manualtxt"]}]}}'}
     headers:
-      Cache-Control: [private]
-      Content-Length: ['386']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:06 GMT']
-      ETag: [9fe141b6-0ce4-4f66-90b1-5c27243d00da]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [private]
+      content-length: ['420']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:43 GMT']
+      etag: [060202a0-b139-4b36-bf79-b7a064cc71d1]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
-    body: '{"name": "manuala", "properties": {"ARecords": [{"ipv4Address": "10.0.0.10"}],
-      "TTL": 3600}, "type": "a"}'
+    body: '{"properties": {"TTL": 0, "ARecords": [{"ipv4Address": "10.0.1.0"}, {"ipv4Address":
+      "10.0.1.1"}]}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['105']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [84a4f192-9ccc-11e7-97ac-a0b3ccf7272a]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/A/manuala?api-version=2016-04-01
-  response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/A\/manuala","name":"manuala","type":"Microsoft.Network\/dnszones\/A","etag":"779fa141-aa9e-492e-a231-b0f49691519c","properties":{"fqdn":"manuala.myzone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.10"}]}}'}
-    headers:
-      Cache-Control: [private]
-      Content-Length: ['375']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:07 GMT']
-      ETag: [779fa141-aa9e-492e-a231-b0f49691519c]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
-    status: {code: 201, message: Created}
-- request:
-    body: '{"name": "mytxtrs", "properties": {"TXTRecords": [{"value": ["hi"]}], "TTL":
-      3600}, "type": "txt"}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
       Content-Length: ['98']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [8580d222-9ccc-11e7-a4cf-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/TXT/mytxtrs?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/A/mya?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/TXT\/mytxtrs","name":"mytxtrs","type":"Microsoft.Network\/dnszones\/TXT","etag":"d0f77322-b8aa-46ae-9e92-921bd585ed02","properties":{"fqdn":"mytxtrs.myzone.com.","TTL":3600,"TXTRecords":[{"value":["hi"]}]}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/A\/mya","name":"mya","type":"Microsoft.Network\/dnszones\/A","etag":"fb429ded-1a3f-4181-a523-524f06bb64c0","properties":{"fqdn":"mya.myzone.com.","TTL":0,"ARecords":[{"ipv4Address":"10.0.1.0"},{"ipv4Address":"10.0.1.1"}]}}'}
     headers:
-      Cache-Control: [private]
-      Content-Length: ['370']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:09 GMT']
-      ETag: [d0f77322-b8aa-46ae-9e92-921bd585ed02]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [private]
+      content-length: ['429']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:44 GMT']
+      etag: [fb429ded-1a3f-4181-a523-524f06bb64c0]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
-    body: '{"name": "mymx", "properties": {"TTL": 3600, "MXRecords": [{"preference":
-      1, "exchange": "mail.contoso.com."}]}, "type": "mx"}'
+    body: '{"properties": {"TTL": 3600, "MXRecords": [{"exchange": "mail.contoso.com.",
+      "preference": 1}]}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
-      Content-Length: ['126']
+      Content-Length: ['96']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [86415db6-9ccc-11e7-9ce8-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/MX/mymx?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/MX/mymx?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/MX\/mymx","name":"mymx","type":"Microsoft.Network\/dnszones\/MX","etag":"247f1572-a422-4cac-bc49-54083048c1ac","properties":{"fqdn":"mymx.myzone.com.","TTL":3600,"MXRecords":[{"exchange":"mail.contoso.com.","preference":1}]}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/MX\/mymx","name":"mymx","type":"Microsoft.Network\/dnszones\/MX","etag":"0b2e8db1-3f52-4ae6-9ee4-6ff940c11af2","properties":{"fqdn":"mymx.myzone.com.","TTL":3600,"MXRecords":[{"exchange":"mail.contoso.com.","preference":1}]}}'}
     headers:
-      Cache-Control: [private]
-      Content-Length: ['389']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:10 GMT']
-      ETag: [247f1572-a422-4cac-bc49-54083048c1ac]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [private]
+      content-length: ['432']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:46 GMT']
+      etag: [0b2e8db1-3f52-4ae6-9ee4-6ff940c11af2]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
-    body: '{"name": "mysrv", "properties": {"TTL": 3600, "SRVRecords": [{"priority":
-      1, "target": "target.contoso.com.", "port": 1234, "weight": 2}]}, "type": "srv"}'
+    body: '{"properties": {"TTL": 60, "caaRecords": [{"tag": "issue", "value": "ca1.contoso.com",
+      "flags": 0}, {"tag": "tag56", "value": "test test test", "flags": 45}]}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
-      Content-Length: ['154']
+      Content-Length: ['159']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [872184d8-9ccc-11e7-b7bf-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/SRV/mysrv?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/CAA/caa2?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/SRV\/mysrv","name":"mysrv","type":"Microsoft.Network\/dnszones\/SRV","etag":"913f3899-389b-463c-8920-4155d5752916","properties":{"fqdn":"mysrv.myzone.com.","TTL":3600,"SRVRecords":[{"port":1234,"priority":1,"target":"target.contoso.com.","weight":2}]}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/CAA\/caa2","name":"caa2","type":"Microsoft.Network\/dnszones\/CAA","etag":"6b5ab6ec-07af-44df-b347-1bec58e007f9","properties":{"fqdn":"caa2.myzone.com.","TTL":60,"caaRecords":[{"flags":0,"tag":"issue","value":"ca1.contoso.com"},{"flags":45,"tag":"tag56","value":"test
+        test test"}]}}'}
     headers:
-      Cache-Control: [private]
-      Content-Length: ['416']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:12 GMT']
-      ETag: [913f3899-389b-463c-8920-4155d5752916]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [private]
+      content-length: ['489']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:49 GMT']
+      etag: [6b5ab6ec-07af-44df-b347-1bec58e007f9]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
-    body: '{"name": "myname", "properties": {"PTRRecords": [{"ptrdname": "myptrdname"}],
-      "TTL": 3600}, "type": "ptr"}'
+    body: '{"properties": {"TTL": 3600, "AAAARecords": [{"ipv6Address": "2001:4898:e0:99:6dc4:6329:1c99:4e69"}]}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
-      Content-Length: ['106']
+      Content-Length: ['102']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [87e40c9a-9ccc-11e7-870c-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/PTR/myname?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/AAAA/myaaaa?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/PTR\/myname","name":"myname","type":"Microsoft.Network\/dnszones\/PTR","etag":"131397af-31cc-4911-81b8-3e8873befd2d","properties":{"fqdn":"myname.myzone.com.","TTL":3600,"PTRRecords":[{"ptrdname":"myptrdname"}]}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/AAAA\/myaaaa","name":"myaaaa","type":"Microsoft.Network\/dnszones\/AAAA","etag":"ac6a0aab-6904-4d9d-aeb7-dd875fef7016","properties":{"fqdn":"myaaaa.myzone.com.","TTL":3600,"AAAARecords":[{"ipv6Address":"2001:4898:e0:99:6dc4:6329:1c99:4e69"}]}}'}
     headers:
-      Cache-Control: [private]
-      Content-Length: ['376']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:12 GMT']
-      ETag: [131397af-31cc-4911-81b8-3e8873befd2d]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [private]
+      content-length: ['450']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:50 GMT']
+      etag: [ac6a0aab-6904-4d9d-aeb7-dd875fef7016]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
-    body: '{"name": "myaaaa", "properties": {"AAAARecords": [{"ipv6Address": "2001:4898:e0:99:6dc4:6329:1c99:4e69"}],
-      "TTL": 3600}, "type": "aaaa"}'
+    body: '{"properties": {"CNAMERecord": {"cname": "contoso.com."}, "TTL": 3600}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
-      Content-Length: ['136']
+      Content-Length: ['71']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [889d1cc0-9ccc-11e7-990d-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/AAAA/myaaaa?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/CNAME/mycname?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/AAAA\/myaaaa","name":"myaaaa","type":"Microsoft.Network\/dnszones\/AAAA","etag":"5bac7493-ceb3-4caa-9b90-8cc60d44b4fd","properties":{"fqdn":"myaaaa.myzone.com.","TTL":3600,"AAAARecords":[{"ipv6Address":"2001:4898:e0:99:6dc4:6329:1c99:4e69"}]}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/CNAME\/mycname","name":"mycname","type":"Microsoft.Network\/dnszones\/CNAME","etag":"c2b459d2-bdc5-4cb4-a802-fc2731c57f18","properties":{"fqdn":"mycname.myzone.com.","TTL":3600,"CNAMERecord":{"cname":"contoso.com."}}}'}
     headers:
-      Cache-Control: [private]
-      Content-Length: ['407']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:14 GMT']
-      ETag: [5bac7493-ceb3-4caa-9b90-8cc60d44b4fd]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [private]
+      content-length: ['424']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:51 GMT']
+      etag: [c2b459d2-bdc5-4cb4-a802-fc2731c57f18]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
-    body: '{"name": "myname2", "properties": {"TXTRecords": [{"value": ["manualtxt"]}],
-      "TTL": 3600}, "type": "txt"}'
+    body: '{"properties": {"TTL": 3600, "PTRRecords": [{"ptrdname": "contoso.com"}]}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
-      Content-Length: ['105']
+      Content-Length: ['74']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [8973cc9e-9ccc-11e7-b11e-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/TXT/myname2?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/PTR/myptr?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/TXT\/myname2","name":"myname2","type":"Microsoft.Network\/dnszones\/TXT","etag":"c52fb02c-da39-4f9c-90da-f2483127da9c","properties":{"fqdn":"myname2.myzone.com.","TTL":3600,"TXTRecords":[{"value":["manualtxt"]}]}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/PTR\/myptr","name":"myptr","type":"Microsoft.Network\/dnszones\/PTR","etag":"43953aec-ccc6-4ba9-9745-59464888a239","properties":{"fqdn":"myptr.myzone.com.","TTL":3600,"PTRRecords":[{"ptrdname":"contoso.com"}]}}'}
     headers:
-      Cache-Control: [private]
-      Content-Length: ['377']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:15 GMT']
-      ETag: [c52fb02c-da39-4f9c-90da-f2483127da9c]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [private]
+      content-length: ['417']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:52 GMT']
+      etag: [43953aec-ccc6-4ba9-9745-59464888a239]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
-    body: '{"name": "myns", "properties": {"NSRecords": [{"nsdname": "ns.contoso.com."}],
-      "TTL": 3600}, "type": "ns"}'
+    body: '{"properties": {"TTL": 3600, "SRVRecords": [{"priority": 1, "weight": 2,
+      "port": 1234, "target": "target.contoso.com."}]}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
-      Content-Length: ['106']
+      Content-Length: ['122']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [8a1027ba-9ccc-11e7-bef9-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/NS/myns?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/SRV/mysrv?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/NS\/myns","name":"myns","type":"Microsoft.Network\/dnszones\/NS","etag":"6bd9fcc1-37ba-446e-a16e-f35d69972d5a","properties":{"fqdn":"myns.myzone.com.","TTL":3600,"NSRecords":[{"nsdname":"ns.contoso.com."}]}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/SRV\/mysrv","name":"mysrv","type":"Microsoft.Network\/dnszones\/SRV","etag":"4c4f9c66-c106-4da9-b737-872bdfcef390","properties":{"fqdn":"mysrv.myzone.com.","TTL":3600,"SRVRecords":[{"port":1234,"priority":1,"target":"target.contoso.com.","weight":2}]}}'}
     headers:
-      Cache-Control: [private]
-      Content-Length: ['371']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:17 GMT']
-      ETag: [6bd9fcc1-37ba-446e-a16e-f35d69972d5a]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
+      cache-control: [private]
+      content-length: ['459']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:54 GMT']
+      etag: [4c4f9c66-c106-4da9-b737-872bdfcef390]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [8abc646e-9ccc-11e7-8017-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/NS/@?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/NS/@?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/NS\/@","name":"@","type":"Microsoft.Network\/dnszones\/NS","etag":"d6fca75d-843d-4ffa-a38a-5dd195fa7c2c","properties":{"fqdn":"myzone.com.","TTL":172800,"NSRecords":[{"nsdname":"ns1-07.azure-dns.com."},{"nsdname":"ns2-07.azure-dns.net."},{"nsdname":"ns3-07.azure-dns.org."},{"nsdname":"ns4-07.azure-dns.info."}]}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/NS\/@","name":"@","type":"Microsoft.Network\/dnszones\/NS","etag":"434c5c39-684f-4fac-8809-2ab24be999d2","properties":{"fqdn":"myzone.com.","TTL":172800,"NSRecords":[{"nsdname":"ns1-04.azure-dns.com."},{"nsdname":"ns2-04.azure-dns.net."},{"nsdname":"ns3-04.azure-dns.org."},{"nsdname":"ns4-04.azure-dns.info."}]}}'}
     headers:
-      Cache-Control: [private]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:17 GMT']
-      ETag: [d6fca75d-843d-4ffa-a38a-5dd195fa7c2c]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      content-length: ['477']
+      cache-control: [private]
+      content-length: ['520']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:55 GMT']
+      etag: [434c5c39-684f-4fac-8809-2ab24be999d2]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"name": "@", "properties": {"NSRecords": [{"nsdname": "ns1-07.azure-dns.com."},
-      {"nsdname": "ns2-07.azure-dns.net."}, {"nsdname": "ns3-07.azure-dns.org."},
-      {"nsdname": "ns4-07.azure-dns.info."}], "TTL": 172800}, "id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnszones/myzone.com/NS/@",
-      "etag": "d6fca75d-843d-4ffa-a38a-5dd195fa7c2c", "type": "NS"}'
+    body: '{"etag": "434c5c39-684f-4fac-8809-2ab24be999d2", "properties": {"TTL":
+      172800, "NSRecords": [{"nsdname": "ns1-04.azure-dns.com."}, {"nsdname": "ns2-04.azure-dns.net."},
+      {"nsdname": "ns3-04.azure-dns.org."}, {"nsdname": "ns4-04.azure-dns.info."}]}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone import]
       Connection: [keep-alive]
-      Content-Length: ['436']
+      Content-Length: ['247']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [8afbc280-9ccc-11e7-9c7a-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/NS/@?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/NS/@?api-version=2017-09-01
   response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/NS\/@","name":"@","type":"Microsoft.Network\/dnszones\/NS","etag":"5f85fd22-b1f2-4042-8500-87156095b5eb","properties":{"fqdn":"myzone.com.","TTL":172800,"NSRecords":[{"nsdname":"ns1-07.azure-dns.com."},{"nsdname":"ns2-07.azure-dns.net."},{"nsdname":"ns3-07.azure-dns.org."},{"nsdname":"ns4-07.azure-dns.info."}]}}'}
+    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/NS\/@","name":"@","type":"Microsoft.Network\/dnszones\/NS","etag":"6bc6b2c7-bf4e-4ed3-afb0-9555f70d3fa1","properties":{"fqdn":"myzone.com.","TTL":172800,"NSRecords":[{"nsdname":"ns1-04.azure-dns.com."},{"nsdname":"ns2-04.azure-dns.net."},{"nsdname":"ns3-04.azure-dns.org."},{"nsdname":"ns4-04.azure-dns.info."}]}}'}
     headers:
-      Cache-Control: [private]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:18 GMT']
-      ETag: [5f85fd22-b1f2-4042-8500-87156095b5eb]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      content-length: ['477']
+      cache-control: [private]
+      content-length: ['520']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:56 GMT']
+      etag: [6bc6b2c7-bf4e-4ed3-afb0-9555f70d3fa1]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
-- request:
-    body: '{"name": "mycname", "properties": {"CNAMERecord": {"cname": "contoso.com."},
-      "TTL": 3600}, "type": "cname"}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Length: ['107']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [8bd0c40c-9ccc-11e7-8d5c-a0b3ccf7272a]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/CNAME/mycname?api-version=2016-04-01
-  response:
-    body: {string: '{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/CNAME\/mycname","name":"mycname","type":"Microsoft.Network\/dnszones\/CNAME","etag":"445632b9-cacf-4e42-85e3-75a119c847b3","properties":{"fqdn":"mycname.myzone.com.","TTL":3600,"CNAMERecord":{"cname":"contoso.com."}}}'}
-    headers:
-      Cache-Control: [private]
-      Content-Length: ['381']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:19 GMT']
-      ETag: [445632b9-cacf-4e42-85e3-75a119c847b3]
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
-    status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [network dns zone export]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 dnsmanagementclient/1.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 dnsmanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.21]
       accept-language: [en-US]
-      x-ms-client-request-id: [8c58d09a-9ccc-11e7-8e2b-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export/providers/Microsoft.Network/dnsZones/myzone.com/recordsets?api-version=2016-04-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_dns_zone_import_export000001/providers/Microsoft.Network/dnsZones/myzone.com/recordsets?api-version=2017-09-01
   response:
-    body: {string: '{"value":[{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/NS\/@","name":"@","type":"Microsoft.Network\/dnszones\/NS","etag":"5f85fd22-b1f2-4042-8500-87156095b5eb","properties":{"fqdn":"myzone.com.","TTL":172800,"NSRecords":[{"nsdname":"ns1-07.azure-dns.com."},{"nsdname":"ns2-07.azure-dns.net."},{"nsdname":"ns3-07.azure-dns.org."},{"nsdname":"ns4-07.azure-dns.info."}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/SOA\/@","name":"@","type":"Microsoft.Network\/dnszones\/SOA","etag":"472f9813-d14e-4857-84a5-bdd7a6841fc5","properties":{"fqdn":"myzone.com.","TTL":3600,"SOARecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"ns1-07.azure-dns.com.","minimumTTL":300,"refreshTime":3600,"retryTime":300,"serialNumber":1}}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/A\/manuala","name":"manuala","type":"Microsoft.Network\/dnszones\/A","etag":"779fa141-aa9e-492e-a231-b0f49691519c","properties":{"fqdn":"manuala.myzone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.10"}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/A\/mya","name":"mya","type":"Microsoft.Network\/dnszones\/A","etag":"9fe141b6-0ce4-4f66-90b1-5c27243d00da","properties":{"fqdn":"mya.myzone.com.","TTL":0,"ARecords":[{"ipv4Address":"10.0.1.0"},{"ipv4Address":"10.0.1.1"}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/AAAA\/myaaaa","name":"myaaaa","type":"Microsoft.Network\/dnszones\/AAAA","etag":"5bac7493-ceb3-4caa-9b90-8cc60d44b4fd","properties":{"fqdn":"myaaaa.myzone.com.","TTL":3600,"AAAARecords":[{"ipv6Address":"2001:4898:e0:99:6dc4:6329:1c99:4e69"}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/CNAME\/mycname","name":"mycname","type":"Microsoft.Network\/dnszones\/CNAME","etag":"445632b9-cacf-4e42-85e3-75a119c847b3","properties":{"fqdn":"mycname.myzone.com.","TTL":3600,"CNAMERecord":{"cname":"contoso.com."}}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/MX\/mymx","name":"mymx","type":"Microsoft.Network\/dnszones\/MX","etag":"247f1572-a422-4cac-bc49-54083048c1ac","properties":{"fqdn":"mymx.myzone.com.","TTL":3600,"MXRecords":[{"exchange":"mail.contoso.com.","preference":1}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/PTR\/myname","name":"myname","type":"Microsoft.Network\/dnszones\/PTR","etag":"131397af-31cc-4911-81b8-3e8873befd2d","properties":{"fqdn":"myname.myzone.com.","TTL":3600,"PTRRecords":[{"ptrdname":"myptrdname"}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/TXT\/myname2","name":"myname2","type":"Microsoft.Network\/dnszones\/TXT","etag":"c52fb02c-da39-4f9c-90da-f2483127da9c","properties":{"fqdn":"myname2.myzone.com.","TTL":3600,"TXTRecords":[{"value":["manualtxt"]}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/NS\/myns","name":"myns","type":"Microsoft.Network\/dnszones\/NS","etag":"6bd9fcc1-37ba-446e-a16e-f35d69972d5a","properties":{"fqdn":"myns.myzone.com.","TTL":3600,"NSRecords":[{"nsdname":"ns.contoso.com."}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/PTR\/myptr","name":"myptr","type":"Microsoft.Network\/dnszones\/PTR","etag":"72ac06a3-bf0e-4e65-b451-0fc8d4aded04","properties":{"fqdn":"myptr.myzone.com.","TTL":3600,"PTRRecords":[{"ptrdname":"contoso.com"}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/SRV\/mysrv","name":"mysrv","type":"Microsoft.Network\/dnszones\/SRV","etag":"913f3899-389b-463c-8920-4155d5752916","properties":{"fqdn":"mysrv.myzone.com.","TTL":3600,"SRVRecords":[{"port":1234,"priority":1,"target":"target.contoso.com.","weight":2}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/TXT\/mytxt2","name":"mytxt2","type":"Microsoft.Network\/dnszones\/TXT","etag":"381f6147-5026-4aa1-b987-eeaf8063127c","properties":{"fqdn":"mytxt2.myzone.com.","TTL":7200,"TXTRecords":[{"value":["abc
-        def"]},{"value":["foo bar"]}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export\/providers\/Microsoft.Network\/dnszones\/myzone.com\/TXT\/mytxtrs","name":"mytxtrs","type":"Microsoft.Network\/dnszones\/TXT","etag":"d0f77322-b8aa-46ae-9e92-921bd585ed02","properties":{"fqdn":"mytxtrs.myzone.com.","TTL":3600,"TXTRecords":[{"value":["hi"]}]}}]}'}
+    body: {string: '{"value":[{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/NS\/@","name":"@","type":"Microsoft.Network\/dnszones\/NS","etag":"6bc6b2c7-bf4e-4ed3-afb0-9555f70d3fa1","properties":{"fqdn":"myzone.com.","TTL":172800,"NSRecords":[{"nsdname":"ns1-04.azure-dns.com."},{"nsdname":"ns2-04.azure-dns.net."},{"nsdname":"ns3-04.azure-dns.org."},{"nsdname":"ns4-04.azure-dns.info."}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/SOA\/@","name":"@","type":"Microsoft.Network\/dnszones\/SOA","etag":"75855135-a1e9-41fa-904b-ab87f6b387e3","properties":{"fqdn":"myzone.com.","TTL":3600,"SOARecord":{"email":"azuredns-hostmaster.microsoft.com.","expireTime":2419200,"host":"ns1-04.azure-dns.com.","minimumTTL":300,"refreshTime":3600,"retryTime":300,"serialNumber":1}}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/CAA\/caa1","name":"caa1","type":"Microsoft.Network\/dnszones\/CAA","etag":"b1edf985-3a0c-484b-bd76-ef2300287562","properties":{"fqdn":"caa1.myzone.com.","TTL":60,"caaRecords":[{"flags":0,"tag":"issue","value":"ca1.contoso.com"},{"flags":128,"tag":"iodef","value":"mailto:test@contoso.com"}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/CAA\/caa2","name":"caa2","type":"Microsoft.Network\/dnszones\/CAA","etag":"6b5ab6ec-07af-44df-b347-1bec58e007f9","properties":{"fqdn":"caa2.myzone.com.","TTL":60,"caaRecords":[{"flags":0,"tag":"issue","value":"ca1.contoso.com"},{"flags":45,"tag":"tag56","value":"test
+        test test"}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/A\/manuala","name":"manuala","type":"Microsoft.Network\/dnszones\/A","etag":"1a0b9f18-608d-4b14-80d5-8d6d45862daf","properties":{"fqdn":"manuala.myzone.com.","TTL":3600,"ARecords":[{"ipv4Address":"10.0.0.10"}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/A\/mya","name":"mya","type":"Microsoft.Network\/dnszones\/A","etag":"fb429ded-1a3f-4181-a523-524f06bb64c0","properties":{"fqdn":"mya.myzone.com.","TTL":0,"ARecords":[{"ipv4Address":"10.0.1.0"},{"ipv4Address":"10.0.1.1"}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/AAAA\/myaaaa","name":"myaaaa","type":"Microsoft.Network\/dnszones\/AAAA","etag":"ac6a0aab-6904-4d9d-aeb7-dd875fef7016","properties":{"fqdn":"myaaaa.myzone.com.","TTL":3600,"AAAARecords":[{"ipv6Address":"2001:4898:e0:99:6dc4:6329:1c99:4e69"}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/CNAME\/mycname","name":"mycname","type":"Microsoft.Network\/dnszones\/CNAME","etag":"c2b459d2-bdc5-4cb4-a802-fc2731c57f18","properties":{"fqdn":"mycname.myzone.com.","TTL":3600,"CNAMERecord":{"cname":"contoso.com."}}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/MX\/mymx","name":"mymx","type":"Microsoft.Network\/dnszones\/MX","etag":"0b2e8db1-3f52-4ae6-9ee4-6ff940c11af2","properties":{"fqdn":"mymx.myzone.com.","TTL":3600,"MXRecords":[{"exchange":"mail.contoso.com.","preference":1}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/PTR\/myname","name":"myname","type":"Microsoft.Network\/dnszones\/PTR","etag":"60e66822-7000-40a5-a5c8-a36e0e76512e","properties":{"fqdn":"myname.myzone.com.","TTL":3600,"PTRRecords":[{"ptrdname":"myptrdname"}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/TXT\/myname2","name":"myname2","type":"Microsoft.Network\/dnszones\/TXT","etag":"060202a0-b139-4b36-bf79-b7a064cc71d1","properties":{"fqdn":"myname2.myzone.com.","TTL":3600,"TXTRecords":[{"value":["manualtxt"]}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/NS\/myns","name":"myns","type":"Microsoft.Network\/dnszones\/NS","etag":"6f9ddf8e-40c2-4609-a014-1e21b0bc217e","properties":{"fqdn":"myns.myzone.com.","TTL":3600,"NSRecords":[{"nsdname":"ns.contoso.com."}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/PTR\/myptr","name":"myptr","type":"Microsoft.Network\/dnszones\/PTR","etag":"43953aec-ccc6-4ba9-9745-59464888a239","properties":{"fqdn":"myptr.myzone.com.","TTL":3600,"PTRRecords":[{"ptrdname":"contoso.com"}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/SRV\/mysrv","name":"mysrv","type":"Microsoft.Network\/dnszones\/SRV","etag":"4c4f9c66-c106-4da9-b737-872bdfcef390","properties":{"fqdn":"mysrv.myzone.com.","TTL":3600,"SRVRecords":[{"port":1234,"priority":1,"target":"target.contoso.com.","weight":2}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/TXT\/mytxt2","name":"mytxt2","type":"Microsoft.Network\/dnszones\/TXT","etag":"592b6d59-05f0-40da-9b9f-93077d29954f","properties":{"fqdn":"mytxt2.myzone.com.","TTL":7200,"TXTRecords":[{"value":["abc
+        def"]},{"value":["foo bar"]}]}},{"id":"\/subscriptions\/0b1f6471-1bf0-4dda-aec3-cb9272f09590\/resourceGroups\/cli_dns_zone_import_export000001\/providers\/Microsoft.Network\/dnszones\/myzone.com\/TXT\/mytxtrs","name":"mytxtrs","type":"Microsoft.Network\/dnszones\/TXT","etag":"587d8698-cc79-476c-ad63-c51c4a0a6572","properties":{"fqdn":"mytxtrs.myzone.com.","TTL":3600,"TXTRecords":[{"value":["hi"]}]}}]}'}
     headers:
-      Cache-Control: [private]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:53:20 GMT']
-      Server: [Microsoft-IIS/8.5]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      X-AspNet-Version: [4.0.30319]
-      X-Content-Type-Options: [nosniff]
-      X-Powered-By: [ASP.NET]
-      content-length: ['5616']
+      cache-control: [private]
+      content-length: ['7208']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 09 Nov 2017 19:32:57 GMT']
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.21]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_dns_zone_import_export000001?api-version=2017-05-10
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Thu, 09 Nov 2017 19:32:58 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZETlM6NUZaT05FOjVGSU1QT1JUOjVGRVhQT1JUU0VLTkpQVkdOS0k0VXw5RjY2MkI5QkY5MjQxMkUyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
 version: 1

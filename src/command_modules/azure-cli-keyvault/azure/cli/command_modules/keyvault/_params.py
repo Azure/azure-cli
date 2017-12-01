@@ -166,13 +166,13 @@ register_cli_argument('keyvault set-policy', 'certificate_permissions', metavar=
 for item in ['key', 'secret', 'certificate']:
     register_cli_argument('keyvault {}'.format(item), '{}_name'.format(item),
                           options_list=('--name', '-n'), help='Name of the {}.'.format(item),
-                          id_part='child_name', completer=get_keyvault_name_completion_list(item))
+                          id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
     register_cli_argument('keyvault {}'.format(item), 'vault_base_url', vault_name_type,
                           type=vault_base_url_type, id_part=None)
 # TODO: Fix once service side issue is fixed that there is no way to list pending certificates
 register_cli_argument('keyvault certificate pending', 'certificate_name',
                       options_list=('--name', '-n'), help='Name of the pending certificate.',
-                      id_part='child_name', completer=None)
+                      id_part='child_name_1', completer=None)
 
 register_cli_argument('keyvault key', 'key_ops', options_list=('--ops'), nargs='*',
                       help='Space separated list of permitted JSON web key operations.',

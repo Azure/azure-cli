@@ -32,7 +32,7 @@ Known limitations:
     * PTR records must have a non-empty name
     * currently only supports the following:
     '$ORIGIN', '$TTL', 'SOA', 'NS', 'A', 'AAAA', 'CNAME', 'MX', 'PTR',
-    'TXT', 'SRV', 'SPF', 'URI'
+    'TXT', 'SRV', 'SPF', 'URI', 'CAA'
 """
 
 import copy
@@ -120,6 +120,7 @@ def _make_parser():
     _make_record_parser(parsers, 'NS', [('ttl', str, '?'), ('DELIM', str), ('host', str)])
     _make_record_parser(parsers, 'A', [('ttl', str, '?'), ('DELIM', str), ('ip', str)])
     _make_record_parser(parsers, 'AAAA', [('ttl', str, '?'), ('DELIM', str), ('ip', str)])
+    _make_record_parser(parsers, 'CAA', [('ttl', str, '?'), ('DELIM', str), ('flags', int), ('tag', str), ('value', str)])
     _make_record_parser(parsers, 'CNAME', [('ttl', str, '?'), ('DELIM', str), ('alias', str)])
     _make_record_parser(parsers, 'MX', [('ttl', str, '?'), ('DELIM', str), ('preference', str), ('host', str)])
     _make_record_parser(parsers, 'TXT', [('ttl', str), ('DELIM', str), ('txt', str, '+')])
@@ -284,9 +285,9 @@ def _flatten(text):
 
     # tokens: sequence of non-whitespace separated by '' where a newline was
     tokens = []
-    for l in (x for x in lines if len(x) > 0):
-        l = l.replace('\t', ' ')
-        tokens += _tokenize_line(l, quote_strings=True, infer_name=False)
+    for line in (x for x in lines if len(x) > 0):
+        line = line.replace('\t', ' ')
+        tokens += _tokenize_line(line, quote_strings=True, infer_name=False)
         tokens.append(SENTINEL)
 
     # find (...) and turn it into a single line ("capture" it)

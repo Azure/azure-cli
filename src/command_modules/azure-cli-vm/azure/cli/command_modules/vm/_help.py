@@ -12,7 +12,7 @@ vm_ids_example = """        - name: {0}
             az {1} --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
 """
 
-helps['vm format-secret'] = """
+helps['vm secret format'] = """
     type: command
     short-summary: Transform secrets into a form that can be used by VMs and VMSSes.
     examples:
@@ -24,7 +24,7 @@ helps['vm format-secret'] = """
             secrets=$(az keyvault secret list-versions --vault-name vaultname \\
               -n cert1 --query "[?attributes.enabled].id" -o tsv)
 
-            vm_secrets=$(az vm format-secret -s "$secrets")
+            vm_secrets=$(az vm secret format -s "$secrets")
 
             az vm create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"
@@ -79,7 +79,7 @@ helps['vm create'] = """
             secrets=$(az keyvault secret list-versions --vault-name vaultname \\
               -n cert1 --query "[?attributes.enabled].id" -o tsv)
 
-            vm_secrets=$(az vm format-secret -s "$secrets") \n
+            vm_secrets=$(az vm secret format -s "$secrets") \n
 
             az vm create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"
@@ -126,7 +126,7 @@ helps['vmss create'] = """
             secrets=$(az keyvault secret list-versions --vault-name vaultname \\
               -n cert1 --query "[?attributes.enabled].id" -o tsv)
 
-            vm_secrets=$(az vm format-secret -s "$secrets") \n
+            vm_secrets=$(az vm secret format -s "$secrets") \n
 
             az vmss create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"

@@ -15,7 +15,8 @@ class VstsContinuousDeliveryProvider(object):
 
     def setup_continuous_delivery(self,
                                   resource_group_name, name, repo_url, branch, git_token,
-                                  slot, cd_app_type, cd_account, cd_create_account, location):
+                                  slot, cd_app_type_details, cd_project_url, cd_create_account, location,
+                                  test, private_repo_username, private_repo_password, webapp_list):
         """
         This method sets up CD for an Azure Web App thru Team Services
         """
@@ -31,11 +32,11 @@ class VstsContinuousDeliveryProvider(object):
         # Generate an Azure token with the VSTS resource app id
         auth_token = profile.get_access_token_for_resource(user, None, cd_manager.get_vsts_app_id())
 
-        cd_manager.set_repository_info(repo_url, branch, git_token)
+        cd_manager.set_repository_info(repo_url, branch, git_token, private_repo_username, private_repo_password)
         cd_manager.set_azure_web_info(resource_group_name, name, cred, subscription['id'],
                                       subscription['name'], subscription['tenantId'], location)
-        vsts_cd_status = cd_manager.setup_continuous_delivery(slot, cd_app_type, cd_account,
-                                                              cd_create_account, auth_token)
+        vsts_cd_status = cd_manager.setup_continuous_delivery(slot, cd_app_type_details, cd_project_url,
+                                                              cd_create_account, auth_token, test, webapp_list)
         return vsts_cd_status
 
     def remove_continuous_delivery(self):  # pylint: disable=no-self-use
@@ -51,8 +52,8 @@ class VstsContinuousDeliveryProvider(object):
             message = '{: >3.0f}% complete: {}'.format(percent_done, status)
             # Erase the previous message
             # (backspace to beginning, space over the text and backspace again)
-            l = len(self._progress_last_message)
-            print('\b' * l + ' ' * l + '\b' * l, end='', file=stderr)
+            msg_len = len(self._progress_last_message)
+            print('\b' * msg_len + ' ' * msg_len + '\b' * msg_len, end='', file=stderr)
             print(message, end='', file=stderr)
             self._progress_last_message = message
             stderr.flush()

@@ -48,6 +48,13 @@ def configure_common_settings(client):
     except KeyError:
         pass
 
+    try:
+        command_ext_name = APPLICATION.session['command_extension_name']
+        if command_ext_name:
+            client.config.add_user_agent("CliExtension/{}".format(command_ext_name))
+    except KeyError:
+        pass
+
     for header, value in APPLICATION.session['headers'].items():
         # We are working with the autorest team to expose the add_header functionality of the generated client to avoid
         # having to access private members

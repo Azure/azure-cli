@@ -10,6 +10,7 @@ ALL_MODULES=`find $share_folder/build/ -name "*.whl"`
 
 pip install -qqq -e ./tools
 pip install -qqq coverage codecov
+[ -d privates ] && pip install -qqq privates/*.whl
 pip install -qqq $ALL_MODULES
 
 echo '=== List installed packages'

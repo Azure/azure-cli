@@ -358,6 +358,17 @@ class VMCustomImageTest(ScenarioTest):
             JMESPathCheckV2("vmss.virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType", 'Standard_LRS')
         ])
 
+    @ResourceGroupPreparer()
+    def test_custom_image_with_plan(self, resource_group):
+        # this test should be recorded using accounts "@azuresdkteam.onmicrosoft.com", as it uses pre-made custom image
+        prepared_image_with_plan_info = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.Compute/images/custom-image-with-plan'
+        plan_name = 'linuxdsvmubuntu'
+        self.cmd('vm create -g {} -n vm1 --image {} --generate-ssh-keys --plan-promotion-code 99percentoff --plan-publisher microsoft-ads --plan-name {} --plan-product linux-data-science-vm-ubuntu'.format(
+            resource_group, prepared_image_with_plan_info, plan_name))
+        self.cmd('vm show -g {} -n vm1'.format(resource_group), checks=[
+            JMESPathCheckV2('plan.name', plan_name)
+        ])
+
 
 class VMCreateFromUnmanagedDiskTest(ResourceGroupVCRTestBase):
 
@@ -674,31 +685,28 @@ class VMAvailSetScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_vm_availset(self, resource_group):
         name = 'availset-test'
-        self.cmd('vm availability-set create -g {} -n {}'.format(resource_group, name), checks=[
-                JMESPathCheckV2('name', name),
-                JMESPathCheckV2('platformFaultDomainCount', 2),
-                JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
-                JMESPathCheckV2('sku.name', 'Aligned')
-        ])
+        self.cmd('vm availability-set create -g {} -n {}'.format(resource_group, name),
+                 checks=[JMESPathCheckV2('name', name),
+                         JMESPathCheckV2('platformFaultDomainCount', 2),
+                         JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
+                         JMESPathCheckV2('sku.name', 'Aligned')])
 
         # create with explict UD count
-        self.cmd('vm availability-set create -g {} -n avset2 --platform-fault-domain-count 2 --platform-update-domain-count 2'.format(resource_group), checks=[
-                JMESPathCheckV2('platformFaultDomainCount', 2),
-                JMESPathCheckV2('platformUpdateDomainCount', 2),
-                JMESPathCheckV2('sku.name', 'Aligned')
-        ])
+        self.cmd('vm availability-set create -g {} -n avset2 --platform-fault-domain-count 2 --platform-update-domain-count 2'.format(resource_group),
+                 checks=[JMESPathCheckV2('platformFaultDomainCount', 2),
+                         JMESPathCheckV2('platformUpdateDomainCount', 2),
+                         JMESPathCheckV2('sku.name', 'Aligned')])
         self.cmd('vm availability-set delete -g {} -n avset2'.format(resource_group))
 
         self.cmd('vm availability-set update -g {} -n {} --set tags.test=success'.format(resource_group, name),
                  checks=JMESPathCheckV2('tags.test', 'success'))
         self.cmd('vm availability-set list -g {}'.format(resource_group), checks=[
             JMESPathCheckV2('length(@)', 1),
-            JMESPathCheckV2('[0].name', name),
-        ])
-        self.cmd('vm availability-set list-sizes -g {} -n {}'.format(
-            resource_group, name), checks=JMESPathCheckV2('type(@)', 'array'))
-        self.cmd('vm availability-set show -g {} -n {}'.format(
-            resource_group, name), checks=[JMESPathCheckV2('name', name)])
+            JMESPathCheckV2('[0].name', name)])
+        self.cmd('vm availability-set list-sizes -g {} -n {}'.format(resource_group, name),
+                 checks=JMESPathCheckV2('type(@)', 'array'))
+        self.cmd('vm availability-set show -g {} -n {}'.format(resource_group, name),
+                 checks=[JMESPathCheckV2('name', name)])
         self.cmd('vm availability-set delete -g {} -n {}'.format(resource_group, name))
         self.cmd('vm availability-set list -g {}'.format(resource_group), checks=[JMESPathCheckV2('length(@)', 0)])
 
@@ -708,19 +716,17 @@ class VMAvailSetLiveScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer()
     def test_vm_availset_convert(self, resource_group):
         name = 'availset-test'
-        self.cmd('vm availability-set create -g {} -n {} --unmanaged --platform-fault-domain-count 3 -l westus2 '.format(resource_group, name), checks=[
-                JMESPathCheckV2('name', name),
-                JMESPathCheckV2('platformFaultDomainCount', 3),
-                JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
-                JMESPathCheckV2('sku.name', 'Classic')
-        ])
+        self.cmd('vm availability-set create -g {} -n {} --unmanaged --platform-fault-domain-count 3 -l westus2 '.format(resource_group, name),
+                 checks=[JMESPathCheckV2('name', name),
+                         JMESPathCheckV2('platformFaultDomainCount', 3),
+                         JMESPathCheckV2('platformUpdateDomainCount', 5),  # server defaults to 5
+                         JMESPathCheckV2('sku.name', 'Classic')])
 
         # the conversion should auto adjust the FD from 3 to 2 as 'westus2' only offers 2
-        self.cmd('vm availability-set convert -g {} -n {}'.format(resource_group, name), checks=[
-                JMESPathCheckV2('name', name),
-                JMESPathCheckV2('platformFaultDomainCount', 2),
-                JMESPathCheckV2('sku.name', 'Aligned')
-        ])
+        self.cmd('vm availability-set convert -g {} -n {}'.format(resource_group, name),
+                 checks=[JMESPathCheckV2('name', name),
+                         JMESPathCheckV2('platformFaultDomainCount', 2),
+                         JMESPathCheckV2('sku.name', 'Aligned')])
 
 
 class ComputeListSkusScenarioTest(LiveScenarioTest):
@@ -1188,13 +1194,13 @@ class VMCreateExistingIdsOptions(ResourceGroupVCRTestBase):
 
     def body(self):
         from azure.cli.core.commands.client_factory import get_subscription_id
-        from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+        from msrestazure.tools import resource_id, is_valid_resource_id
         subscription_id = get_subscription_id()
         rg = self.resource_group
 
         av_set = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Compute', type='availabilitySets', name=self.availset_name)
         pub_ip = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='publicIpAddresses', name=self.pubip_name)
-        subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type='subnets', name=self.vnet_name, child_name=self.subnet_name)
+        subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name=self.vnet_name, child_name_1=self.subnet_name)
         nsg = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='networkSecurityGroups', name=self.nsg_name)
 
         assert is_valid_resource_id(av_set)
@@ -1526,14 +1532,14 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
     @ResourceGroupPreparer()
     def test_vmss_create_none_options(self, resource_group):
         vmss_name = 'vmss1'
-
         self.cmd('vmss create -n {0} -g {1} --image Debian --load-balancer {3} --admin-username ubuntu'
-                 ' --ssh-key-value \'{2}\' --public-ip-address {3} --tags {3}'
+                 ' --ssh-key-value \'{2}\' --public-ip-address {3} --tags {3} --vm-sku Basic_A1'
                  .format(vmss_name, resource_group, TEST_SSH_KEY_PUB, '""' if platform.system() == 'Windows' else "''"))
         self.cmd('vmss show -n {} -g {}'.format(vmss_name, resource_group), [
-            JMESPathCheckV2('availabilitySet', None),
             JMESPathCheckV2('tags', {}),
-            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None)
+            JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations.ipConfigurations.loadBalancerBackendAddressPools', None),
+            JMESPathCheckV2('sku.name', 'Basic_A1'),
+            JMESPathCheckV2('sku.tier', 'Basic')
         ])
         self.cmd('vmss update -g {} -n {} --set tags.test=success'.format(resource_group, vmss_name),
                  checks=JMESPathCheckV2('tags.test', 'success'))
@@ -1809,7 +1815,7 @@ class VMSSCreateExistingIdsOptions(ResourceGroupVCRTestBase):
 
     def body(self):
         from azure.cli.core.commands.client_factory import get_subscription_id
-        from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+        from msrestazure.tools import resource_id, is_valid_resource_id
         subscription_id = get_subscription_id()
         rg = self.resource_group
         vmss_name = 'vrfvmss'
@@ -1817,7 +1823,7 @@ class VMSSCreateExistingIdsOptions(ResourceGroupVCRTestBase):
         container_name = 'vrfcontainer'
         sku_name = 'Standard_A3'
 
-        subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type='subnets', name=self.vnet_name, child_name=self.subnet_name)
+        subnet = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='virtualNetworks', child_type_1='subnets', name=self.vnet_name, child_name_1=self.subnet_name)
         lb = resource_id(subscription=subscription_id, resource_group=rg, namespace='Microsoft.Network', type='loadBalancers', name=self.lb_name)
 
         assert is_valid_resource_id(subnet)
@@ -2001,11 +2007,9 @@ class MSIScenarioTest(ScenarioTest):
 
         # Fixing the role assignment guids so test can run under playback. The assignments will
         # be auto-deleted when the RG gets recycled, so the same ids can be reused.
-        guids = [uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C1A0'),
-                 uuid.UUID('C1E7FC22-CB48-407E-BE6A-19F0F1ED9C81'),
-                 uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D41732'),
+        guids = [uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D41732'),
                  uuid.UUID('13ECC8E1-A3AA-40CE-95E9-1313957D6CF3')]
-        with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=guids, autospec=True):
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=guids, autospec=True):
             # create a linux vm with default configuration
             self.cmd('vm create -g {} -n {} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {}'.format(resource_group, vm1, default_scope), checks=[
                 JMESPathCheckV2('identity.role', 'Contributor'),
@@ -2385,6 +2389,37 @@ class VMScaffoldingTest(ScenarioTest):
         self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['publicIps']))
         self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['privateIps']))
 
+
+class VMSecretTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vm_secret_e2e_test(self, resource_group, resource_group_location):
+        vm = 'vm1'
+        vault_name = self.create_random_name('vmsecretkv', 20)
+        certificate = 'vm-secrt-cert'
+
+        vault_result = self.cmd('keyvault create -g {rg} -n {name} -l {loc} --enabled-for-disk-encryption true --enabled-for-deployment true'.format(
+            rg=resource_group,
+            name=vault_name,
+            loc=resource_group_location
+        )).get_output_in_json()
+        policy_path = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
+
+        self.cmd('vm create -g {} -n {} --image rhel'.format(resource_group, vm))
+        time.sleep(60)  # ensure we don't hit the DNS exception (ignored under playback)
+
+        self.cmd('keyvault certificate create --vault-name {} -n {} -p @"{}"'.format(vault_name, certificate, policy_path))
+        secret_result = self.cmd('vm secret add -g {} -n {} --keyvault {} --certificate {}'.format(resource_group, vm, vault_name, certificate), checks=[
+            JMESPathCheckV2('length([])', 1),
+            JMESPathCheckV2('[0].sourceVault.id', vault_result['id']),
+            JMESPathCheckV2('length([0].vaultCertificates)', 1),
+        ]).get_output_in_json()
+        self.assertTrue('https://{}.vault.azure.net/secrets/{}/'.format(vault_name, certificate) in secret_result[0]['vaultCertificates'][0]['certificateUrl'])
+        self.cmd('vm secret list -g {} -n {}'.format(resource_group, vm))
+        self.cmd('vm secret remove -g {} -n {} --keyvault {} --certificate {}'.format(resource_group, vm, vault_name, certificate))
+
+        self.cmd('vm secret list -g {} -n {}'.format(resource_group, vm), checks=[
+            JMESPathCheckV2('length([])', 0)
+        ])
 # endregion
 
 

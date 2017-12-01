@@ -160,7 +160,8 @@ class Test_Webapp_Mocked(unittest.TestCase):
 
         # Mock the cd manager class so no REST calls are made
         cd_manager = mock.Mock()
-        status = ContinuousDeliveryResult(None, None, None, None, None, None, "message1", None, None, None)
+        status = ContinuousDeliveryResult(None, None, None, None, None, None, "message1", None,
+                                          None, None)
         cd_manager.setup_continuous_delivery.return_value = status
         cd_manager_mock.return_value = cd_manager
 
@@ -171,9 +172,20 @@ class Test_Webapp_Mocked(unittest.TestCase):
         site.default_host_name = 'myweb.com'
         client.web_apps.get.return_value = site
 
-        config_source_control('group1', 'myweb', 'http://github.com/repo1', None, None,
-                              None, None, "slot1", 'vsts', 'ASPNetWap', 'account1', False)
-        cd_manager.setup_continuous_delivery.assert_called_with('slot1', 'ASPNetWap', 'account1', True, None)
+        config_source_control('group1', 'myweb', 'http://github.com/repo1', None, None, None,
+                              None, None, 'ASPNet', 'working_directory', 'Gulp', 'Django',
+                              'Python 2.7.12 x64', True, 'https://account1.visualstudio.com',
+                              None, 'slot1', None, None)
+        cd_app_type_details = {
+            'cd_app_type': 'ASPNet',
+            'app_working_dir': 'working_directory',
+            'nodejs_task_runner': 'Gulp',
+            'python_framework': 'Django',
+            'python_version': 'Python 2.7.12 x64'
+        }
+        cd_manager.setup_continuous_delivery.assert_called_with('slot1', cd_app_type_details,
+                                                                'https://account1.visualstudio.com',
+                                                                True, None, None, None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
     def test_update_site_config(self, site_op_mock):

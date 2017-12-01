@@ -46,3 +46,36 @@ helps['acs create'] = """
         - name: Create an ACS cluster with agent-profiles specified from a file.
           text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles MyAgentProfiles.json
 """
+helps['aks'] = """
+     type: group
+     short-summary: Manage Kubernetes clusters.
+"""
+helps['aks create'] = """
+    type: command
+    short-summary: Create a new Azure managed Kubernetes cluster.
+    examples:
+        - name: Create a Kubernetes cluster.
+          text: az aks create -g MyResourceGroup -n MyManagedCluster
+        - name: Create a Kubernetes cluster with a an existing SSH key.
+          text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
+        - name: Create a Kubernetes cluster with a specific version
+          text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.8.1
+        - name: Create a Kubernetes cluster with a larger node pool count
+          text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
+"""
+helps['aks delete'] = """
+    type: command
+    short-summary: Delete a managed Kubernetes cluster.
+"""
+helps['aks get-versions'] = """
+    type: command
+    short-summary: Get versions available to upgrade a managed Kubernetes cluster.
+"""
+helps['aks install-cli'] = """
+    type: command
+    short-summary: Download and install kubectl, the Kubernetes command line tool.
+"""
+helps['aks wait'] = """
+    type: command
+    short-summary: Wait for a Kubernetes cluster to reach a desired state.
+"""

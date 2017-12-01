@@ -19,7 +19,6 @@ from azure.cli.testsdk.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneChe
 
 
 class ResourceGroupScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
     def test_resource_group(self, resource_group):
         s = self
@@ -287,7 +286,6 @@ class ProviderOperationTest(VCRTestBase):
 
 
 class DeploymentTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_lite')
     def test_group_deployment_lite(self, resource_group):
         # ensures that a template that is missing "parameters" or "resources" still deploys
@@ -309,18 +307,22 @@ class DeploymentTest(ScenarioTest):
         object_file = os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\')
         deployment_name = 'azure-cli-deployment'
 
-        subnet_id = self.cmd('network vnet create -g {} -n vnet1 --subnet-name subnet1'.format(resource_group)).get_output_in_json()['newVNet']['subnets'][0]['id']
+        subnet_id = self.cmd(
+            'network vnet create -g {} -n vnet1 --subnet-name subnet1'.format(resource_group)).get_output_in_json()[
+            'newVNet']['subnets'][0]['id']
 
-        self.cmd('group deployment validate -g {} --template-file {} --parameters @"{}" --parameters subnetId="{}" --parameters backendAddressPools=@"{}"'.format(
-            resource_group, template_file, parameters_file, subnet_id, object_file), checks=[
-            JCheck('properties.provisioningState', 'Succeeded')
-        ])
+        self.cmd(
+            'group deployment validate -g {} --template-file {} --parameters @"{}" --parameters subnetId="{}" --parameters backendAddressPools=@"{}"'.format(
+                resource_group, template_file, parameters_file, subnet_id, object_file), checks=[
+                JCheck('properties.provisioningState', 'Succeeded')
+            ])
 
-        self.cmd('group deployment create -g {} -n {} --template-file {} --parameters @"{}" --parameters subnetId="{}" --parameters backendAddressPools=@"{}"'.format(
-            resource_group, deployment_name, template_file, parameters_file, subnet_id, object_file), checks=[
-            JCheck('properties.provisioningState', 'Succeeded'),
-            JCheck('resourceGroup', resource_group),
-        ])
+        self.cmd(
+            'group deployment create -g {} -n {} --template-file {} --parameters @"{}" --parameters subnetId="{}" --parameters backendAddressPools=@"{}"'.format(
+                resource_group, deployment_name, template_file, parameters_file, subnet_id, object_file), checks=[
+                JCheck('properties.provisioningState', 'Succeeded'),
+                JCheck('resourceGroup', resource_group),
+            ])
         self.cmd('network lb show -g {} -n test-lb'.format(resource_group), checks=[
             JCheck('tags', {'key': 'super=value'})
         ])
@@ -349,11 +351,14 @@ class DeploymentLiveTest(LiveScenarioTest):
         object_file = os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\')
         deployment_name = 'azure-cli-deployment2'
 
-        subnet_id = self.cmd('network vnet create -g {} -n vnet1 --subnet-name subnet1'.format(resource_group)).get_output_in_json()['newVNet']['subnets'][0]['id']
+        subnet_id = self.cmd(
+            'network vnet create -g {} -n vnet1 --subnet-name subnet1'.format(resource_group)).get_output_in_json()[
+            'newVNet']['subnets'][0]['id']
 
         with force_progress_logging() as test_io:
-            self.cmd('group deployment create --verbose -g {} -n {} --template-file {} --parameters @"{}" --parameters subnetId="{}" --parameters backendAddressPools=@"{}"'.format(
-                resource_group, deployment_name, template_file, parameters_file, subnet_id, object_file))
+            self.cmd(
+                'group deployment create --verbose -g {} -n {} --template-file {} --parameters @"{}" --parameters subnetId="{}" --parameters backendAddressPools=@"{}"'.format(
+                    resource_group, deployment_name, template_file, parameters_file, subnet_id, object_file))
 
         # very the progress
         lines = test_io.getvalue().splitlines()
@@ -389,13 +394,10 @@ class DeploymentnoWaitTest(ResourceGroupVCRTestBase):
                  checks=NoneCheck())
 
         self.cmd('group deployment show -g {} -n {}'.format(self.resource_group, deployment_name),
-                 checks=[
-                     JMESPathCheck('properties.provisioningState', 'Succeeded')
-                 ])
+                 checks=[JMESPathCheck('properties.provisioningState', 'Succeeded')])
 
 
 class DeploymentThruUriTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_uri')
     def test_group_deployment_thru_uri(self, resource_group):
         self.resource_group = resource_group
@@ -413,7 +415,8 @@ class DeploymentThruUriTest(ScenarioTest):
 
         deployment_name = result['name']
         result = self.cmd(
-            'group deployment show -g {} -n {}'.format(self.resource_group, deployment_name), checks=JCheck('name', deployment_name))
+            'group deployment show -g {} -n {}'.format(self.resource_group, deployment_name),
+            checks=JCheck('name', deployment_name))
 
         self.cmd('group deployment delete -g {} -n {}'.format(self.resource_group, deployment_name))
         self.cmd('group deployment list -g {}'.format(self.resource_group), checks=NoneCheck())
@@ -470,14 +473,15 @@ class PolicyScenarioTest(ScenarioTest):
         mode = 'Indexed'
 
         # create a policy
-        self.cmd('policy definition create -n {} --rules {} --params {} --display-name {} --description {} --mode {}'.format(
-            policy_name, rules_file, params_def_file, policy_display_name, policy_description, mode),
+        self.cmd(
+            'policy definition create -n {} --rules {} --params {} --display-name {} --description {} --mode {}'.format(
+                policy_name, rules_file, params_def_file, policy_display_name, policy_description, mode),
             checks=[
-                        JCheck('name', policy_name),
-                        JCheck('displayName', policy_display_name),
-                        JCheck('description', policy_description),
-                        JCheck('mode', mode)
-                   ]
+                JCheck('name', policy_name),
+                JCheck('displayName', policy_display_name),
+                JCheck('description', policy_description),
+                JCheck('mode', mode)
+            ]
         )
 
         # update it
@@ -496,13 +500,11 @@ class PolicyScenarioTest(ScenarioTest):
         policy_assignment_name = self.create_random_name('azurecli-test-policy-assignment', 40)
         policy_assignment_display_name = self.create_random_name('test_assignment', 20)
         self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {} --params {}'.format(
-                 policy_name, policy_assignment_name, policy_assignment_display_name, resource_group, params_file),
-                 checks=[
-                    JCheck('name', policy_assignment_name),
+            policy_name, policy_assignment_name, policy_assignment_display_name, resource_group, params_file),
+            checks=[JCheck('name', policy_assignment_name),
                     JCheck('displayName', policy_assignment_display_name),
                     JCheck('sku.name', 'A0'),
-                    JCheck('sku.tier', 'Free'),
-                 ])
+                    JCheck('sku.tier', 'Free')])
 
         # create a policy assignment with not scopes and standard sku
         get_cmd = 'group show -n {}'
@@ -511,26 +513,26 @@ class PolicyScenarioTest(ScenarioTest):
         subnet_name = self.create_random_name('azurecli-test-policy-subnet', 40)
         vnetcreatecmd = 'network vnet create -g {} -n {} --subnet-name {}'
         self.cmd(vnetcreatecmd.format(resource_group, vnet_name, subnet_name))
-        notscope = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks'.format(rg['id'].split("/")[2], resource_group)
-        self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {} --not-scopes {} --params {} --sku {}'.format(
-                 policy_name, policy_assignment_name, policy_assignment_display_name, resource_group, notscope, params_file, 'standard'),
-                 checks=[
-                    JCheck('name', policy_assignment_name),
+        notscope = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks'.format(
+            rg['id'].split("/")[2], resource_group)
+        self.cmd(
+            'policy assignment create --policy {} -n {} --display-name {} -g {} --not-scopes {} --params {} --sku {}'.format(
+                policy_name, policy_assignment_name, policy_assignment_display_name, resource_group, notscope,
+                params_file, 'standard'),
+            checks=[JCheck('name', policy_assignment_name),
                     JCheck('displayName', policy_assignment_display_name),
                     JCheck('sku.name', 'A1'),
                     JCheck('sku.tier', 'Standard'),
-                    JCheck('notScopes[0]', notscope)
-                 ])
+                    JCheck('notScopes[0]', notscope)])
 
         # create a policy assignment using a built in policy definition name
         policy_assignment_name2 = self.create_random_name('azurecli-test-policy-assignment2', 40)
-        built_in_policy = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']|[0]"').get_output_in_json()
+        built_in_policy = self.cmd(
+            'policy definition list --query "[?policyType==\'BuiltIn\']|[0]"').get_output_in_json()
         self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {}'.format(
-                 built_in_policy['name'], policy_assignment_name2, policy_assignment_display_name, resource_group),
-                 checks=[
-                    JCheck('name', policy_assignment_name2),
-                    JCheck('displayName', policy_assignment_display_name)
-                 ])
+            built_in_policy['name'], policy_assignment_name2, policy_assignment_display_name, resource_group),
+            checks=[JCheck('name', policy_assignment_name2),
+                    JCheck('displayName', policy_assignment_display_name)])
         self.cmd('policy assignment delete -n {} -g {}'.format(policy_assignment_name2, resource_group))
 
         # listing at subscription level won't find the assignment made at a resource group
@@ -577,36 +579,32 @@ class PolicyScenarioTest(ScenarioTest):
         with open(os.path.join(curr_dir, 'sample_policy_set.json'), 'w') as outfile:
             json.dump(policyset, outfile)
         self.cmd('policy set-definition create -n {} --definitions @"{}" --display-name {} --description {}'.format(
-                 policyset_name, policyset_file, policyset_display_name, policyset_description),
-                 checks=[
-                    JCheck('name', policyset_name),
+            policyset_name, policyset_file, policyset_display_name, policyset_description),
+            checks=[JCheck('name', policyset_name),
                     JCheck('displayName', policyset_display_name),
-                    JCheck('description', policyset_description)
-                ])
+                    JCheck('description', policyset_description)])
 
         # update it
         new_policyset_description = policy_description + '_new'
-        self.cmd('policy set-definition update -n {} --description {}'.format(policyset_name, new_policyset_description),
-                 checks=JCheck('description', new_policyset_description))
+        self.cmd(
+            'policy set-definition update -n {} --description {}'.format(policyset_name, new_policyset_description),
+            checks=JCheck('description', new_policyset_description))
 
         # list and show it
         self.cmd('policy set-definition list', checks=JMESPathCheck("length([?name=='{}'])".format(policyset_name), 1))
-        self.cmd('policy set-definition show -n {}'.format(policyset_name), checks=[
-            JCheck('name', policyset_name),
-            JCheck('displayName', policyset_display_name)
-        ])
+        self.cmd('policy set-definition show -n {}'.format(policyset_name),
+                 checks=[JCheck('name', policyset_name),
+                         JCheck('displayName', policyset_display_name)])
 
         # create a policy assignment on a resource group
         policy_assignment_name = self.create_random_name('azurecli-test-policy-assignment', 40)
         policy_assignment_display_name = self.create_random_name('test_assignment', 20)
         self.cmd('policy assignment create -d {} -n {} --display-name {} -g {}'.format(
-                 policyset_name, policy_assignment_name, policy_assignment_display_name, resource_group),
-                 checks=[
-                    JCheck('name', policy_assignment_name),
+            policyset_name, policy_assignment_name, policy_assignment_display_name, resource_group),
+            checks=[JCheck('name', policy_assignment_name),
                     JCheck('displayName', policy_assignment_display_name),
                     JCheck('sku.name', 'A0'),
-                    JCheck('sku.tier', 'Free'),
-                 ])
+                    JCheck('sku.tier', 'Free')])
 
         # delete the assignment
         self.cmd('policy assignment delete -n {} -g {}'.format(policy_assignment_name, resource_group))
@@ -638,17 +636,19 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
 
         # create a managedapp definition
         create_cmd = 'managedapp definition create -n {} --package-file-uri {} --display-name {} --description {} -l {} -a {} --lock-level {} -g {}'
-        appdef = self.cmd(create_cmd.format(appdef_name, packageUri, appdef_display_name, appdef_description, location, auth, lock, resource_group), checks=[
-            JCheck('name', appdef_name),
-            JCheck('displayName', appdef_display_name),
-            JCheck('description', appdef_description),
-            JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-            JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
-            JCheck('artifacts[0].name', 'ApplianceResourceTemplate'),
-            JCheck('artifacts[0].type', 'Template'),
-            JCheck('artifacts[1].name', 'CreateUiDefinition'),
-            JCheck('artifacts[1].type', 'Custom')
-        ]).get_output_in_json()
+        appdef = self.cmd(
+            create_cmd.format(appdef_name, packageUri, appdef_display_name, appdef_description, location, auth, lock,
+                              resource_group), checks=[
+                JCheck('name', appdef_name),
+                JCheck('displayName', appdef_display_name),
+                JCheck('description', appdef_description),
+                JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
+                JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+                JCheck('artifacts[0].name', 'ApplianceResourceTemplate'),
+                JCheck('artifacts[0].type', 'Template'),
+                JCheck('artifacts[1].name', 'CreateUiDefinition'),
+                JCheck('artifacts[1].type', 'Custom')
+            ]).get_output_in_json()
 
         # list and show it
         list_cmd = 'managedapp definition list -g {}'
@@ -687,17 +687,19 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
 
         # create a managedapp definition with inline params for create-ui-definition and main-template
         create_cmd = 'managedapp definition create -n {} --create-ui-definition @"{}" --main-template @"{}" --display-name {} --description {} -l {} -a {} --lock-level {} -g {}'
-        appdef = self.cmd(create_cmd.format(appdef_name, createUiDef_file, mainTemplate_file, appdef_display_name, appdef_description, location, auth, lock, resource_group), checks=[
-            JCheck('name', appdef_name),
-            JCheck('displayName', appdef_display_name),
-            JCheck('description', appdef_description),
-            JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-            JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
-            JCheck('artifacts[0].name', 'ApplicationResourceTemplate'),
-            JCheck('artifacts[0].type', 'Template'),
-            JCheck('artifacts[1].name', 'CreateUiDefinition'),
-            JCheck('artifacts[1].type', 'Custom')
-        ]).get_output_in_json()
+        appdef = self.cmd(
+            create_cmd.format(appdef_name, createUiDef_file, mainTemplate_file, appdef_display_name, appdef_description,
+                              location, auth, lock, resource_group), checks=[
+                JCheck('name', appdef_name),
+                JCheck('displayName', appdef_display_name),
+                JCheck('description', appdef_description),
+                JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
+                JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+                JCheck('artifacts[0].name', 'ApplicationResourceTemplate'),
+                JCheck('artifacts[0].type', 'Template'),
+                JCheck('artifacts[1].name', 'CreateUiDefinition'),
+                JCheck('artifacts[1].type', 'Custom')
+            ]).get_output_in_json()
 
         # list and show it
         list_cmd = 'managedapp definition list -g {}'
@@ -737,7 +739,8 @@ class ManagedAppScenarioTest(ScenarioTest):
         # create a managedapp definition
         create_cmd = 'managedapp definition create -n {} --package-file-uri {} --display-name {} --description {} -l {} -a {} --lock-level {} -g {}'
         managedappdef = self.cmd(create_cmd.format(appdef_name, packageUri, appdef_display_name,
-                                                   appdef_description, location, auth, lock, resource_group)).get_output_in_json()
+                                                   appdef_description, location, auth, lock,
+                                                   resource_group)).get_output_in_json()
 
         # create a managedapp
         managedapp_name = 'mymanagedapp'
@@ -746,7 +749,8 @@ class ManagedAppScenarioTest(ScenarioTest):
         newrg = self.create_random_name('climanagedapp', 25)
         managedrg = '/subscriptions/{}/resourceGroups/{}'.format(managedappdef['id'].split("/")[2], newrg)
         create_cmd = 'managedapp create -n {} -g {} -l {} --kind {} -m {} -d {}'
-        app = self.cmd(create_cmd.format(managedapp_name, resource_group, managedapp_loc, managedapp_kind, managedrg, managedappdef['id']), checks=[
+        app = self.cmd(create_cmd.format(managedapp_name, resource_group, managedapp_loc, managedapp_kind, managedrg,
+                                         managedappdef['id']), checks=[
             JCheck('name', managedapp_name),
             JCheck('type', 'Microsoft.Solutions/applications'),
             JCheck('kind', 'servicecatalog'),
@@ -773,7 +777,6 @@ class ManagedAppScenarioTest(ScenarioTest):
 
 
 class CrossRGDeploymentScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(name_prefix='cli_test_cross_rg_alt', parameter_name='resource_group_cross')
     @ResourceGroupPreparer(name_prefix='cli_test_cross_rg_deploy')
     def test_group_deployment_crossrg(self, resource_group, resource_group_cross):
@@ -783,10 +786,11 @@ class CrossRGDeploymentScenarioTest(ScenarioTest):
         storage_account_1 = create_random_name(prefix='crossrg')
         storage_account_2 = create_random_name(prefix='crossrg')
 
-        self.cmd('group deployment validate -g {} --template-file {} --parameters CrossRg={} StorageAccountName1={} StorageAccountName2={}'.format(
-            resource_group, template_file, resource_group_cross, storage_account_1, storage_account_2), checks=[
-            JCheck('properties.provisioningState', 'Succeeded')
-        ])
+        self.cmd(
+            'group deployment validate -g {} --template-file {} --parameters CrossRg={} StorageAccountName1={} StorageAccountName2={}'.format(
+                resource_group, template_file, resource_group_cross, storage_account_1, storage_account_2), checks=[
+                JCheck('properties.provisioningState', 'Succeeded')
+            ])
         self.cmd('group deployment create -g {} -n {} --template-file {} --parameters CrossRg={}'.format(
             resource_group, deployment_name, template_file, resource_group_cross), checks=[
             JCheck('properties.provisioningState', 'Succeeded'),

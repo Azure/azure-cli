@@ -56,6 +56,16 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         self.batch_cmd('batch pool create --json-file "{}"', account_info, create_pool_file_path)
 
+        result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_A1 '
+                                '--image a:b:c --node-agent-sku-id "batch.node.windows amd64"',
+                                account_info, create_pool_file_path, expect_failure=True)
+
+        result = self.batch_cmd('batch pool create --id pool_image1 --vm-size Standard_A1 '
+                                '--image /subscriptions/11111111-1111-1111-1111-111111111111'
+                                '/resourceGroups/test_rg/providers/Microsoft.Compute/images/custom_image '
+                                '--node-agent-sku-id "batch.node.windows amd64"',
+                                account_info, create_pool_file_path, expect_failure=True)
+
         result = self.batch_cmd('batch pool show --pool-id {}', account_info, create_pool_id) \
             .assert_with_checks([JMESPathCheck('allocationState', 'steady'),
                                  JMESPathCheck('id', create_pool_id),

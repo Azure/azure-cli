@@ -8,11 +8,10 @@ import tempfile
 import shutil
 import zipfile
 import traceback
+import hashlib
 from subprocess import check_output, STDOUT, CalledProcessError
-
 import requests
 from wheel.install import WHEEL_INFO_RE
-
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
 from azure.cli.core.util import CLIError
@@ -22,7 +21,8 @@ from azure.cli.core.extension import (extension_exists, get_extension_path, get_
 import azure.cli.core.azlogging as azlogging
 
 from ._homebrew_patch import HomebrewPipPatch
-
+from ._index import get_index_extensions
+from ._resolve import resolve_from_index, NoExtensionCandidatesError
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -84,13 +84,16 @@ def _validate_whl_extension(ext_file):
     _validate_whl_cli_compat(azext_metadata)
 
 
-def _add_whl_ext(source):  # pylint: disable=too-many-statements
+def _add_whl_ext(source, ext_sha256=None):  # pylint: disable=too-many-statements
+    if not source.endswith('.whl'):
+        raise ValueError('Unknown extension type. Only Python wheels are supported.')
     url_parse_result = urlparse(source)
     is_url = (url_parse_result.scheme == 'http' or url_parse_result.scheme == 'https')
     logger.debug('Extension source is url? %s', is_url)
     whl_filename = os.path.basename(url_parse_result.path) if is_url else os.path.basename(source)
     parsed_filename = WHEEL_INFO_RE(whl_filename)
-    extension_name = parsed_filename.groupdict().get('name') if parsed_filename else None
+    # Extension names can have - but .whl format changes it to _ (PEP 0427). Undo this.
+    extension_name = parsed_filename.groupdict().get('name').replace('_', '-') if parsed_filename else None
     if not extension_name:
         raise CLIError('Unable to determine extension name from {}. Is the file name correct?'.format(source))
     if extension_exists(extension_name):
@@ -113,6 +116,15 @@ def _add_whl_ext(source):  # pylint: disable=too-many-statements
             raise CLIError("File {} not found.".format(source))
     # Validate the extension
     logger.debug('Validating the extension {}'.format(ext_file))
+    if ext_sha256:
+        valid_checksum, computed_checksum = is_valid_sha256sum(ext_file, ext_sha256)
+        if valid_checksum:
+            logger.debug("Checksum of %s is OK", ext_file)
+        else:
+            logger.debug("Invalid checksum for %s. Expected '%s', computed '%s'.",
+                         ext_file, ext_sha256, computed_checksum)
+            raise CLIError("The checksum of the extension does not match the expected value. "
+                           "Use --debug for more information.")
     try:
         _validate_whl_extension(ext_file)
     except AssertionError:
@@ -138,11 +150,25 @@ def _add_whl_ext(source):  # pylint: disable=too-many-statements
     logger.debug('Saved the whl to %s', dst)
 
 
-def add_extension(source):
-    if source.endswith('.whl'):
-        _add_whl_ext(source)
-    else:
-        raise ValueError('Unknown extension type. Only Python wheels are supported.')
+def is_valid_sha256sum(a_file, expected_sum):
+    sha256 = hashlib.sha256()
+    with open(a_file, 'rb') as f:
+        sha256.update(f.read())
+    computed_hash = sha256.hexdigest()
+    return expected_sum == computed_hash, computed_hash
+
+
+def add_extension(source=None, extension_name=None, index_url=None, yes=None):  # pylint: disable=unused-argument
+    ext_sha256 = None
+    if extension_name:
+        if extension_exists(extension_name):
+            raise CLIError('The extension {} already exists.'.format(extension_name))
+        try:
+            source, ext_sha256 = resolve_from_index(extension_name, index_url=index_url)
+        except NoExtensionCandidatesError as err:
+            logger.debug(err)
+            raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
+    _add_whl_ext(source, ext_sha256=ext_sha256)
 
 
 def remove_extension(extension_name):
@@ -167,3 +193,38 @@ def show_extension(extension_name):
                 OUT_KEY_METADATA: extension.metadata}
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
+
+
+def update_extension(extension_name, index_url=None):
+    try:
+        ext = get_extension(extension_name)
+        cur_version = ext.get_version()
+        try:
+            download_url, ext_sha256 = resolve_from_index(extension_name, cur_version=cur_version, index_url=index_url)
+        except NoExtensionCandidatesError as err:
+            logger.debug(err)
+            raise CLIError("No updates available for '{}'. Use --debug for more information.".format(extension_name))
+        # Copy current version of extension to tmp directory in case we need to restore it after a failed install.
+        backup_dir = os.path.join(tempfile.mkdtemp(), extension_name)
+        extension_path = get_extension_path(extension_name)
+        logger.debug('Backing up the current extension: %s to %s', extension_path, backup_dir)
+        shutil.copytree(extension_path, backup_dir)
+        # Remove current version of the extension
+        shutil.rmtree(extension_path)
+        # Install newer version
+        try:
+            _add_whl_ext(download_url, ext_sha256=ext_sha256)
+            logger.debug('Deleting backup of old extension at %s', backup_dir)
+            shutil.rmtree(backup_dir)
+        except Exception as err:
+            logger.error('An error occurred whilst updating.')
+            logger.error(err)
+            logger.debug('Copying %s to %s', backup_dir, extension_path)
+            shutil.copytree(backup_dir, extension_path)
+            raise CLIError('Failed to update. Rolled {} back to {}.'.format(extension_name, cur_version))
+    except ExtensionNotInstalledException as e:
+        raise CLIError(e)
+
+
+def list_available_extensions(index_url=None):
+    return get_index_extensions(index_url=index_url)

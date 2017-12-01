@@ -2,9 +2,17 @@
 
 Release History
 ===============
+2.0.18
+++++++
+* `vmss create`: fix a bug that blocks using Basic tier of VM sizes
+* `vm/vmss create`: expose `plan` arguments for using custom images with billing informations 
+* vm : support `vm secret add/remove/list`
+* vm : `vm format-secret` is copied to `vm secret format`. The old one will be removed in future
+* Minor fixes.
 
 2.0.17
 ++++++
+* `vm encryption enable`: expose '--encrypt-format'
 * `vmss create`: expose '--accelerated-networking'
 
 2.0.16 (2017-10-09)

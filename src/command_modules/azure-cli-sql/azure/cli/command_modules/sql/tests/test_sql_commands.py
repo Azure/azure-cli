@@ -64,7 +64,6 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 
 class SqlServerMgmtScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
     def test_sql_server_mgmt(self, resource_group_1, resource_group_2, resource_group_location):
@@ -146,7 +145,6 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer()
     @SqlServerPreparer()
     def test_sql_firewall_mgmt(self, resource_group, resource_group_location, server):
@@ -337,7 +335,7 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
                          JMESPathCheck('[0].resourceGroup', resource_group),
                          JMESPathCheck('[0].databaseName', database_name)
                      ])
-            .get_output_in_json())
+                .get_output_in_json())
 
         # Cancel operation
         self.cmd('sql db op cancel -g {} -s {} -d {} -n {}'
@@ -385,7 +383,6 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
     def test_sql_db_copy(self, resource_group_1, resource_group_2,
                          resource_group_location,
                          server1, server2):
-
         database_name = "cliautomationdb01"
         database_copy_name = "cliautomationdb02"
         service_objective = 'S1'
@@ -812,7 +809,6 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
-
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1")
@@ -1208,21 +1204,17 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
                  checks=[
                      # Standard edition exists, other editions don't
                      JMESPathCheckExists("[?name == 'Standard']"),
-                     JMESPathCheck("length([?name != 'Standard'])", 0),
-                 ])
+                     JMESPathCheck("length([?name != 'Standard'])", 0)])
 
         # Search for db service objective - note that it's case insensitive
-        self.cmd('sql db list-editions -l {} --edition standard --service-objective s0'
-                 .format(location), checks=[
-                     # Standard edition exists, other editions don't
-                     JMESPathCheckExists("[?name == 'Standard']"),
-                     JMESPathCheck("length([?name != 'Standard'])", 0),
-                     # S0 service objective exists, others don't exist
-                     JMESPathCheckExists("[].supportedServiceLevelObjectives[] | [?name == 'S0']"),
-                     JMESPathCheck(
-                         "length([].supportedServiceLevelObjectives[] | [?name != 'S0'])",
-                         0),
-                 ])
+        # Checked items:
+        #   * Standard edition exists, other editions don't
+        #   * S0 service objective exists, others don't exist
+        self.cmd('sql db list-editions -l {} --edition standard --service-objective s0'.format(location),
+                 checks=[JMESPathCheckExists("[?name == 'Standard']"),
+                         JMESPathCheck("length([?name != 'Standard'])", 0),
+                         JMESPathCheckExists("[].supportedServiceLevelObjectives[] | [?name == 'S0']"),
+                         JMESPathCheck("length([].supportedServiceLevelObjectives[] | [?name != 'S0'])", 0)])
 
         pool_max_size_length_jmespath = 'length([].supportedElasticPoolDtus[].supportedMaxSizes[])'
         pool_db_max_dtu_length_jmespath = 'length([].supportedElasticPoolDtus[].supportedPerDatabaseMaxDtus[])'
@@ -1232,77 +1224,60 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
 
         # Get all elastic pool capabilities
         self.cmd('sql elastic-pool list-editions -l {}'.format(location),
-                 checks=[
-                     # At least standard and premium edition exist
-                     JMESPathCheckExists("[?name == 'Standard']"),
-                     JMESPathCheckExists("[?name == 'Premium']"),
-                     # Optional details are omitted
-                     JMESPathCheck(pool_max_size_length_jmespath, 0),
-                     JMESPathCheck(pool_db_max_dtu_length_jmespath, 0),
-                     JMESPathCheck(pool_db_min_dtu_length_jmespath, 0),
-                     JMESPathCheck(pool_db_max_size_length_jmespath, 0)
-                 ])
+                 checks=[JMESPathCheckExists("[?name == 'Standard']"),  # At least standard and premium edition exist
+                         JMESPathCheckExists("[?name == 'Premium']"),
+                         JMESPathCheck(pool_max_size_length_jmespath, 0),  # Optional details are omitted
+                         JMESPathCheck(pool_db_max_dtu_length_jmespath, 0),
+                         JMESPathCheck(pool_db_min_dtu_length_jmespath, 0),
+                         JMESPathCheck(pool_db_max_size_length_jmespath, 0)])
 
         # Search for elastic pool edition - note that it's case insensitive
         self.cmd('sql elastic-pool list-editions -l {} --edition standard'.format(location),
-                 checks=[
-                     # Standard edition exists, other editions don't
-                     JMESPathCheckExists("[?name == 'Standard']"),
-                     JMESPathCheck("length([?name != 'Standard'])", 0)
-                 ])
+                 checks=[JMESPathCheckExists("[?name == 'Standard']"),  # Standard edition exists, other editions don't
+                         JMESPathCheck("length([?name != 'Standard'])", 0)])
 
         # Search for dtu limit
         self.cmd('sql elastic-pool list-editions -l {} --dtu 100'.format(location),
                  checks=[
                      # All results have 100 dtu
                      JMESPathCheckGreaterThan('length([].supportedElasticPoolDtus[?limit == `100`][])', 0),
-                     JMESPathCheck('length([].supportedElasticPoolDtus[?limit != `100`][])', 0)
-                 ])
+                     JMESPathCheck('length([].supportedElasticPoolDtus[?limit != `100`][])', 0)])
 
         # Get all db capabilities with pool max size
         self.cmd('sql elastic-pool list-editions -l {} --show-details max-size'.format(location),
-                 checks=[
-                     JMESPathCheckGreaterThan(pool_max_size_length_jmespath, 0),
-                     JMESPathCheck(pool_db_max_dtu_length_jmespath, 0),
-                     JMESPathCheck(pool_db_min_dtu_length_jmespath, 0),
-                     JMESPathCheck(pool_db_max_size_length_jmespath, 0)
-                 ])
+                 checks=[JMESPathCheckGreaterThan(pool_max_size_length_jmespath, 0),
+                         JMESPathCheck(pool_db_max_dtu_length_jmespath, 0),
+                         JMESPathCheck(pool_db_min_dtu_length_jmespath, 0),
+                         JMESPathCheck(pool_db_max_size_length_jmespath, 0)])
 
         # Get all db capabilities with per db max size
         self.cmd('sql elastic-pool list-editions -l {} --show-details db-max-size'.format(location),
-                 checks=[
-                     JMESPathCheck(pool_max_size_length_jmespath, 0),
-                     JMESPathCheck(pool_db_max_dtu_length_jmespath, 0),
-                     JMESPathCheck(pool_db_min_dtu_length_jmespath, 0),
-                     JMESPathCheckGreaterThan(pool_db_max_size_length_jmespath, 0)
-                 ])
+                 checks=[JMESPathCheck(pool_max_size_length_jmespath, 0),
+                         JMESPathCheck(pool_db_max_dtu_length_jmespath, 0),
+                         JMESPathCheck(pool_db_min_dtu_length_jmespath, 0),
+                         JMESPathCheckGreaterThan(pool_db_max_size_length_jmespath, 0)])
 
         # Get all db capabilities with per db max dtu
         self.cmd('sql elastic-pool list-editions -l {} --edition standard --show-details db-max-dtu'.format(location),
-                 checks=[
-                     JMESPathCheck(pool_max_size_length_jmespath, 0),
-                     JMESPathCheckGreaterThan(pool_db_max_dtu_length_jmespath, 0),
-                     JMESPathCheck(pool_db_min_dtu_length_jmespath, 0),
-                     JMESPathCheck(pool_db_max_size_length_jmespath, 0)
-                 ])
+                 checks=[JMESPathCheck(pool_max_size_length_jmespath, 0),
+                         JMESPathCheckGreaterThan(pool_db_max_dtu_length_jmespath, 0),
+                         JMESPathCheck(pool_db_min_dtu_length_jmespath, 0),
+                         JMESPathCheck(pool_db_max_size_length_jmespath, 0)])
 
         # Get all db capabilities with per db min dtu (which is nested under per db max dtu)
         self.cmd('sql elastic-pool list-editions -l {} --edition standard --show-details db-min-dtu'.format(location),
-                 checks=[
-                     JMESPathCheck(pool_max_size_length_jmespath, 0),
-                     JMESPathCheckGreaterThan(pool_db_max_dtu_length_jmespath, 0),
-                     JMESPathCheckGreaterThan(pool_db_min_dtu_length_jmespath, 0),
-                     JMESPathCheck(pool_db_max_size_length_jmespath, 0)
-                 ])
+                 checks=[JMESPathCheck(pool_max_size_length_jmespath, 0),
+                         JMESPathCheckGreaterThan(pool_db_max_dtu_length_jmespath, 0),
+                         JMESPathCheckGreaterThan(pool_db_min_dtu_length_jmespath, 0),
+                         JMESPathCheck(pool_db_max_size_length_jmespath, 0)])
 
         # Get all db capabilities with everything
-        self.cmd('sql elastic-pool list-editions -l {} --edition standard --show-details db-min-dtu db-max-dtu db-max-size max-size'.format(location),
-                 checks=[
-                     JMESPathCheckGreaterThan(pool_max_size_length_jmespath, 0),
-                     JMESPathCheckGreaterThan(pool_db_max_dtu_length_jmespath, 0),
-                     JMESPathCheckGreaterThan(pool_db_min_dtu_length_jmespath, 0),
-                     JMESPathCheckGreaterThan(pool_db_max_size_length_jmespath, 0)
-                 ])
+        self.cmd('sql elastic-pool list-editions -l {} --edition standard --show-details db-min-dtu db-max-dtu '
+                 'db-max-size max-size'.format(location),
+                 checks=[JMESPathCheckGreaterThan(pool_max_size_length_jmespath, 0),
+                         JMESPathCheckGreaterThan(pool_db_max_dtu_length_jmespath, 0),
+                         JMESPathCheckGreaterThan(pool_db_min_dtu_length_jmespath, 0),
+                         JMESPathCheckGreaterThan(pool_db_max_size_length_jmespath, 0)])
 
 
 class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
@@ -1330,39 +1305,35 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
                  '--start-ip-address {} --end-ip-address {}'
                  .format(firewall_rule_1, resource_group, server,
                          start_ip_address_1, end_ip_address_1),
-                 checks=[
-                     JMESPathCheck('name', firewall_rule_1),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('startIpAddress', start_ip_address_1),
-                     JMESPathCheck('endIpAddress', end_ip_address_1)])
+                 checks=[JMESPathCheck('name', firewall_rule_1),
+                         JMESPathCheck('resourceGroup', resource_group),
+                         JMESPathCheck('startIpAddress', start_ip_address_1),
+                         JMESPathCheck('endIpAddress', end_ip_address_1)])
 
         # create dbs
         self.cmd('sql db create -g {} --server {} --name {}'
                  .format(resource_group, server, db_name),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', db_name),
-                     JMESPathCheck('location', location_long_name),
-                     JMESPathCheck('elasticPoolName', None),
-                     JMESPathCheck('status', 'Online')])
+                 checks=[JMESPathCheck('resourceGroup', resource_group),
+                         JMESPathCheck('name', db_name),
+                         JMESPathCheck('location', location_long_name),
+                         JMESPathCheck('elasticPoolName', None),
+                         JMESPathCheck('status', 'Online')])
 
         self.cmd('sql db create -g {} --server {} --name {}'
                  .format(resource_group, server, db_name2),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', db_name2),
-                     JMESPathCheck('location', location_long_name),
-                     JMESPathCheck('elasticPoolName', None),
-                     JMESPathCheck('status', 'Online')])
+                 checks=[JMESPathCheck('resourceGroup', resource_group),
+                         JMESPathCheck('name', db_name2),
+                         JMESPathCheck('location', location_long_name),
+                         JMESPathCheck('elasticPoolName', None),
+                         JMESPathCheck('status', 'Online')])
 
         self.cmd('sql db create -g {} --server {} --name {}'
                  .format(resource_group, server, db_name3),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('name', db_name3),
-                     JMESPathCheck('location', location_long_name),
-                     JMESPathCheck('elasticPoolName', None),
-                     JMESPathCheck('status', 'Online')])
+                 checks=[JMESPathCheck('resourceGroup', resource_group),
+                         JMESPathCheck('name', db_name3),
+                         JMESPathCheck('location', location_long_name),
+                         JMESPathCheck('elasticPoolName', None),
+                         JMESPathCheck('status', 'Online')])
 
         # get storage account endpoint
         storage_endpoint = self.cmd('storage account show -g {} -n {}'
@@ -1385,69 +1356,59 @@ class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
         # create storage account blob container
         self.cmd('storage container create -n {} --account-name {} --account-key {} '
                  .format(container, storage_account, storageKey),
-                 checks=[
-                     JMESPathCheck('created', True)])
+                 checks=[JMESPathCheck('created', True)])
 
         # export database to blob container using both keys
         self.cmd('sql db export -s {} -n {} -g {} -p {} -u {}'
                  ' --storage-key {} --storage-key-type StorageAccessKey'
                  ' --storage-uri {}'
-                 .format(server, db_name, resource_group, admin_password, admin_login, storageKey,
-                         bacpacUri),
-                 checks=[
-                     JMESPathCheck('blobUri', bacpacUri),
-                     JMESPathCheck('databaseName', db_name),
-                     JMESPathCheck('requestType', 'Export'),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('serverName', server),
-                     JMESPathCheck('status', 'Completed')])
+                 .format(server, db_name, resource_group, admin_password, admin_login, storageKey, bacpacUri),
+                 checks=[JMESPathCheck('blobUri', bacpacUri),
+                         JMESPathCheck('databaseName', db_name),
+                         JMESPathCheck('requestType', 'Export'),
+                         JMESPathCheck('resourceGroup', resource_group),
+                         JMESPathCheck('serverName', server),
+                         JMESPathCheck('status', 'Completed')])
 
         self.cmd('sql db export -s {} -n {} -g {} -p {} -u {}'
                  ' --storage-key {} --storage-key-type SharedAccessKey'
                  ' --storage-uri {}'
-                 .format(server, db_name, resource_group, admin_password, admin_login, sasKey,
-                         bacpacUri2),
-                 checks=[
-                     JMESPathCheck('blobUri', bacpacUri2),
-                     JMESPathCheck('databaseName', db_name),
-                     JMESPathCheck('requestType', 'Export'),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('serverName', server),
-                     JMESPathCheck('status', 'Completed')])
+                 .format(server, db_name, resource_group, admin_password, admin_login, sasKey, bacpacUri2),
+                 checks=[JMESPathCheck('blobUri', bacpacUri2),
+                         JMESPathCheck('databaseName', db_name),
+                         JMESPathCheck('requestType', 'Export'),
+                         JMESPathCheck('resourceGroup', resource_group),
+                         JMESPathCheck('serverName', server),
+                         JMESPathCheck('status', 'Completed')])
 
         # import bacpac to second database using Storage Key
         self.cmd('sql db import -s {} -n {} -g {} -p {} -u {}'
                  ' --storage-key {} --storage-key-type StorageAccessKey'
                  ' --storage-uri {}'
-                 .format(server, db_name2, resource_group, admin_password, admin_login, storageKey,
-                         bacpacUri),
-                 checks=[
-                     JMESPathCheck('blobUri', bacpacUri),
-                     JMESPathCheck('databaseName', db_name2),
-                     JMESPathCheck('name', 'import'),
-                     JMESPathCheck('requestType', 'Import'),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('serverName', server),
-                     JMESPathCheck('status', 'Completed')])
+                 .format(server, db_name2, resource_group, admin_password, admin_login, storageKey, bacpacUri),
+                 checks=[JMESPathCheck('blobUri', bacpacUri),
+                         JMESPathCheck('databaseName', db_name2),
+                         JMESPathCheck('name', 'import'),
+                         JMESPathCheck('requestType', 'Import'),
+                         JMESPathCheck('resourceGroup', resource_group),
+                         JMESPathCheck('serverName', server),
+                         JMESPathCheck('status', 'Completed')])
 
         # import bacpac to third database using SAS key
         self.cmd('sql db import -s {} -n {} -g {} -p {} -u {}'
                  ' --storage-key {} --storage-key-type SharedAccessKey'
                  ' --storage-uri {}'
-                 .format(server, db_name3, resource_group, admin_password, admin_login, sasKey,
-                         bacpacUri2),
-                 checks=[
-                     JMESPathCheck('blobUri', bacpacUri2),
-                     JMESPathCheck('databaseName', db_name3),
-                     JMESPathCheck('name', 'import'),
-                     JMESPathCheck('requestType', 'Import'),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('serverName', server),
-                     JMESPathCheck('status', 'Completed')])
+                 .format(server, db_name3, resource_group, admin_password, admin_login, sasKey, bacpacUri2),
+                 checks=[JMESPathCheck('blobUri', bacpacUri2),
+                         JMESPathCheck('databaseName', db_name3),
+                         JMESPathCheck('name', 'import'),
+                         JMESPathCheck('requestType', 'Import'),
+                         JMESPathCheck('resourceGroup', resource_group),
+                         JMESPathCheck('serverName', server),
+                         JMESPathCheck('status', 'Completed')])
 
 
 class SqlServerConnectionStringScenarioTest(ScenarioTest):
-
     def test_sql_db_conn_str(self):
         # ADO.NET, username/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c ado.net').get_output_in_json()
@@ -1679,7 +1640,6 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
 
 
 class SqlServerVnetMgmtScenarioTest(ScenarioTest):
-
     @ResourceGroupPreparer(location='eastus2euap')
     @SqlServerPreparer(location='eastus2euap')
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
@@ -1695,11 +1655,10 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
         addressPrefix = '10.0.1.0/24'
         endpoint = 'Microsoft.Sql'
 
-        # Vnet 1
+        # Vnet 1 without service endpoints to test ignore-missing-vnet-service-endpoint feature
         self.cmd('network vnet create -g {} -n {}'.format(rg, vnetName1))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {}'
-                 .format(rg, vnetName1, subnetName, addressPrefix, endpoint),
-                 checks=JMESPathCheck('serviceEndpoints[0].service', 'Microsoft.Sql'))
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {}'
+                 .format(rg, vnetName1, subnetName, addressPrefix))
 
         vnet1 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'
                          .format(subnetName, vnetName1, rg)).get_output_in_json()
@@ -1715,8 +1674,8 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
                          .format(subnetName, vnetName2, rg)).get_output_in_json()
         vnet_id_2 = vnet2['id']
 
-        # test sql server vnet-rule create using subnet name and vnet name
-        self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {} --vnet-name {}'
+        # test sql server vnet-rule create using subnet name and vnet name and ignore-missing-vnet-service-endpoint flag
+        self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {} --vnet-name {} -i'
                  .format(vnet_rule_1, rg, server, subnetName, vnetName1))
 
         # test sql server vnet-rule show rule 1
@@ -1724,33 +1683,43 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
                  .format(vnet_rule_1, rg, server),
                  checks=[
                      JMESPathCheck('name', vnet_rule_1),
-                     JMESPathCheck('resourceGroup', rg)])
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('ignoreMissingVnetServiceEndpoint', True)])
 
         # test sql server vnet-rule create using subnet id
         self.cmd('sql server vnet-rule create --name {} -g {} --server {} --subnet {}'
-                 .format(vnet_rule_2, rg, server, vnet_id_1),
+                 .format(vnet_rule_2, rg, server, vnet_id_2),
                  checks=[
                      JMESPathCheck('name', vnet_rule_2),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_1)])
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_2),
+                     JMESPathCheck('ignoreMissingVnetServiceEndpoint', False)])
 
         # test sql server vnet-rule update rule 1 with vnet 2
         self.cmd('sql server vnet-rule update --name {} -g {} --server {} --subnet {}'
                  .format(vnet_rule_1, rg, server, vnet_id_2),
-
                  checks=[
                      JMESPathCheck('name', vnet_rule_1),
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_2)])
+                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_2),
+                     JMESPathCheck('ignoreMissingVnetServiceEndpoint', False)])
+
+        # test sql server vnet-rule update rule 2 with vnet 1 and ignore-missing-vnet-service-endpoint flag
+        self.cmd('sql server vnet-rule update --name {} -g {} --server {} --subnet {} -i'
+                 .format(vnet_rule_2, rg, server, vnet_id_1),
+                 checks=[JMESPathCheck('name', vnet_rule_2),
+                         JMESPathCheck('resourceGroup', rg),
+                         JMESPathCheck('virtualNetworkSubnetId', vnet_id_1),
+                         JMESPathCheck('ignoreMissingVnetServiceEndpoint', True)])
 
         # test sql server vnet-rule list
-        self.cmd('sql server vnet-rule list -g {} --server {}'
-                 .format(rg, server), checks=[JMESPathCheck('length(@)', 2)])
+        self.cmd('sql server vnet-rule list -g {} --server {}'.format(rg, server),
+                 checks=[JMESPathCheck('length(@)', 2)])
 
         # test sql server vnet-rule delete rule 1
-        self.cmd('sql server vnet-rule delete --name {} -g {} --server {}'
-                 .format(vnet_rule_1, rg, server), checks=NoneCheck())
+        self.cmd('sql server vnet-rule delete --name {} -g {} --server {}'.format(vnet_rule_1, rg, server),
+                 checks=NoneCheck())
 
         # test sql server vnet-rule delete rule 2
-        self.cmd('sql server vnet-rule delete --name {} -g {} --server {}'
-                 .format(vnet_rule_2, rg, server), checks=NoneCheck())
+        self.cmd('sql server vnet-rule delete --name {} -g {} --server {}'.format(vnet_rule_2, rg, server),
+                 checks=NoneCheck())

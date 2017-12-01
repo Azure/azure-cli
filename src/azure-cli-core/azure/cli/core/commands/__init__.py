@@ -408,7 +408,7 @@ def load_params(command):
 def _get_command_table_from_extensions():
     extensions = get_extension_names()
     if extensions:
-        logger.debug("Found {} extensions: {}".format(len(extensions), extensions))
+        logger.debug("Found {} extension(s): {}".format(len(extensions), extensions))
         for ext_name in extensions:
             ext_dir = get_extension_path(ext_name)
             sys.path.append(ext_dir)

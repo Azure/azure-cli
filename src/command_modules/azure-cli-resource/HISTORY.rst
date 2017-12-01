@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.18
+++++++
+* --resource parameter, resource-level locks now support resource-ids.
+
 2.0.17
 ++++++
 * `group export`: Fixed incompatibility with most recent version of msrest dependency.

@@ -131,7 +131,7 @@ def show_nic_ip_config(resource_group_name, nic_name, ip_config_name):
 register_cli_command('network nic ip-config show', ...#show_nic_ip_config, ...)
 
 register_cli_argument('network nic ip-config', 'nic_name', id_part='name', help='The NIC name.')
-register_cli_argument('network nic ip-config', 'ip_config_name', id_part='child_name', options_list=('--name', '-n'), help='The IP config name.')
+register_cli_argument('network nic ip-config', 'ip_config_name', id_part='child_name_1', options_list=('--name', '-n'), help='The IP config name.')
 ```
 The help output becomes:
 ```
@@ -146,9 +146,33 @@ Resource Id Arguments
 ```
 Now the user may identify the target IP config by specifying either the resource group, NIC and IP config names or by simply pasting in the ID for the IP config itself.
 
+This feature is powered by the `parse_resource_id` helper method within the `msrestazure` package, which parses a resource ID into a dictionary. Specifying `id_part` maps the parsed value for a given key in that dictionary into your argument. 
+
+For example, consider the following ID of a subnet lock:
+```
+subscription/0000-0000-0000-0000/resourceGroups/myresourcegroup/Microsoft.Network/virtualNetworks/myvnet/subnets/mysubnet /providers/Microsoft.Authorization/locks/mylock
+```
+
+When run through `parse_resource_id`, the following dictionary results:
+```Python
+{
+    "subscription": "0000-0000-0000-0000",
+    "resource_group": "myresourcegroup",
+    "namespace": "Microsoft.Network",
+    "resource_type": "virtualNetworks",
+    "name": "myvnet",
+    "child_type_1": "subnets",
+    "child_name_1": "mysubnet",
+    "child_namespace_2": "Microsoft.Authorization",
+    "child_type_2": "locks",
+    "child_name_2": "mylock"
+}
+```
+
+Any of these keys could be supplied as a value for `id_part`, thought typically you would only use `name`, `child_name_1`, `child_name_2`, etc.
+
 A couple things to note:
 - Currently, `--ids` is not exposed for any command that is called 'create', even if it is configured properly.
-- The supported values for `id_part` are: `name`, `child_name`, and `grandchild_name`.
 
 
 Generic Update Commands
@@ -196,3 +220,60 @@ if custom_function:
 instance = _process_generic_updates(...) # apply generic updates, which will overwrite custom logic in the event of a conflict
 return setter(instance)  # update the instance and return the result
 ```
+
+Custom Table Formats
+=============================
+
+By default, when the `-o/--output table` option is supplied, the CLI will display the top level fields of the object structure as the columns of the table. The user can always specify a `--query` to control table and TSV formats, but the CLI also allows the command author to specify a different default table format. Two options exist:
+
+**Supply a Callable**
+
+Supply a callable that accepts the result as input and returns a list of OrderedDicts:
+
+```Python
+def transform_foo(result):
+    result = OrderedDict([('name', result['name']),
+                          ('resourceGroup', result['resourceGroup']),
+                          ('location', result['location'])])
+    return result
+```
+
+**Supply a JMESPath String**
+
+A string containing Python dictionary-syntax '{Key:JMESPath path to property, ...}'
+
+Example: 
+```Python
+table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}'
+```
+
+Tab Completion
+=============================
+
+Tab completion is enabled by default (in bash or `az interactive`) for command names, argument names and argument choice lists. To enable tab completion for dynamic properties (for example, resource names) you can supply a callable which returns a list of options:
+
+**get_resource_name_completion_list(type)**
+
+Since many completers simply return a list of resource names, you can use the `get_resource_name_completion_list` method from `azure.cli.core.commands.parameters` which accepts the type of resource you wish to get completions for.
+
+Example:
+```Python
+completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines')
+```
+
+The behavior of the completer will depend on what the user has entered prior to hitting [TAB][TAB].  For example:
+`az vm show -n [TAB][TAB]`
+This will show VM names within the entire subscription.
+`az vm show -g myrg -n [TAB][TAB]`
+This will show VM names only within the provided resource group.
+
+**Custom Completer**
+
+```Python
+def get_foo_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
+    # TODO: Your custom logic here
+    result = ... 
+    return [r.name for r in result]
+```
+
+The method signature must be as shown and it must return a list of names. You can make additional REST calls within the completer and may examine the partially processed namespace via `parsed_args` to filter the list based on already supplied args (as in the above case with VM).

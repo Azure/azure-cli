@@ -84,6 +84,10 @@ def process_aaaa(io, data, name, print_name=False):
     return process_rr(io, data, 'AAAA', 'ip', name, print_name)
 
 
+def process_caa(io, data, name, print_name=False):
+    process_rr(io, _quote_field(data, 'value'), 'CAA', ['flags', 'tag', 'value'], name, print_name)
+
+
 def process_cname(io, data, name, print_name=False):
     return process_rr(io, data, 'CNAME', 'alias', name, print_name)
 

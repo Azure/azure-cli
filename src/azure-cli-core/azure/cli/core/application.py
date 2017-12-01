@@ -109,6 +109,7 @@ class Application(object):
         self.session = {
             'headers': {},  # the x-ms-client-request-id is generated before a command is to execute
             'command': 'unknown',
+            'command_extension_name': None,
             'completer_active': ARGCOMPLETE_ENV_NAME in os.environ,
             'query_active': False,
             'az_interactive_active': False
@@ -205,9 +206,12 @@ class Application(object):
             params.pop('func', None)
             params.pop('command', None)
 
-            telemetry.set_command_details(expanded_arg.command,
-                                          self.configuration.output_format,
-                                          [p for p in unexpanded_argv if p.startswith('-')])
+            command_source = command_table[command].command_source
+            telemetry.set_command_details(expanded_arg.command, self.configuration.output_format,
+                                          [p for p in unexpanded_argv if p.startswith('-')],
+                                          extension_name=command_source.extension_name if command_source else None)
+            if command_source:
+                self.session['command_extension_name'] = command_source.extension_name
 
             result = expanded_arg.func(params)
             result = todict(result)
