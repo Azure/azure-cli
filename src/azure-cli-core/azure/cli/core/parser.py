@@ -68,7 +68,7 @@ class AzCliCommandParser(CLICommandParser):
             command_validator = metadata.validator
             argument_validators = []
             argument_groups = {}
-            for arg_name, arg in metadata.arguments.items():
+            for _, arg in metadata.arguments.items():
                 if arg.validator:
                     argument_validators.append(arg.validator)
                 try:

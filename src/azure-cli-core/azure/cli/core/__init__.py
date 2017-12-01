@@ -93,7 +93,7 @@ class MainCommandsLoader(CLICommandsLoader):
             loaders = self.cmd_to_loader_map[cmd_name]
             for loader in loaders:
                 loader.command_table = self.command_table
-                loader._update_command_definitions()
+                loader._update_command_definitions()  # pylint: disable=protected-access
 
     def load_command_table(self, args):
         from importlib import import_module
@@ -200,7 +200,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 loader.load_arguments(command)  # this adds entries to the argument registries
                 self.argument_registry.arguments.update(loader.argument_registry.arguments)
                 self.extra_argument_registry.update(loader.extra_argument_registry)
-                loader._update_command_definitions()
+                loader._update_command_definitions()  # pylint: disable=protected-access
 
 
 class AzCommandsLoader(CLICommandsLoader):

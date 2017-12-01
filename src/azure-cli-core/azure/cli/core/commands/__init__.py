@@ -13,7 +13,7 @@ import time
 from importlib import import_module
 
 from azure.cli.core import EXCLUDED_PARAMS
-from azure.cli.core.commands.arm import _cli_generic_update_command, _cli_generic_wait_command
+import azure.cli.core.telemetry as telemetry
 
 from knack.arguments import CLICommandArgument, ignore_type, ArgumentsContext
 from knack.commands import CLICommand, CommandGroup
@@ -23,7 +23,6 @@ from knack.util import CLIError
 
 import six
 
-import azure.cli.core.telemetry as telemetry
 
 logger = get_logger(__name__)
 
@@ -140,7 +139,6 @@ class AzCliCommand(CLICommand):
                 overrides.settings['required'] = False
 
     def load_arguments(self):
-        from azure.cli.core.commands.validators import DefaultStr, DefaultInt
         super(AzCliCommand, self).load_arguments()
         if self.arguments_loader:
             cmd_args = self.arguments_loader()
@@ -155,12 +153,6 @@ class AzCliCommand(CLICommand):
         from azure.cli.core.commands.validators import DefaultStr, DefaultInt
         arg = self.arguments[param_name]
         self._resolve_default_value_from_cfg_file(arg, argtype)
-        internal_arg_type = arg.type.settings.get('arg_type', None)
-        if internal_arg_type:
-            try:
-                argtype.settings.update(internal_arg_type.type.settings)
-            except AttributeError:
-                argtype.settings.update(internal_arg_type.settings)
         arg.type.update(other=argtype)
         arg_default = arg.type.settings.get('default', None)
         if isinstance(arg_default, str):
@@ -329,9 +321,10 @@ class AzCliCommandInvoker(CommandInvoker):
         if results and len(results) == 1:
             results = results[0]
 
-        return CommandResultItem(results,
-                                 table_transformer=self.commands_loader.command_table[parsed_args.command].table_transformer,
-                                 is_query_active=self.data['query_active'])
+        return CommandResultItem(
+            results,
+            table_transformer=self.commands_loader.command_table[parsed_args.command].table_transformer,
+            is_query_active=self.data['query_active'])
 
     def _build_kwargs(self, func, ns):  # pylint: disable=no-self-use
         from azure.cli.core.util import get_arg_list
@@ -389,7 +382,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
             odata_filters = "{} and {} eq '{}'".format(odata_filters, 'correlationId', correlation_id)
 
-            activity_log = get_mgmt_service_client(MonitorManagementClient).activity_logs.list(filter=odata_filters)
+            activity_log = get_mgmt_service_client(
+                self.cli_ctx, MonitorManagementClient).activity_logs.list(filter=odata_filters)
 
             results = []
             max_events = 50  # default max value for events in list_activity_log
@@ -606,31 +600,12 @@ class CliCommandType(object):
         self.settings.update(**kwargs)
 
 
-def get_complex_argument_processor(expanded_arguments, assigned_arg, model_type):
-    """
-    Return a validator which will aggregate multiple arguments to one complex argument.
-    """
-    def _expansion_validator_impl(namespace):
-        """
-        The validator create a argument of a given type from a specific set of arguments from CLI
-        command.
-        :param namespace: The argparse namespace represents the CLI arguments.
-        :return: The argument of specific type.
-        """
-        ns = vars(namespace)
-        kwargs = dict((k, ns[k]) for k in ns if k in set(expanded_arguments))
-
-        setattr(namespace, assigned_arg, model_type(**kwargs))
-
-    return _expansion_validator_impl
-
-
 class AzCommandGroup(CommandGroup):
 
     def __init__(self, command_loader, group_name, **kwargs):
         operations_tmpl = kwargs.pop('operations_tmpl', None)
         super(AzCommandGroup, self).__init__(command_loader, group_name,
-                                            operations_tmpl, **kwargs)
+                                             operations_tmpl, **kwargs)
         if operations_tmpl:
             self.group_kwargs['operations_tmpl'] = operations_tmpl
         self.is_stale = False
@@ -723,6 +698,7 @@ class AzCommandGroup(CommandGroup):
                                          operation=merged_kwargs['operations_tmpl'].format(method_name),
                                          **merged_kwargs)
 
+    # pylint: disable=no-self-use
     def _resolve_operation(self, kwargs, name, command_type=None, source_kwarg='command_type'):
 
         allowed_source_kwargs = ['command_type', 'custom_command_type']
@@ -749,15 +725,13 @@ class AzCommandGroup(CommandGroup):
 
         return operations_tmpl.format(name)
 
-
-    def _resolve_client_factory(self, kwargs, command_type=None, source_kwarg='command_type'):
-        pass
-
     def generic_update_command(self, name,
                                getter_name='get', getter_type=None,
                                setter_name='create_or_update', setter_type=None, setter_arg_name='parameters',
                                child_collection_prop_name=None, child_collection_key='name', child_arg_name='item_name',
                                custom_func_name=None, custom_func_type=None, **kwargs):
+        from azure.cli.core.commands.arm import _cli_generic_update_command
+
         self._check_stale()
         merged_kwargs = self.group_kwargs.copy()
         merged_kwargs.update(kwargs)
@@ -780,6 +754,7 @@ class AzCommandGroup(CommandGroup):
             **merged_kwargs)
 
     def generic_wait_command(self, name, getter_name='get', getter_type=None, **kwargs):
+        from azure.cli.core.commands.arm import _cli_generic_update_command, _cli_generic_wait_command
         self._check_stale()
         merged_kwargs = self.group_kwargs.copy()
         merged_kwargs.update(kwargs)
@@ -855,8 +830,8 @@ class AzArgumentContext(ArgumentsContext):
         # TODO:
         # two privates symbols are imported here. they should be made public or this utility class
         # should be moved into azure.cli.core
-        from azure.cli.core.sdk.validators import get_complex_argument_processor
         from knack.introspection import extract_args_from_signature, option_descriptions
+
         self._check_stale()
         if not self._applicable():
             return
@@ -868,6 +843,24 @@ class AzArgumentContext(ArgumentsContext):
         # derive from msrest.serialization.Model and used in the SDK API to carry parameters, the
         # document of their properties are attached to the classes instead of constructors.
         parameter_docs = option_descriptions(model_type)
+
+        def get_complex_argument_processor(expanded_arguments, assigned_arg, model_type):
+            """
+            Return a validator which will aggregate multiple arguments to one complex argument.
+            """
+            def _expansion_validator_impl(namespace):
+                """
+                The validator create a argument of a given type from a specific set of arguments from CLI
+                command.
+                :param namespace: The argparse namespace represents the CLI arguments.
+                :return: The argument of specific type.
+                """
+                ns = vars(namespace)
+                kwargs = dict((k, ns[k]) for k in ns if k in set(expanded_arguments))
+
+                setattr(namespace, assigned_arg, model_type(**kwargs))
+
+            return _expansion_validator_impl
 
         expanded_arguments = []
         for name, arg in extract_args_from_signature(model_type.__init__, excluded_params=EXCLUDED_PARAMS):
