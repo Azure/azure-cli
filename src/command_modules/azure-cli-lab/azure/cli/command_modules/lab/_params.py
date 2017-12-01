@@ -10,7 +10,7 @@ from azure.cli.command_modules.lab.validators import (validate_lab_vm_create,
                                                       validate_claim_vm,
                                                       _validate_artifacts)
 from azure.cli.core.commands.parameters import resource_group_name_type
-from azure.cli.core.sdk.util import ParametersContext
+from azure.cli.core.commands import ParametersContext
 from azure.cli.core.util import get_json_object
 
 

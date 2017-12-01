@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.core.sdk.util import CliCommandType
+from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.billing._client_factory import (
     invoices_mgmt_client_factory, billing_periods_mgmt_client_factory)
 from ._exception_handler import billing_exception_handler

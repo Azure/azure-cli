@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core import AzCommandsLoader
-from azure.cli.core.sdk.util import CliCommandType
+from azure.cli.core.commands import CliCommandType
 
 from azure.cli.command_modules.profile._completers import get_subscription_id_list
 from azure.cli.command_modules.profile._format import transform_account_list

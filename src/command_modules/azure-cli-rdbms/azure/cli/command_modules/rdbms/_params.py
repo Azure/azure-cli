@@ -27,7 +27,7 @@ def load_arguments(self, _):
             c.ignore('name', 'family', 'size')
 
             c.expand('properties', engine.models.ServerPropertiesForDefaultCreate)
-            c.argument('administrator_login', arg_group='Authentication')
+            c.argument('administrator_login', required=True, arg_group='Authentication')
             c.argument('administrator_login_password', arg_group='Authentication')
 
             c.expand('parameters', engine.models.ServerForCreate)

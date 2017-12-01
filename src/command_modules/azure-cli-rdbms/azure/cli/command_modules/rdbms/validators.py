@@ -11,9 +11,9 @@ from knack.util import CLIError
 
 
 def get_combined_validator(validators):
-    def _final_valiator_impl(cmd, namespace):
+    def _final_validator_impl(cmd, namespace):
         # do additional creation validation
-        if namespace.subcommand == 'create':
+        if namespace._subcommand == 'create':
             storage_validator(namespace)
             password_validator(namespace)
             get_default_location_from_resource_group(cmd, namespace)
@@ -28,7 +28,7 @@ def get_combined_validator(validators):
         else:
             namespace.parameters.sku = None
 
-    return _final_valiator_impl
+    return _final_validator_impl
 
 
 def configuration_value_validator(ns):

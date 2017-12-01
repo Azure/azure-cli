@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.sdk.util import CliCommandType
+from azure.cli.core.commands import CliCommandType
 
 from azure.cli.command_modules.rdbms._client_factory import (
     cf_mysql_servers, cf_postgres_servers, cf_mysql_firewall_rules, cf_postgres_firewall_rules,
@@ -114,13 +114,13 @@ def load_command_table(self, _):
         g.custom_command('download', '_download_log_files')
 
     with self.command_group('mysql db', mysql_db_sdk) as g:
-        # g.command('create', 'create_or_update')
-        # g.command('delete', 'delete', confirmation=True)
-        # g.command('show', 'get')
+        g.command('create', 'create_or_update')
+        g.command('delete', 'delete', confirmation=True)
+        g.command('show', 'get')
         g.command('list', 'list_by_server')
 
     with self.command_group('postgres db', postgres_db_sdk) as g:
-        # g.command('create', 'create_or_update')
-        # g.command('delete', 'delete', confirmation=True)
-        # g.command('show', 'get')
+        g.command('create', 'create_or_update')
+        g.command('delete', 'delete', confirmation=True)
+        g.command('show', 'get')
         g.command('list', 'list_by_server')

@@ -10,7 +10,7 @@ import azure.cli.command_modules.find._help  # pylint: disable=unused-import
 class FindCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core.sdk.util import CliCommandType
+        from azure.cli.core.commands import CliCommandType
         find_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.find.custom#{}')
         super(FindCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=find_custom)
         self.module_name = __name__

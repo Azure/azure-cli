@@ -7,7 +7,7 @@
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import deployment_validate_table_format
-from azure.cli.core.sdk.util import CliCommandType
+from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from azure.cli.command_modules.network._client_factory import (
