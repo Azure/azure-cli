@@ -1239,10 +1239,7 @@ def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot
 
 
 def _get_site_credential(client, resource_group_name, name, slot=None):
-    if slot:
-        creds = client.web_apps.list_publishing_credentials_slot(resource_group_name, name, slot)
-    else:
-        creds = client.web_apps.list_publishing_credentials(resource_group_name, name)
+    creds = _generic_site_operation(resource_group_name, name, 'list_publishing_credentials', slot)
     creds = creds.result()
     return (creds.publishing_user_name, creds.publishing_password)
 
