@@ -1060,7 +1060,7 @@ def show_container_cd_url(cmd, resource_group_name, name, slot=None):
 
 def view_in_browser(cmd, resource_group_name, name, slot=None, logs=False):
     site = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
-    url = site.default_host_name
+    url = site.enabled_host_names[0]  # picks the custom domain URL incase a domain is assigned
     ssl_host = next((h for h in site.host_name_ssl_states
                      if h.ssl_state != SslState.disabled), None)
     url = ('https' if ssl_host else 'http') + '://' + url
