@@ -364,7 +364,7 @@ def k8s_install_connector(client, name, resource_group, connector_name,
     profile = Profile()
     _, _, tenant_id = profile.get_login_credentials()
     # Check if we want the windows connector
-    if (os_type == 'windows') or (os_type == 'both'):
+    if os_type.lower() in ['windows', 'both']:
         # The current connector will deploy two connectors, one for Windows and another one for Linux
         image_tag = 'canary'
     logger.warning('Deploying the aci-connector using Helm')
@@ -397,8 +397,6 @@ def k8s_uninstall_connector(client, name, connector_name, resource_group,
     # Get the credentials from a AKS instance
     _, browse_path = tempfile.mkstemp()
     aks_get_credentials(client, resource_group, name, admin=False, path=browse_path)
-    # Validate if the RG exists
-    # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     if graceful:
         logger.warning('Graceful option selected, will try to drain the node first')
         kubectl_not_installed = "Kubectl not detected, please verify if it is installed."
@@ -407,13 +405,12 @@ def k8s_uninstall_connector(client, name, connector_name, resource_group,
         except OSError:
             raise CLIError(kubectl_not_installed)
         try:
-            if (os_type == 'windows') or (os_type == 'both'):
-                drain_node = subprocess.check_output(
-                    ["kubectl", "drain", "aci-connector-0", "--force"],
-                    universal_newlines=True)
-                drain_node = subprocess.check_output(
-                    ["kubectl", "drain", "aci-connector-1", "--force"],
-                    universal_newlines=True)
+            if os_type.lower() in ['windows', 'both']:
+                nodes = ['-0', '-1']
+                for n in nodes:
+                    drain_node = subprocess.check_output(
+                        ["kubectl", "drain", "aci-connector{}".format(n), "--force"],
+                        universal_newlines=True)
             else:
                 drain_node = subprocess.check_output(
                     ["kubectl", "drain", "aci-connector", "--force"],
@@ -422,7 +419,6 @@ def k8s_uninstall_connector(client, name, connector_name, resource_group,
             raise CLIError('Could not find the node, make sure you' +
                            'are using the correct --os-type option: {}'.format(err))
         if drain_node:
-            # remove the "pods/" prefix from the name
             drain_node = str(drain_node)
         else:
             raise CLIError("Couldn't find the node.")
