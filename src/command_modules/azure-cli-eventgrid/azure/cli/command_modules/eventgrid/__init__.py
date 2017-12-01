@@ -11,7 +11,7 @@ import azure.cli.command_modules.eventgrid._help  # pylint: disable=unused-impor
 class EventGridCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core.sdk.util import CliCommandType
+        from azure.cli.core.commands import CliCommandType
         eventgrid_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.eventgrid.custom#{}')
         super(EventGridCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                       custom_command_type=eventgrid_custom,
