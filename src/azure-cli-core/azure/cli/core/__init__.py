@@ -80,6 +80,10 @@ class AzCli(CLI):
         from azure.cli.core.util import get_az_version_string
         print(get_az_version_string())
 
+    def exception_handler(self, ex):  # pylint: disable=no-self-use
+        from azure.cli.core.util import handle_exception
+        return handle_exception(ex)
+
 
 class MainCommandsLoader(CLICommandsLoader):
 
