@@ -389,11 +389,10 @@ def k8s_uninstall_connector(client, name, connector_name, resource_group,
                     universal_newlines=True)
         except subprocess.CalledProcessError as err:
             raise CLIError('Could not find the node, make sure you' +
-                           'are using the correct --os-type option: {}'.format(err))
-        if drain_node:
-            drain_node = str(drain_node)
-        else:
-            raise CLIError("Couldn't find the node.")
+                           ' are using the correct --os-type option: {}'.format(err))
+        if not drain_node:
+            raise CLIError('Could not find the node, make sure you' +
+                           ' are using the correct --os-type')
 
     logger.warning('Undeploying the aci-connector using Helm')
     try:
