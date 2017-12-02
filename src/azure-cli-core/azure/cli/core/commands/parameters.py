@@ -152,8 +152,14 @@ def get_enum_type(data, default=None):
     class DefaultAction(argparse.Action):
 
         def __call__(self, parser, args, values, option_string=None):
-            if values:
-                values = next((x for x in self.choices if x.lower() == values.lower()), values)
+
+            def _get_value(val):
+                return next((x for x in self.choices if x.lower() == val.lower()), val)
+
+            if isinstance(values, list):
+                values = [_get_value(v) for v in values]
+            else:
+                values = _get_value(values)
             setattr(args, self.dest, values)
 
     def _type(value):
