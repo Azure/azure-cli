@@ -1191,7 +1191,10 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
 class SqlServerCapabilityScenarioTest(ScenarioTest):
     def test_sql_capabilities(self):
         location = 'westus'
-
+        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = 2048
         # New capabilities are added quite frequently and the state of each capability depends
         # on your subscription. So it's not a good idea to make strict checks against exactly
         # which capabilities are returned. The idea is to just check the overall structure.
@@ -1468,24 +1471,20 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
         self.assertEqual(conn_str, '$conn = new PDO("sqlsrv:server = tcp:myserver.database.windows.net,1433; Database = mydb; LoginTimeout = 30; Encrypt = 1; TrustServerCertificate = 0;", "<username>", "<password>");')
 
         # PHP PDO, ADPassword
-        with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADPassword')
+        self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADPassword', expect_failure=True)
 
         # PHP PDO, ADIntegrated
-        with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADIntegrated')
+        self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADIntegrated', expect_failure=True)
 
         # PHP, user name/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c php').get_output_in_json()
         self.assertEqual(conn_str, '$connectionOptions = array("UID"=>"<username>@myserver", "PWD"=>"<password>", "Database"=>mydb, "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0); $serverName = "tcp:myserver.database.windows.net,1433"; $conn = sqlsrv_connect($serverName, $connectionOptions);')
 
         # PHP, ADPassword
-        with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADPassword')
+        self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADPassword', expect_failure=True)
 
         # PHP, ADIntegrated
-        with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADIntegrated')
+        self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADIntegrated', expect_failure=True)
 
         # ODBC, user name/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc').get_output_in_json()

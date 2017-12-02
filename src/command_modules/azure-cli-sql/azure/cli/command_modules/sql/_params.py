@@ -25,7 +25,9 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     StorageKeyType,
     TransparentDataEncryptionStatus)
 
-from azure.cli.core.commands.parameters import get_three_state_flag, get_enum_type, get_resource_name_completion_list
+from azure.cli.core.commands.parameters import (get_three_state_flag, get_enum_type,
+                                                get_resource_name_completion_list,
+                                                get_location_type)
 from knack.arguments import CLIArgumentType, ignore_type
 
 from .custom import (
@@ -171,6 +173,10 @@ def _configure_db_create_params(
 
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
+
+    with self.argument_context('sql') as c:
+        c.argument('location_name', arg_type=get_location_type(self.cli_ctx))
+        c.argument('usage_name', options_list=('--usage', '-u'))
 
     with self.argument_context('sql db') as c:
         c.argument('database_name',
@@ -717,6 +723,5 @@ def load_arguments(self, _):
                    help='Create firewall rule before the virtual network has vnet service endpoint enabled',
                    arg_type=get_three_state_flag())
 
-    with self.argument_context('sql server vnet-rule') as c:
         c.extra('vnet_name', options_list=('--vnet-name'),
                 help='The virtual network name')
