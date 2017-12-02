@@ -9,6 +9,7 @@ import platform
 
 from azure.cli.core.commands.validators import validate_tag, validate_tags
 from azure.cli.core.commands.validators import generate_deployment_name
+from azure.cli.core.decorators import Completer
 from azure.cli.core.profiles import ResourceType
 
 from knack.arguments import CLIArgumentType, CaseInsensitiveList
@@ -24,8 +25,9 @@ def get_subscription_locations(cli_ctx):
     return list(subscription_client.subscriptions.list_locations(subscription_id))
 
 
-def get_location_completion_list(cli_ctx, prefix, **kwargs):  # pylint: disable=unused-argument
-    result = get_subscription_locations(cli_ctx)
+@Completer
+def get_location_completion_list(cmd, prefix, namespace,**kwargs):  # pylint: disable=unused-argument
+    result = get_subscription_locations(cmd.cli_ctx)
     return [l.name for l in result]
 
 
@@ -58,8 +60,9 @@ def get_resource_groups(cli_ctx):
     return list(rcf.resource_groups.list())
 
 
-def get_resource_group_completion_list(cli_ctx, prefix, **kwargs):  # pylint: disable=unused-argument
-    result = get_resource_groups(cli_ctx)
+@Completer
+def get_resource_group_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+    result = get_resource_groups(cmd.cli_ctx)
     return [l.name for l in result]
 
 
@@ -93,7 +96,9 @@ def get_resource_name_completion_list(resource_type=None):
 
 
 def get_generic_completion_list(generic_list):
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
+
+    @Completer
+    def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
         return generic_list
     return completer
 

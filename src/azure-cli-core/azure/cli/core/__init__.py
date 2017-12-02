@@ -36,6 +36,7 @@ class AzCli(CLI):
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
 
         import knack.events as events
+        from knack.util import ensure_dir
 
         self.data['headers'] = {}
         self.data['command'] = 'unknown'
@@ -44,8 +45,7 @@ class AzCli(CLI):
         self.data['query_active'] = False
 
         azure_folder = self.config.config_dir
-        if not os.path.exists(azure_folder):
-            os.mkdir(azure_folder)
+        ensure_dir(azure_folder)
         ACCOUNT.load(os.path.join(azure_folder, 'azureProfile.json'))
         CONFIG.load(os.path.join(azure_folder, 'az.json'))
         SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
@@ -79,6 +79,10 @@ class AzCli(CLI):
     def show_version(self):
         from azure.cli.core.util import get_az_version_string
         print(get_az_version_string())
+
+    def exception_handler(self, ex):  # pylint: disable=no-self-use
+        from azure.cli.core.util import handle_exception
+        return handle_exception(ex)
 
 
 class MainCommandsLoader(CLICommandsLoader):
