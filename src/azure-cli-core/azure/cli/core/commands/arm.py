@@ -302,7 +302,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
                 client = factory(context.cli_ctx, None)
 
         operations_tmpl = _get_operations_tmpl(cmd)
-        client_arg_name = 'client' if operations_tmpl.startswith('azure.cli') else 'self'
+        client_arg_name = 'client' if operations_tmpl.startswith(('azure.cli', 'azext')) else 'self'
         getterargs = {key: val for key, val in args.items() if key in get_arguments_loader()}
         if client_arg_name in getterargs or client_arg_name == 'self':
             getterargs[client_arg_name] = client
@@ -442,7 +442,7 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         cmd = args.get('cmd')
 
         operations_tmpl = _get_operations_tmpl(cmd)
-        client_arg_name = 'client' if operations_tmpl.startswith('azure.cli') else 'self'
+        client_arg_name = 'client' if operations_tmpl.startswith(('azure.cli', 'azext')) else 'self'
         try:
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
