@@ -10,7 +10,6 @@ import re
 from enum import Enum
 
 from azure.cli.core._profile import Profile
-from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)

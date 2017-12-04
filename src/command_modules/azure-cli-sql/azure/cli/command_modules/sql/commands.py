@@ -25,7 +25,6 @@ from ._util import (
     get_sql_server_usages_operations,
     get_sql_subscription_usages_operations,
     get_sql_virtual_network_rules_operations,
-    # get_sql_recommended_elastic_pools_operations
 )
 from ._validators import validate_subnet
 
@@ -87,17 +86,6 @@ def load_command_table(self, _):
         g.command('pause', 'pause')
         g.command('resume', 'resume')
         g.generic_update_command('update', custom_func_name='dw_update', no_wait_param='raw')
-
-    # Data Warehouse restore will not be included in the first batch of GA commands
-    # (list_restore_points also applies to db, but it's not very useful. It's
-    # mainly useful for dw.)
-    # with s.group('sql db restore-point') as c:
-    #     c.command('list', 'list_restore_points')
-
-    # Service tier advisor will not be included in the first batch of GA commands
-    # with s.group('sql db service-tier-advisor') as c:
-    #     c.command('list', 'list_service_tier_advisors')
-    #     c.command('show', 'get_service_tier_advisor')
 
     database_operations_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations.database_operations#DatabaseOperations.{}',
@@ -170,21 +158,6 @@ def load_command_table(self, _):
     with self.command_group('sql elastic-pool', database_operations) as g:
         g.command('list-dbs', 'list_by_elastic_pool')
 
-    # recommanded_elastic_pools_ops = CliCommandType(
-    #    operations_tmpl='azure.mgmt.sql.operations.recommended_elastic_pools_operations#RecommendedElasticPoolsOperations.{}',
-    #    client_factory=get_sql_recommended_elastic_pools_operations)
-    # Recommended elastic pools will not be included in the first batch of GA commands
-    # with ServiceGroup(__name__, get_sql_recommended_elastic_pools_operations,
-    #                   recommanded_elastic_pools_ops) as s:
-    #    with s.group('sql elastic-pool recommended') as c:
-    #        c.command('show', 'get')
-    #        c.command('show-metrics', 'list_metrics')
-    #        c.command('list', 'list')
-
-    #    with s.group('sql elastic-pool recommended db') as c:
-    #        c.command('show', 'get_databases')
-    #        c.command('list', 'list_databases')
-
     ###############################################
     #                sql server                   #
     ###############################################
@@ -213,9 +186,6 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.command('show', 'get')
         g.command('list', 'list_by_server')
-        # Keeping this command hidden for now. `firewall-rule create` will explain the special
-        # 0.0.0.0 rule.
-        # c.custom_command('allow-all-azure-ips', 'firewall_rule_allow_all_azure_ips')
 
     aadadmin_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations.server_azure_ad_administrators_operations#ServerAzureADAdministratorsOperations.{}',
