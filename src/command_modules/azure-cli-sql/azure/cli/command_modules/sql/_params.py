@@ -723,5 +723,5 @@ def load_arguments(self, _):
                    help='Create firewall rule before the virtual network has vnet service endpoint enabled',
                    arg_type=get_three_state_flag())
 
-        c.extra('vnet_name', options_list=('--vnet-name'),
-                help='The virtual network name')
+    with self.argument_context('sql server vnet-rule create') as c: 
+        c.extra('vnet_name', options_list=('--vnet-name'), help='The virtual network name')
