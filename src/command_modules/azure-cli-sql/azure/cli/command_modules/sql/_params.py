@@ -43,7 +43,7 @@ from .custom import (
 
 
 server_param_type = CLIArgumentType(
-    options_list=('--server', '-s'),
+    options_list=['--server', '-s'],
     help='Name of the Azure SQL server.')
 
 #####
@@ -176,16 +176,16 @@ def load_arguments(self, _):
 
     with self.argument_context('sql') as c:
         c.argument('location_name', arg_type=get_location_type(self.cli_ctx))
-        c.argument('usage_name', options_list=('--usage', '-u'))
+        c.argument('usage_name', options_list=['--usage', '-u'])
 
     with self.argument_context('sql db') as c:
         c.argument('database_name',
-                   options_list=('--name', '-n'),
+                   options_list=['--name', '-n'],
                    help='Name of the Azure SQL Database.')
         c.argument('server_name', arg_type=server_param_type)
-        c.argument('elastic_pool_name', options_list=('--elastic-pool',))
-        c.argument('requested_service_objective_name', options_list=('--service-objective',))
-        c.argument('max_size_bytes', options_list=('--max-size',),
+        c.argument('elastic_pool_name', options_list=['--elastic-pool'])
+        c.argument('requested_service_objective_name', options_list=['--service-objective'])
+        c.argument('max_size_bytes', options_list=['--max-size'],
                    type=SizeWithUnitConverter('B', result_type=int),
                    help='The max storage size of the database. Only the following'
                    ' sizes are supported (in addition to limitations being placed on'
@@ -194,7 +194,7 @@ def load_arguments(self, _):
 
         # Adjust help text.
         c.argument('edition',
-                   options_list=('--edition',),
+                   options_list=['--edition'],
                    help='The edition of the database.')
 
     with self.argument_context('sql db create') as c:
@@ -210,17 +210,17 @@ def load_arguments(self, _):
                    help='Name of the database that will be created as the copy destination.')
 
         c.argument('dest_resource_group_name',
-                   options_list=('--dest-resource-group',),
+                   options_list=['--dest-resource-group'],
                    help='Name of the resouce group to create the copy in.'
                    ' If unspecified, defaults to the origin resource group.')
 
         c.argument('dest_server_name',
-                   options_list=('--dest-server',),
+                   options_list=['--dest-server'],
                    help='Name of the server to create the copy in.'
                    ' If unspecified, defaults to the origin server.')
 
         c.argument('requested_service_objective_name',
-                   options_list=('--service-objective',),
+                   options_list=['--service-objective'],
                    help='Name of the service objective for the new database.')
 
     with self.argument_context('sql db create-replica') as c:
@@ -230,16 +230,16 @@ def load_arguments(self, _):
                    help='Name of the elastic pool to create the new database in.')
 
         c.argument('requested_service_objective_name',
-                   options_list=('--service-objective',),
+                   options_list=['--service-objective'],
                    help='Name of the service objective for the new secondary database.')
 
         c.argument('secondary_resource_group_name',
-                   options_list=('--secondary-resource-group',),
+                   options_list=['--secondary-resource-group'],
                    help='Name of the resource group to create the new secondary database in.'
                    ' If unspecified, defaults to the origin resource group.')
 
         c.argument('secondary_server_name',
-                   options_list=('--secondary-server',),
+                   options_list=['--secondary-server'],
                    help='Name of the server to create the new secondary database in.')
 
     with self.argument_context('sql db restore') as c:
@@ -251,14 +251,14 @@ def load_arguments(self, _):
         restore_point_arg_group = 'Restore Point'
 
         c.argument('restore_point_in_time',
-                   options_list=('--time', '-t'),
+                   options_list=['--time', '-t'],
                    arg_group=restore_point_arg_group,
                    help='The point in time of the source database that will be restored to create the'
                    ' new database. Must be greater than or equal to the source database\'s'
                    ' earliestRestoreDate value. Either --time or --deleted-time (or both) must be specified.')
 
         c.argument('source_database_deletion_date',
-                   options_list=('--deleted-time',),
+                   options_list=['--deleted-time'],
                    arg_group=restore_point_arg_group,
                    help='If specified, restore from a deleted database instead of from an existing database.'
                    ' Must match the deleted time of a deleted database in the same server.'
@@ -282,7 +282,7 @@ def load_arguments(self, _):
 
     with self.argument_context('sql db list-editions') as c:
         c.argument('show_details',
-                   options_list=('--show-details', '-d'),
+                   options_list=['--show-details', '-d'],
                    help='List of additional details to include in output.',
                    nargs='+',
                    arg_type=get_enum_type(DatabaseCapabilitiesAdditionalDetails))
@@ -309,17 +309,17 @@ def load_arguments(self, _):
 
     with self.argument_context('sql db export') as c:
         c.expand('parameters', ExportRequest)
-        c.argument('administrator_login', options_list=('--admin-user', '-u'))
-        c.argument('administrator_login_password', options_list=('--admin-password', '-p'))
-        c.argument('authentication_type', options_list=('--auth-type', '-a'),
+        c.argument('administrator_login', options_list=['--admin-user', '-u'])
+        c.argument('administrator_login_password', options_list=['--admin-password', '-p'])
+        c.argument('authentication_type', options_list=['--auth-type', '-a'],
                    arg_type=get_enum_type(AuthenticationType))
         c.argument('storage_key_type', arg_type=get_enum_type(StorageKeyType))
 
     with self.argument_context('sql db import') as c:
         c.expand('parameters', ImportExtensionRequest)
-        c.argument('administrator_login', options_list=('--admin-user', '-u'))
-        c.argument('administrator_login_password', options_list=('--admin-password', '-p'))
-        c.argument('authentication_type', options_list=('--auth-type', '-a'),
+        c.argument('administrator_login', options_list=['--admin-user', '-u'])
+        c.argument('administrator_login_password', options_list=['--admin-password', '-p'])
+        c.argument('authentication_type', options_list=['--auth-type', '-a'],
                    arg_type=get_enum_type(AuthenticationType))
         c.argument('storage_key_type', arg_type=get_enum_type(StorageKeyType))
 
@@ -328,18 +328,18 @@ def load_arguments(self, _):
         # The parameter name '--name' is used for 'database_name', so we need to give a different name
         # for the import extension 'name' parameter to avoid conflicts. This parameter is actually not
         # needed, but we still need to avoid this conflict.
-        c.argument('name', options_list=('--not-name',), arg_type=ignore_type)
+        c.argument('name', options_list=['--not-name'], arg_type=ignore_type)
 
     with self.argument_context('sql db show-connection-string') as c:
         c.argument('client_provider',
-                   options_list=('--client', '-c'),
+                   options_list=['--client', '-c'],
                    help='Type of client connection provider.',
                    arg_type=get_enum_type(ClientType))
 
         auth_group = 'Authentication'
 
         c.argument('auth_type',
-                   options_list=('--auth-type', '-a'),
+                   options_list=['--auth-type', '-a'],
                    arg_group=auth_group,
                    help='Type of authentication.',
                    arg_type=get_enum_type(ClientAuthenticationType))
@@ -349,12 +349,12 @@ def load_arguments(self, _):
     #####
     with self.argument_context('sql db op') as c:
         c.argument('database_name',
-                   options_list=('--database', '-d'),
+                   options_list=['--database', '-d'],
                    required=True,
                    help='Name of the Azure SQL Database.')
 
         c.argument('operation_id',
-                   options_list=('--name', '-n'),
+                   options_list=['--name', '-n'],
                    required=True,
                    help='The unique name of the operation to cancel.')
 
@@ -365,20 +365,20 @@ def load_arguments(self, _):
         _configure_db_create_params(c, Engine.db, CreateMode.online_secondary)
 
         c.argument('elastic_pool_name',
-                   options_list=('--elastic-pool',),
+                   options_list=['--elastic-pool'],
                    help='Name of elastic pool to create the new replica in.')
 
         c.argument('requested_service_objective_name',
-                   options_list=('--service-objective',),
+                   options_list=['--service-objective'],
                    help='Name of service objective for the new replica.')
 
         c.argument('partner_resource_group_name',
-                   options_list=('--partner-resource-group',),
+                   options_list=['--partner-resource-group'],
                    help='Name of the resource group to create the new replica in.'
                    ' If unspecified, defaults to the origin resource group.')
 
         c.argument('partner_server_name',
-                   options_list=('--partner-server',),
+                   options_list=['--partner-server'],
                    help='Name of the server to create the new replica in.')
 
     with self.argument_context('sql db replica set-primary') as c:
@@ -394,10 +394,10 @@ def load_arguments(self, _):
 
     with self.argument_context('sql db replica delete-link') as c:
         c.argument('partner_server_name',
-                   options_list=('--partner-server',),
+                   options_list=['--partner-server'],
                    help='Name of the server that the other replica is in.')
         c.argument('partner_resource_group_name',
-                   options_list=('--partner-resource-group',),
+                   options_list=['--partner-resource-group'],
                    help='Name of the resource group that the other replica is in. If unspecified,'
                    ' defaults to the first database\'s resource group.')
 
@@ -408,12 +408,12 @@ def load_arguments(self, _):
         storage_arg_group = 'Storage'
 
         arg_ctx.argument('storage_account',
-                         options_list=('--storage-account',),
+                         options_list=['--storage-account'],
                          arg_group=storage_arg_group,
                          help='Name of the storage account.')
 
         arg_ctx.argument('storage_account_access_key',
-                         options_list=('--storage-key',),
+                         options_list=['--storage-key'],
                          arg_group=storage_arg_group,
                          help='Access key for the storage account.')
 
@@ -432,7 +432,7 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(BlobAuditingPolicyState))
 
         c.argument('audit_actions_and_groups',
-                   options_list=('--actions',),
+                   options_list=['--actions'],
                    arg_group=policy_arg_group,
                    help='List of actions and action groups to audit.',
                    nargs='+')
@@ -458,19 +458,19 @@ def load_arguments(self, _):
 
         c.argument('disabled_alerts',
                    arg_group=policy_arg_group,
-                   options_list=('--disabled-alerts',),
+                   options_list=['--disabled-alerts'],
                    help='List of disabled alerts.',
                    nargs='+')
 
         c.argument('email_addresses',
                    arg_group=notification_arg_group,
-                   options_list=('--email-addresses',),
+                   options_list=['--email-addresses'],
                    help='List of email addresses that alerts are sent to.',
                    nargs='+')
 
         c.argument('email_account_admins',
                    arg_group=notification_arg_group,
-                   options_list=('--email-account-admins',),
+                   options_list=['--email-account-admins'],
                    help='Whether the alert is sent to the account administrators.',
                    arg_type=get_enum_type(SecurityAlertPolicyEmailAccountAdmins))
 
@@ -481,13 +481,13 @@ def load_arguments(self, _):
     #####
     with self.argument_context('sql db tde') as c:
         c.argument('database_name',
-                   options_list=('--database', '-d'),
+                   options_list=['--database', '-d'],
                    required=True,
                    help='Name of the Azure SQL Database.')
 
     with self.argument_context('sql db tde set') as c:
         c.argument('status',
-                   options_list=('--status'),
+                   options_list=['--status'],
                    required=True,
                    help='Status of the transparent data encryption.',
                    arg_type=get_enum_type(TransparentDataEncryptionStatus))
@@ -496,22 +496,22 @@ def load_arguments(self, _):
     #                sql dw                       #
     ###############################################
     with self.argument_context('sql dw') as c:
-        c.argument('database_name', options_list=('--name', '-n'),
+        c.argument('database_name', options_list=['--name', '-n'],
                    help='Name of the data warehouse.')
 
         c.argument('server_name', arg_type=server_param_type)
 
-        c.argument('max_size_bytes', options_list=('--max-size',),
+        c.argument('max_size_bytes', options_list=['--max-size'],
                    type=SizeWithUnitConverter('B', result_type=int),
                    help='The max storage size of the data warehouse. If no unit is specified, defaults'
                    'to bytes (B).')
 
         c.argument('requested_service_objective_name',
-                   options_list=('--service-objective',),
+                   options_list=['--service-objective'],
                    help='The service objective of the data warehouse.')
 
         c.argument('collation',
-                   options_list=('--collation',),
+                   options_list=['--collation'],
                    help='The collation of the data warehouse.')
 
     with self.argument_context('sql dw create') as c:
@@ -536,7 +536,7 @@ def load_arguments(self, _):
         c.ignore('zone_redundant')
 
         c.argument('elastic_pool_name',
-                   options_list=('--name', '-n'),
+                   options_list=['--name', '-n'],
                    help='The name of the elastic pool.')
         c.argument('server_name', arg_type=server_param_type)
 
@@ -546,13 +546,13 @@ def load_arguments(self, _):
         # list-editions --show-details db-max-dtu db-min-dtu` parameter values. These are more
         # consistent with other az sql commands, but the original can't be removed due to
         # compatibility.
-        c.argument('database_dtu_max', options_list=('--db-dtu-max', '--db-max-dtu'))
-        c.argument('database_dtu_min', options_list=('--db-dtu-min', '--db-min-dtu'))
+        c.argument('database_dtu_max', options_list=['--db-dtu-max', '--db-max-dtu'])
+        c.argument('database_dtu_min', options_list=['--db-dtu-min', '--db-min-dtu'])
 
         # --storage was the original param name, which is consistent with the underlying REST API.
         # --max-size is an alias which is consistent with the `sql elastic-pool list-editions
         # --show-details max-size` parameter value and also matches `sql db --max-size` parameter name.
-        c.argument('storage_mb', options_list=('--storage', '--max-size',),
+        c.argument('storage_mb', options_list=['--storage', '--max-size'],
                    type=SizeWithUnitConverter('MB', result_type=int),
                    help='The max storage size of the elastic pool. If no unit is specified, defaults'
                    ' to megabytes (MB).')
@@ -567,7 +567,7 @@ def load_arguments(self, _):
         # Note that `ElasticPoolCapabilitiesAdditionalDetails` intentionally match param names to
         # other commands, such as `sql elastic-pool create --db-max-dtu --db-min-dtu --max-size`.
         c.argument('show_details',
-                   options_list=('--show-details', '-d'),
+                   options_list=['--show-details', '-d'],
                    help='List of additional details to include in output.',
                    nargs='+',
                    arg_type=get_enum_type(ElasticPoolCapabilitiesAdditionalDetails))
@@ -594,9 +594,9 @@ def load_arguments(self, _):
     #                sql server                   #
     ###############################################
     with self.argument_context('sql server') as c:
-        c.argument('server_name', options_list=('--name', '-n'))
-        c.argument('administrator_login', options_list=('--admin-user', '-u'))
-        c.argument('administrator_login_password', options_list=('--admin-password', '-p'))
+        c.argument('server_name', options_list=['--name', '-n'])
+        c.argument('administrator_login', options_list=['--admin-user', '-u'])
+        c.argument('administrator_login_password', options_list=['--admin-password', '-p'])
 
     with self.argument_context('sql server create') as c:
         # Both administrator_login and administrator_login_password are required for server creation.
@@ -608,7 +608,7 @@ def load_arguments(self, _):
         })
 
         c.argument('assign_identity',
-                   options_list=('--assign-identity', '-i'),
+                   options_list=['--assign-identity', '-i'],
                    help='Generate and assign an Azure Active Directory Identity for this server'
                    'for use with key management services like Azure KeyVault.')
 
@@ -621,7 +621,7 @@ def load_arguments(self, _):
     with self.argument_context('sql server update') as c:
         c.argument('administrator_login_password', help='The administrator login password.')
         c.argument('assign_identity',
-                   options_list=('--assign_identity', '-i'),
+                   options_list=['--assign_identity', '-i'],
                    help='Generate and assign an Azure Active Directory Identity for this server'
                    'for use with key management services like Azure KeyVault.')
 
@@ -629,11 +629,11 @@ def load_arguments(self, _):
     #           sql server ad-admin
     ######
     with self.argument_context('sql server ad-admin') as c:
-        c.argument('server_name', options_list=('--server-name', '-s'),
+        c.argument('server_name', options_list=['--server-name', '-s'],
                    help='The name of the SQL Server')
-        c.argument('login', options_list=('--display-name', '-u'),
+        c.argument('login', options_list=['--display-name', '-u'],
                    help='Display name of the Azure AD administrator user or group.')
-        c.argument('sid', options_list=('--object-id', '-i'),
+        c.argument('sid', options_list=['--object-id', '-i'],
                    help='The unique ID of the Azure AD administrator ')
         c.ignore('tenant_id')
 
@@ -646,7 +646,7 @@ def load_arguments(self, _):
     #####
     with self.argument_context('sql server conn-policy') as c:
         c.argument('server_name', arg_type=server_param_type)
-        c.argument('connection_type', options_list=('--connection-type', '-t'),
+        c.argument('connection_type', options_list=['--connection-type', '-t'],
                    arg_type=get_enum_type(ServerConnectionType))
 
     #####
@@ -658,16 +658,16 @@ def load_arguments(self, _):
         c.argument('server_name', arg_type=server_param_type)
 
         c.argument('firewall_rule_name',
-                   options_list=('--name', '-n'),
+                   options_list=['--name', '-n'],
                    help='The name of the firewall rule.')
 
         c.argument('start_ip_address',
-                   options_list=('--start-ip-address',),
+                   options_list=['--start-ip-address'],
                    help='The start IP address of the firewall rule. Must be IPv4 format. Use value'
                    ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
 
         c.argument('end_ip_address',
-                   options_list=('--end-ip-address',),
+                   options_list=['--end-ip-address'],
                    help='The end IP address of the firewall rule. Must be IPv4 format. Use value'
                    ' \'0.0.0.0\' to represent all Azure-internal IP addresses.')
 
@@ -676,9 +676,9 @@ def load_arguments(self, _):
     #####
     with self.argument_context('sql server key') as c:
         c.argument('server_name', arg_type=server_param_type)
-        c.argument('key_name', options_list=('--name', '-n'))
+        c.argument('key_name', options_list=['--name', '-n'])
         c.argument('kid',
-                   options_list=('--kid', '-k'),
+                   options_list=['--kid', '-k'],
                    required=True,
                    help='The Azure Key Vault key identifier of the server key. An example key identifier is '
                    '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
@@ -691,12 +691,12 @@ def load_arguments(self, _):
 
     with self.argument_context('sql server tde-key set') as c:
         c.argument('kid',
-                   options_list=('--kid', '-k'),
+                   options_list=['--kid', '-k'],
                    help='The Azure Key Vault key identifier of the server key to be made encryption protector.'
                    'An example key identifier is '
                    '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
         c.argument('server_key_type',
-                   options_list=('--server-key-type', '-t'),
+                   options_list=['--server-key-type', '-t'],
                    help='The type of the server key',
                    arg_type=get_enum_type(ServerKeyType))
 
@@ -707,21 +707,21 @@ def load_arguments(self, _):
         # Help text needs to be specified because 'sql server vnet-rule create' is a custom
         # command.
         c.argument('server_name',
-                   options_list=('--server', '-s'),
+                   options_list=['--server', '-s'],
                    completer=get_resource_name_completion_list('Microsoft.SQL/servers'))
 
         c.argument('virtual_network_rule_name',
-                   options_list=('--name', '-n'))
+                   options_list=['--name', '-n'])
 
         c.argument('virtual_network_subnet_id',
-                   options_list=('--subnet'),
+                   options_list=['--subnet'],
                    help='Name or ID of the subnet that allows access to an Azure Sql Server. '
                    'If subnet name is provided, --vnet-name must be provided.')
 
         c.argument('ignore_missing_vnet_service_endpoint',
-                   options_list=('--ignore-missing-endpoint', '-i'),
+                   options_list=['--ignore-missing-endpoint', '-i'],
                    help='Create firewall rule before the virtual network has vnet service endpoint enabled',
                    arg_type=get_three_state_flag())
 
-    with self.argument_context('sql server vnet-rule create') as c: 
-        c.extra('vnet_name', options_list=('--vnet-name'), help='The virtual network name')
+    with self.argument_context('sql server vnet-rule create') as c:
+        c.extra('vnet_name', options_list=['--vnet-name'], help='The virtual network name')

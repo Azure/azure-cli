@@ -79,7 +79,7 @@ class ClientAuthenticationType(Enum):
 def _get_server_dns_suffx(cli_ctx):
     # Allow dns suffix to be overridden by environment variable for testing purposes
     from os import getenv
-    return getenv('_AZURE_CLI_SQL_DNS_SUFFIX', default=get_active_cloud(cli_ctx).suffixes.sql_server_hostname)
+    return getenv('_AZURE_CLI_SQL_DNS_SUFFIX', default=cli_ctx.cloud.suffixes.sql_server_hostname)
 
 
 def db_show_conn_str(
