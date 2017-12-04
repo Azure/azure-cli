@@ -896,6 +896,9 @@ helps['network lb create'] = """
     type: command
     short-summary: Create a load balancer.
     examples:
+        - name: Create a load balancer on a specific virtual network and subnet.
+          text: >
+            az network lb create -g MyResourceGroup -n MyLb --vnet-name MyVnet --subnet MySubnet
         - name: Create a zone flavored public facing load balancer through provisioning a zonal public ip
           text: >
             az network lb create -g MyResourceGroup -n myLB --public-ip-zone 2
@@ -1187,6 +1190,9 @@ helps['network nic create'] = """
     type: command
     short-summary: Create a network interface.
     examples:
+        - name: Create a network interface for a specified subnet on a specified virtual network.
+          text: >
+            az network nic create -g MyResourceGroup --vnet-name MyVnet --subnet MySubnet -n MyNic
         - name: Create a network interface for a specified subnet on a virtual network which allows
                 IP forwarding subject to a network security group.
           text: >
@@ -1668,7 +1674,7 @@ helps['network vnet create'] = """
     short-summary: Create a virtual network.
     long-summary: You may also create a subnet at the same time by specifying a subnet name and (optionally) an address prefix.
     examples:
-        - name: Create a virtual network with a specific address prefix and one subnet.
+        - name: Create a virtual network with a specific address prefix and subnet.
           text: >
             az network vnet create -g MyResourceGroup -n MyVnet --address-prefix 10.0.0.0/16 --subnet-name MySubnet --subnet-prefix 10.0.0.0/24
 """
