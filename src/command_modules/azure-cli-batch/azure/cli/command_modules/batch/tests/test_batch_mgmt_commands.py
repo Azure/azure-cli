@@ -8,6 +8,7 @@ import os
 import mock
 
 from knack.util import CLIError
+from azure.cli.testsdk import TestCli
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 from azure.mgmt.keyvault.models import SecretPermissions, KeyPermissions
@@ -20,11 +21,11 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
 
     @ResourceGroupPreparer(location='northeurope')
     def test_batch_account_cmd(self, resource_group):
-        self.skipTest("")
         config_dir = tempfile.mkdtemp()
         config_path = os.path.join(config_dir, 'config')
 
         self.kwargs.update({
+            'rg': resource_group,
             'str_n': 'clibatchteststorage1',
             'loc': 'northeurope',
             'acc': 'clibatchtest1',
@@ -38,70 +39,71 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
 
         # test create storage account with default set
         result = self.cmd('storage account create -g {rg} -n {str_n} -l {loc} --sku Standard_LRS').assert_with_checks([
-                self.check('name', '{str_n}'),
-                self.check('location', '{loc}'),
-                self.check('resourceGroup', '{rg}')])
+            self.check('name', '{str_n}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}')])
         storage_id = result.get_output_in_json()['id']
 
         # test create keyvault for use with BYOS account
         self.cmd('keyvault create -g {rg} -n {kv} -l {byos_l} --enabled-for-deployment true --enabled-for'
                  '-disk-encryption true --enabled-for-template-deployment true').assert_with_checks([
-                         self.check('name', '{kv}'),
-                         self.check('location', '{byos_l}'),
-                         self.check('resourceGroup', '{rg}'),
-                         self.check('type(properties.accessPolicies)', 'array'),
-                         self.check('length(properties.accessPolicies)', 1),
-                         self.check('properties.sku.name', 'standard')])
+                     self.check('name', '{kv}'),
+                     self.check('location', '{byos_l}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('type(properties.accessPolicies)', 'array'),
+                     self.check('length(properties.accessPolicies)', 1),
+                     self.check('properties.sku.name', 'standard')])
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {obj_id} '
                  '--key-permissions {perm_k} --secret-permissions {perm_s}')
 
         # test create account with default set
         self.cmd('batch account create -g {rg} -n {acc} -l {loc}').assert_with_checks([
-                self.check('name', '{acc}'),
-                self.check('location', '{loc}'),
-                self.check('resourceGroup', '{rg}')])
+            self.check('name', '{acc}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}')])
 
         # test create account with BYOS
         self.cmd('batch account create -g {rg} -n {byos_n} -l {byos_l} --keyvault {kv}').assert_with_checks([
-                self.check('name', '{byos_n}'),
-                self.check('location', '{byos_l}'),
-                self.check('resourceGroup', '{rg}')])
+            self.check('name', '{byos_n}'),
+            self.check('location', '{byos_l}'),
+            self.check('resourceGroup', '{rg}')])
 
         self.cmd('batch account set -g {rg} -n {acc} --storage-account {str_n}').assert_with_checks([
-                self.check('name', '{acc}'),
-                self.check('location', '{loc}'),
-                self.check('resourceGroup', '{rg}')])
+            self.check('name', '{acc}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}')])
 
         self.cmd('batch account show -g {rg} -n {acc}').assert_with_checks([
-                self.check('name', '{acc}'),
-                self.check('location', '{loc}'),
-                self.check('resourceGroup', '{rg}'),
-                self.check('autoStorage.storageAccountId', storage_id)])
+            self.check('name', '{acc}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('autoStorage.storageAccountId', storage_id)])
 
         self.cmd('batch account autostorage-keys sync -g {rg} -n {acc}')
 
         keys = self.cmd('batch account keys list -g {rg} -n {acc}').assert_with_checks([
-                self.check('primary != null', True),
-                self.check('secondary != null', True)])
+            self.check('primary != null', True),
+            self.check('secondary != null', True)])
 
         keys2 = self.cmd('batch account keys renew -g {rg} -n {acc} --key-name primary').assert_with_checks([
-                self.check('primary != null', True),
-                self.check('secondary', keys.get_output_in_json()['secondary'])])
+            self.check('primary != null', True),
+            self.check('secondary', keys.get_output_in_json()['secondary'])])
 
         self.assertTrue(keys.get_output_in_json()['primary'] !=
                         keys2.get_output_in_json()['primary'])
 
+        cli_ctx = TestCli()
         with mock.patch('azure.cli.core._config.GLOBAL_CONFIG_DIR', config_dir), \
                 mock.patch('azure.cli.core._config.GLOBAL_CONFIG_PATH', config_path):
             self.cmd('batch account login -g {rg} -n {acc}').assert_with_checks(self.is_empty())
-            self.assertEqual(az_config.config_parser.get('batch', 'auth_mode'), 'aad')
-            self.assertEqual(az_config.config_parser.get('batch', 'account'), account_name)
-            self.assertFalse(az_config.config_parser.has_option('batch', 'access_key'))
+            self.assertEqual(cli_ctx.config.get('batch', 'auth_mode'), 'aad')
+            self.assertEqual(cli_ctx.config.get('batch', 'account'), self.kwargs['acc'])
+            self.assertFalse(cli_ctx.config.has_option('batch', 'access_key'))
 
             self.cmd('batch account login -g {rg} -n {acc} --shared-key-auth').assert_with_checks(self.is_empty())
-            self.assertEqual(az_config.config_parser.get('batch', 'auth_mode'), 'shared_key')
-            self.assertEqual(az_config.config_parser.get('batch', 'account'), 'clibatchtest1')
-            self.assertEqual(az_config.config_parser.get('batch', 'access_key'),
+            self.assertEqual(cli_ctx.config.get('batch', 'auth_mode'), 'shared_key')
+            self.assertEqual(cli_ctx.config.get('batch', 'account'), self.kwargs['acc'])
+            self.assertEqual(cli_ctx.config.get('batch', 'access_key'),
                              keys2.get_output_in_json()['primary'])
 
         # test batch account delete
@@ -116,6 +118,7 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
     def test_batch_application_cmd(self, resource_group):
         _, package_file_name = tempfile.mkstemp()
         self.kwargs.update({
+            'rg': resource_group,
             'str_n': 'clibatchteststorage7',
             'loc': 'ukwest',
             'acc': 'clibatchtest7',
@@ -125,15 +128,15 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
         })
 
         # test create account with default set
-        result = self.cmd('storage account create -g {rg} -n {str_n} -l {loc} --sku Standard_LRS').assert_with_checks([
-                self.check('name', '{str_n}'),
-                self.check('location', '{loc}'),
-                self.check('resourceGroup', '{rg}')])
+        self.cmd('storage account create -g {rg} -n {str_n} -l {loc} --sku Standard_LRS').assert_with_checks([
+            self.check('name', '{str_n}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}')])
 
         self.cmd('batch account create -g {rg} -n {acc} -l {loc} --storage-account {str_n}').assert_with_checks([
-                self.check('name', '{acc}'),
-                self.check('location', '{loc}'),
-                self.check('resourceGroup', '{rg}')])
+            self.check('name', '{acc}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}')])
 
         with open(package_file_name, 'w') as f:
             f.write('storage blob test sample file')
@@ -141,38 +144,38 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
         # test create application with default set
         self.cmd('batch application create -g {rg} -n {acc} --application-id {app} '
                  '--allow-updates').assert_with_checks([
-                         self.check('id', '{app}'),
-                         self.check('allowUpdates', True)])
+                     self.check('id', '{app}'),
+                     self.check('allowUpdates', True)])
 
         self.cmd('batch application list -g {rg} -n {acc}').assert_with_checks([
-                self.check('length(@)', 1),
-                self.check('[0].id', '{app}')])
+            self.check('length(@)', 1),
+            self.check('[0].id', '{app}')])
 
         self.cmd('batch application package create -g {rg} -n {acc} --application-id {app}'
                  ' --version {app_p} --package-file "{app_f}"').assert_with_checks([
-                         self.check('id', '{app}'),
-                         self.check('storageUrl != null', True),
-                         self.check('version', '{app_p}'),
-                         self.check('state', 'active')])
+                     self.check('id', '{app}'),
+                     self.check('storageUrl != null', True),
+                     self.check('version', '{app_p}'),
+                     self.check('state', 'active')])
 
         self.cmd('batch application package activate -g {rg} -n {acc} --application-id {app}'
                  ' --version {app_p} --format zip')
 
         self.cmd('batch application package show -g {rg} -n {acc} '
                  '--application-id {app} --version {app_p}').assert_with_checks([
-                            self.check('id', '{app}'),
-                            self.check('format', 'zip'),
-                            self.check('version', '{app_p}'),
-                            self.check('state', 'active')])
+                     self.check('id', '{app}'),
+                     self.check('format', 'zip'),
+                     self.check('version', '{app_p}'),
+                     self.check('state', 'active')])
 
         self.cmd('batch application set -g {rg} -n {acc} --application-id {app} '
                  '--default-version {app_p}')
 
         self.cmd('batch application show -g {rg} -n {acc} --application-id {app}').assert_with_checks([
-                self.check('id', '{app}'),
-                self.check('defaultVersion', '{app_p}'),
-                self.check('packages[0].format', 'zip'),
-                self.check('packages[0].state', 'active')])
+            self.check('id', '{app}'),
+            self.check('defaultVersion', '{app_p}'),
+            self.check('packages[0].format', 'zip'),
+            self.check('packages[0].state', 'active')])
 
         # test batch applcation delete
         self.cmd('batch application package delete -g {rg} -n {acc} --application-id {app} '

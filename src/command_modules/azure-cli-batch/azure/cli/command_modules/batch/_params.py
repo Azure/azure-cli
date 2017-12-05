@@ -117,7 +117,7 @@ def load_arguments(self, _):
         c.argument('os_family', arg_type=get_enum_type(['2', '3', '4', '5']))
         c.argument('auto_scale_formula', help='A formula for the desired number of compute nodes in the pool. The formula is checked for validity before the pool is created. If the formula is not valid, the Batch service rejects the request with detailed error information. For more information about specifying this formula, see https://azure.microsoft.com/documentation/articles/batch-automatic-scaling/.')
         c.extra('image', completer=load_node_agent_skus, arg_group="Pool: Virtual Machine Configuration",
-                   help="OS image reference. This can be either 'publisher:offer:sku[:version]' format, or a fully qualified ARM image id of the form '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/images/{imageName}'. If 'publisher:offer:sku[:version]' format, version is optional and if omitted latest will be used. Valid values can be retrieved via 'az batch pool node-agent-skus list'. For example: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
+                help="OS image reference. This can be either 'publisher:offer:sku[:version]' format, or a fully qualified ARM image id of the form '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/images/{imageName}'. If 'publisher:offer:sku[:version]' format, version is optional and if omitted latest will be used. Valid values can be retrieved via 'az batch pool node-agent-skus list'. For example: 'MicrosoftWindowsServer:WindowsServer:2012-R2-Datacenter:latest'")
 
     with self.argument_context('batch certificate') as c:
         c.argument('thumbprint', help='The certificate thumbprint.')
@@ -140,8 +140,8 @@ def load_arguments(self, _):
     for item in ['batch certificate delete', 'batch certificate create', 'batch pool resize', 'batch pool reset', 'batch job list', 'batch task create']:
         with self.argument_context(item) as c:
             c.extra('account_name', arg_group='Batch Account', validator=validate_client_parameters,
-                       help='The Batch account name. Alternatively, set by environment variable: AZURE_BATCH_ACCOUNT')
+                    help='The Batch account name. Alternatively, set by environment variable: AZURE_BATCH_ACCOUNT')
             c.extra('account_key', arg_group='Batch Account',
-                       help='The Batch account key. Alternatively, set by environment variable: AZURE_BATCH_ACCESS_KEY')
+                    help='The Batch account key. Alternatively, set by environment variable: AZURE_BATCH_ACCESS_KEY')
             c.extra('account_endpoint', arg_group='Batch Account',
-                       help='Batch service endpoint. Alternatively, set by environment variable: AZURE_BATCH_ENDPOINT')
+                    help='Batch service endpoint. Alternatively, set by environment variable: AZURE_BATCH_ENDPOINT')

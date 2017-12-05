@@ -7,7 +7,6 @@ import json
 import re
 
 from six import string_types
-from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
 
 from azure.cli.command_modules.batch import _validators as validators
 from azure.cli.command_modules.batch import _format as transformers
@@ -15,7 +14,7 @@ from azure.cli.command_modules.batch import _parameter_format as params
 
 from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands import CONFIRM_PARAM_NAME
-from azure.cli.core.sdk.util import AzCommandGroup
+from azure.cli.core.commands import AzCommandGroup
 
 from knack.arguments import CLICommandArgument, IgnoreAction
 from knack.introspection import extract_full_summary_from_signature, extract_args_from_signature
@@ -748,11 +747,11 @@ class AzureBatchDataPlaneCommand(object):
                     choices = [c for c in choices if c != "'unmapped'"]
                     docstring = docstring[0:values_index]
                 args.append(((arg[0], CLICommandArgument(arg[0],
-                                                  options_list=[arg_name(arg[0])],
-                                                  required=False,
-                                                  default=None,
-                                                  choices=choices,
-                                                  help=docstring))))
+                                                         options_list=[arg_name(arg[0])],
+                                                         required=False,
+                                                         default=None,
+                                                         choices=choices,
+                                                         help=docstring))))
             elif arg_type.startswith(":class:"):  # TODO: could add handling for enums
                 param_type = class_name(arg_type)
                 self.parser.set_request_param(arg[0], param_type)
@@ -765,12 +764,12 @@ class AzureBatchDataPlaneCommand(object):
                             "If this parameter is specified, all '{} Arguments'" \
                             " are ignored.".format(arg[0].replace('_', ' '), group_title(arg[0]))
                 args.append((param, CLICommandArgument(param,
-                                                 options_list=[arg_name(param)],
-                                                 required=False,
-                                                 default=None,
-                                                 type=file_type,
-                                                 completer=FilesCompleter(),
-                                                 help=docstring)))
+                                                       options_list=[arg_name(param)],
+                                                       required=False,
+                                                       default=None,
+                                                       type=file_type,
+                                                       completer=FilesCompleter(),
+                                                       help=docstring)))
             elif arg[0] not in params.IGNORE_PARAMETERS:
                 args.append(arg)
         return_type = find_return_type(handler)
@@ -778,23 +777,23 @@ class AzureBatchDataPlaneCommand(object):
             param = 'destination'
             docstring = "The path to the destination file or directory."
             args.append((param, CLICommandArgument(param,
-                                             options_list=[arg_name(param)],
-                                             required=True,
-                                             default=None,
-                                             completer=DirectoriesCompleter(),
-                                             type=file_type,
-                                             validator=validators.validate_file_destination,
-                                             help=docstring)))
+                                                   options_list=[arg_name(param)],
+                                                   required=True,
+                                                   default=None,
+                                                   completer=DirectoriesCompleter(),
+                                                   type=file_type,
+                                                   validator=validators.validate_file_destination,
+                                                   help=docstring)))
         if return_type == 'None' and handler.__name__.startswith('get'):
             self._head_cmd = True
         if self.confirmation:
             param = CONFIRM_PARAM_NAME
             docstring = 'Do not prompt for confirmation.'
             args.append((param, CLICommandArgument(param,
-                                             options_list=['--yes', '-y'],
-                                             required=False,
-                                             action='store_true',
-                                             help=docstring)))
+                                                   options_list=['--yes', '-y'],
+                                                   required=False,
+                                                   action='store_true',
+                                                   help=docstring)))
         auth_group_name = 'Batch Account'
         args.append(('cmd', CLICommandArgument('cmd', action=IgnoreAction)))
         args.append(('account_name', CLICommandArgument(
@@ -805,7 +804,8 @@ class AzureBatchDataPlaneCommand(object):
             'account_key', options_list=['--account-key'], required=False, default=None, arg_group=auth_group_name,
             help='Batch account key. Alternatively, set by environment variable: AZURE_BATCH_ACCESS_KEY')))
         args.append(('account_endpoint', CLICommandArgument(
-            'account_endpoint', options_list=['--account-endpoint'], required=False, default=None, arg_group=auth_group_name,
+            'account_endpoint', options_list=['--account-endpoint'], required=False,
+            default=None, arg_group=auth_group_name,
             help='Batch service endpoint. Alternatively, set by environment variable: AZURE_BATCH_ENDPOINT')))
         return args
 

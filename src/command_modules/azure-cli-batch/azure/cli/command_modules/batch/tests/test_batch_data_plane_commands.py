@@ -6,8 +6,7 @@
 import os
 import datetime
 
-from knack.util import CLIError
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, JMESPathCheck
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
 
@@ -239,7 +238,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test filter/header argument
         self.batch_cmd('batch job reset --job-id {j_id} --pool-id {p_id} --on-all-tasks-complete '
-                        'terminateJob --if-unmodified-since {start}', expect_failure=True)
+                       'terminateJob --if-unmodified-since {start}', expect_failure=True)
 
         # test reset job
         self.batch_cmd('batch job reset --job-id {j_id} --pool-id {p_id}  '
@@ -373,7 +372,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test app package reference
         self.batch_cmd('batch pool create --id app_package_test --vm-size small --os-family 4 '
-                        '--application-package-references does-not-exist', expect_failure=True)
-        self.batch_cmd('batch pool set --pool-id {pool_p} --application-package-references does-not-exist', expect_failure=True)
+                       '--application-package-references does-not-exist', expect_failure=True)
+        self.batch_cmd('batch pool set --pool-id {pool_p} --application-package-references does-not-exist',
+                       expect_failure=True)
 
         # TODO: Test node commands

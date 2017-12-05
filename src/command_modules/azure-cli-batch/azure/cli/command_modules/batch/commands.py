@@ -3,8 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
-from azure.cli.core.sdk.util import CliCommandType
+from azure.cli.core.commands import CliCommandType
 
 from azure.cli.command_modules.batch import _client_factory as factories
 from azure.cli.command_modules.batch._validators import (

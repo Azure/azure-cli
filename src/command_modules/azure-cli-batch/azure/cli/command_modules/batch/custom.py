@@ -23,7 +23,6 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.core._profile import Profile
 
-from knack.util import CLIError
 from knack.log import get_logger
 
 logger = get_logger(__name__)
@@ -62,9 +61,9 @@ def create_account(client,
         parameters.pool_allocation_mode = 'UserSubscription'
 
     return client.create(resource_group_name=resource_group_name,
-        account_name=account_name,
-        parameters=parameters,
-        raw=no_wait)
+                         account_name=account_name,
+                         parameters=parameters,
+                         raw=no_wait)
 
 
 @transfer_doc(AutoStorageBaseProperties)
@@ -83,7 +82,7 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
                          account_name=account_name)
     cmd.cli_ctx.config.set_value('batch', 'account', account.name)
     cmd.cli_ctx.config.set_value('batch', 'endpoint',
-                           'https://{}/'.format(account.account_endpoint))
+                                 'https://{}/'.format(account.account_endpoint))
 
     if shared_key_auth:
         keys = client.get_keys(resource_group_name=resource_group_name,
@@ -205,9 +204,9 @@ def resize_pool(client, pool_id, target_dedicated_nodes=None, target_low_priorit
                 if_unmodified_since=None, abort=False):
     if abort:
         stop_resize_option = PoolStopResizeOptions(if_match=if_match,
-                                                    if_none_match=if_none_match,
-                                                    if_modified_since=if_modified_since,
-                                                    if_unmodified_since=if_unmodified_since)
+                                                   if_none_match=if_none_match,
+                                                   if_modified_since=if_modified_since,
+                                                   if_unmodified_since=if_unmodified_since)
         return client.stop_resize(pool_id, pool_stop_resize_options=stop_resize_option)
 
     param = PoolResizeParameter(target_dedicated_nodes=target_dedicated_nodes,
@@ -215,9 +214,9 @@ def resize_pool(client, pool_id, target_dedicated_nodes=None, target_low_priorit
                                 resize_timeout=resize_timeout,
                                 node_deallocation_option=node_deallocation_option)
     resize_option = PoolResizeOptions(if_match=if_match,
-                                        if_none_match=if_none_match,
-                                        if_modified_since=if_modified_since,
-                                        if_unmodified_since=if_unmodified_since)
+                                      if_none_match=if_none_match,
+                                      if_modified_since=if_modified_since,
+                                      if_unmodified_since=if_unmodified_since)
     return client.resize(pool_id, param, pool_resize_options=resize_option)
 
 
@@ -271,11 +270,11 @@ def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redef
                                                 select=select,
                                                 expand=expand)
         return list(client.list_from_job_schedule(job_schedule_id=job_schedule_id,
-                                                    job_list_from_job_schedule_options=option1))
+                                                  job_list_from_job_schedule_options=option1))
 
     option2 = JobListOptions(filter=filter,
-                                select=select,
-                                expand=expand)
+                             select=select,
+                             expand=expand)
     return list(client.list(job_list_options=option2))
 
 

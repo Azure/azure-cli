@@ -9,11 +9,8 @@ import datetime
 import isodate
 import mock
 
-from msrest.exceptions import ValidationError, ClientRequestError
 from azure.batch import models, operations, BatchServiceClient
 from azure.batch.batch_auth import SharedKeyCredentials
-from knack.util import CLIError
-from azure.cli.testsdk import TestCli
 
 from azure.cli.command_modules.batch import _validators
 from azure.cli.command_modules.batch import _command_type
@@ -24,9 +21,10 @@ class TestObj(object):  # pylint: disable=too-few-public-methods
 
 
 class TestBatchValidators(unittest.TestCase):
+    # pylint: disable=protected-access
+
     def __init__(self, methodName):
         super(TestBatchValidators, self).__init__(methodName)
-        pass
 
     def test_batch_datetime_format(self):
         obj = _validators.datetime_format("2017-01-24T15:47:24Z")

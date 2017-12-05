@@ -13,7 +13,7 @@ from azure.cli.command_modules.batch._command_type import BatchCommandGroup
 class BatchCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        from azure.cli.core.sdk.util import CliCommandType
+        from azure.cli.core.commands import CliCommandType
         batch_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.batch.custom#{}',
             exception_handler=batch_exception_handler)
