@@ -49,24 +49,24 @@ interactions:
       Cache-Control: [max-age=300]
       Connection: [close]
       Content-Length: ['2235']
-      Content-Security-Policy: [default-src 'none'; style-src 'unsafe-inline']
+      Content-Security-Policy: [default-src 'none'; style-src 'unsafe-inline'; sandbox]
       Content-Type: [text/plain; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:04:40 GMT']
+      Date: ['Wed, 29 Nov 2017 21:49:28 GMT']
       ETag: ['"d6824855d13e27c5258a680eb60f635d088fd05e"']
-      Expires: ['Mon, 18 Sep 2017 23:09:40 GMT']
-      Source-Age: ['0']
+      Expires: ['Wed, 29 Nov 2017 21:54:28 GMT']
+      Source-Age: ['109']
       Strict-Transport-Security: [max-age=31536000]
       Vary: ['Authorization,Accept-Encoding']
       Via: [1.1 varnish]
-      X-Cache: [MISS]
-      X-Cache-Hits: ['0']
+      X-Cache: [HIT]
+      X-Cache-Hits: ['1']
       X-Content-Type-Options: [nosniff]
-      X-Fastly-Request-ID: [b4c24c17ea9d93ea4fb34252136750806ec1c150]
+      X-Fastly-Request-ID: [05698c25fe88db31cbcca29ad74c5ec1d0aa74e4]
       X-Frame-Options: [deny]
       X-Geo-Block-List: ['']
-      X-GitHub-Request-Id: ['C770:28E20:410D28D:454757A:59C05107']
-      X-Served-By: [cache-dfw18636-DFW]
-      X-Timer: ['S1505775880.098939,VS0,VE81']
+      X-GitHub-Request-Id: ['E7A6:F612:98ADB:A468A:5A1F2AFB']
+      X-Served-By: [cache-mdw17349-MDW]
+      X-Timer: ['S1511992169.658993,VS0,VE0']
       X-XSS-Protection: [1; mode=block]
     status: {code: 200, message: OK}
 - request:
@@ -76,10 +76,10 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 storagemanagementclient/1.2.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 storagemanagementclient/1.4.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [c008639a-9cc5-11e7-8fd6-a0b3ccf7272a]
+      x-ms-client-request-id: [2cb5190a-d54f-11e7-9ea1-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Storage/storageAccounts?api-version=2017-06-01
   response:
@@ -87,7 +87,7 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:04:39 GMT']
+      Date: ['Wed, 29 Nov 2017 21:49:28 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -101,19 +101,18 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 networkmanagementclient/1.5.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [c02762c2-9cc5-11e7-8d4f-a0b3ccf7272a]
+      x-ms-client-request-id: [2cd9740c-d54f-11e7-ad55-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/virtualNetworks?api-version=2017-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/virtualNetworks?api-version=2017-10-01
   response:
     body: {string: '{"value":[]}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:04:40 GMT']
+      Date: ['Wed, 29 Nov 2017 21:49:28 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -121,64 +120,65 @@ interactions:
       content-length: ['12']
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"parameters": {}, "template": {"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-      "resources": [{"dependsOn": [], "properties": {"accountType": "Premium_LRS"},
-      "name": "vhdstoragee72a2b331a1623", "location": "westus", "tags": {}, "type":
-      "Microsoft.Storage/storageAccounts", "apiVersion": "2015-06-15"}, {"properties":
-      {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}, "subnets": [{"properties":
-      {"addressPrefix": "10.0.0.0/24"}, "name": "vm-generalizeSubnet"}]}, "dependsOn":
-      [], "location": "westus", "tags": {}, "name": "vm-generalizeVNET", "apiVersion":
-      "2015-06-15", "type": "Microsoft.Network/virtualNetworks"}, {"dependsOn": [],
-      "properties": {"securityRules": [{"properties": {"sourceAddressPrefix": "*",
-      "sourcePortRange": "*", "access": "Allow", "destinationPortRange": "22", "destinationAddressPrefix":
-      "*", "protocol": "Tcp", "direction": "Inbound", "priority": 1000}, "name": "default-allow-ssh"}]},
-      "name": "vm-generalizeNSG", "location": "westus", "tags": {}, "type": "Microsoft.Network/networkSecurityGroups",
-      "apiVersion": "2015-06-15"}, {"dependsOn": [], "properties": {"publicIPAllocationMethod":
-      "dynamic"}, "name": "vm-generalizePublicIP", "location": "westus", "tags": {},
-      "type": "Microsoft.Network/publicIPAddresses", "apiVersion": "2017-09-01"},
-      {"dependsOn": ["Microsoft.Network/virtualNetworks/vm-generalizeVNET", "Microsoft.Network/networkSecurityGroups/vm-generalizeNSG",
-      "Microsoft.Network/publicIpAddresses/vm-generalizePublicIP"], "properties":
-      {"ipConfigurations": [{"properties": {"publicIPAddress": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/publicIPAddresses/vm-generalizePublicIP"},
-      "subnet": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/virtualNetworks/vm-generalizeVNET/subnets/vm-generalizeSubnet"},
-      "privateIPAllocationMethod": "Dynamic"}, "name": "ipconfigvm-generalize"}],
-      "networkSecurityGroup": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkSecurityGroups/vm-generalizeNSG"}},
-      "name": "vm-generalizeVMNic", "location": "westus", "tags": {}, "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2015-06-15"}, {"dependsOn": ["Microsoft.Storage/storageAccounts/vhdstoragee72a2b331a1623",
-      "Microsoft.Network/networkInterfaces/vm-generalizeVMNic"], "properties": {"hardwareProfile":
-      {"vmSize": "Standard_DS1_v2"}, "osProfile": {"adminUsername": "ubuntu", "adminPassword":
-      "testPassword0", "computerName": "vm-generalize"}, "storageProfile": {"imageReference":
-      {"offer": "UbuntuServer", "version": "latest", "sku": "16.04-LTS", "publisher":
-      "Canonical"}, "osDisk": {"createOption": "fromImage", "name": "osdisk_e72a2b331a",
-      "caching": null, "vhd": {"uri": "https://vhdstoragee72a2b331a1623.blob.core.windows.net/vhds/osdisk_e72a2b331a.vhd"}}},
-      "networkProfile": {"networkInterfaces": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic"}]}},
-      "name": "vm-generalize", "location": "westus", "tags": {}, "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2017-03-30"}], "variables": {}, "contentVersion": "1.0.0.0",
-      "outputs": {}, "parameters": {}}, "mode": "Incremental"}}'
+    body: '{"properties": {"parameters": {}, "mode": "Incremental", "template": {"variables":
+      {}, "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "outputs": {}, "parameters": {}, "contentVersion": "1.0.0.0", "resources": [{"name":
+      "vhdstoragee2a73524ebad1e", "location": "westus", "apiVersion": "2015-06-15",
+      "type": "Microsoft.Storage/storageAccounts", "tags": {}, "dependsOn": [], "properties":
+      {"accountType": "Premium_LRS"}}, {"name": "vm-generalizeVNET", "location": "westus",
+      "apiVersion": "2015-06-15", "type": "Microsoft.Network/virtualNetworks", "tags":
+      {}, "dependsOn": [], "properties": {"subnets": [{"name": "vm-generalizeSubnet",
+      "properties": {"addressPrefix": "10.0.0.0/24"}}], "addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}}}, {"name": "vm-generalizeNSG", "location": "westus", "apiVersion":
+      "2015-06-15", "type": "Microsoft.Network/networkSecurityGroups", "tags": {},
+      "dependsOn": [], "properties": {"securityRules": [{"name": "default-allow-ssh",
+      "properties": {"priority": 1000, "protocol": "Tcp", "sourceAddressPrefix": "*",
+      "destinationPortRange": "22", "destinationAddressPrefix": "*", "direction":
+      "Inbound", "sourcePortRange": "*", "access": "Allow"}}]}}, {"name": "vm-generalizePublicIP",
+      "location": "westus", "apiVersion": "2017-10-01", "type": "Microsoft.Network/publicIPAddresses",
+      "tags": {}, "dependsOn": [], "properties": {"publicIPAllocationMethod": "dynamic"}},
+      {"name": "vm-generalizeVMNic", "location": "westus", "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/networkInterfaces", "tags": {}, "dependsOn": ["Microsoft.Network/virtualNetworks/vm-generalizeVNET",
+      "Microsoft.Network/networkSecurityGroups/vm-generalizeNSG", "Microsoft.Network/publicIpAddresses/vm-generalizePublicIP"],
+      "properties": {"ipConfigurations": [{"name": "ipconfigvm-generalize", "properties":
+      {"subnet": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/virtualNetworks/vm-generalizeVNET/subnets/vm-generalizeSubnet"},
+      "privateIPAllocationMethod": "Dynamic", "publicIPAddress": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/publicIPAddresses/vm-generalizePublicIP"}}}],
+      "networkSecurityGroup": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkSecurityGroups/vm-generalizeNSG"}}},
+      {"name": "vm-generalize", "location": "westus", "apiVersion": "2017-03-30",
+      "type": "Microsoft.Compute/virtualMachines", "tags": {}, "dependsOn": ["Microsoft.Storage/storageAccounts/vhdstoragee2a73524ebad1e",
+      "Microsoft.Network/networkInterfaces/vm-generalizeVMNic"], "properties": {"networkProfile":
+      {"networkInterfaces": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic"}]},
+      "storageProfile": {"osDisk": {"createOption": "fromImage", "name": "osdisk_e2a73524eb",
+      "vhd": {"uri": "https://vhdstoragee2a73524ebad1e.blob.core.windows.net/vhds/osdisk_e2a73524eb.vhd"},
+      "caching": null}, "imageReference": {"publisher": "Canonical", "sku": "16.04-LTS",
+      "offer": "UbuntuServer", "version": "latest"}}, "hardwareProfile": {"vmSize":
+      "Standard_DS1_v2"}, "osProfile": {"computerName": "vm-generalize", "adminPassword":
+      "testPassword0", "adminUsername": "ubuntu"}}}]}}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['3478']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [c07d38ee-9cc5-11e7-a996-a0b3ccf7272a]
+      x-ms-client-request-id: [2cfef9be-d54f-11e7-a68b-a0b3ccf7272a]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/vm_deploy_3JhDZC8Q3Jos33RHLHNrGUUhrbZfAGNG","name":"vm_deploy_3JhDZC8Q3Jos33RHLHNrGUUhrbZfAGNG","properties":{"templateHash":"14137468743983835840","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-09-18T23:04:42.2418461Z","duration":"PT0.3284431S","correlationId":"7e60ac4d-d7a6-4eef-a7d6-01f47db324e2","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/virtualNetworks/vm-generalizeVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-generalizeVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkSecurityGroups/vm-generalizeNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-generalizeNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/publicIPAddresses/vm-generalizePublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-generalizePublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-generalizeVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Storage/storageAccounts/vhdstoragee72a2b331a1623","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"vhdstoragee72a2b331a1623"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-generalizeVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-generalize"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/vm_deploy_vqUUkoQ9HaKFlhs5bYgMYjHmn0hGwirm","name":"vm_deploy_vqUUkoQ9HaKFlhs5bYgMYjHmn0hGwirm","properties":{"templateHash":"1654755170227772342","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-11-29T21:49:30.9297161Z","duration":"PT0.7070139S","correlationId":"445e015e-2a49-437e-beb7-09cf35291486","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/virtualNetworks/vm-generalizeVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-generalizeVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkSecurityGroups/vm-generalizeNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-generalizeNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/publicIPAddresses/vm-generalizePublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-generalizePublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-generalizeVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Storage/storageAccounts/vhdstoragee2a73524ebad1e","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"vhdstoragee2a73524ebad1e"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-generalizeVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-generalize"}]}}'}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/vm_deploy_3JhDZC8Q3Jos33RHLHNrGUUhrbZfAGNG/operationStatuses/08586958310035642333?api-version=2017-05-10']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/vm_deploy_vqUUkoQ9HaKFlhs5bYgMYjHmn0hGwirm/operationStatuses/08586896147152549314?api-version=2017-05-10']
       Cache-Control: [no-cache]
-      Content-Length: ['2870']
+      Content-Length: ['2869']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:04:41 GMT']
+      Date: ['Wed, 29 Nov 2017 21:49:30 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-subscription-writes: ['1192']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -187,19 +187,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [c07d38ee-9cc5-11e7-a996-a0b3ccf7272a]
+      x-ms-client-request-id: [2cfef9be-d54f-11e7-a68b-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586958310035642333?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586896147152549314?api-version=2017-05-10
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:05:11 GMT']
+      Date: ['Wed, 29 Nov 2017 21:50:01 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -213,19 +213,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [c07d38ee-9cc5-11e7-a996-a0b3ccf7272a]
+      x-ms-client-request-id: [2cfef9be-d54f-11e7-a68b-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586958310035642333?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586896147152549314?api-version=2017-05-10
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:05:42 GMT']
+      Date: ['Wed, 29 Nov 2017 21:50:31 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -239,19 +239,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [c07d38ee-9cc5-11e7-a996-a0b3ccf7272a]
+      x-ms-client-request-id: [2cfef9be-d54f-11e7-a68b-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586958310035642333?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586896147152549314?api-version=2017-05-10
   response:
     body: {string: '{"status":"Running"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:06:12 GMT']
+      Date: ['Wed, 29 Nov 2017 21:51:01 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -265,19 +265,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [c07d38ee-9cc5-11e7-a996-a0b3ccf7272a]
+      x-ms-client-request-id: [2cfef9be-d54f-11e7-a68b-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586958310035642333?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586896147152549314?api-version=2017-05-10
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:06:42 GMT']
+      Date: ['Wed, 29 Nov 2017 21:51:32 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -291,24 +291,24 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [c07d38ee-9cc5-11e7-a996-a0b3ccf7272a]
+      x-ms-client-request-id: [2cfef9be-d54f-11e7-a68b-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/vm_deploy_3JhDZC8Q3Jos33RHLHNrGUUhrbZfAGNG","name":"vm_deploy_3JhDZC8Q3Jos33RHLHNrGUUhrbZfAGNG","properties":{"templateHash":"14137468743983835840","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-09-18T23:06:41.0629912Z","duration":"PT1M59.1495882S","correlationId":"7e60ac4d-d7a6-4eef-a7d6-01f47db324e2","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/virtualNetworks/vm-generalizeVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-generalizeVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkSecurityGroups/vm-generalizeNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-generalizeNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/publicIPAddresses/vm-generalizePublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-generalizePublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-generalizeVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Storage/storageAccounts/vhdstoragee72a2b331a1623","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"vhdstoragee72a2b331a1623"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-generalizeVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-generalize"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkSecurityGroups/vm-generalizeNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/publicIPAddresses/vm-generalizePublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/virtualNetworks/vm-generalizeVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Storage/storageAccounts/vhdstoragee72a2b331a1623"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Resources/deployments/vm_deploy_vqUUkoQ9HaKFlhs5bYgMYjHmn0hGwirm","name":"vm_deploy_vqUUkoQ9HaKFlhs5bYgMYjHmn0hGwirm","properties":{"templateHash":"1654755170227772342","parameters":{},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-11-29T21:51:05.8133189Z","duration":"PT1M35.5906167S","correlationId":"445e015e-2a49-437e-beb7-09cf35291486","providers":[{"namespace":"Microsoft.Storage","resourceTypes":[{"resourceType":"storageAccounts","locations":["westus"]}]},{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/virtualNetworks/vm-generalizeVNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vm-generalizeVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkSecurityGroups/vm-generalizeNSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vm-generalizeNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/publicIPAddresses/vm-generalizePublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vm-generalizePublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-generalizeVMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Storage/storageAccounts/vhdstoragee2a73524ebad1e","resourceType":"Microsoft.Storage/storageAccounts","resourceName":"vhdstoragee2a73524ebad1e"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vm-generalizeVMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vm-generalize"}],"outputs":{},"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkSecurityGroups/vm-generalizeNSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/publicIPAddresses/vm-generalizePublicIP"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/virtualNetworks/vm-generalizeVNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Storage/storageAccounts/vhdstoragee2a73524ebad1e"}]}}'}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:06:43 GMT']
+      Date: ['Wed, 29 Nov 2017 21:51:32 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Vary: [Accept-Encoding]
-      content-length: ['3926']
+      content-length: ['3925']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -317,21 +317,21 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 computemanagementclient/3.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [0a071ab8-9cc6-11e7-a018-a0b3ccf7272a]
+      x-ms-client-request-id: [7707a9de-d54f-11e7-9dd5-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize?$expand=instanceView&api-version=2017-03-30
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"3d73fa8b-cd8f-474a-bafe-9e080157da46\"\
+    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"e56f4916-9aef-4685-b9c8-f1b1f969e541\"\
         ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
         \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
         \       \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
         ,\r\n        \"sku\": \"16.04-LTS\",\r\n        \"version\": \"latest\"\r\n\
         \      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n   \
-        \     \"name\": \"osdisk_e72a2b331a\",\r\n        \"createOption\": \"FromImage\"\
-        ,\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstoragee72a2b331a1623.blob.core.windows.net/vhds/osdisk_e72a2b331a.vhd\"\
+        \     \"name\": \"osdisk_e2a73524eb\",\r\n        \"createOption\": \"FromImage\"\
+        ,\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstoragee2a73524ebad1e.blob.core.windows.net/vhds/osdisk_e2a73524eb.vhd\"\
         \r\n        },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\"\
         : 30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\"\
         : {\r\n      \"computerName\": \"vm-generalize\",\r\n      \"adminUsername\"\
@@ -339,20 +339,20 @@ interactions:
         : false\r\n      },\r\n      \"secrets\": []\r\n    },\r\n    \"networkProfile\"\
         : {\"networkInterfaces\":[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic\"\
         }]},\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\"\
-        : {\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.2.17\",\r\n\
+        : {\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"2.2.18\",\r\n\
         \        \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/succeeded\"\
         ,\r\n            \"level\": \"Info\",\r\n            \"displayStatus\": \"\
         Ready\",\r\n            \"message\": \"Guest Agent is running\",\r\n     \
-        \       \"time\": \"2017-09-18T23:06:46+00:00\"\r\n          }\r\n       \
+        \       \"time\": \"2017-11-29T21:51:31+00:00\"\r\n          }\r\n       \
         \ ],\r\n        \"extensionHandlers\": []\r\n      },\r\n      \"disks\":\
-        \ [\r\n        {\r\n          \"name\": \"osdisk_e72a2b331a\",\r\n       \
+        \ [\r\n        {\r\n          \"name\": \"osdisk_e2a73524eb\",\r\n       \
         \   \"statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\"\
         ,\r\n              \"level\": \"Info\",\r\n              \"displayStatus\"\
-        : \"Provisioning succeeded\",\r\n              \"time\": \"2017-09-18T23:04:59.6171627+00:00\"\
+        : \"Provisioning succeeded\",\r\n              \"time\": \"2017-11-29T21:49:58.4611131+00:00\"\
         \r\n            }\r\n          ]\r\n        }\r\n      ],\r\n      \"statuses\"\
         : [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\
         \n          \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning\
-        \ succeeded\",\r\n          \"time\": \"2017-09-18T23:06:20.9004306+00:00\"\
+        \ succeeded\",\r\n          \"time\": \"2017-11-29T21:50:46.7132692+00:00\"\
         \r\n        },\r\n        {\r\n          \"code\": \"PowerState/running\"\
         ,\r\n          \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\
         \r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachines\"\
@@ -361,7 +361,7 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:06:49 GMT']
+      Date: ['Wed, 29 Nov 2017 21:51:33 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -369,6 +369,7 @@ interactions:
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
       content-length: ['2589']
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4935,Microsoft.Compute/LowCostGet30Min;39805']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -377,21 +378,20 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 networkmanagementclient/1.5.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [0d368dd8-9cc6-11e7-85e1-a0b3ccf7272a]
+      x-ms-client-request-id: [775c735a-d54f-11e7-9e6d-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic?api-version=2017-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic?api-version=2017-10-01
   response:
     body: {string: "{\r\n  \"name\": \"vm-generalizeVMNic\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic\"\
-        ,\r\n  \"etag\": \"W/\\\"ddeec2ef-32f3-4ffb-81a8-cd35df2160b6\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"880c6ea9-9d33-49d7-b000-f8b362c32641\\\"\",\r\n \
         \ \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n\
-        \    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"2f0499a0-21af-4c9d-804f-86bd0d067683\"\
+        \    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"5fa1f069-6562-4a07-9970-ea1450ffd373\"\
         ,\r\n    \"ipConfigurations\": [\r\n      {\r\n        \"name\": \"ipconfigvm-generalize\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic/ipConfigurations/ipconfigvm-generalize\"\
-        ,\r\n        \"etag\": \"W/\\\"ddeec2ef-32f3-4ffb-81a8-cd35df2160b6\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"880c6ea9-9d33-49d7-b000-f8b362c32641\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
         ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
         : \"Dynamic\",\r\n          \"publicIPAddress\": {\r\n            \"id\":\
@@ -400,8 +400,8 @@ interactions:
         \r\n          },\r\n          \"primary\": true,\r\n          \"privateIPAddressVersion\"\
         : \"IPv4\"\r\n        }\r\n      }\r\n    ],\r\n    \"dnsSettings\": {\r\n\
         \      \"dnsServers\": [],\r\n      \"appliedDnsServers\": [],\r\n      \"\
-        internalDomainNameSuffix\": \"yxlk24l5q4oudmmzybbgpzrlpf.dx.internal.cloudapp.net\"\
-        \r\n    },\r\n    \"macAddress\": \"00-0D-3A-36-34-AC\",\r\n    \"enableAcceleratedNetworking\"\
+        internalDomainNameSuffix\": \"1bjofldkc2audoayyzvefoq3rc.dx.internal.cloudapp.net\"\
+        \r\n    },\r\n    \"macAddress\": \"00-0D-3A-30-B6-1B\",\r\n    \"enableAcceleratedNetworking\"\
         : false,\r\n    \"enableIPForwarding\": false,\r\n    \"networkSecurityGroup\"\
         : {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkSecurityGroups/vm-generalizeNSG\"\
         \r\n    },\r\n    \"primary\": true,\r\n    \"virtualMachine\": {\r\n    \
@@ -411,8 +411,8 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:06:49 GMT']
-      ETag: [W/"ddeec2ef-32f3-4ffb-81a8-cd35df2160b6"]
+      Date: ['Wed, 29 Nov 2017 21:51:34 GMT']
+      ETag: [W/"880c6ea9-9d33-49d7-b000-f8b362c32641"]
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -428,35 +428,35 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 networkmanagementclient/1.5.0rc1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [0d663d7e-9cc6-11e7-afc1-a0b3ccf7272a]
+      x-ms-client-request-id: [779e7058-d54f-11e7-8d88-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/publicIPAddresses/vm-generalizePublicIP?api-version=2017-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/publicIPAddresses/vm-generalizePublicIP?api-version=2017-10-01
   response:
     body: {string: "{\r\n  \"name\": \"vm-generalizePublicIP\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/publicIPAddresses/vm-generalizePublicIP\"\
-        ,\r\n  \"etag\": \"W/\\\"27911d09-49b6-4e35-8ae8-44be5cd67cde\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"11a39fda-df9b-4f1a-b5e3-b93f85351798\\\"\",\r\n \
         \ \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"properties\": {\r\n\
-        \    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"8e75b1ce-dbc8-44b8-9174-6e1a0c92880a\"\
-        ,\r\n    \"ipAddress\": \"40.78.19.164\",\r\n    \"publicIPAddressVersion\"\
+        \    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\": \"ee57adc6-2716-4dca-bf50-07593ded7c44\"\
+        ,\r\n    \"ipAddress\": \"104.42.111.89\",\r\n    \"publicIPAddressVersion\"\
         : \"IPv4\",\r\n    \"publicIPAllocationMethod\": \"Dynamic\",\r\n    \"idleTimeoutInMinutes\"\
-        : 4,\r\n    \"ipConfiguration\": {\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic/ipConfigurations/ipconfigvm-generalize\"\
+        : 4,\r\n    \"ipTags\": [],\r\n    \"ipConfiguration\": {\r\n      \"id\"\
+        : \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Network/networkInterfaces/vm-generalizeVMNic/ipConfigurations/ipconfigvm-generalize\"\
         \r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Network/publicIPAddresses\",\r\
         \n  \"sku\": {\r\n    \"name\": \"Basic\"\r\n  }\r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:06:50 GMT']
-      ETag: [W/"27911d09-49b6-4e35-8ae8-44be5cd67cde"]
+      Date: ['Wed, 29 Nov 2017 21:51:34 GMT']
+      ETag: [W/"11a39fda-df9b-4f1a-b5e3-b93f85351798"]
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
-      content-length: ['923']
+      content-length: ['943']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -466,25 +466,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 computemanagementclient/3.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [0d91289a-9cc6-11e7-8569-a0b3ccf7272a]
+      x-ms-client-request-id: [77ddce58-d54f-11e7-a036-a0b3ccf7272a]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize/powerOff?api-version=2017-03-30
   response:
     body: {string: ''}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/41d8d519-b4db-45e4-abbb-cccf8425865c?api-version=2017-03-30']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/ec2ec3a9-2aea-4114-a2ce-b3c438e0e586?api-version=2017-03-30']
       Cache-Control: [no-cache]
       Content-Length: ['0']
-      Date: ['Mon, 18 Sep 2017 23:06:50 GMT']
+      Date: ['Wed, 29 Nov 2017 21:51:35 GMT']
       Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/41d8d519-b4db-45e4-abbb-cccf8425865c?monitor=true&api-version=2017-03-30']
+      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/ec2ec3a9-2aea-4114-a2ce-b3c438e0e586?monitor=true&api-version=2017-03-30']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/DeleteVM3Min;293,Microsoft.Compute/DeleteVM30Min;1469']
+      x-ms-ratelimit-remaining-subscription-writes: ['1193']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -493,49 +494,20 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 computemanagementclient/3.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [0d91289a-9cc6-11e7-8569-a0b3ccf7272a]
+      x-ms-client-request-id: [77ddce58-d54f-11e7-a036-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/41d8d519-b4db-45e4-abbb-cccf8425865c?api-version=2017-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/ec2ec3a9-2aea-4114-a2ce-b3c438e0e586?api-version=2017-03-30
   response:
-    body: {string: "{\r\n  \"startTime\": \"2017-09-18T23:06:51.2582542+00:00\",\r\
-        \n  \"status\": \"InProgress\",\r\n  \"name\": \"41d8d519-b4db-45e4-abbb-cccf8425865c\"\
-        \r\n}"}
+    body: {string: "{\r\n  \"startTime\": \"2017-11-29T21:51:34.6077426+00:00\",\r\
+        \n  \"endTime\": \"2017-11-29T21:51:40.2017751+00:00\",\r\n  \"status\": \"\
+        Succeeded\",\r\n  \"name\": \"ec2ec3a9-2aea-4114-a2ce-b3c438e0e586\"\r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:07:20 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['134']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
-      accept-language: [en-US]
-      x-ms-client-request-id: [0d91289a-9cc6-11e7-8569-a0b3ccf7272a]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/41d8d519-b4db-45e4-abbb-cccf8425865c?api-version=2017-03-30
-  response:
-    body: {string: "{\r\n  \"startTime\": \"2017-09-18T23:06:51.2582542+00:00\",\r\
-        \n  \"endTime\": \"2017-09-18T23:07:28.5058209+00:00\",\r\n  \"status\": \"\
-        Succeeded\",\r\n  \"name\": \"41d8d519-b4db-45e4-abbb-cccf8425865c\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:07:50 GMT']
+      Date: ['Wed, 29 Nov 2017 21:52:05 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -543,6 +515,7 @@ interactions:
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
       content-length: ['184']
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/GetOperation3Min;2076,Microsoft.Compute/GetOperation30Min;17510']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -552,10 +525,10 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 computemanagementclient/3.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [321cdbb0-9cc6-11e7-bc75-a0b3ccf7272a]
+      x-ms-client-request-id: [8a9ecb12-d54f-11e7-8aa6-a0b3ccf7272a]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize/generalize?api-version=2017-03-30
   response:
@@ -563,12 +536,13 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Length: ['0']
-      Date: ['Mon, 18 Sep 2017 23:07:51 GMT']
+      Date: ['Wed, 29 Nov 2017 21:52:06 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1189']
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/DeleteVM3Min;292,Microsoft.Compute/DeleteVM30Min;1468']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -577,21 +551,21 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 computemanagementclient/3.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [3247c6cc-9cc6-11e7-ba71-a0b3ccf7272a]
+      x-ms-client-request-id: [8ac7404c-d54f-11e7-80df-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize?api-version=2017-03-30
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"3d73fa8b-cd8f-474a-bafe-9e080157da46\"\
+    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"e56f4916-9aef-4685-b9c8-f1b1f969e541\"\
         ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
         \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
         \       \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
         ,\r\n        \"sku\": \"16.04-LTS\",\r\n        \"version\": \"latest\"\r\n\
         \      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n   \
-        \     \"name\": \"osdisk_e72a2b331a\",\r\n        \"createOption\": \"FromImage\"\
-        ,\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstoragee72a2b331a1623.blob.core.windows.net/vhds/osdisk_e72a2b331a.vhd\"\
+        \     \"name\": \"osdisk_e2a73524eb\",\r\n        \"createOption\": \"FromImage\"\
+        ,\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstoragee2a73524ebad1e.blob.core.windows.net/vhds/osdisk_e2a73524eb.vhd\"\
         \r\n        },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\"\
         : 30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\"\
         : {\r\n      \"computerName\": \"vm-generalize\",\r\n      \"adminUsername\"\
@@ -605,7 +579,7 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:07:51 GMT']
+      Date: ['Wed, 29 Nov 2017 21:52:06 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -613,35 +587,37 @@ interactions:
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
       content-length: ['1444']
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4944,Microsoft.Compute/LowCostGet30Min;39799']
     status: {code: 200, message: OK}
 - request:
-    body: '{"destinationContainerName": "vhds", "overwriteVhds": true, "vhdPrefix":
-      "vmtest"}'
+    body: '{"vhdPrefix": "vmtest", "overwriteVhds": true, "destinationContainerName":
+      "vhds"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['82']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 computemanagementclient/3.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [3269284c-9cc6-11e7-b465-a0b3ccf7272a]
+      x-ms-client-request-id: [8b041a5c-d54f-11e7-ae62-a0b3ccf7272a]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize/capture?api-version=2017-03-30
   response:
     body: {string: ''}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/d5f3ed20-0beb-4375-b220-534f21bbef90?api-version=2017-03-30']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/528ee991-ca37-4952-b8ff-c88e00eb2623?api-version=2017-03-30']
       Cache-Control: [no-cache]
       Content-Length: ['0']
-      Date: ['Mon, 18 Sep 2017 23:07:52 GMT']
+      Date: ['Wed, 29 Nov 2017 21:52:07 GMT']
       Expires: ['-1']
-      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/d5f3ed20-0beb-4375-b220-534f21bbef90?monitor=true&api-version=2017-03-30']
+      Location: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/528ee991-ca37-4952-b8ff-c88e00eb2623?monitor=true&api-version=2017-03-30']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1174']
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/CreateUpdateVM3Min;292,Microsoft.Compute/CreateUpdateVM30Min;1457']
+      x-ms-ratelimit-remaining-subscription-writes: ['1191']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -650,35 +626,35 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 computemanagementclient/3.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [3269284c-9cc6-11e7-b465-a0b3ccf7272a]
+      x-ms-client-request-id: [8b041a5c-d54f-11e7-ae62-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/d5f3ed20-0beb-4375-b220-534f21bbef90?api-version=2017-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/528ee991-ca37-4952-b8ff-c88e00eb2623?api-version=2017-03-30
   response:
-    body: {string: "{\r\n  \"startTime\": \"2017-09-18T23:07:53.2148798+00:00\",\r\
-        \n  \"endTime\": \"2017-09-18T23:07:53.6524841+00:00\",\r\n  \"status\": \"\
+    body: {string: "{\r\n  \"startTime\": \"2017-11-29T21:52:06.8123462+00:00\",\r\
+        \n  \"endTime\": \"2017-11-29T21:52:07.0623615+00:00\",\r\n  \"status\": \"\
         Succeeded\",\r\n  \"properties\": {\r\n    \"output\": {\"$schema\":\"http://schema.management.azure.com/schemas/2014-04-01-preview/VM_IP.json\"\
         ,\"contentVersion\":\"1.0.0.0\",\"parameters\":{\"vmName\":{\"type\":\"string\"\
         },\"vmSize\":{\"type\":\"string\",\"defaultValue\":\"Standard_DS1_v2\"},\"\
         adminUserName\":{\"type\":\"string\"},\"adminPassword\":{\"type\":\"securestring\"\
         },\"networkInterfaceId\":{\"type\":\"string\"}},\"resources\":[{\"apiVersion\"\
         :\"2017-03-30\",\"properties\":{\"hardwareProfile\":{\"vmSize\":\"[parameters('vmSize')]\"\
-        },\"storageProfile\":{\"osDisk\":{\"osType\":\"Linux\",\"name\":\"vmtest-osDisk.3d73fa8b-cd8f-474a-bafe-9e080157da46.vhd\"\
-        ,\"createOption\":\"FromImage\",\"image\":{\"uri\":\"https://vhdstoragee72a2b331a1623.blob.core.windows.net/system/Microsoft.Compute/Images/vhds/vmtest-osDisk.3d73fa8b-cd8f-474a-bafe-9e080157da46.vhd\"\
-        },\"vhd\":{\"uri\":\"https://vhdstoragee72a2b331a1623.blob.core.windows.net/vmcontainer514291ec-d4aa-4905-8221-ed50454af8f4/osDisk.514291ec-d4aa-4905-8221-ed50454af8f4.vhd\"\
+        },\"storageProfile\":{\"osDisk\":{\"osType\":\"Linux\",\"name\":\"vmtest-osDisk.e56f4916-9aef-4685-b9c8-f1b1f969e541.vhd\"\
+        ,\"createOption\":\"FromImage\",\"image\":{\"uri\":\"https://vhdstoragee2a73524ebad1e.blob.core.windows.net/system/Microsoft.Compute/Images/vhds/vmtest-osDisk.e56f4916-9aef-4685-b9c8-f1b1f969e541.vhd\"\
+        },\"vhd\":{\"uri\":\"https://vhdstoragee2a73524ebad1e.blob.core.windows.net/vmcontainer6ebff45b-a722-4875-b2a6-b7dff23c7ca2/osDisk.6ebff45b-a722-4875-b2a6-b7dff23c7ca2.vhd\"\
         },\"caching\":\"ReadWrite\"}},\"osProfile\":{\"computerName\":\"[parameters('vmName')]\"\
         ,\"adminUsername\":\"[parameters('adminUsername')]\",\"adminPassword\":\"\
         [parameters('adminPassword')]\"},\"networkProfile\":{\"networkInterfaces\"\
         :[{\"id\":\"[parameters('networkInterfaceId')]\"}]},\"provisioningState\"\
         :0},\"type\":\"Microsoft.Compute/virtualMachines\",\"location\":\"westus\"\
-        ,\"name\":\"[parameters('vmName')]\"}]}\r\n  },\r\n  \"name\": \"d5f3ed20-0beb-4375-b220-534f21bbef90\"\
+        ,\"name\":\"[parameters('vmName')]\"}]}\r\n  },\r\n  \"name\": \"528ee991-ca37-4952-b8ff-c88e00eb2623\"\
         \r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:08:22 GMT']
+      Date: ['Wed, 29 Nov 2017 21:52:37 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -686,6 +662,7 @@ interactions:
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
       content-length: ['1508']
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/GetOperation3Min;2085,Microsoft.Compute/GetOperation30Min;17497']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -694,21 +671,21 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 computemanagementclient/3.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [45303994-9cc6-11e7-88d5-a0b3ccf7272a]
+      x-ms-client-request-id: [9df1ddee-d54f-11e7-aa46-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize?api-version=2017-03-30
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"3d73fa8b-cd8f-474a-bafe-9e080157da46\"\
+    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"e56f4916-9aef-4685-b9c8-f1b1f969e541\"\
         ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
         \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
         \       \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
         ,\r\n        \"sku\": \"16.04-LTS\",\r\n        \"version\": \"latest\"\r\n\
         \      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n   \
-        \     \"name\": \"osdisk_e72a2b331a\",\r\n        \"createOption\": \"FromImage\"\
-        ,\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstoragee72a2b331a1623.blob.core.windows.net/vhds/osdisk_e72a2b331a.vhd\"\
+        \     \"name\": \"osdisk_e2a73524eb\",\r\n        \"createOption\": \"FromImage\"\
+        ,\r\n        \"vhd\": {\r\n          \"uri\": \"https://vhdstoragee2a73524ebad1e.blob.core.windows.net/vhds/osdisk_e2a73524eb.vhd\"\
         \r\n        },\r\n        \"caching\": \"ReadWrite\",\r\n        \"diskSizeGB\"\
         : 30\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n    \"osProfile\"\
         : {\r\n      \"computerName\": \"vm-generalize\",\r\n      \"adminUsername\"\
@@ -722,7 +699,7 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:08:22 GMT']
+      Date: ['Wed, 29 Nov 2017 21:52:38 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -730,6 +707,7 @@ interactions:
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
       content-length: ['1444']
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4943,Microsoft.Compute/LowCostGet30Min;39793']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -738,11 +716,11 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.1.0 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [455d873e-9cc6-11e7-aa47-a0b3ccf7272a]
+      x-ms-client-request-id: [9e0e8eec-d54f-11e7-86d7-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_generalize_vm?api-version=2017-05-10
   response:
@@ -750,7 +728,7 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:08:24 GMT']
+      Date: ['Wed, 29 Nov 2017 21:52:38 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
@@ -758,18 +736,17 @@ interactions:
       content-length: ['234']
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"sourceVirtualMachine": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize"}},
-      "location": "westus"}'
+    body: '{"location": "westus", "properties": {"sourceVirtualMachine": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize"}}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['227']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 computemanagementclient/3.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [457c8658-9cc6-11e7-bd38-a0b3ccf7272a]
+      x-ms-client-request-id: [9e27efb0-d54f-11e7-972b-a0b3ccf7272a]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/images/myImage?api-version=2017-03-30
   response:
@@ -777,23 +754,24 @@ interactions:
         \      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize\"\
         \r\n    },\r\n    \"storageProfile\": {\r\n      \"osDisk\": {\r\n       \
         \ \"osType\": \"Linux\",\r\n        \"osState\": \"Generalized\",\r\n    \
-        \    \"diskSizeGB\": 30,\r\n        \"blobUri\": \"https://vhdstoragee72a2b331a1623.blob.core.windows.net/vhds/osdisk_e72a2b331a.vhd\"\
+        \    \"diskSizeGB\": 30,\r\n        \"blobUri\": \"https://vhdstoragee2a73524ebad1e.blob.core.windows.net/vhds/osdisk_e2a73524eb.vhd\"\
         ,\r\n        \"caching\": \"ReadWrite\"\r\n      },\r\n      \"dataDisks\"\
         : []\r\n    },\r\n    \"provisioningState\": \"Creating\"\r\n  },\r\n  \"\
         type\": \"Microsoft.Compute/images\",\r\n  \"location\": \"westus\",\r\n \
         \ \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/images/myImage\"\
         ,\r\n  \"name\": \"myImage\"\r\n}"}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/7de36699-1865-4f36-8c16-683fe14f3116?api-version=2017-03-30']
+      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/7074b90f-2b54-4fbd-84c9-aac1ed2764bc?api-version=2017-03-30']
       Cache-Control: [no-cache]
       Content-Length: ['822']
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:08:29 GMT']
+      Date: ['Wed, 29 Nov 2017 21:52:44 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/CreateImages3Min;39,Microsoft.Compute/CreateImages30Min;198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -802,27 +780,28 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 computemanagementclient/3.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [457c8658-9cc6-11e7-bd38-a0b3ccf7272a]
+      x-ms-client-request-id: [9e27efb0-d54f-11e7-972b-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/7de36699-1865-4f36-8c16-683fe14f3116?api-version=2017-03-30
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/7074b90f-2b54-4fbd-84c9-aac1ed2764bc?api-version=2017-03-30
   response:
-    body: {string: "{\r\n  \"startTime\": \"2017-09-18T23:08:25.284972+00:00\",\r\n\
-        \  \"endTime\": \"2017-09-18T23:08:35.3974671+00:00\",\r\n  \"status\": \"\
-        Succeeded\",\r\n  \"name\": \"7de36699-1865-4f36-8c16-683fe14f3116\"\r\n}"}
+    body: {string: "{\r\n  \"startTime\": \"2017-11-29T21:52:39.4440181+00:00\",\r\
+        \n  \"endTime\": \"2017-11-29T21:52:49.5538448+00:00\",\r\n  \"status\": \"\
+        Succeeded\",\r\n  \"name\": \"7074b90f-2b54-4fbd-84c9-aac1ed2764bc\"\r\n}"}
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:08:59 GMT']
+      Date: ['Wed, 29 Nov 2017 21:53:14 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       Strict-Transport-Security: [max-age=31536000; includeSubDomains]
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
-      content-length: ['183']
+      content-length: ['184']
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/GetOperation3Min;2080,Microsoft.Compute/GetOperation30Min;17475']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -831,10 +810,10 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.14
-          msrest_azure/0.4.14 computemanagementclient/2.1.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.16+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.17 computemanagementclient/3.0.1 Azure-SDK-For-Python AZURECLI/TEST/2.0.22]
       accept-language: [en-US]
-      x-ms-client-request-id: [457c8658-9cc6-11e7-bd38-a0b3ccf7272a]
+      x-ms-client-request-id: [9e27efb0-d54f-11e7-972b-a0b3ccf7272a]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/images/myImage?api-version=2017-03-30
   response:
@@ -842,7 +821,7 @@ interactions:
         \      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_generalize_vm/providers/Microsoft.Compute/virtualMachines/vm-generalize\"\
         \r\n    },\r\n    \"storageProfile\": {\r\n      \"osDisk\": {\r\n       \
         \ \"osType\": \"Linux\",\r\n        \"osState\": \"Generalized\",\r\n    \
-        \    \"diskSizeGB\": 30,\r\n        \"blobUri\": \"https://vhdstoragee72a2b331a1623.blob.core.windows.net/vhds/osdisk_e72a2b331a.vhd\"\
+        \    \"diskSizeGB\": 30,\r\n        \"blobUri\": \"https://vhdstoragee2a73524ebad1e.blob.core.windows.net/vhds/osdisk_e2a73524eb.vhd\"\
         ,\r\n        \"caching\": \"ReadWrite\",\r\n        \"storageAccountType\"\
         : \"Standard_LRS\"\r\n      },\r\n      \"dataDisks\": []\r\n    },\r\n  \
         \  \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"Microsoft.Compute/images\"\
@@ -851,7 +830,7 @@ interactions:
     headers:
       Cache-Control: [no-cache]
       Content-Type: [application/json; charset=utf-8]
-      Date: ['Mon, 18 Sep 2017 23:08:59 GMT']
+      Date: ['Wed, 29 Nov 2017 21:53:15 GMT']
       Expires: ['-1']
       Pragma: [no-cache]
       Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -859,5 +838,6 @@ interactions:
       Transfer-Encoding: [chunked]
       Vary: [Accept-Encoding]
       content-length: ['870']
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/GetImages3Min;356,Microsoft.Compute/GetImages30Min;2492']
     status: {code: 200, message: OK}
 version: 1

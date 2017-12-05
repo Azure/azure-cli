@@ -162,7 +162,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                                     JMESPathCheck('resourceGroup', resource_group)]).get_output_in_json()
 
         self.cmd('backup policy list -g {} -v {}'.format(resource_group, vault_name), checks=[
-            JMESPathCheck("length(@)", 3),
+            JMESPathCheck("length(@)", 4),
             JMESPathCheck("length([?name == '{}'])".format(default_policy), 1),
             JMESPathCheck("length([?name == '{}'])".format(policy1), 1),
             JMESPathCheck("length([?name == '{}'])".format(policy2), 1)])
@@ -182,7 +182,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                      JMESPathCheck('resourceGroup', resource_group)])
 
         self.cmd('backup policy list -g {} -v {}'.format(resource_group, vault_name), checks=[
-            JMESPathCheck("length(@)", 4),
+            JMESPathCheck("length(@)", 5),
             JMESPathCheck("length([?name == '{}'])".format(default_policy), 1),
             JMESPathCheck("length([?name == '{}'])".format(policy1), 1),
             JMESPathCheck("length([?name == '{}'])".format(policy2), 1),
@@ -191,7 +191,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup policy delete -g {} -v {} -n {}'.format(resource_group, vault_name, policy3))
 
         self.cmd('backup policy list -g {} -v {}'.format(resource_group, vault_name), checks=[
-            JMESPathCheck("length(@)", 3),
+            JMESPathCheck("length(@)", 4),
             JMESPathCheck("length([?name == '{}'])".format(default_policy), 1),
             JMESPathCheck("length([?name == '{}'])".format(policy1), 1),
             JMESPathCheck("length([?name == '{}'])".format(policy2), 1)])
