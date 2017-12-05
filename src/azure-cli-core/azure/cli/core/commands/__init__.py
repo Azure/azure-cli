@@ -894,6 +894,10 @@ class AzArgumentContext(ArgumentsContext):
         if not self._applicable():
             return
 
+        if self.scope not in self.command_loader.command_table:
+            raise ValueError("command authoring error: extra argument '{}' cannot be registered to a group-level "
+                             "scope '{}'. It must be registered to a specific command.".format(dest, self.scope))
+
         merged_kwargs = self.group_kwargs.copy()
         merged_kwargs.update(kwargs)
         if self.command_loader.supported_api_version(resource_type=merged_kwargs.get('resource_type'),
