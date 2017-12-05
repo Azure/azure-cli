@@ -6,6 +6,8 @@
 import os
 import json
 
+from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
+
 
 # TYPES VALIDATORS
 
@@ -158,13 +160,13 @@ def application_enabled(cmd, namespace):
                          format(namespace.account_name))
 
 
-def validate_pool_resize_parameters(cmd, namespace):
+def validate_pool_resize_parameters(namespace):
     """Validate pool resize parameters correct"""
     if not namespace.abort and not namespace.target_dedicated_nodes:
         raise ValueError("The target-dedicated-nodes parameter is required to resize the pool.")
 
 
-def validate_json_file(cmd, namespace):
+def validate_json_file(namespace):
     """Validate the give json file existing"""
     if namespace.json_file:
         try:
@@ -176,7 +178,7 @@ def validate_json_file(cmd, namespace):
             raise ValueError("Invalid JSON file: {}".format(err))
 
 
-def validate_cert_file(cmd, namespace):
+def validate_cert_file(namespace):
     """Validate the give cert file existing"""
     try:
         with open(namespace.certificate_file, "rb"):
@@ -185,7 +187,7 @@ def validate_cert_file(cmd, namespace):
         raise ValueError("Cannot access certificate file: " + namespace.certificate_file)
 
 
-def validate_options(cmd, namespace):
+def validate_options(namespace):
     """Validate any flattened request header option arguments."""
     try:
         start = namespace.start_range
@@ -202,7 +204,7 @@ def validate_options(cmd, namespace):
             namespace.ocp_range = "bytes={}-{}".format(start, end)
 
 
-def validate_file_destination(cmd, namespace):
+def validate_file_destination(namespace):
     """Validate the destination path for a file download."""
     try:
         path = namespace.destination
@@ -263,7 +265,7 @@ def validate_pool_settings(namespace, parser):
             namespace.enable_auto_scale = True
 
 
-def validate_cert_settings(cmd, namespace):
+def validate_cert_settings(namespace):
     """Custom parsing for certificate commands - adds default thumbprint
     algorithm.
     """

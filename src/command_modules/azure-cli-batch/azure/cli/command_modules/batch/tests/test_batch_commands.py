@@ -111,12 +111,12 @@ class TestBatchValidators(unittest.TestCase):
 
     def test_batch_validate_options(self):
         ns = TestObj()
-        _validators.validate_options(None, ns)
+        _validators.validate_options(ns)
         self.assertFalse(hasattr(ns, 'ocp_range'))
 
         ns.start_range = "100"
         ns.end_range = None
-        _validators.validate_options(None, ns)
+        _validators.validate_options(ns)
         self.assertFalse(hasattr(ns, 'start_range'))
         self.assertFalse(hasattr(ns, 'end_range'))
         self.assertEqual(ns.ocp_range, "bytes=100-")
@@ -124,7 +124,7 @@ class TestBatchValidators(unittest.TestCase):
         del ns.ocp_range
         ns.start_range = None
         ns.end_range = 150
-        _validators.validate_options(None, ns)
+        _validators.validate_options(ns)
         self.assertFalse(hasattr(ns, 'start_range'))
         self.assertFalse(hasattr(ns, 'end_range'))
         self.assertEqual(ns.ocp_range, "bytes=0-150")
@@ -132,32 +132,32 @@ class TestBatchValidators(unittest.TestCase):
         del ns.ocp_range
         ns.start_range = 11
         ns.end_range = 22
-        _validators.validate_options(None, ns)
+        _validators.validate_options(ns)
         self.assertFalse(hasattr(ns, 'start_range'))
         self.assertFalse(hasattr(ns, 'end_range'))
         self.assertEqual(ns.ocp_range, "bytes=11-22")
 
     def test_batch_validate_file_destination(self):
         ns = TestObj()
-        _validators.validate_file_destination(None, ns)
+        _validators.validate_file_destination(ns)
         self.assertFalse(hasattr(ns, 'destination'))
 
         ns.destination = os.path.dirname(__file__)
         ns.file_name = "/wd/stdout.txt"
-        _validators.validate_file_destination(None, ns)
+        _validators.validate_file_destination(ns)
         self.assertEqual(ns.destination, os.path.join(os.path.dirname(__file__), 'stdout.txt'))
 
         ns.destination = __file__
         with self.assertRaises(ValueError):
-            _validators.validate_file_destination(None, ns)
+            _validators.validate_file_destination(ns)
 
         ns.destination = os.path.join(os.path.dirname(__file__), 'test.txt')
-        _validators.validate_file_destination(None, ns)
+        _validators.validate_file_destination(ns)
         self.assertEqual(ns.destination, os.path.join(os.path.dirname(__file__), 'test.txt'))
 
         ns.destination = "X:\\test.txt"
         with self.assertRaises(ValueError):
-            _validators.validate_file_destination(None, ns)
+            _validators.validate_file_destination(ns)
 
 
 class TestBatchParser(unittest.TestCase):
