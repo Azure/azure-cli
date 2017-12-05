@@ -34,8 +34,8 @@ def load_arguments(self, _):
         c.argument('storage_account_name', help='Provide the name of an existing storage account if you\'re recreating a container registry over a previous registry created storage account. Only applicable to Classic SKU.', completer=get_resource_name_completion_list(STORAGE_RESOURCE_TYPE))
         c.argument('sku', help='The SKU of the container registry', choices=MANAGED_REGISTRY_SKU + CLASSIC_REGISTRY_SKU)
         c.argument('password_name', help='The name of password to regenerate', choices=['password', 'password2'])
-        c.argument('username', options_list=('--username', '-u'), help='The username used to log into a container registry')
-        c.argument('password', options_list=('--password', '-p'), help='The password used to log into a container registry')
+        c.argument('username', options_list=['--username', '-u'], help='The username used to log into a container registry')
+        c.argument('password', options_list=['--password', '-p'], help='The password used to log into a container registry')
 
     with self.argument_context('acr create') as c:
         c.argument('admin_enabled', nargs='?', required=False, const='true', default='false', help='Indicates whether the admin user is enabled', choices=['true', 'false'])
@@ -45,7 +45,7 @@ def load_arguments(self, _):
 
     with self.argument_context('acr repository delete') as c:
         c.argument('manifest', nargs='?', required=False, const='', default=None, help='The sha256 based digest of manifest to delete')
-        c.argument('yes', options_list=('--yes', '-y'), action='store_true', help='Do not prompt for confirmation')
+        c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
         c.argument('repository', help='The name of the repository to delete.')
         c.argument('tag', help='The name of tag to delete')
 
@@ -64,8 +64,8 @@ def load_arguments(self, _):
         c.argument('registry_name', completer=None)
 
     with self.argument_context('acr webhook') as c:
-        c.argument('registry_name', options_list=('--registry', '-r'), help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
-        c.argument('webhook_name', options_list=('--name', '-n'), help='The name of the webhook', completer=get_resource_name_completion_list(WEBHOOK_RESOURCE_TYPE))
+        c.argument('registry_name', options_list=['--registry', '-r'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
+        c.argument('webhook_name', options_list=['--name', '-n'], help='The name of the webhook', completer=get_resource_name_completion_list(WEBHOOK_RESOURCE_TYPE))
         c.argument('uri', help='The service URI for the webhook to post notifications.')
         c.argument('headers', nargs='+', help="Space separated custom headers in 'key[=value]' format that will be added to the webhook notifications. Use {} to clear existing headers.".format(quotes), validator=validate_headers)
         c.argument('actions', nargs='+', help='Space separated list of actions that trigger the webhook to post notifications.', choices=['push', 'delete'])
@@ -76,8 +76,8 @@ def load_arguments(self, _):
         c.argument('webhook_name', completer=None)
 
     with self.argument_context('acr replication') as c:
-        c.argument('registry_name', options_list=('--registry', '-r'), help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
-        c.argument('replication_name', options_list=('--name', '-n'), help='The name of the replication.', completer=get_resource_name_completion_list(REPLICATION_RESOURCE_TYPE))
+        c.argument('registry_name', options_list=['--registry', '-r'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
+        c.argument('replication_name', options_list=['--name', '-n'], help='The name of the replication.', completer=get_resource_name_completion_list(REPLICATION_RESOURCE_TYPE))
 
     with self.argument_context('acr replication create') as c:
         c.argument('replication_name', help='The name of the replication. Default to the location name.', completer=None)

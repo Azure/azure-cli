@@ -95,8 +95,8 @@ class AcrCommandsTests(ScenarioTest):
         })
 
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --deployment-name {deployment_name}',
-                 checks=[self.check('name', self.kwargs['registry_name']),
-                         self.check('location', self.kwargs['rg_loc']),
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
                          self.check('adminUserEnabled', False),
                          self.check('sku.name', 'Classic'),
                          self.check('sku.tier', 'Classic'),
@@ -121,8 +121,8 @@ class AcrCommandsTests(ScenarioTest):
         })
 
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --storage-account-name {sa_for_create} --deployment-name {deployment_name}',
-                 checks=[self.check('name', self.kwargs['registry_name']),
-                         self.check('location', self.kwargs['rg_loc']),
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
                          self.check('adminUserEnabled', False),
                          self.check('sku.name', 'Classic'),
                          self.check('sku.tier', 'Classic'),
@@ -143,8 +143,8 @@ class AcrCommandsTests(ScenarioTest):
         })
 
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --deployment-name {deployment_name}',
-                 checks=[self.check('name', self.kwargs['registry_name']),
-                         self.check('location', self.kwargs['rg_loc']),
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
                          self.check('adminUserEnabled', False),
                          self.check('sku.name', 'Standard'),
                          self.check('sku.tier', 'Standard'),
@@ -170,38 +170,38 @@ class AcrCommandsTests(ScenarioTest):
         })
 
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --deployment-name {deployment_name}',
-                 checks=[self.check('name', self.kwargs['registry_name']),
-                         self.check('location', self.kwargs['rg_loc']),
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
                          self.check('adminUserEnabled', False),
                          self.check('sku.name', 'Standard'),
                          self.check('sku.tier', 'Standard'),
                          self.check('provisioningState', 'Succeeded')])
 
         self.cmd('acr webhook create -n {webhook_name} -r {registry_name} --uri {uri} --actions {actions}',
-                 checks=[self.check('name', self.kwargs['webhook_name']),
-                         self.check('location', self.kwargs['rg_loc']),
+                 checks=[self.check('name', '{webhook_name}'),
+                         self.check('location', '{rg_loc}'),
                          self.check('status', 'enabled'),
                          self.check('provisioningState', 'Succeeded')])
 
         self.cmd('acr webhook list -r {registry_name}',
-                 checks=[self.check('[0].name', self.kwargs['webhook_name']),
+                 checks=[self.check('[0].name', '{webhook_name}'),
                          self.check('[0].status', 'enabled'),
                          self.check('[0].provisioningState', 'Succeeded')])
         self.cmd('acr webhook show -n {webhook_name} -r {registry_name}',
-                 checks=[self.check('name', self.kwargs['webhook_name']),
+                 checks=[self.check('name', '{webhook_name}'),
                          self.check('status', 'enabled'),
                          self.check('provisioningState', 'Succeeded')])
 
         # update webhook
         self.cmd('acr webhook update -n {webhook_name} -r {registry_name} --headers {headers} --scope {webhook_scope}',
-                 checks=[self.check('name', self.kwargs['webhook_name']),
+                 checks=[self.check('name', '{webhook_name}'),
                          self.check('status', 'enabled'),
                          self.check('provisioningState', 'Succeeded'),
-                         self.check('scope', self.kwargs['webhook_scope'])])
+                         self.check('scope', '{webhook_scope}')])
 
         # get webhook config
         self.cmd('acr webhook get-config -n {webhook_name} -r {registry_name}',
-                 checks=[self.check('serviceUri', self.kwargs['uri']),
+                 checks=[self.check('serviceUri', '{uri}'),
                          self.check('customHeaders', {'key': 'value'})])
         # ping
         self.cmd('acr webhook ping -n {webhook_name} -r {registry_name}', checks=[self.exists('id')])
@@ -238,28 +238,28 @@ class AcrCommandsTests(ScenarioTest):
         })
 
         self.cmd('acr create -n {registry_name} -g {rg} -l {rg_loc} --sku {sku} --deployment-name {deployment_name}',
-                 checks=[self.check('name', self.kwargs['registry_name']),
-                         self.check('location', self.kwargs['rg_loc']),
+                 checks=[self.check('name', '{registry_name}'),
+                         self.check('location', '{rg_loc}'),
                          self.check('adminUserEnabled', False),
                          self.check('sku.name', 'Premium'),
                          self.check('sku.tier', 'Premium'),
                          self.check('provisioningState', 'Succeeded')])
 
         self.cmd('acr replication create -n {replication_name} -r {registry_name} -l {replication_loc}',
-                 checks=[self.check('name', self.kwargs['replication_name']),
-                         self.check('location', self.kwargs['replication_loc']),
+                 checks=[self.check('name', '{replication_name}'),
+                         self.check('location', '{replication_loc}'),
                          self.check('provisioningState', 'Succeeded')])
 
         self.cmd('acr replication list -r {registry_name}',
                  checks=[self.check('[0].provisioningState', 'Succeeded'),
                          self.check('[1].provisioningState', 'Succeeded')])
         self.cmd('acr replication show -n {replication_name} -r {registry_name}',
-                 checks=[self.check('name', self.kwargs['replication_name']),
+                 checks=[self.check('name', '{replication_name}'),
                          self.check('provisioningState', 'Succeeded')])
 
         # update replication
         self.cmd('acr replication update -n {replication_name} -r {registry_name} --tags {tags}',
-                 checks=[self.check('name', self.kwargs['replication_name']),
+                 checks=[self.check('name', '{replication_name}'),
                          self.check('provisioningState', 'Succeeded'),
                          self.check('tags', {'key': 'value'})])
 
