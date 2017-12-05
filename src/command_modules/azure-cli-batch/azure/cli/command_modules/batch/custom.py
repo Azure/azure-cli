@@ -42,14 +42,14 @@ def transfer_doc(source_func, *additional_source_funcs):
 
 # Mgmt custom commands
 
-def list_accounts(cmd, client, resource_group_name=None):
+def list_accounts(client, resource_group_name=None):
     acct_list = client.list_by_resource_group(resource_group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list(acct_list)
 
 
 @transfer_doc(AutoStorageBaseProperties)
-def create_account(cmd, client,
+def create_account(client,
                    resource_group_name, account_name, location, tags=None, storage_account=None,
                    keyvault=None, keyvault_url=None, no_wait=False):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
@@ -68,7 +68,7 @@ def create_account(cmd, client,
 
 
 @transfer_doc(AutoStorageBaseProperties)
-def update_account(cmd, client, resource_group_name, account_name,
+def update_account(client, resource_group_name, account_name,
                    tags=None, storage_account=None):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
@@ -78,7 +78,7 @@ def update_account(cmd, client, resource_group_name, account_name,
                          auto_storage=properties)
 
 
-def login_account(cmd, client, resource_group_name, account_name, shared_key_auth=False):
+def login_account(cmd, client, resource_group_name, account_name, shared_key_auth=False, show=False):
     account = client.get(resource_group_name=resource_group_name,
                          account_name=account_name)
     cmd.cli_ctx.config.set_value('batch', 'account', account.name)
@@ -90,30 +90,31 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
                                account_name=account_name)
         cmd.cli_ctx.config.set_value('batch', 'auth_mode', 'shared_key')
         cmd.cli_ctx.config.set_value('batch', 'access_key', keys.primary)
-        response = {
-            'account': account.name,
-            'endpoint': 'https://{}/'.format(account.account_endpoint),
-            'primaryKey': keys.primary,
-            'secondaryKey': keys.secondary
-        }
+        if show:
+            return {
+                'account': account.name,
+                'endpoint': 'https://{}/'.format(account.account_endpoint),
+                'primaryKey': keys.primary,
+                'secondaryKey': keys.secondary
+            }
     else:
         cmd.cli_ctx.config.set_value('batch', 'auth_mode', 'aad')
-        resource = cmd.cli_ctx.cloud.endpoints.batch_resource_id
-        profile = Profile(cmd.cli_ctx)
-        creds, subscription, tenant = profile.get_raw_token(resource=resource)
-        response = {
-            'tokenType': creds[0],
-            'accessToken': creds[1],
-            'expiresOn': creds[2]['expiresOn'],
-            'subscription': subscription,
-            'tenant': tenant,
-            'resource': resource
-        }
-    return response
+        if show:
+            resource = cmd.cli_ctx.cloud.endpoints.batch_resource_id
+            profile = Profile(cmd.cli_ctx)
+            creds, subscription, tenant = profile.get_raw_token(resource=resource)
+            return {
+                'tokenType': creds[0],
+                'accessToken': creds[1],
+                'expiresOn': creds[2]['expiresOn'],
+                'subscription': subscription,
+                'tenant': tenant,
+                'resource': resource
+            }
 
 
 @transfer_doc(ApplicationUpdateParameters)
-def update_application(cmd, client,
+def update_application(client,
                        resource_group_name, account_name, application_id, allow_updates=None,
                        display_name=None, default_version=None):
     parameters = ApplicationUpdateParameters(allow_updates=allow_updates,
@@ -176,7 +177,7 @@ def create_application_package(cmd, client,
 
 
 @transfer_doc(CertificateAddParameter)
-def create_certificate(cmd, client, certificate_file, thumbprint, password=None):
+def create_certificate(client, certificate_file, thumbprint, password=None):
     thumbprint_algorithm = 'sha1'
     certificate_format = 'pfx' if password else 'cer'
     with open(certificate_file, "rb") as f:
@@ -189,7 +190,7 @@ def create_certificate(cmd, client, certificate_file, thumbprint, password=None)
     return client.get(thumbprint_algorithm, thumbprint)
 
 
-def delete_certificate(cmd, client, thumbprint, abort=False):
+def delete_certificate(client, thumbprint, abort=False):
     thumbprint_algorithm = 'sha1'
     if abort:
         return client.cancel_deletion(thumbprint_algorithm, thumbprint)
@@ -198,7 +199,7 @@ def delete_certificate(cmd, client, thumbprint, abort=False):
 
 
 @transfer_doc(PoolResizeParameter)
-def resize_pool(cmd, client, pool_id, target_dedicated_nodes=None, target_low_priority_nodes=None,
+def resize_pool(client, pool_id, target_dedicated_nodes=None, target_low_priority_nodes=None,
                 resize_timeout=None, node_deallocation_option=None,
                 if_match=None, if_none_match=None, if_modified_since=None,
                 if_unmodified_since=None, abort=False):
@@ -221,7 +222,7 @@ def resize_pool(cmd, client, pool_id, target_dedicated_nodes=None, target_low_pr
 
 
 @transfer_doc(PoolUpdatePropertiesParameter, StartTask)
-def update_pool(cmd, client,
+def update_pool(client,
                 pool_id, json_file=None, start_task_command_line=None, certificate_references=None,
                 application_package_references=None, metadata=None,
                 start_task_environment_settings=None, start_task_wait_for_success=None,
@@ -263,7 +264,7 @@ def update_pool(cmd, client,
     return client.get(pool_id)
 
 
-def list_job(cmd, client, job_schedule_id=None, filter=None,  # pylint: disable=redefined-builtin
+def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redefined-builtin
              select=None, expand=None):
     if job_schedule_id:
         option1 = JobListFromJobScheduleOptions(filter=filter,
@@ -279,7 +280,7 @@ def list_job(cmd, client, job_schedule_id=None, filter=None,  # pylint: disable=
 
 
 @transfer_doc(TaskAddParameter, TaskConstraints)
-def create_task(cmd, client,
+def create_task(client,
                 job_id, json_file=None, task_id=None, command_line=None, resource_files=None,
                 environment_settings=None, affinity_info=None, max_wall_clock_time=None,
                 retention_time=None, max_task_retry_count=None,

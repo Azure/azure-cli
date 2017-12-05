@@ -38,17 +38,17 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
 
         # test create storage account with default set
         result = self.cmd('storage account create -g {rg} -n {str_n} -l {loc} --sku Standard_LRS').assert_with_checks([
-                self.check('name', 'clibatchteststorage1'),
-                self.check('location', 'northeurope'),
-                self.check('resourceGroup', resource_group)])
+                self.check('name', '{str_n}'),
+                self.check('location', '{loc}'),
+                self.check('resourceGroup', '{rg}')])
         storage_id = result.get_output_in_json()['id']
 
         # test create keyvault for use with BYOS account
         self.cmd('keyvault create -g {rg} -n {kv} -l {byos_l} --enabled-for-deployment true --enabled-for'
                  '-disk-encryption true --enabled-for-template-deployment true').assert_with_checks([
-                         self.check('name', 'clibatchtestkeyvault1'),
-                         self.check('location', 'uksouth'),
-                         self.check('resourceGroup', resource_group),
+                         self.check('name', '{kv}'),
+                         self.check('location', '{byos_l}'),
+                         self.check('resourceGroup', '{rg}'),
                          self.check('type(properties.accessPolicies)', 'array'),
                          self.check('length(properties.accessPolicies)', 1),
                          self.check('properties.sku.name', 'standard')])
@@ -57,25 +57,25 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
 
         # test create account with default set
         self.cmd('batch account create -g {rg} -n {acc} -l {loc}').assert_with_checks([
-                self.check('name', 'clibatchtest1'),
-                self.check('location', 'northeurope'),
-                self.check('resourceGroup', resource_group)])
+                self.check('name', '{acc}'),
+                self.check('location', '{loc}'),
+                self.check('resourceGroup', '{rg}')])
 
         # test create account with BYOS
         self.cmd('batch account create -g {rg} -n {byos_n} -l {byos_l} --keyvault {kv}').assert_with_checks([
-                self.check('name', 'clibatchtestuser1'),
-                self.check('location', 'uksouth'),
-                self.check('resourceGroup', resource_group)])
+                self.check('name', '{byos_n}'),
+                self.check('location', '{byos_l}'),
+                self.check('resourceGroup', '{rg}')])
 
         self.cmd('batch account set -g {rg} -n {acc} --storage-account {str_n}').assert_with_checks([
-                self.check('name', 'clibatchtest1'),
-                self.check('location', 'northeurope'),
-                self.check('resourceGroup', resource_group)])
+                self.check('name', '{acc}'),
+                self.check('location', '{loc}'),
+                self.check('resourceGroup', '{rg}')])
 
         self.cmd('batch account show -g {rg} -n {acc}').assert_with_checks([
-                self.check('name', 'clibatchtest1'),
-                self.check('location', 'northeurope'),
-                self.check('resourceGroup', resource_group),
+                self.check('name', '{acc}'),
+                self.check('location', '{loc}'),
+                self.check('resourceGroup', '{rg}'),
                 self.check('autoStorage.storageAccountId', storage_id)])
 
         self.cmd('batch account autostorage-keys sync -g {rg} -n {acc}')
@@ -114,29 +114,26 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
 
     @ResourceGroupPreparer(location='ukwest')
     def test_batch_application_cmd(self, resource_group):
-        application_name = 'testapp'
-        application_package_name = '1.0'
         _, package_file_name = tempfile.mkstemp()
-
         self.kwargs.update({
             'str_n': 'clibatchteststorage7',
             'loc': 'ukwest',
             'acc': 'clibatchtest7',
-            'app': application_name,
-            'app_p': application_package_name,
+            'app': 'testapp',
+            'app_p': '1.0',
             'app_f': package_file_name
         })
 
         # test create account with default set
         result = self.cmd('storage account create -g {rg} -n {str_n} -l {loc} --sku Standard_LRS').assert_with_checks([
-                self.check('name', 'clibatchteststorage7'),
-                self.check('location', 'ukwest'),
-                self.check('resourceGroup', resource_group)])
+                self.check('name', '{str_n}'),
+                self.check('location', '{loc}'),
+                self.check('resourceGroup', '{rg}')])
 
         self.cmd('batch account create -g {rg} -n {acc} -l {loc} --storage-account {str_n}').assert_with_checks([
-                self.check('name', 'clibatchtest7'),
-                self.check('location', 'ukwest'),
-                self.check('resourceGroup', resource_group)])
+                self.check('name', '{acc}'),
+                self.check('location', '{loc}'),
+                self.check('resourceGroup', '{rg}')])
 
         with open(package_file_name, 'w') as f:
             f.write('storage blob test sample file')
@@ -144,18 +141,18 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
         # test create application with default set
         self.cmd('batch application create -g {rg} -n {acc} --application-id {app} '
                  '--allow-updates').assert_with_checks([
-                         self.check('id', application_name),
+                         self.check('id', '{app}'),
                          self.check('allowUpdates', True)])
 
         self.cmd('batch application list -g {rg} -n {acc}').assert_with_checks([
                 self.check('length(@)', 1),
-                self.check('[0].id', application_name)])
+                self.check('[0].id', '{app}')])
 
         self.cmd('batch application package create -g {rg} -n {acc} --application-id {app}'
                  ' --version {app_p} --package-file "{app_f}"').assert_with_checks([
-                         self.check('id', application_name),
+                         self.check('id', '{app}'),
                          self.check('storageUrl != null', True),
-                         self.check('version', application_package_name),
+                         self.check('version', '{app_p}'),
                          self.check('state', 'active')])
 
         self.cmd('batch application package activate -g {rg} -n {acc} --application-id {app}'
@@ -163,17 +160,17 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
 
         self.cmd('batch application package show -g {rg} -n {acc} '
                  '--application-id {app} --version {app_p}').assert_with_checks([
-                            self.check('id', application_name),
+                            self.check('id', '{app}'),
                             self.check('format', 'zip'),
-                            self.check('version', application_package_name),
+                            self.check('version', '{app_p}'),
                             self.check('state', 'active')])
 
         self.cmd('batch application set -g {rg} -n {acc} --application-id {app} '
                  '--default-version {app_p}')
 
         self.cmd('batch application show -g {rg} -n {acc} --application-id {app}').assert_with_checks([
-                self.check('id', application_name),
-                self.check('defaultVersion', application_package_name),
+                self.check('id', '{app}'),
+                self.check('defaultVersion', '{app_p}'),
                 self.check('packages[0].format', 'zip'),
                 self.check('packages[0].state', 'active')])
 

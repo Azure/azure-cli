@@ -56,6 +56,7 @@ def load_arguments(self, _):
 
     with self.argument_context('batch account login') as c:
         c.argument('shared_key_auth', action='store_true', help='Using Shared Key authentication, if not specified, it will use Azure Active Directory authentication.')
+        c.argument('show', action='store_true', help='Display the credential information for the Batch account.')
 
     with self.argument_context('batch application set') as c:
         c.argument('application_id', options_list=('--application-id',), help="The ID of the application.")

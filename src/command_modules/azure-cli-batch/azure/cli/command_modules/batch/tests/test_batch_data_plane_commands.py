@@ -22,9 +22,8 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
     @BatchAccountPreparer(location='northcentralus')
     def test_batch_certificate_cmd(self, resource_group, batch_account_name):
         create_cert_file_path = self._get_test_data_file('batchtest.cer')
-        cert_thumbprint = '59833fd835f827e9ec693a4c82435a6360cc6271'
         self.kwargs.update({
-            'cert': cert_thumbprint,
+            'cert': '59833fd835f827e9ec693a4c82435a6360cc6271',
             'cert_f': create_cert_file_path
         })
 
@@ -33,19 +32,19 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         self.batch_cmd('batch certificate create --thumbprint {cert} '
                        '--certificate-file "{cert_f}"').assert_with_checks([
-                           self.check('thumbprint', cert_thumbprint),
+                           self.check('thumbprint', '{cert}'),
                            self.check('thumbprintAlgorithm', 'sha1'),
                            self.check('state', 'active')])
 
         # test create account with default set
         self.batch_cmd('batch certificate list').assert_with_checks([
             self.check('length(@)', 1),
-            self.check('[0].thumbprint', cert_thumbprint)])
+            self.check('[0].thumbprint', '{cert}')])
 
         self.batch_cmd("batch certificate delete --thumbprint {cert} --yes")
 
         self.batch_cmd('batch certificate show --thumbprint {cert}').assert_with_checks([
-            self.check('thumbprint', cert_thumbprint),
+            self.check('thumbprint', '{cert}'),
             self.check('thumbprintAlgorithm', 'sha1'),
             self.check('state', 'deleting')])
 

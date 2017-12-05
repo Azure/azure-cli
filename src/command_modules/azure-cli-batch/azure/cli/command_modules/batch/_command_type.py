@@ -15,15 +15,13 @@ from azure.cli.command_modules.batch import _parameter_format as params
 
 from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands import CONFIRM_PARAM_NAME
-from azure.cli.core.sdk.util import _CommandGroup
+from azure.cli.core.sdk.util import AzCommandGroup
 
 from knack.arguments import CLICommandArgument, IgnoreAction
 from knack.introspection import extract_full_summary_from_signature, extract_args_from_signature
 
 _CLASS_NAME = re.compile(r"<(.*?)>")  # Strip model name from class docstring
 _UNDERSCORE_CASE = re.compile('(?!^)([A-Z]+)')  # Convert from CamelCase to underscore_case
-
-
 
 
 def _load_model(name):
@@ -812,7 +810,7 @@ class AzureBatchDataPlaneCommand(object):
         return args
 
 
-class BatchCommandGroup(_CommandGroup):
+class BatchCommandGroup(AzCommandGroup):
 
     def batch_command(self, name, method_name=None, command_type=None, **kwargs):
         self._check_stale()
