@@ -21,8 +21,7 @@ No credentials specified to access storage service. Please provide any of the fo
 """
 
 
-def get_storage_data_service_client(cli_ctx, service, name=None, key=None, connection_string=None,
-                                    sas_token=None):
+def get_storage_data_service_client(cli_ctx, service, name=None, key=None, connection_string=None, sas_token=None):
     return get_data_service_client(cli_ctx, service, name, key, connection_string, sas_token,
                                    endpoint_suffix=cli_ctx.cloud.suffixes.storage_endpoint)
 
@@ -44,52 +43,45 @@ def storage_client_factory(cli_ctx, **_):
 
 
 def file_data_service_factory(cli_ctx, kwargs):
-    FileService = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'file#FileService')
-    return generic_data_service_factory(
-        cli_ctx, FileService,
-        kwargs.pop('account_name', None),
-        kwargs.pop('account_key', None),
-        connection_string=kwargs.pop('connection_string', None),
-        sas_token=kwargs.pop('sas_token', None))
+    t_file_svc = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'file#FileService')
+    return generic_data_service_factory(cli_ctx, t_file_svc, kwargs.pop('account_name', None),
+                                        kwargs.pop('account_key', None),
+                                        connection_string=kwargs.pop('connection_string', None),
+                                        sas_token=kwargs.pop('sas_token', None))
 
 
 def page_blob_service_factory(cli_ctx, kwargs):
-    PageBlobService = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'blob.pageblobservice#PageBlobService')
-    return generic_data_service_factory(
-        cli_ctx, PageBlobService,
-        kwargs.pop('account_name', None),
-        kwargs.pop('account_key', None),
-        connection_string=kwargs.pop('connection_string', None),
-        sas_token=kwargs.pop('sas_token', None))
+    t_page_blob_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'blob.pageblobservice#PageBlobService')
+    return generic_data_service_factory(cli_ctx, t_page_blob_service, kwargs.pop('account_name', None),
+                                        kwargs.pop('account_key', None),
+                                        connection_string=kwargs.pop('connection_string', None),
+                                        sas_token=kwargs.pop('sas_token', None))
 
 
 def blob_data_service_factory(cli_ctx, kwargs):
-    BlockBlobService = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
-    from ._params import blob_types
+    from azure.cli.command_modules.storage.sdkutil import get_blob_service_by_type
     blob_type = kwargs.get('blob_type')
-    blob_service = blob_types.get(blob_type, BlockBlobService)
-    return generic_data_service_factory(
-        cli_ctx, blob_service,
-        kwargs.pop('account_name', None),
-        kwargs.pop('account_key', None),
-        connection_string=kwargs.pop('connection_string', None),
-        sas_token=kwargs.pop('sas_token', None))
+    blob_service = get_blob_service_by_type(cli_ctx, blob_type) or get_blob_service_by_type(cli_ctx, 'block')
+
+    return generic_data_service_factory(cli_ctx, blob_service, kwargs.pop('account_name', None),
+                                        kwargs.pop('account_key', None),
+                                        connection_string=kwargs.pop('connection_string', None),
+                                        sas_token=kwargs.pop('sas_token', None))
 
 
 def table_data_service_factory(cli_ctx, kwargs):
-    TableService = get_table_data_type(cli_ctx, 'table', 'TableService')
-    return generic_data_service_factory(
-        cli_ctx, TableService,
-        kwargs.pop('account_name', None),
-        kwargs.pop('account_key', None),
-        connection_string=kwargs.pop('connection_string', None),
-        sas_token=kwargs.pop('sas_token', None))
+    return generic_data_service_factory(cli_ctx,
+                                        get_table_data_type(cli_ctx, 'table', 'TableService'),
+                                        kwargs.pop('account_name', None),
+                                        kwargs.pop('account_key', None),
+                                        connection_string=kwargs.pop('connection_string', None),
+                                        sas_token=kwargs.pop('sas_token', None))
 
 
 def queue_data_service_factory(cli_ctx, kwargs):
-    QueueService = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'queue#QueueService')
+    t_queue_service = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'queue#QueueService')
     return generic_data_service_factory(
-        cli_ctx, QueueService,
+        cli_ctx, t_queue_service,
         kwargs.pop('account_name', None),
         kwargs.pop('account_key', None),
         connection_string=kwargs.pop('connection_string', None),
@@ -97,23 +89,23 @@ def queue_data_service_factory(cli_ctx, kwargs):
 
 
 def cloud_storage_account_service_factory(cli_ctx, kwargs):
-    CloudStorageAccount = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'common#CloudStorageAccount')
+    t_cloud_storage_account = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'common#CloudStorageAccount')
     account_name = kwargs.pop('account_name', None)
     account_key = kwargs.pop('account_key', None)
     sas_token = kwargs.pop('sas_token', None)
     kwargs.pop('connection_string', None)
-    return CloudStorageAccount(account_name, account_key, sas_token)
+    return t_cloud_storage_account(account_name, account_key, sas_token)
 
 
 def multi_service_properties_factory(cli_ctx, kwargs):
     """Create multiple data services properties instance based on the services option"""
     from .services_wrapper import ServiceProperties
 
-    BaseBlobService, FileService, QueueService, = \
-        get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
-                'blob.baseblobservice#BaseBlobService', 'file#FileService', 'queue#QueueService')
+    t_base_blob_service, t_file_service, t_queue_service, = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
+                                                                    'blob.baseblobservice#BaseBlobService',
+                                                                    'file#FileService', 'queue#QueueService')
 
-    TableService = get_table_data_type(cli_ctx, 'table', 'TableService')
+    t_table_service = get_table_data_type(cli_ctx, 'table', 'TableService')
 
     account_name = kwargs.pop('account_name', None)
     account_key = kwargs.pop('account_key', None)
@@ -122,16 +114,14 @@ def multi_service_properties_factory(cli_ctx, kwargs):
     services = kwargs.pop('services', [])
 
     def get_creator(name, service_type):
-        return lambda: ServiceProperties(name, service_type, account_name, account_key, connection_string, sas_token)
+        return lambda: ServiceProperties(cli_ctx, name, service_type, account_name, account_key, connection_string,
+                                         sas_token)
 
-    creators = {
-        'b': get_creator('blob', BaseBlobService),
-        'f': get_creator('file', FileService),
-        'q': get_creator('queue', QueueService),
-        't': get_creator('table', TableService)
-    }
+    creators = {'b': get_creator('blob', t_base_blob_service), 'f': get_creator('file', t_file_service),
+                'q': get_creator('queue', t_queue_service), 't': get_creator('table', t_table_service)}
 
     return [creators[s]() for s in services]
+
 
 def cf_sa(cli_ctx, _):
     return storage_client_factory(cli_ctx).storage_accounts

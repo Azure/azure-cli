@@ -5,8 +5,8 @@
 
 import logging
 import multiprocessing
-import sys
 import subprocess
+import sys
 
 
 def init(root):
@@ -15,6 +15,9 @@ def init(root):
                         help='Select the commands with the given prefix. If omit select all the commands.')
     parser.add_argument('--list-only', dest='list_only', action='store_true',
                         help='List the commands\' information instead of execute them in separate processes.')
+    parser.add_argument('--details', dest='details', action='store_true',
+                        help='List the commands\' details. Use with --list-only.')
+    parser.set_defaults(func=run_commands)
     parser.set_defaults(func=run_commands)
 
 
@@ -42,7 +45,10 @@ def run_commands(args):
 
     if args.list_only:
         for each in sorted(table):
-            print_command_info(table[each])
+            if args.details:
+                print_command_info(table[each])
+            else:
+                print(each)
         sys.exit(0)
 
     commands = ['az {} --help'.format(each) for each in table]

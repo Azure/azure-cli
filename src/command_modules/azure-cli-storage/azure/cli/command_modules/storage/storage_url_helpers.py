@@ -11,7 +11,7 @@ container and/or blob URL.
 
 # pylint: disable=too-few-public-methods, too-many-instance-attributes
 class StorageResourceIdentifier(object):
-    def __init__(self, moniker):
+    def __init__(self, cloud, moniker):
         self.is_valid = False
         self.account_name = None
         self.container = None
@@ -32,8 +32,7 @@ class StorageResourceIdentifier(object):
         if url.path is None:
             return
 
-        from azure.cli.core._profile import CLOUD
-        self.account_name, type_name = url.netloc[:0 - len(CLOUD.suffixes.storage_endpoint) - 1]\
+        self.account_name, type_name = url.netloc[:0 - len(cloud.suffixes.storage_endpoint) - 1]\
             .split('.', 2)
 
         if type_name == 'blob':

@@ -682,6 +682,8 @@ class AzCommandGroup(CommandGroup):
         operation = operations_tmpl.format(method_name) if operations_tmpl else None
         self.command_loader._cli_command(command_name, operation, **merged_kwargs)  # pylint: disable=protected-access
 
+        return command_name
+
     def custom_command(self, name, method_name, **kwargs):
         """
         Register a custome CLI command.
@@ -711,6 +713,8 @@ class AzCommandGroup(CommandGroup):
         self.command_loader._cli_command(command_name,  # pylint: disable=protected-access
                                          operation=operations_tmpl.format(method_name),
                                          **merged_kwargs)
+
+        return command_name
 
     # pylint: disable=no-self-use
     def _resolve_operation(self, kwargs, name, command_type=None, source_kwarg='command_type'):
