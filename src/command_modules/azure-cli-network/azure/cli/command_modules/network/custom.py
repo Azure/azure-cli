@@ -2725,7 +2725,7 @@ def update_subnet(cmd, instance, resource_group_name, address_prefix=None, netwo
     :param str network_security_group: attach with existing network security group,
         both name or id are accepted. Use empty string "" to detach it.
     '''
-    NetworkSecurityGroup, ServiceEndpoint = cmd.get_models('NetworkSecurityGroup', 'ServiceEndpoint')
+    NetworkSecurityGroup, ServiceEndpoint = cmd.get_models('NetworkSecurityGroup', 'ServiceEndpointPropertiesFormat')
 
     if address_prefix:
         instance.address_prefix = address_prefix

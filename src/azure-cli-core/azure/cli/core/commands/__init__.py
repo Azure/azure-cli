@@ -238,6 +238,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 self.commands_loader.command_table = cmd_table
 
         self.commands_loader.command_table = self.commands_loader.command_table  # update with the truncated table
+        self.commands_loader.command_name = command
         self.commands_loader.load_arguments(command)
         self.cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, cmd_tbl=self.commands_loader.command_table)
         self.parser.cli_ctx = self.cli_ctx

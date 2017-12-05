@@ -211,7 +211,10 @@ def _get_operations_tmpl(cmd):
 
 
 def _get_client_factory(_, kwargs):
-    factory = kwargs.get('client_factory', kwargs.get('command_type').settings.get('client_factory', None))
+    command_type = kwargs.get('command_type', None)
+    factory = kwargs.get('client_factory', None)
+    if not factory and command_type:
+        factory = command_type.settings.get('client_factory', None)
     return factory
 
 
