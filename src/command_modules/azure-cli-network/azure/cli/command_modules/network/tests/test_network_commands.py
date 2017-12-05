@@ -1543,7 +1543,7 @@ class NetworkSubnetEndpointServiceScenarioTest(ScenarioTest):
             'subnet': 'subnet1'
         }
         self.cmd('network vnet list-endpoint-services -l westus', checks=[
-            JMESPathCheckV2('length(@)', 1),
+            JMESPathCheckV2('length(@)', 2),
             JMESPathCheckV2('@[0].name', 'Microsoft.Storage')
         ])
         self.cmd('network vnet create -g {rg} -n {vnet}'.format(**kwargs))

@@ -557,10 +557,8 @@ def process_public_ip_create_namespace(namespace):
 
 
 def process_route_table_create_namespace(namespace):
-    RouteTable = get_sdk(ResourceType.MGMT_NETWORK, 'RouteTable', mod='models')
     get_default_location_from_resource_group(namespace)
     validate_tags(namespace)
-    namespace.parameters = RouteTable(location=namespace.location, tags=namespace.tags)
 
 
 def process_tm_endpoint_create_namespace(namespace):

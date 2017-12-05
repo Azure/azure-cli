@@ -512,7 +512,8 @@ register_extra_cli_argument('network route-table create', 'tags')
 register_extra_cli_argument('network route-table create', 'location')
 
 register_cli_argument('network route-table create', 'location', location_type, validator=process_route_table_create_namespace)
-register_cli_argument('network route-table create', 'parameters', ignore_type)
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-10-01') as c:
+    c.register_cli_argument('network route-table', 'disable_bgp_route_propagation', help='Disable routes learned by BGP.', **three_state_flag())
 
 # Route Operation
 register_cli_argument('network route-table route', 'route_name', name_arg_type, id_part='child_name_1', help='Route name')
