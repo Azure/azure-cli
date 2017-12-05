@@ -32,7 +32,7 @@ class CheckerMixin(object):
     def _apply_kwargs(self, val):
         try:
             return val.format(**self.kwargs)
-        except Exception as ex:
+        except Exception:  # pylint: disable=broad-except
             return val
 
     def check(self, query, expected_results):
@@ -52,7 +52,7 @@ class CheckerMixin(object):
         expected_results = self._apply_kwargs(expected_results)
         return JMESPathCheckGreaterThan(query, expected_results)
 
-    def is_empty(self):
+    def is_empty(self):  # pylint: disable=no-self-use
         from azure.cli.testsdk.checkers import NoneCheck
         return NoneCheck()
 
@@ -108,7 +108,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
     def cmd(self, command, checks=None, expect_failure=False):
         try:
             command = command.format(**self.kwargs)
-        except KeyError as ex:
+        except KeyError:
             pass
         return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
 
@@ -132,7 +132,7 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
     def cmd(self, command, checks=None, expect_failure=False):
         try:
             command = command.format(**self.kwargs)
-        except KeyError as ex:
+        except KeyError:
             pass
         return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
 
@@ -148,7 +148,7 @@ class ExecutionResult(object):
         if in_process:
             self._in_process_execute(cli_ctx, command, expect_failure=expect_failure)
         else:
-            self._out_of_process_execute(cli_ctx, command)
+            self._out_of_process_execute(command)
 
         if expect_failure and self.exit_code == 0:
             logger.error('Command "%s" => %d. (It did not fail as expected) Output: %s. %s', command,

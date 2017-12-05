@@ -48,6 +48,7 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
 
 # Storage Account Preparer and its shorthand decorator
 
+# pylint: disable=too-many-instance-attributes
 class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', parameter_name='storage_account',
                  resource_group_parameter_name='resource_group', skip_delete=True,
@@ -93,6 +94,7 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
 
 # KeyVault Preparer and its shorthand decorator
 
+# pylint: disable=too-many-instance-attributes
 class KeyVaultPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest', sku='standard', location='westus', parameter_name='key_vault',
                  resource_group_parameter_name='resource_group', skip_delete=True,
@@ -134,6 +136,7 @@ class KeyVaultPreparer(AbstractPreparer, SingleValueReplacer):
 
 # Role based access control service principal preparer
 
+# pylint: disable=too-many-instance-attributes
 class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='http://clitest',
                  skip_assignment=True, parameter_name='sp_name', parameter_password='sp_password',

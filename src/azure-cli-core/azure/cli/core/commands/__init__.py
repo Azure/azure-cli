@@ -275,9 +275,9 @@ class AzCliCommandInvoker(CommandInvoker):
             if hasattr(expanded_arg, 'cmd'):
                 expanded_arg.cmd = cmd
 
-            self._validation(expanded_arg)
+            self.cli_ctx.data['command'] = expanded_arg.command
 
-            self.data['command'] = expanded_arg.command
+            self._validation(expanded_arg)
 
             params = self._filter_params(expanded_arg)
 
@@ -286,6 +286,8 @@ class AzCliCommandInvoker(CommandInvoker):
                                           self.data['output'],
                                           [p for p in args if p.startswith('-')],
                                           extension_name=command_source.extension_name if command_source else None)
+            if command_source:
+                self.data['command_extension_name'] = command_source.extension_name
 
             try:
                 result = cmd(params)
@@ -308,9 +310,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 self.cli_ctx.raise_event(events.EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
                 self.cli_ctx.raise_event(events.EVENT_INVOKER_FILTER_RESULT, event_data=event_data)
                 result = event_data['result']
-
-                if result:
-                    results.append(result)
+                results.append(result)
 
             except Exception as ex:  # pylint: disable=broad-except
                 if cmd.exception_handler:
