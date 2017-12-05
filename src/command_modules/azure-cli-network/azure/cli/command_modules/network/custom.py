@@ -3210,4 +3210,22 @@ def add_vpn_conn_ipsec_policy(cmd, resource_group_name, connection_name,
                              pfs_group=pfs_group)
     if conn.ipsec_policies:
         conn.ipsec_policies.append(new_policy)
+
+
+def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_wait=False):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
+    conn = ncf.get(resource_group_name, connection_name)
+    conn.ipsec_policies = None
+    conn.use_policy_based_traffic_selectors = False
+    if no_wait:
+        return ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
+
+    from azure.cli.core.commands import LongRunningOperation
+    poller = ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
+    return LongRunningOperation(cmd.cli_ctx)(poller).ipsec_policies
+
+
+def list_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name):
+    ncf = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
+    return ncf.get(resource_group_name, connection_name).ipsec_policies
 # endregion

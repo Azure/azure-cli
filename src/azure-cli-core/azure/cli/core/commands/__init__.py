@@ -825,7 +825,7 @@ class AzArgumentContext(ArgumentsContext):
                                                      max_api=merged_kwargs.get('max_api')):
             super(AzArgumentContext, self).argument(dest, **merged_kwargs)
         else:
-            self.ignore(dest)
+            super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
 
     def expand(self, dest, model_type, group_name=None, patches=None):
         # TODO:
