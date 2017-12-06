@@ -28,4 +28,5 @@ FAQ
 - Add a dependency on `azure-cli-core` to your `setup.py`.
 - Rename your package to start with `azure-cli-*`.
 - If you rely on an Azure autorest SDK, release the SDK at [azure-sdk-for-python](https://github.com/Azure/azure-sdk-for-python) and add it as a dependency.
+- If you no longer want your extension to be loaded, modify `BLACKLISTED_EXTENSIONS` in azure.cli.core.commands.__init__.py.
 - Create a PR to [Azure/azure-cli](https://github.com/Azure/azure-cli/).
