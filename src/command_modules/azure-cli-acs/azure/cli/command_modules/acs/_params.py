@@ -78,7 +78,7 @@ def load_arguments(self, _):
         c.argument('dns_name_prefix', options_list=['--dns-prefix', '-d'])
         c.argument('orchestrator_type', get_enum_type(orchestrator_types), options_list=['--orchestrator-type', '-t'])
         c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
-                   completer=FilesCompleter())
+                   completer=FilesCompleter(), validator=validate_ssh_key)
         c.argument('tags', tags_type)
         c.argument('disable_browser', help='Do not open browser after opening a proxy to the cluster web user interface')
 
