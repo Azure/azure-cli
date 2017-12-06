@@ -131,7 +131,7 @@ for name in $(ls src/command_modules | grep azure-cli-); do
     if [ "$name" == "azure-cli-keyvault" ]; then continue; fi
     if [ "$name" == "azure-cli-lab" ]; then continue; fi
     if [ "$name" == "azure-cli-monitor" ]; then continue; fi
-    if [ "$name" == "azure-cli-network" ]; then continue; fi
+    # if [ "$name" == "azure-cli-network" ]; then continue; fi
     if [ "$name" == "azure-cli-profile" ]; then continue; fi
     if [ "$name" == "azure-cli-rdbms" ]; then continue; fi
     # if [ "$name" == "azure-cli-redis" ]; then continue; fi

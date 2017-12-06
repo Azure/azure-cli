@@ -250,7 +250,7 @@ def load_command_table(self, _):
             g.custom_command('create', 'create_ag_{}'.format(_make_singular(subresource)), no_wait_param='no_wait', validator=create_validator)
             g.generic_update_command('update', command_type=network_ag_sdk, no_wait_param='raw',
                                      custom_func_name='update_ag_{}'.format(_make_singular(subresource)),
-                                     child_collection_prop_name=subresource)
+                                     child_collection_prop_name=subresource, validator=create_validator)
 
     with self.command_group('network application-gateway redirect-config', network_util, min_api='2017-06-01') as g:
         subresource = 'redirect_configurations'
