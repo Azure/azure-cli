@@ -11,9 +11,6 @@ from ._client_factory import cf_compute_service
 
 @Completer
 def get_vm_size_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-    print(prefix)
-    print(namespace)
-    raise NotImplementedError()
     try:
         location = namespace.location
     except AttributeError:
@@ -23,4 +20,4 @@ def get_vm_size_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: di
 
 
 def get_vm_sizes(cli_ctx, location):
-    return list(cf_compute_service(cli_ctx, None).virtual_machine_sizes.list(location))
+    return list(cf_compute_service(cli_ctx).virtual_machine_sizes.list(location))

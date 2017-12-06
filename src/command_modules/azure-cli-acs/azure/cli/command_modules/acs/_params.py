@@ -9,20 +9,55 @@ import os.path
 import platform
 
 from argcomplete.completers import FilesCompleter
-from azure.cli.core.commands.parameters import file_type
-from azure.cli.core.commands.parameters import get_enum_type
-from azure.cli.core.commands.parameters import get_resource_name_completion_list
-from azure.cli.core.commands.parameters import name_type
-from azure.cli.core.commands.parameters import tags_type
+from azure.cli.core.commands.parameters import (
+    file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type)
 from azure.cli.core.commands.validators import validate_file_or_dict
 
 from ._completers import get_vm_size_completion_list
-from ._validators import validate_create_parameters
-from ._validators import validate_k8s_version
-from ._validators import validate_k8s_client_version
-from ._validators import validate_linux_host_name
-from ._validators import validate_list_of_integers
-from ._validators import validate_ssh_key
+from ._validators import (
+    validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
+    validate_list_of_integers, validate_ssh_key)
+
+
+aci_connector_os_type = ['Windows', 'Linux', 'Both']
+
+aci_connector_chart_url = 'https://github.com/Azure/aci-connector-k8s/raw/master/charts/aci-connector.tgz'
+
+orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
+
+regions_in_preview = [
+    "canadacentral",
+    "canadaeast",
+    "centralindia",
+    "koreasouth",
+    "koreacentral",
+    "southindia",
+    "uksouth",
+    "ukwest",
+    "westcentralus",
+    "westindia",
+    "westus2",
+]
+
+regions_in_prod = [
+    "australiaeast",
+    "australiasoutheast",
+    "brazilsouth",
+    "centralus",
+    "eastasia",
+    "eastus",
+    "eastus2",
+    "japaneast",
+    "japanwest",
+    "northcentralus",
+    "northeurope",
+    "southcentralus",
+    "southeastasia",
+    "westeurope",
+    "westus",
+]
+
+storage_profile_types = ["StorageAccount", "ManagedDisks"]
 
 
 def load_arguments(self, _):
@@ -53,7 +88,6 @@ def load_arguments(self, _):
         c.argument('master_profile', options_list=['--master-profile', '-m'], type=validate_file_or_dict,
                    help=_get_feature_in_preview_message() + 'The file or dictionary representation of the master profile. Note it will override any master settings once set')
         c.argument('master_vm_size', completer=get_vm_size_completion_list, help=_get_feature_in_preview_message())
-        # c.argument('master_osdisk_size', type=int, )
         c.argument('agent_count', type=int,
                    help='Set default number of agents for the agent pools.  Note, for DC/OS clusters you will also get 1 or 2 public agents in addition to these selected masters.')
         c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters,
@@ -169,44 +203,3 @@ def _get_default_install_location(exe_name):
 
 def _get_feature_in_preview_message():
     return "Feature in preview, only in " + ", ".join(regions_in_preview) + ". "
-
-
-orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
-
-aci_connector_os_type = ['Windows', 'Linux', 'Both']
-
-aci_connector_chart_url = 'https://github.com/Azure/aci-connector-k8s/raw/master/charts/aci-connector.tgz'
-
-regions_in_preview = [
-    "canadacentral",
-    "canadaeast",
-    "centralindia",
-    "koreasouth",
-    "koreacentral",
-    "southindia",
-    "uksouth",
-    "ukwest",
-    "westcentralus",
-    "westindia",
-    "westus2",
-]
-
-regions_in_prod = [
-    "australiaeast",
-    "australiasoutheast",
-    "brazilsouth",
-    "centralus",
-    "eastasia",
-    "eastus",
-    "eastus2",
-    "japaneast",
-    "japanwest",
-    "northcentralus",
-    "northeurope",
-    "southcentralus",
-    "southeastasia",
-    "westeurope",
-    "westus",
-]
-
-storage_profile_types = ["StorageAccount", "ManagedDisks"]
