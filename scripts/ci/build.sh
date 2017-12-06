@@ -105,7 +105,6 @@ setup(
 EOL
 
 for name in $(ls src/command_modules | grep azure-cli-); do
-    if [ "$name" == "azure-cli-acs" ]; then continue; fi
     if [ "$name" == "azure-cli-advisor" ]; then continue; fi
     if [ "$name" == "azure-cli-appservice" ]; then continue; fi
     if [ "$name" == "azure-cli-backup" ]; then continue; fi
@@ -150,10 +149,10 @@ done
 
 cat >>$testsrc_dir/setup.py <<EOL
     ],
-    package_data={'': ['recordings/**/*.yaml', 
+    package_data={'': ['recordings/**/*.yaml',
                        'data/*.zip',
                        'data/*.whl',
-                       '*.pem', 
+                       '*.pem',
                        '*.pfx',
                        '*.txt',
                        '*.json',
@@ -162,9 +161,9 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '*.md',
                        '*.bat',
                        '*.txt',
-                       '*.cer', 
+                       '*.cer',
                        '**/*.cer',
-                       '**/*.pem', 
+                       '**/*.pem',
                        '**/*.pfx',
                        '**/*.txt',
                        '**/*.json',
@@ -178,16 +177,16 @@ cat >>$testsrc_dir/setup.py <<EOL
 EOL
 
 pushd $testsrc_dir
-python setup.py -q bdist_wheel -d $output_dir 
+python setup.py -q bdist_wheel -d $output_dir
 python setup.py -q sdist -d $sdist_dir
 popd
 
 ##############################################
 # clear afterwards
-rm -rf $testsrc_dir  
+rm -rf $testsrc_dir
 git checkout src
 
 ##############################################
-# summary 
+# summary
 echo 'Build result:'
 ls -R ./artifacts
