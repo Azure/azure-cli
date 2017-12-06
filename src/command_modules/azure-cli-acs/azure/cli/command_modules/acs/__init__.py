@@ -9,12 +9,12 @@ from azure.cli.core import AzCommandsLoader
 import azure.cli.command_modules.acs._help  # pylint: disable=unused-import
 
 
-class ContainerCommandsLoader(AzCommandsLoader):
+class ContainerServiceCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
         acs_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.acs.custom#{}')
-        super(ContainerCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=acs_custom)
+        super(ContainerServiceCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=acs_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.acs.commands import load_command_table
@@ -26,4 +26,4 @@ class ContainerCommandsLoader(AzCommandsLoader):
         load_arguments(self, command)
 
 
-COMMAND_LOADER_CLS = ContainerCommandsLoader
+COMMAND_LOADER_CLS = ContainerServiceCommandsLoader
