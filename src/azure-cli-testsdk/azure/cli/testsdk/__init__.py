@@ -7,8 +7,6 @@ from azure.cli.core import AzCli
 
 from azure_devtools.scenario_tests import live_only, record_only, get_sha1_hash
 
-from knack.commands import CLICommandsLoader
-
 from .base import ScenarioTest, LiveScenarioTest
 from .preparers import (StorageAccountPreparer, ResourceGroupPreparer, RoleBasedServicePrincipalPreparer,
                         KeyVaultPreparer)
@@ -29,17 +27,15 @@ class TestCli(AzCli):
     def __init__(self, commands_loader_cls=None, **kwargs):
         import os
 
-        from azure.cli.core import MainCommandsLoader, AzCli
+        from azure.cli.core import MainCommandsLoader
         from azure.cli.core.commands import AzCliCommandInvoker
         from azure.cli.core.azlogging import AzCliLogging
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.parser import AzCliCommandParser
         from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
         from azure.cli.core._help import AzCliHelp
-        from azure.cli.core._profile import Profile
 
         from knack.completion import ARGCOMPLETE_ENV_NAME
-        from knack.log import get_logger
 
         super(TestCli, self).__init__(
             cli_name='az',

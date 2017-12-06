@@ -100,6 +100,7 @@ class HelpTest(unittest.TestCase):
         cli.invocation.parser.load_command_table(cmd_tbl)
         for cmd in cmd_tbl:
             try:
+                cmd_tbl[cmd].loader.command_name = cmd
                 cmd_tbl[cmd].loader.load_arguments(cmd)
             except KeyError:
                 pass

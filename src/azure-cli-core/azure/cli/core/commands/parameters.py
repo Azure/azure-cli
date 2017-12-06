@@ -26,7 +26,7 @@ def get_subscription_locations(cli_ctx):
 
 
 @Completer
-def get_location_completion_list(cmd, prefix, namespace,**kwargs):  # pylint: disable=unused-argument
+def get_location_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     result = get_subscription_locations(cmd.cli_ctx)
     return [l.name for l in result]
 
@@ -83,7 +83,6 @@ def get_resources_in_subscription(cli_ctx, resource_type=None):
 
 
 def get_resource_name_completion_list(resource_type=None):
-    from azure.cli.core.decorators import Completer
 
     @Completer
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument

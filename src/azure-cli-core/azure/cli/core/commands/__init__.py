@@ -238,6 +238,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 self.commands_loader.command_table = cmd_table
 
         self.commands_loader.command_table = self.commands_loader.command_table  # update with the truncated table
+        self.commands_loader.command_name = command
         self.commands_loader.load_arguments(command)
         self.cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, cmd_tbl=self.commands_loader.command_table)
         self.parser.cli_ctx = self.cli_ctx
@@ -274,9 +275,9 @@ class AzCliCommandInvoker(CommandInvoker):
             if hasattr(expanded_arg, 'cmd'):
                 expanded_arg.cmd = cmd
 
-            self._validation(expanded_arg)
+            self.cli_ctx.data['command'] = expanded_arg.command
 
-            self.data['command'] = expanded_arg.command
+            self._validation(expanded_arg)
 
             params = self._filter_params(expanded_arg)
 
@@ -285,6 +286,8 @@ class AzCliCommandInvoker(CommandInvoker):
                                           self.data['output'],
                                           [p for p in args if p.startswith('-')],
                                           extension_name=command_source.extension_name if command_source else None)
+            if command_source:
+                self.data['command_extension_name'] = command_source.extension_name
 
             try:
                 result = cmd(params)
@@ -307,9 +310,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 self.cli_ctx.raise_event(events.EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
                 self.cli_ctx.raise_event(events.EVENT_INVOKER_FILTER_RESULT, event_data=event_data)
                 result = event_data['result']
-
-                if result:
-                    results.append(result)
+                results.append(result)
 
             except Exception as ex:  # pylint: disable=broad-except
                 if cmd.exception_handler:
@@ -824,7 +825,7 @@ class AzArgumentContext(ArgumentsContext):
                                                      max_api=merged_kwargs.get('max_api')):
             super(AzArgumentContext, self).argument(dest, **merged_kwargs)
         else:
-            self.ignore(dest)
+            super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
 
     def expand(self, dest, model_type, group_name=None, patches=None):
         # TODO:
@@ -894,7 +895,7 @@ class AzArgumentContext(ArgumentsContext):
             return
 
         if self.scope not in self.command_loader.command_table:
-            raise ValueError("command authoring error: extra argument '{}' cannot be registered to a group-level "\
+            raise ValueError("command authoring error: extra argument '{}' cannot be registered to a group-level "
                              "scope '{}'. It must be registered to a specific command.".format(dest, self.scope))
 
         merged_kwargs = self.group_kwargs.copy()

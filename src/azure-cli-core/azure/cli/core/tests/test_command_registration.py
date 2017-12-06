@@ -16,6 +16,17 @@ from azure.cli.testsdk import TestCli
 from knack.arguments import CLICommandArgument, CLIArgumentType
 
 
+def _prepare_test_commands_loader(loader_cls, cli_ctx, command):
+    loader = loader_cls(cli_ctx)
+    loader.cli_ctx.invocation = mock.MagicMock()
+    loader.cli_ctx.invocation.commands_loader = loader
+    loader.command_name = command
+    loader.load_command_table(None)
+    loader.load_arguments(loader.command_name)
+    loader._update_command_definitions()
+    return loader
+
+
 class TestCommandRegistration(unittest.TestCase):
 
     @classmethod
@@ -50,7 +61,7 @@ class TestCommandRegistration(unittest.TestCase):
         """
         pass
 
-    def test_register_cli_argument(self):
+    def test_argument(self):
 
         class TestCommandsLoader(AzCommandsLoader):
 
@@ -66,12 +77,10 @@ class TestCommandRegistration(unittest.TestCase):
                     c.argument('vm_name', options_list=('--wonky-name', '-n'), metavar='VMNAME', help='Completely WONKY name...', required=False)
 
         cli = TestCli(commands_loader_cls=TestCommandsLoader)
-        loader = TestCommandsLoader(cli)
-        loader.load_command_table(None)
-        loader.load_arguments('test register sample-vm-get')
-        loader._update_command_definitions()
-        command_metadata = loader.command_table['test register sample-vm-get']
+        command = 'test register sample-vm-get'
+        loader = _prepare_test_commands_loader(TestCommandsLoader, cli, command)
 
+        command_metadata = loader.command_table[command]
         self.assertEqual(len(loader.command_table), 1,
                          'We expect exactly one command in the command table')
         self.assertEqual(len(command_metadata.arguments), 4, 'We expected exactly 4 arguments')
@@ -101,10 +110,8 @@ class TestCommandRegistration(unittest.TestCase):
                     c.argument('vm_name', options_list=('--wonky-name', '-n'), metavar='VMNAME', help='Completely WONKY name...', required=False)
 
         cli = TestCli(commands_loader_cls=TestCommandsLoader)
-        loader = TestCommandsLoader(cli)
-        loader.load_command_table(None)
-        loader.load_arguments('test command sample-vm-get')
-        loader._update_command_definitions()
+        command = 'test command sample-vm-get'
+        loader = _prepare_test_commands_loader(TestCommandsLoader, cli, command)
 
         self.assertEqual(len(loader.command_table), 1,
                          'We expect exactly one command in the command table')
@@ -210,7 +217,7 @@ class TestCommandRegistration(unittest.TestCase):
         self.assertTrue(isinstance(ext2.command_source, ExtensionCommandSource))
         self.assertTrue(ext2.command_source.overrides_command)
 
-    def test_register_cli_argument_with_overrides(self):
+    def test_argument_with_overrides(self):
 
         global_vm_name_type = CLIArgumentType(
             options_list=('--foo', '-f'), metavar='FOO', help='foo help'
@@ -240,24 +247,21 @@ class TestCommandRegistration(unittest.TestCase):
                     c.argument('vm_name', derived_vm_name_type, help='second modification')
 
         cli = TestCli(commands_loader_cls=TestCommandsLoader)
-        loader = TestCommandsLoader(cli)
-        loader.load_command_table(None)
-        loader.load_arguments('test vm-get')
-        loader.load_arguments('test command vm-get-1')
-        loader.load_arguments('test command vm-get-2')
-        loader._update_command_definitions()
-
+        loader = _prepare_test_commands_loader(TestCommandsLoader, cli, 'test vm-get')
         self.assertEqual(len(loader.command_table), 3,
                          'We expect exactly three commands in the command table')
         command1 = loader.command_table['test vm-get'].arguments['vm_name']
-        command2 = loader.command_table['test command vm-get-1'].arguments['vm_name']
-        command3 = loader.command_table['test command vm-get-2'].arguments['vm_name']
-
         self.assertTrue(command1.options['help'] == 'foo help')
+
+        loader = _prepare_test_commands_loader(TestCommandsLoader, cli, 'test command vm-get-1')
+        command2 = loader.command_table['test command vm-get-1'].arguments['vm_name']
         self.assertTrue(command2.options['help'] == 'first modification')
+
+        loader = _prepare_test_commands_loader(TestCommandsLoader, cli, 'test command vm-get-2')
+        command3 = loader.command_table['test command vm-get-2'].arguments['vm_name']
         self.assertTrue(command3.options['help'] == 'second modification')
 
-    def test_register_extra_cli_argument(self):
+    def test_extra_argument(self):
 
         class TestCommandsLoader(AzCommandsLoader):
 
@@ -273,10 +277,8 @@ class TestCommandRegistration(unittest.TestCase):
                     c.extra('added_param', options_list=['--added-param'], metavar='ADDED', help='Just added this right now!', required=True)
 
         cli = TestCli(commands_loader_cls=TestCommandsLoader)
-        loader = TestCommandsLoader(cli)
-        loader.load_command_table(None)
-        loader.load_arguments('test command sample-vm-get')
-        loader._update_command_definitions()
+        command = 'test command sample-vm-get'
+        loader = _prepare_test_commands_loader(TestCommandsLoader, cli, command)
 
         self.assertEqual(len(loader.command_table), 1,
                          'We expect exactly one command in the command table')
@@ -320,12 +322,10 @@ class TestCommandRegistration(unittest.TestCase):
                 sample_sdk_method_with_weird_docstring)  # pylint: disable=line-too-long
 
         cli = TestCli(commands_loader_cls=TestCommandsLoader)
-        loader = TestCommandsLoader(cli)
-        loader.load_command_table(None)
-        loader.load_arguments('test command foo')
-        loader._update_command_definitions()
+        command = 'test command foo'
+        loader = _prepare_test_commands_loader(TestCommandsLoader, cli, command)
 
-        command_metadata = loader.command_table['test command foo']
+        command_metadata = loader.command_table[command]
         self.assertEqual(len(command_metadata.arguments), 3, 'We expected exactly 3 arguments')
         some_expected_arguments = {
             'param_a': CLIArgumentType(dest='param_a', required=True, help=''),
@@ -359,7 +359,7 @@ class TestCommandRegistration(unittest.TestCase):
         arg.update(validator=None)
         self.assertIsNone(arg.settings['validator'])
 
-    def test_override_using_register_cli_argument(self):
+    def test_override_using_argument(self):
         def sample_sdk_method(param_a):  # pylint: disable=unused-argument
             pass
 
@@ -382,12 +382,10 @@ class TestCommandRegistration(unittest.TestCase):
 
         setattr(sys.modules[__name__], sample_sdk_method.__name__, sample_sdk_method)
         cli = TestCli(commands_loader_cls=TestCommandsLoader)
-        loader = TestCommandsLoader(cli)
-        loader.load_command_table(None)
-        loader.load_arguments('override_using_register_cli_argument foo')
-        loader._update_command_definitions()
+        command = 'override_using_register_cli_argument foo'
+        loader = _prepare_test_commands_loader(TestCommandsLoader, cli, command)
 
-        command_metadata = loader.command_table['override_using_register_cli_argument foo']
+        command_metadata = loader.command_table[command]
         self.assertEqual(len(command_metadata.arguments), 1, 'We expected exactly 1 arguments')
 
         actual_arg = command_metadata.arguments['param_a']

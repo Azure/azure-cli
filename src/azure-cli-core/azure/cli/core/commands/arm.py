@@ -211,7 +211,10 @@ def _get_operations_tmpl(cmd):
 
 
 def _get_client_factory(_, kwargs):
-    factory = kwargs.get('client_factory', kwargs.get('command_type').settings.get('client_factory', None))
+    command_type = kwargs.get('command_type', None)
+    factory = kwargs.get('client_factory', None)
+    if not factory and command_type:
+        factory = command_type.settings.get('client_factory', None)
     return factory
 
 
@@ -357,9 +360,11 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
         setter = context.get_op_handler(setter_op)
 
+        no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+        if no_wait_param:
+            setterargs[no_wait_param] = args[no_wait_param]
         result = setter(**setterargs)
 
-        no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
         if no_wait_param and setterargs.get(no_wait_param, None):
             return None
 
