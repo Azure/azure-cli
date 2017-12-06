@@ -19,7 +19,7 @@ from knack.log import get_logger
 from ._client_factory import cf_acr_registries
 from ._constants import MANAGED_REGISTRY_SKU
 from ._utils import get_registry_by_name
-from .credential import _get_acr_credentials
+from .credential import get_acr_credentials
 
 
 logger = get_logger(__name__)
@@ -155,7 +155,7 @@ def _get_credentials(cli_ctx,
     if not password:
         try:
             client = cf_acr_registries(cli_ctx)
-            cred = _get_acr_credentials(cli_ctx, client, registry_name)
+            cred = get_acr_credentials(cli_ctx, client, registry_name)
             username = cred.username
             password = cred.passwords[0].value
             return login_server, username, password

@@ -8,7 +8,7 @@ from knack.util import CLIError
 from ._utils import get_registry_by_name
 
 
-def _get_acr_credentials(cli_ctx, client, registry_name, resource_group_name=None):
+def get_acr_credentials(cli_ctx, client, registry_name, resource_group_name=None):
     registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
 
     if registry.admin_user_enabled:  # pylint: disable=no-member
@@ -18,7 +18,7 @@ def _get_acr_credentials(cli_ctx, client, registry_name, resource_group_name=Non
 
 
 def acr_credential_show(cmd, client, registry_name, resource_group_name=None):
-    return _get_acr_credentials(cmd.cli_ctx, client, registry_name, resource_group_name)
+    return get_acr_credentials(cmd.cli_ctx, client, registry_name, resource_group_name)
 
 
 def acr_credential_renew(cmd, client, registry_name, password_name, resource_group_name=None):
