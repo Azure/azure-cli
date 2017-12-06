@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from __future__ import print_function
 import os
 import logging
 import unittest
@@ -10,7 +11,7 @@ from six import StringIO
 import sys
 
 from azure.cli.core import AzCommandsLoader
-from azure.cli.core.commands import AzCliCommand
+from azure.cli.core.commands import AzCliCommand, CliCommandType
 
 from azure.cli.testsdk import TestCli
 
@@ -38,20 +39,21 @@ class TestCommandWithConfiguredDefaults(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def sample_vm_list(resource_group_name):
-                return resource_group_name
+                return str(resource_group_name)
             setattr(sys.modules[__name__], sample_vm_list.__name__, sample_vm_list)
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
-                with self.command_group('test', operations_tmpl='{}#{{}}'.format(__name__)) as g:
+                test_type = CliCommandType(operations_tmpl='{}#{{}}'.format(__name__))
+                with self.command_group('test', test_type) as g:
                     g.command('sample-vm-list', 'sample_vm_list')
                 return self.command_table
 
             def load_arguments(self, command):
-                super(TestCommandsLoader, self).load_arguments(command)
+                self.command_table[command].load_arguments()  # this loads the arguments via reflection
                 with self.argument_context('test') as c:
                     c.argument('resource_group_name', options_list=['--resource-group-name', '-g'],
                                configured_default='group', required=required_arg)
+                self._update_command_definitions()  # pylint: disable=protected-access
         return TestCli(commands_loader_cls=TestCommandsLoader)
 
     @mock.patch.dict(os.environ, {'AZURE__DEFAULTS_GROUP': 'myRG'})

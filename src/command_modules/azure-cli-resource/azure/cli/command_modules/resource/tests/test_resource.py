@@ -19,14 +19,14 @@ class ResourceGroupScenarioTest(ScenarioTest):
 
         self.cmd('group delete -n {rg} --yes')
         self.cmd('group exists -n {rg}',
-                 checks=self.is_empty())
+                 checks=self.check('@', False))
 
         self.cmd('group create -n {rg} -l westus --tag a=b c', checks=[
             self.check('name', '{rg}'),
             self.check('tags', {'a': 'b', 'c': ''})
         ])
         self.cmd('group exists -n {rg}',
-                 checks=self.check('@', 'True'))
+                 checks=self.check('@', True))
         self.cmd('group show -n {rg}', checks=[
             self.check('name', '{rg}'),
             self.check('tags', {'a': 'b', 'c': ''})
@@ -47,11 +47,11 @@ class ResourceGroupNoWaitScenarioTest(ScenarioTest):
         self.cmd('group wait --deleted -n {rg}',
                  checks=self.is_empty())
         self.cmd('group exists -n {rg}',
-                 checks=self.is_empty())
+                 checks=self.check('@', False))
         self.cmd('group create -n {rg} -l westus',
                  checks=self.check('name', '{rg}'))
         self.cmd('group exists -n {rg}',
-                 checks=self.check('@', 'True'))
+                 checks=self.check('@', True))
         self.cmd('group wait --exists -n {rg}',
                  checks=self.is_empty())
 

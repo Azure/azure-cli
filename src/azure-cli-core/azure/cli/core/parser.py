@@ -85,7 +85,7 @@ class AzCliCommandParser(CLICommandParser):
                         param = CLICommandParser._add_argument(command_parser, arg)
                 except argparse.ArgumentError as ex:
                     raise CLIError("command authoring error for '{}': '{}' {}".format(
-                        command_name, ex.args[0].dest, ex.message))
+                        command_name, ex.args[0].dest, ex.message))  # pylint: disable=no-member
                 param.completer = arg.completer
 
             command_parser.set_defaults(
