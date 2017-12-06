@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.22
+++++++
+* `webapp/functionapp deployment source config-zip -h`: updating help for enabling build
+
 0.1.21
 ++++++
 * `webapp config ssl upload`: fix a bug in the cert name generation
