@@ -115,7 +115,6 @@ for name in $(ls src/command_modules | grep azure-cli-); do
     # if [ "$name" == "azure-cli-billing" ]; then continue; fi
     # if [ "$name" == "azure-cli-cdn" ]; then continue; fi
     # if [ "$name" == "azure-cli-cloud" ]; then continue; fi
-    if [ "$name" == "azure-cli-cognitiveservices" ]; then continue; fi
     # if [ "$name" == "azure-cli-configure" ]; then continue; fi
     if [ "$name" == "azure-cli-consumption" ]; then continue; fi
     if [ "$name" == "azure-cli-container" ]; then continue; fi
