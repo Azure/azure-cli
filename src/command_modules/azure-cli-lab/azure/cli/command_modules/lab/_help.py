@@ -70,25 +70,25 @@ helps['lab vm create'] = """
             examples:
                 - name: Create a VM in the lab from a gallery image.
                   text: >
-                    az lab vm create --lab-name ${LabName} -g ${ResourceGroup} --name ${VMName} --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2
+                    az lab vm create --lab-name {LabName} -g {ResourceGroup} --name {VMName} --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2
                 - name: Create a VM in the lab from a gallery image with SSH authentication.
                   text: >
-                    az lab vm create --lab-name ${LabName} -g ${ResourceGroup} --name ${VMName} --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2 --authentication-type ssh
+                    az lab vm create --lab-name {LabName} -g {ResourceGroup} --name {VMName} --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2 --authentication-type ssh
                 - name: Create a claimable VM in the lab from a gallery image with password authentication.
                   text: >
-                    az lab vm create --lab-name ${LabName} -g ${ResourceGroup} --name ${VMName} --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2 --allow-claim
+                    az lab vm create --lab-name {LabName} -g {ResourceGroup} --name {VMName} --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2 --allow-claim
                 - name: Create a windows VM in the lab from a gallery image with password authentication.
                   text: >
-                    az lab vm create --lab-name ${LabName} -g ${ResourceGroup} --name ${VMName} --image "Windows Server 2008 R2 SP1" --image-type gallery --size Standard_DS1_v2
+                    az lab vm create --lab-name {LabName} -g {ResourceGroup} --name {VMName} --image "Windows Server 2008 R2 SP1" --image-type gallery --size Standard_DS1_v2
                 - name: Create a VM in the lab from a custom image.
                   text: >
-                    az lab vm create --lab-name ${LabName} -g ${ResourceGroup} --name ${VMName} --image "jenkins_custom" --image-type custom --size Standard_DS1_v2
+                    az lab vm create --lab-name {LabName} -g {ResourceGroup} --name {VMName} --image "jenkins_custom" --image-type custom --size Standard_DS1_v2
                 - name: Create a VM in the lab with a public IP.
                   text: >
-                    az lab vm create --lab-name ${LabName} -g ${ResourceGroup} --name ${VMName} --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2 --ip-configuration public
+                    az lab vm create --lab-name {LabName} -g {ResourceGroup} --name {VMName} --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2 --ip-configuration public
                 - name: Create a VM from a formula.
                   text: >
-                    az lab vm create --lab-name ${LabName} -g ${ResourceGroup} --name ${VMName} --formula MyFormula --artifacts '@artifacts.json'
+                    az lab vm create --lab-name {LabName} -g {ResourceGroup} --name {VMName} --formula MyFormula --artifacts '@artifacts.json'
             """
 helps['lab vm list'] = """
             type: command
@@ -141,15 +141,15 @@ helps['lab vm claim'] = """
             examples:
                 - name: Claim any available virtual machine in the lab.
                   text: >
-                    az lab vm claim -g ${ResourceGroup} --lab-name ${LabName}
+                    az lab vm claim -g {ResourceGroup} --lab-name {LabName}
                 - name: Claim a specific virtual machine in the lab.
                   text: >
-                    az lab vm claim -g ${ResourceGroup} --lab-name ${LabName} --name ${VMName}
+                    az lab vm claim -g {ResourceGroup} --lab-name {LabName} --name {VMName}
                 - name: Claim multiple virtual machines in the lab by IDs.
                   text: |
                     az lab vm claim --ids \\
-                        /subscriptions/${SubID}/resourcegroups/${ResourceGroup}/providers/microsoft.devtestlab/labs/${LabName}/virtualmachines/${VMName1} \\
-                        /subscriptions/${SubID}/resourcegroups/${ResourceGroup}/providers/microsoft.devtestlab/labs/${LabName}/virtualmachines/${VMName2}
+                        /subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/microsoft.devtestlab/labs/{LabName}/virtualmachines/{VMName1} \\
+                        /subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/microsoft.devtestlab/labs/{LabName}/virtualmachines/{VMName2}
             """
 helps['lab custom-image'] = """
             type: group
@@ -179,9 +179,9 @@ helps['lab custom-image create'] = """
             examples:
                 - name: Create a custom image in the lab from a running Windows virtual machine without applying sysprep.
                   text: |
-                    az lab custom-image create --lab-name ${LabName} -g ${ResourceGroup} --name ${VMName} \\
+                    az lab custom-image create --lab-name {LabName} -g {ResourceGroup} --name {VMName} \\
                         --os-type Windows --os-state NonSysprepped \\
-                        --source-vm-id "/subscriptions/${SubID}/resourcegroups/${ResourceGroup}/microsoft.devtestlab/labs/${LabName}/virtualmachines/${VMName}"
+                        --source-vm-id "/subscriptions/{SubID}/resourcegroups/{ResourceGroup}/microsoft.devtestlab/labs/{LabName}/virtualmachines/{VMName}"
 """
 helps['lab gallery-image'] = """
             type: group

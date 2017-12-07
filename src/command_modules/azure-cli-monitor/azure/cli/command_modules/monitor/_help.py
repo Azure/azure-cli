@@ -44,14 +44,14 @@ helps['monitor alert create'] = """
     examples:
         - name: Create a high CPU usage alert on a VM with no actions.
           text: >
-            az monitor alert create -n rule1 -g ${ResourceGroup} --target ${VirtualMachineID} --condition "Percentage CPU > 90 avg 5m"
+            az monitor alert create -n rule1 -g {ResourceGroup} --target {VirtualMachineID} --condition "Percentage CPU > 90 avg 5m"
         - name: Create a high CPU usage alert on a VM with email and webhook actions.
           text: |
-            az monitor alert create -n rule1 -g ${ResourceGroup} --target ${VirtualMachineID} \\
+            az monitor alert create -n rule1 -g {ResourceGroup} --target {VirtualMachineID} \\
                 --condition "Percentage CPU > 90 avg 5m" \\
                 --action email bob@contoso.com ann@contoso.com --email-service-owners \\
                 --action webhook https://www.contoso.com/alerts?type=HighCPU \\
-                --action webhook https://alerts.contoso.com apiKey=${APIKey} type=HighCPU
+                --action webhook https://alerts.contoso.com apiKey={APIKey} type=HighCPU
 """
 
 helps['monitor alert update'] = """
@@ -161,31 +161,31 @@ helps['monitor metrics list'] = """
     examples:
         - name: List a VM's CPU usage for the past hour
           text: >
-              az monitor metrics list --resource ${ResourceName} --metric "Percentage CPU"
+              az monitor metrics list --resource {ResourceName} --metric "Percentage CPU"
         - name: List success E2E latency of a storage account and split the data series based on API name
           text: >
-              az monitor metrics list --resource ${ResourceName} --metric SuccessE2ELatency \\
+              az monitor metrics list --resource {ResourceName} --metric SuccessE2ELatency \\
                                       --dimension ApiName
         - name: List success E2E latency of a storage account and split the data series based on both API name and geo type
           text: >
-              az monitor metrics list --resource ${ResourceName} --metric SuccessE2ELatency \\
+              az monitor metrics list --resource {ResourceName} --metric SuccessE2ELatency \\
                                       --dimension ApiName GeoType
         - name: List success E2E latency of a storage account and split the data series based on both API name and geo type using "--filter" parameter
           text: >
-              az monitor metrics list --resource ${ResourceName} --metric SuccessE2ELatency \\
+              az monitor metrics list --resource {ResourceName} --metric SuccessE2ELatency \\
                                       --filter "ApiName eq '*' and GeoType eq '*'"
         - name: List success E2E latency of a storage account and split the data series based on both API name and geo type. Limits the api name to 'DeleteContainer'
           text: >
-              az monitor metrics list --resource ${ResourceName} --metric SuccessE2ELatency \\
+              az monitor metrics list --resource {ResourceName} --metric SuccessE2ELatency \\
                                       --filter "ApiName eq 'DeleteContainer' and GeoType eq '*'"
         - name: List transactions of a storage account per day since 2017-01-01
           text: >
-              az monitor metrics list --resource ${ResourceName} --metric Transactions \\
+              az monitor metrics list --resource {ResourceName} --metric Transactions \\
                                       --start-time 2017-01-01T00:00:00Z \\
                                       --interval PT24H
         - name: List the metadata values for a storage account under transaction metric's api name dimension since 2017
           text: >
-              az monitor metrics list --resource ${ResourceName} --metric Transactions \\
+              az monitor metrics list --resource {ResourceName} --metric Transactions \\
                                       --filter "ApiName eq '*'" \\
                                       --start-time 2017-01-01T00:00:00Z
 """
@@ -374,19 +374,19 @@ helps['monitor activity-log alert create'] = """
     examples:
         - name: Create an alert with default settings.
           text: >
-              az monitor activity-log alert create -n ${AlertName} -g ${ResourceGroup}
+              az monitor activity-log alert create -n {AlertName} -g {ResourceGroup}
         - name: Create an alert with condition about error level service health log.
           text: >
-              az monitor activity-log alert create -n ${AlertName} -g ${ResourceGroup} \\
+              az monitor activity-log alert create -n {AlertName} -g {ResourceGroup} \\
                 --condition category=ServiceHealth and level=Error
         - name: Create an alert with an action group and specify webhook properties.
           text: >
-              az monitor activity-log alert create -n ${AlertName} -g ${ResourceGroup} \\
-                -a /subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/microsoft.insights/actionGroups/${ActionGroup} \\
+              az monitor activity-log alert create -n {AlertName} -g {ResourceGroup} \\
+                -a /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/actionGroups/{ActionGroup} \\
                 -w usage=test owner=jane
         - name: Create an alert which is initially disabled.
           text: >
-              az monitor activity-log alert create -n ${AlertName} -g ${ResourceGroup} --disable
+              az monitor activity-log alert create -n {AlertName} -g {ResourceGroup} --disable
 """
 
 helps['monitor activity-log alert update'] = """
@@ -405,11 +405,11 @@ helps['monitor activity-log alert update'] = """
     examples:
         - name: Update the condition
           text: >
-              az monitor activity-log alert update -n ${AlertName} -g ${ResourceGroup} \\
+              az monitor activity-log alert update -n {AlertName} -g {ResourceGroup} \\
                 --condition category=ServiceHealth and level=Error
         - name: Disable an alert
           text: >
-              az monitor activity-log alert update -n ${AlertName} -g ${ResourceGroup} --enable false
+              az monitor activity-log alert update -n {AlertName} -g {ResourceGroup} --enable false
 """
 
 helps['monitor activity-log alert action-group'] = """
@@ -440,22 +440,22 @@ helps['monitor activity-log alert action-group add'] = """
     examples:
         - name: Add an action group and specify webhook properties.
           text: |
-              az monitor activity-log alert action-group add -n ${AlertName} -g ${ResourceGroup} \\
-                --action /subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/microsoft.insights/actionGroups/${ActionGroup} \\
+              az monitor activity-log alert action-group add -n {AlertName} -g {ResourceGroup} \\
+                --action /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/actionGroups/{ActionGroup} \\
                 --webhook-properties usage=test owner=jane
         - name: Overwite an existing action group's webhook properties.
           text: |
-              az monitor activity-log alert action-group add -n ${AlertName} -g ${ResourceGroup} \\
-                -a /subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/microsoft.insights/actionGroups/${ActionGroup} \\
+              az monitor activity-log alert action-group add -n {AlertName} -g {ResourceGroup} \\
+                -a /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/actionGroups/{ActionGroup} \\
                 --webhook-properties usage=test owner=john
         - name: Remove webhook properties from an existing action group.
           text: |
-              az monitor activity-log alert action-group add -n ${AlertName} -g ${ResourceGroup} \\
-                -a /subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/microsoft.insights/actionGroups/${ActionGroup}
+              az monitor activity-log alert action-group add -n {AlertName} -g {ResourceGroup} \\
+                -a /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/actionGroups/{ActionGroup}
         - name: Add new action groups but prevent the command from accidently overwrite existing webhook properties
           text: |
-              az monitor activity-log alert action-group add -n ${AlertName} -g ${ResourceGroup} --strict \\
-                --action-group ${ResourceIDList}
+              az monitor activity-log alert action-group add -n {AlertName} -g {ResourceGroup} --strict \\
+                --action-group {ResourceIDList}
 """
 
 helps['monitor activity-log alert action-group remove'] = """

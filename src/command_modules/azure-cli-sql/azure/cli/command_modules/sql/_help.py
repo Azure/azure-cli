@@ -356,7 +356,7 @@ helps['sql server vnet-rule create'] = """
         - name: Create a vnet rule by providing the subnet id.
           text: |
             az sql server vnet-rule create \\
-              --subnet /subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.Network/virtualNetworks/${VNETName}/subnets/${SubnetName}
+              --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName}
         - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the SQL server.
           text: az sql server vnet-rule create --subnet subnetName --vnet-name vnetName
     """

@@ -47,8 +47,8 @@ helps['ad sp create-for-rbac'] = """
         - name: Create with customized contributor assignments.
           text: |
             az ad sp create-for-rbac -n "MyApp" --role contributor \\
-                --scopes /subscriptions/{$SubID}/resourceGroups/{$ResourceGroup1} \\
-                /subscriptions/{$SubID}/resourceGroups/{$ResourceGroup2}
+                --scopes /subscriptions/{SubID}/resourceGroups/{ResourceGroup1} \\
+                /subscriptions/{SubID}/resourceGroups/{ResourceGroup2}
         - name: Create using a self-signed certificte.
           text: az ad sp create-for-rbac --create-cert
         - name: Create using a self-signed certificate, and store it within KeyVault.

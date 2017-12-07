@@ -514,11 +514,11 @@ helps['vm diagnostics set'] = """
                 --account-name $my_diagnostic_storage_account --expiry 9999-12-31T23:59Z \\
                 --permissions wlacu --resource-types co --services bt -o tsv)
 
-            protected_settings="{'storageAccountName': '${my_diagnostic_storage_account}', \\
-                'storageAccountSasToken': '${storage_sastoken}'}"
+            protected_settings="{'storageAccountName': '{my_diagnostic_storage_account}', \\
+                'storageAccountSasToken': '{storage_sastoken}'}"
 
-            az vm diagnostics set --settings "${default_config}" \\
-                --protected-settings "${protected_settings}" \\
+            az vm diagnostics set --settings "{default_config}" \\
+                --protected-settings "{protected_settings}" \\
                 --resource-group $my_resource_group --vm-name $my_linux_vm
 """
 
@@ -735,11 +735,11 @@ helps['vm extension image show'] = """
             location=westus\n
 
             latest=$(az vm extension image list-versions \\
-              --publisher ${publisher} -l ${location} -n ${extension} \\
+              --publisher {publisher} -l {location} -n {extension} \\
               --query "[].name" -o tsv | sort | tail -n 1)
 
-            az vm extension image show -l ${location} \\
-              --publisher ${publisher} -n ${extension} --version ${latest}
+            az vm extension image show -l {location} \\
+              --publisher {publisher} -n {extension} --version {latest}
 """
 
 helps['vm image'] = """
@@ -804,7 +804,7 @@ helps['vm image show'] = """
           text: >
             latest=$(az vm image list -p OpenLogic -s 7.3 --all --query \\
                 "[?offer=='CentOS'].version" -o tsv | sort -u | tail -n 1)
-            az vm image show -l westus -f CentOS -p OpenLogic --s 7.3 --version ${latest}
+            az vm image show -l westus -f CentOS -p OpenLogic --s 7.3 --version {latest}
 """
 
 helps['vm nic'] = """
@@ -941,9 +941,9 @@ deallocate_generalize_capture = """        - name: Deallocate, generalize, and c
         - name: Deallocate, generalize, and capture multiple stopped virtual machines.
           text: |
             vms_ids=$(az vm list -g MyResourceGroup --query "[].id" -o tsv)
-            az vm deallocate --ids ${vms_ids}
-            az vm generalize --ids ${vms_ids}
-            az vm capture --ids ${vms_ids} --vhd-name-prefix MyPrefix
+            az vm deallocate --ids {vms_ids}
+            az vm generalize --ids {vms_ids}
+            az vm capture --ids {vms_ids} --vhd-name-prefix MyPrefix
 """
 
 helps['vmss encryption'] = """

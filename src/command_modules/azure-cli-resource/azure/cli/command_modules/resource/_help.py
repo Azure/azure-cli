@@ -21,12 +21,12 @@ helps['managedapp create'] = """
         - name: Create a managed application of kind 'ServiceCatalog'. This requires a valid managed application definition ID.
           text: |
             az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind ServiceCatalog \\
-                -m "/subscriptions/${SubID}/resourceGroups/${ManagedResourceGroup}" \\
-                -d "/subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.Solutions/applianceDefinitions/${ApplianceDefinition}"
+                -m "/subscriptions/{SubID}/resourceGroups/{ManagedResourceGroup}" \\
+                -d "/subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Solutions/applianceDefinitions/{ApplianceDefinition}"
         - name: Create a managed application of kind 'MarketPlace'. This requires a valid plan, containing details about existing marketplace package like plan name, version, publisher and product.
           text: |
             az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind MarketPlace \\
-                -m "/subscriptions/${SubID}/resourceGroups/${ManagedResourceGroup}" \\
+                -m "/subscriptions/{SubID}/resourceGroups/{ManagedResourceGroup}" \\
                 --plan-name ContosoAppliance --plan-version "1.0" --plan-product "contoso-appliance" --plan-publisher Contoso
 """
 helps['managedapp definition create'] = """
@@ -256,7 +256,7 @@ helps['policy assignment create'] = """
     examples:
         - name: Provide rule parameter values with the following example
           text: |
-                az policy assignment create --policy ${PolicyNamed} -p '{
+                az policy assignment create --policy {PolicyNamed} -p '{
                     "allowedLocations": {
                         "value": [
                             "australiaeast",
@@ -348,7 +348,7 @@ helps['resource tag'] = """
             az resource tag --tags vmlist=vm1 -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
         - name: Tag a web app with the key 'vmlist' and value 'vm1', using a resource identifier.
           text: >
-            az resource tag --tags vmlist=vm1 --id /subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.Web/sites/${WebApp}
+            az resource tag --tags vmlist=vm1 --id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp}
 """
 
 helps['resource create'] = """
@@ -361,7 +361,7 @@ helps['resource create'] = """
                         "kind": "api",
                         "location": "West US",
                         "properties": {
-                            "serverFarmId": "/subscriptions/${SubID}/resourcegroups/${ResourceGroup}/providers/Microsoft.Web/serverfarms/${ServicePlan}"
+                            "serverFarmId": "/subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/Microsoft.Web/serverfarms/{ServicePlan}"
                         }
                     }'
        - name: Create a resource by loading JSON configuration from a file.
@@ -370,7 +370,7 @@ helps['resource create'] = """
        - name: Create a web app with the minimum required configuration information.
          text: |
             az resource create -g myRG -n myWeb --resource-type Microsoft.web/sites --properties '{
-                    "serverFarmId":"/subscriptions/${SubID}/resourcegroups/${ResourceGroup}/providers/Microsoft.Web/serverfarms/${ServicePlan}"
+                    "serverFarmId":"/subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/Microsoft.Web/serverfarms/{ServicePlan}"
                 }'
 """
 
@@ -384,17 +384,17 @@ helps['resource invoke-action'] = """
     short-summary: Invoke an action on the resource.
     long-summary: >
         A list of possible actions corresponding to a resource can be found at https://docs.microsoft.com/en-us/rest/api/. All POST requests are actions that can be invoked and are specified at the end of the URI path. For instance, to stop a VM, the
-        request URI is https://management.azure.com/subscriptions/${SubscriptionId}/resourceGroups/${ResourceGroup}/providers/Microsoft.Compute/virtualMachines/${VM}/powerOff?api-version=${APIVersion} and the corresponding action is `powerOff`. This can
+        request URI is https://management.azure.com/subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroup}/providers/Microsoft.Compute/virtualMachines/{VM}/powerOff?api-version={APIVersion} and the corresponding action is `powerOff`. This can
         be found at https://docs.microsoft.com/en-us/rest/api/compute/virtualmachines/virtualmachines-stop.
     examples:
        - name: Power-off a vm, specified by Id.
          text: >
             az resource invoke-action --action powerOff \\
-              --ids /subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.Compute/virtualMachines/${VMName}
+              --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Compute/virtualMachines/{VMName}
        - name: Capture information for a stopped vm.
          text: >
             az resource invoke-action --action capture \\
-              --ids /subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.Compute/virtualMachines/${VMName} \\
+              --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Compute/virtualMachines/{VMName} \\
               --request-body '{
                 "vhdPrefix": "myPrefix",
                 "destinationContainerName": "myContainer",
@@ -599,29 +599,29 @@ helps['resource link'] = """
 helps['resource link create'] = """
     type: command
     short-summary: Create a new link between resources.
-    long-summary: A link-id is of the form /subscriptions/${SubID}/resourceGroups/${ResourceGroupID}/${ProviderNamespace}/${ResourceType}/${ResourceName}/Microsoft.Resources/links/${LinkName}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
     examples:
-        - name: Create a link from ${SourceID} to ${ResourceID} with notes
+        - name: Create a link from {SourceID} to {ResourceID} with notes
           text: >
-            az resource link create --link-id ${SourceID} --target-id ${ResourceID} --notes "SourceID depends on ResourceID"
+            az resource link create --link-id {SourceID} --target-id {ResourceID} --notes "SourceID depends on ResourceID"
 """
 helps['resource link update'] = """
     type: command
     short-summary: Update link between resources.
-    long-summary: A link-id is of the form /subscriptions/${SubID}/resourceGroups/${ResourceGroup}/${ProviderNamespace}/${ResourceType}/${ResourceName}/Microsoft.Resources/links/${LinkName}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
     examples:
-        - name: Update the notes for ${LinkID} notes "some notes to explain this link"
+        - name: Update the notes for {LinkID} notes "some notes to explain this link"
           text: >
-            az resource link update --link-id ${LinkID} --notes "some notes to explain this link"
+            az resource link update --link-id {LinkID} --notes "some notes to explain this link"
 """
 helps['resource link delete'] = """
     type: command
     short-summary: Delete a link between resources.
-    long-summary: A link-id is of the form /subscriptions/${SubID}/resourceGroups/${ResourceGroupID}/${ProviderNamespace}/${ResourceType}/${ResourceName}/Microsoft.Resources/links/${LinkName}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
     examples:
-        - name: Delete link ${LinkID}
+        - name: Delete link {LinkID}
           text: >
-            az resource link delete --link-id ${LinkID}
+            az resource link delete --link-id {LinkID}
 """
 helps['resource link list'] = """
     type: command
@@ -630,14 +630,14 @@ helps['resource link list'] = """
         - name: List links, filtering with <filter-string>
           text: >
             az resource link list --filter <filter-string>
-        - name: List all links for resource group ${ResourceGroup} in subscription ${SubID}
+        - name: List all links for resource group {ResourceGroup} in subscription {SubID}
           text: >
-            az resource link list --scope /subscriptions/${SubID}/resourceGroups/${ResourceGroup}
+            az resource link list --scope /subscriptions/{SubID}/resourceGroups/{ResourceGroup}
 """
 helps['resource link show'] = """
     type: command
     short-summary: Get details for a resource link.
-    long-summary: A link-id is of the form /subscriptions/${SubID}/resourceGroups/${ResourceGroup}/${ProviderNamespace}/${ResourceType}/${ResourceName}/Microsoft.Resources/links/${LinkName}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
 """
 helps['resource lock'] = """
     type: group
@@ -652,7 +652,7 @@ helps['resource lock create'] = """
             az resource lock create --lock-type ReadOnly -n lockName -g MyResourceGroup --resource myvnet --resource-type Microsoft.Network/virtualNetworks
         - name: Create a read-only resource level lock on a vnet using a vnet id.
           text: >
-            az resource lock create --lock-type ReadOnly -n lockName --resource /subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.Network/virtualNetworks/${VNETName}
+            az resource lock create --lock-type ReadOnly -n lockName --resource /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}
     """
 helps['resource lock delete'] = """
     type: command
@@ -663,7 +663,7 @@ helps['resource lock delete'] = """
             az resource lock delete --name lockName -g MyResourceGroup --resource myvnet --resource-type Microsoft.Network/virtualNetworks
         - name: Delete a resource level lock on a vnet using a vnet id.
           text: >
-            az resource lock delete -n lockName --resource /subscriptions/${SubID}/resourceGroups/${ResourceGroup}/providers/Microsoft.Network/virtualNetworks/${VMName}
+            az resource lock delete -n lockName --resource /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VMName}
     """
 helps['resource lock list'] = """
     type: command
