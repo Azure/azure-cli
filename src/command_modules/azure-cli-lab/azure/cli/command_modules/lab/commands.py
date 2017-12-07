@@ -16,7 +16,7 @@ from ._client_factory import (get_devtestlabs_virtual_machine_operation,
                               get_devtestlabs_secret_operation,
                               get_devtestlabs_environment_operation,
                               get_devtestlabs_arm_template_operation)
-from .validators import validate_lab_vm_create, validate_lab_vm_list, validate_claim_vm
+from .validators import validate_lab_vm_create, validate_lab_vm_list, validate_claim_vm, validate_user_name
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -155,7 +155,8 @@ def load_command_table(self, _):
     # Secret Operations Commands
     secret_operations = CliCommandType(
         operations_tmpl='azure.mgmt.devtestlabs.operations.secrets_operations#.SecretsOperations{}',
-        client_factory=get_devtestlabs_secret_operation
+        client_factory=get_devtestlabs_secret_operation,
+        validator=validate_user_name
     )
 
     with self.command_group('lab secret', secret_operations) as g:
@@ -167,7 +168,8 @@ def load_command_table(self, _):
     # Environment Operations Commands
     environment_operations = CliCommandType(
         operations_tmpl='azure.mgmt.devtestlabs.operations.environments_operations#EnvironmentsOperations.{}',
-        client_factory=get_devtestlabs_environment_operation
+        client_factory=get_devtestlabs_environment_operation,
+        validator=validate_user_name
     )
 
     with self.command_group('lab environment', environment_operations) as g:

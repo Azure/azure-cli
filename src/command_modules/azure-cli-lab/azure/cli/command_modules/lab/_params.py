@@ -98,7 +98,7 @@ def load_arguments(self, _):
 
         c.argument('name', options_list=['--name', '-n'])
         c.argument('secret', options_list=['--value'], type=lambda x: Secret(value=x))
-        c.ignore('user_name', validator=validate_user_name)
+        c.ignore('user_name')
         c.argument('lab_name')
 
     with self.argument_context('lab formula export-artifacts') as c:
@@ -109,7 +109,7 @@ def load_arguments(self, _):
     with self.argument_context('lab environment') as c:
 # with ParametersContext(command='lab environment') as c:
         c.argument('name', options_list=['--name', '-n'])
-        c.ignore('user_name', validator=validate_user_name)
+        c.ignore('user_name')
         # c.argument('lab_name', validator=validate_user_name)
         c.argument('lab name')
 
