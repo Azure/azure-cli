@@ -114,7 +114,7 @@ helps['storage account show'] = """
     short-summary: Show storage account properties.
     examples:
         - name: Show properties for a storage account by resource ID.
-          text: az storage account show --ids /subscriptions/{SubID}/resourceGroups/{MyResourceGroup}/providers/Microsoft.Storage/storageAccounts/{MyStorageAccount}
+          text: az storage account show --ids /subscriptions/{$SubID}/resourceGroups/{$ResourceGroup}/providers/Microsoft.Storage/storageAccounts/{$StorageAccount}
         - name: Show properties for a storage account using an account name and resource group.
           text: az storage account show -g MyResourceGroup -n MyStorageAccount
 """
@@ -137,7 +137,7 @@ helps['storage account delete'] = """
     short-summary: Delete a storage account.
     examples:
         - name: Delete a storage account using a resource ID.
-          text: az storage account delete --ids /subscriptions/{SubID}/resourceGroups/{MyResourceGroup}/providers/Microsoft.Storage/storageAccounts/{MyStorageAccount}
+          text: az storage account delete --ids /subscriptions/{$SubID}/resourceGroups/{$ResourceGroup}/providers/Microsoft.Storage/storageAccounts/{$StorageAccount}
         - name: Delete a storage account using an account name and resource group.
           text: az storage account delete -n MyStorageAccount -g MyResourceGroup
 """
@@ -407,7 +407,7 @@ helps['storage cors add'] = """
         - name: --max-age
           short-summary: The maximum number of seconds the client/browser should cache a preflight response.
         - name: --origins
-          short-summary: List of origin domains that will be allowed via CORS, or "*" to allow all domains.
+          short-summary: List of origin domains that will be allowed via CORS, or '*' to allow all domains.
         - name: --methods
           short-summary: List of HTTP methods allowed to be executed by the origin.
         - name: --allowed-headers

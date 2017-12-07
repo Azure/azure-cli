@@ -1092,7 +1092,7 @@ helps['vm open-port'] = """
         network commands directly (nsg rule create, etc).
     examples:
         - name: Open all ports on a VM to inbound traffic.
-          text: az vm open-port -g MyResourceGroup -n MyVm --port *
+          text: az vm open-port -g MyResourceGroup -n MyVm --port '*'
         - name: Open a range of ports on a VM to inbound traffic with the highest priority.
           text: az vm open-port -g MyResourceGroup -n MyVm --port 80-100 --priority 100
 {0}
