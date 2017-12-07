@@ -322,7 +322,7 @@ helps['webapp deployment source config-zip'] = """
         zip file with the following content '[config] SCM_DO_BUILD_DURING_DEPLOYMENT = true',
         to enable Kudu detection logic and build script generation process
         See https://github.com/projectkudu/kudu/wiki/Configurable-settings#enabledisable-build-actions-preview.
-        Alternatley the setting can be enabled using the az functionapp config appsettings set command.
+        Alternatley the setting can be enabled using the az webapp config appsettings set command.
     examples:
          - name: Perform deployment by using zip file content.
            text: >
