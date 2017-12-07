@@ -5,17 +5,11 @@
 
 from knack.util import CLIError
 
-from ._factory import get_acr_service_client
 from ._utils import get_registry_by_name
 
 
-def acr_credential_show(registry_name, resource_group_name=None):
-    """Gets the login credentials for the specified container registry.
-    :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
-    """
-    registry, resource_group_name = get_registry_by_name(registry_name, resource_group_name)
-    client = get_acr_service_client().registries
+def get_acr_credentials(cli_ctx, client, registry_name, resource_group_name=None):
+    registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
 
     if registry.admin_user_enabled:  # pylint: disable=no-member
         return client.list_credentials(resource_group_name, registry_name)
@@ -23,14 +17,12 @@ def acr_credential_show(registry_name, resource_group_name=None):
     admin_not_enabled_error(registry_name)
 
 
-def acr_credential_renew(registry_name, password_name, resource_group_name=None):
-    """Regenerates one of the login credentials for the specified container registry.
-    :param str registry_name: The name of container registry
-    :param str password_name: The name of password to regenerate
-    :param str resource_group_name: The name of resource group
-    """
-    registry, resource_group_name = get_registry_by_name(registry_name, resource_group_name)
-    client = get_acr_service_client().registries
+def acr_credential_show(cmd, client, registry_name, resource_group_name=None):
+    return get_acr_credentials(cmd.cli_ctx, client, registry_name, resource_group_name)
+
+
+def acr_credential_renew(cmd, client, registry_name, password_name, resource_group_name=None):
+    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     if registry.admin_user_enabled:  # pylint: disable=no-member
         return client.regenerate_credential(

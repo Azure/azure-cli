@@ -11,7 +11,7 @@ from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import shell_safe_json_parse
+from azure.cli.core.util import shell_safe_json_parse, get_arg_list
 from azure.cli.core.profiles import ResourceType
 
 from knack.arguments import CLICommandArgument, ignore_type
@@ -306,10 +306,11 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
         operations_tmpl = _get_operations_tmpl(cmd)
         client_arg_name = 'client' if operations_tmpl.startswith(('azure.cli', 'azext')) else 'self'
-        getterargs = {key: val for key, val in args.items() if key in get_arguments_loader()}
-        if client_arg_name in getterargs or client_arg_name == 'self':
-            getterargs[client_arg_name] = client
+        get_args_from_loader = get_arguments_loader()
+        getterargs = {key: val for key, val in args.items() if key in get_args_from_loader}
         getter = context.get_op_handler(getter_op)
+        if client_arg_name in getterargs or client_arg_name == 'self' or client_arg_name in get_arg_list(getter):
+            getterargs[client_arg_name] = client
         if child_collection_prop_name:
             parent = getter(**getterargs)
             instance = _get_child(
@@ -333,8 +334,10 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
                 instance = custom_function(instance=instance, **custom_func_args)
 
         # apply generic updates after custom updates
-        setterargs = {key: val for key, val in args.items() if key in set_arguments_loader()}
-        if client_arg_name in setterargs or client_arg_name == 'self':
+        set_args_from_loader = set_arguments_loader()
+        setterargs = {key: val for key, val in args.items() if key in set_args_from_loader}
+        setter = context.get_op_handler(setter_op)
+        if client_arg_name in setterargs or client_arg_name == 'self' or client_arg_name in get_arg_list(setter):
             setterargs[client_arg_name] = client
 
         for arg in ordered_arguments:
@@ -358,7 +361,6 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
         # Done... update the instance!
         setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
-        setter = context.get_op_handler(setter_op)
 
         no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
         if no_wait_param:

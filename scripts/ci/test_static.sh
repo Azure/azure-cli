@@ -34,7 +34,7 @@ run_style() {
 set +e
 
 run_style azure.cli.core
-#run_style azure.cli.command_modules.acr
+run_style azure.cli.command_modules.acr
 #run_style azure.cli.command_modules.acs
 #run_style azure.cli.command_modules.advisor
 #run_style azure.cli.command_modules.appservice

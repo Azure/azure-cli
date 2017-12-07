@@ -105,7 +105,6 @@ setup(
 EOL
 
 for name in $(ls src/command_modules | grep azure-cli-); do
-    if [ "$name" == "azure-cli-acr" ]; then continue; fi
     if [ "$name" == "azure-cli-acs" ]; then continue; fi
     if [ "$name" == "azure-cli-advisor" ]; then continue; fi
     if [ "$name" == "azure-cli-appservice" ]; then continue; fi
