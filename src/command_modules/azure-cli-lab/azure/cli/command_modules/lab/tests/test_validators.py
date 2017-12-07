@@ -6,7 +6,7 @@
 import unittest
 from knack.util import CLIError
 from azure.cli.core.commands.arm import is_valid_resource_id
-from azure.cli.command_modules.lab.validators import (_update_artifacts)
+from azure.cli.command_modules.lab.validators import _update_artifacts
 
 
 class ValidatorsCommandTest(unittest.TestCase):

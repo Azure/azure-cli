@@ -4,8 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
-from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
-from azure.cli.core.commands import (ServiceGroup, create_service_adapter)
+from azure.cli.core.commands import CliCommandType
 from ._client_factory import (get_devtestlabs_virtual_machine_operation,
                               get_devtestlabs_custom_image_operation,
                               get_devtestlabs_gallery_image_operation,
@@ -17,11 +16,11 @@ from ._client_factory import (get_devtestlabs_virtual_machine_operation,
                               get_devtestlabs_secret_operation,
                               get_devtestlabs_environment_operation,
                               get_devtestlabs_arm_template_operation)
+from .validators import validate_lab_vm_create, validate_lab_vm_list, validate_claim_vm
 
-if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
-    custom_path = 'azure.cli.command_modules.lab.custom'
-    mgmt_operations_path = 'azure.mgmt.devtestlabs.operations.{}'
 
+# pylint: disable=too-many-locals, too-many-statements
+def load_command_table(self, _):
     def _export_artifacts(formula):
         """ Exports artifacts from the given formula. This method removes some of the properties of the
             artifact model as they do not play important part for users in create or read context.
@@ -61,161 +60,130 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
                             ('location', result['location']),
                             ('osType', result['osType'])])
 
-    # Custom Command's service adapter
-    custom_operations = create_service_adapter(custom_path)
-
     # Virtual Machine Operations Commands
-    virtual_machine_operations = create_service_adapter(
-        mgmt_operations_path.format('virtual_machines_operations'),
-        'VirtualMachinesOperations')
+    virtual_machine_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.devtestlabs.operations.virtual_machines_operations#VirtualMachinesOperations.{}',
+        client_factory=get_devtestlabs_virtual_machine_operation
+    )
 
-    with ServiceGroup(__name__, get_devtestlabs_virtual_machine_operation,
-                      virtual_machine_operations) as s:
-        with s.group('lab vm') as c:
-            c.command('show', 'get', table_transformer=transform_vm)
-            c.command('delete', 'delete')
-            c.command('start', 'start')
-            c.command('stop', 'stop')
-            c.command('apply-artifacts', 'apply_artifacts')
-
-    # Virtual Machine Operations Custom Commands
-    with ServiceGroup(__name__, get_devtestlabs_virtual_machine_operation,
-                      custom_operations) as s:
-        with s.group('lab vm') as c:
-            c.command('list', 'list_vm', table_transformer=transform_vm_list)
-            c.command('claim', 'claim_vm')
-
-    # Lab Operations Custom Commands
-    with ServiceGroup(__name__, get_devtestlabs_lab_operation,
-                      custom_operations) as s:
-        with s.group('lab vm') as c:
-            c.command('create', 'create_lab_vm')
-
-    lab_operations = create_service_adapter(mgmt_operations_path.format('labs_operations'),
-                                            'LabsOperations')
+    with self.command_group('lab vm', virtual_machine_operations) as g:
+        g.command('show', 'get', table_transformer=transform_vm)
+        g.command('delete', 'delete')
+        g.command('start', 'start')
+        g.command('stop', 'stop')
+        g.command('apply-artifacts', 'apply_artifacts')
+        g.custom_command('list', 'list_vm', client_factory=get_devtestlabs_virtual_machine_operation,
+                         validator=validate_lab_vm_list)
+        g.custom_command('claim', 'claim_vm', client_factory=get_devtestlabs_virtual_machine_operation,
+                         validator=validate_claim_vm)
+        g.custom_command('create', 'create_lab_vm', client_factory=get_devtestlabs_lab_operation,
+                         validator=validate_lab_vm_create)
 
     # Lab Operations Commands
-    with ServiceGroup(__name__, get_devtestlabs_lab_operation,
-                      lab_operations) as s:
-        with s.group('lab') as c:
-            c.command('get', 'get')
-            c.command('delete', 'delete')
+    lab_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.devtestlabs.operations.labs_operations#LabsOperations.{}',
+        client_factory=get_devtestlabs_lab_operation
+    )
+
+    with self.command_group('lab', lab_operations) as g:
+        g.command('get', 'get')
+        g.command('delete', 'delete')
 
     # Custom Image Operations Commands
-    custom_image_operations = create_service_adapter(
-        mgmt_operations_path.format('custom_images_operations'),
-        'CustomImagesOperations')
 
-    with ServiceGroup(__name__, get_devtestlabs_custom_image_operation,
-                      custom_image_operations) as s:
-        with s.group('lab custom-image') as c:
-            c.command('show', 'get')
-            c.command('list', 'list')
-            c.command('delete', 'delete')
+    custom_image_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.devtestlabs.operations.custom_images_operations#CustomImagesOperations.{}',
+        client_factory=get_devtestlabs_custom_image_operation
+    )
 
-    with ServiceGroup(__name__, get_devtestlabs_custom_image_operation, custom_operations) as s:
-        with s.group('lab custom-image') as c:
-            c.command('create', 'create_custom_image')
+    with self.command_group('lab custom-image', custom_image_operations) as g:
+        g.command('show', 'get')
+        g.command('list', 'list')
+        g.command('delete', 'delete')
+        g.custom_command('create', 'create_custom_image', client_factory=get_devtestlabs_custom_image_operation)
 
     # Gallery Image Operations Commands
-    gallery_image_operations = create_service_adapter(
-        mgmt_operations_path.format('gallery_images_operations'),
-        'GalleryImagesOperations')
+    gallery_image_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.devtestlabs.operations.gallery_images_operations#GalleryImagesOperations.{}',
+        client_factory=get_devtestlabs_gallery_image_operation
+    )
 
-    with ServiceGroup(__name__, get_devtestlabs_gallery_image_operation,
-                      gallery_image_operations) as s:
-        with s.group('lab gallery-image') as c:
-            c.command('list', 'list')
+    with self.command_group('lab gallery-image', gallery_image_operations) as g:
+        g.command('list', 'list')
 
     # Artifact Operations Commands
-    artifact_operations = create_service_adapter(
-        mgmt_operations_path.format('artifacts_operations'),
-        'ArtifactsOperations')
+    artifact_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.devtestlabs.operations.artifacts_operations#ArtifactsOperations.{}',
+        client_factory=get_devtestlabs_artifact_operation
+    )
 
-    with ServiceGroup(__name__, get_devtestlabs_artifact_operation,
-                      artifact_operations) as s:
-        with s.group('lab artifact') as c:
-            c.command('list', 'list')
+    with self.command_group('lab artifact', artifact_operations) as g:
+        g.command('list', 'list')
 
     # Artifact Source Operations Commands
-    artifact_source_operations = create_service_adapter(
-        mgmt_operations_path.format('artifact_sources_operations'),
-        'ArtifactSourcesOperations')
+    artifact_source_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.devtestlabs.operations.artifact_sources_operations#ArtifactSourcesOperations.{}',
+        client_factory=get_devtestlabs_artifact_source_operation
+    )
 
-    with ServiceGroup(__name__, get_devtestlabs_artifact_source_operation,
-                      artifact_source_operations) as s:
-        with s.group('lab artifact-source') as c:
-            c.command('list', 'list', table_transformer=transform_artifact_source_list)
-            c.command('show', 'get', table_transformer=transform_artifact_source)
+    with self.command_group('lab artifact-source', artifact_source_operations) as g:
+        g.command('list', 'list', table_transformer=transform_artifact_source_list)
+        g.command('show', 'get', table_transformer=transform_artifact_source)
 
     # Virtual Network Operations Commands
-    virtual_network_operations = create_service_adapter(
-        mgmt_operations_path.format('virtual_networks_operations'),
-        'VirtualNetworksOperations')
+    virtual_network_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.devtestlabs.operations.virtual_networks_operations#VirtualNetworksOperations.{}',
+        client_factory=get_devtestlabs_virtual_network_operation
+    )
 
-    with ServiceGroup(__name__, get_devtestlabs_virtual_network_operation,
-                      virtual_network_operations) as s:
-        with s.group('lab vnet') as c:
-            c.command('list', 'list')
-            c.command('get', 'get')
+    with self.command_group('lab vnet', virtual_network_operations) as g:
+        g.command('list', 'list')
+        g.command('get', 'get')
 
     # Formula Operations Commands
-    formula_operations = create_service_adapter(
-        mgmt_operations_path.format('formulas_operations'),
-        'FormulasOperations')
+    formula_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.devtestlabs.operations.formulas_operations#FormulasOperations.{}',
+        client_factory=get_devtestlabs_formula_operation
+    )
 
-    with ServiceGroup(__name__, get_devtestlabs_formula_operation,
-                      formula_operations) as s:
-        with s.group('lab formula') as c:
-            c.command('show', 'get')
-            c.command('list', 'list')
-            c.command('delete', 'delete')
-            c.command('export-artifacts', 'get', transform=_export_artifacts)
+    with self.command_group('lab formula', formula_operations) as g:
+        g.command('show', 'get')
+        g.command('list', 'list')
+        g.command('delete', 'delete')
+        g.command('export-artifacts', 'get', transform=_export_artifacts)
 
     # Secret Operations Commands
-    secret_operations = create_service_adapter(
-        mgmt_operations_path.format('secrets_operations'),
-        'SecretsOperations')
+    secret_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.devtestlabs.operations.secrets_operations#.SecretsOperations{}',
+        client_factory=get_devtestlabs_secret_operation
+    )
 
-    with ServiceGroup(__name__, get_devtestlabs_secret_operation,
-                      secret_operations) as s:
-        with s.group('lab secret') as c:
-            c.command('set', 'create_or_update')
-            c.command('show', 'get')
-            c.command('list', 'list')
-            c.command('delete', 'delete')
+    with self.command_group('lab secret', secret_operations) as g:
+        g.command('set', 'create_or_update')
+        g.command('show', 'get')
+        g.command('list', 'list')
+        g.command('delete', 'delete')
 
     # Environment Operations Commands
-    environment_operations = create_service_adapter(
-        mgmt_operations_path.format('environments_operations'),
-        'EnvironmentsOperations')
+    environment_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.devtestlabs.operations.environments_operations#EnvironmentsOperations.{}',
+        client_factory=get_devtestlabs_environment_operation
+    )
 
-    with ServiceGroup(__name__, get_devtestlabs_environment_operation,
-                      environment_operations) as s:
-        with s.group('lab environment') as c:
-            c.command('show', 'get')
-            c.command('list', 'list')
-            c.command('delete', 'delete')
-            c.command('create', 'create_or_update')
-
-    # Environment Operations Custom Commands
-    with ServiceGroup(__name__, get_devtestlabs_environment_operation,
-                      custom_operations) as s:
-        with s.group('lab environment') as c:
-            c.command('create', 'create_environment')
+    with self.command_group('lab environment', environment_operations) as g:
+        g.command('show', 'get')
+        g.command('list', 'list')
+        g.command('delete', 'delete')
+        g.command('create', 'create_or_update')
+        g.custom_command('create', 'create_environment', client_factory=get_devtestlabs_environment_operation)
 
     # ARM Templates Operations Commands
-    arm_template_operations = create_service_adapter(
-        mgmt_operations_path.format('arm_templates_operations'),
-        'ArmTemplatesOperations')
+    arm_template_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.devtestlabs.operations.arm_templates_operations#ArmTemplatesOperations.{}',
+        client_factory=get_devtestlabs_arm_template_operation
+    )
 
-    with ServiceGroup(__name__, get_devtestlabs_arm_template_operation,
-                      arm_template_operations) as s:
-        with s.group('lab arm-template') as c:
-            c.command('list', 'list', table_transformer=transform_arm_template_list)
-
-    # ARM Templates Operations Custom Commands
-    with ServiceGroup(__name__, get_devtestlabs_arm_template_operation,
-                      custom_operations) as s:
-        with s.group('lab arm-template') as c:
-            c.command('show', 'show_arm_template', table_transformer=transform_arm_template)
+    with self.command_group('lab arm-template', arm_template_operations) as g:
+        g.command('list', 'list', table_transformer=transform_arm_template_list)
+        g.custom_command('show', 'show_arm_template', table_transformer=transform_arm_template,
+                         client_factory=get_devtestlabs_arm_template_operation)
