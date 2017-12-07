@@ -29,8 +29,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             create_cmd.format(resource_group, aks_name, dns_prefix, ssh_pubkey_file,
                               resource_group_location, sp_name, sp_password),
             checks=[
-                JMESPathCheckExists('properties.fqdn'),
-                JMESPathCheck('properties.provisioningState', 'Succeeded')
+                JMESPathCheckExists('fqdn'),
+                JMESPathCheck('provisioningState', 'Succeeded')
         ])
 
         # show
@@ -38,9 +38,9 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             JMESPathCheck('type', 'Microsoft.ContainerService/ManagedClusters'),
             JMESPathCheck('name', aks_name),
             JMESPathCheck('resourceGroup', resource_group),
-            JMESPathCheck('properties.agentPoolProfiles[0].count', 3),
-            JMESPathCheck('properties.agentPoolProfiles[0].vmSize', 'Standard_D1_v2'),
-            JMESPathCheck('properties.dnsPrefix', dns_prefix)
+            JMESPathCheck('agentPoolProfiles[0].count', 3),
+            JMESPathCheck('agentPoolProfiles[0].vmSize', 'Standard_D1_v2'),
+            JMESPathCheck('dnsPrefix', dns_prefix)
         ])
 
         # get-credentials
@@ -64,12 +64,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # scale-up
         self.cmd('aks scale -g {} -n {} --node-count 5'.format(resource_group, aks_name), checks=[
-            JMESPathCheck('properties.agentPoolProfiles[0].count', 5)
+            JMESPathCheck('agentPoolProfiles[0].count', 5)
         ])
 
         # show again
         self.cmd('aks show -g {} -n {}'.format(resource_group, aks_name), checks=[
-            JMESPathCheck('properties.agentPoolProfiles[0].count', 5)
+            JMESPathCheck('agentPoolProfiles[0].count', 5)
         ])
 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
@@ -87,8 +87,8 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             create_cmd.format(resource_group, aks_name, dns_prefix, ssh_pubkey_file, original_k8s_version,
                               resource_group_location, sp_name, sp_password),
             checks=[
-                JMESPathCheckExists('properties.fqdn'),
-                JMESPathCheck('properties.provisioningState', 'Succeeded')
+                JMESPathCheckExists('fqdn'),
+                JMESPathCheck('provisioningState', 'Succeeded')
         ])
 
         # show
@@ -96,23 +96,23 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             JMESPathCheck('type', 'Microsoft.ContainerService/ManagedClusters'),
             JMESPathCheck('name', aks_name),
             JMESPathCheck('resourceGroup', resource_group),
-            JMESPathCheck('properties.agentPoolProfiles[0].count', 3),
-            JMESPathCheck('properties.agentPoolProfiles[0].vmSize', 'Standard_D1_v2'),
-            JMESPathCheck('properties.dnsPrefix', dns_prefix),
-            JMESPathCheck('properties.provisioningState', 'Succeeded'),
-            JMESPathCheck('properties.kubernetesVersion', '1.7.7')
+            JMESPathCheck('agentPoolProfiles[0].count', 3),
+            JMESPathCheck('agentPoolProfiles[0].vmSize', 'Standard_D1_v2'),
+            JMESPathCheck('dnsPrefix', dns_prefix),
+            JMESPathCheck('provisioningState', 'Succeeded'),
+            JMESPathCheck('kubernetesVersion', '1.7.7')
         ])
 
         # upgrade
         new_k8s_version = '1.8.1'
         upgrade_cmd = 'aks upgrade -g {} -n {} --kubernetes-version {} --yes'
         self.cmd(upgrade_cmd.format(resource_group, aks_name, new_k8s_version), checks=[
-            JMESPathCheck('properties.provisioningState', 'Succeeded')
+            JMESPathCheck('provisioningState', 'Succeeded')
         ])
 
         # show again
         self.cmd('aks show -g {} -n {}'.format(resource_group, aks_name), checks=[
-            JMESPathCheck('properties.kubernetesVersion', '1.8.1')
+            JMESPathCheck('kubernetesVersion', '1.8.1')
         ])
 
     @classmethod
