@@ -10,5 +10,5 @@ from azure.cli.core._environment import get_config_dir
 GLOBAL_CONFIG_DIR = get_config_dir()
 CONFIG_FILE_NAME = 'config'
 GLOBAL_CONFIG_PATH = os.path.join(GLOBAL_CONFIG_DIR, CONFIG_FILE_NAME)
-ENV_VAR_PREFIX = 'AZURE_'
+ENV_VAR_PREFIX = 'AZURE'
 DEFAULTS_SECTION = 'defaults'
