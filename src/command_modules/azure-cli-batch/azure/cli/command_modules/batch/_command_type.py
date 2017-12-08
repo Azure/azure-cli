@@ -542,7 +542,6 @@ class AzureBatchDataPlaneCommand(object):
             'description_loader': self.description_loader,
             'table_transformer': self.table_transformer,
             'confirmation': self.confirmation,
-            #'validator': self.validator,
             'client_factory': self.client_factory
         }
         args.update(self.merged_kwargs)

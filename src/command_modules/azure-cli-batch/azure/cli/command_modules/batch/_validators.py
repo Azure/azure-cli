@@ -309,4 +309,3 @@ def validate_client_parameters(cmd, namespace):
 
     if cmd.cli_ctx.config.get('batch', 'auth_mode', 'shared_key') == 'aad':
         namespace.account_key = None
-

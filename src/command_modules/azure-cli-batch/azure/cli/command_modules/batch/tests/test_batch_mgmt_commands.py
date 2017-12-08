@@ -17,13 +17,11 @@ from azure.mgmt.keyvault.models import SecretPermissions, KeyPermissions
 ALL_SECRET_PERMISSIONS = ' '.join([perm.value for perm in SecretPermissions])
 ALL_KEY_PERMISSIONS = ' '.join([perm.value for perm in KeyPermissions])
 
+
 class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(location='northeurope')
     def test_batch_account_cmd(self, resource_group):
-        config_dir = tempfile.mkdtemp()
-        config_path = os.path.join(config_dir, 'config')
-
         self.kwargs.update({
             'rg': resource_group,
             'str_n': 'clibatchteststorage1',
