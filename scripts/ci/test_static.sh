@@ -51,7 +51,7 @@ run_style azure.cli.command_modules.configure
 #run_style azure.cli.command_modules.cosmosdb
 #run_style azure.cli.command_modules.dla
 #run_style azure.cli.command_modules.dls
-#run_style azure.cli.command_modules.eventgrid
+run_style azure.cli.command_modules.eventgrid
 run_style azure.cli.command_modules.extension
 run_style azure.cli.command_modules.feedback
 run_style azure.cli.command_modules.find
