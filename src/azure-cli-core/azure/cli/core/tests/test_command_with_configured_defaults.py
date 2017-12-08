@@ -56,7 +56,7 @@ class TestCommandWithConfiguredDefaults(unittest.TestCase):
                 self._update_command_definitions()  # pylint: disable=protected-access
         return TestCli(commands_loader_cls=TestCommandsLoader)
 
-    @mock.patch.dict(os.environ, {'AZURE__DEFAULTS_GROUP': 'myRG'})
+    @mock.patch.dict(os.environ, {'AZURE_DEFAULTS_GROUP': 'myRG'})
     def test_apply_configured_defaults_on_required_arg(self):
         io = StringIO()
         cli = self.set_up_command_table(required_arg=True)
@@ -64,7 +64,7 @@ class TestCommandWithConfiguredDefaults(unittest.TestCase):
         result = io.getvalue()
         self.assertTrue('myRG' in result)
 
-    @mock.patch.dict(os.environ, {'AZURE__DEFAULTS_GROUP': 'myRG'})
+    @mock.patch.dict(os.environ, {'AZURE_DEFAULTS_GROUP': 'myRG'})
     def test_apply_configured_defaults_on_optional_arg(self):
         io = StringIO()
         cli = self.set_up_command_table(required_arg=False)
