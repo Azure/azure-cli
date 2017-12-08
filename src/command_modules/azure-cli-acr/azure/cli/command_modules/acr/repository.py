@@ -8,12 +8,15 @@ from base64 import b64encode
 import requests
 from requests.utils import to_native_string
 
-from knack.prompting import prompt, prompt_pass, NoTTYException, prompt_y_n
+from knack.prompting import prompt_y_n, NoTTYException
 from knack.util import CLIError
+from knack.log import get_logger
 
 from ._utils import validate_managed_registry
 from ._docker_utils import get_access_credentials
 
+
+logger = get_logger(__name__)
 
 
 DELETE_NOT_SUPPORTED = 'Delete is not supported for registries in Basic SKU.'
@@ -150,17 +153,13 @@ def _obtain_data_from_registry(login_server,
     return resultList
 
 
-def acr_repository_list(registry_name,
+def acr_repository_list(cmd,
+                        registry_name,
                         resource_group_name=None,
                         username=None,
                         password=None):
-    """Lists repositories in the specified container registry.
-    :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
-    :param str username: The username used to log into the container registry
-    :param str password: The password used to log into the container registry
-    """
     login_server, username, password = get_access_credentials(
+        cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         username=username,
@@ -174,19 +173,14 @@ def acr_repository_list(registry_name,
         result_index='repositories')
 
 
-def acr_repository_show_tags(registry_name,
+def acr_repository_show_tags(cmd,
+                             registry_name,
                              repository,
                              resource_group_name=None,
                              username=None,
                              password=None):
-    """Shows tags of a given repository in the specified container registry.
-    :param str registry_name: The name of container registry
-    :param str repository: The repository to obtain tags from
-    :param str resource_group_name: The name of resource group
-    :param str username: The username used to log into the container registry
-    :param str password: The password used to log into the container registry
-    """
     login_server, username, password = get_access_credentials(
+        cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         username=username,
@@ -202,19 +196,14 @@ def acr_repository_show_tags(registry_name,
         result_index='tags')
 
 
-def acr_repository_show_manifests(registry_name,
+def acr_repository_show_manifests(cmd,
+                                  registry_name,
                                   repository,
                                   resource_group_name=None,
                                   username=None,
                                   password=None):
-    """Shows manifests of a given repository in the specified container registry.
-    :param str registry_name: The name of container registry
-    :param str repository: The repository to obtain manifests from
-    :param str resource_group_name: The name of resource group
-    :param str username: The username used to log into the container registry
-    :param str password: The password used to log into the container registry
-    """
     login_server, username, password = get_access_credentials(
+        cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         username=username,
@@ -230,7 +219,8 @@ def acr_repository_show_manifests(registry_name,
         result_index='manifests')
 
 
-def acr_repository_delete(registry_name,
+def acr_repository_delete(cmd,
+                          registry_name,
                           repository,
                           tag=None,
                           manifest=None,
@@ -238,19 +228,11 @@ def acr_repository_delete(registry_name,
                           username=None,
                           password=None,
                           yes=False):
-    """Deletes a repository or a manifest/tag from the given repository in the specified container registry.
-    :param str registry_name: The name of container registry
-    :param str repository: The name of repository to delete
-    :param str tag: The name of tag to delete
-    :param str manifest: The sha256 based digest of manifest to delete
-    :param str resource_group_name: The name of resource group
-    :param str username: The username used to log into the container registry
-    :param str password: The password used to log into the container registry
-    """
     _, resource_group_name = validate_managed_registry(
-        registry_name, resource_group_name, DELETE_NOT_SUPPORTED)
+        cmd.cli_ctx, registry_name, resource_group_name, DELETE_NOT_SUPPORTED)
 
     login_server, username, password = get_access_credentials(
+        cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         username=username,

@@ -9,8 +9,6 @@ import binascii
 from datetime import datetime
 import re
 
-from azure.keyvault.models import JsonWebKeyOperation
-
 from azure.mgmt.keyvault import KeyVaultManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -28,14 +26,14 @@ def _extract_version(item_id):
     return item_id.split('/')[-1]
 
 
-def _get_resource_group_from_vault_name(vault_name):
+def _get_resource_group_from_vault_name(cli_ctx, vault_name):
     """
     Fetch resource group from vault name
     :param str vault_name: name of the key vault
     :return: resource group name or None
     :rtype: str
     """
-    client = get_mgmt_service_client(KeyVaultManagementClient).vaults
+    client = get_mgmt_service_client(cli_ctx, KeyVaultManagementClient).vaults
     for vault in client.list():
         id_comps = parse_resource_id(vault.id)
         if id_comps['name'] == vault_name:
@@ -159,10 +157,10 @@ def validate_principal(ns):
             None, 'specify exactly one: --object-id, --spn, --upn')
 
 
-def validate_resource_group_name(ns):
+def validate_resource_group_name(cmd, ns):
     if not ns.resource_group_name:
         vault_name = ns.vault_name
-        group_name = _get_resource_group_from_vault_name(vault_name)
+        group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, vault_name)
         if group_name:
             ns.resource_group_name = group_name
         else:
@@ -207,7 +205,11 @@ def datetime_type(string):
     raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))
 
 
-def vault_base_url_type(name):
-    from azure.cli.core._profile import CLOUD
-    suffix = CLOUD.suffixes.keyvault_dns
-    return 'https://{}{}'.format(name, suffix)
+def get_vault_base_url_type(cli_ctx):
+
+    suffix = cli_ctx.cloud.suffixes.keyvault_dns
+
+    def vault_base_url_type(name):
+        return 'https://{}{}'.format(name, suffix)
+
+    return vault_base_url_type

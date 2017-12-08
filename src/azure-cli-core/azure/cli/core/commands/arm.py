@@ -288,6 +288,24 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         arguments['cmd'] = CLICommandArgument('cmd', arg_type=ignore_type)
         return [(k, v) for k, v in arguments.items()]
 
+    def _extract_handler_and_args(args, commmand_kwargs, op):
+        factory = _get_client_factory(name, commmand_kwargs)
+        client = None
+        if factory:
+            try:
+                client = factory(context.cli_ctx)
+            except TypeError:
+                client = factory(context.cli_ctx, None)
+
+        client_arg_name = 'client' if op.startswith(('azure.cli', 'azext')) else 'self'
+        op_handler = context.get_op_handler(op)
+        exclude = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
+        raw_args = dict(extract_args_from_signature(op_handler, excluded_params=exclude))
+        op_args = {key: val for key, val in args.items() if key in raw_args}
+        if client_arg_name in raw_args:
+            op_args[client_arg_name] = client
+        return op_handler, op_args
+
     def handler(args):  # pylint: disable=too-many-branches,too-many-statements
         cmd = args.get('cmd')
         ordered_arguments = args.pop('ordered_arguments', [])
@@ -296,20 +314,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
                 raise CLIError("Unexpected '{}' was not empty.".format(item))
             del args[item]
 
-        factory = _get_client_factory(name, cmd.command_kwargs)
-        client = None
-        if factory:
-            try:
-                client = factory(context.cli_ctx)
-            except TypeError:
-                client = factory(context.cli_ctx, None)
-
-        operations_tmpl = _get_operations_tmpl(cmd)
-        client_arg_name = 'client' if operations_tmpl.startswith(('azure.cli', 'azext')) else 'self'
-        getterargs = {key: val for key, val in args.items() if key in get_arguments_loader()}
-        if client_arg_name in getterargs or client_arg_name == 'self':
-            getterargs[client_arg_name] = client
-        getter = context.get_op_handler(getter_op)
+        getter, getterargs = _extract_handler_and_args(args, cmd.command_kwargs, getter_op)
         if child_collection_prop_name:
             parent = getter(**getterargs)
             instance = _get_child(
@@ -324,18 +329,14 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
         # pass instance to the custom_function, if provided
         if custom_function_op:
-            custom_function = context.get_op_handler(custom_function_op)
-            custom_func_args = \
-                {k: v for k, v in args.items() if k in function_arguments_loader()}
+            custom_function, custom_func_args = _extract_handler_and_args(args, cmd.command_kwargs, custom_function_op)
             if child_collection_prop_name:
                 parent = custom_function(instance=instance, parent=parent, **custom_func_args)
             else:
                 instance = custom_function(instance=instance, **custom_func_args)
 
         # apply generic updates after custom updates
-        setterargs = {key: val for key, val in args.items() if key in set_arguments_loader()}
-        if client_arg_name in setterargs or client_arg_name == 'self':
-            setterargs[client_arg_name] = client
+        setter, setterargs = _extract_handler_and_args(args, cmd.command_kwargs, setter_op)
 
         for arg in ordered_arguments:
             arg_type, arg_values = arg
@@ -358,8 +359,6 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
         # Done... update the instance!
         setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
-        setter = context.get_op_handler(setter_op)
-
         no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
         if no_wait_param:
             setterargs[no_wait_param] = args[no_wait_param]

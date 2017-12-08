@@ -36,7 +36,7 @@ def _get_proxy_instance():
     if os_platform == 'Darwin':
         return MacProxy()
     elif os_platform == 'Windows':
-        from azure.cli.command_modules.acs.win_proxy import WinProxy
+        from .win_proxy import WinProxy
         return WinProxy()
     elif os_platform == 'Linux':
         return LinuxProxy()
@@ -80,7 +80,7 @@ class LinuxProxy(Proxy):
 
     def disable_http_proxy(self):
         """
-        Disables the HTTP proxy
+        Disables the HTTP proxy on Linux
         """
         subprocess.call('sudo gsettings set org.gnome.system.proxy mode \'none\'', shell=True)
 
@@ -88,13 +88,13 @@ class LinuxProxy(Proxy):
 class MacProxy(Proxy):
     def set_http_proxy(self, host, port):
         """
-        Sets the HTTP proxy
+        Sets the HTTP proxy on macOS
         """
         cmd = 'sudo networksetup -setwebproxy wi-fi {} {}'.format(host, port)
         subprocess.call(cmd, shell=True)
 
     def disable_http_proxy(self):
         """
-        Disables the HTTP proxy
+        Disables the HTTP proxy on macOS
         """
         subprocess.call('sudo networksetup -setwebproxystate wi-fi off', shell=True)
