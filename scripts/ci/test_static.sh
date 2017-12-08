@@ -65,7 +65,7 @@ run_style azure.cli.command_modules.network
 #run_style azure.cli.command_modules.profile
 #run_style azure.cli.command_modules.rdbms
 run_style azure.cli.command_modules.redis
-#run_style azure.cli.command_modules.reservations
+run_style azure.cli.command_modules.reservations
 run_style azure.cli.command_modules.resource
 run_style azure.cli.command_modules.role
 #run_style azure.cli.command_modules.servicefabric
