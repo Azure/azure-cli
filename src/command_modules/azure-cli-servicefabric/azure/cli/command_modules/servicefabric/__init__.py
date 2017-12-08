@@ -8,14 +8,14 @@ from azure.cli.core import AzCommandsLoader
 import azure.cli.command_modules.servicefabric._help  # pylint: disable=unused-import
 
 
-class SFCommandsLoader(AzCommandsLoader):
+class ServiceFabricCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
         sf_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.servicefabric.custom#{}')
-        super(SFCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                               custom_command_type=sf_custom,
-                                               min_profile='2017-03-10-profile')
+        super(ServiceFabricCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                                                          custom_command_type=sf_custom,
+                                                          min_profile='2017-03-10-profile')
 
     def load_command_table(self, args):
         from azure.cli.command_modules.servicefabric.commands import load_command_table
@@ -27,4 +27,4 @@ class SFCommandsLoader(AzCommandsLoader):
         load_arguments(self, command)
 
 
-COMMAND_LOADER_CLS = SFCommandsLoader
+COMMAND_LOADER_CLS = ServiceFabricCommandsLoader
