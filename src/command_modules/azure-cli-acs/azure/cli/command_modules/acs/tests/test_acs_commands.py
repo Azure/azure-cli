@@ -7,7 +7,7 @@ import os
 import tempfile
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer,
-                               RoleBasedServicePrincipalPreparer, JMESPathCheck)
+                               RoleBasedServicePrincipalPreparer)
 
 # flake8: noqa
 
@@ -22,27 +22,27 @@ class AzureContainerServiceScenarioTest(ScenarioTest):
         # create
         create_cmd = 'acs create -g {} -n {} --dns-prefix {} --ssh-key-value {} -l {}'
         self.cmd(create_cmd.format(resource_group, acs_name, dns_prefix, ssh_pubkey_file, resource_group_location),
-                 checks=[JMESPathCheck('properties.outputs.masterFQDN.value',
+                 checks=[self.check('properties.outputs.masterFQDN.value',
                                        '{}mgmt.{}.cloudapp.azure.com'.format(dns_prefix, resource_group_location)),
-                         JMESPathCheck('properties.outputs.agentFQDN.value',
+                         self.check('properties.outputs.agentFQDN.value',
                                        '{}agent.{}.cloudapp.azure.com'.format(dns_prefix, resource_group_location))])
 
         # show
         self.cmd('acs show -g {} -n {}'.format(resource_group, acs_name), checks=[
-            JMESPathCheck('agentPoolProfiles[0].count', 3),
-            JMESPathCheck('agentPoolProfiles[0].vmSize', 'Standard_D2_v2'),
-            JMESPathCheck('masterProfile.dnsPrefix', dns_prefix + 'mgmt'),
-            JMESPathCheck('orchestratorProfile.orchestratorType', 'DCOS'),
-            JMESPathCheck('name', acs_name),
+            self.check('agentPoolProfiles[0].count', 3),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_D2_v2'),
+            self.check('masterProfile.dnsPrefix', dns_prefix + 'mgmt'),
+            self.check('orchestratorProfile.orchestratorType', 'DCOS'),
+            self.check('name', acs_name),
         ])
 
         # scale-up
         self.cmd('acs scale -g {} -n {} --new-agent-count 5'.format(resource_group, acs_name),
-                 checks=JMESPathCheck('agentPoolProfiles[0].count', 5))
+                 checks=self.check('agentPoolProfiles[0].count', 5))
 
         # show again
         self.cmd('acs show -g {} -n {}'.format(resource_group, acs_name),
-                 checks=JMESPathCheck('agentPoolProfiles[0].count', 5))
+                 checks=self.check('agentPoolProfiles[0].count', 5))
 
     # the length is set to avoid following error:
     # Resource name k8s-master-ip-cliacstestgae47e-clitestdqdcoaas25vlhygb2aktyv4-c10894mgmt-D811C917
@@ -55,7 +55,7 @@ class AzureContainerServiceScenarioTest(ScenarioTest):
         cmd = 'acs create -g {} -n {} --orchestrator-type Kubernetes --service-principal {} ' \
               '--client-secret {} --ssh-key-value {}'
         self.cmd(cmd.format(resource_group, acs_name, sp_name, sp_password, ssh_pubkey_file),
-                 checks=[JMESPathCheck('properties.provisioningState', 'Succeeded')])
+                 checks=[self.check('properties.provisioningState', 'Succeeded')])
 
 
     @classmethod

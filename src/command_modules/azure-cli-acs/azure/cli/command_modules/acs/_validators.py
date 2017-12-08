@@ -8,10 +8,10 @@ import os.path
 import re
 
 from azure.cli.core.util import CLIError
-import azure.cli.core.azlogging as azlogging
 import azure.cli.core.keys as keys
+from knack.log import get_logger
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 
 def validate_ssh_key(namespace):
