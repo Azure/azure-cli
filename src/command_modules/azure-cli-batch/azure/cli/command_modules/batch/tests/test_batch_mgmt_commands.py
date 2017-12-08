@@ -30,7 +30,7 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
             'loc': 'northeurope',
             'acc': 'clibatchtest1',
             'byos_n': 'clibatchtestuser1',
-            'byos_l': 'uksouth',
+            'byos_l': 'southindia',
             'kv': 'clibatchtestkeyvault1',
             'obj_id': 'f520d84c-3fd3-4cc8-88d4-2ed25b00d27a',
             'perm_k': ALL_KEY_PERMISSIONS,
@@ -92,19 +92,14 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
         self.assertTrue(keys.get_output_in_json()['primary'] !=
                         keys2.get_output_in_json()['primary'])
 
-        cli_ctx = TestCli()
-        with mock.patch('azure.cli.core._config.GLOBAL_CONFIG_DIR', config_dir), \
-                mock.patch('azure.cli.core._config.GLOBAL_CONFIG_PATH', config_path):
-            self.cmd('batch account login -g {rg} -n {acc}').assert_with_checks(self.is_empty())
-            self.assertEqual(cli_ctx.config.get('batch', 'auth_mode'), 'aad')
-            self.assertEqual(cli_ctx.config.get('batch', 'account'), self.kwargs['acc'])
-            self.assertFalse(cli_ctx.config.has_option('batch', 'access_key'))
+        self.cmd('batch account login -g {rg} -n {acc}').assert_with_checks(self.is_empty())
+        self.assertEqual(self.cli_ctx.config.get('batch', 'auth_mode'), 'aad')
+        self.assertEqual(self.cli_ctx.config.get('batch', 'account'), self.kwargs['acc'])
 
-            self.cmd('batch account login -g {rg} -n {acc} --shared-key-auth').assert_with_checks(self.is_empty())
-            self.assertEqual(cli_ctx.config.get('batch', 'auth_mode'), 'shared_key')
-            self.assertEqual(cli_ctx.config.get('batch', 'account'), self.kwargs['acc'])
-            self.assertEqual(cli_ctx.config.get('batch', 'access_key'),
-                             keys2.get_output_in_json()['primary'])
+        self.cmd('batch account login -g {rg} -n {acc} --shared-key-auth').assert_with_checks(self.is_empty())
+        self.assertEqual(self.cli_ctx.config.get('batch', 'auth_mode'), 'shared_key')
+        self.assertEqual(self.cli_ctx.config.get('batch', 'account'), self.kwargs['acc'])
+        self.assertEqual(self.cli_ctx.config.get('batch', 'access_key'), keys2.get_output_in_json()['primary'])
 
         # test batch account delete
         self.cmd('batch account delete -g {rg} -n {acc} --yes')
