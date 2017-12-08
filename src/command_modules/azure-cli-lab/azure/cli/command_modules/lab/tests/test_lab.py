@@ -4,137 +4,146 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from azure.cli.testsdk.vcr_test_base import ResourceGroupVCRTestBase, JMESPathCheck, NoneCheck
 from azure.cli.testsdk import record_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
-TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
-TEMPLATE = '{}/lab_template.json'.format(TEST_DIR)
-ENV_PARAMTERS = '@{}/docdbenv_paramters.json'.format(TEST_DIR)
+TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+TEMPLATE = os.path.join(TEST_DIR, 'lab_template.json').replace('\\', '\\\\')
+ENV_PARAMETERS = os.path.join('@' + TEST_DIR, 'lab_template.json').replace('\\', '\\\\')
 LAB_NAME = 'cliautomationlab'
 
 
-class LabGalleryVMMgmtScenarioTest(ResourceGroupVCRTestBase):
-
-    def __init__(self, test_method):
-        super(LabGalleryVMMgmtScenarioTest, self).__init__(__file__, test_method,
-                                                           resource_group='cliautomation')
+class LabGalleryVMMgmtScenarioTest(ScenarioTest):
 
     @record_only()
-    def test_lab_gallery_vm_mgmt(self):
-        self.execute()
+    @ResourceGroupPreparer(name_prefix='cliautomation')
+    def test_lab_gallery_vm_mgmt(self, resource_group):
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'linux_vm_name': 'ubuntuvm5367',
+            'linux_image': '\"Ubuntu Server 16.04 LTS\"',
+            'windows_vm_name': 'winvm5367',
+            'windows_image': '\"Windows Server 2008 R2 SP1\"',
+            'image_type': 'gallery',
+            'size': 'Standard_DS1_v2',
+            'password': 'SecretPassword123',
+            'template': TEMPLATE,
+            'lab_name': LAB_NAME
+        })
 
-    def body(self):
-        rg = self.resource_group
-        linux_vm_name = 'ubuntuvm5367'
-        linux_image = 'Ubuntu\ Server\ 16.04\ LTS'
-        windows_vm_name = 'winvm5367'
-        windows_image = 'Windows\ Server\ 2008\ R2\ SP1'
-        image_type = 'gallery'
-        size = 'Standard_DS1_v2'
-        password = 'SecretPassword123'
-
-        self.cmd('group deployment create -g {} --template-file {}'
-                 .format(rg, TEMPLATE),
-                 checks=[JMESPathCheck('properties.provisioningState', 'Succeeded')])
+        self.cmd('group deployment create -g {resource_group} --template-file {template}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
 
         # Create claimable linux vm in the lab
-        self.cmd('lab vm create -g {} --lab-name {} --name {} '
-                 '--image {} --image-type {} --size {} --admin-password {} --allow-claim'
-                 .format(rg, LAB_NAME, linux_vm_name, linux_image, image_type, size, password),
-                 checks=[NoneCheck()])
+        self.cmd('lab vm create -g {resource_group} --lab-name {lab_name} --name {linux_vm_name} --image {linux_image}'
+                 ' --image-type {image_type} --size {size} --admin-password {password} --allow-claim', checks=[
+                     self.is_empty()])
 
-        self.cmd('lab vm show -g {} --lab-name {} --name {}'
-                 .format(rg, LAB_NAME, linux_vm_name),
-                 checks=[
-                     JMESPathCheck('name', linux_vm_name),
-                     JMESPathCheck('provisioningState', 'Succeeded'),
-                     JMESPathCheck('osType', 'Linux'),
-                     JMESPathCheck('virtualMachineCreationSource', 'FromGalleryImage'),
-                     JMESPathCheck('size', size),
-                     JMESPathCheck('disallowPublicIpAddress', True),
-                     JMESPathCheck('artifactDeploymentStatus.totalArtifacts', 0),
-                     JMESPathCheck('galleryImageReference.publisher', 'Canonical')
-                 ])
+        self.cmd('lab vm show -g {resource_group} --lab-name {lab_name} --name {linux_vm_name}', checks=[
+            self.check('name', '{linux_vm_name}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('osType', 'Linux'),
+            self.check('virtualMachineCreationSource', 'FromGalleryImage'),
+            self.check('size', '{size}'),
+            self.check('disallowPublicIpAddress', True),
+            self.check('artifactDeploymentStatus.totalArtifacts', 0),
+            self.check('galleryImageReference.publisher', 'Canonical')
+        ])
 
         # Create windows vm in the lab
-        self.cmd('lab vm create -g {} --lab-name {} --name {} '
-                 '--image {} --image-type {} --size {} --admin-password {} --allow-claim'
-                 .format(rg, LAB_NAME, windows_vm_name, windows_image, image_type, size, password),
-                 checks=[NoneCheck()])
+        self.cmd('lab vm create -g {resource_group} --lab-name {lab_name} --name {windows_vm_name} '
+                 '--image {windows_image} --image-type {image_type} --size {size} --admin-password {password} '
+                 '--allow-claim', checks=[
+                     self.is_empty()])
 
-        self.cmd('lab vm show -g {} --lab-name {} --name {} '
-                 .format(rg, LAB_NAME, windows_vm_name),
-                 checks=[
-                     JMESPathCheck('name', windows_vm_name),
-                     JMESPathCheck('provisioningState', 'Succeeded'),
-                     JMESPathCheck('osType', 'Windows'),
-                     JMESPathCheck('virtualMachineCreationSource', 'FromGalleryImage'),
-                     JMESPathCheck('size', size),
-                     JMESPathCheck('disallowPublicIpAddress', True),
-                     JMESPathCheck('artifactDeploymentStatus.totalArtifacts', 0),
-                     JMESPathCheck('galleryImageReference.publisher', 'MicrosoftWindowsServer')
-                 ])
+        self.cmd('lab vm show -g {resource_group} --lab-name {lab_name} --name {windows_vm_name} ', checks=[
+            self.check('name', '{windows_vm_name}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('osType', 'Windows'),
+            self.check('virtualMachineCreationSource', 'FromGalleryImage'),
+            self.check('size', '{size}'),
+            self.check('disallowPublicIpAddress', True),
+            self.check('artifactDeploymentStatus.totalArtifacts', 0),
+            self.check('galleryImageReference.publisher', 'MicrosoftWindowsServer')
+        ])
 
         # List claimable vms
-        self.cmd('lab vm list -g {} --lab-name {} --claimable'
-                 .format(rg, LAB_NAME), checks=[JMESPathCheck('length(@)', 2)])
+        self.cmd('lab vm list -g {resource_group} --lab-name {lab_name} --claimable', checks=[
+            self.check('length(@)', 2)
+        ])
 
         # claim a specific vm
-        self.cmd('lab vm claim -g {} --lab-name {} --name {}'
-                 .format(rg, LAB_NAME, linux_vm_name), checks=[NoneCheck()])
+        self.cmd('lab vm claim -g {resource_group} --lab-name {lab_name} --name {linux_vm_name}', checks=[
+            self.is_empty()
+        ])
 
         # List my vms - we have already claimed one VM
-        self.cmd('lab vm list -g {} --lab-name {}'
-                 .format(rg, LAB_NAME), checks=[JMESPathCheck('length(@)', 1)])
+        self.cmd('lab vm list -g {resource_group} --lab-name {lab_name}', checks=[
+            self.check('length(@)', 1)
+        ])
 
         # claim any vm
-        self.cmd('lab vm claim -g {} --lab-name {}'.format(rg, LAB_NAME), checks=[NoneCheck()])
+        self.cmd('lab vm claim -g {resource_group} --lab-name {lab_name}', checks=[
+            self.is_empty()
+        ])
 
         # List my vms - we have claimed both VMs
-        self.cmd('lab vm list -g {} --lab-name {}'
-                 .format(rg, LAB_NAME), checks=[JMESPathCheck('length(@)', 2)])
+        self.cmd('lab vm list -g {resource_group} --lab-name {lab_name}', checks=[
+            self.check('length(@)', 2)
+        ])
 
         # Delete all the vms
-        self.cmd('lab vm delete -g {} --lab-name {} --name {}'
-                 .format(rg, LAB_NAME, linux_vm_name), checks=[NoneCheck()])
-        self.cmd('lab vm delete -g {} --lab-name {} --name {}'
-                 .format(rg, LAB_NAME, windows_vm_name), checks=[NoneCheck()])
+        self.cmd('lab vm delete -g {resource_group} --lab-name {lab_name} --name {linux_vm_name}', checks=[
+            self.is_empty()
+        ])
+        self.cmd('lab vm delete -g {resource_group} --lab-name {lab_name} --name {windows_vm_name}', checks=[
+            self.is_empty()
+        ])
 
         # Delete the lab
-        self.cmd('lab delete -g {} --name {}'.format(rg, LAB_NAME), checks=[NoneCheck()])
+        self.cmd('lab delete -g {resource_group} --name {lab_name}', checks=[
+            self.is_empty()
+        ])
 
 
-class LabEnvironmentMgmtScenarioTest(ResourceGroupVCRTestBase):
-
-    def __init__(self, test_method):
-        super(LabEnvironmentMgmtScenarioTest, self).__init__(__file__, test_method,
-                                                             resource_group='cliautomation01')
-
+class LabEnvironmentMgmtScenarioTest(ScenarioTest):
     @record_only()
-    def test_lab_environment_mgmt(self):
-        self.execute()
+    @ResourceGroupPreparer(name_prefix='cliautomation01')
+    def test_lab_environment_mgmt(self, resource_group):
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'env_name': 'docdbenv',
+            'arm_template': 'documentdb-webapp',
+            'password': 'SecretPassword123',
+            'template': TEMPLATE,
+            'lab_name': LAB_NAME,
+            'env_params': ENV_PARAMETERS
+        })
 
-    def body(self):
-        rg = self.resource_group
-        env_name = 'docdbenv'
-        arm_template = 'documentdb-webapp'
+        self.cmd('group deployment create -g {resource_group} --template-file {template}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
 
-        self.cmd('group deployment create -g {} --template-file {}'.format(rg, TEMPLATE),
-                 checks=[JMESPathCheck('properties.provisioningState', 'Succeeded')])
+        artifact_sources = self.cmd('lab artifact-source list -g {resource_group} --lab-name {lab_name}') \
+            .get_output_in_json()
 
-        artifact_sources = self.cmd('lab artifact-source list -g {} --lab-name {}'
-                                    .format(rg, LAB_NAME))
+        self.kwargs.update({
+            'artifact_source_name': artifact_sources[0]['name']
+        })
 
         # Create environment in the lab
-        self.cmd('lab environment create -g {} --lab-name {} --name {} '
-                 '--arm-template {} --artifact-source-name {} --parameters {}'
-                 .format(rg, LAB_NAME, env_name, arm_template, artifact_sources[0]['name'], ENV_PARAMTERS),
-                 checks=[JMESPathCheck('provisioningState', 'Succeeded'),
-                         JMESPathCheck('type', 'Microsoft.DevTestLab/labs/users/environments')])
+        self.cmd('lab environment create -g {resource_group} --lab-name {lab_name} --name {env_name} --arm-template '
+                 '{arm_template} --artifact-source-name {artifact_source_name} --parameters {env_params}', checks=[
+                     self.check('provisioningState', 'Succeeded'),
+                     self.check('type', 'Microsoft.DevTestLab/labs/users/environments')])
 
         # Delete environment from the lab
-        self.cmd('lab environment delete -g {} --lab-name {} --name {}'
-                 .format(rg, LAB_NAME, env_name), checks=[NoneCheck()])
+        self.cmd('lab environment delete -g {resource_group} --lab-name {lab_name} --name {env_name}', checks=[
+            self.is_empty()
+        ])
 
         # Delete the lab
-        self.cmd('lab delete -g {} --name {}'.format(rg, LAB_NAME), checks=[NoneCheck()])
+        self.cmd('lab delete -g {resource_group} --name {lab_name}', checks=[
+            self.is_empty()
+        ])

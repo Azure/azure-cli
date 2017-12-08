@@ -64,7 +64,6 @@ def create_lab_vm(client, resource_group_name, lab_name, name, notes=None, image
         allow_claim=allow_claim,
         storage_type=disk_type,
         expiration_date=expiration_date)
-
     return client.create_environment(resource_group_name, lab_name, lab_virtual_machine)
 
 
