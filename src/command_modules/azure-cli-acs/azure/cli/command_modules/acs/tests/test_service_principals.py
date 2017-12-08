@@ -79,11 +79,12 @@ class AcsServicePrincipalTest(unittest.TestCase):
         client.applications = mock.Mock()
         client.applications.create.return_value.app_id = app_id
         client.applications.list.return_value = []
+        cli_ctx = mock.MagicMock()
 
         name = "foo"
         url = "http://contuso.com"
         secret = "notASecret"
-        _build_service_principal(client, name, url, secret)
+        _build_service_principal(client, cli_ctx, name, url, secret)
 
         self.assertTrue(client.applications.create.called)
         self.assertTrue(client.applications.list.called)
