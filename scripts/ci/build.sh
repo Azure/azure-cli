@@ -105,37 +105,26 @@ setup(
 EOL
 
 for name in $(ls src/command_modules | grep azure-cli-); do
-    if [ "$name" == "azure-cli-acr" ]; then continue; fi
-    if [ "$name" == "azure-cli-acs" ]; then continue; fi
     if [ "$name" == "azure-cli-advisor" ]; then continue; fi
     if [ "$name" == "azure-cli-appservice" ]; then continue; fi
     if [ "$name" == "azure-cli-backup" ]; then continue; fi
     if [ "$name" == "azure-cli-batch" ]; then continue; fi
     if [ "$name" == "azure-cli-batchai" ]; then continue; fi
-    # if [ "$name" == "azure-cli-billing" ]; then continue; fi
-    # if [ "$name" == "azure-cli-cdn" ]; then continue; fi
-    # if [ "$name" == "azure-cli-cloud" ]; then continue; fi
-    # if [ "$name" == "azure-cli-configure" ]; then continue; fi
     if [ "$name" == "azure-cli-consumption" ]; then continue; fi
     if [ "$name" == "azure-cli-container" ]; then continue; fi
     if [ "$name" == "azure-cli-cosmosdb" ]; then continue; fi
     if [ "$name" == "azure-cli-dla" ]; then continue; fi
     if [ "$name" == "azure-cli-dls" ]; then continue; fi
     if [ "$name" == "azure-cli-eventgrid" ]; then continue; fi
-    # if [ "$name" == "azure-cli-extension" ]; then continue; fi
-    # if [ "$name" == "azure-cli-feedback" ]; then continue; fi
     if [ "$name" == "azure-cli-find" ]; then continue; fi
     if [ "$name" == "azure-cli-interactive" ]; then continue; fi
     if [ "$name" == "azure-cli-iot" ]; then continue; fi
-    if [ "$name" == "azure-cli-keyvault" ]; then continue; fi
+	  if [ "$name" == "azure-cli-keyvault" ]; then continue; fi
     if [ "$name" == "azure-cli-lab" ]; then continue; fi
     if [ "$name" == "azure-cli-monitor" ]; then continue; fi
-    # if [ "$name" == "azure-cli-network" ]; then continue; fi
     if [ "$name" == "azure-cli-profile" ]; then continue; fi
     if [ "$name" == "azure-cli-rdbms" ]; then continue; fi
-    # if [ "$name" == "azure-cli-redis" ]; then continue; fi
     if [ "$name" == "azure-cli-reservations" ]; then continue; fi
-    # if [ "$name" == "azure-cli-resource" ]; then continue; fi
     if [ "$name" == "azure-cli-role" ]; then continue; fi
     if [ "$name" == "azure-cli-servicefabric" ]; then continue; fi
     if [ "$name" == "azure-cli-sql" ]; then continue; fi
@@ -150,10 +139,10 @@ done
 
 cat >>$testsrc_dir/setup.py <<EOL
     ],
-    package_data={'': ['recordings/**/*.yaml', 
+    package_data={'': ['recordings/**/*.yaml',
                        'data/*.zip',
                        'data/*.whl',
-                       '*.pem', 
+                       '*.pem',
                        '*.pfx',
                        '*.txt',
                        '*.json',
@@ -162,9 +151,9 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '*.md',
                        '*.bat',
                        '*.txt',
-                       '*.cer', 
+                       '*.cer',
                        '**/*.cer',
-                       '**/*.pem', 
+                       '**/*.pem',
                        '**/*.pfx',
                        '**/*.txt',
                        '**/*.json',
@@ -178,16 +167,16 @@ cat >>$testsrc_dir/setup.py <<EOL
 EOL
 
 pushd $testsrc_dir
-python setup.py -q bdist_wheel -d $output_dir 
+python setup.py -q bdist_wheel -d $output_dir
 python setup.py -q sdist -d $sdist_dir
 popd
 
 ##############################################
 # clear afterwards
-rm -rf $testsrc_dir  
+rm -rf $testsrc_dir
 git checkout src
 
 ##############################################
-# summary 
+# summary
 echo 'Build result:'
 ls -R ./artifacts
