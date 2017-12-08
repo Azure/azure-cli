@@ -874,7 +874,7 @@ class AzArgumentContext(ArgumentsContext):
             if name in patches:
                 patches[name](arg)
 
-            self.extra(name, arg_type=arg)
+            self.extra(name, arg_type=arg.type)
             expanded_arguments.append(name)
 
         self.argument(dest,
@@ -905,4 +905,5 @@ class AzArgumentContext(ArgumentsContext):
         if self.command_loader.supported_api_version(resource_type=merged_kwargs.get('resource_type'),
                                                      min_api=merged_kwargs.get('min_api'),
                                                      max_api=merged_kwargs.get('max_api')):
-            super(AzArgumentContext, self).extra(dest, **merged_kwargs)
+            merged_kwargs.pop('dest', None)
+            super(AzArgumentContext, self).extra(argument_dest=dest, **merged_kwargs)

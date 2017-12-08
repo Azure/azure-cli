@@ -11,7 +11,7 @@ from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import shell_safe_json_parse, get_arg_list
+from azure.cli.core.util import shell_safe_json_parse
 from azure.cli.core.profiles import ResourceType
 
 from knack.arguments import CLICommandArgument, ignore_type
@@ -289,7 +289,6 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         return [(k, v) for k, v in arguments.items()]
 
     def _extract_handler_and_args(args, commmand_kwargs, op):
-        from knack.introspection import extract_args_from_signature
         factory = _get_client_factory(name, commmand_kwargs)
         client = None
         if factory:
