@@ -44,7 +44,7 @@ run_style azure.cli.command_modules.acs
 run_style azure.cli.command_modules.billing
 run_style azure.cli.command_modules.cdn
 run_style azure.cli.command_modules.cloud
-#run_style azure.cli.command_modules.cognitiveservices
+run_style azure.cli.command_modules.cognitiveservices
 run_style azure.cli.command_modules.configure
 #run_style azure.cli.command_modules.consumption
 #run_style azure.cli.command_modules.container
