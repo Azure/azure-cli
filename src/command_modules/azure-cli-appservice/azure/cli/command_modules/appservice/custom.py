@@ -1296,7 +1296,7 @@ def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certif
     cert_name = _generate_cert_name(thumb_print, hosting_environment_profile_param,
                                     webapp.location, cert_resource_group_name)
     cert = Certificate(password=certificate_password, pfx_blob=cert_contents,
-                       location=webapp.location)
+                       location=webapp.location, server_farm_id=webapp.server_farm_id)
     return client.certificates.create_or_update(cert_resource_group_name, cert_name, cert)
 
 
