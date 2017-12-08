@@ -120,12 +120,11 @@ for name in $(ls src/command_modules | grep azure-cli-); do
     if [ "$name" == "azure-cli-find" ]; then continue; fi
     if [ "$name" == "azure-cli-interactive" ]; then continue; fi
     if [ "$name" == "azure-cli-iot" ]; then continue; fi
-	if [ "$name" == "azure-cli-keyvault" ]; then continue; fi
+	  if [ "$name" == "azure-cli-keyvault" ]; then continue; fi
     if [ "$name" == "azure-cli-lab" ]; then continue; fi
     if [ "$name" == "azure-cli-monitor" ]; then continue; fi
     if [ "$name" == "azure-cli-profile" ]; then continue; fi
     if [ "$name" == "azure-cli-rdbms" ]; then continue; fi
-    if [ "$name" == "azure-cli-reservations" ]; then continue; fi
     if [ "$name" == "azure-cli-role" ]; then continue; fi
     if [ "$name" == "azure-cli-servicefabric" ]; then continue; fi
     if [ "$name" == "azure-cli-sql" ]; then continue; fi
