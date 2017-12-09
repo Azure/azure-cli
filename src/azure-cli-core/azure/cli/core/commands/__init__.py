@@ -175,6 +175,14 @@ class AzCliCommand(CLICommand):
             resource_type = command_type.settings.get('resource_type', None) if command_type else None
         return resource_type
 
+    def _merge_kwargs(self, kwargs, base_kwargs=None):
+        base = base_kwargs if base_kwargs is not None else getattr(self, 'command_kwargs')
+        return _merge_kwargs(base, kwargs)
+
+    # pylint: disable=no-self-use
+    def _resolve_kwarg(self, kwargs, name, default_source_name='command_type', required=False):
+        return _resolve_kwarg(kwargs, name, default_source_name, required)
+
     def get_api_version(self, resource_type=None):
         resource_type = resource_type or self._get_resource_type()
         return self.loader.get_api_version(resource_type=resource_type)
@@ -583,6 +591,25 @@ def _is_poller(obj):
     return False
 
 
+def _merge_kwargs(base_kwargs, patch_kwargs):
+    merged_kwargs = base_kwargs.copy()
+    merged_kwargs.update(patch_kwargs)
+    return merged_kwargs
+
+
+def _resolve_kwarg(kwargs, name, default_source_name, required):
+    value = kwargs.get(name, None)
+    default_source = kwargs.get(default_source_name, None) if not value else None
+    if default_source:
+        value = default_source.settings.get(name, None)
+
+    if value or not required:
+        return value
+    else:
+        error = "command authoring error: kwarg '{}' not found.".format(name)
+        raise ValueError(error)
+
+
 # pylint: disable=too-few-public-methods
 class CliCommandType(object):
 
@@ -604,9 +631,11 @@ class CliCommandType(object):
 class AzCommandGroup(CommandGroup):
 
     def __init__(self, command_loader, group_name, **kwargs):
-        operations_tmpl = kwargs.pop('operations_tmpl', None)
+        merged_kwargs = self._merge_kwargs(kwargs, base_kwargs=command_loader.module_kwargs)
+        operations_tmpl = merged_kwargs.pop('operations_tmpl', None)
         super(AzCommandGroup, self).__init__(command_loader, group_name,
-                                             operations_tmpl, **kwargs)
+                                             operations_tmpl, **merged_kwargs)
+        self.group_kwargs = merged_kwargs
         if operations_tmpl:
             self.group_kwargs['operations_tmpl'] = operations_tmpl
         self.is_stale = False
@@ -624,16 +653,22 @@ class AzCommandGroup(CommandGroup):
             logger.error(message)
             raise CLIError(message)
 
+    def _merge_kwargs(self, kwargs, base_kwargs=None):
+        base = base_kwargs if base_kwargs is not None else getattr(self, 'group_kwargs')
+        return _merge_kwargs(base, kwargs)
+
+    # pylint: disable=no-self-use
+    def _resolve_kwarg(self, kwargs, name, default_source_name='command_type', required=False):
+        return _resolve_kwarg(kwargs, name, default_source_name, required)
+
     # pylint: disable=arguments-differ
-    def command(self, name, method_name=None, command_type=None, **kwargs):
+    def command(self, name, method_name=None, **kwargs):
         """
         Register a CLI command
         :param name: Name of the command as it will be called on the command line
         :type name: str
         :param method_name: Name of the method the command maps to
         :type method_name: str
-        :param command_type: CliCommandType object containing settings to apply to the entire command group
-        :type command_type: CliCommandType
         :param kwargs: Keyword arguments. Supported keyword arguments include:
             - client_factory: Callable which returns a client needed to access the underlying command method. (function)
             - confirmation: Prompt prior to the action being executed. This is useful if the action
@@ -650,15 +685,9 @@ class AzCommandGroup(CommandGroup):
         :rtype: None
         """
         self._check_stale()
-        merged_kwargs = self.group_kwargs.copy()
-        group_command_type = merged_kwargs.get('command_type', None)
-        if command_type:
-            merged_kwargs.update(command_type.settings)
-        elif group_command_type:
-            merged_kwargs.update(group_command_type.settings)
-        merged_kwargs.update(kwargs)
 
-        operations_tmpl = merged_kwargs.get('operations_tmpl')
+        merged_kwargs = self._merge_kwargs(kwargs)
+        operations_tmpl = self._resolve_kwarg(merged_kwargs, 'operations_tmpl', required=True)
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         operation = operations_tmpl.format(method_name) if operations_tmpl else None
         self.command_loader._cli_command(command_name, operation, **merged_kwargs)  # pylint: disable=protected-access
@@ -686,17 +715,11 @@ class AzCommandGroup(CommandGroup):
         :rtype: None
         """
         self._check_stale()
-        merged_kwargs = self.group_kwargs.copy()
-        custom_command_type = merged_kwargs.get('custom_command_type', None)
-        if not custom_command_type:
-            raise CLIError('Module does not have `custom_command_type` set!')
-        if custom_command_type:
-            merged_kwargs.update(custom_command_type.settings)
-        merged_kwargs.update(kwargs)
-
+        merged_kwargs = self._merge_kwargs(kwargs)
+        operations_tmpl = self._resolve_kwarg(merged_kwargs, 'operations_tmpl', 'custom_command_type', required=True)
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         self.command_loader._cli_command(command_name,  # pylint: disable=protected-access
-                                         operation=merged_kwargs['operations_tmpl'].format(method_name),
+                                         operation=operations_tmpl.format(method_name),
                                          **merged_kwargs)
 
     # pylint: disable=no-self-use
@@ -734,8 +757,7 @@ class AzCommandGroup(CommandGroup):
         from azure.cli.core.commands.arm import _cli_generic_update_command
 
         self._check_stale()
-        merged_kwargs = self.group_kwargs.copy()
-        merged_kwargs.update(kwargs)
+        merged_kwargs = _merge_kwargs(self.group_kwargs, kwargs)
 
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type)
@@ -757,8 +779,7 @@ class AzCommandGroup(CommandGroup):
     def generic_wait_command(self, name, getter_name='get', getter_type=None, **kwargs):
         from azure.cli.core.commands.arm import _cli_generic_update_command, _cli_generic_wait_command
         self._check_stale()
-        merged_kwargs = self.group_kwargs.copy()
-        merged_kwargs.update(kwargs)
+        merged_kwargs = _merge_kwargs(self.group_kwargs, kwargs)
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         _cli_generic_wait_command(
             self.command_loader,
@@ -789,7 +810,7 @@ class AzArgumentContext(ArgumentsContext):
     def __init__(self, command_loader, scope, **kwargs):
         super(AzArgumentContext, self).__init__(command_loader, scope)
         self.scope = scope  # this is called "command" in knack, but that is not an accurate name
-        self.group_kwargs = kwargs
+        self.group_kwargs = _merge_kwargs(command_loader.module_kwargs, kwargs)
         self.is_stale = False
 
     def __enter__(self):
@@ -810,19 +831,29 @@ class AzArgumentContext(ArgumentsContext):
             logger.error(message)
             raise CLIError(message)
 
+    def _merge_kwargs(self, kwargs, base_kwargs=None):
+        base = base_kwargs if base_kwargs is not None else getattr(self, 'group_kwargs')
+        return _merge_kwargs(base, kwargs)
+
+    # pylint: disable=no-self-use
+    def _resolve_kwarg(self, kwargs, name, default_source_name='arg_type', required=False):
+        return _resolve_kwarg(kwargs, name, default_source_name, required)
+
     # pylint: disable=arguments-differ
     def argument(self, dest, arg_type=None, **kwargs):
         self._check_stale()
         if not self._applicable():
             return
 
-        merged_kwargs = self.group_kwargs.copy()
+        merged_kwargs = self._merge_kwargs(kwargs)
         if arg_type:
-            merged_kwargs.update(arg_type.settings)
-        merged_kwargs.update(kwargs)
-        if self.command_loader.supported_api_version(resource_type=merged_kwargs.get('resource_type'),
-                                                     min_api=merged_kwargs.get('min_api'),
-                                                     max_api=merged_kwargs.get('max_api')):
+            merged_kwargs['arg_type'] = arg_type
+        resource_type = self._resolve_kwarg(merged_kwargs, 'resource_type')
+        min_api = self._resolve_kwarg(merged_kwargs, 'min_api')
+        max_api = self._resolve_kwarg(merged_kwargs, 'max_api')
+        if self.command_loader.supported_api_version(resource_type=resource_type,
+                                                     min_api=min_api,
+                                                     max_api=max_api):
             super(AzArgumentContext, self).argument(dest, **merged_kwargs)
         else:
             super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
@@ -865,16 +896,17 @@ class AzArgumentContext(ArgumentsContext):
 
         expanded_arguments = []
         for name, arg in extract_args_from_signature(model_type.__init__, excluded_params=EXCLUDED_PARAMS):
+            arg = arg.type
             if name in parameter_docs:
-                arg.type.settings['help'] = parameter_docs[name]
+                arg.settings['help'] = parameter_docs[name]
 
             if group_name:
-                arg.type.settings['arg_group'] = group_name
+                arg.settings['arg_group'] = group_name
 
             if name in patches:
                 patches[name](arg)
 
-            self.extra(name, arg_type=arg.type)
+            self.extra(name, arg_type=arg)
             expanded_arguments.append(name)
 
         self.argument(dest,
@@ -898,12 +930,14 @@ class AzArgumentContext(ArgumentsContext):
             raise ValueError("command authoring error: extra argument '{}' cannot be registered to a group-level "
                              "scope '{}'. It must be registered to a specific command.".format(dest, self.scope))
 
-        merged_kwargs = self.group_kwargs.copy()
+        merged_kwargs = _merge_kwargs(self.group_kwargs, kwargs)
         if arg_type:
-            merged_kwargs.update(arg_type.settings)
-        merged_kwargs.update(kwargs)
-        if self.command_loader.supported_api_version(resource_type=merged_kwargs.get('resource_type'),
-                                                     min_api=merged_kwargs.get('min_api'),
-                                                     max_api=merged_kwargs.get('max_api')):
+            merged_kwargs['arg_type'] = arg_type
+        resource_type = _resolve_kwarg(merged_kwargs, 'resource_type', 'arg_type', False)
+        min_api = _resolve_kwarg(merged_kwargs, 'min_api', 'arg_type', False)
+        max_api = _resolve_kwarg(merged_kwargs, 'max_api', 'arg_type', False)
+        if self.command_loader.supported_api_version(resource_type=resource_type,
+                                                     min_api=min_api,
+                                                     max_api=max_api):
             merged_kwargs.pop('dest', None)
             super(AzArgumentContext, self).extra(argument_dest=dest, **merged_kwargs)
