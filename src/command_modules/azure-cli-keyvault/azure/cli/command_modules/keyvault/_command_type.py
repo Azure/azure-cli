@@ -50,21 +50,15 @@ class KeyVaultCommandGroup(AzCommandGroup):
     def __init__(self, command_loader, group_name, **kwargs):
         from azure.cli.command_modules.keyvault._client_factory import keyvault_data_plane_factory
         # all regular and custom commands should use the keyvault data plane client
-        kwargs['custom_command_type'].client_factory = keyvault_data_plane_factory
+        merged_kwargs = self._merge_kwargs(kwargs, base_kwargs=command_loader.module_kwargs)
+        merged_kwargs['custom_command_type'].settings['client_factory'] = keyvault_data_plane_factory
         super(KeyVaultCommandGroup, self).__init__(command_loader, group_name, **kwargs)
 
     def _create_keyvault_command(self, name, method_name=None, command_type_name=None, **kwargs):
         self._check_stale()
-        merged_kwargs = self.group_kwargs.copy()
-        group_command_type = merged_kwargs.get(command_type_name, None)
-        command_type = merged_kwargs.get(command_type_name, None)
-        if command_type:
-            merged_kwargs.update(command_type.settings)
-        elif group_command_type:
-            merged_kwargs.update(group_command_type.settings)
-        merged_kwargs.update(kwargs)
 
-        operations_tmpl = merged_kwargs.get('operations_tmpl')
+        merged_kwargs = self._merge_kwargs(kwargs)
+        operations_tmpl = self._resolve_kwarg(merged_kwargs, 'operations_tmpl', command_type_name)
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         op = self.command_loader.get_op_handler(operations_tmpl.format(method_name))
 
