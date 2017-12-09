@@ -24,16 +24,13 @@ def load_arguments(self, _):
         c.argument('artifacts', type=get_json_object)
 
         # Image related arguments
-        for arg_name in ['os_type', 'gallery_image_reference', 'custom_image_id']:
-            c.ignore(arg_name)
+        c.ignore('os_type', 'gallery_image_reference', 'custom_image_id')
 
         # Network related arguments
         for arg_name in ['ip_configuration', 'subnet', 'vnet_name']:
             c.argument(arg_name, arg_group='Network')
 
-        for arg_name in ['lab_subnet_name', 'lab_virtual_network_id', 'disallow_public_ip_address',
-                         'network_interface']:
-            c.ignore(arg_name)
+        c.ignore('lab_subnet_name', 'lab_virtual_network_id', 'disallow_public_ip_address', 'network_interface')
 
         # Creating VM in the different location then lab is an officially unsupported scenario
         c.ignore('location')

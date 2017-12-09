@@ -34,7 +34,7 @@ def transform_artifact_source(result):
 
 
 def transform_arm_template_list(arm_template_list):
-    return OrderedDict([transform_arm_template(v) for v in arm_template_list])
+    return [transform_arm_template(v) for v in arm_template_list]
 
 
 def transform_arm_template(result):
@@ -44,10 +44,14 @@ def transform_arm_template(result):
 
 
 def transform_vm_list(vm_list):
-    return OrderedDict([transform_vm(v) for v in vm_list])
+    return [_transform_vm_dict(v) for v in vm_list]
 
-
-def transform_vm(result):
+def _transform_vm_dict(result):
     return OrderedDict([('name', result['name']),
                         ('location', result['location']),
                         ('osType', result['osType'])])
+
+def transform_vm(result):
+    return OrderedDict([('name', result.name),
+                        ('location', result.location),
+                        ('osType', result.os_type)])
