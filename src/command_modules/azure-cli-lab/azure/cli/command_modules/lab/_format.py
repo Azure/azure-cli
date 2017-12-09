@@ -46,10 +46,12 @@ def transform_arm_template(result):
 def transform_vm_list(vm_list):
     return [_transform_vm_dict(v) for v in vm_list]
 
+
 def _transform_vm_dict(result):
     return OrderedDict([('name', result['name']),
                         ('location', result['location']),
                         ('osType', result['osType'])])
+
 
 def transform_vm(result):
     return OrderedDict([('name', result.name),
