@@ -124,6 +124,9 @@ cli_command(__name__, 'webapp log download', custom_path + 'download_historical_
 cli_command(__name__, 'webapp log config', custom_path + 'config_diagnostics')
 cli_command(__name__, 'webapp log show', custom_path + 'show_diagnostic_settings')
 cli_command(__name__, 'webapp browse', custom_path + 'view_in_browser')
+cli_command(__name__, 'appservice samples', custom_path + 'view_samples_in_browser')
+cli_command(__name__, 'webapp samples', custom_path + 'view_samples_in_browser')
+cli_command(__name__, 'functionapp samples', custom_path + 'view_functions_samples_in_browser')
 
 cli_command(__name__, 'webapp deployment slot list', custom_path + 'list_slots', table_transformer=output_slots_in_table)
 cli_command(__name__, 'webapp deployment slot delete', custom_path + 'delete_slot')
