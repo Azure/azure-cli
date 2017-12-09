@@ -1065,6 +1065,16 @@ def view_functions_samples_in_browser():
     _open_page_in_browser(url)
 
 
+def view_docs_in_browser():
+    url = 'https://docs.microsoft.com/azure/app-service/'
+    _open_page_in_browser(url)
+
+
+def view_functions_docs_in_browser():
+    url = 'https://docs.microsoft.com/azure/azure-functions'
+    _open_page_in_browser(url)
+
+
 def _open_page_in_browser(url):
     import sys
     if sys.platform.lower() == 'darwin':

@@ -482,6 +482,21 @@ helps['functionapp samples'] = """
     short-summary: Open functions samples in a browser.
 """
 
+helps['webapp docs'] = """
+    type: command
+    short-summary: Open App service documentation in a browser.
+"""
+
+helps['appservice docs'] = """
+    type: command
+    short-summary: Open App service documentation in a browser.
+"""
+
+helps['functionapp docs'] = """
+    type: command
+    short-summary: Open functions documentation in a browser.
+"""
+
 helps['webapp create'] = """
     type: command
     short-summary: Create a web app.
