@@ -177,11 +177,7 @@ class AzCliCommand(CLICommand):
 
     def _merge_kwargs(self, kwargs, base_kwargs=None):
         base = base_kwargs if base_kwargs is not None else getattr(self, 'command_kwargs')
-        return _merge_kwargs(base, kwargs)
-
-    # pylint: disable=no-self-use
-    def _resolve_kwarg(self, kwargs, name, default_source_name='command_type', required=False):
-        return _resolve_kwarg(kwargs, name, default_source_name, required)
+        return _merge_kwargs(kwargs, base)
 
     def get_api_version(self, resource_type=None):
         resource_type = resource_type or self._get_resource_type()
@@ -591,23 +587,10 @@ def _is_poller(obj):
     return False
 
 
-def _merge_kwargs(base_kwargs, patch_kwargs):
+def _merge_kwargs(patch_kwargs, base_kwargs):
     merged_kwargs = base_kwargs.copy()
     merged_kwargs.update(patch_kwargs)
     return merged_kwargs
-
-
-def _resolve_kwarg(kwargs, name, default_source_name, required):
-    value = kwargs.get(name, None)
-    default_source = kwargs.get(default_source_name, None) if not value else None
-    if default_source:
-        value = default_source.settings.get(name, None)
-
-    if value or not required:
-        return value
-    else:
-        error = "command authoring error: kwarg '{}' not found.".format(name)
-        raise ValueError(error)
 
 
 # pylint: disable=too-few-public-methods
@@ -657,9 +640,14 @@ class AzCommandGroup(CommandGroup):
         base = base_kwargs if base_kwargs is not None else getattr(self, 'group_kwargs')
         return _merge_kwargs(base, kwargs)
 
-    # pylint: disable=no-self-use
-    def _resolve_kwarg(self, kwargs, name, default_source_name='command_type', required=False):
-        return _resolve_kwarg(kwargs, name, default_source_name, required)
+    def _flatten_kwargs(self, kwargs, default_source_name):
+        merged_kwargs = self._merge_kwargs(kwargs)
+        default_source = merged_kwargs.get(default_source_name, None)
+        if default_source:
+            arg_source_copy = default_source.settings.copy()
+            arg_source_copy.update(merged_kwargs)
+            return arg_source_copy
+        return merged_kwargs
 
     # pylint: disable=arguments-differ
     def command(self, name, method_name=None, **kwargs):
@@ -685,9 +673,8 @@ class AzCommandGroup(CommandGroup):
         :rtype: None
         """
         self._check_stale()
-
-        merged_kwargs = self._merge_kwargs(kwargs)
-        operations_tmpl = self._resolve_kwarg(merged_kwargs, 'operations_tmpl', required=True)
+        merged_kwargs = self._flatten_kwargs(kwargs, 'command_type')
+        operations_tmpl = merged_kwargs['operations_tmpl']
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         operation = operations_tmpl.format(method_name) if operations_tmpl else None
         self.command_loader._cli_command(command_name, operation, **merged_kwargs)  # pylint: disable=protected-access
@@ -715,8 +702,8 @@ class AzCommandGroup(CommandGroup):
         :rtype: None
         """
         self._check_stale()
-        merged_kwargs = self._merge_kwargs(kwargs)
-        operations_tmpl = self._resolve_kwarg(merged_kwargs, 'operations_tmpl', 'custom_command_type', required=True)
+        merged_kwargs = self._flatten_kwargs(kwargs, 'custom_command_type')
+        operations_tmpl = merged_kwargs['operations_tmpl']
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         self.command_loader._cli_command(command_name,  # pylint: disable=protected-access
                                          operation=operations_tmpl.format(method_name),
@@ -831,13 +818,17 @@ class AzArgumentContext(ArgumentsContext):
             logger.error(message)
             raise CLIError(message)
 
+    def _flatten_kwargs(self, kwargs, arg_type):
+        merged_kwargs = self._merge_kwargs(kwargs)
+        if arg_type:
+            arg_type_copy = arg_type.settings.copy()
+            arg_type_copy.update(merged_kwargs)
+            return arg_type_copy
+        return merged_kwargs
+
     def _merge_kwargs(self, kwargs, base_kwargs=None):
         base = base_kwargs if base_kwargs is not None else getattr(self, 'group_kwargs')
-        return _merge_kwargs(base, kwargs)
-
-    # pylint: disable=no-self-use
-    def _resolve_kwarg(self, kwargs, name, default_source_name='arg_type', required=False):
-        return _resolve_kwarg(kwargs, name, default_source_name, required)
+        return _merge_kwargs(kwargs, base)
 
     # pylint: disable=arguments-differ
     def argument(self, dest, arg_type=None, **kwargs):
@@ -845,12 +836,10 @@ class AzArgumentContext(ArgumentsContext):
         if not self._applicable():
             return
 
-        merged_kwargs = self._merge_kwargs(kwargs)
-        if arg_type:
-            merged_kwargs['arg_type'] = arg_type
-        resource_type = self._resolve_kwarg(merged_kwargs, 'resource_type')
-        min_api = self._resolve_kwarg(merged_kwargs, 'min_api')
-        max_api = self._resolve_kwarg(merged_kwargs, 'max_api')
+        merged_kwargs = self._flatten_kwargs(kwargs, arg_type)
+        resource_type = merged_kwargs.get('resource_type', None)
+        min_api = merged_kwargs.get('min_api', None)
+        max_api = merged_kwargs.get('max_api', None)
         if self.command_loader.supported_api_version(resource_type=resource_type,
                                                      min_api=min_api,
                                                      max_api=max_api):
@@ -930,12 +919,10 @@ class AzArgumentContext(ArgumentsContext):
             raise ValueError("command authoring error: extra argument '{}' cannot be registered to a group-level "
                              "scope '{}'. It must be registered to a specific command.".format(dest, self.scope))
 
-        merged_kwargs = _merge_kwargs(self.group_kwargs, kwargs)
-        if arg_type:
-            merged_kwargs['arg_type'] = arg_type
-        resource_type = _resolve_kwarg(merged_kwargs, 'resource_type', 'arg_type', False)
-        min_api = _resolve_kwarg(merged_kwargs, 'min_api', 'arg_type', False)
-        max_api = _resolve_kwarg(merged_kwargs, 'max_api', 'arg_type', False)
+        merged_kwargs = self._flatten_kwargs(kwargs, arg_type)
+        resource_type = merged_kwargs.get('resource_type', None)
+        min_api = merged_kwargs.get('min_api', None)
+        max_api = merged_kwargs.get('max_api', None)
         if self.command_loader.supported_api_version(resource_type=resource_type,
                                                      min_api=min_api,
                                                      max_api=max_api):

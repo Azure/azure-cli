@@ -57,8 +57,8 @@ class KeyVaultCommandGroup(AzCommandGroup):
     def _create_keyvault_command(self, name, method_name=None, command_type_name=None, **kwargs):
         self._check_stale()
 
-        merged_kwargs = self._merge_kwargs(kwargs)
-        operations_tmpl = self._resolve_kwarg(merged_kwargs, 'operations_tmpl', command_type_name)
+        merged_kwargs = self._flatten_kwargs(kwargs, command_type_name)
+        operations_tmpl = merged_kwargs['operations_tmpl']
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         op = self.command_loader.get_op_handler(operations_tmpl.format(method_name))
 
