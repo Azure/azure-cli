@@ -25,15 +25,21 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
             self.assertIsNone(usage['meterDetails'])
 
     def test_list_usages_billing_period(self):
-        billing_period = '201710'
-        usages_list = self.cmd('consumption usage list -p {} -t 5'.format(billing_period)).get_output_in_json()
+        self.kwargs.update({
+            'billing_period': '201710'
+        })
+
+        usages_list = self.cmd('consumption usage list -p {billing_period} -t 5').get_output_in_json()
         self.assertTrue(usages_list)
         self.assertTrue(len(usages_list) <= 5)
         self._validate_usage(usages_list[0], False)
 
     def test_list_usages_billing_period_expand(self):
-        billing_period = '201710'
-        usages_list = self.cmd('consumption usage list -p {} -a -m -t 5'.format(billing_period)).get_output_in_json()
+        self.kwargs.update({
+            'billing_period': '201710'
+        })
+
+        usages_list = self.cmd('consumption usage list -p {billing_period} -a -m -t 5').get_output_in_json()
         self.assertTrue(usages_list)
         self.assertTrue(len(usages_list) <= 5)
         self._validate_usage(usages_list[0], True)
@@ -45,6 +51,18 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         self._validate_usage(usages_list[0], False)
 
     def test_list_usages_subscription_custom_date_range(self):
-        usages_list = self.cmd('consumption usage list -s 2017-10-11T23:59:59Z -e 2017-10-12T03:59:59Z').get_output_in_json()
+        self.kwargs.update({
+            'start_date': '2017-10-11T23:59:59Z',
+            'end_date': '2017-10-12T03:59:59Z'
+        })
+
+        usages_list = self.cmd('consumption usage list -s {start_date} -e {end_date}').get_output_in_json()
         self.assertTrue(usages_list)
-        self.assertTrue(all((datetime.strptime(usage_date['usageEnd'], "%Y-%m-%dT%H:%M:%SZ") >= datetime.strptime('2017-10-11T23:59:59Z', "%Y-%m-%dT%H:%M:%SZ") and datetime.strptime(usage_date['usageEnd'], "%Y-%m-%dT%H:%M:%SZ") <= datetime.strptime('2017-10-12T23:59:59Z', "%Y-%m-%dT%H:%M:%SZ")) for usage_date in usages_list))
+
+        def usage_date_check(usage_date):
+            check_after = datetime.strptime(usage_date['usageEnd'], "%Y-%m-%dT%H:%M:%SZ") >= \
+                datetime.strptime('2017-10-11T23:59:59Z', "%Y-%m-%dT%H:%M:%SZ")
+            check_before = datetime.strptime(usage_date['usageEnd'], "%Y-%m-%dT%H:%M:%SZ") <= \
+                datetime.strptime('2017-10-12T23:59:59Z', "%Y-%m-%dT%H:%M:%SZ")
+            return check_after and check_before
+        self.assertTrue(all(usage_date_check(usage_date) for usage_date in usages_list))
