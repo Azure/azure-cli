@@ -124,7 +124,6 @@ for name in $(ls src/command_modules | grep azure-cli-); do
     if [ "$name" == "azure-cli-profile" ]; then continue; fi
     if [ "$name" == "azure-cli-rdbms" ]; then continue; fi
     if [ "$name" == "azure-cli-role" ]; then continue; fi
-    if [ "$name" == "azure-cli-servicefabric" ]; then continue; fi
     if [ "$name" == "azure-cli-sql" ]; then continue; fi
     if [ "$name" == "azure-cli-storage" ]; then continue; fi
     if [ "$name" == "azure-cli-vm" ] ; then continue; fi

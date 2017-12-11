@@ -3,127 +3,101 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import \
-    (register_cli_argument)
-import azure.cli.core.commands.arm  # pylint: disable=unused-import
+# pylint: disable=line-too-long
+
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.commands.parameters import (
-    resource_group_name_type,
-    enum_choice_list
-)
+from azure.cli.core.commands.parameters import resource_group_name_type, get_enum_type
 from azure.cli.core.util import get_json_object
 
-# PARAMETER REGISTRATIONS
 
-register_cli_argument('sf cluster list', 'resource_group_name', resource_group_name_type,
-                      id_part=None, help='The resource group name')
+def load_arguments(self, _):  # pylint: disable=too-many-statements
+    with self.argument_context('sf') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None, help='The resource group name')
+        c.argument('cluster_name', options_list=['--name', '--cluster-name', '-n'], help='Specify the name of the cluster, if not given it will be same as resource group name')
+        c.argument('location', validator=get_default_location_from_resource_group)
+        c.argument('secret_identifier', help='The existing Azure key vault secret URL')
+        c.argument('certificate_file', help='The existing certificate file path for the primary cluster certificate.')
+        c.argument('parameter_file', help='The path to the template parameter file.')
+        c.argument('template_file', help='The path to the template file.')
+        c.argument('vm_password', help='The password of the Vm')
+        c.argument('certificate_output_folder', help='The folder of the new certificate file to be created.')
+        c.argument('certificate_password', help='The password of the certificate file.')
+        c.argument('certificate_subject_name', help='The subject name of the certificate to be created.')
+        c.argument('vault_resource_group_name', options_list=['--vault-resource-group'], help='Key vault resource group name,if not given it will be cluster resource group name')
+        c.argument('vault_name', help='Azure key vault name, it not given it will be the cluster resource group name')
+        c.argument('cluster_size', options_list=['--cluster-size', '-s'], help='The number of nodes in the cluster. Default are 5 nodes')
+        c.argument('vm_sku', help='The Vm Sku')
+        c.argument('vm_user_name', help='The user name for logging to Vm. Default will be adminuser')
+        c.argument('vm_os', arg_type=get_enum_type(['WindowsServer2012R2Datacenter',
+                                                    'WindowsServer2016Datacenter',
+                                                    'WindowsServer2016DatacenterwithContainers',
+                                                    'UbuntuServer1604']),
+                   default='WindowsServer2016Datacenter', options_list=['--vm-os', '--os'],
+                   help='The Operating System of the VMs that make up the cluster.')
+        c.argument('node_type', help='the Node type name.')
 
-register_cli_argument('sf', 'resource_group_name', resource_group_name_type,
-                      id_part=None, help='The resource group name')
-register_cli_argument('sf', 'cluster_name', options_list=('--name', '--cluster-name', '-n'),
-                      help='Specify the name of the cluster, if not given it will be same as resource group name')
-register_cli_argument('sf', 'location',
-                      validator=get_default_location_from_resource_group)
+    with self.argument_context('sf cluster list') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type, id_part=None, help='The resource group name')
 
-register_cli_argument('sf', 'secret_identifier', options_list=('--secret-identifier'),
-                      help='The existing Azure key vault secret URL')
-register_cli_argument('sf', 'certificate_file', options_list=('--certificate-file'),
-                      help='The existing certificate file path for the primary cluster certificate.')
-register_cli_argument('sf', 'parameter_file', options_list=('--parameter-file'),
-                      help='The path to the template parameter file.')
-register_cli_argument('sf', 'template_file', options_list=('--template-file'),
-                      help='The path to the template file.')
-register_cli_argument('sf', 'vm_password', options_list=('--vm-password'),
-                      help='The password of the Vm')
-register_cli_argument('sf', 'certificate_output_folder', options_list=('--certificate-output-folder'),
-                      help='The folder of the new certificate file to be created.')
-register_cli_argument('sf', 'certificate_password', options_list=('--certificate-password'),
-                      help='The password of the certificate file.')
-register_cli_argument('sf', 'certificate_subject_name', options_list=('--certificate-subject-name'),
-                      help='The subject name of the certificate to be created.')
-register_cli_argument('sf', 'vault_resource_group_name', options_list=('--vault-resource-group'),
-                      help='Key vault resource group name,if not given it will be cluster resource group name')
-register_cli_argument('sf', 'vault_name', options_list=('--vault-name'),
-                      help='Azure key vault name, it not given it will be the cluster resource group name')
-register_cli_argument('sf', 'cluster_size', options_list=('--cluster-size', '-s'),
-                      help='The number of nodes in the cluster. Default are 5 nodes')
-register_cli_argument('sf', 'vm_sku', options_list=(
-    '--vm-sku'), help='The Vm Sku')
-register_cli_argument('sf', 'vm_user_name', options_list=(
-    '--vm-user-name'), help='The user name for logging to Vm. Default will be adminuser')
-register_cli_argument('sf', 'vm_os', default='WindowsServer2016Datacenter', options_list=('--vm-os', '--os'),
-                      help='The Operating System of the VMs that make up the cluster.',
-                      **enum_choice_list(['WindowsServer2012R2Datacenter',
-                                          'WindowsServer2016Datacenter',
-                                          'WindowsServer2016DatacenterwithContainers',
-                                          'UbuntuServer1604']))
+    with self.argument_context('sf client certificate') as c:
+        c.argument('certificate_common_name', help='client certificate common name.')
+        c.argument('admin_client_thumbprints', nargs='+', help='Space separated list of client certificate thumbprint that only has admin permission, ')
+        c.argument('certificate_issuer_thumbprint', help='client certificate issuer thumbprint.')
 
-register_cli_argument('sf client certificate', 'certificate_common_name',
-                      help='client certificate common name.')
-register_cli_argument('sf client certificate', 'admin_client_thumbprints', nargs='+',
-                      help='Space separated list of client certificate thumbprint that only has admin permission, ')
-register_cli_argument('sf client certificate', 'certificate_issuer_thumbprint',
-                      help='client certificate issuer thumbprint.')
+    with self.argument_context('sf cluster certificate') as c:
+        c.argument('thumbprint', help='The cluster certificate thumbprint to be removed')
 
-register_cli_argument('sf cluster certificate', 'thumbprint',
-                      help='The cluster certificate thumbprint to be removed')
+    with self.argument_context('sf cluster client-certificate') as c:
+        c.argument('is_admin', help='Client authentication type.')
+        c.argument('certificate_issuer_thumbprint', help='client certificate issuer thumbprint.')
+        c.argument('certificate_common_name', help='client certificate common name.')
+        c.argument('admin_client_thumbprints', nargs='+', help='client certificate thumbprint that only has admin permission.')
+        c.argument('readonly_client_thumbprints', nargs='+', help='Space separated list of client certificate thumbprint that has read only permission.')
 
-register_cli_argument('sf cluster client-certificate', 'is_admin',
-                      help='Client authentication type.')
-register_cli_argument('sf cluster client-certificate', 'certificate_issuer_thumbprint',
-                      help='client certificate issuer thumbprint.')
-register_cli_argument('sf cluster client-certificate', 'certificate_common_name',
-                      help='client certificate common name.')
-register_cli_argument('sf cluster client-certificate', 'admin_client_thumbprints', nargs='+',
-                      help='client certificate thumbprint that only has admin permission.')
-register_cli_argument('sf cluster client-certificate', 'readonly_client_thumbprints', nargs='+',
-                      help='Space separated list of client certificate thumbprint that has read only permission.')
-register_cli_argument('sf cluster client-certificate add', 'thumbprint',
-                      help='client certificate thumbprint.')
-register_cli_argument('sf cluster client-certificate remove', 'thumbprints', nargs='+',
-                      help='A single or Space separated list of client certificate thumbprint(s) to be remove.')
+    with self.argument_context('sf cluster client-certificate add') as c:
+        c.argument('thumbprint', help='client certificate thumbprint.')
 
-register_cli_argument('sf', 'node_type', help='the Node type name.')
+    with self.argument_context('sf cluster client-certificate remove') as c:
+        c.argument('thumbprints', nargs='+', help='A single or Space separated list of client certificate thumbprint(s) to be remove.')
 
-register_cli_argument(
-    'sf cluster node', 'number_of_nodes_to_add', help='number of nodes to add.')
-register_cli_argument(
-    'sf cluster node', 'number_of_nodes_to_remove', help='number of nodes to remove.')
+    with self.argument_context('sf cluster node') as c:
+        c.argument('number_of_nodes_to_add', help='number of nodes to add.')
+        c.argument('number_of_nodes_to_remove', help='number of nodes to remove.')
 
-register_cli_argument('sf cluster durability', 'durability_level',
-                      help='durability level.', **enum_choice_list(['Bronze', 'Silver', 'Gold']))
+    with self.argument_context('sf cluster durability') as c:
+        c.argument('durability_level', arg_type=get_enum_type(['Bronze', 'Silver', 'Gold']), help='durability level.')
 
-register_cli_argument('sf cluster setting', 'parameter', help='parameter name')
-register_cli_argument('sf cluster setting', 'section', help='section name')
-register_cli_argument('sf cluster setting', 'value', help='Specify the value')
+    with self.argument_context('sf cluster setting') as c:
+        c.argument('parameter', help='parameter name')
+        c.argument('section', help='section name')
+        c.argument('value', help='Specify the value')
+        c.argument('settings_section_description', help='Specify the value')
 
-register_cli_argument('sf cluster setting',
-                      'settings_section_description', help='Specify the value')
+    with self.argument_context('sf cluster upgrade-type set') as c:
+        c.argument('version', help='cluster code version')
+        c.argument('upgrade_mode', arg_type=get_enum_type(['manual', 'automatic']), help='cluster upgrade mode')
 
-register_cli_argument('sf cluster upgrade-type set',
-                      'version', help='cluster code version')
-register_cli_argument('sf cluster upgrade-type set', 'upgrade_mode',
-                      help='cluster upgrade mode', **enum_choice_list(['manual', 'automatic']))
+    with self.argument_context('sf cluster reliability') as c:
+        c.argument('reliability_level', arg_type=get_enum_type(['Bronze', 'Silver', 'Gold']), help='durability level.')
+        c.argument('auto_add_node', help='Add node count automatically when changing reliability.')
 
-register_cli_argument('sf cluster reliability', 'reliability_level',
-                      help='durability level.', **enum_choice_list(['Bronze', 'Silver', 'Gold']))
+    with self.argument_context('sf cluster setting set') as c:
+        c.argument('settings_section_description', type=get_json_object,
+                   help='JSON encoded parameters configuration. Use @{file} to load from a file. '
+                        'For example: [{"section": "NamingService","parameter": "MaxOperationTimeout","value": 1000},{"section": "MaxFileOperationTimeout","parameter": "Max2","value": 1000]')
 
-register_cli_argument('sf cluster reliability', 'auto_add_node',
-                      help='Add node count automatically when changing reliability.')
+    with self.argument_context('sf cluster setting remove') as c:
+        c.argument('settings_section_description', type=get_json_object,
+                   help='JSON encoded parameters configuration. Use @{file} to load from a file. '
+                        'For example: [{"section": "NamingService","parameter": "MaxOperationTimeout"}]')
 
-register_cli_argument('sf cluster setting set', 'settings_section_description', type=get_json_object,
-                      help='JSON encoded parameters configuration. Use @{file} to load from a file.'
-                      """for example: [{"section": "NamingService","parameter": "MaxOperationTimeout","value": 1000},{"section": "MaxFileOperationTimeout","parameter": "Max2","value": 1000]""")  # pylint: disable=line-too-long
+    with self.argument_context('sf cluster client-certificate remove') as c:
+        c.argument('client_certificate_common_names', type=get_json_object,
+                   help='JSON encoded parameters configuration. Use @{file} to load from a file. '
+                        'For example: [{"certificateCommonName": "test.com","certificateIssuerThumbprint": "22B4AE296B504E512DF880A77A2CAE20200FF922"}]')
 
-register_cli_argument('sf cluster setting remove', 'settings_section_description', type=get_json_object,
-                      help='JSON encoded parameters configuration. Use @{file} to load from a file.'
-                      """for example: [{"section": "NamingService","parameter": "MaxOperationTimeout"}]""")
-
-register_cli_argument('sf cluster client-certificate remove', 'client_certificate_common_names', type=get_json_object,
-                      help='JSON encoded parameters configuration. Use @{file} to load from a file.'
-                      """for example: [{"certificateCommonName": "test.com","certificateIssuerThumbprint": "22B4AE296B504E512DF880A77A2CAE20200FF922"}]""")
-
-register_cli_argument('sf cluster client-certificate add', 'client_certificate_common_names', type=get_json_object,
-                      help='JSON encoded parameters configuration. Use @{file} to load from a file.'
-                      """for example: [{"isAdmin":true, "certificateCommonName": "test.com",
-                         "certificateIssuerThumbprint": "22B4AE296B504E512DF880A77A2CAE20200FF922"}]""")
+    with self.argument_context('sf cluster client-certificate add') as c:
+        c.argument('client_certificate_common_names', type=get_json_object,
+                   help='JSON encoded parameters configuration. Use @{file} to load from a file. '
+                        'For example: [{"isAdmin":true, "certificateCommonName": "test.com", '
+                        '"certificateIssuerThumbprint": "22B4AE296B504E512DF880A77A2CAE20200FF922"}]')
