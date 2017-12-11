@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from datetime import datetime
-from azure.cli.testsdk import ScenarioTest
+from azure.cli.testsdk import ScenarioTest, record_only
 
 
+@record_only()
 class AzureConsumptionServiceScenarioTest(ScenarioTest):
     def _validate_usage(self, usage, includeMeterDetails=False):
         self.assertIsNotNone(usage)
