@@ -108,7 +108,6 @@ for name in $(ls src/command_modules | grep azure-cli-); do
     if [ "$name" == "azure-cli-advisor" ]; then continue; fi
     if [ "$name" == "azure-cli-appservice" ]; then continue; fi
     if [ "$name" == "azure-cli-backup" ]; then continue; fi
-    if [ "$name" == "azure-cli-batch" ]; then continue; fi
     if [ "$name" == "azure-cli-batchai" ]; then continue; fi
     if [ "$name" == "azure-cli-consumption" ]; then continue; fi
     if [ "$name" == "azure-cli-container" ]; then continue; fi

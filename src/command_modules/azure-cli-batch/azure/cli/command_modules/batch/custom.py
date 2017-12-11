@@ -193,8 +193,7 @@ def delete_certificate(client, thumbprint, abort=False):
     thumbprint_algorithm = 'sha1'
     if abort:
         return client.cancel_deletion(thumbprint_algorithm, thumbprint)
-    else:
-        return client.delete(thumbprint_algorithm, thumbprint)
+    return client.delete(thumbprint_algorithm, thumbprint)
 
 
 @transfer_doc(PoolResizeParameter)

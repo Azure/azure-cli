@@ -23,7 +23,8 @@ from azure.cli.command_modules.batch._validators import \
 
 from knack.arguments import CLIArgumentType
 
-# pylint: disable=line-too-long
+
+# pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
     batch_name_type = CLIArgumentType(
         help='Name of the Batch account.',

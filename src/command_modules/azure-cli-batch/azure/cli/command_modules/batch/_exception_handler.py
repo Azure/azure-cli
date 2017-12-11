@@ -20,7 +20,7 @@ def batch_exception_handler(ex):
             raise CLIError(message)
         except AttributeError:
             raise CLIError(ex)
-    elif isinstance(ex, ValidationError) or isinstance(ex, ClientRequestError):
+    elif isinstance(ex, (ValidationError, ClientRequestError)):
         raise CLIError(ex)
     elif isinstance(ex, CloudError):
         raise CLIError(ex)
