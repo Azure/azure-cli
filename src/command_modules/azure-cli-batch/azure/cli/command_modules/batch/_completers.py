@@ -5,6 +5,7 @@
 
 from azure.cli.core.decorators import Completer
 
+
 @Completer
 def load_node_agent_skus(cmd, prefix, namespace):  # pylint: disable=unused-argument
     from msrest.exceptions import ClientRequestError

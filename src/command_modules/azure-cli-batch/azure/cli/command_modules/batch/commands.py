@@ -72,7 +72,6 @@ def load_command_table(self, _):
     with self.command_group('batch location quotas', get_mgmt_type('location')) as g:
         g.command('show', 'get_quotas')
 
-
     # Data Plane Commands
     with self.command_group('batch application summary', get_data_type('application')) as g:
         g.batch_command('list', 'list')

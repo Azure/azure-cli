@@ -10,7 +10,7 @@ from six import string_types
 
 from azure.cli.command_modules.batch import _validators as validators
 from azure.cli.command_modules.batch import _format as transformers
-from azure.cli.command_modules.batch import _parameter_format as params
+from azure.cli.command_modules.batch import _parameter_format as pformat
 
 from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands import CONFIRM_PARAM_NAME
@@ -204,7 +204,7 @@ class BatchArgumentTree(object):
         """Whether argument should not be exposed"""
         arg = self._arg_tree[name]
         full_path = full_name(arg)
-        return arg['path'] in params.SILENT_PARAMETERS or full_path in params.SILENT_PARAMETERS
+        return arg['path'] in pformat.SILENT_PARAMETERS or full_path in pformat.SILENT_PARAMETERS
 
     def _is_bool(self, name):
         """Whether argument value is a boolean"""
@@ -428,13 +428,13 @@ class BatchArgumentTree(object):
 
 
 class AzureBatchDataPlaneCommand(object):
-    # pylint: disable=too-many-instance-attributes, too-few-public-methods
+    # pylint: disable=too-many-instance-attributes, too-few-public-methods, too-many-statements
     def __init__(self, name, operation, op_handler, client_factory=None, validator=None, **kwargs):
 
         if not isinstance(operation, string_types):
             raise ValueError("Operation must be a string. Got '{}'".format(operation))
 
-        self._flatten = kwargs.pop('flatten', params.FLATTEN)  # Number of object levels to flatten
+        self._flatten = kwargs.pop('flatten', pformat.FLATTEN)  # Number of object levels to flatten
         self._head_cmd = False
 
         self.parser = None
@@ -460,7 +460,6 @@ class AzureBatchDataPlaneCommand(object):
             from msrest.exceptions import ValidationError, ClientRequestError
             from azure.batch.models import BatchErrorException
             from knack.util import CLIError
-            from knack.commands import CLICommand
             cmd = kwargs.pop('cmd')
 
             try:
@@ -542,7 +541,6 @@ class AzureBatchDataPlaneCommand(object):
             'description_loader': self.description_loader,
             'table_transformer': self.table_transformer,
             'confirmation': self.confirmation,
-            #'validator': self.validator,
             'client_factory': self.client_factory
         }
         args.update(self.merged_kwargs)
@@ -572,7 +570,7 @@ class AzureBatchDataPlaneCommand(object):
         """
         kwargs[self._options_param] = self._options_model
         for param in self._options_attrs:
-            if param in params.IGNORE_OPTIONS:
+            if param in pformat.IGNORE_OPTIONS:
                 continue
             param_value = kwargs.pop(param)
             if param_value is None:
@@ -593,7 +591,7 @@ class AzureBatchDataPlaneCommand(object):
         :param str param: The parameter name with complete namespace.
         :returns: bool
         """
-        return param.count('.') < self._flatten and param not in params.IGNORE_PARAMETERS
+        return param.count('.') < self._flatten and param not in pformat.IGNORE_PARAMETERS
 
     def _get_attrs(self, model, path):
         """Get all the attributes from the complex parameter model that should
@@ -603,26 +601,26 @@ class AzureBatchDataPlaneCommand(object):
         """
         for attr, details in model._attribute_map.items():  # pylint: disable=protected-access
             conditions = []
-            full_path = '.'.join([self.parser._request_param['name'], path, attr])
+            full_path = '.'.join([self.parser._request_param['name'], path, attr])  # pylint: disable=protected-access
             conditions.append(
                 model._validation.get(attr, {}).get('readonly'))  # pylint: disable=protected-access
             conditions.append(
                 model._validation.get(attr, {}).get('constant'))  # pylint: disable=protected-access
-            conditions.append(any([i for i in params.IGNORE_PARAMETERS if i in full_path]))
+            conditions.append(any([i for i in pformat.IGNORE_PARAMETERS if i in full_path]))
             conditions.append(details['type'][0] in ['{'])
             if not any(conditions):
                 yield attr, details
 
     def _process_options(self):
         """Process the request options parameter to expose as arguments."""
-        for param in [o for o in self._options_attrs if o not in params.IGNORE_OPTIONS]:
+        for param in [o for o in self._options_attrs if o not in pformat.IGNORE_OPTIONS]:
             options = {}
             options['required'] = False
             options['arg_group'] = 'Pre-condition and Query'
             if param in ['if_modified_since', 'if_unmodified_since']:
                 options['type'] = validators.datetime_format
-            if param in params.FLATTEN_OPTIONS:
-                for f_param, f_docstring in params.FLATTEN_OPTIONS[param].items():
+            if param in pformat.FLATTEN_OPTIONS:
+                for f_param, f_docstring in pformat.FLATTEN_OPTIONS[param].items():
                     options['default'] = None
                     options['help'] = f_docstring
                     options['options_list'] = [arg_name(f_param)]
@@ -654,9 +652,9 @@ class AzureBatchDataPlaneCommand(object):
             new = _build_prefix(arg, param, path)
             options['options_list'] = [arg_name(new)]
             self._resolve_conflict(new, param, path, options, typestr, dependencies, conflicting)
-        elif arg in conflicting or arg in params.QUALIFIED_PROPERTIES:
+        elif arg in conflicting or arg in pformat.QUALIFIED_PROPERTIES:
             new = _build_prefix(arg, param, path)
-            if new in conflicting or new in params.QUALIFIED_PROPERTIES and '.' not in path:
+            if new in conflicting or new in pformat.QUALIFIED_PROPERTIES and '.' not in path:
                 self.parser.queue_argument(arg, path, param, options, typestr, dependencies)
             else:
                 options['options_list'] = [arg_name(new)]
@@ -687,14 +685,14 @@ class AzureBatchDataPlaneCommand(object):
                     lambda ns: validators.validate_required_parameter(ns, self.parser)
                 options['default'] = None  # Extract details from signature
 
-                if details['type'] in params.BASIC_TYPES:
+                if details['type'] in pformat.BASIC_TYPES:
                     self._resolve_conflict(param_attr, param_attr, path, options,
                                            details['type'], required_attrs, conflict_names)
                 elif details['type'].startswith('['):
                     # We only expose a list arg if there's a validator for it
                     # This will fail for 2D arrays - though Batch doesn't have any yet
                     inner_type = details['type'][1:-1]
-                    if inner_type in params.BASIC_TYPES:
+                    if inner_type in pformat.BASIC_TYPES:
                         options['help'] += " Space separated values."
                         self._resolve_conflict(
                             param_attr, param_attr, path, options,
@@ -770,7 +768,7 @@ class AzureBatchDataPlaneCommand(object):
                                                        type=file_type,
                                                        completer=FilesCompleter(),
                                                        help=docstring)))
-            elif arg[0] not in params.IGNORE_PARAMETERS:
+            elif arg[0] not in pformat.IGNORE_PARAMETERS:
                 args.append(arg)
         return_type = find_return_type(handler)
         if return_type == 'Generator':
