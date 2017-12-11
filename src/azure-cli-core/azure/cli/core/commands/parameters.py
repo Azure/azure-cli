@@ -223,7 +223,7 @@ tag_type = CLIArgumentType(
 
 no_wait_type = CLIArgumentType(
     options_list=('--no-wait', ),
-    help='do not wait for the long running operation to finish',
+    help='do not wait for the long-running operation to finish',
     action='store_true'
 )
 

@@ -311,7 +311,7 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('location', get_location_type(self.cli_ctx), help='Location in which to create VM and related resources. If default location is not configured, will default to the resource group\'s location')
             c.argument('tags', tags_type)
-            c.argument('no_wait', help='Do not wait for the long running operation to finish.')
+            c.argument('no_wait', help='Do not wait for the long-running operation to finish.')
             c.argument('validate', options_list=['--validate'], help='Generate and validate the ARM template without creating any resources.', action='store_true')
             c.argument('size', help='The VM size to be created. See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
             c.argument('image', completer=get_urn_aliases_completion_list)
