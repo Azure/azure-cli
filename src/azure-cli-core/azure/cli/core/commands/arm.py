@@ -407,19 +407,19 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         )
         cmd_args['deleted'] = CLICommandArgument(
             'deleted', options_list=['--deleted'], action='store_true', arg_group=group_name,
-            help='wait till deleted'
+            help='wait until deleted'
         )
         cmd_args['created'] = CLICommandArgument(
             'created', options_list=['--created'], action='store_true', arg_group=group_name,
-            help="wait till created with 'provisioningState' at 'Succeeded'"
+            help="wait until created with 'provisioningState' at 'Succeeded'"
         )
         cmd_args['updated'] = CLICommandArgument(
             'updated', options_list=['--updated'], action='store_true', arg_group=group_name,
-            help="wait till updated with provisioningState at 'Succeeded'"
+            help="wait until updated with provisioningState at 'Succeeded'"
         )
         cmd_args['exists'] = CLICommandArgument(
             'exists', options_list=['--exists'], action='store_true', arg_group=group_name,
-            help="wait till the resource exists"
+            help="wait until the resource exists"
         )
         cmd_args['custom'] = CLICommandArgument(
             'custom', options_list=['--custom'], arg_group=group_name,
