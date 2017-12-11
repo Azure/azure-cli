@@ -638,7 +638,7 @@ class AzCommandGroup(CommandGroup):
 
     def _merge_kwargs(self, kwargs, base_kwargs=None):
         base = base_kwargs if base_kwargs is not None else getattr(self, 'group_kwargs')
-        return _merge_kwargs(base, kwargs)
+        return _merge_kwargs(kwargs, base)
 
     def _flatten_kwargs(self, kwargs, default_source_name):
         merged_kwargs = self._merge_kwargs(kwargs)
@@ -744,7 +744,7 @@ class AzCommandGroup(CommandGroup):
         from azure.cli.core.commands.arm import _cli_generic_update_command
 
         self._check_stale()
-        merged_kwargs = _merge_kwargs(self.group_kwargs, kwargs)
+        merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs)
 
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type)
@@ -766,7 +766,7 @@ class AzCommandGroup(CommandGroup):
     def generic_wait_command(self, name, getter_name='get', getter_type=None, **kwargs):
         from azure.cli.core.commands.arm import _cli_generic_update_command, _cli_generic_wait_command
         self._check_stale()
-        merged_kwargs = _merge_kwargs(self.group_kwargs, kwargs)
+        merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs)
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         _cli_generic_wait_command(
             self.command_loader,
@@ -778,16 +778,16 @@ class AzCommandGroup(CommandGroup):
 # PARAMETERS UTILITIES
 
 def patch_arg_make_required(argument):
-    argument.type.settings['required'] = True
+    argument.settings['required'] = True
 
 
 def patch_arg_make_optional(argument):
-    argument.type.settings['required'] = False
+    argument.settings['required'] = False
 
 
 def patch_arg_update_description(description):
     def _patch_action(argument):
-        argument.type.settings['help'] = description
+        argument.settings['help'] = description
 
     return _patch_action
 
@@ -797,7 +797,7 @@ class AzArgumentContext(ArgumentsContext):
     def __init__(self, command_loader, scope, **kwargs):
         super(AzArgumentContext, self).__init__(command_loader, scope)
         self.scope = scope  # this is called "command" in knack, but that is not an accurate name
-        self.group_kwargs = _merge_kwargs(command_loader.module_kwargs, kwargs)
+        self.group_kwargs = _merge_kwargs(kwargs, command_loader.module_kwargs)
         self.is_stale = False
 
     def __enter__(self):
