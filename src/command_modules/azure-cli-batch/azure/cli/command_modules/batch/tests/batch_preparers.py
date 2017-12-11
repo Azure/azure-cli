@@ -50,7 +50,7 @@ class BatchAccountPreparer(AbstractPreparer, SingleValueReplacer):
 class BatchScenarioMixin(object):
     def set_account_info(self, account_name, group_name):
         """Returns the batch account name, key, and endpoint in a tuple."""
-        key = self.get_account_key(account_name, group_name),
+        key = self.get_account_key(account_name, group_name)
         endpoint = self.get_account_endpoint(account_name, group_name)
         self.kwargs.update({
             'acc_u': endpoint,

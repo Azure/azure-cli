@@ -6,8 +6,8 @@
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,unused-argument
 
 import shlex
-from azure.cli.core.prompting import prompt_pass, NoTTYException
-from azure.cli.core.util import CLIError
+from knack.prompting import prompt_pass, NoTTYException
+from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (ContainerGroup, Container, ContainerPort, Port, IpAddress,
                                                  ImageRegistryCredential, ResourceRequirements, ResourceRequests,
                                                  ContainerGroupNetworkProtocol, Volume, AzureFileVolume, VolumeMount)
@@ -20,18 +20,18 @@ AZURE_FILE_VOLUME_NAME = 'azurefile'
 def list_containers(client, resource_group_name=None):
     """List all container groups in a resource group. """
     if resource_group_name is None:
-        return client.container_groups.list()
-    return client.container_groups.list_by_resource_group(resource_group_name)
+        return client.list()
+    return client.list_by_resource_group(resource_group_name)
 
 
 def get_container(client, resource_group_name, name):
     """Show details of a container group. """
-    return client.container_groups.get(resource_group_name, name)
+    return client.get(resource_group_name, name)
 
 
 def delete_container(client, resource_group_name, name, **kwargs):
     """Delete a container group. """
-    return client.container_groups.delete(resource_group_name, name)
+    return client.delete(resource_group_name, name)
 
 
 def create_container(client,
@@ -92,7 +92,7 @@ def create_container(client,
                             image_registry_credentials=image_registry_credentials,
                             volumes=azure_file_volume)
 
-    return client.container_groups.create_or_update(resource_group_name, name, cgroup)
+    return client.create_or_update(resource_group_name, name, cgroup)
 
 
 def create_resource_requirements(cpu, memory):
@@ -173,5 +173,5 @@ def container_logs(client, resource_group_name, name, container_name=None):
     """Tail a container instance log. """
     if container_name is None:
         container_name = name
-    log = client.container_logs.list(resource_group_name, container_name, name)
+    log = client.list(resource_group_name, name, container_name)
     return log.content
