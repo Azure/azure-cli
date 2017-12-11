@@ -64,7 +64,7 @@ def load_command_table(self, _):
     )
 
     secret_operations = CliCommandType(
-        operations_tmpl='azure.mgmt.devtestlabs.operations.secrets_operations#.SecretsOperations{}',
+        operations_tmpl='azure.mgmt.devtestlabs.operations.secrets_operations#SecretsOperations.{}',
         client_factory=get_devtestlabs_secret_operation,
         validator=validate_user_name
     )
