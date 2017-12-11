@@ -56,7 +56,7 @@ run_style azure.cli.command_modules.extension
 run_style azure.cli.command_modules.feedback
 run_style azure.cli.command_modules.find
 run_style azure.cli.command_modules.interactive
-#run_style azure.cli.command_modules.iot
+run_style azure.cli.command_modules.iot
 run_style azure.cli.command_modules.keyvault
 run_style azure.cli.command_modules.lab
 #run_style azure.cli.command_modules.monitor

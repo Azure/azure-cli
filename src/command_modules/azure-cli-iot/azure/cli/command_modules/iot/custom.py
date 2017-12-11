@@ -17,7 +17,7 @@ from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.authentication
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.device_description import DeviceDescription
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.x509_thumbprint import X509Thumbprint
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
-from ._factory import resource_service_factory
+from ._client_factory import resource_service_factory
 from ._utils import create_self_signed_certificate, open_certificate
 
 
@@ -95,9 +95,10 @@ def iot_hub_certificate_verify(client, hub_name, certificate_name, certificate_p
     return client.certificates.verify(resource_group_name, hub_name, certificate_name, etag, certificate)
 
 
-def iot_hub_create(client, hub_name, resource_group_name, location=None, sku=IotHubSku.f1.value, unit=1):
+def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None, sku=IotHubSku.f1.value, unit=1):
+    cli_ctx = cmd.cli_ctx
     _check_name_availability(client.iot_hub_resource, hub_name)
-    location = _ensure_location(resource_group_name, location)
+    location = _ensure_location(cli_ctx, resource_group_name, location)
     hub_description = IotHubDescription(location, client.iot_hub_resource.config.subscription_id, resource_group_name,
                                         IotHubSkuInfo(name=sku, capacity=unit))
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub_description)
@@ -399,9 +400,9 @@ def _get_iot_hub_by_name(client, hub_name):
     return target_hub
 
 
-def _ensure_location(resource_group_name, location):
+def _ensure_location(cli_ctx, resource_group_name, location):
     if location is None:
-        resource_group_client = resource_service_factory().resource_groups
+        resource_group_client = resource_service_factory(cli_ctx).resource_groups
         return resource_group_client.get(resource_group_name).location
     return location
 

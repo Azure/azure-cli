@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import re
 import collections
 import jmespath
 from .exceptions import JMESPathCheckAssertionError
@@ -56,6 +57,20 @@ class JMESPathCheckGreaterThan(object):  # pylint: disable=too-few-public-method
                                                   execution_result.output)
             else:
                 raise JMESPathCheckAssertionError(self._query, expected_result_format, 'None',
+                                                  execution_result.output)
+
+
+class JMESPathPatternCheck(object):  # pylint: disable=too-few-public-methods
+        def __init__(self, query, expected_result):
+            self._query = query
+            self._expected_result = expected_result
+
+        def __call__(self, execution_result):
+            json_value = execution_result.get_output_in_json()
+            actual_result = jmespath.search(self._query, json_value,
+                                            jmespath.Options(collections.OrderedDict))
+            if not re.match(self._expected_result, str(actual_result), re.IGNORECASE):
+                raise JMESPathCheckAssertionError(self._query, self._expected_result, actual_result,
                                                   execution_result.output)
 
 

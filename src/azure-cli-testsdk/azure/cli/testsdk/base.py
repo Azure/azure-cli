@@ -52,6 +52,12 @@ class CheckerMixin(object):
         expected_results = self._apply_kwargs(expected_results)
         return JMESPathCheckGreaterThan(query, expected_results)
 
+    def check_pattern(self, query, expected_results):
+        from azure.cli.testsdk.checkers import JMESPathPatternCheck
+        query = self._apply_kwargs(query)
+        expected_results = self._apply_kwargs(expected_results)
+        return JMESPathPatternCheck(query, expected_results)
+
     def is_empty(self):  # pylint: disable=no-self-use
         from azure.cli.testsdk.checkers import NoneCheck
         return NoneCheck()
