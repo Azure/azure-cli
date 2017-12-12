@@ -14,6 +14,7 @@ from azure.cli.core.cloud import (Cloud,
                                   switch_active_cloud,
                                   update_cloud,
                                   get_active_cloud_name,
+                                  cloud_is_registered,
                                   CloudAlreadyRegisteredException,
                                   CloudNotRegisteredException,
                                   CannotUnregisterCloudException)
@@ -67,7 +68,7 @@ def _populate_from_metadata_endpoint(cloud, arm_endpoint):
         raise CLIError(error_msg_fmt.format(msg))
 
 
-def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
+def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
     if cloud_config:
         # Using JSON format so convert the keys to snake case
         for key in cloud_config:
@@ -88,7 +89,7 @@ def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
                           'active_directory_graph_resource_id': '--endpoint-active-directory-graph-resource-id'}
     missing_endpoints = [e_param for e_name, e_param in required_endpoints.items()
                          if not c.endpoints.has_endpoint_set(e_name)]
-    if missing_endpoints:
+    if missing_endpoints and not cloud_is_registered(cli_ctx, cloud_name):
         raise CLIError("The following endpoints are required for the CLI to function and were not specified on the "
                        "command line, in the cloud config or could not be autodetected.\n"
                        "Specify them on the command line or through the cloud config file:\n"
@@ -114,7 +115,7 @@ def register_cloud(cmd,
                    suffix_keyvault_dns=None,
                    suffix_azure_datalake_store_file_system_endpoint=None,
                    suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
-    c = _build_cloud(cloud_name, cloud_config=cloud_config,
+    c = _build_cloud(cmd.cli_ctx, cloud_name, cloud_config=cloud_config,
                      cloud_args=locals())
     try:
         add_cloud(cmd.cli_ctx, c)
@@ -142,7 +143,7 @@ def modify_cloud(cmd,
                  suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
     if not cloud_name:
         cloud_name = cmd.cli_ctx.cloud.name
-    c = _build_cloud(cloud_name, cloud_config=cloud_config,
+    c = _build_cloud(cmd.cli_ctx, cloud_name, cloud_config=cloud_config,
                      cloud_args=locals())
     try:
         update_cloud(cmd.cli_ctx, c)
