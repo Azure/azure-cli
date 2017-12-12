@@ -111,7 +111,7 @@ def extract_args_from_signature(operation, no_wait_param=None):
                     no_wait_param))
             found_no_wait_param = True
             options_list = ['--no-wait']
-            help_str = 'do not wait for the long running operation to finish'
+            help_str = 'do not wait for the long-running operation to finish'
         else:
             options_list = ['--' + arg_name.replace('_', '-')]
             help_str = arg_docstring_help.get(arg_name)
