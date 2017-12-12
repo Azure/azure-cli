@@ -310,9 +310,7 @@ class AzCommandsLoader(CLICommandsLoader):
 
         name = ' '.join(name.split())
 
-        command_type = kwargs.get('command_type', None)
-        client_factory = kwargs.get('client_factory', None) or command_type and \
-            command_type.settings.get('client_factory', None)
+        client_factory = kwargs.get('client_factory', None)
 
         def default_command_handler(command_args):
             from azure.cli.core.util import get_arg_list
