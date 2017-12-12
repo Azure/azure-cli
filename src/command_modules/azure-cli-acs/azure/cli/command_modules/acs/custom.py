@@ -1217,8 +1217,7 @@ def _update_dict(dict1, dict2):
     return cp
 
 
-def aks_browse(cmd, client, resource_group_name, name, disable_browser=False):
-    """Open a web browser to the dashboard for a managed Kubernetes cluster."""
+def aks_browse(client, resource_group_name, name, disable_browser=False):
     if not which('kubectl'):
         raise CLIError('Can not find kubectl executable in PATH')
 
@@ -1260,7 +1259,6 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
                tags=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                no_wait=False):
-    """Create a new managed Kubernetes cluster."""
     try:
         if not ssh_key_value or not is_valid_ssh_rsa_public_key(ssh_key_value):
             raise ValueError()
@@ -1326,8 +1324,7 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
 
 def aks_get_credentials(client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config')):
-    """Get access credentials for a managed Kubernetes cluster."""
-    mc = aks_show(cmd, client, resource_group_name, name)
+    mc = aks_show(client, resource_group_name, name)
     access_profiles = mc.properties.access_profiles
     if not access_profiles:
         msg = "No Kubernetes access profiles found. Cluster provisioning state is \"{}\"."
@@ -1341,7 +1338,6 @@ def aks_get_credentials(client, resource_group_name, name, admin=False,
 
 
 def aks_list(client, resource_group_name=None):
-    """List managed Kubernetes clusters."""
     if resource_group_name:
         managed_clusters = client.list_by_resource_group(resource_group_name)
     else:
@@ -1350,13 +1346,11 @@ def aks_list(client, resource_group_name=None):
 
 
 def aks_show(client, resource_group_name, name):
-    """Show a managed Kubernetes cluster."""
     mc = client.get(resource_group_name, name)
     return _remove_nulls([mc])[0]
 
 
-def aks_scale(cmd, client, resource_group_name, name, node_count, no_wait=False):
-    """Scale the node pool in a managed Kubernetes cluster."""
+def aks_scale(client, resource_group_name, name, node_count, no_wait=False):
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
     instance.properties.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
@@ -1367,8 +1361,7 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, no_wait=False)
     return client.create_or_update(resource_group_name, name, instance, raw=no_wait)
 
 
-def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
-    """Upgrade a managed Kubernetes cluster to a newer version."""
+def aks_upgrade(client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
     instance = client.get(resource_group_name, name)
     instance.properties.kubernetes_version = kubernetes_version
 

@@ -241,6 +241,11 @@ helps['aks install-connector'] = """
           text: az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector --chart-url <CustomURL>
 """.format(sp_cache=SERVICE_PRINCIPAL_CACHE)
 
+helps['aks list'] = """
+    type: command
+    short-summary: List managed Kubernetes clusters.
+"""
+
 helps['aks remove-connector'] = """
     type: command
     short-summary: Remove the ACI Connector from a managed Kubernetes cluster.
@@ -266,7 +271,7 @@ helps['aks remove-connector'] = """
 
 helps['aks scale'] = """
     type: command
-    short-sumnary: Scale the node pool in a managed Kubernetes cluster.
+    short-summary: Scale the node pool in a managed Kubernetes cluster.
     parameters:
         - name: --node-count -c
           type: int
