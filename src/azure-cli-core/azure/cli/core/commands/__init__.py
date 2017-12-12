@@ -146,7 +146,7 @@ class AzCliCommand(CLICommand):
                 cmd_args.append(
                     (self.no_wait_param,
                      CLICommandArgument(self.no_wait_param, options_list=['--no-wait'], action='store_true',
-                                        help='Do not wait for the long running operation to finish.')))
+                                        help='Do not wait for the long-running operation to finish.')))
             self.arguments.update(cmd_args)
 
     def update_argument(self, param_name, argtype):
@@ -463,7 +463,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 self._delay()
             except KeyboardInterrupt:
                 self.cli_ctx.get_progress_controller().stop()
-                logger.error('Long running operation wait cancelled.  %s', correlation_message)
+                logger.error('Long-running operation wait cancelled.  %s', correlation_message)
                 raise
 
         try:
@@ -639,7 +639,7 @@ class AzCommandGroup(CommandGroup):
             - confirmation: Prompt prior to the action being executed. This is useful if the action
                             would cause a loss of data. (bool)
             - exception_handler: Exception handler for handling non-standard exceptions (function)
-            - no_wait_param: The name of a boolean parameter that will be exposed as `--no-wait` to skip long running
+            - no_wait_param: The name of a boolean parameter that will be exposed as `--no-wait` to skip long-running
               operation polling. (string)
             - transform: Transform function for transforming the output of the command (function)
             - table_transformer: Transform function or JMESPath query to be applied to table output to create a
