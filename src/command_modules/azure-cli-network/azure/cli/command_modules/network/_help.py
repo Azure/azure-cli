@@ -576,13 +576,15 @@ helps['network dns record-set'] = """
 
 # region DNS records
 
-for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+dns_record_types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']
+
+for record in dns_record_types:
     helps['network dns record-set {}'.format(record)] = """
         type: group
         short-summary: Manage DNS {} records.
     """.format(record.upper())
 
-for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+for record in dns_record_types:
     indef_article = 'an' if record.startswith('a') else 'a'
 
     helps['network dns record-set {0} remove-record'.format(record)] = """
@@ -616,12 +618,12 @@ for record in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
             az network dns record-set {2} show -g MyResourceGroup -n MyRecordSet -z www.mysite.com
     """.format(record.upper(), indef_article, record)
 
-for item in ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+for record in dns_record_types:
     indef_article = 'an' if record.startswith('a') else 'a'
 
     helps['network dns record-set {} update'.format(record)] = """
         type: command
-        short-summary: Update  {} {} record set.
+        short-summary: Update {} {} record set.
     """.format(indef_article, record.upper())
 
     helps['network dns record-set {} add-record'.format(record)] = """

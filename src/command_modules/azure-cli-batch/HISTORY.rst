@@ -3,10 +3,13 @@
 Release History
 ===============
 
+3.1.7
++++++
+* Fixed bug in pool create command when a resource ID was used with the --image flag.
+
 3.1.6
 +++++
 * minor fixes
-
 
 3.1.5 (2017-10-09)
 ++++++++++++++++++

@@ -66,7 +66,7 @@ def run_tests(modules, parallel, run_live, tests):
     return result
 
 
-if __name__ == '__main__':
+def main():
     parse = argparse.ArgumentParser('Test tools')
     parse.add_argument('--module', dest='modules', nargs='+',
                        help='The modules of which the test to be run. Accept short names, except azure-cli, '
@@ -99,3 +99,6 @@ if __name__ == '__main__':
     success = run_tests(selected_modules, parallel=args.parallel, run_live=args.live, tests=args.tests)
 
     sys.exit(0 if success else 1)
+
+if __name__ == '__main__':
+    main()

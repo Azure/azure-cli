@@ -9,7 +9,7 @@ import os
 import unittest
 
 from azure.cli.core.util import CLIError
-from azure.cli.core.commands.arm import resource_id
+from msrestazure.tools import resource_id
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
@@ -1113,58 +1113,56 @@ class NetworkNicScenarioTest(ScenarioTest):
         # create with minimum parameters
         self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {}'.format(rg, nic, subnet, vnet), checks=[
             JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
-            JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded')
-        ])
+            JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded')])
+
         # exercise optional parameters
-        self.cmd('network nic create -g {} -n {} --subnet {} --ip-forwarding --private-ip-address {} --public-ip-address {} --internal-dns-name test --dns-servers 100.1.2.3 --lb-address-pools {} --lb-inbound-nat-rules {}'.format(rg, nic, subnet_id, private_ip, public_ip_name, address_pool_ids, rule_ids), checks=[
-                JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
-                JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAddress', private_ip),
-                JMESPathCheckV2('NewNIC.enableIpForwarding', True),
-                JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded'),
-                JMESPathCheckV2('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
-                JMESPathCheckV2('length(NewNIC.dnsSettings.dnsServers)', 1)
-        ])
+        self.cmd('network nic create -g {} -n {} --subnet {} --ip-forwarding --private-ip-address {} --public-ip-address {} --internal-dns-name test --dns-servers 100.1.2.3 --lb-address-pools {} --lb-inbound-nat-rules {}'.format(rg, nic, subnet_id, private_ip, public_ip_name, address_pool_ids, rule_ids),
+                 checks=[JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Static'),
+                         JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAddress', private_ip),
+                         JMESPathCheckV2('NewNIC.enableIpForwarding', True),
+                         JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded'),
+                         JMESPathCheckV2('NewNIC.dnsSettings.internalDnsNameLabel', 'test'),
+                         JMESPathCheckV2('length(NewNIC.dnsSettings.dnsServers)', 1)])
+
         # exercise creating with NSG
-        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {}'.format(rg, nic, subnet, vnet, nsg), checks=[
-            JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
-            JMESPathCheckV2('NewNIC.enableIpForwarding', False),
-            JMESPathCheckV2("NewNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
-            JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded')
-        ])
+        self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {}'.format(rg, nic, subnet, vnet, nsg),
+                 checks=[JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
+                         JMESPathCheckV2('NewNIC.enableIpForwarding', False),
+                         JMESPathCheckV2("NewNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
+                         JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded')])
+
         # exercise creating with NSG and Public IP
         self.cmd('network nic create -g {} -n {} --subnet {} --vnet-name {} --network-security-group {} --public-ip-address {}'.format(rg, nic, subnet, vnet, nsg_id, public_ip_id), checks=[
             JMESPathCheckV2('NewNIC.ipConfigurations[0].privateIpAllocationMethod', 'Dynamic'),
             JMESPathCheckV2('NewNIC.enableIpForwarding', False),
             JMESPathCheckV2("NewNIC.networkSecurityGroup.contains(id, '{}')".format(nsg), True),
-            JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded')
-        ])
-        self.cmd('network nic list', checks=[
-            JMESPathCheckV2('type(@)', 'array'),
-            JMESPathCheckV2("length([?contains(id, 'networkInterfaces')]) == length(@)", True)
-        ])
-        self.cmd('network nic list --resource-group {}'.format(rg), checks=[
-            JMESPathCheckV2('type(@)', 'array'),
-            JMESPathCheckV2("length([?type == '{}']) == length(@)".format(rt), True),
-            JMESPathCheckV2("length([?resourceGroup == '{}']) == length(@)".format(rg), True)
-        ])
-        self.cmd('network nic show --resource-group {} --name {}'.format(rg, nic), checks=[
-            JMESPathCheckV2('type(@)', 'object'),
-            JMESPathCheckV2('type', rt),
-            JMESPathCheckV2('resourceGroup', rg),
-            JMESPathCheckV2('name', nic)
-        ])
-        self.cmd('network nic update -g {} -n {} --internal-dns-name noodle --ip-forwarding true --dns-servers "" --network-security-group {}'.format(rg, nic, alt_nsg), checks=[
-                JMESPathCheckV2('enableIpForwarding', True),
-                JMESPathCheckV2('dnsSettings.internalDnsNameLabel', 'noodle'),
-                JMESPathCheckV2('length(dnsSettings.dnsServers)', 0),
-                JMESPathCheckV2("networkSecurityGroup.contains(id, '{}')".format(alt_nsg), True)
-        ])
+            JMESPathCheckV2('NewNIC.provisioningState', 'Succeeded')])
+
+        self.cmd('network nic list',
+                 checks=[JMESPathCheckV2('type(@)', 'array'),
+                         JMESPathCheckV2("length([?contains(id, 'networkInterfaces')]) == length(@)", True)])
+
+        self.cmd('network nic list --resource-group {}'.format(rg),
+                 checks=[JMESPathCheckV2('type(@)', 'array'),
+                         JMESPathCheckV2("length([?type == '{}']) == length(@)".format(rt), True),
+                         JMESPathCheckV2("length([?resourceGroup == '{}']) == length(@)".format(rg), True)])
+
+        self.cmd('network nic show --resource-group {} --name {}'.format(rg, nic),
+                 checks=[JMESPathCheckV2('type(@)', 'object'),
+                         JMESPathCheckV2('type', rt),
+                         JMESPathCheckV2('resourceGroup', rg),
+                         JMESPathCheckV2('name', nic)])
+
+        self.cmd('network nic update -g {} -n {} --internal-dns-name noodle --ip-forwarding true --dns-servers "" --network-security-group {}'.format(rg, nic, alt_nsg),
+                 checks=[JMESPathCheckV2('enableIpForwarding', True),
+                         JMESPathCheckV2('dnsSettings.internalDnsNameLabel', 'noodle'),
+                         JMESPathCheckV2('length(dnsSettings.dnsServers)', 0),
+                         JMESPathCheckV2("networkSecurityGroup.contains(id, '{}')".format(alt_nsg), True)])
 
         # test generic update
-        self.cmd('network nic update -g {} -n {} --set dnsSettings.internalDnsNameLabel=doodle --set enableIpForwarding=false'.format(rg, nic), checks=[
-            JMESPathCheckV2('enableIpForwarding', False),
-            JMESPathCheckV2('dnsSettings.internalDnsNameLabel', 'doodle')
-        ])
+        self.cmd('network nic update -g {} -n {} --set dnsSettings.internalDnsNameLabel=doodle --set enableIpForwarding=false'.format(rg, nic),
+                 checks=[JMESPathCheckV2('enableIpForwarding', False),
+                         JMESPathCheckV2('dnsSettings.internalDnsNameLabel', 'doodle')])
 
         self.cmd('network nic delete --resource-group {} --name {}'.format(rg, nic))
         self.cmd('network nic list -g {}'.format(rg), checks=NoneCheck())
@@ -1890,6 +1888,10 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         self.cmd('network traffic-manager endpoint update -n {} --profile-name {} -g {} --type externalEndpoints --weight 25 --target www.contoso.com'.format(endpoint_name, tm_name, self.resource_group), checks=[JMESPathCheckV2('weight', 25), JMESPathCheckV2('target', 'www.contoso.com')])
         self.cmd('network traffic-manager endpoint show -g {} --profile-name {} -t externalEndpoints -n {}'.format(self.resource_group, tm_name, endpoint_name))
         self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name), checks=JMESPathCheckV2('length(@)', 1))
+
+        # ensure that a profile with endpoints can be updated
+        self.cmd('network traffic-manager profile update -n {} -g {}'.format(tm_name, self.resource_group))
+
         self.cmd('network traffic-manager endpoint delete -g {} --profile-name {} -t externalEndpoints -n {}'.format(self.resource_group, tm_name, endpoint_name))
         self.cmd('network traffic-manager endpoint list -g {} --profile-name {} -t externalEndpoints'.format(self.resource_group, tm_name), checks=JMESPathCheckV2('length(@)', 0))
 
@@ -1914,9 +1916,20 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
         base_record_sets = 2
         self.cmd('network dns zone show -n {} -g {}'.format(zone_name, rg), checks=[JMESPathCheck('numberOfRecordSets', base_record_sets)])
 
-        args = {'a': '--ipv4-address 10.0.0.10', 'aaaa': '--ipv6-address 2001:db8:0:1:1:1:1:1', 'cname': '--cname mycname', 'mx': '--exchange 12 --preference 13', 'ns': '--nsdname foobar.com', 'ptr': '--ptrdname foobar.com', 'soa': '--email foo.com --expire-time 30 --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123', 'srv': '--port 1234 --priority 1 --target target.com --weight 50', 'txt': '--value some_text'}
+        args = {
+            'a': '--ipv4-address 10.0.0.10',
+            'aaaa': '--ipv6-address 2001:db8:0:1:1:1:1:1',
+            'caa': '--flags 0 --tag foo --value "my value"',
+            'cname': '--cname mycname',
+            'mx': '--exchange 12 --preference 13',
+            'ns': '--nsdname foobar.com',
+            'ptr': '--ptrdname foobar.com',
+            'soa': '--email foo.com --expire-time 30 --minimum-ttl 20 --refresh-time 60 --retry-time 90 --serial-number 123',
+            'srv': '--port 1234 --priority 1 --target target.com --weight 50',
+            'txt': '--value some_text'
+        }
 
-        record_types = ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']
+        record_types = ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']
 
         for t in record_types:
             # test creating the record set and then adding records
@@ -1953,22 +1966,18 @@ class NetworkDnsScenarioTest(ResourceGroupVCRTestBase):
         self.cmd('network dns record-set {0} delete -n myrs{0} -g {1} --zone-name {2} -y'.format('a', rg, zone_name))
         self.cmd('network dns record-set {0} show -n myrs{0} -g {1} --zone-name {2}'.format('a', rg, zone_name), allowed_exceptions='does not exist in resource group')
 
-        self.cmd('network dns zone delete -g {} -n {} -y'.format(rg, zone_name), checks=JMESPathCheck('status', 'Succeeded'))
+        self.cmd('network dns zone delete -g {} -n {} -y'.format(rg, zone_name), checks=NoneCheck())
 
 
-class NetworkZoneImportExportTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(NetworkZoneImportExportTest, self).__init__(__file__, test_method, resource_group='cli_dns_zone_import_export')
+class NetworkZoneImportExportTest(ScenarioTest):
 
-    def test_network_dns_zone_import_export(self):
-        self.execute()
-
-    def body(self):
+    @ResourceGroupPreparer(name_prefix='cli_dns_zone_import_export')
+    def test_network_dns_zone_import_export(self, resource_group):
         zone_name = 'myzone.com'
         zone_file_path = os.path.join(TEST_DIR, 'zone_files', 'zone1.txt')
 
-        self.cmd('network dns zone import -n {} -g {} --file-name "{}"'.format(zone_name, self.resource_group, zone_file_path))
-        self.cmd('network dns zone export -n {} -g {}'.format(zone_name, self.resource_group))
+        self.cmd('network dns zone import -n {} -g {} --file-name "{}"'.format(zone_name, resource_group, zone_file_path))
+        self.cmd('network dns zone export -n {} -g {}'.format(zone_name, resource_group))
 
 # TODO: Troubleshoot VNET gateway issue and re-enable
 # class NetworkWatcherScenarioTest(ScenarioTest):

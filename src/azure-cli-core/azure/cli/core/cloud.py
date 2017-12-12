@@ -189,7 +189,7 @@ AZURE_US_GOV_CLOUD = Cloud(
         sql_management='https://management.core.usgovcloudapi.net:8443/',
         batch_resource_id='https://batch.core.usgovcloudapi.net/',
         gallery='https://gallery.usgovcloudapi.net/',
-        active_directory='https://login.microsoftonline.com',
+        active_directory='https://login.microsoftonline.us',
         active_directory_resource_id='https://management.core.usgovcloudapi.net/',
         active_directory_graph_resource_id='https://graph.windows.net/',
         vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json'),   # pylint: disable=line-too-long

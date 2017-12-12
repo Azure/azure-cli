@@ -12,8 +12,6 @@ helps['monitor'] = """
     short-summary: Manage the Azure Monitor Service.
 """
 
-# region Alerts
-
 helps['monitor alert'] = """
     type: group
     short-summary: Manage metric-based alert rules.
@@ -126,10 +124,6 @@ helps['monitor alert list-incidents'] = """
     short-summary: List all incidents for an alert rule.
     """
 
-# endregion
-
-# region Metrics
-
 helps['monitor metrics'] = """
     type: group
     short-summary: View Azure resource metrics.
@@ -137,12 +131,70 @@ helps['monitor metrics'] = """
 
 helps['monitor metrics list'] = """
     type: command
-    short-summary: List metric values for a resource.
+    short-summary: List the metric values for a resource.
+    parameters:
+        - name: --aggregation
+          type: string
+          short-summary: The list of aggregation types (space separated) to retrieve.
+        - name: --interval
+          type: string
+          short-summary: The interval of the metric query. In ISO 8601 duration format, eg "PT1M"
+        - name: --start-time
+          type: string
+          short-summary: The start time of the query. In ISO format with explicit indication of timezone,
+                         1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to 1 Hour prior to the current time.
+        - name: --end-time
+          type: string
+          short-summary: The end time of the query. In ISO format with explicit indication of timezone,
+                         1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to current time.
+        - name: --filter
+          type: string
+          short-summary: A string used to reduce the set of metric data returned. eg. "BlobType eq '*'"
+        - name: --metadata
+          short-summary: Returns the metadata values instead of metric data
+        - name: --dimension
+          type: string
+          short-summary: The list of dimensions (space separated) the metrics are queried into.
+    examples:
+        - name: List a VM's CPU usage for the past hour
+          text: >
+              az monitor metrics list --resource <resource id> --metric "Percentage CPU"
+        - name: List success E2E latency of a storage account and split the data series based on API name
+          text: >
+              az monitor metrics list --resource <resource id> --metric SuccessE2ELatency \\
+                                      --dimension ApiName
+        - name: List success E2E latency of a storage account and split the data series based on both API name and geo type
+          text: >
+              az monitor metrics list --resource <resource id> --metric SuccessE2ELatency \\
+                                      --dimension ApiName GeoType
+        - name: List success E2E latency of a storage account and split the data series based on both API name and geo type using "--filter" parameter
+          text: >
+              az monitor metrics list --resource <resource id> --metric SuccessE2ELatency \\
+                                      --filter "ApiName eq '*' and GeoType eq '*'"
+        - name: List success E2E latency of a storage account and split the data series based on both API name and geo type. Limits the api name to 'DeleteContainer'
+          text: >
+              az monitor metrics list --resource <resource id> --metric SuccessE2ELatency \\
+                                      --filter "ApiName eq 'DeleteContainer' and GeoType eq '*'"
+              Filter string reference: https://docs.microsoft.com/en-us/rest/api/monitor/metrics/list
+        - name: List transactions of a storage account per day since 2017-01-01
+          text: >
+              az monitor metrics list --resource <resource id> --metric Transactions \\
+                                      --start-time 2017-01-01T00:00:00Z \\
+                                      --interval PT24H
+        - name: List the metadata values for a storage account under transaction metric's api name dimension since 2017
+          text: >
+              az monitor metrics list --resource <resource id> --metric Transactions \\
+                                      --filter "ApiName eq '*'" \\
+                                      --start-time 2017-01-01T00:00:00Z
 """
 
 helps['monitor metrics list-definitions'] = """
     type: command
-    short-summary: List metric definitions for a resource.
+    short-summary: Lists the metric definitions for the resource.
+    parameters:
+        - name: --metric-names
+          type: string
+          short-summary: The list of the metrics definitions to be shown.
 """
 
 # endregion
@@ -172,6 +224,10 @@ helps['monitor diagnostic-settings create'] = """
                 - name: --logs
                   type: string
                   short-summary: JSON encoded list of logs settings. Use @{file} to load from a file.
+                - name: --event-hub-name
+                  type: string
+                  short-summary: The name of the event hub. If none is specified, the default event hub will be
+                                 selected.
                 - name: --metrics
                   type: string
                   short-summary: JSON encoded list of metric settings. Use @{file} to load from a file.
@@ -260,4 +316,184 @@ helps['monitor action-group update'] = """
             Multiple actions can be specified by using more than one `--add-action` argument.
         - name: --remove-action -r
           short-summary: Remove receivers from the action group. Accept space separated list of receiver names.
+"""
+
+helps['monitor activity-log alert'] = """
+    type: group
+    short-summary: Manage activity log alerts
+"""
+
+helps['monitor activity-log alert list'] = """
+    type: command
+    short-summary: List activity log alerts under a resource group or the current subscription.
+    parameters:
+        - name: --resource-group -g
+          short-summary: Name of the resource group under which the activity log alerts are being listed. If it is
+                         omitted, all the activity log alerts under the current subscription are listed.
+"""
+
+helps['monitor activity-log alert create'] = """
+    type: command
+    short-summary: Create a default activity log alert
+    long-summary: This command will create a default activity log with one condition which compares if the activities
+                  logs 'category' field equals to 'ServiceHealth'. The newly created activity log alert does not have
+                  any action groups attached to it.
+    parameters:
+        - name: --name -n
+          short-summary: Name of the activity log alerts
+        - name: --scope -s
+          short-summary: A list of string that will be used as prefixes. The alert will only apply to activityLogs
+                         with resourceIds that fall under one of these prefixes. If not provided, the path to this
+                         resource group will be used.
+        - name: --disable
+          short-summary: Disable the activity log alert after it is created.
+        - name: --description
+          short-summary: A description of this activity log alert
+        - name: --condition -c
+          short-summary: A condition expression represents the condition that will cause the alert to activate. The
+                         format is FIELD=VALUE[ and FILED=VALUE...]. The possible values for the field are 'resourceId',
+                         'category', 'caller', 'level', 'operationName', 'resourceGroup', 'resourceProvider', 'status',
+                         'subStatus', 'resourceType', or anything beginning with 'properties.'.
+        - name: --action-group -a
+          short-summary: Add action group. Accept space separated action groups identifiers. The identify can be the
+                         action group's name or its resource id.
+        - name: --webhook-properties -w
+          short-summary: Space separated web hook properties in 'key[=value]' format. These properties will be
+                         associated with the action groups added in this command. For any webhook receiver in these
+                         action group, these data are appended to the webhook payload. To attach different webhook
+                         properties to different action groups, add the action groups in separate update-action
+                         commands.
+    examples:
+        - name: Create an alert with default settings.
+          text: >
+              az monitor activity-log alert create -n {ALERT_NAME} -g {RG}
+
+        - name: Create an alert with condition about error level service health log.
+          text: >
+              az monitor activity-log alert create -n {ALERT_NAME} -g {RG} \\
+                --condition category=ServiceHealth and level=Error
+
+        - name: Create an alert with an action group and specify webhook properties.
+          text: >
+              az monitor activity-log alert create -n {ALERT_NAME} -g {RG} \\
+                -a /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/microsoft.insights/actionGroups/example_action_group
+                -w usage=test owner=jane
+
+        - name: Create an alert is disabled initially.
+          text: >
+              az monitor activity-log alert create -n {ALERT_NAME} -g {RG} --disable
+"""
+
+helps['monitor activity-log alert update'] = """
+    type: command
+    short-summary: Update the details of this activity log alert
+    parameters:
+        - name: --description
+          short-summary: A description of this activity log alert.
+        - name: --condition -c
+          short-summary: A condition expression represents the condition that will cause the alert to activate. The
+                         format is FIELD=VALUE[ and FILED=VALUE...]. The possible values for the field are 'resourceId',
+                         'category', 'caller', 'level', 'operationName', 'resourceGroup', 'resourceProvider', 'status',
+                         'subStatus', 'resourceType', or anything beginning with 'properties.'.
+        - name: --enable
+          short-summary: Enable or disable this activity log alert.
+    examples:
+        - name: Update the condition
+          text: >
+              az monitor activity-log alert update -n {ALERT_NAME} -g {RG} \\
+                --condition category=ServiceHealth and level=Error
+
+        - name: Disable an alert
+          text: >
+              az monitor activity-log alert update -n {ALERT_NAME} -g {RG} --enable false
+"""
+
+helps['monitor activity-log alert action-group'] = """
+    type: group
+    short-summary: Manage action groups for activity log alerts
+"""
+
+helps['monitor activity-log alert action-group add'] = """
+    type: command
+    short-summary: Add action groups to this activity log alert. It can also be used to overwrite existing webhook
+                   properties of particular action groups.
+    parameters:
+        - name: --name -n
+          short-summary: Name of the activity log alerts
+        - name: --action-group -a
+          short-summary: The names or the resource ids of the action groups to be added.
+        - name: --reset
+          short-summary: Remove all the existing action groups before add new conditions.
+        - name: --webhook-properties -w
+          short-summary: Space separated web hook properties in 'key[=value]' format. These properties will be
+                         associated with the action groups added in this command. For any webhook receiver in these
+                         action group, these data are appended to the webhook payload. To attach different webhook
+                         properties to different action groups, add the action groups in separate update-action
+                         commands.
+        - name: --strict
+          short-summary: Fails the command if an action group to be added will change existing webhook properties.
+    examples:
+        - name: Add an action group and specify webhook properties.
+          text: >
+              az monitor activity-log alert action-group add -n {ALERT_NAME} -g {RG} \\
+                --action /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/microsoft.insights/actionGroups/example_action_group
+                --webhook-properties usage=test owner=jane
+
+        - name: Overwite an existing action group's webhook properties.
+          text: >
+              az monitor activity-log alert action-group add -n {ALERT_NAME} -g {RG} \\
+                -a /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/microsoft.insights/actionGroups/example_action_group
+                --webhook-properties usage=test owner=john
+
+        - name: Remove webhook properties from an existing action group.
+          text: >
+              az monitor activity-log alert action-group add -n {ALERT_NAME} -g {RG} \\
+                -a /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/microsoft.insights/actionGroups/example_action_group
+
+        - name: Add new action groups but prevent the command from accidently overwrite existing webhook properties
+          text: >
+              az monitor activity-log alert action-group add -n {ALERT_NAME} -g {RG} --strict \\
+                --action-group {A_LIST_OF_RESOURCE_IDS}
+"""
+
+helps['monitor activity-log alert action-group remove'] = """
+    type: command
+    short-summary: Remove action groups from this activity log alert
+    parameters:
+        - name: --name -n
+          short-summary: Name of the activity log alerts
+        - name: --action-group -a
+          short-summary: The names or the resource ids of the action groups to be added.
+"""
+
+helps['monitor activity-log alert scope'] = """
+    type: group
+    short-summary: Manage scopes for activity log alerts
+"""
+
+helps['monitor activity-log alert scope add'] = """
+    type: command
+    short-summary: Add scopes to this activity log alert.
+    parameters:
+        - name: --name -n
+          short-summary: Name of the activity log alerts
+        - name: --scope -s
+          short-summary: The scopes to add
+        - name: --reset
+          short-summary: Remove all the existing scopes before add new scopes.
+"""
+
+helps['monitor activity-log alert scope remove'] = """
+    type: command
+    short-summary: Removes scopes from this activity log alert.
+    parameters:
+        - name: --name -n
+          short-summary: Name of the activity log alerts
+        - name: --scope -s
+          short-summary: The scopes to remove
+"""
+
+helps['monitor activity-log list-categories'] = """
+    type: command
+    short-summary: List the event categories of activity logs.
 """

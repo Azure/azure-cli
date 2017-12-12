@@ -1193,14 +1193,14 @@ def encryption_protector_update(
 
 
 #####
-#           sql server vnet-rule validate
+#           sql server vnet-rule
 #####
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
 
 
 def validate_subnet(namespace):
-    from azure.cli.core.commands.arm import resource_id, is_valid_resource_id
+    from msrestazure.tools import resource_id, is_valid_resource_id
 
     subnet = namespace.virtual_network_subnet_id
     subnet_is_id = is_valid_resource_id(subnet)
@@ -1215,8 +1215,8 @@ def validate_subnet(namespace):
             namespace='Microsoft.Network',
             type='virtualNetworks',
             name=vnet,
-            child_type='subnets',
-            child_name=subnet)
+            child_type_1='subnets',
+            child_name_1=subnet)
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
     delattr(namespace, 'vnet_name')

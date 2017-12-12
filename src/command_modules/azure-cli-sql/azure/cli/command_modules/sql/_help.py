@@ -284,6 +284,18 @@ helps['sql server update'] = """
     type: command
     short-summary: Update a server.
     """
+helps['sql server conn-policy'] = """
+    type: group
+    short-summary: Manage a server's connection policy.
+    """
+helps['sql server conn-policy show'] = """
+    type: command
+    short-summary: Gets a server's secure connection policy.
+    """
+helps['sql server conn-policy update'] = """
+    type: command
+    short-summary: Updates a server's secure connection policy.
+    """
 helps['sql server firewall-rule'] = """
     type: group
     short-summary: Manage a server's firewall rules.

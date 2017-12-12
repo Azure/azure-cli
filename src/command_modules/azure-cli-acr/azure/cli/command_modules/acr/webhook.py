@@ -34,6 +34,7 @@ def acr_webhook_create(webhook_name,
                        uri,
                        actions,
                        registry_name,
+                       location=None,
                        resource_group_name=None,
                        headers=None,
                        status='enabled',
@@ -44,6 +45,7 @@ def acr_webhook_create(webhook_name,
     :param str uri: The service URI for the webhook to post notifications
     :param str actions: The list of actions that trigger the webhook to post notifications
     :param str registry_name: The name of container registry
+    :param str location: The name of location
     :param str resource_group_name: The name of resource group
     :param str headers: Custom headers that will be added to the webhook notifications
     :param str status: Indicates whether the webhook is enabled
@@ -59,7 +61,7 @@ def acr_webhook_create(webhook_name,
         registry_name,
         webhook_name,
         WebhookCreateParameters(
-            location=registry.location,
+            location=location or registry.location,
             service_uri=uri,
             actions=actions,
             custom_headers=headers,

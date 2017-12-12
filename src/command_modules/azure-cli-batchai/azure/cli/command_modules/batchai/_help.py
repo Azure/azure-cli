@@ -25,7 +25,7 @@ helps['batchai cluster resize'] = """
     short-summary: Resize a cluster.
 """
 
-helps['batchai cluster set-auto-scale-parameters'] = """
+helps['batchai cluster auto-scale'] = """
     type: command
     short-summary: Set auto-scale parameters for a cluster.
 """
@@ -85,12 +85,12 @@ helps['batchai job list-nodes'] = """
     short-summary: List remote login information for nodes on which the job was run.
 """
 
-helps['batchai file list-files'] = """
+helps['batchai job list-files'] = """
     type: command
     short-summary: List job's output files in a directory with given id.
 """
 
-helps['batchai stream-file'] = """
+helps['batchai job stream-file'] = """
     type: command
     short-summary: Output the current content of the file and outputs appended data as the file grows
                    (similar to 'tail -f').

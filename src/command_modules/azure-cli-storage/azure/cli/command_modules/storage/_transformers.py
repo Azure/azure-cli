@@ -5,6 +5,7 @@
 
 from collections import OrderedDict
 import re
+from .url_quote_util import encode_url_path
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -105,6 +106,6 @@ def transform_url(result):
     """ Ensures the resulting URL string does not contain extra / characters """
     result = re.sub('//', '/', result)
     result = re.sub('/', '//', result, count=1)
-    return result
+    return encode_url_path(result)
 
 # endregion

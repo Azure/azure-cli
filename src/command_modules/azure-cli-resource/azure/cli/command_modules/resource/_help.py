@@ -63,19 +63,6 @@ helps['managedapp list'] = """
 helps['lock'] = """
     type: group
     short-summary: Manage Azure locks.
-    parameters:
-        - name: --resource-type
-          type: string
-          text: The name of the resource type. May have a provider namespace.
-        - name: --resource-provider-namespace
-          type: string
-          text: The name of the resource provider.
-        - name: --parent-resource-path
-          type: string
-          text: The path to the parent resource of the resource being locked.
-        - name: --resource-name
-          type: string
-          text: The name of the resource this lock applies to.
 """
 helps['lock create'] = """
     type: command
@@ -100,7 +87,7 @@ helps['lock list'] = """
     examples:
         - name: List out the locks on a vnet resource. Includes locks in the associated group and subscription.
           text: >
-            az lock list --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks -g group
+            az lock list --resource myvnet --resource-type Microsoft.Network/virtualNetworks -g group
         - name: List out all locks on the subscription level
           text: >
             az lock list
@@ -665,7 +652,10 @@ helps['resource lock create'] = """
     examples:
         - name: Create a read-only resource level lock on a vnet.
           text: >
-            az resource lock create --lock-type ReadOnly -n lockName -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
+            az resource lock create --lock-type ReadOnly -n lockName -g MyResourceGroup --resource myvnet --resource-type Microsoft.Network/virtualNetworks
+        - name: Create a read-only resource level lock on a vnet using a vnet id.
+          text: >
+            az resource lock create --lock-type ReadOnly -n lockName --resource /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/myvnet
     """
 helps['resource lock delete'] = """
     type: command
@@ -673,7 +663,10 @@ helps['resource lock delete'] = """
     examples:
         - name: Delete a resource level lock
           text: >
-            az resource lock delete --name lockName -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
+            az resource lock delete --name lockName -g MyResourceGroup --resource myvnet --resource-type Microsoft.Network/virtualNetworks
+        - name: Delete a resource level lock on a vnet using a vnet id.
+          text: >
+            az resource lock delete -n lockName --resource /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/myvnet
     """
 helps['resource lock list'] = """
     type: command
@@ -681,7 +674,7 @@ helps['resource lock list'] = """
     examples:
         - name: List out all locks on a vnet
           text: >
-            az resource lock list -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
+            az resource lock list -g MyResourceGroup --resource myvnet --resource-type Microsoft.Network/virtualNetworks
     """
 helps['resource lock show'] = """
     type: command
@@ -689,7 +682,7 @@ helps['resource lock show'] = """
     examples:
         - name: Show a resource level lock
           text: >
-            az resource lock show -n lockname -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks
+            az resource lock show -n lockname -g MyResourceGroup --resource myvnet --resource-type Microsoft.Network/virtualNetworks
     """
 helps['resource lock update'] = """
     type: command
@@ -697,5 +690,5 @@ helps['resource lock update'] = """
     examples:
         - name: Update a resource level lock with new notes and type
           text: >
-            az resource lock update --name lockName -g MyResourceGroup --resource-name myvnet --resource-type Microsoft.Network/virtualNetworks --notes newNotesHere --lock-type CanNotDelete
+            az resource lock update --name lockName -g MyResourceGroup --resource myvnet --resource-type Microsoft.Network/virtualNetworks --notes newNotesHere --lock-type CanNotDelete
     """

@@ -52,8 +52,8 @@ class VstsContinuousDeliveryProvider(object):
             message = '{: >3.0f}% complete: {}'.format(percent_done, status)
             # Erase the previous message
             # (backspace to beginning, space over the text and backspace again)
-            l = len(self._progress_last_message)
-            print('\b' * l + ' ' * l + '\b' * l, end='', file=stderr)
+            msg_len = len(self._progress_last_message)
+            print('\b' * msg_len + ' ' * msg_len + '\b' * msg_len, end='', file=stderr)
             print(message, end='', file=stderr)
             self._progress_last_message = message
             stderr.flush()

@@ -12,11 +12,12 @@ import unittest
 import yaml
 
 from msrestazure.azure_exceptions import CloudError
-
+from azure.graphrbac.models import GraphErrorException
 from azure.cli.command_modules.acs._params import (regionsInPreview,
                                                    regionsInProd)
 from azure.cli.command_modules.acs.custom import (merge_kubernetes_configurations, list_acs_locations,
-                                                  _acs_browse_internal, _add_role_assignment, _get_default_dns_prefix)
+                                                  _acs_browse_internal, _add_role_assignment, _get_default_dns_prefix,
+                                                  create_application)
 from azure.mgmt.containerservice.models import (ContainerServiceOrchestratorTypes,
                                                 ContainerService,
                                                 ContainerServiceOrchestratorProfile)
@@ -59,9 +60,9 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         with mock.patch(
                 'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            resp = mock.create_autospec(requests.Response)
+            resp = requests.Response()
             resp.status_code = 409
-            resp.text = 'Conflict'
+            resp._content = b'Conflict'
             err = CloudError(resp)
             err.message = 'The role assignment already exists.'
             create_role_assignment.side_effect = err
@@ -76,9 +77,9 @@ class AcsCustomCommandTest(unittest.TestCase):
 
         with mock.patch(
                 'azure.cli.command_modules.acs.custom.create_role_assignment') as create_role_assignment:
-            resp = mock.create_autospec(requests.Response)
+            resp = requests.Response()
             resp.status_code = 500
-            resp.text = 'Internal Error'
+            resp._content = b'Internal Error'
             err = CloudError(resp)
             err.message = 'Internal Error'
             create_role_assignment.side_effect = err
@@ -86,31 +87,31 @@ class AcsCustomCommandTest(unittest.TestCase):
 
             create_role_assignment.assert_called_with(role, sp)
             self.assertFalse(ok, 'Expected _add_role_assignment to fail')
-# flake8: noqa
-    # @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
-    # def test_browse_k8s(self, get_subscription_id):
-    #     acs_info = ContainerService("location", {}, {}, {})
-    #     acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-    #         ContainerServiceOrchestratorTypes.kubernetes)
-    #
-    #     with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info',
-    #                     return_value=acs_info) as get_acs_info:
-    #         with mock.patch(
-    #                 'azure.cli.command_modules.acs.custom._k8s_browse_internal') as k8s_browse:
-    #             _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
-    #             get_acs_info.assert_called_with('name', 'resource-group')
-    #             k8s_browse.assert_called_with('name', acs_info, False, 'ssh/key/file')
-    #
-    # @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
-    # def test_browse_dcos(self, get_subscription_id):
-    #     acs_info = ContainerService("location", {}, {}, {})
-    #     acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
-    #         ContainerServiceOrchestratorTypes.dcos)
-    #
-    #     with mock.patch(
-    #             'azure.cli.command_modules.acs.custom._dcos_browse_internal') as dcos_browse:
-    #         _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
-    #         dcos_browse.assert_called_with(acs_info, False, 'ssh/key/file')
+
+    @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
+    def test_browse_k8s(self, get_subscription_id):
+        acs_info = ContainerService("location", {}, {}, {})
+        acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
+            ContainerServiceOrchestratorTypes.kubernetes)
+
+        with mock.patch('azure.cli.command_modules.acs.custom._get_acs_info',
+                        return_value=acs_info) as get_acs_info:
+            with mock.patch(
+                    'azure.cli.command_modules.acs.custom._k8s_browse_internal') as k8s_browse:
+                _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
+                get_acs_info.assert_called_with('name', 'resource-group')
+                k8s_browse.assert_called_with('name', acs_info, False, 'ssh/key/file')
+
+    @mock.patch('azure.cli.command_modules.acs.custom._get_subscription_id')
+    def test_browse_dcos(self, get_subscription_id):
+        acs_info = ContainerService("location", {}, {}, {})
+        acs_info.orchestrator_profile = ContainerServiceOrchestratorProfile(
+            ContainerServiceOrchestratorTypes.dcos)
+
+        with mock.patch(
+                'azure.cli.command_modules.acs.custom._dcos_browse_internal') as dcos_browse:
+            _acs_browse_internal(acs_info, 'resource-group', 'name', False, 'ssh/key/file')
+            dcos_browse.assert_called_with(acs_info, False, 'ssh/key/file')
 
     def test_merge_credentials_non_existent(self):
         self.assertRaises(CLIError, merge_kubernetes_configurations, 'non', 'existent')
@@ -291,3 +292,23 @@ class AcsCustomCommandTest(unittest.TestCase):
         self.assertEqual(len(merged['users']), 2)
         self.assertEqual(merged['users'], ['user1', 'user2'])
         self.assertEqual(merged['current-context'], obj2['current-context'])
+
+    def test_acs_sp_create_failed_with_polished_error_if_due_to_permission(self):
+
+        class FakedError(object):
+            def __init__(self, message):
+                self.message = message
+
+        def _test_deserializer(resp_type, response):
+            err = FakedError('Insufficient privileges to complete the operation')
+            return err
+
+        client = mock.MagicMock()
+        client.create.side_effect = GraphErrorException(_test_deserializer, None)
+
+        # action
+        with self.assertRaises(CLIError) as context:
+            create_application(client, 'acs_sp', 'http://acs_sp', ['http://acs_sp'])
+
+        # assert we handled such error
+        self.assertTrue('https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))

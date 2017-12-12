@@ -36,11 +36,21 @@ def process_deployment_create_namespace(namespace):
     _validate_deployment_name(namespace)
 
 
-def internal_validate_lock_parameters(resource_group, resource_provider_namespace,
+def internal_validate_lock_parameters(namespace, resource_group, resource_provider_namespace,
                                       parent_resource_path, resource_type, resource_name):
     if resource_group is None:
         if resource_name is not None:
-            raise CLIError('--resource-name is ignored if --resource-group is not given.')
+            from msrestazure.tools import parse_resource_id, is_valid_resource_id
+            if not is_valid_resource_id(resource_name):
+                raise CLIError('--resource is not a valid resource ID. '
+                               '--resource as a resource name is ignored if --resource-group is not given.')
+            # resource-name is an ID, populate namespace
+            id_dict = parse_resource_id(resource_name)
+            for id_part in ['resource_name', 'resource_type', 'resource_group']:
+                setattr(namespace, id_part, id_dict.get(id_part))
+            setattr(namespace, 'resource_provider_namespace', id_dict.get('resource_namespace'))
+            setattr(namespace, 'parent_resource_path', id_dict.get('resource_parent').strip('/'))
+
         if resource_type is not None:
             raise CLIError('--resource-type is ignored if --resource-group is not given.')
         if resource_provider_namespace is not None:
@@ -51,27 +61,28 @@ def internal_validate_lock_parameters(resource_group, resource_provider_namespac
 
     if resource_name is None:
         if resource_type is not None:
-            raise CLIError('--resource-type is ignored if --resource-name is not given.')
+            raise CLIError('--resource-type is ignored if --resource is not given.')
         if resource_provider_namespace is not None:
-            raise CLIError('--namespace is ignored if --resource-name is not given.')
+            raise CLIError('--namespace is ignored if --resource is not given.')
         if parent_resource_path is not None:
-            raise CLIError('--parent is ignored if --resource-name is not given.')
+            raise CLIError('--parent is ignored if --resource is not given.')
         return
 
     if not resource_type:
-        raise CLIError('--resource-type is required if --resource-name is present')
+        raise CLIError('--resource-type is required if the name, --resource, is present')
 
     parts = resource_type.split('/')
     if resource_provider_namespace is None:
         if len(parts) == 1:
-            raise CLIError('A resource namespace is required if --resource-name is present.'
+            raise CLIError('A resource namespace is required if the name, --resource, is present.'
                            'Expected <namespace>/<type> or --namespace=<namespace>')
     elif len(parts) != 1:
         raise CLIError('Resource namespace specified in both --resource-type and --namespace')
 
 
 def validate_lock_parameters(namespace):
-    internal_validate_lock_parameters(getattr(namespace, 'resource_group', None),
+    internal_validate_lock_parameters(namespace,
+                                      getattr(namespace, 'resource_group', None),
                                       getattr(namespace, 'resource_provider_namespace', None),
                                       getattr(namespace, 'parent_resource_path', None),
                                       getattr(namespace, 'resource_type', None),
@@ -106,11 +117,10 @@ def validate_resource_lock(namespace):
                                                                'resource_name']):
                 raise CLIError('{} is not a valid resource-level lock id.'.format(lock_id))
     else:
+        if not getattr(namespace, 'resource_name', None):
+            raise CLIError('Missing required {} parameter.'.format('resource_name'))
         kwargs = {}
-        for param in ['resource_group', 'resource_type', 'resource_name']:
-            if not getattr(namespace, param, None):
-                raise CLIError('Missing required {} parameter.'.format(param))
-            kwargs[param] = getattr(namespace, param)
-        kwargs['resource_provider_namespace'] = getattr(namespace, 'resource_provider_namespace', None)
-        kwargs['parent_resource_path'] = getattr(namespace, 'parent_resource_path', None)
-        internal_validate_lock_parameters(**kwargs)
+        for param in ['resource_group', 'resource_name', 'resource_provider_namespace', 'parent_resource_path',
+                      'resource_type']:
+            kwargs[param] = getattr(namespace, param, None)
+        internal_validate_lock_parameters(namespace, **kwargs)

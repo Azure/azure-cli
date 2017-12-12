@@ -52,7 +52,7 @@ def get_document_client_factory(kwargs):
 
         if name and resource_group and not key:
             # if resource group name is provided find key
-            keys = cf_documentdb().database_accounts.list_keys(resource_group, name)
+            keys = cf_cosmosdb().database_accounts.list_keys(resource_group, name)
             key = keys.primary_master_key
 
         url_connection = _get_url_connection(url_connection, name)
@@ -72,7 +72,7 @@ def get_document_client_factory(kwargs):
     return client
 
 
-def cf_documentdb(**_):
+def cf_cosmosdb(**_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.documentdb import DocumentDB
-    return get_mgmt_service_client(DocumentDB)
+    from azure.mgmt.cosmosdb import CosmosDB
+    return get_mgmt_service_client(CosmosDB)

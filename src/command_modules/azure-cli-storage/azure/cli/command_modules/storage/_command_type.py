@@ -24,9 +24,10 @@ def cli_storage_data_plane_command(name, operation, client_factory, transform=No
     group_name = 'Storage Account'
     command.add_argument('account_name', '--account-name', required=False, default=None,
                          arg_group=group_name,
-                         help='Storage account name. Must be used in conjunction with either '
-                         'storage account key or a SAS token. Environment variable: '
-                         'AZURE_STORAGE_ACCOUNT')
+                         help='Storage account name. Related environment variable: AZURE_STORAGE_ACCOUNT. Must be used '
+                              'in conjunction with either storage account key or a SAS token. If neither are present, '
+                              'the command will try to query the storage account key using the authenticated Azure '
+                              'account. If a large number of storage commands are executed the API quota may be hit')
     command.add_argument('account_key', '--account-key', required=False, default=None,
                          arg_group=group_name,
                          help='Storage account key. Must be used in conjunction with storage '

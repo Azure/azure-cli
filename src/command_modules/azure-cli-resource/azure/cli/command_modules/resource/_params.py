@@ -44,6 +44,7 @@ register_cli_argument('resource list', 'name', resource_name_type)
 register_cli_argument('resource move', 'ids', nargs='+')
 register_cli_argument('resource invoke-action', 'action', help='The action that will be invoked on the specified resource')
 register_cli_argument('resource invoke-action', 'request_body', help='JSON encoded parameter arguments for the action that will be passed along in the post request body. Use @{file} to load from a file.')
+register_cli_argument('resource show', 'include_response_body', action='store_true', help=r"Use it if the default command output doesn't capture all on the wire")
 
 register_cli_argument('resource create', 'resource_id', options_list=['--id'], help='Resource ID.', action=None)
 register_cli_argument('resource create', 'properties', options_list=('--properties', '-p'),
@@ -155,11 +156,11 @@ register_cli_argument('managedapp definition create', 'mainTemplate', options_li
 register_cli_argument('lock', 'parent_resource_path', resource_parent_type)
 register_cli_argument('lock', 'resource_provider_namespace', resource_namespace_type)
 register_cli_argument('lock', 'resource_type', arg_type=resource_type_type, completer=get_resource_types_completion_list)
-register_cli_argument('lock', 'resource_name', options_list=('--resource-name'), help='Name of the resource being locked.')
+register_cli_argument('lock', 'resource_name', options_list=('--resource', '--resource-name'), help='Name or ID of the resource being locked. If an ID is given, other resource arguments should not be given.')
 register_cli_argument('lock', 'resource_group', resource_group_name_type, validator=validate_lock_parameters)
 
 register_cli_argument('resource lock', 'resource_group', resource_group_name_type)
-register_cli_argument('resource lock', 'resource_name', options_list=('--resource-name'), validator=validate_resource_lock)
+register_cli_argument('resource lock', 'resource_name', options_list=('--resource', '--resource-name'), help='Name or ID of the resource being locked. If an ID is given, other resource arguments should not be given.', validator=validate_resource_lock)
 
 register_cli_argument('group lock', 'resource_group', resource_group_name_type, validator=validate_group_lock)
 

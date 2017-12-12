@@ -82,6 +82,17 @@ def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
             setattr(c.suffixes, arg.replace('suffix_', ''), cloud_args[arg])
     arm_endpoint = cloud_args.get('endpoint_resource_manager', None)
     _populate_from_metadata_endpoint(c, arm_endpoint)
+    required_endpoints = {'resource_manager': '--endpoint-resource-manager',
+                          'active_directory': '--endpoint-active-directory',
+                          'active_directory_resource_id': '--endpoint-active-directory-resource-id',
+                          'active_directory_graph_resource_id': '--endpoint-active-directory-graph-resource-id'}
+    missing_endpoints = [e_param for e_name, e_param in required_endpoints.items()
+                         if not c.endpoints.has_endpoint_set(e_name)]
+    if missing_endpoints:
+        raise CLIError("The following endpoints are required for the CLI to function and were not specified on the "
+                       "command line, in the cloud config or could not be autodetected.\n"
+                       "Specify them on the command line or through the cloud config file:\n"
+                       "{}".format(', '.join(missing_endpoints)))
     return c
 
 

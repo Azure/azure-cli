@@ -50,4 +50,6 @@ def print_records(records, print_format=None, title=None, foot_notes=None):
 
 
 def print_heading(heading, f=None):
-    print('{0}\n{1}\n{0}'.format('=' * len(heading), heading), file=f)
+    lines = heading.splitlines()
+    header_len = max(len(l) for l in lines)
+    print('{0}\n{1}\n{0}'.format('=' * header_len, heading), file=f)

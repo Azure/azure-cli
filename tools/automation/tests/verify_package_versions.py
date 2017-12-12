@@ -9,21 +9,12 @@ import os
 import sys
 import argparse
 import subprocess
-from docutils import core, io
-try:
-    import xmlrpclib
-except ImportError:
-    import xmlrpc.client as xmlrpclib  # pylint: disable=import-error
 
 from ..utilities.path import get_all_module_paths
 from ..utilities.display import print_heading
+from ..utilities.pypi import is_available_on_pypi
 
 SETUP_PY_NAME = 'setup.py'
-
-def is_available_on_pypi(module_name, module_version):
-    client = xmlrpclib.ServerProxy('https://pypi.python.org/pypi')
-    available_versions = client.package_releases(module_name, True)
-    return module_version in available_versions
 
 
 def is_unreleased_version(mod_name, mod_version):

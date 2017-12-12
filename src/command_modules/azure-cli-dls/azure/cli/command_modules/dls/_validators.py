@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.datalake.store import DataLakeStoreAccountManagementClient
-from azure.cli.core.commands.arm import parse_resource_id
 from azure.cli.core.util import CLIError
+from msrestazure.tools import parse_resource_id
 
 
 # Helpers

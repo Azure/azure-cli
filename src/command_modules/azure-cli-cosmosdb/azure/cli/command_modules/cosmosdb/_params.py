@@ -13,11 +13,11 @@ from azure.cli.core.commands.parameters import (
 
 from azure.cli.core.util import shell_safe_json_parse
 
-from azure.mgmt.documentdb.models.document_db_enums import KeyKind
-from azure.mgmt.documentdb.models.document_db_enums import DefaultConsistencyLevel
-from azure.mgmt.documentdb.models.document_db_enums import DatabaseAccountKind
-from azure.mgmt.documentdb.models.failover_policy import FailoverPolicy
-from azure.mgmt.documentdb.models.location import Location
+from azure.mgmt.cosmosdb.models.cosmos_db_enums import KeyKind
+from azure.mgmt.cosmosdb.models.cosmos_db_enums import DefaultConsistencyLevel
+from azure.mgmt.cosmosdb.models.cosmos_db_enums import DatabaseAccountKind
+from azure.mgmt.cosmosdb.models.failover_policy import FailoverPolicy
+from azure.mgmt.cosmosdb.models.location import Location
 from azure.cli.core.commands import register_cli_argument, CliArgumentType
 
 

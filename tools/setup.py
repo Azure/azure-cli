@@ -25,7 +25,7 @@ DEPENDENCIES = [
     'autopep8>=1.2.4',
     'pylint>=1.7.1'
     'coverage>=4.2',
-    'flake8>=3.2.1',
+    'flake8==3.5.0',
     'pycodestyle>=2.2.0',
     'nose>=1.3.7',
     'readme_renderer>=17.2',
@@ -42,16 +42,6 @@ setup(
     author='Microsoft Corporation',
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
-    namespace_packages=[
-    ],
-    scripts=[
-        "scripts/check_style",
-        "scripts/check_style.bat",
-        "scripts/run_tests",
-        "scripts/run_tests.bat",
-        'scripts/azdev',
-        'scripts/azdev.bat'
-    ],
     packages=[
         'automation',
         'automation.style',
@@ -59,5 +49,12 @@ setup(
         'automation.setup',
         'automation.coverage'
     ],
+    entry_points = {
+        'console_scripts': [
+            'azdev=automation.__main__:main',
+            'check_style=automation.style.run:main',
+            'run_tests=automation.tests.run:main'
+            ]
+    },
     install_requires=DEPENDENCIES
 )

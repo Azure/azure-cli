@@ -3,6 +3,23 @@
 Release History
 ===============
 
+2.0.21
+++++++
+* add `az aks install-connector` and `az aks remove-connector` commands
+
+2.0.20
+++++++
+* `acs create`: emit out an actionable error if provisioning application failed for lack of permissions
+* fix `aks get-credentials -f` without fully-qualified path
+
+2.0.19
+++++++
+* call "agent" a "node" in AKS to match documentation
+* deprecate --orchestrator-release option in acs create
+* change default VM size for AKS to Standard_D1_v2
+* fix "az aks browse" on Windows
+* fix "az aks get-credentials" on Windows
+
 2.0.18
 ++++++
 * fix kubernetes get-credentials

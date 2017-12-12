@@ -199,7 +199,6 @@ class Profile(object):
                 'isMRRT': True,
                 'accessToken': tokens[decoded_tokens.index(t)],
                 'tokenType': 'Bearer',
-                'oid': t['oid']
             })
 
         # merging with existing cached ones

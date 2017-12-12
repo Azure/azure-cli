@@ -109,7 +109,6 @@ echo Built CLI packages successfully.
 
 if %errorlevel% neq 0 goto ERROR
 
-
 set ALL_MODULES=
 for %%i in (%TEMP_SCRATCH_FOLDER%\*.whl) do (
     set ALL_MODULES=!ALL_MODULES! %%i

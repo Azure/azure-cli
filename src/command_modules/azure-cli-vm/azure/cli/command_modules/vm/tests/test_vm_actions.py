@@ -163,6 +163,7 @@ class TestActions(unittest.TestCase):
 
         np = mock.MagicMock()
         np.location = 'some region'
+        np.plan_name, np.plan_publisher, np.plan_product = '', '', ''
         np.image = 'publisher1:offer1:sku1:1.0.0'
 
         # action
@@ -187,6 +188,7 @@ class TestActions(unittest.TestCase):
         np = mock.MagicMock()
         np.location = 'some region'
         np.image = 'publisher1:offer1:sku1:1.0.0'
+        np.plan_name, np.plan_publisher, np.plan_product = '', '', ''
 
         # action
         _parse_image_argument(np)
