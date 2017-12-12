@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.20
+++++++
+* Minor fixes
+
 2.0.19
 ++++++
 * show zone information on `az vm list-skus -otable`
