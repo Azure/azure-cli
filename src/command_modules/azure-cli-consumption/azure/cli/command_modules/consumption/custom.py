@@ -8,7 +8,7 @@
 from azure.cli.command_modules.consumption._client_factory import cf_consumption
 
 
-def cli_consumption_list_usage(client, billing_period_name=None, top=None, include_additional_properties=False, include_meter_details=False, start_date=None, end_date=None):
+def cli_consumption_list_usage(cmd, client, billing_period_name=None, top=None, include_additional_properties=False, include_meter_details=False, start_date=None, end_date=None):
     """List all usage details of the subscription"""
     if include_additional_properties and include_meter_details:
         expand = 'properties/additionalProperties,properties/meterDetails'
@@ -20,9 +20,9 @@ def cli_consumption_list_usage(client, billing_period_name=None, top=None, inclu
         expand = None
 
     if billing_period_name:
-        scope = "/subscriptions/{}/providers/Microsoft.Billing/billingPeriods/{}".format(cf_consumption().config.subscription_id, billing_period_name)
+        scope = "/subscriptions/{}/providers/Microsoft.Billing/billingPeriods/{}".format(cf_consumption(cmd.cli_ctx).config.subscription_id, billing_period_name)
     else:
-        scope = "/subscriptions/{}".format(cf_consumption().config.subscription_id)
+        scope = "/subscriptions/{}".format(cf_consumption(cmd.cli_ctx).config.subscription_id)
 
     filter_from = None
     filter_to = None
