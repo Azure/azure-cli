@@ -50,7 +50,7 @@ Also, you can run `az` and if your command module contributes any commands, they
 If your commands aren't showing with `az`, use `az --debug` to help debug. There could have been an exception
 thrown whilst attempting to load your module.
 
-**Note of locally installed Azure SDKs:**  
+**Note for locally installed Azure SDKs:**  
 If you're receiving Azure import errors, run `pip install -I azure-nspkg==1.0.0` in your virtual environment
 after installing your SDK locally.
 
