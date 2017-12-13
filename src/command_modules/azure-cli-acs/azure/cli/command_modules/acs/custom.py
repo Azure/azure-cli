@@ -315,12 +315,12 @@ def k8s_install_connector(client, name, resource_group, connector_name,
                           location=None, service_principal=None, client_secret=None,
                           chart_url=None, os_type='Linux'):
     from subprocess import PIPE, Popen
-    helm_not_installed = "Helm not detected, please verify if it is installed."
+    helm_not_installed = 'Helm not detected, please verify if it is installed.'
     node_prefix = 'virtual-kubelet-' + connector_name.lower()
     url_chart = chart_url
     # Check if Helm is installed locally
     try:
-        Popen(["helm"], stdout=PIPE, stderr=PIPE)
+        Popen(['helm'], stdout=PIPE, stderr=PIPE)
     except OSError:
         raise CLIError(helm_not_installed)
     # Validate if the RG exists
@@ -338,8 +338,8 @@ def k8s_install_connector(client, name, resource_group, connector_name,
     # Ensure that the SPN exists
     principal_obj = _ensure_service_principal(service_principal, client_secret, subscription_id,
                                               dns_name_prefix, location, connector_name)
-    client_secret = principal_obj.get("client_secret")
-    service_principal = principal_obj.get("service_principal")
+    client_secret = principal_obj.get('client_secret')
+    service_principal = principal_obj.get('service_principal')
     # Get the TenantID
     profile = Profile()
     _, _, tenant_id = profile.get_login_credentials()
@@ -347,13 +347,13 @@ def k8s_install_connector(client, name, resource_group, connector_name,
     if os_type.lower() in ['linux', 'both']:
         _helm_install_aci_connector(url_chart, connector_name, service_principal, client_secret,
                                     subscription_id, tenant_id, rgkaci.name, location,
-                                    node_prefix + '-linux', "Linux")
+                                    node_prefix + '-linux', 'Linux')
 
     # Check if we want the windows connector
     if os_type.lower() in ['windows', 'both']:
         _helm_install_aci_connector(url_chart, connector_name, service_principal, client_secret,
                                     subscription_id, tenant_id, rgkaci.name, location,
-                                    node_prefix + '-win', "Windows")
+                                    node_prefix + '-win', 'Windows')
 
 def _helm_install_aci_connector(url_chart, connector_name, service_principal, client_secret,
                                   subscription_id, tenant_id, aciResourceGroup, aciRegion,
@@ -374,10 +374,10 @@ def _helm_install_aci_connector(url_chart, connector_name, service_principal, cl
 def k8s_uninstall_connector(client, name, connector_name, resource_group,
                             graceful=False, os_type='Linux'):
     from subprocess import PIPE, Popen
-    helm_not_installed = "Error : Helm not detected, please verify if it is installed."
+    helm_not_installed = 'Error : Helm not detected, please verify if it is installed.'
     # Check if Helm is installed locally
     try:
-        Popen(["helm"], stdout=PIPE, stderr=PIPE)
+        Popen(['helm'], stdout=PIPE, stderr=PIPE)
     except OSError:
         raise CLIError(helm_not_installed)
     # Get the credentials from a AKS instance
@@ -387,24 +387,24 @@ def k8s_uninstall_connector(client, name, connector_name, resource_group,
     node_prefix = 'virtual-kubelet-' + connector_name.lower()
 
     if os_type.lower() in ['windows', 'both']:
-        _undeploy_connector(graceful, node_prefix + "-win", connector_name.lower() + "-windows")
+        _undeploy_connector(graceful, node_prefix + '-win', connector_name.lower() + '-windows')
 
     if os_type.lower() in ['linux', 'both']:
-        _undeploy_connector(graceful, node_prefix + "-linux", connector_name.lower() + "-linux")
+        _undeploy_connector(graceful, node_prefix + '-linux', connector_name.lower() + '-linux')
 
 def _undeploy_connector(graceful, nodeName, helm_release_name):
     if graceful:
         logger.warning('Graceful option selected, will try to drain the node first')
         from subprocess import PIPE, Popen
-        kubectl_not_installed = "Kubectl not detected, please verify if it is installed."
+        kubectl_not_installed = 'Kubectl not detected, please verify if it is installed.'
         try:
-            Popen(["kubectl"], stdout=PIPE, stderr=PIPE)
+            Popen(['kubectl'], stdout=PIPE, stderr=PIPE)
         except OSError:
             raise CLIError(kubectl_not_installed)
 
         try:
             drain_node = subprocess.check_output(
-                ["kubectl", "drain", nodeName, "--force"],
+                ['kubectl', 'drain', nodeName, '--force'],
                 universal_newlines=True)
 
             if not drain_node:
@@ -414,9 +414,9 @@ def _undeploy_connector(graceful, nodeName, helm_release_name):
             raise CLIError('Could not find the node, make sure you' +
                         ' are using the correct --os-type option: {}'.format(err))
 
-    logger.warning("Undeploying the " + helm_release_name + " using Helm")
+    logger.warning('Undeploying the ' + helm_release_name + ' using Helm')
     try:
-        subprocess.call(["helm", "del", helm_release_name, "--purge"])
+        subprocess.call(['helm', 'del', helm_release_name, '--purge'])
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not undeploy the ACI connector Chart: {}'.format(err))
 

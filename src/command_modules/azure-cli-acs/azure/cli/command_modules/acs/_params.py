@@ -25,6 +25,7 @@ from azure.cli.command_modules.acs._validators import validate_create_parameters
 from azure.cli.command_modules.acs._validators import validate_k8s_client_version
 from azure.cli.command_modules.acs._validators import validate_k8s_version
 from azure.cli.command_modules.acs._validators import validate_linux_host_name
+from azure.cli.command_modules.acs._validators import validate_connector_name
 
 
 def _compute_client_factory(**_):
@@ -188,10 +189,10 @@ register_cli_argument('aks install-cli', 'client_version', options_list=('--clie
                       validator=validate_k8s_client_version)
 register_cli_argument('aks install-connector', 'os_type', help='The OS type of the connector', **enum_choice_list(aci_connector_os_type))
 register_cli_argument('aks install-connector', 'chart_url', help='URL to the chart', default=aci_connector_chart_url)
-register_cli_argument('aks install-connector', 'connector_name', help='The name for the ACI Connector')
+register_cli_argument('aks install-connector', 'connector_name', help='The name for the ACI Connector', validator=validate_connector_name)
 register_cli_argument('aks install-connector', 'service_principal', help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
 register_cli_argument('aks install-connector', 'client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
 register_cli_argument('aks remove-connector', 'os_type', help='The OS type of the connector', **enum_choice_list(aci_connector_os_type))
 register_cli_argument('aks remove-connector', 'graceful', help='Mention if you want to drain/uncordon your aci-connector to move your applications', action='store_true')
-register_cli_argument('aks remove-connector', 'connector_name', help='The name for the ACI Connector')
+register_cli_argument('aks remove-connector', 'connector_name', help='The name for the ACI Connector', validator=validate_connector_name)
 register_cli_argument('aks remove-connector', 'resource_group', arg_type=resource_group_name_type, help='The name of the resource group where the AKS cluster is deployed')
