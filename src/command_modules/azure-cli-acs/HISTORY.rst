@@ -6,6 +6,7 @@ Release History
 2.0.22
 ++++++
 * add korea south and korea central to preview regions
+* update `az aks install-connector` and `az aks remove-connector` commands to use the virtual-kubelet
 
 2.0.21
 ++++++
