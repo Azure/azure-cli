@@ -666,8 +666,6 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
     :type master_storage_profile: str
     :param agent_profiles: AgentPoolProfiles used to describe agent pools
     :type agent_profiles: dict
-    :param agent_count: the default number of agents for the agent pools.
-    :type agent_count: int
     :param agent_vm_size: The size of the Virtual Machine.
     :type agent_vm_size: str
     :param agent_osdisk_size: The osDisk size in GB of agent pool Virtual Machine
@@ -685,14 +683,6 @@ def acs_create(resource_group_name, deployment_name, name, ssh_key_value, dns_na
      applications on the cluster.
     :type orchestrator_type: str or :class:`orchestratorType
      <Default.models.orchestratorType>`
-    :param service_principal: The service principal used for cluster authentication
-     to Azure APIs. If not specified, it is created for you and stored in the
-     ${HOME}/.azure directory.
-    :type service_principal: str
-    :param client_secret: The secret associated with the service principal. If
-     --service-principal is specified, then secret should also be specified. If
-     --service-principal is not specified, the secret is auto-generated for you
-     and stored in ${HOME}/.azure/ directory.
     :param tags: Tags object.
     :type tags: object
     :param windows: If true, the cluster will be built for running Windows container.
@@ -1228,13 +1218,6 @@ def _update_dict(dict1, dict2):
 
 
 def aks_browse(client, resource_group_name, name, disable_browser=False):
-    """
-    Open a web browser to the dashboard for a managed Kubernetes cluster.
-
-    :param disable_browser: If true, don't launch a web browser after establishing the
-     kubectl port-forward
-    :type disable_browser: bool
-    """
     if not which('kubectl'):
         raise CLIError('Can not find kubectl executable in PATH')
 
@@ -1276,39 +1259,6 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
                tags=None,
                generate_ssh_keys=False,  # pylint: disable=unused-argument
                no_wait=False):
-    """Create a managed Kubernetes cluster.
-    :type dns_name_prefix: str
-    :param location: Location for VM resources.
-    :type location: str
-    :param ssh_key_value: Configure all linux machines with the SSH RSA
-     public key string.  Your key should include three parts, for example
-    'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm
-    :type ssh_key_value: str
-    :param admin_username: User name for the Linux Virtual Machines.
-    :type admin_username: str
-    :param kubernetes_version: The version of Kubernetes to use for creating
-     the cluster, such as '1.7.7' or '1.8.1'.
-    :type kubernetes_version: str
-    :param node_count: the default number of nodes for the node pools.
-    :type node_count: int
-    :param node_vm_size: The size of the Virtual Machine.
-    :type node_vm_size: str
-    :param node_osdisk_size: The osDisk size in GB of node pool Virtual Machine
-    :type node_osdisk_size: int
-    :param service_principal: The service principal used for cluster authentication
-     to Azure APIs. If not specified, it is created for you and stored in the
-     ${HOME}/.azure directory.
-    :type service_principal: str
-    :param client_secret: The secret associated with the service principal. If
-     --service-principal is specified, then secret should also be specified. If
-     --service-principal is not specified, the secret is auto-generated for you
-     and stored in ${HOME}/.azure/ directory.
-    :param tags: Tags object.
-    :type tags: object
-    :param no_wait: Start creating but return immediately instead of waiting
-     until the managed cluster is created.
-    :type no_wait: bool
-    """
     try:
         if not ssh_key_value or not is_valid_ssh_rsa_public_key(ssh_key_value):
             raise ValueError()
@@ -1374,13 +1324,6 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
 
 def aks_get_credentials(client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config')):
-    """Get credentials to access a managed Kubernetes cluster.
-    :param path: A kubectl config file to create or update. Use "-" to print YAML
-     to stdout instead
-    :type path: str
-    :param admin: Get the "clusterAdmin" kubectl config instead of the default "clusterUser"
-    :type admin: bool
-    """
     mc = aks_show(client, resource_group_name, name)
     access_profiles = mc.properties.access_profiles
     if not access_profiles:
@@ -1395,7 +1338,6 @@ def aks_get_credentials(client, resource_group_name, name, admin=False,
 
 
 def aks_list(client, resource_group_name=None):
-    """List managed Kubernetes clusters."""
     if resource_group_name:
         managed_clusters = client.list_by_resource_group(resource_group_name)
     else:
@@ -1404,19 +1346,11 @@ def aks_list(client, resource_group_name=None):
 
 
 def aks_show(client, resource_group_name, name):
-    """Show a managed Kubernetes cluster."""
     mc = client.get(resource_group_name, name)
     return _remove_nulls([mc])[0]
 
 
 def aks_scale(client, resource_group_name, name, node_count, no_wait=False):
-    """Scale the node pool in a managed Kubernetes cluster.
-    :param node_count: The desired number of nodes.
-    :type node_count: int
-    :param no_wait: Start upgrading but return immediately instead of waiting
-     until the managed cluster is upgraded.
-    :type no_wait: bool
-    """
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
     instance.properties.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
@@ -1428,14 +1362,6 @@ def aks_scale(client, resource_group_name, name, node_count, no_wait=False):
 
 
 def aks_upgrade(client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
-    """Upgrade a managed Kubernetes cluster to a newer version.
-    :param kubernetes_version: The version of Kubernetes to upgrade the cluster to,
-    such as '1.7.7' or '1.8.1'.
-    :type kubernetes_version: str
-    :param no_wait: Start upgrading but return immediately instead of waiting
-     until the managed cluster is upgraded.
-    :type no_wait: bool
-    """
     instance = client.get(resource_group_name, name)
     instance.properties.kubernetes_version = kubernetes_version
 
