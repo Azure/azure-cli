@@ -517,7 +517,7 @@ def _load_command_loader(loader, args, name, prefix):
                     # else:
                     loader.cmd_to_loader_map[cmd] = [command_loader]
     else:
-        logger.debug("Command module '%s' is missing `COMMAND_LOADER_CLS` entry.", name)
+        logger.debug("Module '%s' is missing `COMMAND_LOADER_CLS` entry.", name)
     return command_table
 
 
