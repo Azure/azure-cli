@@ -4,13 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 
-def iot_hub_service_factory(_):
+def iot_hub_service_factory(cli_ctx, *_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.iothub.iot_hub_client import IotHubClient
-    return get_mgmt_service_client(IotHubClient)
+    return get_mgmt_service_client(cli_ctx, IotHubClient)
 
 
-def resource_service_factory(**_):
+def resource_service_factory(cli_ctx, **_):
     from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(ResourceManagementClient)
+    return get_mgmt_service_client(cli_ctx, ResourceManagementClient)
