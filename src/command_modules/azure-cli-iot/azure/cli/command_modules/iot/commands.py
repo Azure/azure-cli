@@ -18,7 +18,7 @@ if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
             result = super(PolicyUpdateResultTransform, self).__call__(poller)
             return result.properties.authorization_policies
 
-    # Deleting IoT Hub is a long running operation. Due to API implementation issue, 404 error will be thrown during
+    # Deleting IoT Hub is a long-running operation. Due to API implementation issue, 404 error will be thrown during
     # deletion of an IoT Hub.
     # This is a work around to suppress the 404 error. It should be removed after API is fixed.
     class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods

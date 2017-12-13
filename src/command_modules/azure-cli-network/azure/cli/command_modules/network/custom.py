@@ -1769,7 +1769,7 @@ def create_vpn_connection(client, resource_group_name, connection_name, vnet_gat
         using an 'ExpressRoute' connection.
     :param str authorization_key: The authorization key for the VPN connection.
     :param bool enable_bgp: Enable BGP for this VPN connection.
-    :param bool no_wait: Do not wait for the long running operation to finish.
+    :param bool no_wait: Do not wait for the long-running operation to finish.
     :param bool validate: Display and validate the ARM template but do not create any resources.
     """
     from azure.cli.core.util import random_string
@@ -2119,7 +2119,7 @@ def _poll(self, update_cmd):
                 self._response)
         else:
             raise BadResponse(
-                'Location header is missing from long running operation.')
+                'Location header is missing from long-running operation.')
 
     if failed(self._operation.status):
         raise OperationFailed("Operation failed or cancelled")
