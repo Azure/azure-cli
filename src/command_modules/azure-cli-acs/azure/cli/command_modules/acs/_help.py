@@ -14,12 +14,12 @@ SERVICE_PRINCIPAL_CACHE = os.path.join('$HOME', '.azure', 'acsServicePrincipal.j
 
 helps['acs'] = """
      type: group
-     short-summary: Manage Azure container services.
+     short-summary: Manage Azure Container Services.
 """
 
 helps['acs browse'] = """
     type: command
-    short-summary: Open a web browser to the dashboard for a container service's orchestrator.
+    short-summary: Show the dashboard for a service container's orchestrator in a web browser.
 """
 
 helps['acs create'] = """
@@ -28,40 +28,47 @@ helps['acs create'] = """
     parameters:
         - name: --service-principal
           type: string
-          short-summary: Service principal used for authentication to Azure APIs. If not specified, a new service
-                         principal with contributor role is created and cached at {sp_cache} to be used by subsequent
-                         `az acs` commands.
+          short-summary: Service principal used for authentication to Azure APIs.
+          long-summary:  If not specified, a new service principal with the contributor role is created and cached at
+                         {sp_cache} to be used by subsequent `az acs` commands.
         - name: --client-secret
           type: string
-          short-summary: Secret associated with a service principal. This argument is required if `--service-principal`
-                         is specified.
+          short-summary: Secret associated with the service principal. This argument is required if
+                         `--service-principal` is specified.
         - name: --agent-count
-          short-summary: Set default number of agents for the agent pools.
-                         Note that DC/OS clusters will have 1 or 2 additional public agents.
+          short-summary: Set the default number of agents for the agent pools.
+          long-summary: Note that DC/OS clusters will have 1 or 2 additional public agents.
     examples:
-        - name: Create a default acs cluster.
-          text: az acs create -g MyResourceGroup -n MyContainerService
-        - name: Create a Kubernetes cluster.
-          text: az acs create --orchestrator-type Kubernetes -g MyResourceGroup -n MyContainerService
-        - name: Create a Kubernetes cluster with a an existing SSH key.
-          text: >-
-              az acs create --orchestrator-type Kubernetes -g MyResourceGroup -n MyContainerService
+        - name: Create a DCOS cluster with an existing SSH key.
+          text: |-
+              az acs create --orchestrator-type DCOS -g MyResourceGroup -n MyContainerService \\
                 --ssh-key-value /path/to/publickey
-        - name: Create an ACS cluster with two agent pools.
-          text: >-
-              az acs create -g MyResourceGroup -n MyContainerService
-                --agent-profiles "[{{'name':'agentpool1'}},{{'name':'agentpool2'}}]"
-        - name: Create an ACS cluster where the second agent pool has a vmSize specified.
-          text: >-
-              az acs create -g MyResourceGroup -n MyContainerService
-                --agent-profiles "[{{'name':'agentpool1'}},{{'name':'agentpool2','vmSize':'Standard_D2'}}]"
-        - name: Create an ACS cluster with agent-profiles specified from a file.
+        - name: Create a DCOS cluster with two agent pools.
+          text: |-
+              az acs create -g MyResourceGroup -n MyContainerService --agent-profiles '[
+                {{
+                  "name": "agentpool1"
+                }},
+                {{
+                  "name": "agentpool2"
+                }}]'
+        - name: Create a DCOS cluster where the second agent pool has a vmSize specified.
+          text: |-
+              az acs create -g MyResourceGroup -n MyContainerService --agent-profiles '[
+                {{
+                  "name": "agentpool1"
+                }},
+                {{
+                  "name": "agentpool2",
+                  "vmSize": "Standard_D2"
+                }}]'
+        - name: Create a DCOS cluster with agent-profiles specified from a file.
           text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles MyAgentProfiles.json
 """.format(sp_cache=SERVICE_PRINCIPAL_CACHE)
 
 helps['acs dcos'] = """
     type: group
-    short-summary: Commands to manage a DC/OS-orchestrated Azure container service.
+    short-summary: Commands to manage a DC/OS-orchestrated Azure Container Service.
 """
 
 helps['acs install-cli'] = """
@@ -71,7 +78,7 @@ helps['acs install-cli'] = """
 
 helps['acs kubernetes'] = """
     type: group
-    short-summary: Commands to manage a Kubernetes-orchestrated Azure container service.
+    short-summary: Commands to manage a Kubernetes-orchestrated Azure Container Service.
 """
 
 helps['acs kubernetes get-credentials'] = """
@@ -81,7 +88,7 @@ helps['acs kubernetes get-credentials'] = """
 
 helps['acs list-locations'] = """
     type: command
-    short-summary: List locations where Azure container service is in preview and in production.
+    short-summary: List locations where Azure Container Service is in preview and in production.
 """
 
 helps['acs scale'] = """
@@ -95,24 +102,26 @@ helps['acs scale'] = """
 
 helps['acs show'] = """
     type: command
-    short-summary: Show details of a container service.
+    short-summary: Show the details for a container service.
 """
 
 helps['acs wait'] = """
     type: command
     short-summary: Wait for a container service to reach a desired state.
+    long-summary: If an operation on a container service was interrupted or was started with `--no-wait`, use this
+                  command to wait for it to complete. Returns
 """
 
 # AKS command help
 
 helps['aks'] = """
      type: group
-     short-summary: Manage Azure Kubernetes clusters.
+     short-summary: Manage Azure Kubernetes Services.
 """
 
 helps['aks browse'] = """
     type: command
-    short-summary: Open a web browser to the dashboard for a managed Kubernetes cluster.
+    short-summary: Show the dashboard for a Kubernetes cluster in a web browser.
     parameters:
         - name: --disable-browser
           type: bool
@@ -128,13 +137,13 @@ helps['aks create'] = """
           short-summary: Generate SSH public and private key files if missing.
         - name: --service-principal
           type: string
-          short-summary: Service principal used for authentication to Azure APIs. If not specified, a new service
-                         principal with contributor role is created and cached at {sp_cache} to be used by subsequent
-                         `az aks` commands.
+          short-summary: Service principal used for authentication to Azure APIs.
+          long-summary:  If not specified, a new service principal with the contributor role is created and cached at
+                         {sp_cache} to be used by subsequent `az aks` commands.
         - name: --client-secret
           type: string
-          short-summary: Secret associated with a service principal. This argument is required if `--service-principal`
-                         is specified.
+          short-summary: Secret associated with the service principal. This argument is required if
+                         `--service-principal` is specified.
         - name: --node-vm-size -s
           type: string
           short-summary: Size of Virtual Machines to create as Kubernetes nodes.
@@ -160,9 +169,7 @@ helps['aks create'] = """
           type: string
           short-summary: User account to create on node VMs for SSH access.
     examples:
-        - name: Create a Kubernetes cluster.
-          text: az aks create -g MyResourceGroup -n MyManagedCluster
-        - name: Create a Kubernetes cluster with an existing SSH key.
+        - name: Create a Kubernetes cluster with an existing SSH public key.
           text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
         - name: Create a Kubernetes cluster with a specific version.
           text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.8.1
@@ -199,10 +206,7 @@ helps['aks install-cli'] = """
 
 helps['aks install-connector'] = """
     type: command
-    short-summary: Install the ACI Connector to a managed Kubernetes cluster.
-    long-summary: |
-        Allows the cluster to deploy Azure Container Instances.
-        See https://github.com/Azure/aci-connector-k8s for more details.
+    short-summary: Install the Azure Container Instances (ACI) Connector on a managed Kubernetes cluster.
     parameters:
         - name: --chart-url
           type: string
@@ -215,26 +219,34 @@ helps['aks install-connector'] = """
           short-summary: Install support for deploying ACIs of this operating system type.
         - name: --service-principal
           type: string
-          short-summary: Service principal used for authentication to Azure APIs. If not specified, a new service
-                         principal with contributor role is created and cached at {sp_cache} to be used by subsequent
-                         `az aks` commands.
+          short-summary: Service principal used for authentication to Azure APIs.
+          long-summary:  If not specified, a new service principal with the contributor role is created and cached at
+                         {sp_cache} to be used by subsequent `az aks` commands.
         - name: --client-secret
           type: string
-          short-summary: Secret associated with a service principal. This argument is required if `--service-principal`
-                         is specified.
+          short-summary: Secret associated with the service principal. This argument is required if
+                         `--service-principal` is specified.
     examples:
-        - name: Install the ACI Connector to a managed Kubernetes cluster.
-          text: >-
-            az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup
-            --connector-name MyConnector
+        - name: Install the ACI Connector for Linux to a managed Kubernetes cluster.
+          text: |-
+            az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
+              --connector-name MyConnector
         - name: Install the ACI Connector for Windows to a managed Kubernetes cluster.
-          text: az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector --os-type Windows
-        - name: Install the ACI Connector for Windows and Linux to a managed Kubernetes cluster.
-          text: az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector --os-type Both
-        - name: Install the ACI Connector using a specific service principal and secret.
-          text: az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector --service-principal <SPN_ID> --client-secret <SPN_SECRET>
+          text: |-
+            az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
+               --connector-name MyConnector --os-type Windows
+        - name: Install the ACI Connector for both Windows and Linux to a managed Kubernetes cluster.
+          text: |-
+            az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
+              --connector-name MyConnector --os-type Both
+        - name: Install the ACI Connector using a specific service principal.
+          text: |-
+            az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
+              --connector-name MyConnector --service-principal <SPN_ID> --client-secret <SPN_SECRET>
         - name: Install the ACI Connector from a custom Helm chart.
-          text: az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector --chart-url <CustomURL>
+          text: |-
+            az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
+              --connector-name MyConnector --chart-url <CustomURL>
 """.format(sp_cache=SERVICE_PRINCIPAL_CACHE)
 
 helps['aks list'] = """
@@ -245,9 +257,6 @@ helps['aks list'] = """
 helps['aks remove-connector'] = """
     type: command
     short-summary: Remove the ACI Connector from a managed Kubernetes cluster.
-    long-summary: |-
-        Stops the cluster from deploying Azure Container Instances.
-        See https://github.com/Azure/aci-connector-k8s for more details.
     parameters:
         - name: --connector-name
           type: string
@@ -259,10 +268,10 @@ helps['aks remove-connector'] = """
           type: string
           short-summary: Remove support for deploying ACIs of this operating system type.
     examples:
-        - name: Remove the ACI Connector from a managed Kubernetes cluster.
-          text: az aks remove-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector
         - name: Remove the ACI Connector from a cluster using the graceful mode.
-          text: az aks remove-connector --name MyManagedCluster --resource-group MyResourceGroup --connector-name MyConnector --graceful
+          text: |-
+            az aks remove-connector --name MyManagedCluster --resource-group MyResourceGroup \\
+              --connector-name MyConnector --graceful
 """
 
 helps['aks scale'] = """
@@ -276,13 +285,13 @@ helps['aks scale'] = """
 
 helps['aks show'] = """
     type: command
-    short-summary: Show details of a managed Kubernetes cluster.
+    short-summary: Show the details for a managed Kubernetes cluster.
 """
 
 helps['aks upgrade'] = """
     type: command
     short-summary: Upgrade a managed Kubernetes cluster to a newer version.
-    long-summary: "NOTE: Kubernetes may be unavailable during cluster upgrades."
+    long-summary: "Kubernetes will be unavailable during cluster upgrades."
     parameters:
         - name: --kubernetes-version -k
           type: string
@@ -297,20 +306,7 @@ helps['aks wait'] = """
     long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to
                   wait for it to complete.
     examples:
-        - name: Wait for a cluster to be created.
-          text: |-
-            az aks create -g MyResourceGroup -n MyManagedCluster --no-wait
-            az aks wait -g MyResourceGroup -n MyManagedCluster --created
-        - name: Wait for a cluster to be deleted.
-          text: |-
-            az aks delete -g MyResourceGroup -n MyManagedCluster --no-wait --yes
-            az aks wait -g MyResourceGroup -n MyManagedCluster --deleted
-        - name: Wait for a cluster's node pool to scale up.
-          text: |-
-            az aks scale -g MyResourceGroup -n MyManagedCluster --node-count 7 --no-wait
-            az aks wait -g MyResourceGroup -n MyManagedCluster --updated
         - name: Wait for a cluster to be upgraded, polling every minute for up to thirty minutes.
           text: |-
-            az aks upgrade -g MyResourceGroup -n MyManagedCluster -k 1.8.2 --no-wait --yes
             az aks wait -g MyResourceGroup -n MyManagedCluster --updated --interval 60 --timeout 1800
 """
