@@ -74,7 +74,7 @@ orchestratorTypes = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
 
 aci_connector_os_type = ['Windows', 'Linux', 'Both']
 
-aci_connector_chart_url = 'https://github.com/Azure/aci-connector-k8s/raw/master/charts/aci-connector.tgz'
+aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-0.1.0.tgz'
 
 k8s_version_arg_type = CliArgumentType(options_list=('--kubernetes-version', '-k'), metavar='KUBERNETES_VERSION')
 

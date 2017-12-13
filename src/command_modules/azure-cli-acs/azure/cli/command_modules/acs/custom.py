@@ -316,7 +316,7 @@ def k8s_install_connector(client, name, resource_group, connector_name,
                           chart_url=None, os_type='Linux'):
     from subprocess import PIPE, Popen
     helm_not_installed = "Helm not detected, please verify if it is installed."
-    image_tag = 'latest'
+    node_prefix = 'virtual-kubelet-' + connector_name.lower()
     url_chart = chart_url
     # Check if Helm is installed locally
     try:
@@ -343,19 +343,33 @@ def k8s_install_connector(client, name, resource_group, connector_name,
     # Get the TenantID
     profile = Profile()
     _, _, tenant_id = profile.get_login_credentials()
+    # Check if we want the linux connector
+    if os_type.lower() in ['linux', 'both']:
+        _helm_install_aci_connector(url_chart, connector_name, service_principal, client_secret,
+                                    subscription_id, tenant_id, rgkaci.name, location,
+                                    node_prefix + '-linux', "Linux")
+
     # Check if we want the windows connector
     if os_type.lower() in ['windows', 'both']:
-        # The current connector will deploy two connectors, one for Windows and another one for Linux
-        image_tag = 'canary'
-    logger.warning('Deploying the aci-connector using Helm')
-    try:
-        subprocess.call(["helm", "install", url_chart, "--name", connector_name, "--set", "env.azureClientId=" +
-                         service_principal + ",env.azureClientKey=" + client_secret + ",env.azureSubscriptionId=" +
-                         subscription_id + ",env.azureTenantId=" + tenant_id + ",env.aciResourceGroup=" + rgkaci.name +
-                         ",env.aciRegion=" + location + ",image.tag=" + image_tag])
-    except subprocess.CalledProcessError as err:
-        raise CLIError('Could not deploy the ACI Chart: {}'.format(err))
+        _helm_install_aci_connector(url_chart, connector_name, service_principal, client_secret,
+                                    subscription_id, tenant_id, rgkaci.name, location,
+                                    node_prefix + '-win', "Windows")
 
+def _helm_install_aci_connector(url_chart, connector_name, service_principal, client_secret,
+                                  subscription_id, tenant_id, aciResourceGroup, aciRegion,
+                                  nodeName, nodeOsType):
+    image_tag = 'latest'
+    node_taint = 'azure.com/aci'
+    helm_release_name = connector_name.lower() + "-" + nodeOsType.lower()
+    logger.warning("Deploying the ACI connector for '" + nodeOsType + "' using Helm")
+    try:
+        subprocess.call(["helm", "install", url_chart, "--name", helm_release_name, "--set", "env.azureClientId=" +
+                        service_principal + ",env.azureClientKey=" + client_secret + ",env.azureSubscriptionId=" +
+                        subscription_id + ",env.azureTenantId=" + tenant_id + ",env.aciResourceGroup=" + aciResourceGroup +
+                        ",env.aciRegion=" + aciRegion + ",image.tag=" + image_tag + ",env.nodeName=" + nodeName +
+                        ",env.nodeTaint=" + node_taint + ",env.nodeOsType=" + nodeOsType])
+    except subprocess.CalledProcessError as err:
+        raise CLIError('Could not deploy the ACI connector Chart: {}'.format(err))
 
 def k8s_uninstall_connector(client, name, connector_name, resource_group,
                             graceful=False, os_type='Linux'):
@@ -369,37 +383,42 @@ def k8s_uninstall_connector(client, name, connector_name, resource_group,
     # Get the credentials from a AKS instance
     _, browse_path = tempfile.mkstemp()
     aks_get_credentials(client, resource_group, name, admin=False, path=browse_path)
+
+    node_prefix = 'virtual-kubelet-' + connector_name.lower()
+
+    if os_type.lower() in ['windows', 'both']:
+        _undeploy_connector(graceful, node_prefix + "-win", connector_name.lower() + "-windows")
+
+    if os_type.lower() in ['linux', 'both']:
+        _undeploy_connector(graceful, node_prefix + "-linux", connector_name.lower() + "-linux")
+
+def _undeploy_connector(graceful, nodeName, helm_release_name):
     if graceful:
         logger.warning('Graceful option selected, will try to drain the node first')
+        from subprocess import PIPE, Popen
         kubectl_not_installed = "Kubectl not detected, please verify if it is installed."
         try:
             Popen(["kubectl"], stdout=PIPE, stderr=PIPE)
         except OSError:
             raise CLIError(kubectl_not_installed)
+
         try:
-            if os_type.lower() in ['windows', 'both']:
-                nodes = ['-0', '-1']
-                for n in nodes:
-                    drain_node = subprocess.check_output(
-                        ["kubectl", "drain", "aci-connector{}".format(n), "--force"],
-                        universal_newlines=True)
-            else:
-                drain_node = subprocess.check_output(
-                    ["kubectl", "drain", "aci-connector", "--force"],
-                    universal_newlines=True)
+            drain_node = subprocess.check_output(
+                ["kubectl", "drain", nodeName, "--force"],
+                universal_newlines=True)
+
+            if not drain_node:
+                raise CLIError('Could not find the node, make sure you' +
+                            ' are using the correct --os-type')
         except subprocess.CalledProcessError as err:
             raise CLIError('Could not find the node, make sure you' +
-                           ' are using the correct --os-type option: {}'.format(err))
-        if not drain_node:
-            raise CLIError('Could not find the node, make sure you' +
-                           ' are using the correct --os-type')
+                        ' are using the correct --os-type option: {}'.format(err))
 
-    logger.warning('Undeploying the aci-connector using Helm')
+    logger.warning("Undeploying the " + helm_release_name + " using Helm")
     try:
-        subprocess.call(["helm", "del", connector_name, "--purge"])
+        subprocess.call(["helm", "del", helm_release_name, "--purge"])
     except subprocess.CalledProcessError as err:
-        raise CLIError('Could not deploy the ACI Chart: {}'.format(err))
-
+        raise CLIError('Could not undeploy the ACI connector Chart: {}'.format(err))
 
 def _build_service_principal(client, name, url, client_secret):
     # use get_progress_controller
