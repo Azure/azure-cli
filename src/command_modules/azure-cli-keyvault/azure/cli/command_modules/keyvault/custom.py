@@ -578,7 +578,7 @@ restore_key.__doc__ = KeyVaultClient.restore_key.__doc__
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
                        disabled=False, tags=None, validity=None):
     cert_attrs = CertificateAttributes(not disabled)
-    logger.info("Starting long running operation 'keyvault certificate create'")
+    logger.info("Starting long-running operation 'keyvault certificate create'")
 
     if validity is not None:
         certificate_policy['x509_certificate_properties']['validity_in_months'] = validity
@@ -595,13 +595,13 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
         check = client.get_certificate_operation(vault_base_url, certificate_name)
         if check.status != 'inProgress':
             logger.info(
-                "Long running operation 'keyvault certificate create' finished with result %s.",
+                "Long-running operation 'keyvault certificate create' finished with result %s.",
                 check)
             return check
         try:
             time.sleep(10)
         except KeyboardInterrupt:
-            logger.info("Long running operation wait cancelled.")
+            logger.info("Long-running operation wait cancelled.")
             raise
         except Exception as client_exception:
             telemetry.set_exception(exception=client_exception, fault_type='cert-create-error',

@@ -242,7 +242,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 self._delay()
             except KeyboardInterrupt:
                 self.progress_controller.stop()
-                logger.error('Long running operation wait cancelled.  %s', correlation_message)
+                logger.error('Long-running operation wait cancelled.  %s', correlation_message)
                 raise
 
         try:
