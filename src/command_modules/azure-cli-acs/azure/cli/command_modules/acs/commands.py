@@ -29,7 +29,7 @@ def load_command_table(self, _):
     )
 
     # ACS base commands
-    with self.command_group('acs', container_services_sdk) as g:
+    with self.command_group('acs', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('browse', 'acs_browse')
         g.custom_command('create', 'acs_create', no_wait_param='no_wait',
                          table_transformer=deployment_validate_table_format)
@@ -41,18 +41,18 @@ def load_command_table(self, _):
         g.generic_wait_command('wait')
 
     # ACS Mesos DC/OS commands
-    with self.command_group('acs dcos', container_services_sdk) as g:
+    with self.command_group('acs dcos', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('browse', 'dcos_browse')
         g.custom_command('install-cli', 'dcos_install_cli')
 
     # ACS Kubernetes commands
-    with self.command_group('acs kubernetes', container_services_sdk) as g:
+    with self.command_group('acs kubernetes', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('browse', 'k8s_browse')
         g.custom_command('get-credentials', 'k8s_get_credentials')
         g.custom_command('install-cli', 'k8s_install_cli')
 
     # AKS commands
-    with self.command_group('aks', managed_clusters_sdk) as g:
+    with self.command_group('aks', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
         g.custom_command('browse', 'aks_browse')
         g.custom_command('create', 'aks_create', no_wait_param='no_wait')
         g.command('delete', 'delete', no_wait_param='raw', confirmation=True)

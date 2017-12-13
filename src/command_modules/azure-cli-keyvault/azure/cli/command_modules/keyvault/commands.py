@@ -37,7 +37,7 @@ def load_command_table(self, _):
         return kv_data_sdk.settings['operations_tmpl'].format(method)
 
     # Management Plane Commands
-    with self.command_group('keyvault', kv_vaults_sdk, custom_command_type=kv_vaults_custom) as g:
+    with self.command_group('keyvault', kv_vaults_sdk, client_factory=keyvault_client_vaults_factory) as g:
         g.custom_command('create', 'create_keyvault')
         g.custom_command('recover', 'recover_keyvault')
         g.custom_command('list', 'list_keyvault')

@@ -601,7 +601,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         args = list(self.command_list._load_transformed_arguments(handler))
         self.assertEqual(len(args), 7)
         names = [a for a, _ in args]
-        self.assertEqual(names, ['filter', 'select', 'expand', 'cmd', 'account_name', 'account_key', 'account_endpoint'])
+        self.assertEqual(set(names), set(['filter', 'select', 'expand', 'cmd', 'account_name', 'account_key', 'account_endpoint']))
         self.assertFalse('yes' in [a for a, _ in args])
         self.assertFalse('json_file' in [a for a, _ in args])
         self.assertFalse('destination' in [a for a, _ in args])

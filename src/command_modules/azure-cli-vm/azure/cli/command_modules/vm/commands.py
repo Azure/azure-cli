@@ -157,7 +157,7 @@ def load_command_table(self, _):
         g.command('start', 'start', no_wait_param='raw')
         g.command('stop', 'power_off', no_wait_param='raw')
         g.generic_update_command('update', no_wait_param='raw')
-        g.generic_wait_command('wait', 'get_instance_view', command_type=compute_custom, client_factory=None)
+        g.generic_wait_command('wait', 'get_instance_view', getter_type=compute_custom)
 
     with self.command_group('vm availability-set', compute_availset_sdk) as g:
         g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')
@@ -253,7 +253,7 @@ def load_command_table(self, _):
         g.custom_command('stop', 'stop_vmss', no_wait_param='no_wait')
         g.generic_update_command('update', getter_name='get_vmss', setter_name='set_vmss', no_wait_param='no_wait', command_type=compute_custom)
         g.custom_command('update-instances', 'update_vmss_instances', no_wait_param='no_wait')
-        g.generic_wait_command('wait', getter_name='get_vmss', command_type=compute_custom)
+        g.generic_wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
 
     with self.command_group('vmss diagnostics', compute_vmss_sdk) as g:
         g.custom_command('set', 'set_vmss_diagnostics_extension')
