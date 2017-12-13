@@ -24,10 +24,10 @@ def load_command_table(self, _):
         exception_handler=billing_exception_handler
     )
 
-    with self.command_group('billing invoice', billing_invoice_util) as g:
+    with self.command_group('billing invoice', billing_invoice_util, client_factory=invoices_mgmt_client_factory) as g:
         g.custom_command('list', 'cli_billing_list_invoices')
         g.custom_command('show', 'cli_billing_get_invoice')
 
-    with self.command_group('billing period', billing_period_util) as g:
+    with self.command_group('billing period', billing_period_util, client_factory=billing_periods_mgmt_client_factory) as g:
         g.custom_command('list', 'cli_billing_list_periods')
         g.command('show', 'get')

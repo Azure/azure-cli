@@ -54,8 +54,6 @@ class AzCli(CLI):
 
         register_extensions(self)
         self.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_id_parameters)
-        # TODO: Doesn't work because args get copied
-        # self.register_event(events.EVENT_INVOKER_PRE_CMD_TBL_CREATE, _pre_command_table_create)
 
         self.progress_controller = None
 
@@ -294,16 +292,12 @@ class AzCommandsLoader(CLICommandsLoader):
         return get_sdk(self.cli_ctx, resource_type, *attr_args, mod='models')
 
     def command_group(self, group_name, command_type=None, **kwargs):
-        merged_kwargs = self.module_kwargs.copy()
         if command_type:
-            merged_kwargs['command_type'] = command_type
-        merged_kwargs.update(kwargs)
-        return self._command_group_cls(self, group_name, **merged_kwargs)
+            kwargs['command_type'] = command_type
+        return self._command_group_cls(self, group_name, **kwargs)
 
     def argument_context(self, scope, **kwargs):
-        merged_kwargs = self.module_kwargs.copy()
-        merged_kwargs.update(kwargs)
-        return self._argument_context_cls(self, scope, **merged_kwargs)
+        return self._argument_context_cls(self, scope, **kwargs)
 
     def _cli_command(self, name, operation=None, handler=None, argument_loader=None, description_loader=None, **kwargs):
 
@@ -316,9 +310,7 @@ class AzCommandsLoader(CLICommandsLoader):
 
         name = ' '.join(name.split())
 
-        command_type = kwargs.get('command_type', None)
-        client_factory = kwargs.get('client_factory', None) or command_type and \
-            command_type.settings.get('client_factory', None)
+        client_factory = kwargs.get('client_factory', None)
 
         def default_command_handler(command_args):
             from azure.cli.core.util import get_arg_list
