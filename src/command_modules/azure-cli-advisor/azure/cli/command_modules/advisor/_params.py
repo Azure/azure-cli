@@ -5,6 +5,7 @@
 
 from azure.cli.core.commands.parameters import get_enum_type
 from knack.arguments import CLIArgumentType
+from ._validators import validate_include_or_exclude, validate_ids_or_resource_group
 
 
 def load_arguments(self, _):
@@ -13,7 +14,7 @@ def load_arguments(self, _):
                                         '"Resource Id" arguments should be specified.')
 
     with self.argument_context('advisor recommendation list') as c:
-        c.argument('ids', ids_arg_type)
+        c.argument('ids', ids_arg_type, validator=validate_ids_or_resource_group)
         c.argument('category', options_list=['--category', '-c'], help='Name of recommendation category.',
                    arg_type=get_enum_type(['Cost', 'HighAvailability', 'Performance', 'Security']))
 
@@ -31,4 +32,4 @@ def load_arguments(self, _):
         c.argument('exclude', options_list=['--exclude', '-e'], action='store_true',
                    help='Exclude from recommendation generation.')
         c.argument('include', options_list=['--include', '-i'], action='store_true',
-                   help='Include in recommendation generation.')
+                   help='Include in recommendation generation.', validator=validate_include_or_exclude)
