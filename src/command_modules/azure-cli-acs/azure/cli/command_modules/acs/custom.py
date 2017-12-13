@@ -355,21 +355,23 @@ def k8s_install_connector(client, name, resource_group, connector_name,
                                     subscription_id, tenant_id, rgkaci.name, location,
                                     node_prefix + '-win', 'Windows')
 
+
 def _helm_install_aci_connector(url_chart, connector_name, service_principal, client_secret,
-                                  subscription_id, tenant_id, aciResourceGroup, aciRegion,
-                                  nodeName, nodeOsType):
+                                subscription_id, tenant_id, aci_resource_group, aci_region,
+                                node_name, os_type):
     image_tag = 'latest'
     node_taint = 'azure.com/aci'
-    helm_release_name = connector_name.lower() + "-" + nodeOsType.lower()
-    logger.warning("Deploying the ACI connector for '" + nodeOsType + "' using Helm")
+    helm_release_name = connector_name.lower() + "-" + os_type.lower()
+    logger.warning("Deploying the ACI connector for '%s' using Helm", os_type)
     try:
         subprocess.call(["helm", "install", url_chart, "--name", helm_release_name, "--set", "env.azureClientId=" +
-                        service_principal + ",env.azureClientKey=" + client_secret + ",env.azureSubscriptionId=" +
-                        subscription_id + ",env.azureTenantId=" + tenant_id + ",env.aciResourceGroup=" + aciResourceGroup +
-                        ",env.aciRegion=" + aciRegion + ",image.tag=" + image_tag + ",env.nodeName=" + nodeName +
-                        ",env.nodeTaint=" + node_taint + ",env.nodeOsType=" + nodeOsType])
+                         service_principal + ",env.azureClientKey=" + client_secret + ",env.azureSubscriptionId=" +
+                         subscription_id + ",env.azureTenantId=" + tenant_id + ",env.aciResourceGroup=" +
+                         aci_resource_group + ",env.aciRegion=" + aci_region + ",image.tag=" + image_tag +
+                         ",env.nodeName=" + node_name + ",env.nodeTaint=" + node_taint + ",env.nodeOsType=" + os_type])
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not deploy the ACI connector Chart: {}'.format(err))
+
 
 def k8s_uninstall_connector(client, name, connector_name, resource_group,
                             graceful=False, os_type='Linux'):
@@ -386,13 +388,14 @@ def k8s_uninstall_connector(client, name, connector_name, resource_group,
 
     node_prefix = 'virtual-kubelet-' + connector_name.lower()
 
-    if os_type.lower() in ['windows', 'both']:
-        _undeploy_connector(graceful, node_prefix + '-win', connector_name.lower() + '-windows')
-
     if os_type.lower() in ['linux', 'both']:
         _undeploy_connector(graceful, node_prefix + '-linux', connector_name.lower() + '-linux')
 
-def _undeploy_connector(graceful, nodeName, helm_release_name):
+    if os_type.lower() in ['windows', 'both']:
+        _undeploy_connector(graceful, node_prefix + '-win', connector_name.lower() + '-windows')
+
+
+def _undeploy_connector(graceful, node_name, helm_release_name):
     if graceful:
         logger.warning('Graceful option selected, will try to drain the node first')
         from subprocess import PIPE, Popen
@@ -404,21 +407,22 @@ def _undeploy_connector(graceful, nodeName, helm_release_name):
 
         try:
             drain_node = subprocess.check_output(
-                ['kubectl', 'drain', nodeName, '--force'],
+                ['kubectl', 'drain', node_name, '--force'],
                 universal_newlines=True)
 
             if not drain_node:
                 raise CLIError('Could not find the node, make sure you' +
-                            ' are using the correct --os-type')
+                               ' are using the correct --os-type')
         except subprocess.CalledProcessError as err:
             raise CLIError('Could not find the node, make sure you' +
-                        ' are using the correct --os-type option: {}'.format(err))
+                           ' are using the correct --os-type option: {}'.format(err))
 
-    logger.warning('Undeploying the ' + helm_release_name + ' using Helm')
+    logger.warning("Undeploying the '%s' using Helm", helm_release_name)
     try:
         subprocess.call(['helm', 'del', helm_release_name, '--purge'])
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not undeploy the ACI connector Chart: {}'.format(err))
+
 
 def _build_service_principal(client, name, url, client_secret):
     # use get_progress_controller

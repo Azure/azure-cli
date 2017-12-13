@@ -91,6 +91,7 @@ def validate_linux_host_name(namespace):
         raise CLIError('--name cannot exceed 63 characters and can only contain '
                        'letters, numbers, or dashes (-).')
 
+
 def validate_connector_name(namespace):
     """Validates a string as a legal connector name.
 
@@ -98,7 +99,7 @@ def validate_connector_name(namespace):
     for a while. So it's more user-friendly to validate in the CLI pre-flight.
     """
     # https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/identifiers.md
-    regex = re.compile(r'^[a-z0-9]([a-z0-9\-]*[a-z0-9])?$')  # pylint:disable=line-too-long
+    regex = re.compile(r'^[a-z0-9]([a-z0-9\-]*[a-z0-9])?$')
     found = regex.findall(namespace.connector_name)
     if not found:
         raise CLIError('--connector-name must consist of lower case alphanumeric characters or dashes (-), '
