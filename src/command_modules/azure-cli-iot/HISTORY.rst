@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.15
+++++++
+* add missing hyphen to documentation string
+
 0.1.14
 ++++++
 * Adds support for certificate authorities (CA) and certificate chains.
