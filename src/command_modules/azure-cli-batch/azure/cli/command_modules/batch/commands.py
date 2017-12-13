@@ -29,23 +29,27 @@ def load_command_table(self, _):
     mgmt_path = 'azure.mgmt.batch.operations.{}_operations#{}.'
 
     def get_data_type(name):
-        factory = getattr(factories, "{}_client_factory".format(name))
         return CliCommandType(
             operations_tmpl=data_path.format(name, _operation(name)) + "{}",
-            client_factory=factory,
+            client_factory=get_data_factory(name),
             exception_handler=batch_exception_handler
         )
 
     def get_mgmt_type(name):
-        factory = getattr(factories, "mgmt_{}_client_factory".format(name))
         return CliCommandType(
             operations_tmpl=mgmt_path.format(name, _operation(name)) + "{}",
-            client_factory=factory,
+            client_factory=get_mgmt_factory(name),
             exception_handler=batch_exception_handler
         )
 
+    def get_mgmt_factory(name):
+        return getattr(factories, "mgmt_{}_client_factory".format(name))
+
+    def get_data_factory(name):
+        return getattr(factories, "{}_client_factory".format(name))
+
     # Mgmt Account Operations
-    with self.command_group('batch account', get_mgmt_type('batch_account')) as g:
+    with self.command_group('batch account', get_mgmt_type('batch_account'), client_factory=get_mgmt_factory('batch_account')) as g:
         g.custom_command('list', 'list_accounts', table_transformer=account_list_table_format)
         g.command('show', 'get')
         g.custom_command('create', 'create_account', no_wait_param='no_wait')
@@ -56,14 +60,14 @@ def load_command_table(self, _):
         g.command('keys list', 'get_keys', table_transformer=account_keys_list_table_format)
         g.command('keys renew', 'regenerate_key', table_transformer=account_keys_renew_table_format)
 
-    with self.command_group('batch application', get_mgmt_type('application')) as g:
+    with self.command_group('batch application', get_mgmt_type('application'), client_factory=get_mgmt_factory('application')) as g:
         g.command('list', 'list', table_transformer=application_list_table_format)
         g.command('show', 'get')
         g.command('create', 'create')
         g.custom_command('set', 'update_application')
         g.command('delete', 'delete', confirmation=True)
 
-    with self.command_group('batch application package', get_mgmt_type('application_package'))as g:
+    with self.command_group('batch application package', get_mgmt_type('application_package'), client_factory=get_mgmt_factory('application_package'))as g:
         g.custom_command('create', 'create_application_package')
         g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get')
@@ -80,14 +84,14 @@ def load_command_table(self, _):
     with self.command_group('batch pool node-agent-skus', get_data_type('account')) as g:
         g.batch_command('list', 'list_node_agent_skus')
 
-    with self.command_group('batch certificate', get_data_type('certificate')) as g:
+    with self.command_group('batch certificate', get_data_type('certificate'), client_factory=get_data_factory('certificate')) as g:
         g.custom_command('create', 'create_certificate')
         g.custom_command('delete', 'delete_certificate', confirmation=True)
         g.batch_command('show', 'get', validator=validate_cert_settings)
         g.batch_command('list', 'list')
 
     pool_type = get_data_type('pool')
-    with self.command_group('batch pool', pool_type) as g:
+    with self.command_group('batch pool', pool_type, client_factory=get_data_factory('pool')) as g:
         g.batch_command('usage-metrics list', 'list_usage_metrics')
         g.batch_command('all-statistics show', 'get_all_lifetime_statistics')
         g.batch_command('create', 'add', validator=validate_pool_settings)
@@ -105,7 +109,7 @@ def load_command_table(self, _):
     with self.command_group('batch node', pool_type) as g:
         g.batch_command('delete', 'remove_nodes')
 
-    with self.command_group('batch job', get_data_type('job')) as g:
+    with self.command_group('batch job', get_data_type('job'), client_factory=get_data_factory('job')) as g:
         g.batch_command('all-statistics show', 'get_all_lifetime_statistics')
         g.batch_command('create', 'add')
         g.batch_command('delete', 'delete')
@@ -130,7 +134,7 @@ def load_command_table(self, _):
         g.batch_command('stop', 'terminate')
         g.batch_command('list', 'list')
 
-    with self.command_group('batch task', get_data_type('task')) as g:
+    with self.command_group('batch task', get_data_type('task'), client_factory=get_data_factory('task')) as g:
         g.custom_command('create', 'create_task', table_transformer=task_create_table_format)
         g.batch_command('list', 'list')
         g.batch_command('delete', 'delete')
