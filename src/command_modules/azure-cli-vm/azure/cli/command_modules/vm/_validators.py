@@ -763,7 +763,6 @@ def _validate_vm_vmss_msi(namespace, from_set_command=False):
         if not namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None) is None:
             raise CLIError("usage error: '--role {}' is not applicable as the '--scope' is not provided".format(
                 namespace.identity_role))
-        # keep 'identity_role' for output as logical name is more readable
         user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
         if user_assigned_identities and not supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-12-01'):
             raise CLIError('usage error: user assigned identity is only available under profile '
@@ -771,6 +770,7 @@ def _validate_vm_vmss_msi(namespace, from_set_command=False):
         if namespace.identity_scope:
             if identities and MSI_LOCAL_ID not in identities:
                 raise CLIError("usage error: '--scope'/'--role' is only applicable when assign system identity")
+            # keep 'identity_role' for output as logical name is more readable
             setattr(namespace, 'identity_role_id', _resolve_role_id(namespace.identity_role, namespace.identity_scope))
     elif namespace.identity_scope or getattr(namespace.identity_role, 'is_default', None) is None:
         raise CLIError('usage error: --assign-identity [--scope SCOPE] [--role ROLE]')
