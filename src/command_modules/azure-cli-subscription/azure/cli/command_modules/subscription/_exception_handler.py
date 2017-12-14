@@ -5,7 +5,7 @@
 
 from azure.cli.core.util import CLIError
 
-def subscriptiondefinition_exception_handler(ex):
+def subscription_definition_exception_handler(ex):
     from azure.mgmt.subscription.models import ErrorResponseException
     if isinstance(ex, ErrorResponseException):
         message = ex.error.error.message
