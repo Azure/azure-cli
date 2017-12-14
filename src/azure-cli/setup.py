@@ -86,6 +86,7 @@ DEPENDENCIES = [
     'azure-cli-role',
     'azure-cli-sql',
     'azure-cli-storage',
+    'azure-cli-subscription',
     'azure-cli-vm',
     'azure-cli-servicefabric'
 ]
