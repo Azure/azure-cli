@@ -14,27 +14,27 @@ logger = get_logger(__name__)
 
 
 class IterateAction(argparse.Action):  # pylint: disable=too-few-public-methods
-    '''Action used to collect argument values in an IterateValue list
+    """Action used to collect argument values in an IterateValue list
     The application will loop through each value in the IterateValue
     and execeute the associated handler for each
-    '''
+    """
 
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, IterateValue(values))
 
 
 class IterateValue(list):
-    '''Marker class to indicate that, when found as a value in the parsed namespace
+    """Marker class to indicate that, when found as a value in the parsed namespace
     from argparse, the handler should be invoked once per value in the list with all
     other values in the parsed namespace frozen.
 
     Typical use is to allow multiple ID parameter to a show command etc.
-    '''
+    """
     pass
 
 
 def validate_tags(ns):
-    ''' Extracts multiple space-separated tags in key[=value] format '''
+    """ Extracts multiple space-separated tags in key[=value] format """
     if isinstance(ns.tags, list):
         tags_dict = {}
         for item in ns.tags:
@@ -43,7 +43,7 @@ def validate_tags(ns):
 
 
 def validate_tag(string):
-    ''' Extracts a single tag in key[=value] format '''
+    """ Extracts a single tag in key[=value] format """
     result = {}
     if string:
         comps = string.split('=', 1)
@@ -52,7 +52,7 @@ def validate_tag(string):
 
 
 def validate_key_value_pairs(string):
-    ''' Validates key-value pairs in the following format: a=b;c=d '''
+    """ Validates key-value pairs in the following format: a=b;c=d """
     result = None
     if string:
         kv_list = [x for x in string.split(';') if '=' in x]     # key-value pairs
