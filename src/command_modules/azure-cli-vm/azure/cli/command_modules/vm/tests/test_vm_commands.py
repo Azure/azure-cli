@@ -2182,7 +2182,7 @@ class MSIScenarioTest(ScenarioTest):
         emsi2_result = self.cmd('identity create -g {} -n {}'.format(resource_group, emsi2)).get_output_in_json()
 
         # create a vm with system + user assigned identities
-        result = self.cmd('vm create -g {} -n {} --image ubuntults --assign-identity {} [system] --role reader --scope {}'.format(
+        result = self.cmd('vm create -g {} -n {} --image ubuntults --assign-identity {} [system] --role reader --scope {} --generate-ssh-keys'.format(
             resource_group, vm, emsi, default_scope)).get_output_in_json()
         self.assertEqual(result['identity']['externalIdentities'][0].lower(), emsi_result['id'].lower())
         result = self.cmd('vm show -g {} -n {}'.format(resource_group, vm), checks=[
@@ -2225,7 +2225,7 @@ class MSIScenarioTest(ScenarioTest):
         emsi2_result = self.cmd('identity create -g {} -n {}'.format(resource_group, emsi2)).get_output_in_json()
 
         # create a vmss with system + user assigned identities
-        result = self.cmd('vmss create -g {} -n {} --image ubuntults --assign-identity {} [system] --role reader --scope {} --instance-count 1'.format(
+        result = self.cmd('vmss create -g {} -n {} --image ubuntults --assign-identity {} [system] --role reader --scope {} --instance-count 1 --generate-ssh-keys'.format(
             resource_group, vmss, emsi, default_scope)).get_output_in_json()
         self.assertEqual(result['vmss']['identity']['externalIdentities'][0].lower(), emsi_result['id'].lower())
 
