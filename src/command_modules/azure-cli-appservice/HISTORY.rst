@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.22
+++++++
+* `appservice/webapp/functionapp docs/samples`: new commands to open docs and cli samples
+
 0.1.21
 ++++++
 * `webapp config ssl upload`: fix a bug in the cert name generation
