@@ -727,7 +727,8 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         self.cmd('managedapp definition list -g {}'.format(resource_group), checks=NoneCheck())
 
 
-class ManagedAppScenarioTest(ScenarioTest):
+# TODO: Change back to ScenarioTest and re-record when issue #5110 is fixed.
+class ManagedAppScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer()
     def test_managedapp(self, resource_group):
         location = 'westcentralus'

@@ -67,7 +67,7 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2017-10-01',
-        ResourceType.MGMT_NETWORK: '2017-10-01',
+        ResourceType.MGMT_NETWORK: '2017-11-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2017-12-01', {
             'resource_skus': '2017-09-01',
             'disks': '2017-03-30',
