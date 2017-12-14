@@ -1055,23 +1055,33 @@ def view_in_browser(resource_group_name, name, slot=None, logs=False):
         get_streaming_log(resource_group_name, name, provider=None, slot=slot)
 
 
-def view_samples_in_browser():
-    url = 'https://docs.microsoft.com/azure/app-service/app-service-cli-samples'
+def view_appservice_samples_in_browser():
+    url = 'https://go.microsoft.com/fwlink/?linkid=864819'
+    _open_page_in_browser(url)
+
+
+def view_appservice_docs_in_browser():
+    url = 'https://go.microsoft.com/fwlink/?linkid=864822'
+    _open_page_in_browser(url)
+
+
+def view_webapp_samples_in_browser():
+    url = 'https://go.microsoft.com/fwlink/?linkid=864819'
+    _open_page_in_browser(url)
+
+
+def view_webapp_docs_in_browser():
+    url = 'https://go.microsoft.com/fwlink/?linkid=864822'
     _open_page_in_browser(url)
 
 
 def view_functions_samples_in_browser():
-    url = 'https://docs.microsoft.com/azure/azure-functions/functions-cli-samples'
-    _open_page_in_browser(url)
-
-
-def view_docs_in_browser():
-    url = 'https://docs.microsoft.com/azure/app-service/'
+    url = 'https://go.microsoft.com/fwlink/?linkid=864823'
     _open_page_in_browser(url)
 
 
 def view_functions_docs_in_browser():
-    url = 'https://docs.microsoft.com/azure/azure-functions'
+    url = 'https://go.microsoft.com/fwlink/?linkid=864821'
     _open_page_in_browser(url)
 
 
