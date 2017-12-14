@@ -122,7 +122,7 @@ def transform_boolean_for_table(result):
     return result
 
 
-def transform_file_directory_result(result):
+def transform_file_directory_result(cli_ctx):
     """
     Transform a the result returned from file and directory listing API.
 
@@ -130,15 +130,18 @@ def transform_file_directory_result(result):
     in order to align the object's properties so as to offer a better view to the file and dir
     list.
     """
-    File, Directory = get_sdk(ResourceType.DATA_STORAGE, 'File', 'Directory', mod='file.models')
-    return_list = []
-    for each in result:
-        if isinstance(each, File):
-            delattr(each, 'content')
-            setattr(each, 'type', 'file')
-        elif isinstance(each, Directory):
-            setattr(each, 'type', 'dir')
+    t_file, t_dir = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'File', 'Directory', mod='file.models')
 
-        return_list.append(each)
+    def transformer(result):
+        return_list = []
+        for each in result:
+            if isinstance(each, t_file):
+                delattr(each, 'content')
+                setattr(each, 'type', 'file')
+            elif isinstance(each, t_dir):
+                setattr(each, 'type', 'dir')
 
-    return return_list
+            return_list.append(each)
+
+        return return_list
+    return transformer

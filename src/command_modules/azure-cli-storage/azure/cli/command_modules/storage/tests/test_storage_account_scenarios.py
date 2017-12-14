@@ -10,12 +10,10 @@ from .storage_test_util import StorageScenarioMixin
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
-
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_service_endpoints')
     @StorageAccountPreparer()
     def test_storage_account_service_endpoints(self, resource_group, storage_account):
-
         kwargs = {
             'rg': resource_group,
             'acc': storage_account,

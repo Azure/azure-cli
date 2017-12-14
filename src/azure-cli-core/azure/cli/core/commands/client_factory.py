@@ -93,7 +93,7 @@ def _get_mgmt_service_client(cli_ctx,
 
     configure_common_settings(cli_ctx, client)
 
-    return (client, subscription_id)
+    return client, subscription_id
 
 
 def get_data_service_client(cli_ctx, service_type, account_name, account_key, connection_string=None,

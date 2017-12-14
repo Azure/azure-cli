@@ -70,7 +70,7 @@ run_style azure.cli.command_modules.resource
 run_style azure.cli.command_modules.role
 run_style azure.cli.command_modules.servicefabric
 #run_style azure.cli.command_modules.sql
-#run_style azure.cli.command_modules.storage
+run_style azure.cli.command_modules.storage
 #run_style azure.cli.command_modules.testsdk
 #run_style azure.cli.command_modules.vm
 

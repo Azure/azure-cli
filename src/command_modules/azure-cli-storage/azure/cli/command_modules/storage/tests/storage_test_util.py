@@ -7,13 +7,19 @@ import os
 import tempfile
 import shutil
 
-from azure.cli.testsdk import get_active_api_profile
 from azure.cli.testsdk.preparers import AbstractPreparer
 
 
 class StorageScenarioMixin(object):
+    profile = None
+
+    def get_current_profile(self):
+        if not self.profile:
+            self.profile = self.cmd('cloud show --query profile -otsv').output
+        return self.profile
+
     def get_account_key(self, group, name):
-        if get_active_api_profile() == '2017-03-09-profile':
+        if self.get_current_profile() == '2017-03-09-profile':
             template = 'storage account keys list -n {} -g {} --query "key1" -otsv'
         else:
             template = 'storage account keys list -n {} -g {} --query "[0].value" -otsv'
