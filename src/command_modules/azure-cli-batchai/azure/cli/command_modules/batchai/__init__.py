@@ -12,7 +12,6 @@ class BatchAiCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        #from azure.cli.command_modules.batchai._client_factory import cf_redis
         batchai_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.batchai.custom#{}')
         super(BatchAiCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                     min_profile='2017-03-10-profile',
