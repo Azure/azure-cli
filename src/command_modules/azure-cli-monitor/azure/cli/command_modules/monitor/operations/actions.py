@@ -7,7 +7,7 @@ import argparse
 import re
 
 from azure.cli.core.util import CLIError
-from azure.cli.command_modules.monitor.custom import operator_map, aggregation_map
+from ..util import get_aggregation_map, get_operator_map
 
 
 def period_type(value):
@@ -49,9 +49,9 @@ class ConditionAction(argparse.Action):
         if len(values) < 5:
             raise CLIError('usage error: --condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} DURATION')
         metric_name = ' '.join(values[:-4])
-        operator = operator_map[values[-4]]
+        operator = get_operator_map()[values[-4]]
         threshold = int(values[-3])
-        aggregation = aggregation_map[values[-2].lower()]
+        aggregation = get_aggregation_map()[values[-2].lower()]
         window = period_type(values[-1])
         metric = RuleMetricDataSource(None, metric_name)  # target URI will be filled in later
         condition = ThresholdRuleCondition(operator, threshold, metric, window, aggregation)

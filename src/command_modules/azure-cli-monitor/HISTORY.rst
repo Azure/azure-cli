@@ -3,6 +3,12 @@
 Release History
 ===============
 
+0.0.13
+++++++
+* Update managed SDK reference to 0.4.0
+* Remove data plane SDK reference
+* BREAKING CHANGE: Add multi-dimension support to metrics command
+
 0.0.12
 ++++++
 * Add activity-log alert commands

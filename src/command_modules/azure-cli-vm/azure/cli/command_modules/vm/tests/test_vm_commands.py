@@ -363,7 +363,10 @@ class VMCustomImageTest(ScenarioTest):
         # this test should be recorded using accounts "@azuresdkteam.onmicrosoft.com", as it uses pre-made custom image
         prepared_image_with_plan_info = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.Compute/images/custom-image-with-plan'
         plan_name = 'linuxdsvmubuntu'
-        self.cmd('vm create -g {} -n vm1 --image {} --generate-ssh-keys --plan-promotion-code 99percentoff --plan-publisher microsoft-ads --plan-name {} --plan-product linux-data-science-vm-ubuntu'.format(
+        with self.assertRaises(CLIError):
+            self.cmd('vm create -g {} -n vm1 --image {} --generate-ssh-keys --plan-promotion-code 99percentoff --plan-publisher microsoft-ads --plan-name {} --plan-product linux-data-science-vm-ubuntu'.format(
+                resource_group, prepared_image_with_plan_info, plan_name))
+        self.cmd('vm create -g {} -n vm1 --image {} --generate-ssh-keys --plan-publisher microsoft-ads --plan-name {} --plan-product linux-data-science-vm-ubuntu'.format(
             resource_group, prepared_image_with_plan_info, plan_name))
         self.cmd('vm show -g {} -n vm1'.format(resource_group), checks=[
             JMESPathCheckV2('plan.name', plan_name)
@@ -2233,6 +2236,16 @@ class VMZoneScenarioTest(ScenarioTest):
         result = self.cmd('disk list -g {} -otable'.format(resource_group))
         table_output = set(result.output.splitlines()[2].split())
         self.assertTrue(set([resource_group, resource_group_location, disk_name, zones]).issubset(table_output))
+
+    def test_list_skus_contains_zone_info(self):
+        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = 2048
+        # we pick eastus2 as it is one of 3 regions so far with zone support
+        location = 'eastus2'
+        result = self.cmd('vm list-skus -otable -l {} -otable'.format(location))
+        self.assertTrue(next(l for l in result.output.splitlines() if '1,2,3' in l).split()[-1] == '1,2,3')
 
 
 class VMRunCommandScenarioTest(ScenarioTest):

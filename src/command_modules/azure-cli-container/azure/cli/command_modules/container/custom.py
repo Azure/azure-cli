@@ -173,5 +173,5 @@ def container_logs(client, resource_group_name, name, container_name=None):
     """Tail a container instance log. """
     if container_name is None:
         container_name = name
-    log = client.container_logs.list(resource_group_name, container_name, name)
+    log = client.container_logs.list(resource_group_name, name, container_name)
     return log.content
