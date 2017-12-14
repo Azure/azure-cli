@@ -51,7 +51,6 @@ from azure.mgmt.containerservice.models import ContainerServiceSshConfiguration
 from azure.mgmt.containerservice.models import ContainerServiceSshPublicKey
 from azure.mgmt.containerservice.models import ContainerServiceStorageProfileTypes
 from azure.mgmt.containerservice.models import ManagedCluster
-from azure.mgmt.containerservice.models import ManagedClusterProperties
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
                                     KeyCredential,
@@ -1287,7 +1286,7 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
     :param admin_username: User name for the Linux Virtual Machines.
     :type admin_username: str
     :param kubernetes_version: The version of Kubernetes to use for creating
-     the cluster, such as '1.7.7' or '1.8.1'.
+     the cluster, such as '1.7.9' or '1.8.2'.
     :type kubernetes_version: str
     :param node_count: the default number of nodes for the node pools.
     :type node_count: int
@@ -1348,13 +1347,13 @@ def aks_create(client, resource_group_name, name, ssh_key_value,  # pylint: disa
         secret=principal_obj.get("client_secret"),
         key_vault_secret_ref=None)
 
-    props = ManagedClusterProperties(
+    mc = ManagedCluster(
+        location=location, tags=tags,
         dns_prefix=dns_name_prefix,
         kubernetes_version=kubernetes_version,
         agent_pool_profiles=[agent_pool_profile],
         linux_profile=linux_profile,
         service_principal_profile=service_principal_profile)
-    mc = ManagedCluster(location=location, tags=tags, properties=props)
 
     # Due to SPN replication latency, we do a few retries here
     maxRetry = 30
@@ -1381,15 +1380,13 @@ def aks_get_credentials(client, resource_group_name, name, admin=False,
     :param admin: Get the "clusterAdmin" kubectl config instead of the default "clusterUser"
     :type admin: bool
     """
-    mc = aks_show(client, resource_group_name, name)
-    access_profiles = mc.properties.access_profiles
-    if not access_profiles:
-        msg = "No Kubernetes access profiles found. Cluster provisioning state is \"{}\"."
-        raise CLIError(msg.format(mc.properties.provisioning_state))
+    access_profile = client.get_access_profiles(
+        resource_group_name, name, "clusterAdmin" if admin else "clusterUser")
+
+    if not access_profile:
+        raise CLIError("No Kubernetes access profile found.")
     else:
-        access_profiles = access_profiles.as_dict()
-        access_profile = access_profiles.get('cluster_admin' if admin else 'cluster_user')
-        encoded_kubeconfig = access_profile.get('kube_config')
+        encoded_kubeconfig = access_profile.kube_config
         kubeconfig = base64.b64decode(encoded_kubeconfig).decode(encoding='UTF-8')
         _print_or_merge_credentials(path, kubeconfig)
 
@@ -1419,10 +1416,10 @@ def aks_scale(client, resource_group_name, name, node_count, no_wait=False):
     """
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
-    instance.properties.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
+    instance.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
 
     # null out the service principal because otherwise validation complains
-    instance.properties.service_principal_profile = None
+    instance.service_principal_profile = None
 
     return client.create_or_update(resource_group_name, name, instance, raw=no_wait)
 
@@ -1430,17 +1427,17 @@ def aks_scale(client, resource_group_name, name, node_count, no_wait=False):
 def aks_upgrade(client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
     """Upgrade a managed Kubernetes cluster to a newer version.
     :param kubernetes_version: The version of Kubernetes to upgrade the cluster to,
-    such as '1.7.7' or '1.8.1'.
+    such as '1.7.9' or '1.8.2'.
     :type kubernetes_version: str
     :param no_wait: Start upgrading but return immediately instead of waiting
      until the managed cluster is upgraded.
     :type no_wait: bool
     """
     instance = client.get(resource_group_name, name)
-    instance.properties.kubernetes_version = kubernetes_version
+    instance.kubernetes_version = kubernetes_version
 
     # null out the service principal because otherwise validation complains
-    instance.properties.service_principal_profile = None
+    instance.service_principal_profile = None
 
     return client.create_or_update(resource_group_name, name, instance, raw=no_wait)
 
@@ -1533,12 +1530,11 @@ def _remove_nulls(managed_clusters):
         for attr in attrs:
             if getattr(managed_cluster, attr, None) is None:
                 delattr(managed_cluster, attr)
-        props = managed_cluster.properties
-        for ap_profile in props.agent_pool_profiles:
+        for ap_profile in managed_cluster.agent_pool_profiles:
             for attr in ap_attrs:
                 if getattr(ap_profile, attr, None) is None:
                     delattr(ap_profile, attr)
         for attr in sp_attrs:
-            if getattr(props.service_principal_profile, attr, None) is None:
-                delattr(props.service_principal_profile, attr)
+            if getattr(managed_cluster.service_principal_profile, attr, None) is None:
+                delattr(managed_cluster.service_principal_profile, attr)
     return managed_clusters
