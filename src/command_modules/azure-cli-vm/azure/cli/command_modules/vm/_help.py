@@ -83,9 +83,15 @@ helps['vm create'] = """
 
             az vm create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"
-        - name: Create a CentOS VM with Managed Service Identity. The VM will have a 'Contributor' role with access to a storage account.
+        - name: Create a CentOS VM with a system assigned identity. The VM will have a 'Contributor' role with access to a storage account.
           text: >
-             az vm create -n MyVm -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+             az vm create -n MyVm -g rg1 --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+        - name: Create a debian VM with a user assigned identity.
+          text: >
+             az vm create -n MyVm -g rg1 --image debian --assign-identity  /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+        - name: Create a debian VM with both system and user assigned identity.
+          text: >
+             az vm create -n MyVm -g rg1 --image debian --assign-identity  [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
         - name: Create a VM in an availability zone in the current resource group's region
           text: >
              az vm create -n MyVm -g MyResourceGroup --image Centos --zone 1
@@ -130,9 +136,15 @@ helps['vmss create'] = """
 
             az vmss create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"
-        - name: Create a VM scaleset with Managed Service Identity. The VM will have a 'Contributor' Role with access to a storage account.
+        - name: Create a VM scaleset with system assigned identity. The VM will have a 'Contributor' Role with access to a storage account.
           text: >
-             az vm create -n MyVm -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+             az vm create -n MyVmss -g MyResourceGroup --image centos --assign-identity --scope /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/MyResourceGroup/myRG/providers/Microsoft.Storage/storageAccounts/storage1
+        - name: Create a debian VM scaleset with a user assigned identity.
+          text: >
+             az vmss create -n MyVmss -g rg1 --image debian --assign-identity  /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
+        - name: Create a debian VM scaleset with both system and user assigned identity.
+          text: >
+             az vmss create -n MyVmss -g rg1 --image debian --assign-identity  [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
         - name: Create a single zone VM scaleset in the current resource group's region
           text: >
              az vmss create -n MyVmss -g MyResourceGroup --image Centos --zones 1
@@ -1005,7 +1017,13 @@ helps['vm assign-identity'] = """
         - name: Enable identity on a VM with the 'Reader' role.
           text: az vm assign-identity -g MyResourceGroup -n MyVm --role Reader
 """
-
+helps['vm remove-identity'] = """
+    type: command
+    short-summary: (PREVIEW) Remove user assigned identities from a VM.
+    examples:
+        - name: Remove 2 identities which are in the same resource group with the VM
+          text: az vm remove-identity -g MyResourceGroup -n MyVm --identities readerId writerId
+"""
 helps['vm run-command'] = """
     type: group
     short-summary: (PREVIEW) Manage run commands on a Virtual Machine
@@ -1029,7 +1047,13 @@ helps['vmss assign-identity'] = """
         - name: Enable identity on a VMSS with the 'Owner' role.
           text: az vmss assign-identity -g MyResourceGroup -n MyVmss --role Owner
 """
-
+helps['vmss remove-identity'] = """
+    type: command
+    short-summary: (PREVIEW) Remove user assigned identities from a VM scaleset.
+    examples:
+        - name: Remove 2 identities which are in the same resource group with the VM scaleset
+          text: az vmss remove-identity -g MyResourceGroup -n MyVm --identities readerId writerId
+"""
 helps['disk'] = """
     type: group
     short-summary: Manage Azure Managed Disks.
@@ -1143,4 +1167,19 @@ helps['image create'] = """
 helps['image list'] = """
     type: command
     short-summary: List custom VM images.
+"""
+
+helps['identity'] = """
+    type: group
+    short-summary: Managed Service Identities
+"""
+
+helps['identity list'] = """
+    type: command
+    short-summary: List Managed Service Identities
+"""
+
+helps['identity list-operations'] = """
+    type: command
+    short-summary: Lists available operations for the Managed Identity provider
 """

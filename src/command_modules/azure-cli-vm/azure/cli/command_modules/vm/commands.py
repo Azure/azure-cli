@@ -11,7 +11,9 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
                                                           cf_images, cf_run_commands,
-                                                          cf_rolling_upgrade_commands)
+                                                          cf_rolling_upgrade_commands,
+                                                          cf_msi_user_identities_operations,
+                                                          cf_msi_operations_operations)
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
 from azure.cli.core.commands.arm import \
     (cli_generic_update_command, cli_generic_wait_command, deployment_validate_table_format)
@@ -353,3 +355,17 @@ if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
 # MSI
 cli_command(__name__, 'vm assign-identity', custom_path.format('assign_vm_identity'))
 cli_command(__name__, 'vmss assign-identity', custom_path.format('assign_vmss_identity'))
+if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-12-01'):
+    cli_command(__name__, 'vm remove-identity', custom_path.format('remove_vm_identity'))
+    cli_command(__name__, 'vmss remove-identity', custom_path.format('remove_vmss_identity'))
+
+
+# TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
+msi_mgmt_path = 'azure.mgmt.msi.operations.{}#{}.{}'
+msi_op_var = 'user_assigned_identities_operations'
+msi_op_class = 'UserAssignedIdentitiesOperations'
+cli_command(__name__, 'identity create', msi_mgmt_path.format(msi_op_var, msi_op_class, 'create_or_update'), cf_msi_user_identities_operations)
+cli_command(__name__, 'identity show', msi_mgmt_path.format(msi_op_var, msi_op_class, 'get'), cf_msi_user_identities_operations)
+cli_command(__name__, 'identity delete', msi_mgmt_path.format(msi_op_var, msi_op_class, 'delete'), cf_msi_user_identities_operations)
+cli_command(__name__, 'identity list', custom_path.format("list_user_assigned_identities"))
+cli_command(__name__, 'identity list-operations', 'azure.mgmt.msi.operations.operations#Operations.list', cf_msi_operations_operations)
