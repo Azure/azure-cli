@@ -2342,8 +2342,6 @@ def _remove_identities(resource_group_name, name, identities, getter, setter):
         resource.identity.identity_ids = None
         if resource.identity.type == ResourceIdentityType.user_assigned:
             resource.identity.type = ResourceIdentityType.none
-            logger.warning("Removing all user assigned identities is not yet supported."
-                           "You can just delete the VM/VMSS to avoid the server error")
         else:  # has to be 'system_assigned_user_assigned'
             resource.identity.type = ResourceIdentityType.system_assigned
     return setter(resource)
