@@ -4,10 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=C0302
-
+from enum import Enum
 import re
 
-from enum import Enum
+# url parse package has different names in Python 2 and 3. 'six' package works cross-version.
+from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error
 
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import (
@@ -30,9 +31,6 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
 )
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
-
-# url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error
 
 from ._util import (
     get_sql_servers_operations
@@ -364,6 +362,7 @@ def db_restore(
 
 # Fails over a database. Wrapper function which uses the server location so that the user doesn't
 # need to specify replication link id.
+# pylint: disable=inconsistent-return-statements
 def db_failover(
         client,
         database_name,
@@ -446,6 +445,7 @@ def db_list_capabilities(
     return editions
 
 
+# pylint: disable=inconsistent-return-statements
 def db_delete_replica_link(
         client,
         database_name,

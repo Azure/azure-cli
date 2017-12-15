@@ -8,15 +8,15 @@
 import os
 import re
 
+from knack.log import get_logger
+from knack.util import CLIError
+
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import hash_string
 from azure.cli.command_modules.vm._vm_utils import check_existence
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
-
-from knack.log import get_logger
-from knack.util import CLIError
 
 from ._client_factory import _compute_client_factory
 
@@ -251,6 +251,7 @@ def _get_image_plan_info_if_exists(cmd, namespace):
                        "will be skipped", namespace.image, ex.message)
 
 
+# pylint: disable=inconsistent-return-statements
 def _get_storage_profile_description(profile):
     if profile == StorageProfile.SACustomImage:
         return 'create unmanaged OS disk created from generalized VHD'

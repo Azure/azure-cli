@@ -9,6 +9,7 @@ from azure.cli.command_modules.network._client_factory import network_client_fac
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
 
 
+# pylint: disable=inconsistent-return-statements
 @Completer
 def subnet_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     client = network_client_factory(cmd.cli_ctx)
@@ -20,6 +21,7 @@ def subnet_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable
 
 def get_lb_subresource_completion_list(prop):
 
+    # pylint: disable=inconsistent-return-statements
     @Completer
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
         client = network_client_factory(cmd.cli_ctx)
@@ -35,6 +37,7 @@ def get_lb_subresource_completion_list(prop):
 
 def get_ag_subresource_completion_list(prop):
 
+    # pylint: disable=inconsistent-return-statements
     @Completer
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
         client = network_client_factory(cmd.cli_ctx)
@@ -48,6 +51,7 @@ def get_ag_subresource_completion_list(prop):
     return completer
 
 
+# pylint: disable=inconsistent-return-statements
 @Completer
 def ag_url_map_rule_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     client = network_client_factory(cmd.cli_ctx)

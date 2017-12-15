@@ -58,6 +58,7 @@ def storage_blob_copy_batch(cmd, client, source_client,
             source_sas = create_short_lived_container_sas(cmd, source_client.account_name, source_client.account_key,
                                                           source_container)
 
+        # pylint: disable=inconsistent-return-statements
         def action_blob_copy(blob_name):
             if dryrun:
                 logger.warning('  - copy blob %s', blob_name)
@@ -79,6 +80,7 @@ def storage_blob_copy_batch(cmd, client, source_client,
             source_sas = create_short_lived_share_sas(cmd, source_client.account_name, source_client.account_key,
                                                       source_share)
 
+        # pylint: disable=inconsistent-return-statements
         def action_file_copy(file_info):
             dir_name, file_name = file_info
             if dryrun:

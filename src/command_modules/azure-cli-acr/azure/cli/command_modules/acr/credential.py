@@ -8,6 +8,7 @@ from knack.util import CLIError
 from ._utils import get_registry_by_name
 
 
+# pylint: disable=inconsistent-return-statements
 def get_acr_credentials(cli_ctx, client, registry_name, resource_group_name=None):
     registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
 
@@ -21,6 +22,7 @@ def acr_credential_show(cmd, client, registry_name, resource_group_name=None):
     return get_acr_credentials(cmd.cli_ctx, client, registry_name, resource_group_name)
 
 
+# pylint: disable=inconsistent-return-statements
 def acr_credential_renew(cmd, client, registry_name, password_name, resource_group_name=None):
     registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
 

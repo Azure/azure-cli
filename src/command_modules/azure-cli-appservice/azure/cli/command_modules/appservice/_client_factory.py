@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
+# pylint: disable=inconsistent-return-statements
 def ex_handler_factory(creating_plan=False, no_throw=False):
     def _polish_bad_errors(ex):
         import json

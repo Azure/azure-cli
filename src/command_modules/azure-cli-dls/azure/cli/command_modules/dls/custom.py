@@ -2,6 +2,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
+from knack.log import get_logger
+from knack.util import CLIError
+
 from azure.mgmt.datalake.store.models import (
     DataLakeStoreAccountUpdateParameters,
     FirewallRule,
@@ -19,9 +23,6 @@ from azure.datalake.store.multithread import (ADLUploader, ADLDownloader)
 from azure.cli.command_modules.dls._client_factory import (cf_dls_filesystem)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
-
-from knack.log import get_logger
-from knack.util import CLIError
 
 
 logger = get_logger(__name__)

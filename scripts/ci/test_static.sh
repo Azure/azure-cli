@@ -37,7 +37,7 @@ run_style azure.cli.core
 run_style azure.cli.command_modules.acr
 run_style azure.cli.command_modules.acs
 run_style azure.cli.command_modules.advisor
-run_style azure.cli.command_modules.appservice
+#run_style azure.cli.command_modules.appservice
 #run_style azure.cli.command_modules.backup
 run_style azure.cli.command_modules.batch
 #run_style azure.cli.command_modules.batchai
@@ -71,7 +71,7 @@ run_style azure.cli.command_modules.role
 run_style azure.cli.command_modules.servicefabric
 run_style azure.cli.command_modules.sql
 run_style azure.cli.command_modules.storage
-run_style azure.cli.command_modules.testsdk
+run_style azure.cli.testsdk
 run_style azure.cli.command_modules.vm
 
 exit $exit_code

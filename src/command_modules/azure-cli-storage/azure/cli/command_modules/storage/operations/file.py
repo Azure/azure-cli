@@ -9,15 +9,15 @@ Commands for storage file share operations
 
 import os.path
 
+from knack.util import CLIError
+from knack.log import get_logger
+
 from azure.common import AzureException, AzureHttpError
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files,
                                                     create_blob_service_from_storage_client,
                                                     create_short_lived_container_sas, create_short_lived_share_sas,
                                                     guess_content_type)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
-
-from knack.util import CLIError
-from knack.log import get_logger
 
 
 def list_share_files(cmd, client, share_name, directory_name=None, timeout=None, exclude_dir=False, snapshot=None):
@@ -149,6 +149,7 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
             source_sas = create_short_lived_container_sas(cmd, source_client.account_name, source_client.account_key,
                                                           source_container)
 
+        # pylint: disable=inconsistent-return-statements
         def action_blob_copy(blob_name):
             if dryrun:
                 logger.warning('  - copy blob %s', blob_name)
@@ -176,6 +177,7 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
             source_sas = create_short_lived_share_sas(cmd, source_client.account_name, source_client.account_key,
                                                       source_share)
 
+        # pylint: disable=inconsistent-return-statements
         def action_file_copy(file_info):
             dir_name, file_name = file_info
             if dryrun:

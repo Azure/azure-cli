@@ -32,6 +32,7 @@ def handle_exception(ex):
     return 1
 
 
+# pylint: disable=inconsistent-return-statements
 def empty_on_404(ex):
     from msrestazure.azure_exceptions import CloudError
     if isinstance(ex, CloudError) and ex.status_code == 404:

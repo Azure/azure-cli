@@ -7,9 +7,9 @@ import os
 import traceback
 import json
 
-from azure.cli.core._config import GLOBAL_CONFIG_DIR
-
 from knack.log import get_logger
+
+from azure.cli.core._config import GLOBAL_CONFIG_DIR
 
 
 _CUSTOM_EXT_DIR = os.environ.get('AZURE_EXTENSION_DIR')

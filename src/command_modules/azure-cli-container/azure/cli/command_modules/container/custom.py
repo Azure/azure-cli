@@ -95,6 +95,7 @@ def create_container(client,
     return client.create_or_update(resource_group_name, name, cgroup)
 
 
+# pylint: disable=inconsistent-return-statements
 def create_resource_requirements(cpu, memory):
     """Create resource requirements. """
     if cpu or memory:
@@ -154,6 +155,7 @@ def create_azure_file_volume(azure_file_volume_share_name, azure_file_volume_acc
     return [Volume(name=AZURE_FILE_VOLUME_NAME, azure_file=azure_file_volume)] if azure_file_volume else None
 
 
+# pylint: disable=inconsistent-return-statements
 def create_azure_file_volume_mount(azure_file_volume, azure_file_volume_mount_path):
     """Create Azure File volume mount. """
     if azure_file_volume_mount_path:
@@ -163,6 +165,7 @@ def create_azure_file_volume_mount(azure_file_volume, azure_file_volume_mount_pa
         return [VolumeMount(name=AZURE_FILE_VOLUME_NAME, mount_path=azure_file_volume_mount_path)]
 
 
+# pylint: disable=inconsistent-return-statements
 def create_ip_address(ip_address, ports):
     """Create IP address. """
     if ip_address and ip_address.lower() == 'public':

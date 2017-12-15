@@ -240,6 +240,7 @@ def _parameters(registry_name,
     return parameters
 
 
+# pylint: disable=inconsistent-return-statements
 def random_storage_account_name(cli_ctx, registry_name):
     from datetime import datetime
 

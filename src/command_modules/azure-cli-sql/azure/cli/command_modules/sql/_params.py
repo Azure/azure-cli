@@ -6,6 +6,8 @@
 import itertools
 from enum import Enum
 
+from knack.arguments import CLIArgumentType, ignore_type
+
 from azure.cli.core.commands import patch_arg_make_required, patch_arg_make_optional
 from azure.mgmt.sql.models.database import Database
 from azure.mgmt.sql.models.elastic_pool import ElasticPool
@@ -28,8 +30,6 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
 from azure.cli.core.commands.parameters import (get_three_state_flag, get_enum_type,
                                                 get_resource_name_completion_list,
                                                 get_location_type)
-from knack.arguments import CLIArgumentType, ignore_type
-
 from .custom import (
     ClientAuthenticationType,
     ClientType,

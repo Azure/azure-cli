@@ -3,11 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from argcomplete.completers import FilesCompleter
+
+from knack.arguments import CLIArgumentType
+
 from azure.cli.core.commands.parameters import (
     tags_type, get_resource_name_completion_list, resource_group_name_type, get_enum_type)
 
 from azure.cli.command_modules.dla._validators import validate_resource_group_name, datetime_format
-
 
 from azure.mgmt.datalake.analytics.account.models.data_lake_analytics_account_management_client_enums import (
     FirewallState,
@@ -19,8 +21,6 @@ from azure.mgmt.datalake.analytics.job.models.data_lake_analytics_job_management
     CompileMode,
     JobState,
     JobResult)
-
-from knack.arguments import CLIArgumentType
 
 
 # pylint: disable=line-too-long, too-many-statements

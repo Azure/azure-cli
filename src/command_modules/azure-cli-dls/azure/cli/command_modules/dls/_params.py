@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.arguments import CLIArgumentType
+
 from azure.cli.core.commands.parameters import (
     tags_type, get_resource_name_completion_list, resource_group_name_type, get_enum_type)
 
@@ -14,8 +16,6 @@ from azure.mgmt.datalake.store.models.data_lake_store_account_management_client_
     FirewallAllowAzureIpsState)
 
 from azure.mgmt.datalake.store.models import EncryptionConfigType
-
-from knack.arguments import CLIArgumentType
 
 
 # pylint: disable=line-too-long, too-many-statements
