@@ -187,7 +187,7 @@ def _user_agrees_to_telemetry(func):
     @wraps(func)
     def _wrapper(*args, **kwargs):
         if not _get_config().getboolean('core', 'collect_telemetry', fallback=True):
-            return
+            return None
         return func(*args, **kwargs)
 
     return _wrapper

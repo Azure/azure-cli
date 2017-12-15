@@ -18,6 +18,12 @@ import uuid
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
+from knack.log import get_logger
+from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
+from knack.util import CLIError
+
+from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id as resource_dict_to_id
+
 from azure.mgmt.resource.resources.models import GenericResource
 
 from azure.mgmt.resource.locks.models import ManagementLockObject
@@ -32,12 +38,6 @@ from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
     _resource_links_client_factory, _authorization_management_client, _resource_managedapps_client_factory)
 from azure.cli.command_modules.resource._validators import _parse_lock_id
-
-from knack.log import get_logger
-from knack.prompting import prompt, prompt_pass, prompt_t_f, prompt_choice_list, prompt_int, NoTTYException
-from knack.util import CLIError
-
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id as resource_dict_to_id
 
 logger = get_logger(__name__)
 
@@ -886,6 +886,7 @@ def register_feature(client, resource_provider_namespace, feature_name):
     return client.register(resource_provider_namespace, feature_name)
 
 
+# pylint: disable=inconsistent-return-statements
 def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                              name=None, display_name=None, params=None,
                              resource_group_name=None, scope=None, sku=None,
@@ -1162,6 +1163,7 @@ def list_locks(cmd, resource_group=None,
         resource_name, filter=filter_string)
 
 
+# pylint: disable=inconsistent-return-statements
 def get_lock(cmd, lock_name=None, resource_group=None, resource_provider_namespace=None,
              parent_resource_path=None, resource_type=None, resource_name=None, ids=None):
     """
@@ -1206,6 +1208,7 @@ def get_lock(cmd, lock_name=None, resource_group=None, resource_provider_namespa
         parent_resource_path or '', resource_type, resource_name, lock_name)
 
 
+# pylint: disable=inconsistent-return-statements
 def delete_lock(cmd, lock_name=None, resource_group=None, resource_provider_namespace=None,
                 parent_resource_path=None, resource_type=None, resource_name=None, ids=None):
     """
@@ -1292,6 +1295,7 @@ def create_lock(cmd, lock_name, level,
         resource_name, lock_name, parameters)
 
 
+# pylint: disable=inconsistent-return-statements
 def update_lock(cmd, lock_name=None, resource_group=None, resource_provider_namespace=None, notes=None,
                 parent_resource_path=None, resource_type=None, resource_name=None, level=None, ids=None):
     """

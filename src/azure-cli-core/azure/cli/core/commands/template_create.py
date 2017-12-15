@@ -6,10 +6,10 @@
 from __future__ import print_function
 import platform
 
-from azure.cli.core.commands.arm import resource_exists
-
 from knack.log import get_logger
 from knack.util import CLIError
+
+from azure.cli.core.commands.arm import resource_exists
 
 logger = get_logger(__name__)
 

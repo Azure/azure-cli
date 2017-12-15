@@ -8,7 +8,7 @@ from ._appservice_utils import _generic_site_operation
 
 
 @Completer
-def get_hostname_completion_list(cmd, prefix, namespace):  # pylint: disable=unused-argument
+def get_hostname_completion_list(cmd, prefix, namespace):  # pylint: disable=unused-argument, inconsistent-return-statements
     if namespace.resource_group_name and namespace.webapp:
         rg = namespace.resource_group_name
         webapp = namespace.webapp

@@ -5,9 +5,9 @@
 
 import re
 
-from azure.cli.core.util import b64_to_hex
-
 import knack.events as events
+
+from azure.cli.core.util import b64_to_hex
 
 
 def register(cli_ctx):

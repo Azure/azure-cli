@@ -5,6 +5,10 @@
 import time
 import uuid
 
+from knack.log import get_logger
+from knack.prompting import prompt_pass, NoTTYException
+from knack.util import CLIError
+
 from azure.mgmt.datalake.analytics.account.models import (DataLakeAnalyticsAccountUpdateParameters,
                                                           FirewallRule,
                                                           DataLakeAnalyticsAccount,
@@ -21,11 +25,6 @@ from azure.mgmt.datalake.analytics.job.models import (JobType,
 from azure.mgmt.datalake.analytics.catalog.models import (DataLakeAnalyticsCatalogCredentialCreateParameters,
                                                           DataLakeAnalyticsCatalogCredentialUpdateParameters)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-
-from knack.log import get_logger
-from knack.prompting import prompt_pass, NoTTYException
-from knack.util import CLIError
-
 
 logger = get_logger(__name__)
 

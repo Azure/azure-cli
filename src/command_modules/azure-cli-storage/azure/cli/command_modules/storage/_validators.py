@@ -10,17 +10,17 @@ import os
 import re
 from datetime import datetime
 
+from knack.util import CLIError
+
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 from azure.cli.command_modules.storage._client_factory import get_storage_data_service_client
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 
-from azure.cli.core.profiles import ResourceType, get_sdk
-
-from knack.util import CLIError
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -28,6 +28,7 @@ storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 # Utilities
 
 
+# pylint: disable=inconsistent-return-statements
 def _query_account_key(cli_ctx, account_name):
     """Query the storage account key. This is used when the customer doesn't offer account key but name."""
     scf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)

@@ -8,11 +8,12 @@ import sys
 import argparse
 import argcomplete
 
-import azure.cli.core.telemetry as telemetry
-
 from knack.log import get_logger
 from knack.parser import CLICommandParser
 from knack.util import CLIError
+
+import azure.cli.core.telemetry as telemetry
+
 
 logger = get_logger(__name__)
 

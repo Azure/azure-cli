@@ -5,6 +5,8 @@
 
 from argcomplete.completers import FilesCompleter
 
+from knack.arguments import CLIArgumentType
+
 from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
     (SkuName, KeyPermissions, SecretPermissions, CertificatePermissions)
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
@@ -25,9 +27,6 @@ from azure.cli.command_modules.keyvault._validators import (
     validate_principal, validate_resource_group_name,
     validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values)
-
-from knack.arguments import CLIArgumentType
-
 
 # CUSTOM CHOICE LISTS
 
