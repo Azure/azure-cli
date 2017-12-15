@@ -36,7 +36,7 @@ DEPENDENCIES = [
     'azure-mgmt-compute==3.1.0rc2',
     'azure-mgmt-keyvault==0.40.0',
     'azure-keyvault==0.3.7',
-    'azure-mgmt-network==1.6.0',
+    'azure-mgmt-network==1.7.0',
     'azure-mgmt-resource==1.2.1',
     'azure-multiapi-storage==0.1.7',
     'azure-cli-core'

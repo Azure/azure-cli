@@ -9,8 +9,8 @@ interactions:
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.23]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -20,14 +20,14 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Nov 2017 23:22:05 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 201, message: Created}
 - request:
-    body: '{"sku": {"name": "Standard"}, "properties": {}, "location": "westus"}'
+    body: '{"location": "westus", "sku": {"name": "Standard"}, "properties": {}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -36,17 +36,44 @@ interactions:
       Content-Length: ['69']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.22]
+          msrest_azure/0.4.18 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2016-06-01
   response:
-    body: {string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2017-11-30T23%3A22%3A10.1946142Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'}
+    body: {string: '{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2017-12-14T23%3A16%3A13.5496072Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['448']
       content-type: [application/json]
-      date: ['Thu, 30 Nov 2017 23:22:09 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:12 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: '{"location": "westus", "sku": {"name": "Standard"}, "properties": {}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [backup vault create]
+      Connection: [keep-alive]
+      Content-Length: ['69']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000003?api-version=2016-06-01
+  response:
+    body: {string: '{"location":"westus","name":"clitest-vault000003","etag":"W/\"datetime''2017-12-14T23%3A16%3A16.8157204Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000003","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['448']
+      content-type: [application/json]
+      date: ['Thu, 14 Dec 2017 23:16:16 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -54,7 +81,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 201, message: Created}
 - request:
-    body: '{"sku": {"name": "Standard"}, "properties": {}, "location": "westus"}'
+    body: '{"location": "westus", "sku": {"name": "Standard"}, "properties": {}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -63,49 +90,22 @@ interactions:
       Content-Length: ['69']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.22]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000003?api-version=2016-06-01
-  response:
-    body: {string: '{"location":"westus","name":"clitest-vault000003","etag":"W/\"datetime''2017-11-30T23%3A22%3A14.1552831Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000003","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['448']
-      content-type: [application/json]
-      date: ['Thu, 30 Nov 2017 23:22:13 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
-    status: {code: 201, message: Created}
-- request:
-    body: '{"sku": {"name": "Standard"}, "properties": {}, "location": "westus"}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [backup vault create]
-      Connection: [keep-alive]
-      Content-Length: ['69']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.22]
+          msrest_azure/0.4.18 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000004?api-version=2016-06-01
   response:
-    body: {string: '{"location":"westus","name":"clitest-vault000004","etag":"W/\"datetime''2017-11-30T23%3A22%3A17.2051108Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000004","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'}
+    body: {string: '{"location":"westus","name":"clitest-vault000004","etag":"W/\"datetime''2017-12-14T23%3A16%3A20.684409Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000004","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['500']
+      content-length: ['499']
       content-type: [application/json]
-      date: ['Thu, 30 Nov 2017 23:22:16 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:20 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -116,17 +116,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.22]
+          msrest_azure/0.4.18 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.RecoveryServices/vaults?api-version=2016-06-01
   response:
-    body: {string: '{"value":[{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2017-11-30T23%3A22%3A10.1946142Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault000004","etag":"W/\"datetime''2017-11-30T23%3A22%3A17.2051108Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000004","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault000003","etag":"W/\"datetime''2017-11-30T23%3A22%3A14.1552831Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000003","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultq5564odu5p6","etag":"W/\"datetime''2017-09-19T18%3A21%3A48.1989494Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rggaimbllzxyuijlxj3lrywgzdrume4xj3xj66hdfhqv6eqba26ht76nokbtp6sfaoi/providers/Microsoft.RecoveryServices/vaults/clitest-vaultq5564odu5p6","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultygetdaet3s5","etag":"W/\"datetime''2017-11-30T22%3A50%3A06.9933679Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rggbrrjutukm735623lbty7dm36lytqsa4n7v3f5jp2tygyofw4k2nwg3boub76c2yg/providers/Microsoft.RecoveryServices/vaults/clitest-vaultygetdaet3s5","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultidk3ocgxkeo","etag":"W/\"datetime''2017-11-09T09%3A47%3A07.0047202Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgkcda272llrw67h7jaywprmciz2sb4qftoveuqvud5eajjk5e3xc5ui6hst6kjtoxf/providers/Microsoft.RecoveryServices/vaults/clitest-vaultidk3ocgxkeo","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultwmy2cqovnax","etag":"W/\"datetime''2017-09-20T00%3A02%3A35.5236245Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnuanxhtclm3obme75s2yhbzhdh6fgu7gcd34afmgnbu2kqpmla5i2d6wpulrddzvz/providers/Microsoft.RecoveryServices/vaults/clitest-vaultwmy2cqovnax","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultetp33oawxea","etag":"W/\"datetime''2017-09-15T22%3A12%3A47.2172541Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpa3pgets3kev3ayjwmgv5a7qu6gyvibpsysagad36u2osnytlxbvwinhmlx2hmfhq/providers/Microsoft.RecoveryServices/vaults/clitest-vaultetp33oawxea","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault5mezslybkil","etag":"W/\"datetime''2017-09-26T17%3A06%3A34.2921171Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpcda3pf4qgao5oxnpmsepukjzbvmxhrvppugmm3fb5yrhyxnu62pkjcr75v4v4s7m/providers/Microsoft.RecoveryServices/vaults/clitest-vault5mezslybkil","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultthkcvmqu3ch","etag":"W/\"datetime''2017-11-09T09%3A45%3A30.0696842Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgustudncomawwcatxebabhw6qup55e6odaifdeitm3lqrkqpxhywb5xupbswyctto5/providers/Microsoft.RecoveryServices/vaults/clitest-vaultthkcvmqu3ch","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}]}'}
+    body: {string: '{"value":[{"location":"westus","name":"clitest-vaultq5564odu5p6","etag":"W/\"datetime''2017-09-19T18%3A21%3A48.1989494Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rggaimbllzxyuijlxj3lrywgzdrume4xj3xj66hdfhqv6eqba26ht76nokbtp6sfaoi/providers/Microsoft.RecoveryServices/vaults/clitest-vaultq5564odu5p6","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultygetdaet3s5","etag":"W/\"datetime''2017-11-30T22%3A50%3A06.9933679Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rggbrrjutukm735623lbty7dm36lytqsa4n7v3f5jp2tygyofw4k2nwg3boub76c2yg/providers/Microsoft.RecoveryServices/vaults/clitest-vaultygetdaet3s5","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultidk3ocgxkeo","etag":"W/\"datetime''2017-11-09T09%3A47%3A07.0047202Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgkcda272llrw67h7jaywprmciz2sb4qftoveuqvud5eajjk5e3xc5ui6hst6kjtoxf/providers/Microsoft.RecoveryServices/vaults/clitest-vaultidk3ocgxkeo","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaulty2ujxwr6an6","etag":"W/\"datetime''2017-12-14T22%3A19%3A46.2165756Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgmrnzrvtiflv2dohaaiklecjpa3jk2qiyz4xfnodmjsf5urhv7vkyf4mtwfw3gd6df/providers/Microsoft.RecoveryServices/vaults/clitest-vaulty2ujxwr6an6","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultwmy2cqovnax","etag":"W/\"datetime''2017-09-20T00%3A02%3A35.5236245Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnuanxhtclm3obme75s2yhbzhdh6fgu7gcd34afmgnbu2kqpmla5i2d6wpulrddzvz/providers/Microsoft.RecoveryServices/vaults/clitest-vaultwmy2cqovnax","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultetp33oawxea","etag":"W/\"datetime''2017-09-15T22%3A12%3A47.2172541Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpa3pgets3kev3ayjwmgv5a7qu6gyvibpsysagad36u2osnytlxbvwinhmlx2hmfhq/providers/Microsoft.RecoveryServices/vaults/clitest-vaultetp33oawxea","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault5mezslybkil","etag":"W/\"datetime''2017-09-26T17%3A06%3A34.2921171Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpcda3pf4qgao5oxnpmsepukjzbvmxhrvppugmm3fb5yrhyxnu62pkjcr75v4v4s7m/providers/Microsoft.RecoveryServices/vaults/clitest-vault5mezslybkil","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultthkcvmqu3ch","etag":"W/\"datetime''2017-11-09T09%3A45%3A30.0696842Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgustudncomawwcatxebabhw6qup55e6odaifdeitm3lqrkqpxhywb5xupbswyctto5/providers/Microsoft.RecoveryServices/vaults/clitest-vaultthkcvmqu3ch","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2017-12-14T23%3A16%3A13.5496072Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault000003","etag":"W/\"datetime''2017-12-14T23%3A16%3A16.8157204Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000003","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault000004","etag":"W/\"datetime''2017-12-14T23%3A16%3A20.684409Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000004","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['4553']
+      content-length: ['5001']
       content-type: [application/json]
-      date: ['Thu, 30 Nov 2017 23:22:16 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:20 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -143,17 +143,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.22]
+          msrest_azure/0.4.18 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults?api-version=2016-06-01
   response:
-    body: {string: '{"value":[{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2017-11-30T23%3A22%3A10.1946142Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault000004","etag":"W/\"datetime''2017-11-30T23%3A22%3A17.2051108Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000004","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault000003","etag":"W/\"datetime''2017-11-30T23%3A22%3A14.1552831Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000003","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}]}'}
+    body: {string: '{"value":[{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2017-12-14T23%3A16%3A13.5496072Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault000003","etag":"W/\"datetime''2017-12-14T23%3A16%3A16.8157204Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000003","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault000004","etag":"W/\"datetime''2017-12-14T23%3A16%3A20.684409Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000004","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1410']
+      content-length: ['1409']
       content-type: [application/json]
-      date: ['Thu, 30 Nov 2017 23:22:17 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:20 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -170,7 +170,7 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.22]
+          msrest_azure/0.4.18 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupstorageconfig/vaultstorageconfig?api-version=2016-06-01
@@ -180,7 +180,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['506']
       content-type: [application/json]
-      date: ['Thu, 30 Nov 2017 23:22:18 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:22 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -199,7 +199,7 @@ interactions:
       Content-Length: ['56']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.22]
+          msrest_azure/0.4.18 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: PATCH
     uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupstorageconfig/vaultstorageconfig?api-version=2016-12-01
@@ -207,7 +207,7 @@ interactions:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
-      date: ['Thu, 30 Nov 2017 23:22:20 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -223,7 +223,7 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.22]
+          msrest_azure/0.4.18 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupstorageconfig/vaultstorageconfig?api-version=2016-06-01
@@ -233,7 +233,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['514']
       content-type: [application/json]
-      date: ['Thu, 30 Nov 2017 23:22:21 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -252,7 +252,7 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.22]
+          msrest_azure/0.4.18 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000004?api-version=2016-06-01
@@ -261,11 +261,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 30 Nov 2017 23:22:24 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:27 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -276,17 +276,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.22]
+          msrest_azure/0.4.18 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.RecoveryServices/vaults?api-version=2016-06-01
   response:
-    body: {string: '{"value":[{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2017-11-30T23%3A22%3A10.1946142Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault000003","etag":"W/\"datetime''2017-11-30T23%3A22%3A14.1552831Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000003","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultq5564odu5p6","etag":"W/\"datetime''2017-09-19T18%3A21%3A48.1989494Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rggaimbllzxyuijlxj3lrywgzdrume4xj3xj66hdfhqv6eqba26ht76nokbtp6sfaoi/providers/Microsoft.RecoveryServices/vaults/clitest-vaultq5564odu5p6","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultygetdaet3s5","etag":"W/\"datetime''2017-11-30T22%3A50%3A06.9933679Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rggbrrjutukm735623lbty7dm36lytqsa4n7v3f5jp2tygyofw4k2nwg3boub76c2yg/providers/Microsoft.RecoveryServices/vaults/clitest-vaultygetdaet3s5","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultidk3ocgxkeo","etag":"W/\"datetime''2017-11-09T09%3A47%3A07.0047202Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgkcda272llrw67h7jaywprmciz2sb4qftoveuqvud5eajjk5e3xc5ui6hst6kjtoxf/providers/Microsoft.RecoveryServices/vaults/clitest-vaultidk3ocgxkeo","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultwmy2cqovnax","etag":"W/\"datetime''2017-09-20T00%3A02%3A35.5236245Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnuanxhtclm3obme75s2yhbzhdh6fgu7gcd34afmgnbu2kqpmla5i2d6wpulrddzvz/providers/Microsoft.RecoveryServices/vaults/clitest-vaultwmy2cqovnax","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultetp33oawxea","etag":"W/\"datetime''2017-09-15T22%3A12%3A47.2172541Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpa3pgets3kev3ayjwmgv5a7qu6gyvibpsysagad36u2osnytlxbvwinhmlx2hmfhq/providers/Microsoft.RecoveryServices/vaults/clitest-vaultetp33oawxea","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault5mezslybkil","etag":"W/\"datetime''2017-09-26T17%3A06%3A34.2921171Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpcda3pf4qgao5oxnpmsepukjzbvmxhrvppugmm3fb5yrhyxnu62pkjcr75v4v4s7m/providers/Microsoft.RecoveryServices/vaults/clitest-vault5mezslybkil","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultthkcvmqu3ch","etag":"W/\"datetime''2017-11-09T09%3A45%3A30.0696842Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgustudncomawwcatxebabhw6qup55e6odaifdeitm3lqrkqpxhywb5xupbswyctto5/providers/Microsoft.RecoveryServices/vaults/clitest-vaultthkcvmqu3ch","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}]}'}
+    body: {string: '{"value":[{"location":"westus","name":"clitest-vaultq5564odu5p6","etag":"W/\"datetime''2017-09-19T18%3A21%3A48.1989494Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rggaimbllzxyuijlxj3lrywgzdrume4xj3xj66hdfhqv6eqba26ht76nokbtp6sfaoi/providers/Microsoft.RecoveryServices/vaults/clitest-vaultq5564odu5p6","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultygetdaet3s5","etag":"W/\"datetime''2017-11-30T22%3A50%3A06.9933679Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rggbrrjutukm735623lbty7dm36lytqsa4n7v3f5jp2tygyofw4k2nwg3boub76c2yg/providers/Microsoft.RecoveryServices/vaults/clitest-vaultygetdaet3s5","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultidk3ocgxkeo","etag":"W/\"datetime''2017-11-09T09%3A47%3A07.0047202Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgkcda272llrw67h7jaywprmciz2sb4qftoveuqvud5eajjk5e3xc5ui6hst6kjtoxf/providers/Microsoft.RecoveryServices/vaults/clitest-vaultidk3ocgxkeo","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaulty2ujxwr6an6","etag":"W/\"datetime''2017-12-14T22%3A19%3A46.2165756Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgmrnzrvtiflv2dohaaiklecjpa3jk2qiyz4xfnodmjsf5urhv7vkyf4mtwfw3gd6df/providers/Microsoft.RecoveryServices/vaults/clitest-vaulty2ujxwr6an6","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultwmy2cqovnax","etag":"W/\"datetime''2017-09-20T00%3A02%3A35.5236245Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgnuanxhtclm3obme75s2yhbzhdh6fgu7gcd34afmgnbu2kqpmla5i2d6wpulrddzvz/providers/Microsoft.RecoveryServices/vaults/clitest-vaultwmy2cqovnax","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultetp33oawxea","etag":"W/\"datetime''2017-09-15T22%3A12%3A47.2172541Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpa3pgets3kev3ayjwmgv5a7qu6gyvibpsysagad36u2osnytlxbvwinhmlx2hmfhq/providers/Microsoft.RecoveryServices/vaults/clitest-vaultetp33oawxea","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault5mezslybkil","etag":"W/\"datetime''2017-09-26T17%3A06%3A34.2921171Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgpcda3pf4qgao5oxnpmsepukjzbvmxhrvppugmm3fb5yrhyxnu62pkjcr75v4v4s7m/providers/Microsoft.RecoveryServices/vaults/clitest-vault5mezslybkil","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vaultthkcvmqu3ch","etag":"W/\"datetime''2017-11-09T09%3A45%3A30.0696842Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rgustudncomawwcatxebabhw6qup55e6odaifdeitm3lqrkqpxhywb5xupbswyctto5/providers/Microsoft.RecoveryServices/vaults/clitest-vaultthkcvmqu3ch","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault000002","etag":"W/\"datetime''2017-12-14T23%3A16%3A13.5496072Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}},{"location":"westus","name":"clitest-vault000003","etag":"W/\"datetime''2017-12-14T23%3A16%3A16.8157204Z''\"","properties":{"provisioningState":"Succeeded"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000003","type":"Microsoft.RecoveryServices/vaults","sku":{"name":"Standard"}}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['4052']
+      content-length: ['4501']
       content-type: [application/json]
-      date: ['Thu, 30 Nov 2017 23:22:25 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:28 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -303,8 +303,8 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 recoveryservicesbackupclient/0.1.1 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+          msrest_azure/0.4.18 recoveryservicesbackupclient/0.1.1 Azure-SDK-For-Python
+          AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000003/backupProtectionContainers?api-version=2016-12-01&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20status%20eq%20%27Registered%27
@@ -314,7 +314,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['12']
       content-type: [application/json]
-      date: ['Thu, 30 Nov 2017 23:22:25 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -333,7 +333,7 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.22]
+          msrest_azure/0.4.18 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000003?api-version=2016-06-01
@@ -342,7 +342,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 30 Nov 2017 23:22:29 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:32 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -357,8 +357,8 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 recoveryservicesbackupclient/0.1.1 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+          msrest_azure/0.4.18 recoveryservicesbackupclient/0.1.1 Azure-SDK-For-Python
+          AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/Subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002/backupProtectionContainers?api-version=2016-12-01&$filter=backupManagementType%20eq%20%27AzureIaasVM%27%20and%20status%20eq%20%27Registered%27
@@ -368,7 +368,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['12']
       content-type: [application/json]
-      date: ['Thu, 30 Nov 2017 23:22:29 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:32 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.0]
@@ -387,7 +387,7 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.22]
+          msrest_azure/0.4.18 recoveryservicesclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.RecoveryServices/vaults/clitest-vault000002?api-version=2016-06-01
@@ -396,7 +396,7 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 30 Nov 2017 23:22:33 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:36 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -412,8 +412,8 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.23]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -422,11 +422,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 30 Nov 2017 23:22:34 GMT']
+      date: ['Thu, 14 Dec 2017 23:16:36 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdBWlVLTkJTWFEzU1VPSFpJQTRCUVVPRVhOSlZYQ04zWlNRWXxGQ0UyOURFRUMxRTM5NTdDLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdYNEVQUzRaUllWWEFRRk9OR0tCRVZXVTRXUFQ2RUxUM09MSHwyQjczOTBBMTQ0OEFFRDlELVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 202, message: Accepted}
 version: 1
