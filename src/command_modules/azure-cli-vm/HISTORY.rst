@@ -2,13 +2,10 @@
 
 Release History
 ===============
-
-2.0.21
-++++++
-* add missing hyphen to help message
-
 2.0.20
 ++++++
+* VM/VMSS: (Preview) support user assigned identity
+* add missing hyphen to help message
 * Minor fixes
 
 2.0.19

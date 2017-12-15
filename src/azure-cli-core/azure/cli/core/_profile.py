@@ -56,7 +56,6 @@ TOKEN_FIELDS_EXCLUDED_FROM_PERSISTENCE = ['familyName',
 _CLIENT_ID = '04b07795-8ddb-461a-bbee-02f9e1bf7b46'
 _COMMON_TENANT = 'common'
 
-_MSI_ACCOUNT_NAME = 'MSI@'
 _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 
 
@@ -254,9 +253,10 @@ class Profile(object):
         s.state = StateType.enabled
         return s
 
-    def find_subscriptions_in_vm_with_msi(self, msi_port):
+    def find_subscriptions_in_vm_with_msi(self, msi_port, identity_id=None):
         import jwt
-        _, token, _ = Profile.get_msi_token(CLOUD.endpoints.active_directory_resource_id, msi_port)
+        token, identity_id_type = Profile.get_msi_token(CLOUD.endpoints.active_directory_resource_id,
+                                                        msi_port, identity_id, for_login=True)
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, verify=False, algorithms=['RS256'])
         tenant = decode['tid']
@@ -265,32 +265,35 @@ class Profile(object):
         subscriptions = subscription_finder.find_from_raw_token(tenant, token)
         if not subscriptions:
             raise CLIError('No access was configured for the VM, hence no subscriptions were found')
-        consolidated = Profile._normalize_properties('VM', subscriptions, is_service_principal=True)
+        base_name = '{}-{}'.format(identity_id_type, identity_id) if identity_id else identity_id_type
+        user = 'userAssignedIdentity' if identity_id else 'systemAssignedIdentity'
+        consolidated = Profile._normalize_properties(user, subscriptions, is_service_principal=True)
         for s in consolidated:
             # use a special name to trigger a special token acquisition
-            s[_SUBSCRIPTION_NAME] = "{}{}".format(_MSI_ACCOUNT_NAME, msi_port)
-        self._set_subscriptions(consolidated)
+            s[_SUBSCRIPTION_NAME] = "{}@{}".format(base_name, msi_port)
+        # key-off subscription name to allow accounts with same id(but under different identities)
+        self._set_subscriptions(consolidated, key_name=_SUBSCRIPTION_NAME)
         return deepcopy(consolidated)
 
-    def _set_subscriptions(self, new_subscriptions, merge=True):
+    def _set_subscriptions(self, new_subscriptions, merge=True, key_name=_SUBSCRIPTION_ID):
         existing_ones = self.load_cached_subscriptions(all_clouds=True)
         active_one = next((x for x in existing_ones if x.get(_IS_DEFAULT_SUBSCRIPTION)), None)
-        active_subscription_id = active_one[_SUBSCRIPTION_ID] if active_one else None
+        active_subscription_id = active_one[key_name] if active_one else None
         active_cloud = get_active_cloud()
         default_sub_id = None
 
         # merge with existing ones
         if merge:
-            dic = collections.OrderedDict((x[_SUBSCRIPTION_ID], x) for x in existing_ones)
+            dic = collections.OrderedDict((x[key_name], x) for x in existing_ones)
         else:
             dic = collections.OrderedDict()
 
-        dic.update((x[_SUBSCRIPTION_ID], x) for x in new_subscriptions)
+        dic.update((x[key_name], x) for x in new_subscriptions)
         subscriptions = list(dic.values())
         if subscriptions:
             if active_one:
                 new_active_one = next(
-                    (x for x in new_subscriptions if x[_SUBSCRIPTION_ID] == active_subscription_id),
+                    (x for x in new_subscriptions if x[key_name] == active_subscription_id),
                     None)
 
                 for s in subscriptions:
@@ -384,6 +387,16 @@ class Profile(object):
             username, tenant, resource)
         return access_token
 
+    @staticmethod
+    def _try_parse_for_msi_port(subscription_name):
+        if '@' in subscription_name:
+            try:
+                parts = subscription_name.split('@', 1)
+                return parts[0], int(parts[1])
+            except ValueError:
+                pass
+        return None, None
+
     def get_login_credentials(self, resource=CLOUD.endpoints.active_directory_resource_id,
                               subscription_id=None):
         account = self.get_subscription(subscription_id)
@@ -391,8 +404,9 @@ class Profile(object):
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
 
         def _retrieve_token():
-            if account[_SUBSCRIPTION_NAME].startswith(_MSI_ACCOUNT_NAME):
-                return Profile.get_msi_token(resource, account[_SUBSCRIPTION_NAME][len(_MSI_ACCOUNT_NAME):])
+            identity_id, msi_port = Profile._try_parse_for_msi_port(account[_SUBSCRIPTION_NAME])
+            if msi_port is not None:
+                return Profile.get_msi_token(resource, msi_port, identity_id)
             elif user_type == _USER:
                 return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                  account[_TENANT_ID], resource)
@@ -435,8 +449,10 @@ class Profile(object):
                 str(account[_TENANT_ID]))
 
     def refresh_accounts(self, subscription_finder=None):
+        import re
         subscriptions = self.load_cached_subscriptions()
-        to_refresh = [s for s in subscriptions if not s[_SUBSCRIPTION_NAME].startswith(_MSI_ACCOUNT_NAME)]
+        # filter away MSI related ones whose name always end with '@<port-number>'
+        to_refresh = [s for s in subscriptions if not re.match('@[0-9]+$', s[_SUBSCRIPTION_NAME])]
         not_to_refresh = [s for s in subscriptions if s not in to_refresh]
 
         from azure.cli.core._debug import allow_debug_adal_connection
@@ -536,13 +552,43 @@ class Profile(object):
         return installation_id
 
     @staticmethod
-    def get_msi_token(resource, port):
+    def get_msi_token(resource, port, identity_id=None, for_login=False):
         import requests
         import time
+        from msrestazure.tools import is_valid_resource_id
+        _System_Assigned_Id_Type = 'MSI'
+        _User_Assigned_Client_Id_type = 'MSIClient'
+        _User_assigned_Object_Id_Type = 'MSIObject'
+        _User_assigned_Resource_Id_Type = 'MSIResource'
+
         request_uri = 'http://localhost:{}/oauth2/token'.format(port)
         payload = {
             'resource': resource
         }
+        identity_id_type = None
+        if for_login:  # we will figure out the right type of id here
+            if not identity_id:
+                identity_id_type = _System_Assigned_Id_Type
+            elif is_valid_resource_id(identity_id):
+                payload['msi_res_id'] = identity_id
+                identity_id_type = _User_assigned_Resource_Id_Type
+            else:  # try to sniff it
+                payload['client_id'] = identity_id
+                identity_id_type = _User_Assigned_Client_Id_type
+                result = requests.post(request_uri, data=payload, headers={'Metadata': 'true'})
+                if result.status_code != 200:
+                    payload.pop('client_id')
+                    payload['object_id'] = identity_id
+                    identity_id_type = _User_assigned_Object_Id_Type
+        else:
+            parts = identity_id.split('-', 1)
+            identity_id_type = parts[0]
+            if parts[0] == _User_assigned_Resource_Id_Type:
+                payload['msi_res_id'] = parts[1]
+            elif parts[0] == _User_Assigned_Client_Id_type:
+                payload['client_id'] = parts[1]
+            elif parts[0] == _User_assigned_Object_Id_Type:
+                payload['object_id'] = parts[1]
 
         # retry as the token endpoint might not be available yet, one example is you use CLI in a
         # custom script extension of VMSS, which might get provisioned before the MSI extensioon
@@ -567,6 +613,8 @@ class Profile(object):
                 logger.debug('MSI: token retrieved')
                 break
         token_entry = json.loads(result.content.decode())
+        if for_login:
+            return token_entry['access_token'], identity_id_type
         return token_entry['token_type'], token_entry['access_token'], token_entry
 
 
