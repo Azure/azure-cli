@@ -240,7 +240,7 @@ class TestActions(unittest.TestCase):
     def test_validate_msi_on_create(self, mock_get_subscription, mock_resolve_role_id):
         # check throw on : az vm/vmss create --assign-identity --role reader --scope ""
         np_mock = mock.MagicMock()
-        np_mock.assign_identity = True
+        np_mock.assign_identity = []
         np_mock.identity_scope = None
         np_mock.identity_role = 'reader'
 
@@ -251,7 +251,7 @@ class TestActions(unittest.TestCase):
 
         # check throw on : az vm/vmss create --scope "some scope"
         np_mock = mock.MagicMock()
-        np_mock.assign_identity = False
+        np_mock.assign_identity = None
         np_mock.identity_scope = 'foo-scope'
         with self.assertRaises(CLIError) as err:
             _validate_vm_vmss_msi(np_mock)
@@ -259,7 +259,7 @@ class TestActions(unittest.TestCase):
 
         # check throw on : az vm/vmss create --role "reader"
         np_mock = mock.MagicMock()
-        np_mock.assign_identity = False
+        np_mock.assign_identity = None
         np_mock.identity_role = 'reader'
         with self.assertRaises(CLIError) as err:
             _validate_vm_vmss_msi(np_mock)
@@ -267,7 +267,7 @@ class TestActions(unittest.TestCase):
 
         # check we set right role id
         np_mock = mock.MagicMock()
-        np_mock.assign_identity = True
+        np_mock.assign_identity = []
         np_mock.identity_scope = 'foo-scope'
         np_mock.identity_role = 'reader'
         mock_resolve_role_id.return_value = 'foo-role-id'
@@ -292,6 +292,7 @@ class TestActions(unittest.TestCase):
         np_mock = mock.MagicMock()
         np_mock.identity_scope = 'foo-scope'
         np_mock.identity_role = 'reader'
+        np_mock.assign_identity = []
         mock_resolve_role_id.return_value = 'foo-role-id'
         _validate_vm_vmss_msi(np_mock, from_set_command=True)
         self.assertEqual(np_mock.identity_role_id, 'foo-role-id')
