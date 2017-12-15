@@ -13,7 +13,8 @@ from knack.util import CLIError
 def get_combined_validator(validators):
     def _final_validator_impl(cmd, namespace):
         # do additional creation validation
-        if namespace._subcommand == 'create':
+        verb = cmd.name.rsplit(' ', 1)[1]
+        if verb == 'create':
             storage_validator(namespace)
             password_validator(namespace)
             get_default_location_from_resource_group(cmd, namespace)
