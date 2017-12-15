@@ -61,7 +61,6 @@ run_style azure.cli.command_modules.keyvault
 run_style azure.cli.command_modules.lab
 #run_style azure.cli.command_modules.monitor
 run_style azure.cli.command_modules.network
-run_style azure.cli.command_modules.nspkg
 run_style azure.cli.command_modules.profile
 run_style azure.cli.command_modules.rdbms
 run_style azure.cli.command_modules.redis
