@@ -7,8 +7,6 @@ from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
 
-from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
-    (SkuName, KeyPermissions, SecretPermissions, CertificatePermissions)
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (
@@ -16,8 +14,6 @@ from azure.cli.core.commands.parameters import (
     get_enum_type)
 from azure.cli.core.util import get_json_object
 
-from azure.keyvault.models import JsonWebKeyOperation
-from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes
 from azure.cli.command_modules.keyvault._completers import (
     get_keyvault_name_completion_list, get_keyvault_version_completion_list)
 from azure.cli.command_modules.keyvault._validators import (
@@ -28,6 +24,7 @@ from azure.cli.command_modules.keyvault._validators import (
     validate_x509_certificate_chain,
     secret_text_encoding_values, secret_binary_encoding_values)
 
+
 # CUSTOM CHOICE LISTS
 
 secret_encoding_values = secret_text_encoding_values + secret_binary_encoding_values
@@ -36,6 +33,10 @@ certificate_format_values = ['PEM', 'DER']
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
+    from azure.keyvault.models import JsonWebKeyOperation
+    from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes
+    from azure.mgmt.keyvault.models.key_vault_management_client_enums import (
+        SkuName, KeyPermissions, SecretPermissions, CertificatePermissions)
 
     # ARGUMENT DEFINITIONS
     vault_name_type = CLIArgumentType(
