@@ -33,7 +33,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-consumption==1.0.0',
+    'azure-mgmt-consumption==1.1.0',
     'azure-cli-core'
 ]
 
