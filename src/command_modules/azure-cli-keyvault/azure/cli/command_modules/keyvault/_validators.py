@@ -9,14 +9,15 @@ import binascii
 from datetime import datetime
 import re
 
+from knack.util import CLIError
+
+from msrestazure.tools import parse_resource_id
+
 from azure.mgmt.keyvault import KeyVaultManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
 
-from knack.util import CLIError
-
-from msrestazure.tools import parse_resource_id
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
 secret_binary_encoding_values = ['base64', 'hex']

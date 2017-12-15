@@ -95,7 +95,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get')
         g.command('list', 'list_by_server')
-        g.generic_update_command('update', setter_name='_firewall_rule_custom_setter',  setter_type=rdbms_custom, custom_func_name='_firewall_rule_update_custom_func')
+        g.generic_update_command('update', setter_name='_firewall_rule_custom_setter', setter_type=rdbms_custom, custom_func_name='_firewall_rule_update_custom_func')
 
     with self.command_group('mysql server configuration', mysql_config_sdk) as g:
         g.command('set', 'create_or_update')

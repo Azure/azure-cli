@@ -16,6 +16,12 @@ except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 
 from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
+
+from knack.log import get_logger
+from knack.util import CLIError
+
+from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
+
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
 from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.keyvault import KeyVaultId
@@ -23,11 +29,6 @@ from azure.keyvault import KeyVaultId
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.profiles import ResourceType
-
-from knack.log import get_logger
-from knack.util import CLIError
-
-from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
 
 from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
@@ -834,6 +835,7 @@ def _set_availset(cmd, resource_group_name, name, **kwargs):
     return _compute_client_factory(cmd.cli_ctx).availability_sets.create_or_update(resource_group_name, name, **kwargs)
 
 
+# pylint: disable=inconsistent-return-statements
 def convert_av_set_to_managed_disk(cmd, resource_group_name, availability_set_name):
     av_set = _get_availset(cmd, resource_group_name, availability_set_name)
     if av_set.sku.name != 'Aligned':
@@ -1036,7 +1038,7 @@ def show_default_diagnostics_configuration(is_windows_os=False):
         # LAD and WAD are not consistent on sas token format. Call it out here
         "storageAccountSasToken": "__SAS_TOKEN_{}__".format("WITH_LEADING_QUESTION_MARK" if is_windows_os else "WITHOUT_LEADING_QUESTION_MARK")
     }, indent=2)
-    logger.warning('Protected settings with storage account info is required to work with the default configurations, e.g. \n' + protected_settings_info)
+    logger.warning('Protected settings with storage account info is required to work with the default configurations, e.g. \n%s', protected_settings_info)
     return public_settings
 # endregion
 
@@ -1941,6 +1943,7 @@ def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None,
                                                      raw=no_wait)
 
 
+# pylint: disable=inconsistent-return-statements
 def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wait=False):
     VirtualMachineScaleSet = cmd.get_models('VirtualMachineScaleSet')
     client = _compute_client_factory(cmd.cli_ctx)
@@ -2086,6 +2089,7 @@ def delete_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
     return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
 
 
+# pylint: disable=inconsistent-return-statements
 def get_vmss_extension(cmd, resource_group_name, vmss_name, extension_name):
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)

@@ -6,9 +6,10 @@
 import argparse
 import time
 import random
-from azure.cli.core.profiles import ResourceType
 
 from knack.log import get_logger
+
+from azure.cli.core.profiles import ResourceType
 
 logger = get_logger(__name__)
 

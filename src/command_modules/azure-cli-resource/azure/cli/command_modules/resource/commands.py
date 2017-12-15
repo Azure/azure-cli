@@ -172,8 +172,8 @@ def load_command_table(self, _):
     # Resource feature commands
     if self.supported_api_version(min_api='2017-05-10'):
         feature_table_transform = '{Name:name, RegistrationState:properties.state}'
-        with self.command_group('feature', resource_feature_sdk) as g:
-            g.custom_command('list', 'list_features', client_factory=cf_features, table_transformer='[].' + feature_table_transform)
+        with self.command_group('feature', resource_feature_sdk, client_factory=cf_features) as g:
+            g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
             g.command('show', 'get', exception_handler=empty_on_404, table_transformer=feature_table_transform)
             g.custom_command('register', 'register_feature')
 

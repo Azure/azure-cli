@@ -49,8 +49,8 @@ run_style azure.cli.command_modules.configure
 run_style azure.cli.command_modules.container
 run_style azure.cli.command_modules.consumption
 #run_style azure.cli.command_modules.cosmosdb
-#run_style azure.cli.command_modules.dla
-#run_style azure.cli.command_modules.dls
+run_style azure.cli.command_modules.dla
+run_style azure.cli.command_modules.dls
 run_style azure.cli.command_modules.eventgrid
 run_style azure.cli.command_modules.extension
 run_style azure.cli.command_modules.feedback
@@ -61,17 +61,16 @@ run_style azure.cli.command_modules.keyvault
 run_style azure.cli.command_modules.lab
 #run_style azure.cli.command_modules.monitor
 run_style azure.cli.command_modules.network
-#run_style azure.cli.command_modules.nspkg
-#run_style azure.cli.command_modules.profile
-#run_style azure.cli.command_modules.rdbms
+run_style azure.cli.command_modules.profile
+run_style azure.cli.command_modules.rdbms
 run_style azure.cli.command_modules.redis
 run_style azure.cli.command_modules.reservations
 run_style azure.cli.command_modules.resource
 run_style azure.cli.command_modules.role
 run_style azure.cli.command_modules.servicefabric
-#run_style azure.cli.command_modules.sql
+run_style azure.cli.command_modules.sql
 run_style azure.cli.command_modules.storage
-#run_style azure.cli.command_modules.testsdk
-#run_style azure.cli.command_modules.vm
+run_style azure.cli.testsdk
+run_style azure.cli.command_modules.vm
 
 exit $exit_code

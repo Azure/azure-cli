@@ -3,10 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.help_files import helps
 
 from azure.cli.core import AzCommandsLoader
-
-from knack.help_files import helps
 
 
 def start_shell(cmd, style=None):

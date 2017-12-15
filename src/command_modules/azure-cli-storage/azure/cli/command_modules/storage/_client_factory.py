@@ -3,12 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
+
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
-
-from knack.util import CLIError
 
 NO_CREDENTIALS_ERROR_MESSAGE = """
 No credentials specified to access storage service. Please provide any of the following:

@@ -11,9 +11,7 @@ import logging as logs
 import sys
 import time
 from importlib import import_module
-
-from azure.cli.core import EXCLUDED_PARAMS
-import azure.cli.core.telemetry as telemetry
+import six
 
 from knack.arguments import CLICommandArgument, ignore_type, ArgumentsContext
 from knack.commands import CLICommand, CommandGroup
@@ -21,7 +19,8 @@ from knack.invocation import CommandInvoker
 from knack.log import get_logger
 from knack.util import CLIError
 
-import six
+from azure.cli.core import EXCLUDED_PARAMS
+import azure.cli.core.telemetry as telemetry
 
 
 logger = get_logger(__name__)
@@ -319,7 +318,7 @@ class AzCliCommandInvoker(CommandInvoker):
             except Exception as ex:  # pylint: disable=broad-except
                 if cmd.exception_handler:
                     cmd.exception_handler(ex)
-                    return
+                    return None
                 else:
                     six.reraise(*sys.exc_info())
 

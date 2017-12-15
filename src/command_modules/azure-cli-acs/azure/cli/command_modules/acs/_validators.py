@@ -7,9 +7,10 @@ import os
 import os.path
 import re
 
+from knack.log import get_logger
+
 from azure.cli.core.util import CLIError
 import azure.cli.core.keys as keys
-from knack.log import get_logger
 
 logger = get_logger(__name__)
 

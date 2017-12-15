@@ -12,6 +12,9 @@ import uuid
 from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
+from knack.log import get_logger
+from knack.util import CLIError, todict
+
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
@@ -24,9 +27,6 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     UserCreateParameters,
                                     PasswordProfile,
                                     ServicePrincipalCreateParameters)
-
-from knack.log import get_logger
-from knack.util import CLIError, todict
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 
@@ -621,6 +621,7 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
     return (app_start_date, app_end_date, cert_start_date, cert_end_date)
 
 
+# pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches
         cmd, name=None, password=None, years=None,

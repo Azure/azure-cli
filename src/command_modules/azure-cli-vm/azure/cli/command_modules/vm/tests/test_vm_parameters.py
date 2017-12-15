@@ -10,20 +10,21 @@ except ImportError:
     import mock
 
 
-#def mock_echo_args(command_name, parameters):
-#    from azure.cli.testsdk import TestCli
-#    try:
-#        argv = ' '.join((command_name, parameters)).split()
-#        cli = TestCli()
-#        cli.invoke(argv)
-#        command_table = cli.invocation.commands_loader.command_table
-#        prefunc = command_table[command_name].handler
-#        command_table[command_name].handler = lambda args: args
-#        cli.invoke(argv)
-#        test = 'banoodle'
-#        return parsed_namespace
-#    finally:
-#        command_table[command_name].handler = prefunc
+def mock_echo_args(command_name, parameters):
+    from azure.cli.testsdk import TestCli
+    try:
+        # TODO: continue work on this...
+        argv = ' '.join((command_name, parameters)).split()
+        cli = TestCli()
+        cli.invoke(argv)
+        command_table = cli.invocation.commands_loader.command_table
+        prefunc = command_table[command_name].handler
+        command_table[command_name].handler = lambda args: args
+        cli.invoke(argv)
+        parsed_namespace = None  # continue this too...
+        return parsed_namespace
+    finally:
+        command_table[command_name].handler = prefunc
 
 
 class TestVMValidators(unittest.TestCase):
@@ -72,7 +73,7 @@ class TestVMValidators(unittest.TestCase):
             self.assertEqual(ns.nics[1], nic2_expected)
 
 
-#class TestArgumentParser(unittest.TestCase):
+# class TestArgumentParser(unittest.TestCase):
 #    @classmethod
 #    def setUpClass(cls):
 #        pass

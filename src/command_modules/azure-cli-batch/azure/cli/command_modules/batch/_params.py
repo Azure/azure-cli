@@ -4,6 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 from argcomplete.completers import FilesCompleter
+
+from knack.arguments import CLIArgumentType
+
 from azure.mgmt.batch.models.batch_management_client_enums import \
     (AccountKeyType)
 from azure.batch.models.batch_service_client_enums import \
@@ -20,8 +23,6 @@ from azure.cli.command_modules.batch._validators import \
      certificate_reference_format, validate_json_file, validate_cert_file, keyvault_id,
      environment_setting_format, validate_cert_settings, resource_file_format,
      validate_client_parameters)
-
-from knack.arguments import CLIArgumentType
 
 
 # pylint: disable=line-too-long, too-many-statements

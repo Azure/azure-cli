@@ -7,6 +7,8 @@ from __future__ import print_function
 from collections import Counter, OrderedDict
 import mock
 
+from knack.log import get_logger
+
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
@@ -26,8 +28,6 @@ from azure.mgmt.dns.models import (RecordSet, AaaaRecord, ARecord, CaaRecord, Cn
 from azure.cli.command_modules.network.zone_file.parse_zone_file import parse_zone_file
 from azure.cli.command_modules.network.zone_file.make_zone_file import make_zone_file
 from azure.cli.core.profiles import ResourceType
-
-from knack.log import get_logger
 
 logger = get_logger(__name__)
 
@@ -964,7 +964,7 @@ def export_zone(cmd, resource_group_name, zone_name):
     print(make_zone_file(zone_obj))
 
 
-# pylint: disable=too-many-return-statements
+# pylint: disable=too-many-return-statements, inconsistent-return-statements
 def _build_record(data):
     record_type = data['type'].lower()
     try:

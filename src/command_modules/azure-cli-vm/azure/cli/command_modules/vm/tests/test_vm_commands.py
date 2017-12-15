@@ -641,7 +641,7 @@ class VMAvailSetScenarioTest(ScenarioTest):
                  checks=self.check('tags.test', 'success'))
         self.cmd('vm availability-set list -g {rg}', checks=[
             self.check('length(@)', 1),
-            self.check('[0].name','{availset}')
+            self.check('[0].name', '{availset}')
         ])
         self.cmd('vm availability-set list-sizes -g {rg} -n {availset}',
                  checks=self.check('type(@)', 'array'))
@@ -1035,7 +1035,7 @@ class VMCreateExistingIdsOptions(ScenarioTest):
 
         subscription_id = self.get_subscription_id()
 
-        self.kwargs.update({            
+        self.kwargs.update({
             'availset': 'vrfavailset',
             'pubip': 'vrfpubip',
             'vnet': 'vrfvnet',
@@ -1625,8 +1625,8 @@ class VMSSVMsScenarioTest(ScenarioTest):
 
         instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss}', checks=[
             self.check('type(@)', 'array'),
-            #self.check('length(@)', '{count}'),
-            #self.check("[].name.starts_with(@, '{vmss}')", [True * '{count}'])
+            self.check('length(@)', '{count}'),
+            self.check("[].name.starts_with(@, '{vmss}')", [True * '{count}'])
         ]).get_output_in_json()
 
         self.kwargs['instance_ids'] = [x['instanceId'] for x in instance_list]
@@ -1714,7 +1714,7 @@ class VMSSILBTest(ScenarioTest):
     def test_vmss_with_ilb(self, resource_group):
 
         self.kwargs.update({'vmss': 'vmss1'})
-        
+
         self.cmd('vmss create -g {rg} -n {vmss} --admin-username admin123 --admin-password PasswordPassword1! --image centos --instance-count 1 --public-ip-address ""')
         # list connection information should fail
         with self.assertRaises(CLIError) as err:
@@ -2017,7 +2017,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
             'vm': 'test-run-command-vm',
             'loc': resource_group_location
         })
-        
+
         self.cmd('vm run-command list -l {loc}')
         self.cmd('vm run-command show --command-id RunShellScript -l {loc}')
         public_ip = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --admin-username clitest1 --admin-password Test12345678!!').get_output_in_json()['publicIpAddress']
