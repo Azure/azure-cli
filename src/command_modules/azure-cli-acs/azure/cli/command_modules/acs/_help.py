@@ -109,7 +109,7 @@ helps['acs wait'] = """
     type: command
     short-summary: Wait for a container service to reach a desired state.
     long-summary: If an operation on a container service was interrupted or was started with `--no-wait`, use this
-                  command to wait for it to complete. Returns
+                  command to wait for it to complete.
 """
 
 # AKS command help
