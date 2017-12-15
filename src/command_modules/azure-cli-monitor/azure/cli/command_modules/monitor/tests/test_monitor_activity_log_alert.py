@@ -4,8 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from time import sleep
+
+from knack.util import CLIError
+
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, JMESPathCheck
-from azure.cli.core.util import CLIError
 
 
 class TestMonitorActivityLogAlert(ScenarioTest):
@@ -14,7 +16,7 @@ class TestMonitorActivityLogAlert(ScenarioTest):
         name, scope, _ = self._create_and_test_default_alert(resource_group)
 
         # fail when recreate
-        with self.assertRaises(CLIError) as cm:
+        with self.assertRaises(AssertionError) as cm:
             self.cmd('az monitor activity-log alert create -n {} -g {}'.format(name, resource_group))
 
         self.assertEqual('The activity log alert {} already exists in resource group {}.'.format(name, resource_group),
@@ -102,7 +104,7 @@ class TestMonitorActivityLogAlert(ScenarioTest):
                 self.assertIsNone(action_group['webhookProperties'])
 
         # update webhook properties in strict mode render error
-        with self.assertRaises(CLIError):
+        with self.assertRaises(AssertionError):
             self.cmd('az monitor activity-log alert action-group add -n {} -g {} -a {} -w purpose=error-trigger '
                      '--strict -ojson'.format(name, resource_group, action_rid[0]))
 
@@ -125,7 +127,7 @@ class TestMonitorActivityLogAlert(ScenarioTest):
         self.cmd('az monitor activity-log alert delete -n {} -g {}'.format(name, resource_group))
 
         # show
-        with self.assertRaises(CLIError):
+        with self.assertRaises(AssertionError):
             self.cmd('az monitor activity-log alert show -n {} -g {}'.format(name, resource_group))
 
     @ResourceGroupPreparer(location='southcentralus')

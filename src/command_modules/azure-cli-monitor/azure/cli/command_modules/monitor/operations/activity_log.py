@@ -3,8 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import CLIError
-from ..util import validate_time_range_and_add_defaults
+from knack.util import CLIError
+
+from azure.cli.command_modules.monitor.util import validate_time_range_and_add_defaults
 
 
 def list_activity_log(client, filters=None, correlation_id=None, resource_group=None, resource_id=None,
