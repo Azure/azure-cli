@@ -15,7 +15,8 @@ from azure.cli.testsdk import (
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
-    StorageAccountPreparer)
+    StorageAccountPreparer,
+    LiveScenarioTest)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
@@ -1655,7 +1656,8 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('length(@)', 1)])
 
 
-class SqlServerVnetMgmtScenarioTest(ScenarioTest):
+# TODO: Restore to ScenarioTest and re-record when issue #5112 is fixed.
+class SqlServerVnetMgmtScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(location='eastus2euap')
     @SqlServerPreparer(location='eastus2euap')
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):

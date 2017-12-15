@@ -67,8 +67,14 @@ class ResourceGroupNoWaitScenarioTest(VCRTestBase):
 
 
 class ResourceScenarioTest(ScenarioTest):
+
     @ResourceGroupPreparer(name_prefix='cli_test_rsrc_scenario', location='southcentralus')
     def test_resource_scenario(self, resource_group):
+        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = 4096
+
         vnet_name = self.create_random_name('cli-test-vnet', 30)
         subnet_name = self.create_random_name('cli-test-subnet', 30)
         vnet_type = 'Microsoft.Network/virtualNetworks'
@@ -107,6 +113,7 @@ class ResourceScenarioTest(ScenarioTest):
 
         # delete resource and verify
         self.cmd('resource delete -n {} -g {} --resource-type {}'.format(vnet_name, resource_group, vnet_type))
+        time.sleep(10)
         self.cmd('resource list', checks=JCheck("length([?name=='{}'])".format(vnet_name), 0))
 
 
