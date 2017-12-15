@@ -363,10 +363,7 @@ class VMCustomImageTest(ScenarioTest):
         # this test should be recorded using accounts "@azuresdkteam.onmicrosoft.com", as it uses pre-made custom image
         prepared_image_with_plan_info = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.Compute/images/custom-image-with-plan'
         plan_name = 'linuxdsvmubuntu'
-        with self.assertRaises(CLIError):
-            self.cmd('vm create -g {} -n vm1 --image {} --generate-ssh-keys --plan-promotion-code 99percentoff --plan-publisher microsoft-ads --plan-name {} --plan-product linux-data-science-vm-ubuntu'.format(
-                resource_group, prepared_image_with_plan_info, plan_name))
-        self.cmd('vm create -g {} -n vm1 --image {} --generate-ssh-keys --plan-publisher microsoft-ads --plan-name {} --plan-product linux-data-science-vm-ubuntu'.format(
+        self.cmd('vm create -g {} -n vm1 --image {} --generate-ssh-keys --plan-promotion-code 99percentoff --plan-publisher microsoft-ads --plan-name {} --plan-product linux-data-science-vm-ubuntu'.format(
             resource_group, prepared_image_with_plan_info, plan_name))
         self.cmd('vm show -g {} -n vm1'.format(resource_group), checks=[
             JMESPathCheckV2('plan.name', plan_name)
@@ -1560,6 +1557,17 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].applicationGatewayBackendAddressPools[0].resourceGroup', resource_group)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_lb')
+    def test_vmss_existing_lb(self, resource_group):
+        vmss_name = 'vmss1'
+        lb_name = 'lb1'
+        self.cmd('network lb create -g {} -n {} --backend-pool-name test'.format(resource_group, lb_name))
+        self.cmd('vmss create -g {} -n {} --load-balancer {} --image UbuntuLTS --admin-username clitester --admin-password TestTest12#$'.format(resource_group, vmss_name, lb_name))
+
+
+# TODO: change back to ScenarioTest and re-record when issue #5111 is fixed
+class VMSSCreatePublicIpPerVm(LiveScenarioTest):  # pylint: disable=too-many-instance-attributes
+
     @ResourceGroupPreparer()
     def test_vmss_public_ip_per_vm_custom_domain_name(self, resource_group):
         vmss_name = 'vmss1'
@@ -1577,13 +1585,6 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         result = self.cmd('vmss list-instance-public-ips -n {} -g {}'.format(vmss_name, resource_group)).get_output_in_json()
         self.assertEqual(len(result[0]['ipAddress'].split('.')), 4)
         self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith('.clitestnewnetwork'))
-
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_lb')
-    def test_vmss_existing_lb(self, resource_group):
-        vmss_name = 'vmss1'
-        lb_name = 'lb1'
-        self.cmd('network lb create -g {} -n {} --backend-pool-name test'.format(resource_group, lb_name))
-        self.cmd('vmss create -g {} -n {} --load-balancer {} --image UbuntuLTS --admin-username clitester --admin-password TestTest12#$'.format(resource_group, vmss_name, lb_name))
 
 
 class VMSSCreateAcceleratedNetworkingTest(ScenarioTest):
