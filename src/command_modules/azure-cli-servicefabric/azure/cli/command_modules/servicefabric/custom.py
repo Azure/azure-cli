@@ -1152,6 +1152,7 @@ def _create_certificate(cli_ctx,
     return vault_id, secret_url, certificate_thumbprint, output_file
 
 
+# pylint: disable=inconsistent-return-statements
 def _add_cert_to_vmss(cli_ctx, vmss, resource_group_name, vault_id, secret_url):
     compute_client = compute_client_factory(cli_ctx)
     secrets = [
@@ -1216,6 +1217,7 @@ def _create_resource_group_name(cli_ctx, rg_name, location, tags=None):
     client.create_or_update(rg_name, parameters)
 
 
+# pylint: disable=inconsistent-return-statements
 def _get_target_instance(reliability_level):
     level = reliability_level.lower()
     if level == 'none':
@@ -1230,6 +1232,7 @@ def _get_target_instance(reliability_level):
         return 9
 
 
+# pylint: disable=inconsistent-return-statements
 def _get_reliability_level(cluster_size):
     size = int(cluster_size)
     if size > 0 and size < 3:
@@ -1310,6 +1313,7 @@ def _get_certificate_name(resource_group_name):
     return "{}{}".format(certificate_name, suffix)
 
 
+# pylint: disable=inconsistent-return-statements
 def _get_vault_from_secret_identifier(cli_ctx, secret_identifier):
     key_vault_client = keyvault_client_factory(cli_ctx).vaults
     vault_name = urlparse(secret_identifier).hostname.split('.')[0]
@@ -1650,6 +1654,7 @@ def _create_keyvault(cli_ctx,
 _create_keyvault.__doc__ = VaultProperties.__doc__
 
 
+# pylint: disable=inconsistent-return-statements
 def _get_current_user_object_id(graph_client):
     try:
         current_user = graph_client.objects.get_current_user()
@@ -1664,11 +1669,11 @@ def _get_object_id_by_spn(graph_client, spn):
         filter="servicePrincipalNames/any(c:c eq '{}')".format(spn)))
     if not accounts:
         logger.warning("Unable to find user with spn '%s'", spn)
-        return
+        return None
     if len(accounts) > 1:
         logger.warning("Multiple service principals found with spn '%s'. "
                        "You can avoid this by specifying object id.", spn)
-        return
+        return None
     return accounts[0].object_id
 
 
@@ -1677,11 +1682,11 @@ def _get_object_id_by_upn(graph_client, upn):
         filter="userPrincipalName eq '{}'".format(upn)))
     if not accounts:
         logger.warning("Unable to find user with upn '%s'", upn)
-        return
+        return None
     if len(accounts) > 1:
         logger.warning("Multiple users principals found with upn '%s'. "
                        "You can avoid this by specifying object id.", upn)
-        return
+        return None
     return accounts[0].object_id
 
 

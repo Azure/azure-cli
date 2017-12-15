@@ -7,14 +7,14 @@
 import argparse
 import platform
 
+from knack.arguments import CLIArgumentType, CaseInsensitiveList
+from knack.log import get_logger
+from knack.util import CLIError
+
 from azure.cli.core.commands.validators import validate_tag, validate_tags
 from azure.cli.core.commands.validators import generate_deployment_name
 from azure.cli.core.decorators import Completer
 from azure.cli.core.profiles import ResourceType
-
-from knack.arguments import CLIArgumentType, CaseInsensitiveList
-from knack.log import get_logger
-from knack.util import CLIError
 
 logger = get_logger(__name__)
 

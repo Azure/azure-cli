@@ -148,7 +148,7 @@ class ACSClient(object):
             t = threading.Thread(target=ACSClient._run_cmd, args=(self, command))
             t.daemon = True
             t.start()
-            return
+            return None
 
         return self._run_cmd(command)
 

@@ -7,17 +7,17 @@ import argparse
 import re
 from six import string_types
 
+from knack.arguments import CLICommandArgument, ignore_type
+from knack.introspection import extract_args_from_signature
+from knack.log import get_logger
+from knack.util import todict, CLIError
+
 from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
 from azure.cli.core.util import shell_safe_json_parse
 from azure.cli.core.profiles import ResourceType
-
-from knack.arguments import CLICommandArgument, ignore_type
-from knack.introspection import extract_args_from_signature
-from knack.log import get_logger
-from knack.util import todict, CLIError
 
 logger = get_logger(__name__)
 
@@ -472,20 +472,20 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
             try:
                 instance = getter(**args)
                 if wait_for_exists:
-                    return
+                    return None
                 provisioning_state = get_provisioning_state(instance)
                 # until we have any needs to wait for 'Failed', let us bail out on this
                 if provisioning_state == 'Failed':
                     raise CLIError('The operation failed')
                 if wait_for_created or wait_for_updated:
                     if provisioning_state == 'Succeeded':
-                        return
+                        return None
                 if custom_condition and bool(verify_property(instance, custom_condition)):
-                    return
+                    return None
             except ClientException as ex:
                 if getattr(ex, 'status_code', None) == 404:
                     if wait_for_deleted:
-                        return
+                        return None
                     if not any([wait_for_created, wait_for_exists, custom_condition]):
                         raise
                 else:

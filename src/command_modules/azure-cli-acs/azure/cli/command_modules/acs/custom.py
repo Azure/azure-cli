@@ -30,6 +30,9 @@ from dateutil.relativedelta import relativedelta
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
+from knack.log import get_logger
+from knack.util import CLIError
+
 from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.command_modules.acs import acs_client, proxy
@@ -55,9 +58,6 @@ from azure.mgmt.containerservice.models import ContainerServiceSshPublicKey
 from azure.mgmt.containerservice.models import ContainerServiceStorageProfileTypes
 from azure.mgmt.containerservice.models import ManagedCluster
 from azure.mgmt.containerservice.models import ManagedClusterProperties
-
-from knack.log import get_logger
-from knack.util import CLIError
 
 from ._client_factory import get_auth_management_client
 from ._client_factory import get_graph_rbac_management_client

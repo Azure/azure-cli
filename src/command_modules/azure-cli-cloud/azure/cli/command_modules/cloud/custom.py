@@ -5,7 +5,9 @@
 
 # pylint: disable=unused-argument
 from knack.util import CLIError, to_snake_case
+
 from msrestazure.azure_cloud import _populate_from_metadata_endpoint, MetadataEndpointError
+
 from azure.cli.core.cloud import (Cloud,
                                   get_clouds,
                                   get_cloud,

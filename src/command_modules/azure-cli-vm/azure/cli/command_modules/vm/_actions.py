@@ -5,12 +5,12 @@
 
 import json
 import re
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 from knack.util import CLIError
+
 from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from azure.cli.core.commands.arm import resource_exists
-
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 from ._client_factory import _compute_client_factory
 

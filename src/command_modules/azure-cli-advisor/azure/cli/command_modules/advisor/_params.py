@@ -3,8 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.parameters import get_enum_type
 from knack.arguments import CLIArgumentType
+
+from azure.cli.core.commands.parameters import get_enum_type
+
 from ._validators import validate_include_or_exclude, validate_ids_or_resource_group
 
 

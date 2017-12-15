@@ -6,12 +6,12 @@
 from __future__ import print_function
 import sys
 
-from azure.cli.core import __version__ as core_version
-from azure.cli.core.util import COMPONENT_PREFIX
-
 from knack.log import get_logger
 from knack.prompting import prompt, NoTTYException
 from knack.util import CLIError
+
+from azure.cli.core import __version__ as core_version
+from azure.cli.core.util import COMPONENT_PREFIX
 
 logger = get_logger(__name__)
 
@@ -34,6 +34,7 @@ INSTRUMENTATION_KEY = '02b91c82-6729-4241-befc-e6d02ca4fbba'
 EVENT_NAME = 'FeedbackEvent'
 
 
+# pylint: disable=inconsistent-return-statements
 def _prompt_net_promoter_score():
     while True:
         try:

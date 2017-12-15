@@ -3,6 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
+from knack.log import get_logger
+
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.mgmt.containerregistry.v2017_10_01.models import (
@@ -11,9 +14,6 @@ from azure.mgmt.containerregistry.v2017_10_01.models import (
     SkuName,
     Sku
 )
-
-from knack.util import CLIError
-from knack.log import get_logger
 
 from ._constants import MANAGED_REGISTRY_SKU
 from ._utils import (

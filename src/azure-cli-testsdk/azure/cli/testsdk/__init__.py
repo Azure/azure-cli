@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core import AzCli
-
 from azure_devtools.scenario_tests import live_only, record_only, get_sha1_hash
+
+from azure.cli.core import AzCli
 
 from .base import ScenarioTest, LiveScenarioTest
 from .preparers import (StorageAccountPreparer, ResourceGroupPreparer, RoleBasedServicePrincipalPreparer,

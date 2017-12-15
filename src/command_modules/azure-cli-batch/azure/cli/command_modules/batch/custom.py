@@ -7,7 +7,10 @@ import json
 import base64
 from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
 
+from knack.log import get_logger
+
 from msrest.exceptions import DeserializationError
+
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.batch.models import (BatchAccountCreateParameters,
                                      AutoStorageBaseProperties,
@@ -22,8 +25,6 @@ from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.core._profile import Profile
-
-from knack.log import get_logger
 
 logger = get_logger(__name__)
 MAX_TASKS_PER_REQUEST = 100
@@ -77,6 +78,7 @@ def update_account(client, resource_group_name, account_name,
                          auto_storage=properties)
 
 
+# pylint: disable=inconsistent-return-statements
 def login_account(cmd, client, resource_group_name, account_name, shared_key_auth=False, show=False):
     account = client.get(resource_group_name=resource_group_name,
                          account_name=account_name)

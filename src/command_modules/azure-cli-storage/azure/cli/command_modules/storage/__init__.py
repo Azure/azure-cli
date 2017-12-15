@@ -141,6 +141,8 @@ class StorageCommandGroup(AzCommandGroup):
         self._register_data_plane_account_arguments(command_name)
 
     def get_handler_suppress_404(self):
+
+        # pylint: disable=inconsistent-return-statements
         def handler(ex):
             from azure.cli.core.profiles import get_sdk
 

@@ -8,14 +8,14 @@ import base64
 import socket
 import os
 
+from knack.util import CLIError
+
 from azure.cli.core.commands.validators import \
     (validate_tags, get_default_location_from_resource_group)
 from azure.cli.core.commands.template_create import get_folded_parameter_validator
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
-
-from knack.util import CLIError
 
 # PARAMETER VALIDATORS
 
@@ -77,6 +77,7 @@ def get_vnet_validator(dest):
     return _validate_vnet_name_or_id
 
 
+# pylint: disable=inconsistent-return-statements
 def dns_zone_name_type(value):
     if value:
         return value[:-1] if value[-1] == '.' else value

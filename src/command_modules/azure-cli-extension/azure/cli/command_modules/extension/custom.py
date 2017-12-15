@@ -14,12 +14,12 @@ import requests
 from wheel.install import WHEEL_INFO_RE
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
+from knack.log import get_logger
+
 from azure.cli.core.util import CLIError
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions,
                                       get_extension, ext_compat_with_cli,
                                       WheelExtension, ExtensionNotInstalledException)
-
-from knack.log import get_logger
 
 from ._homebrew_patch import HomebrewPipPatch
 from ._index import get_index_extensions

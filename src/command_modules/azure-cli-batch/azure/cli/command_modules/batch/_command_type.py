@@ -5,8 +5,10 @@
 
 import json
 import re
-
 from six import string_types
+
+from knack.arguments import CLICommandArgument, IgnoreAction
+from knack.introspection import extract_full_summary_from_signature, extract_args_from_signature
 
 from azure.cli.command_modules.batch import _validators as validators
 from azure.cli.command_modules.batch import _format as transformers
@@ -16,8 +18,6 @@ from azure.cli.core import EXCLUDED_PARAMS
 from azure.cli.core.commands import CONFIRM_PARAM_NAME
 from azure.cli.core.commands import AzCommandGroup
 
-from knack.arguments import CLICommandArgument, IgnoreAction
-from knack.introspection import extract_full_summary_from_signature, extract_args_from_signature
 
 _CLASS_NAME = re.compile(r"<(.*?)>")  # Strip model name from class docstring
 _UNDERSCORE_CASE = re.compile('(?!^)([A-Z]+)')  # Convert from CamelCase to underscore_case
@@ -100,6 +100,7 @@ def find_param_help(model, param):
     return re.sub(r"\n\s*", " ", param_doc.group(1).strip())
 
 
+# pylint: disable=inconsistent-return-statements
 def find_return_type(model):
     """Parse the parameter help info from the model docstring.
     :param class model: Model class.
@@ -455,6 +456,7 @@ class AzureBatchDataPlaneCommand(object):
         def _load_descriptions():
             return extract_full_summary_from_signature(op_handler)
 
+        # pylint: disable=inconsistent-return-statements
         def _execute_command(kwargs):
             from msrest.paging import Paged
             from msrest.exceptions import ValidationError, ClientRequestError

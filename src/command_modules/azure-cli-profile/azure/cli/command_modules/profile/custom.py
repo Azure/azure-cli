@@ -5,14 +5,14 @@
 
 from __future__ import print_function
 
+from knack.log import get_logger
+from knack.prompting import prompt_pass, NoTTYException
+from knack.util import CLIError
+
 from azure.cli.core._profile import Profile
 from azure.cli.core.util import in_cloud_console
 
 from azure.cli.core.commands.validators import DefaultStr
-
-from knack.log import get_logger
-from knack.prompting import prompt_pass, NoTTYException
-from knack.util import CLIError
 
 logger = get_logger(__name__)
 
@@ -44,6 +44,7 @@ def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefi
     return subscriptions
 
 
+# pylint: disable=inconsistent-return-statements
 def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
     import json
     profile = Profile(cmd.cli_ctx)
@@ -86,6 +87,7 @@ def account_clear(cmd):
     profile.logout_all()
 
 
+# pylint: disable=inconsistent-return-statements
 def login(cmd, username=None, password=None, service_principal=None, tenant=None,
           allow_no_subscriptions=False, msi=False, msi_port=DefaultStr(50342)):
     """Log in to access Azure subscriptions"""

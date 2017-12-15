@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
+
 from azure.common import AzureHttpError
 from azure.cli.core.profiles import get_sdk, ResourceType
-
-from knack.util import CLIError
 
 from ._client_factory import generic_data_service_factory
 

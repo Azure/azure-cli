@@ -132,6 +132,7 @@ def iot_hub_delete(client, hub_name, resource_group_name=None):
     return client.iot_hub_resource.delete(resource_group_name, hub_name)
 
 
+# pylint: disable=inconsistent-return-statements
 def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=None, policy_name='iothubowner',
                                    key_type=KeyType.primary.value):
     if hub_name is None:
@@ -297,6 +298,7 @@ def iot_device_delete(client, hub_name, device_id, resource_group_name=None, eta
     return device_client.delete(device_id, etag)
 
 
+# pylint: disable=inconsistent-return-statements
 def iot_device_show_connection_string(client, hub_name, device_id=None, resource_group_name=None, top=20,
                                       key_type=KeyType.primary.value):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
@@ -319,6 +321,7 @@ def iot_device_send_message(client, hub_name, device_id, resource_group_name=Non
     return device_client.send_message(device_id, data, message_id, correlation_id, user_id)
 
 
+# pylint: disable=inconsistent-return-statements
 def iot_device_receive_message(client, hub_name, device_id, resource_group_name=None, lock_timeout=60):
     device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
     result = device_client.receive_message(device_id, lock_timeout, raw=True)

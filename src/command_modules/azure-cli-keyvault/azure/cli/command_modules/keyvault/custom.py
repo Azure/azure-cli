@@ -9,8 +9,14 @@ import os
 import re
 import time
 
-from OpenSSL import crypto
+from knack.log import get_logger
+from knack.util import CLIError
+
 from msrestazure.azure_exceptions import CloudError
+
+from OpenSSL import crypto
+
+
 from azure.keyvault.models import \
     (Action, ActionType, KeyUsageType, CertificateAttributes, CertificatePolicy, IssuerParameters,
      KeyProperties, LifetimeAction, SecretProperties, X509CertificateProperties, SubjectAlternativeNames, Trigger)
@@ -21,10 +27,6 @@ from azure.graphrbac import GraphRbacManagementClient
 
 import azure.cli.core.telemetry as telemetry
 from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
-
-from knack.log import get_logger
-from knack.util import CLIError
-
 
 logger = get_logger(__name__)
 
@@ -132,6 +134,7 @@ def list_keyvault(client, resource_group_name=None):
     return list(vault_list)
 
 
+# pylint: disable=inconsistent-return-statements
 def _get_current_user_object_id(graph_client):
     try:
         current_user = graph_client.objects.get_current_user()
@@ -146,11 +149,11 @@ def _get_object_id_by_spn(graph_client, spn):
         filter="servicePrincipalNames/any(c:c eq '{}')".format(spn)))
     if not accounts:
         logger.warning("Unable to find user with spn '%s'", spn)
-        return
+        return None
     if len(accounts) > 1:
         logger.warning("Multiple service principals found with spn '%s'. "
                        "You can avoid this by specifying object id.", spn)
-        return
+        return None
     return accounts[0].object_id
 
 
@@ -158,11 +161,11 @@ def _get_object_id_by_upn(graph_client, upn):
     accounts = list(graph_client.users.list(filter="userPrincipalName eq '{}'".format(upn)))
     if not accounts:
         logger.warning("Unable to find user with upn '%s'", upn)
-        return
+        return None
     if len(accounts) > 1:
         logger.warning("Multiple users principals found with upn '%s'. "
                        "You can avoid this by specifying object id.", upn)
-        return
+        return None
     return accounts[0].object_id
 
 
@@ -177,6 +180,7 @@ def _get_object_id_from_subscription(graph_client, subscription):
     else:
         logger.warning('Current credentials are not from a user or service principal. '
                        'Azure Key Vault does not work with certificate credentials.')
+    return None
 
 
 def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
@@ -554,6 +558,7 @@ def restore_secret(client, vault_base_url, file_path):
 
 
 # region KeyVault Certificate
+# pylint: disable=inconsistent-return-statements
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
                        disabled=False, tags=None, validity=None):
     cert_attrs = CertificateAttributes(not disabled)

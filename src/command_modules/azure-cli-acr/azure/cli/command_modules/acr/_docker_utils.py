@@ -112,6 +112,7 @@ def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, p
     return access_token
 
 
+# pylint: disable=inconsistent-return-statements
 def _get_credentials(cli_ctx,
                      registry_name,
                      resource_group_name,

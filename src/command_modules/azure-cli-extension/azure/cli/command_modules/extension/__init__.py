@@ -6,13 +6,13 @@
 import argparse
 from collections import OrderedDict
 
+from knack.prompting import prompt_y_n
+from knack.util import CLIError
+
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
 
 import azure.cli.command_modules.extension._help  # pylint: disable=unused-import
-
-from knack.prompting import prompt_y_n
-from knack.util import CLIError
 
 
 # pylint: disable=line-too-long

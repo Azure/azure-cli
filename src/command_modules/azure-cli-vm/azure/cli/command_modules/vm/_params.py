@@ -6,6 +6,8 @@
 # pylint: disable=line-too-long
 from argcomplete.completers import FilesCompleter
 
+from knack.arguments import CLIArgumentType
+
 from azure.mgmt.compute.models import CachingTypes, UpgradeMode
 from azure.mgmt.storage.models import SkuName
 
@@ -20,8 +22,6 @@ from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_asg_names_or_ids)
-
-from knack.arguments import CLIArgumentType
 
 
 # REUSABLE ARGUMENT DEFINITIONS

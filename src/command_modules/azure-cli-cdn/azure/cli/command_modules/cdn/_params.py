@@ -4,12 +4,12 @@
 # --------------------------------------------------------------------------------------------
 import argparse
 
+from knack.arguments import CLIArgumentType
+
 from azure.mgmt.cdn.models import QueryStringCachingBehavior, SkuName
 
 from azure.cli.core.commands.parameters import get_three_state_flag, tags_type, get_enum_type
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-
-from knack.arguments import CLIArgumentType
 
 from ._validators import validate_origin
 

@@ -5,11 +5,12 @@
 
 from argcomplete.completers import FilesCompleter
 
+from knack.arguments import CLIArgumentType
+
 from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
                                                 get_resource_name_completion_list, file_type,
                                                 get_three_state_flag, get_enum_type)
 from azure.mgmt.web.models import DatabaseType, ConnectionStringType, BuiltInAuthenticationProvider
-from knack.arguments import CLIArgumentType
 
 from ._completers import get_hostname_completion_list
 

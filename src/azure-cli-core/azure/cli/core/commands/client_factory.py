@@ -4,13 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+
+from knack.log import get_logger
+from knack.util import CLIError
+
 from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
 from azure.cli.core.profiles._shared import get_client_class
 from azure.cli.core.profiles import ResourceType, get_api_version, get_sdk
-
-from knack.log import get_logger
-from knack.util import CLIError
 
 logger = get_logger(__name__)
 UA_AGENT = "AZURECLI/{}".format(core_version)
