@@ -294,7 +294,7 @@ def build_vm_msi_extension(vm_name, location, role_assignment_guid, port, is_lin
     return {
         'type': 'Microsoft.Compute/virtualMachines/extensions',
         'name': vm_name + '/' + ext_type_name,
-        'apiVersion': get_api_version(ResourceType.MGMT_COMPUTE),
+        'apiVersion': get_api_version(ResourceType.MGMT_COMPUTE).virtual_machine_extensions,
         'location': location,
         'dependsOn': [role_assignment_guid or 'Microsoft.Compute/virtualMachines/' + vm_name],
         'properties': {
@@ -439,7 +439,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
     if license_type:
         vm_properties['licenseType'] = license_type
 
-    vm_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
+    vm_api_version = get_api_version(ResourceType.MGMT_COMPUTE).virtual_machines
     vm = {
         'apiVersion': vm_api_version,
         'type': 'Microsoft.Compute/virtualMachines',
@@ -805,7 +805,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         }
     }
 
-    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30').virtual_machine_scale_sets:  # pylint: disable=no-member
         if dns_servers:
             nic_config['properties']['dnsSettings'] = {'dnsServers': dns_servers}
 
@@ -832,13 +832,15 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
     if license_type:
         vmss_properties['virtualMachineProfile']['licenseType'] = license_type
 
-    if health_probe and supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    if health_probe and supported_api_version(  # pylint: disable=no-member
+            ResourceType.MGMT_COMPUTE,
+            min_api='2017-03-30').virtual_machine_scale_sets:
         vmss_properties['virtualMachineProfile']['networkProfile']['healthProbe'] = {'id': health_probe}
 
-    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
+    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview').virtual_machine_scale_sets:  # pylint: disable=no-member
         vmss_properties['singlePlacementGroup'] = single_placement_group
 
-    vmss_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
+    vmss_api_version = get_api_version(ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
         'name': name,
@@ -859,7 +861,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
 
 def build_av_set_resource(name, location, tags,
                           platform_update_domain_count, platform_fault_domain_count, unmanaged):
-    av_set_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
+    av_set_api_version = get_api_version(ResourceType.MGMT_COMPUTE).availability_sets  # pylint: disable=no-member
     av_set = {
         'type': 'Microsoft.Compute/availabilitySets',
         'name': name,
@@ -871,7 +873,7 @@ def build_av_set_resource(name, location, tags,
         }
     }
 
-    if supported_api_version(ResourceType.MGMT_COMPUTE, '2016-04-30-preview'):
+    if supported_api_version(ResourceType.MGMT_COMPUTE, '2016-04-30-preview').availability_sets:  # pylint: disable=no-member
         av_set['sku'] = {
             'name': 'Classic' if unmanaged else 'Aligned'
         }

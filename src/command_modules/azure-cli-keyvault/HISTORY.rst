@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.15
+++++++
+* add missing hyphen to status messages
+
 2.0.14
 ++++++
 * Minor fixes.

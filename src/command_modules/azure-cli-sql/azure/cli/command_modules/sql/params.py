@@ -10,6 +10,7 @@ from azure.cli.core.commands.parameters import (
     enum_choice_list,
     ignore_type,
     get_resource_name_completion_list,
+    location_type,
     three_state_flag)
 from azure.cli.core.sdk.util import ParametersContext, patch_arg_make_required, patch_arg_make_optional
 from azure.mgmt.sql.models.database import Database
@@ -25,6 +26,7 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     CreateMode,
     SecurityAlertPolicyState,
     SecurityAlertPolicyEmailAccountAdmins,
+    ServerConnectionType,
     ServerKeyType,
     StorageKeyType,
     TransparentDataEncryptionStatus)
@@ -44,6 +46,7 @@ from .custom import (
 server_param_type = CliArgumentType(
     options_list=('--server', '-s'),
     help='Name of the Azure SQL server.')
+
 
 #####
 #        SizeWithUnitConverter - consider moving to common code (azure.cli.core.commands.parameters)
@@ -77,6 +80,11 @@ class SizeWithUnitConverter(object):  # pylint: disable=too-few-public-methods
         return 'Size (in {}) - valid units are {}.'.format(
             self.unit,
             ', '.join(sorted(self.unit_map, key=self.unit_map.__getitem__)))
+
+
+with ParametersContext(command='sql') as c:
+    c.argument('location_name', arg_type=location_type)
+    c.argument('usage_name', options_list=('--usage', '-u'))
 
 
 ###############################################
@@ -677,6 +685,16 @@ with ParametersContext(command='sql server ad-admin') as c:
 with ParametersContext(command='sql server ad-admin create') as c:
     c.expand('properties', ServerAzureADAdministrator, patches={
         'tenant_id': patch_arg_make_optional})
+
+
+#####
+#           sql server conn-policy
+#####
+
+
+with ParametersContext(command='sql server conn-policy') as c:
+    c.argument('server_name', arg_type=server_param_type)
+    c.argument('connection_type', options_list=('--connection-type', '-t'), **enum_choice_list(ServerConnectionType))
 
 
 #####

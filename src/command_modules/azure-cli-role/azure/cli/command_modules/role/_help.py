@@ -162,7 +162,7 @@ helps['role definition create'] = """
           text: |
                 az role definition create --role-definition { \\
                     "Name": "Contoso On-call", \\
-                    "Description": "Perform VM actions and read storange and network information." \\
+                    "Description": "Perform VM actions and read storage and network information." \\
                     "Actions": [ \\
                         "Microsoft.Compute/*/read", \\
                         "Microsoft.Compute/virtualMachines/start/action", \\
@@ -193,6 +193,33 @@ helps['role definition list'] = """
 helps['role definition update'] = """
     type: command
     short-summary: Update a role definition.
+    parameters:
+        - name: --role-definition
+          type: string
+          short-summary: Description of a role as JSON, or a path to a file containing a JSON description.
+    examples:
+        - name: Create a role with read-only access to storage and network resources, and the ability to start or restart VMs.
+          text: |
+                az role definition create --role-definition { \\
+                    "Name": "Contoso On-call", \\
+                    "Description": "Perform VM actions and read storage and network information." \\
+                    "Actions": [ \\
+                        "Microsoft.Compute/*/read", \\
+                        "Microsoft.Compute/virtualMachines/start/action", \\
+                        "Microsoft.Compute/virtualMachines/restart/action", \\
+                        "Microsoft.Network/*/read", \\
+                        "Microsoft.Storage/*/read", \\
+                        "Microsoft.Authorization/*/read", \\
+                        "Microsoft.Resources/subscriptions/resourceGroups/read", \\
+                        "Microsoft.Resources/subscriptions/resourceGroups/resources/read", \\
+                        "Microsoft.Insights/alertRules/*", \\
+                        "Microsoft.Support/*" \\
+                    ], \\
+                    "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"] \\
+                }
+        - name: Create a role from a file containing a JSON description.
+          text: >
+            az role definition create --role-definition ad-role.json
 """
 helps['ad'] = """
     type: group

@@ -1193,7 +1193,7 @@ def encryption_protector_update(
 
 
 #####
-#           sql server vnet-rule validate
+#           sql server vnet-rule
 #####
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.

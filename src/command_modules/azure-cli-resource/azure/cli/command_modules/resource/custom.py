@@ -529,7 +529,7 @@ def _single_or_collection(obj, default=None):
 
 def show_resource(resource_ids=None, resource_group_name=None,
                   resource_provider_namespace=None, parent_resource_path=None, resource_type=None,
-                  resource_name=None, api_version=None):
+                  resource_name=None, api_version=None, include_response_body=False):
     parsed_ids = _get_parsed_resource_ids(resource_ids) or [_create_parsed_id(resource_group_name,
                                                                               resource_provider_namespace,
                                                                               parent_resource_path,
@@ -537,7 +537,8 @@ def show_resource(resource_ids=None, resource_group_name=None,
                                                                               resource_name)]
 
     return _single_or_collection(
-        [_get_rsrc_util_from_parsed_id(id_dict, api_version).get_resource() for id_dict in parsed_ids])
+        [_get_rsrc_util_from_parsed_id(id_dict, api_version).get_resource(
+            include_response_body) for id_dict in parsed_ids])
 
 
 def delete_resource(resource_ids=None, resource_group_name=None,
@@ -1498,16 +1499,22 @@ class _ResourceUtils(object):  # pylint: disable=too-many-instance-attributes
                                                            res)
         return resource
 
-    def get_resource(self):
+    def get_resource(self, include_response_body=False):
         if self.resource_id:
-            resource = self.rcf.resources.get_by_id(self.resource_id, self.api_version)
+            resource = self.rcf.resources.get_by_id(self.resource_id, self.api_version, raw=include_response_body)
         else:
             resource = self.rcf.resources.get(self.resource_group_name,
                                               self.resource_provider_namespace,
                                               self.parent_resource_path,
                                               self.resource_type,
                                               self.resource_name,
-                                              self.api_version)
+                                              self.api_version,
+                                              raw=include_response_body)
+
+        if include_response_body:
+            temp = resource.output
+            setattr(temp, 'response_body', json.loads(resource.response.content.decode()))
+            resource = temp
         return resource
 
     def delete(self):
