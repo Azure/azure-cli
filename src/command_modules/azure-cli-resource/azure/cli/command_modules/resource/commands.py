@@ -23,7 +23,8 @@ from azure.cli.command_modules.resource._client_factory import (_resource_client
                                                                 cf_policy_set_definitions,
                                                                 cf_resource_links,
                                                                 cf_resource_managedapplications,
-                                                                cf_resource_managedappdefinitions)
+                                                                cf_resource_managedappdefinitions,
+                                                                cf_subscriptiondefinitions)
 
 
 # Subscription lock commands
@@ -175,3 +176,7 @@ if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-
     cli_command(__name__, 'managedapp definition delete', 'azure.mgmt.resource.managedapplications.operations#ApplicationDefinitionsOperations.delete', cf_resource_managedappdefinitions)
     cli_command(__name__, 'managedapp definition show', 'azure.cli.command_modules.resource.custom#show_applicationdefinition')
     cli_command(__name__, 'managedapp definition list', 'azure.mgmt.resource.managedapplications.operations#ApplicationDefinitionsOperations.list_by_resource_group', cf_resource_managedappdefinitions, exception_handler=empty_on_404)
+
+cli_command(__name__, 'subscriptiondefinition create', 'azure.cli.command_modules.resource.custom#create_subscription_definition')
+cli_command(__name__, 'subscriptiondefinition show', 'azure.mgmt.resource.subscriptiondefinition.operations#SubscriptionDefinitionOperations.get', cf_subscriptiondefinitions, exception_handler=empty_on_404)
+cli_command(__name__, 'subscriptiondefinition list', 'azure.cli.command_modules.resource.custom#list_subscription_definitions')

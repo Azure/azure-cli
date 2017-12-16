@@ -46,6 +46,13 @@ def _resource_managedapps_client_factory(**_):
     return get_mgmt_service_client(ApplicationClient)
 
 
+def _subscriptiondefinition_client_factory(**_):
+    from azure.cli.core.commands.client_factory import _get_mgmt_service_client
+    from azure.mgmt.resource.subscriptiondefinition import SubscriptionDefinitionClient
+    client, default_subscription_id = _get_mgmt_service_client(SubscriptionDefinitionClient, subscription_bound=False)
+    return client
+
+
 def cf_resource_groups(_):
     return _resource_client_factory().resource_groups
 
@@ -96,3 +103,6 @@ def cf_resource_managedapplications(_):
 
 def cf_resource_managedappdefinitions(_):
     return _resource_managedapps_client_factory().application_definitions
+
+def cf_subscriptiondefinitions(_):
+    return _subscriptiondefinition_client_factory().subscription_definitions
