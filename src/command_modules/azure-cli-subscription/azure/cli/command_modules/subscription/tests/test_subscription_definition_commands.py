@@ -25,12 +25,9 @@ class AzureSubscriptionDefinitionScenarioTest(ScenarioTest):
 
     def test_create_subscription_definitions(self):
         sub_def_list_count_before = len(self.cmd('subscriptiondefinition list').get_output_in_json())
-
         def_name = self.create_random_name(prefix='cli', length=24)
         sub_def = self.cmd('subscriptiondefinition create -n {} -ot MS-AZR-0148P'.format(def_name)).get_output_in_json()
-
         sub_def_list_count_after = len(self.cmd('subscriptiondefinition list').get_output_in_json())
-        
         self.assertIsNotNone(sub_def)
         self.assertEqual(def_name, sub_def['name'])
         self.assertEqual(def_name, sub_def['subscriptionDisplayName'])
