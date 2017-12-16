@@ -6,6 +6,7 @@
 # pylint: disable=line-too-long
 from azure.cli.core.commands import register_cli_argument
 
+
 def get_offer_type_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
     return ['MS-AZR-0017P', 'MS-AZR-0148P']
 
