@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.util import CLIError
-from azure.mgmt.subscription.models import *
+from azure.mgmt.subscription.models import SubscriptionDefinition
 
 def create_subscription_definition(client, name, offer_type, subscription_display_name=None):
     """Create a subscription definition."""
