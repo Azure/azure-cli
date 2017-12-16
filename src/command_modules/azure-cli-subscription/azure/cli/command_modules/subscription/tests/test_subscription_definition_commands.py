@@ -5,6 +5,7 @@
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheck
 
+
 class AzureSubscriptionDefinitionScenarioTest(ScenarioTest):
     def test_list_subscription_definitions(self):
         sub_def_list = self.cmd('subscriptiondefinition list').get_output_in_json()
