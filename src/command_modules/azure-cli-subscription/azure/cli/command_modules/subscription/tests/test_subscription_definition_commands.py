@@ -14,6 +14,14 @@ class AzureSubscriptionDefinitionScenarioTest(ScenarioTest):
         self.assertIsNotNone(sub_def_list[0]['subscriptionId'])
         self.assertIsNotNone(sub_def_list[0]['subscriptionDisplayName'])
 
+    def test_show_subscription_definitions(self):
+        first_sub_def = self.cmd('subscriptiondefinition list').get_output_in_json()[0]
+        self.assertIsNotNone(first_sub_def)
+        self.assertIsNotNone(first_sub_def['name'])
+        sub_def = self.cmd('subscriptiondefinition show -n {}'.format(first_sub_def['name'])).get_output_in_json()
+        self.assertIsNotNone(sub_def)
+        self.assertEqual(sub_def['name'], first_sub_def['name'])
+
     def test_create_subscription_definitions(self):
         sub_def_list_count_before = len(self.cmd('subscriptiondefinition list').get_output_in_json())
 
