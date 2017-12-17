@@ -8,9 +8,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.23]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy000001?api-version=2017-05-10
@@ -20,19 +20,19 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:03 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:16 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 201, message: Created}
 - request:
-    body: 'b''{"properties": {"mode": "Indexed", "displayName": "test_policy000003",
-      "description": "desc_for_test_policy_123", "policyRule": {"if": {"not": {"field":
-      "location", "in": "[parameters(\''allowedLocations\'')]"}}, "then": {"effect":
-      "deny"}}, "parameters": {"allowedLocations": {"type": "array", "metadata": {"description":
-      "The list of locations that can be specified when deploying resources", "strongType":
-      "location", "displayName": "Allowed locations"}}}}}'''
+    body: 'b''{"properties": {"policyRule": {"if": {"not": {"in": "[parameters(\''allowedLocations\'')]",
+      "field": "location"}}, "then": {"effect": "deny"}}, "displayName": "test_policy000003",
+      "description": "desc_for_test_policy_123", "mode": "Indexed", "parameters":
+      {"allowedLocations": {"type": "array", "metadata": {"strongType": "location",
+      "displayName": "Allowed locations", "description": "The list of locations that
+      can be specified when deploying resources"}}}}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -40,80 +40,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['459']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
   response:
-    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
-        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['687']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:04 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
-    status: {code: 201, message: Created}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [policy definition update]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
-  response:
-    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
-        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['687']
-      content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:05 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-    status: {code: 200, message: OK}
-- request:
-    body: 'b''{"properties": {"displayName": "test_policy000003", "description": "desc_for_test_policy_123_new",
-      "policyRule": {"if": {"not": {"field": "location", "in": "[parameters(\''allowedLocations\'')]"}},
-      "then": {"effect": "deny"}}, "parameters": {"allowedLocations": {"type": "Array",
-      "metadata": {"description": "The list of locations that can be specified when
-      deploying resources", "strongType": "location", "displayName": "Allowed locations"}}}}}'''
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [policy definition update]
-      Connection: [keep-alive]
-      Content-Length: ['444']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
-  response:
-    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
-        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['674']
-      content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:05 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:17 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -124,11 +64,72 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [policy definition update]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
+  response:
+    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['687']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 13 Dec 2017 21:11:18 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+    status: {code: 200, message: OK}
+- request:
+    body: 'b''{"properties": {"policyRule": {"if": {"not": {"in": "[parameters(\''allowedLocations\'')]",
+      "field": "location"}}, "then": {"effect": "deny"}}, "displayName": "test_policy000003",
+      "description": "desc_for_test_policy_123_new", "parameters": {"allowedLocations":
+      {"type": "Array", "metadata": {"displayName": "Allowed locations", "strongType":
+      "location", "description": "The list of locations that can be specified when
+      deploying resources"}}}}}'''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [policy definition update]
+      Connection: [keep-alive]
+      Content-Length: ['444']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
+  response:
+    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['674']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 13 Dec 2017 21:11:17 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
       CommandName: [policy definition list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions?api-version=2016-12-01
@@ -146,7 +147,19 @@ interactions:
         Monitor unprotected web application in Security Center","policyType":"BuiltIn","mode":"All","description":"Web
         applications without a Web Application Firewall protection will be monitored
         by Azure Security Center as recommendations.","metadata":{"category":"Security
-        Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.Network/publicIPAddresses","Microsoft.ClassicCompute/domainNames","Microsoft.Web/hostingEnvironments"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"unprotectedWebApplication","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/201ea587-7c90-41c3-910f-c280ae01cfd6","type":"Microsoft.Authorization/policyDefinitions","name":"201ea587-7c90-41c3-910f-c280ae01cfd6"},{"properties":{"displayName":"Apply
+        Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.Network/publicIPAddresses","Microsoft.ClassicCompute/domainNames","Microsoft.Web/hostingEnvironments"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"unprotectedWebApplication","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/201ea587-7c90-41c3-910f-c280ae01cfd6","type":"Microsoft.Authorization/policyDefinitions","name":"201ea587-7c90-41c3-910f-c280ae01cfd6"},{"properties":{"displayName":"[Preview]:
+        Deploy default Microsoft IaaSAntimalware extension for Windows Server","policyType":"BuiltIn","mode":"Indexed","description":"This
+        policy deploys a Microsoft IaaSAntimalware extension with a default configuraion
+        when a VM is not configured with the antimalware extension.","metadata":{"category":"Compute"},"parameters":{},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Compute/virtualMachines"},{"field":"Microsoft.Compute/imagePublisher","equals":"MicrosoftWindowsServer"},{"field":"Microsoft.Compute/imageOffer","equals":"WindowsServer"},{"field":"Microsoft.Compute/imageSKU","in":["2008-R2-SP1","2008-R2-SP1-smalldisk","2012-Datacenter","2012-Datacenter-smalldisk","2012-R2-Datacenter","2012-R2-Datacenter-smalldisk","2016-Datacenter","2016-Datacenter-Server-Core","2016-Datacenter-Server-Core-smalldisk","2016-Datacenter-smalldisk","2016-Datacenter-with-Containers","2016-Datacenter-with-RDSH"]}]},"then":{"effect":"deployIfNotExists","details":{"type":"Microsoft.Compute/virtualMachines/extensions","existenceCondition":{"allOf":[{"field":"Microsoft.Compute/virtualMachines/extensions/type","equals":"IaaSAntimalware"},{"field":"Microsoft.Compute/virtualMachines/extensions/publisher","equals":"Microsoft.Azure.Security"}]},"deployment":{"properties":{"mode":"incremental","template":{"$schema":"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"vmName":{"type":"string"},"location":{"type":"string"},"ExclusionsPaths":{"type":"string","defaultValue":"","metadata":{"description":"Semicolon
+        delimited list of file paths or locations to exclude from scanning"}},"ExclusionsExtensions":{"type":"string","defaultValue":"","metadata":{"description":"Semicolon
+        delimited list of file extensions to exclude from scanning"}},"ExclusionsProcesses":{"type":"string","defaultValue":"","metadata":{"description":"Semicolon
+        delimited list of process names to exclude from scanning"}},"RealtimeProtectionEnabled":{"type":"string","defaultValue":"true","metadata":{"description":"Indicates
+        whether or not real time protection is enabled (default is true)"}},"ScheduledScanSettingsIsEnabled":{"type":"string","defaultValue":"false","metadata":{"description":"Indicates
+        whether or not custom scheduled scan settings are enabled (default is false)"}},"ScheduledScanSettingsScanType":{"type":"string","defaultValue":"Quick","metadata":{"description":"Indicates
+        whether scheduled scan setting type is set to Quick or Full (default is Quick)"}},"ScheduledScanSettingsDay":{"type":"string","defaultValue":"7","metadata":{"description":"Day
+        of the week for scheduled scan (1-Sunday, 2-Monday, ..., 7-Saturday)"}},"ScheduledScanSettingsTime":{"type":"string","defaultValue":"120","metadata":{"description":"When
+        to perform the scheduled scan, measured in minutes from midnight (0-1440).
+        For example: 0 = 12AM, 60 = 1AM, 120 = 2AM."}}},"resources":[{"name":"[concat(parameters(''vmName''),''/IaaSAntimalware'')]","type":"Microsoft.Compute/virtualMachines/extensions","location":"[parameters(''location'')]","apiVersion":"2015-06-15","properties":{"publisher":"Microsoft.Azure.Security","type":"IaaSAntimalware","typeHandlerVersion":"1.3","autoUpgradeMinorVersion":true,"settings":{"AntimalwareEnabled":true,"RealtimeProtectionEnabled":"[parameters(''RealtimeProtectionEnabled'')]","ScheduledScanSettings":{"isEnabled":"[parameters(''ScheduledScanSettingsIsEnabled'')]","day":"[parameters(''ScheduledScanSettingsDay'')]","time":"[parameters(''ScheduledScanSettingsTime'')]","scanType":"[parameters(''ScheduledScanSettingsScanType'')]"},"Exclusions":{"Extensions":"[parameters(''ExclusionsExtensions'')]","Paths":"[parameters(''ExclusionsPaths'')]","Processes":"[parameters(''ExclusionsProcesses'')]"}}}}]},"parameters":{"vmName":{"value":"[field(''name'')]"},"location":{"value":"[field(''location'')]"},"RealtimeProtectionEnabled":{"value":"true"},"ScheduledScanSettingsIsEnabled":{"value":"true"}}}}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/2835b622-407b-4114-9198-6f7064cbe0dc","type":"Microsoft.Authorization/policyDefinitions","name":"2835b622-407b-4114-9198-6f7064cbe0dc"},{"properties":{"displayName":"Apply
         tag and its default value","policyType":"BuiltIn","description":"Applies a
         required tag and its default value if it is not specified by the user.","parameters":{"tagName":{"type":"String","metadata":{"description":"Name
         of the tag, such as costCenter","strongType":"tagName"}},"tagValue":{"type":"String","metadata":{"description":"Value
@@ -155,7 +168,11 @@ interactions:
         Security Groups with too permissive rules will be monitored by Azure Security
         Center as recommendations.","metadata":{"category":"Security Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.Compute/virtualMachines","Microsoft.ClassicCompute/virtualMachines","Microsoft.Network/virtualNetworks","Microsoft.ClassicNetwork/virtualNetworks"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"permissiveNetworkAccess","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/44452482-524f-4bf4-b852-0bff7cc4a3ed","type":"Microsoft.Authorization/policyDefinitions","name":"44452482-524f-4bf4-b852-0bff7cc4a3ed"},{"properties":{"displayName":"Require
         SQL Server version 12.0","policyType":"BuiltIn","description":"This policy
-        ensures all SQL servers use version 12.0.","parameters":{},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.SQL/servers"},{"not":{"field":"Microsoft.SQL/servers/version","equals":"12.0"}}]},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/464dbb85-3d5f-4a1d-bb09-95a9b5dd19cf","type":"Microsoft.Authorization/policyDefinitions","name":"464dbb85-3d5f-4a1d-bb09-95a9b5dd19cf"},{"properties":{"displayName":"[Preview]:
+        ensures all SQL servers use version 12.0.","parameters":{},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.SQL/servers"},{"not":{"field":"Microsoft.SQL/servers/version","equals":"12.0"}}]},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/464dbb85-3d5f-4a1d-bb09-95a9b5dd19cf","type":"Microsoft.Authorization/policyDefinitions","name":"464dbb85-3d5f-4a1d-bb09-95a9b5dd19cf"},{"properties":{"displayName":"Enforce
+        automatic OS upgrade with app health checks on VMSS","policyType":"BuiltIn","mode":"All","description":"This
+        policy enforces usage of automatic OS upgrade with application health checks
+        through health probes, which enables safer rollout by evaluating application
+        health after each OS upgrade batch.","metadata":null,"parameters":{},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Compute/virtualMachineScaleSets"},{"anyOf":[{"not":{"field":"Microsoft.Compute/VirtualMachineScaleSets/upgradePolicy.automaticOSUpgrade","equals":"True"}},{"field":"Microsoft.Compute/VirtualMachineScaleSets/networkProfile.healthProbe.id","exists":"False"}]}]},"then":{"effect":"deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/465f0161-0087-490a-9ad9-ad6217f4f43a","type":"Microsoft.Authorization/policyDefinitions","name":"465f0161-0087-490a-9ad9-ad6217f4f43a"},{"properties":{"displayName":"[Preview]:
         Monitor possible app Whitelisting in Security Center","policyType":"BuiltIn","mode":"All","description":"Possible
         Application Whitelist configuration will be monitored by Azure Security Center.","metadata":{"category":"Security
         Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.Compute/virtualMachines","Microsoft.ClassicCompute/virtualMachines"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"applicationWhitelisting","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/47a6b606-51aa-4496-8bb7-64b11cf66adc","type":"Microsoft.Authorization/policyDefinitions","name":"47a6b606-51aa-4496-8bb7-64b11cf66adc"},{"properties":{"displayName":"Allow
@@ -203,6 +220,11 @@ interactions:
         Monitor unencrypted SQL database in Security Center","policyType":"BuiltIn","mode":"All","description":"Unencrypted
         SQL servers or databases will be monitored by Azure Security Center as recommendations.","metadata":{"category":"Security
         Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.SQL/servers","Microsoft.SQL/servers/databases"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"encryption","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/a8bef009-a5c9-4d0f-90d7-6018734e8a16","type":"Microsoft.Authorization/policyDefinitions","name":"a8bef009-a5c9-4d0f-90d7-6018734e8a16"},{"properties":{"displayName":"[Preview]:
+        Deploy network watcher when virtual networks are created","policyType":"BuiltIn","mode":"Indexed","description":"This
+        policy creates a network watcher resource in regions with virtual networks.
+        You need to ensure existence of a resource group named networkWatcherRG, which
+        will be used to deploy network watcher instances.","metadata":{"category":"Network"},"parameters":{},"policyRule":{"if":{"field":"type","equals":"Microsoft.Network/virtualNetworks"},"then":{"effect":"DeployIfNotExists","details":{"type":"Microsoft.Network/networkWatchers","resourceGroupName":"networkWatcherRG","existenceCondition":{"field":"location","equals":"[field(''location'')]"},"deployment":{"properties":{"mode":"incremental","template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json","contentVersion":"1.0.0.0","parameters":{"location":{"type":"string"}},"resources":[{"apiVersion":"2016-09-01","type":"Microsoft.Network/networkWatchers","name":"[concat(''networkWacher_'',
+        parameters(''location''))]","location":"[parameters(''location'')]"}]},"parameters":{"location":{"value":"[field(''location'')]"}}}}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/a9b99dd8-06c5-4317-8629-9d86a3c6e7d9","type":"Microsoft.Authorization/policyDefinitions","name":"a9b99dd8-06c5-4317-8629-9d86a3c6e7d9"},{"properties":{"displayName":"[Preview]:
         Automatic provisioning of security monitoring agent","policyType":"BuiltIn","mode":"All","description":"Installs
         security agent on VMs for advanced security alerts and preventions in Azure
         Security Center. Applies only for subscriptions that use Azure Security Center.","metadata":{"category":"Security
@@ -222,7 +244,14 @@ interactions:
         recommendations.","metadata":{"category":"Security Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","equals":"Microsoft.Compute/virtualMachines"},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"jitNetworkAccess","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/b0f33259-77d7-4c9e-aac6-3aabcfae693c","type":"Microsoft.Authorization/policyDefinitions","name":"b0f33259-77d7-4c9e-aac6-3aabcfae693c"},{"properties":{"displayName":"Allow
         resource creation only in Asia data centers","policyType":"BuiltIn","description":"Allows
         resource creation in the following locations only: East Asia, Southeast Asia,
-        West India, South India, Central India, Japan East, Japan West","metadata":{"deprecated":true},"parameters":{},"policyRule":{"if":{"not":{"field":"location","in":["eastasia","southeastasia","westindia","southindia","centralindia","japaneast","japanwest"]}},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/c1b9cbed-08e3-427d-b9ce-7c535b1e9b94","type":"Microsoft.Authorization/policyDefinitions","name":"c1b9cbed-08e3-427d-b9ce-7c535b1e9b94"},{"properties":{"displayName":"Allowed
+        West India, South India, Central India, Japan East, Japan West","metadata":{"deprecated":true},"parameters":{},"policyRule":{"if":{"not":{"field":"location","in":["eastasia","southeastasia","westindia","southindia","centralindia","japaneast","japanwest"]}},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/c1b9cbed-08e3-427d-b9ce-7c535b1e9b94","type":"Microsoft.Authorization/policyDefinitions","name":"c1b9cbed-08e3-427d-b9ce-7c535b1e9b94"},{"properties":{"displayName":"[Preview]:
+        Apply Diagnostic Settings for Network Security Groups","policyType":"BuiltIn","mode":"Indexed","description":"This
+        policy automatically deploys diagnostic settings to network security groups.","metadata":{"category":"Monitoring"},"parameters":{"storagePrefix":{"type":"String","metadata":{"displayName":"Storage
+        Account Prefix for Regional Storage Accounts"}},"rgName":{"type":"String","metadata":{"displayName":"Resource
+        Group Name for Storage Accounts( must exists) ","description":"Make sure that
+        this resource group exists"}}},"policyRule":{"if":{"field":"type","equals":"Microsoft.Network/networkSecurityGroups"},"then":{"effect":"DeployIfNotExists","details":{"type":"Microsoft.Insights/diagnosticSettings","name":"setbypolicy","existenceCondition":{"field":"name","notlike":"*"},"deployment":{"properties":{"mode":"incremental","template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"location":{"type":"string"},"storagePrefix":{"type":"string"},"nsgName":{"type":"string"},"rgName":{"type":"string"}},"resources":[{"type":"Microsoft.Network/networkSecurityGroups/providers/diagnosticSettings","name":"[concat(parameters(''nsgName''),''/Microsoft.Insights/setbypolicy'')]","apiVersion":"2017-05-01-preview","location":"[parameters(''location'')]","dependsOn":["deployStorageAccount"],"properties":{"storageAccountId":"[reference(''deployStorageAccount'').outputs.storageAccountId.value]","logs":[{"category":"NetworkSecurityGroupEvent","enabled":true,"retentionPolicy":{"enabled":false,"days":0}},{"category":"NetworkSecurityGroupRuleCounter","enabled":true,"retentionPolicy":{"enabled":false,"days":0}}]}},{"apiVersion":"2017-05-10","name":"deployStorageAccount","type":"Microsoft.Resources/deployments","resourceGroup":"[parameters(''rgName'')]","properties":{"mode":"incremental","parameters":{"location":{"value":"[parameters(''location'')]"},"storagePrefix":{"value":"[parameters(''storagePrefix'')]"}},"template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json","contentVersion":"1.0.0.0","parameters":{"location":{"type":"string"},"storagePrefix":{"type":"string"}},"resources":[{"apiVersion":"2017-06-01","type":"Microsoft.Storage/storageAccounts","name":"[concat(parameters(''storageprefix''),
+        parameters(''location''))]","sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","location":"[parameters(''location'')]","tags":{"created-by":"policy"},"scale":null,"properties":{"networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"supportsHttpsTrafficOnly":false}}],"outputs":{"storageAccountId":{"type":"string","value":"[resourceId(''Microsoft.Storage/storageAccounts'',concat(parameters(''storagePrefix''),
+        parameters(''location'')))]"}}}}}]},"parameters":{"location":{"value":"[field(''location'')]"},"storagePrefix":{"value":"[parameters(''storagePrefix'')]"},"rgName":{"value":"[parameters(''rgName'')]"},"nsgName":{"value":"[field(''name'')]"}}}}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/c9c29499-c1d1-4195-99bd-2ec9e3a9dc89","type":"Microsoft.Authorization/policyDefinitions","name":"c9c29499-c1d1-4195-99bd-2ec9e3a9dc89"},{"properties":{"displayName":"Allowed
         virtual machine SKUs","policyType":"BuiltIn","description":"This policy enables
         you to specify a set of virtual machine SKUs that your organization can deploy.","parameters":{"listOfAllowedSKUs":{"type":"Array","metadata":{"description":"The
         list of SKUs that can be specified for virtual machines.","displayName":"Allowed
@@ -238,20 +267,77 @@ interactions:
         restrict the locations your organization can specify when deploying resources.
         Use to enforce your geo-compliance requirements.","parameters":{"listOfAllowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources.","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''listOfAllowedLocations'')]"}},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4c","type":"Microsoft.Authorization/policyDefinitions","name":"e56962a6-4747-49cd-b67b-bf8b01975c4c"},{"properties":{"displayName":"test_policyyype4jfip","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''listOfAllowedLocations'')]"}},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4c","type":"Microsoft.Authorization/policyDefinitions","name":"e56962a6-4747-49cd-b67b-bf8b01975c4c"},{"properties":{"displayName":"test_policy_123","policyType":"Custom","description":"test_policy_123_new","policyRule":{"then":{"effect":"deny"},"if":{"source":"action","equals":"Microsoft.Storage/storageAccounts/write"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy"},{"properties":{"displayName":"test_policy7toqexs4l","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy7jwftmifj","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy7jwftmifj"},{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy5bv5xqq2s","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy5bv5xqq2s"},{"properties":{"displayName":"test_policyjzzwqm4y6","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy6n4lauim4","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy6n4lauim4"},{"properties":{"displayName":"test_policyd3chinmpo","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy7gag66w2c","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy7gag66w2c"},{"properties":{"displayName":"test_policyu5qycnwlf","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyc4umbzyhc","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyc4umbzyhc"},{"properties":{"displayName":"test_policya4fzrevz3","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyc5rc55x4p","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyc5rc55x4p"},{"properties":{"displayName":"test_policyk2pzv6c47","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydbeyd5nrs","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydbeyd5nrs"},{"properties":{"displayName":"test_policy5wdd7p44s","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydwllppxro","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydwllppxro"},{"properties":{"displayName":"test_policykqgncz42o","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyen4kpwjri","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyen4kpwjri"},{"properties":{"displayName":"test_policy27aocag4g","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"},{"properties":{"displayName":"test_policyfwe33kqnp","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyeo24r3ah2","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyeo24r3ah2"},{"properties":{"displayName":"test_policyojil4bfhq","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyguhpc2m5m","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyguhpc2m5m"},{"properties":{"displayName":"test_policyefslsptce","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyt47o36wqj","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyt47o36wqj"},{"properties":{"displayName":"test_policy5b2y566sk","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policygz5kk3f55","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policygz5kk3f55"},{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"},{"properties":{"displayName":"test_policyx4niz5vcs","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policykg3zihtqy","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policykg3zihtqy"},{"properties":{"displayName":"test_policylhbmrfp7w","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyksyxxdyya","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyksyxxdyya"},{"properties":{"displayName":"test_policyrzb2xkuhz","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policylkrr6nhlt","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policylkrr6nhlt"},{"properties":{"displayName":"test_policyhgogvepjw","policyType":"Custom","description":"desc_for_test_policyfqy7r5mevl_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policynu7qdqhyx","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policynu7qdqhyx"},{"properties":{"displayName":"test_policy3tahlkd4m","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyolabnf6yy","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyolabnf6yy"},{"properties":{"displayName":"test_policymkzeabila","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyomrb4sutu","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyomrb4sutu"},{"properties":{"displayName":"test_policyk75qnukyv","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyoyvpdhear","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyoyvpdhear"},{"properties":{"displayName":"test_policykh4s2a4ui","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyqb5zw2eww","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyqb5zw2eww"},{"properties":{"displayName":"test_policyzflwtkscw","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyqccgcpztw","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyqccgcpztw"},{"properties":{"displayName":"test_policynmaaabsby","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyqd7cpusnm","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyqd7cpusnm"},{"properties":{"displayName":"test_policy7gsfjonhc","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyv3tsinwfz","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyv3tsinwfz"},{"properties":{"displayName":"testDisplay","policyType":"Custom","description":"testDescription","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk8248","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk8248"},{"properties":{"policyType":"Custom","policyRule":{"if":{"source":"action","equals":"blah"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/test2","type":"Microsoft.Authorization/policyDefinitions","name":"test2"}]}'}
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyrsj7lfr2i","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyrsj7lfr2i"},{"properties":{"displayName":"test_policywxbyfsjzc","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyt7cuhddjz","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyt7cuhddjz"},{"properties":{"displayName":"test_policyz2xf2xsbl","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policytmvrvgr3a","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policytmvrvgr3a"},{"properties":{"displayName":"test_policyynmv24m7h","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyuqflm5wvo","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyuqflm5wvo"},{"properties":{"displayName":"test_policyxo4pjk6go","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyuwg53dgxl","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyuwg53dgxl"},{"properties":{"displayName":"test_policytoadasrnk","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyvzg2lmmuj","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyvzg2lmmuj"},{"properties":{"displayName":"test_policy34l3jvnur","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policywmqiqdaub","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policywmqiqdaub"},{"properties":{"displayName":"test_policyh63lq22yy","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyxlkjobh5l","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyxlkjobh5l"},{"properties":{"displayName":"test_policyyxqr7mttl","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyy4snzm2ry","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyy4snzm2ry"},{"properties":{"displayName":"My
+        Policy","policyType":"Custom","description":"This is my policy","policyRule":{"if":{"not":{"field":"location","in":["northeurope","westeurope"]}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy1","type":"Microsoft.Authorization/policyDefinitions","name":"policy1"},{"properties":{"displayName":"useless
+        policy just for tetsing","policyType":"Custom","description":"some testing
+        policy","policyRule":{"if":{"source":"action","equals":"Microsoft.Storage/storageAccounts/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/yugangw-policy","type":"Microsoft.Authorization/policyDefinitions","name":"yugangw-policy"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['28202']
+      content-length: ['56691']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:05 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:18 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -266,20 +352,20 @@ interactions:
       CommandName: [policy definition show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
   response:
-    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
-        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['674']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:05 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:19 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -294,20 +380,20 @@ interactions:
       CommandName: [policy assignment create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
   response:
-    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
-        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['674']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:06 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:18 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -315,11 +401,11 @@ interactions:
       vary: ['Accept-Encoding,Accept-Encoding']
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''b\\\''{"properties": {"displayName": "test_assignment000005", "policyDefinitionId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002",
-      "scope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001",
-      "parameters": {"allowedLocations": {"value": ["australiaeast", "eastus", "japaneast",
-      "westus"]}}}, "sku": {"name": "A0", "tier": "Free"}}\\\''\'''''
+    body: 'b''b\''b\\\''{"sku": {"tier": "Free", "name": "A0"}, "properties": {"scope":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001",
+      "displayName": "test_assignment000005", "parameters": {"allowedLocations": {"value":
+      ["australiaeast", "eastus", "japaneast", "westus"]}}, "policyDefinitionId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002"}}\\\''\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -327,8 +413,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['508']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000004?api-version=2017-06-01-preview
@@ -338,11 +424,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['834']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:06 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:20 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -352,9 +438,9 @@ interactions:
       CommandName: [group show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy000001?api-version=2017-05-10
@@ -364,7 +450,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:06 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:20 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -378,9 +464,9 @@ interactions:
       CommandName: [network vnet create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy000001?api-version=2017-05-10
@@ -390,16 +476,16 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:14 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:20 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {}, "subnets": [{"properties": {"addressPrefix":
-      "10.0.0.0/24"}, "name": "azurecli-test-policy-subnet000007"}]}}'''
+    body: 'b''{"properties": {"subnets": [{"properties": {"addressPrefix": "10.0.0.0/24"},
+      "name": "azurecli-test-policy-subnet000007"}], "addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}, "dhcpOptions": {}}, "location": "westus", "tags": {}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -407,39 +493,38 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['238']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 networkmanagementclient/1.5.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks/azurecli-test-policy-vnet000006?api-version=2017-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks/azurecli-test-policy-vnet000006?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"name\": \"azurecli-test-policy-vnet000006\",\r\n  \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks/azurecli-test-policy-vnet000006\"\
-        ,\r\n  \"etag\": \"W/\\\"e00d9660-6c81-4103-9bdf-18440bf587a6\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"665850e5-49b1-4ea7-a794-e87e961a6f19\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\"\
         ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Updating\",\r\n    \"resourceGuid\": \"220bcaf6-bc21-45a1-95a3-a990e3376c68\"\
+        \ \"Updating\",\r\n    \"resourceGuid\": \"84cdd8a0-3010-45b4-ae02-e1da81095af9\"\
         ,\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"\
         10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\"\
         : []\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"azurecli-test-policy-subnet000007\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks/azurecli-test-policy-vnet000006/subnets/azurecli-test-policy-subnet000007\"\
-        ,\r\n        \"etag\": \"W/\\\"e00d9660-6c81-4103-9bdf-18440bf587a6\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"665850e5-49b1-4ea7-a794-e87e961a6f19\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"addressPrefix\": \"10.0.0.0/24\"\r\n        }\r\n      }\r\
         \n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\"\
         : false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3f42f690-6433-430d-ac0c-d81686da984e?api-version=2017-09-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/846e3253-4552-4bd1-952c-2fe864fc56ef?api-version=2017-11-01']
       cache-control: [no-cache]
       content-length: ['1401']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:15 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:22 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -449,19 +534,18 @@ interactions:
       CommandName: [network vnet create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 networkmanagementclient/1.5.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3f42f690-6433-430d-ac0c-d81686da984e?api-version=2017-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/846e3253-4552-4bd1-952c-2fe864fc56ef?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['29']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:19 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:25 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -477,24 +561,23 @@ interactions:
       CommandName: [network vnet create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 networkmanagementclient/1.5.0rc3 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks/azurecli-test-policy-vnet000006?api-version=2017-09-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks/azurecli-test-policy-vnet000006?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"name\": \"azurecli-test-policy-vnet000006\",\r\n  \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks/azurecli-test-policy-vnet000006\"\
-        ,\r\n  \"etag\": \"W/\\\"482dcc6c-0daf-4c59-89c6-71996648dd50\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"3b72bea3-abbe-47fa-94ac-2b0b9ee4ceaf\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\"\
         ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Succeeded\",\r\n    \"resourceGuid\": \"220bcaf6-bc21-45a1-95a3-a990e3376c68\"\
+        \ \"Succeeded\",\r\n    \"resourceGuid\": \"84cdd8a0-3010-45b4-ae02-e1da81095af9\"\
         ,\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"\
         10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\"\
         : []\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"azurecli-test-policy-subnet000007\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks/azurecli-test-policy-vnet000006/subnets/azurecli-test-policy-subnet000007\"\
-        ,\r\n        \"etag\": \"W/\\\"482dcc6c-0daf-4c59-89c6-71996648dd50\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"3b72bea3-abbe-47fa-94ac-2b0b9ee4ceaf\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
         ,\r\n          \"addressPrefix\": \"10.0.0.0/24\"\r\n        }\r\n      }\r\
         \n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\"\
@@ -503,8 +586,8 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1403']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:20 GMT']
-      etag: [W/"482dcc6c-0daf-4c59-89c6-71996648dd50"]
+      date: ['Wed, 13 Dec 2017 21:11:25 GMT']
+      etag: [W/"3b72bea3-abbe-47fa-94ac-2b0b9ee4ceaf"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -520,32 +603,32 @@ interactions:
       CommandName: [policy assignment create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
   response:
-    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
-        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['674']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:19 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:25 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''b\\\''{"properties": {"displayName": "test_assignment000005", "policyDefinitionId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002",
+    body: 'b''b\''b\\\''{"sku": {"tier": "Standard", "name": "A1"}, "properties":
+      {"policyDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002",
       "scope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001",
-      "notScopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks"],
-      "parameters": {"allowedLocations": {"value": ["australiaeast", "eastus", "japaneast",
-      "westus"]}}}, "sku": {"name": "A1", "tier": "Standard"}}\\\''\'''''
+      "displayName": "test_assignment000005", "parameters": {"allowedLocations": {"value":
+      ["australiaeast", "eastus", "japaneast", "westus"]}}, "notScopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks"]}}\\\''\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -553,8 +636,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['717']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000004?api-version=2017-06-01-preview
@@ -564,11 +647,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1041']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:20 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:26 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1191']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -578,8 +661,8 @@ interactions:
       CommandName: [policy definition list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions?api-version=2016-12-01
@@ -597,7 +680,19 @@ interactions:
         Monitor unprotected web application in Security Center","policyType":"BuiltIn","mode":"All","description":"Web
         applications without a Web Application Firewall protection will be monitored
         by Azure Security Center as recommendations.","metadata":{"category":"Security
-        Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.Network/publicIPAddresses","Microsoft.ClassicCompute/domainNames","Microsoft.Web/hostingEnvironments"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"unprotectedWebApplication","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/201ea587-7c90-41c3-910f-c280ae01cfd6","type":"Microsoft.Authorization/policyDefinitions","name":"201ea587-7c90-41c3-910f-c280ae01cfd6"},{"properties":{"displayName":"Apply
+        Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.Network/publicIPAddresses","Microsoft.ClassicCompute/domainNames","Microsoft.Web/hostingEnvironments"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"unprotectedWebApplication","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/201ea587-7c90-41c3-910f-c280ae01cfd6","type":"Microsoft.Authorization/policyDefinitions","name":"201ea587-7c90-41c3-910f-c280ae01cfd6"},{"properties":{"displayName":"[Preview]:
+        Deploy default Microsoft IaaSAntimalware extension for Windows Server","policyType":"BuiltIn","mode":"Indexed","description":"This
+        policy deploys a Microsoft IaaSAntimalware extension with a default configuraion
+        when a VM is not configured with the antimalware extension.","metadata":{"category":"Compute"},"parameters":{},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Compute/virtualMachines"},{"field":"Microsoft.Compute/imagePublisher","equals":"MicrosoftWindowsServer"},{"field":"Microsoft.Compute/imageOffer","equals":"WindowsServer"},{"field":"Microsoft.Compute/imageSKU","in":["2008-R2-SP1","2008-R2-SP1-smalldisk","2012-Datacenter","2012-Datacenter-smalldisk","2012-R2-Datacenter","2012-R2-Datacenter-smalldisk","2016-Datacenter","2016-Datacenter-Server-Core","2016-Datacenter-Server-Core-smalldisk","2016-Datacenter-smalldisk","2016-Datacenter-with-Containers","2016-Datacenter-with-RDSH"]}]},"then":{"effect":"deployIfNotExists","details":{"type":"Microsoft.Compute/virtualMachines/extensions","existenceCondition":{"allOf":[{"field":"Microsoft.Compute/virtualMachines/extensions/type","equals":"IaaSAntimalware"},{"field":"Microsoft.Compute/virtualMachines/extensions/publisher","equals":"Microsoft.Azure.Security"}]},"deployment":{"properties":{"mode":"incremental","template":{"$schema":"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"vmName":{"type":"string"},"location":{"type":"string"},"ExclusionsPaths":{"type":"string","defaultValue":"","metadata":{"description":"Semicolon
+        delimited list of file paths or locations to exclude from scanning"}},"ExclusionsExtensions":{"type":"string","defaultValue":"","metadata":{"description":"Semicolon
+        delimited list of file extensions to exclude from scanning"}},"ExclusionsProcesses":{"type":"string","defaultValue":"","metadata":{"description":"Semicolon
+        delimited list of process names to exclude from scanning"}},"RealtimeProtectionEnabled":{"type":"string","defaultValue":"true","metadata":{"description":"Indicates
+        whether or not real time protection is enabled (default is true)"}},"ScheduledScanSettingsIsEnabled":{"type":"string","defaultValue":"false","metadata":{"description":"Indicates
+        whether or not custom scheduled scan settings are enabled (default is false)"}},"ScheduledScanSettingsScanType":{"type":"string","defaultValue":"Quick","metadata":{"description":"Indicates
+        whether scheduled scan setting type is set to Quick or Full (default is Quick)"}},"ScheduledScanSettingsDay":{"type":"string","defaultValue":"7","metadata":{"description":"Day
+        of the week for scheduled scan (1-Sunday, 2-Monday, ..., 7-Saturday)"}},"ScheduledScanSettingsTime":{"type":"string","defaultValue":"120","metadata":{"description":"When
+        to perform the scheduled scan, measured in minutes from midnight (0-1440).
+        For example: 0 = 12AM, 60 = 1AM, 120 = 2AM."}}},"resources":[{"name":"[concat(parameters(''vmName''),''/IaaSAntimalware'')]","type":"Microsoft.Compute/virtualMachines/extensions","location":"[parameters(''location'')]","apiVersion":"2015-06-15","properties":{"publisher":"Microsoft.Azure.Security","type":"IaaSAntimalware","typeHandlerVersion":"1.3","autoUpgradeMinorVersion":true,"settings":{"AntimalwareEnabled":true,"RealtimeProtectionEnabled":"[parameters(''RealtimeProtectionEnabled'')]","ScheduledScanSettings":{"isEnabled":"[parameters(''ScheduledScanSettingsIsEnabled'')]","day":"[parameters(''ScheduledScanSettingsDay'')]","time":"[parameters(''ScheduledScanSettingsTime'')]","scanType":"[parameters(''ScheduledScanSettingsScanType'')]"},"Exclusions":{"Extensions":"[parameters(''ExclusionsExtensions'')]","Paths":"[parameters(''ExclusionsPaths'')]","Processes":"[parameters(''ExclusionsProcesses'')]"}}}}]},"parameters":{"vmName":{"value":"[field(''name'')]"},"location":{"value":"[field(''location'')]"},"RealtimeProtectionEnabled":{"value":"true"},"ScheduledScanSettingsIsEnabled":{"value":"true"}}}}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/2835b622-407b-4114-9198-6f7064cbe0dc","type":"Microsoft.Authorization/policyDefinitions","name":"2835b622-407b-4114-9198-6f7064cbe0dc"},{"properties":{"displayName":"Apply
         tag and its default value","policyType":"BuiltIn","description":"Applies a
         required tag and its default value if it is not specified by the user.","parameters":{"tagName":{"type":"String","metadata":{"description":"Name
         of the tag, such as costCenter","strongType":"tagName"}},"tagValue":{"type":"String","metadata":{"description":"Value
@@ -606,7 +701,11 @@ interactions:
         Security Groups with too permissive rules will be monitored by Azure Security
         Center as recommendations.","metadata":{"category":"Security Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.Compute/virtualMachines","Microsoft.ClassicCompute/virtualMachines","Microsoft.Network/virtualNetworks","Microsoft.ClassicNetwork/virtualNetworks"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"permissiveNetworkAccess","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/44452482-524f-4bf4-b852-0bff7cc4a3ed","type":"Microsoft.Authorization/policyDefinitions","name":"44452482-524f-4bf4-b852-0bff7cc4a3ed"},{"properties":{"displayName":"Require
         SQL Server version 12.0","policyType":"BuiltIn","description":"This policy
-        ensures all SQL servers use version 12.0.","parameters":{},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.SQL/servers"},{"not":{"field":"Microsoft.SQL/servers/version","equals":"12.0"}}]},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/464dbb85-3d5f-4a1d-bb09-95a9b5dd19cf","type":"Microsoft.Authorization/policyDefinitions","name":"464dbb85-3d5f-4a1d-bb09-95a9b5dd19cf"},{"properties":{"displayName":"[Preview]:
+        ensures all SQL servers use version 12.0.","parameters":{},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.SQL/servers"},{"not":{"field":"Microsoft.SQL/servers/version","equals":"12.0"}}]},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/464dbb85-3d5f-4a1d-bb09-95a9b5dd19cf","type":"Microsoft.Authorization/policyDefinitions","name":"464dbb85-3d5f-4a1d-bb09-95a9b5dd19cf"},{"properties":{"displayName":"Enforce
+        automatic OS upgrade with app health checks on VMSS","policyType":"BuiltIn","mode":"All","description":"This
+        policy enforces usage of automatic OS upgrade with application health checks
+        through health probes, which enables safer rollout by evaluating application
+        health after each OS upgrade batch.","metadata":null,"parameters":{},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Compute/virtualMachineScaleSets"},{"anyOf":[{"not":{"field":"Microsoft.Compute/VirtualMachineScaleSets/upgradePolicy.automaticOSUpgrade","equals":"True"}},{"field":"Microsoft.Compute/VirtualMachineScaleSets/networkProfile.healthProbe.id","exists":"False"}]}]},"then":{"effect":"deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/465f0161-0087-490a-9ad9-ad6217f4f43a","type":"Microsoft.Authorization/policyDefinitions","name":"465f0161-0087-490a-9ad9-ad6217f4f43a"},{"properties":{"displayName":"[Preview]:
         Monitor possible app Whitelisting in Security Center","policyType":"BuiltIn","mode":"All","description":"Possible
         Application Whitelist configuration will be monitored by Azure Security Center.","metadata":{"category":"Security
         Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.Compute/virtualMachines","Microsoft.ClassicCompute/virtualMachines"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"applicationWhitelisting","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/47a6b606-51aa-4496-8bb7-64b11cf66adc","type":"Microsoft.Authorization/policyDefinitions","name":"47a6b606-51aa-4496-8bb7-64b11cf66adc"},{"properties":{"displayName":"Allow
@@ -654,6 +753,11 @@ interactions:
         Monitor unencrypted SQL database in Security Center","policyType":"BuiltIn","mode":"All","description":"Unencrypted
         SQL servers or databases will be monitored by Azure Security Center as recommendations.","metadata":{"category":"Security
         Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.SQL/servers","Microsoft.SQL/servers/databases"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"encryption","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/a8bef009-a5c9-4d0f-90d7-6018734e8a16","type":"Microsoft.Authorization/policyDefinitions","name":"a8bef009-a5c9-4d0f-90d7-6018734e8a16"},{"properties":{"displayName":"[Preview]:
+        Deploy network watcher when virtual networks are created","policyType":"BuiltIn","mode":"Indexed","description":"This
+        policy creates a network watcher resource in regions with virtual networks.
+        You need to ensure existence of a resource group named networkWatcherRG, which
+        will be used to deploy network watcher instances.","metadata":{"category":"Network"},"parameters":{},"policyRule":{"if":{"field":"type","equals":"Microsoft.Network/virtualNetworks"},"then":{"effect":"DeployIfNotExists","details":{"type":"Microsoft.Network/networkWatchers","resourceGroupName":"networkWatcherRG","existenceCondition":{"field":"location","equals":"[field(''location'')]"},"deployment":{"properties":{"mode":"incremental","template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json","contentVersion":"1.0.0.0","parameters":{"location":{"type":"string"}},"resources":[{"apiVersion":"2016-09-01","type":"Microsoft.Network/networkWatchers","name":"[concat(''networkWacher_'',
+        parameters(''location''))]","location":"[parameters(''location'')]"}]},"parameters":{"location":{"value":"[field(''location'')]"}}}}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/a9b99dd8-06c5-4317-8629-9d86a3c6e7d9","type":"Microsoft.Authorization/policyDefinitions","name":"a9b99dd8-06c5-4317-8629-9d86a3c6e7d9"},{"properties":{"displayName":"[Preview]:
         Automatic provisioning of security monitoring agent","policyType":"BuiltIn","mode":"All","description":"Installs
         security agent on VMs for advanced security alerts and preventions in Azure
         Security Center. Applies only for subscriptions that use Azure Security Center.","metadata":{"category":"Security
@@ -673,7 +777,14 @@ interactions:
         recommendations.","metadata":{"category":"Security Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","equals":"Microsoft.Compute/virtualMachines"},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"jitNetworkAccess","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/b0f33259-77d7-4c9e-aac6-3aabcfae693c","type":"Microsoft.Authorization/policyDefinitions","name":"b0f33259-77d7-4c9e-aac6-3aabcfae693c"},{"properties":{"displayName":"Allow
         resource creation only in Asia data centers","policyType":"BuiltIn","description":"Allows
         resource creation in the following locations only: East Asia, Southeast Asia,
-        West India, South India, Central India, Japan East, Japan West","metadata":{"deprecated":true},"parameters":{},"policyRule":{"if":{"not":{"field":"location","in":["eastasia","southeastasia","westindia","southindia","centralindia","japaneast","japanwest"]}},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/c1b9cbed-08e3-427d-b9ce-7c535b1e9b94","type":"Microsoft.Authorization/policyDefinitions","name":"c1b9cbed-08e3-427d-b9ce-7c535b1e9b94"},{"properties":{"displayName":"Allowed
+        West India, South India, Central India, Japan East, Japan West","metadata":{"deprecated":true},"parameters":{},"policyRule":{"if":{"not":{"field":"location","in":["eastasia","southeastasia","westindia","southindia","centralindia","japaneast","japanwest"]}},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/c1b9cbed-08e3-427d-b9ce-7c535b1e9b94","type":"Microsoft.Authorization/policyDefinitions","name":"c1b9cbed-08e3-427d-b9ce-7c535b1e9b94"},{"properties":{"displayName":"[Preview]:
+        Apply Diagnostic Settings for Network Security Groups","policyType":"BuiltIn","mode":"Indexed","description":"This
+        policy automatically deploys diagnostic settings to network security groups.","metadata":{"category":"Monitoring"},"parameters":{"storagePrefix":{"type":"String","metadata":{"displayName":"Storage
+        Account Prefix for Regional Storage Accounts"}},"rgName":{"type":"String","metadata":{"displayName":"Resource
+        Group Name for Storage Accounts( must exists) ","description":"Make sure that
+        this resource group exists"}}},"policyRule":{"if":{"field":"type","equals":"Microsoft.Network/networkSecurityGroups"},"then":{"effect":"DeployIfNotExists","details":{"type":"Microsoft.Insights/diagnosticSettings","name":"setbypolicy","existenceCondition":{"field":"name","notlike":"*"},"deployment":{"properties":{"mode":"incremental","template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"location":{"type":"string"},"storagePrefix":{"type":"string"},"nsgName":{"type":"string"},"rgName":{"type":"string"}},"resources":[{"type":"Microsoft.Network/networkSecurityGroups/providers/diagnosticSettings","name":"[concat(parameters(''nsgName''),''/Microsoft.Insights/setbypolicy'')]","apiVersion":"2017-05-01-preview","location":"[parameters(''location'')]","dependsOn":["deployStorageAccount"],"properties":{"storageAccountId":"[reference(''deployStorageAccount'').outputs.storageAccountId.value]","logs":[{"category":"NetworkSecurityGroupEvent","enabled":true,"retentionPolicy":{"enabled":false,"days":0}},{"category":"NetworkSecurityGroupRuleCounter","enabled":true,"retentionPolicy":{"enabled":false,"days":0}}]}},{"apiVersion":"2017-05-10","name":"deployStorageAccount","type":"Microsoft.Resources/deployments","resourceGroup":"[parameters(''rgName'')]","properties":{"mode":"incremental","parameters":{"location":{"value":"[parameters(''location'')]"},"storagePrefix":{"value":"[parameters(''storagePrefix'')]"}},"template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json","contentVersion":"1.0.0.0","parameters":{"location":{"type":"string"},"storagePrefix":{"type":"string"}},"resources":[{"apiVersion":"2017-06-01","type":"Microsoft.Storage/storageAccounts","name":"[concat(parameters(''storageprefix''),
+        parameters(''location''))]","sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","location":"[parameters(''location'')]","tags":{"created-by":"policy"},"scale":null,"properties":{"networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"supportsHttpsTrafficOnly":false}}],"outputs":{"storageAccountId":{"type":"string","value":"[resourceId(''Microsoft.Storage/storageAccounts'',concat(parameters(''storagePrefix''),
+        parameters(''location'')))]"}}}}}]},"parameters":{"location":{"value":"[field(''location'')]"},"storagePrefix":{"value":"[parameters(''storagePrefix'')]"},"rgName":{"value":"[parameters(''rgName'')]"},"nsgName":{"value":"[field(''name'')]"}}}}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/c9c29499-c1d1-4195-99bd-2ec9e3a9dc89","type":"Microsoft.Authorization/policyDefinitions","name":"c9c29499-c1d1-4195-99bd-2ec9e3a9dc89"},{"properties":{"displayName":"Allowed
         virtual machine SKUs","policyType":"BuiltIn","description":"This policy enables
         you to specify a set of virtual machine SKUs that your organization can deploy.","parameters":{"listOfAllowedSKUs":{"type":"Array","metadata":{"description":"The
         list of SKUs that can be specified for virtual machines.","displayName":"Allowed
@@ -689,20 +800,77 @@ interactions:
         restrict the locations your organization can specify when deploying resources.
         Use to enforce your geo-compliance requirements.","parameters":{"listOfAllowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources.","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''listOfAllowedLocations'')]"}},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4c","type":"Microsoft.Authorization/policyDefinitions","name":"e56962a6-4747-49cd-b67b-bf8b01975c4c"},{"properties":{"displayName":"test_policyyype4jfip","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''listOfAllowedLocations'')]"}},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4c","type":"Microsoft.Authorization/policyDefinitions","name":"e56962a6-4747-49cd-b67b-bf8b01975c4c"},{"properties":{"displayName":"test_policy_123","policyType":"Custom","description":"test_policy_123_new","policyRule":{"then":{"effect":"deny"},"if":{"source":"action","equals":"Microsoft.Storage/storageAccounts/write"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy"},{"properties":{"displayName":"test_policy7toqexs4l","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy7jwftmifj","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy7jwftmifj"},{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy5bv5xqq2s","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy5bv5xqq2s"},{"properties":{"displayName":"test_policyjzzwqm4y6","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy6n4lauim4","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy6n4lauim4"},{"properties":{"displayName":"test_policyd3chinmpo","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy7gag66w2c","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy7gag66w2c"},{"properties":{"displayName":"test_policyu5qycnwlf","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyc4umbzyhc","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyc4umbzyhc"},{"properties":{"displayName":"test_policya4fzrevz3","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyc5rc55x4p","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyc5rc55x4p"},{"properties":{"displayName":"test_policyk2pzv6c47","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydbeyd5nrs","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydbeyd5nrs"},{"properties":{"displayName":"test_policy5wdd7p44s","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydwllppxro","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydwllppxro"},{"properties":{"displayName":"test_policykqgncz42o","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyen4kpwjri","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyen4kpwjri"},{"properties":{"displayName":"test_policy27aocag4g","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"},{"properties":{"displayName":"test_policyfwe33kqnp","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyeo24r3ah2","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyeo24r3ah2"},{"properties":{"displayName":"test_policyojil4bfhq","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyguhpc2m5m","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyguhpc2m5m"},{"properties":{"displayName":"test_policyefslsptce","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyt47o36wqj","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyt47o36wqj"},{"properties":{"displayName":"test_policy5b2y566sk","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policygz5kk3f55","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policygz5kk3f55"},{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"},{"properties":{"displayName":"test_policyx4niz5vcs","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policykg3zihtqy","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policykg3zihtqy"},{"properties":{"displayName":"test_policylhbmrfp7w","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyksyxxdyya","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyksyxxdyya"},{"properties":{"displayName":"test_policyrzb2xkuhz","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policylkrr6nhlt","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policylkrr6nhlt"},{"properties":{"displayName":"test_policyhgogvepjw","policyType":"Custom","description":"desc_for_test_policyfqy7r5mevl_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policynu7qdqhyx","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policynu7qdqhyx"},{"properties":{"displayName":"test_policy3tahlkd4m","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyolabnf6yy","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyolabnf6yy"},{"properties":{"displayName":"test_policymkzeabila","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyomrb4sutu","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyomrb4sutu"},{"properties":{"displayName":"test_policyk75qnukyv","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyoyvpdhear","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyoyvpdhear"},{"properties":{"displayName":"test_policykh4s2a4ui","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyqb5zw2eww","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyqb5zw2eww"},{"properties":{"displayName":"test_policyzflwtkscw","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyqccgcpztw","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyqccgcpztw"},{"properties":{"displayName":"test_policynmaaabsby","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyqd7cpusnm","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyqd7cpusnm"},{"properties":{"displayName":"test_policy7gsfjonhc","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyv3tsinwfz","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyv3tsinwfz"},{"properties":{"displayName":"testDisplay","policyType":"Custom","description":"testDescription","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk8248","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk8248"},{"properties":{"policyType":"Custom","policyRule":{"if":{"source":"action","equals":"blah"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/test2","type":"Microsoft.Authorization/policyDefinitions","name":"test2"}]}'}
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyrsj7lfr2i","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyrsj7lfr2i"},{"properties":{"displayName":"test_policywxbyfsjzc","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyt7cuhddjz","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyt7cuhddjz"},{"properties":{"displayName":"test_policyz2xf2xsbl","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policytmvrvgr3a","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policytmvrvgr3a"},{"properties":{"displayName":"test_policyynmv24m7h","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyuqflm5wvo","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyuqflm5wvo"},{"properties":{"displayName":"test_policyxo4pjk6go","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyuwg53dgxl","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyuwg53dgxl"},{"properties":{"displayName":"test_policytoadasrnk","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyvzg2lmmuj","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyvzg2lmmuj"},{"properties":{"displayName":"test_policy34l3jvnur","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policywmqiqdaub","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policywmqiqdaub"},{"properties":{"displayName":"test_policyh63lq22yy","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyxlkjobh5l","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyxlkjobh5l"},{"properties":{"displayName":"test_policyyxqr7mttl","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyy4snzm2ry","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyy4snzm2ry"},{"properties":{"displayName":"My
+        Policy","policyType":"Custom","description":"This is my policy","policyRule":{"if":{"not":{"field":"location","in":["northeurope","westeurope"]}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy1","type":"Microsoft.Authorization/policyDefinitions","name":"policy1"},{"properties":{"displayName":"useless
+        policy just for tetsing","policyType":"Custom","description":"some testing
+        policy","policyRule":{"if":{"source":"action","equals":"Microsoft.Storage/storageAccounts/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/yugangw-policy","type":"Microsoft.Authorization/policyDefinitions","name":"yugangw-policy"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['28202']
+      content-length: ['56691']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:20 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:27 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -717,8 +885,8 @@ interactions:
       CommandName: [policy assignment create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d?api-version=2016-12-01
@@ -729,7 +897,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['138']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:21 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:28 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -742,8 +910,8 @@ interactions:
       CommandName: [policy assignment create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d?api-version=2016-12-01
@@ -755,17 +923,17 @@ interactions:
       cache-control: [no-cache]
       content-length: ['877']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:21 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:27 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''{"properties": {"displayName": "test_assignment000005", "policyDefinitionId":
-      "/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d",
-      "scope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001"},
-      "sku": {"name": "A0", "tier": "Free"}}\'''''
+    body: 'b''b\''{"sku": {"tier": "Free", "name": "A0"}, "properties": {"scope":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001",
+      "displayName": "test_assignment000005", "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d"}}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -773,8 +941,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['364']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment2000008?api-version=2017-06-01-preview
@@ -784,11 +952,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['697']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:25 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:28 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -799,8 +967,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment2000008?api-version=2017-06-01-preview
@@ -810,13 +978,13 @@ interactions:
       cache-control: [no-cache]
       content-length: ['697']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:26 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
-      x-ms-ratelimit-remaining-subscription-writes: ['1182']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -826,18 +994,18 @@ interactions:
       CommandName: [policy assignment list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2017-06-01-preview
   response:
-    body: {string: '{"value":[{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk8248","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yangl-test-export"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yangl-test-export/providers/Microsoft.Authorization/policyAssignments/testvivek","type":"Microsoft.Authorization/policyAssignments","name":"testvivek"},{"sku":{"name":"A1","tier":"Standard"},"properties":{"displayName":"test_assignment000005","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001","notScopes":["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks"],"parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000004","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000004"}]}'}
+    body: {string: '{"value":[{"sku":{"name":"A1","tier":"Standard"},"properties":{"displayName":"test_assignment000005","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001","notScopes":["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks"],"parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000004","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000004"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1561']
+      content-length: ['1053']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:26 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -852,18 +1020,18 @@ interactions:
       CommandName: [policy assignment list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2017-06-01-preview
   response:
-    body: {string: '{"value":[{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk8248","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yangl-test-export"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yangl-test-export/providers/Microsoft.Authorization/policyAssignments/testvivek","type":"Microsoft.Authorization/policyAssignments","name":"testvivek"},{"sku":{"name":"A1","tier":"Standard"},"properties":{"displayName":"test_assignment000005","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001","notScopes":["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks"],"parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000004","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000004"}]}'}
+    body: {string: '{"value":[{"sku":{"name":"A1","tier":"Standard"},"properties":{"displayName":"test_assignment000005","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001","notScopes":["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks"],"parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000004","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000004"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1561']
+      content-length: ['1053']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:27 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -879,8 +1047,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000004?api-version=2017-06-01-preview
@@ -890,13 +1058,13 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1041']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:29 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -906,18 +1074,18 @@ interactions:
       CommandName: [policy assignment list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2017-06-01-preview
   response:
-    body: {string: '{"value":[{"sku":{"name":"A0","tier":"Free"},"properties":{"policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk8248","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yangl-test-export"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yangl-test-export/providers/Microsoft.Authorization/policyAssignments/testvivek","type":"Microsoft.Authorization/policyAssignments","name":"testvivek"}]}'}
+    body: {string: '{"value":[]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['519']
+      content-length: ['12']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:29 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:30 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -933,26 +1101,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
   response:
-    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
-        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['674']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:30 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:31 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
-      x-ms-ratelimit-remaining-subscription-writes: ['1182']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -962,8 +1130,8 @@ interactions:
       CommandName: [policy definition list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 policyclient/1.2.0 Azure-SDK-For-Python AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions?api-version=2016-12-01
@@ -981,7 +1149,19 @@ interactions:
         Monitor unprotected web application in Security Center","policyType":"BuiltIn","mode":"All","description":"Web
         applications without a Web Application Firewall protection will be monitored
         by Azure Security Center as recommendations.","metadata":{"category":"Security
-        Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.Network/publicIPAddresses","Microsoft.ClassicCompute/domainNames","Microsoft.Web/hostingEnvironments"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"unprotectedWebApplication","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/201ea587-7c90-41c3-910f-c280ae01cfd6","type":"Microsoft.Authorization/policyDefinitions","name":"201ea587-7c90-41c3-910f-c280ae01cfd6"},{"properties":{"displayName":"Apply
+        Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.Network/publicIPAddresses","Microsoft.ClassicCompute/domainNames","Microsoft.Web/hostingEnvironments"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"unprotectedWebApplication","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/201ea587-7c90-41c3-910f-c280ae01cfd6","type":"Microsoft.Authorization/policyDefinitions","name":"201ea587-7c90-41c3-910f-c280ae01cfd6"},{"properties":{"displayName":"[Preview]:
+        Deploy default Microsoft IaaSAntimalware extension for Windows Server","policyType":"BuiltIn","mode":"Indexed","description":"This
+        policy deploys a Microsoft IaaSAntimalware extension with a default configuraion
+        when a VM is not configured with the antimalware extension.","metadata":{"category":"Compute"},"parameters":{},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Compute/virtualMachines"},{"field":"Microsoft.Compute/imagePublisher","equals":"MicrosoftWindowsServer"},{"field":"Microsoft.Compute/imageOffer","equals":"WindowsServer"},{"field":"Microsoft.Compute/imageSKU","in":["2008-R2-SP1","2008-R2-SP1-smalldisk","2012-Datacenter","2012-Datacenter-smalldisk","2012-R2-Datacenter","2012-R2-Datacenter-smalldisk","2016-Datacenter","2016-Datacenter-Server-Core","2016-Datacenter-Server-Core-smalldisk","2016-Datacenter-smalldisk","2016-Datacenter-with-Containers","2016-Datacenter-with-RDSH"]}]},"then":{"effect":"deployIfNotExists","details":{"type":"Microsoft.Compute/virtualMachines/extensions","existenceCondition":{"allOf":[{"field":"Microsoft.Compute/virtualMachines/extensions/type","equals":"IaaSAntimalware"},{"field":"Microsoft.Compute/virtualMachines/extensions/publisher","equals":"Microsoft.Azure.Security"}]},"deployment":{"properties":{"mode":"incremental","template":{"$schema":"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"vmName":{"type":"string"},"location":{"type":"string"},"ExclusionsPaths":{"type":"string","defaultValue":"","metadata":{"description":"Semicolon
+        delimited list of file paths or locations to exclude from scanning"}},"ExclusionsExtensions":{"type":"string","defaultValue":"","metadata":{"description":"Semicolon
+        delimited list of file extensions to exclude from scanning"}},"ExclusionsProcesses":{"type":"string","defaultValue":"","metadata":{"description":"Semicolon
+        delimited list of process names to exclude from scanning"}},"RealtimeProtectionEnabled":{"type":"string","defaultValue":"true","metadata":{"description":"Indicates
+        whether or not real time protection is enabled (default is true)"}},"ScheduledScanSettingsIsEnabled":{"type":"string","defaultValue":"false","metadata":{"description":"Indicates
+        whether or not custom scheduled scan settings are enabled (default is false)"}},"ScheduledScanSettingsScanType":{"type":"string","defaultValue":"Quick","metadata":{"description":"Indicates
+        whether scheduled scan setting type is set to Quick or Full (default is Quick)"}},"ScheduledScanSettingsDay":{"type":"string","defaultValue":"7","metadata":{"description":"Day
+        of the week for scheduled scan (1-Sunday, 2-Monday, ..., 7-Saturday)"}},"ScheduledScanSettingsTime":{"type":"string","defaultValue":"120","metadata":{"description":"When
+        to perform the scheduled scan, measured in minutes from midnight (0-1440).
+        For example: 0 = 12AM, 60 = 1AM, 120 = 2AM."}}},"resources":[{"name":"[concat(parameters(''vmName''),''/IaaSAntimalware'')]","type":"Microsoft.Compute/virtualMachines/extensions","location":"[parameters(''location'')]","apiVersion":"2015-06-15","properties":{"publisher":"Microsoft.Azure.Security","type":"IaaSAntimalware","typeHandlerVersion":"1.3","autoUpgradeMinorVersion":true,"settings":{"AntimalwareEnabled":true,"RealtimeProtectionEnabled":"[parameters(''RealtimeProtectionEnabled'')]","ScheduledScanSettings":{"isEnabled":"[parameters(''ScheduledScanSettingsIsEnabled'')]","day":"[parameters(''ScheduledScanSettingsDay'')]","time":"[parameters(''ScheduledScanSettingsTime'')]","scanType":"[parameters(''ScheduledScanSettingsScanType'')]"},"Exclusions":{"Extensions":"[parameters(''ExclusionsExtensions'')]","Paths":"[parameters(''ExclusionsPaths'')]","Processes":"[parameters(''ExclusionsProcesses'')]"}}}}]},"parameters":{"vmName":{"value":"[field(''name'')]"},"location":{"value":"[field(''location'')]"},"RealtimeProtectionEnabled":{"value":"true"},"ScheduledScanSettingsIsEnabled":{"value":"true"}}}}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/2835b622-407b-4114-9198-6f7064cbe0dc","type":"Microsoft.Authorization/policyDefinitions","name":"2835b622-407b-4114-9198-6f7064cbe0dc"},{"properties":{"displayName":"Apply
         tag and its default value","policyType":"BuiltIn","description":"Applies a
         required tag and its default value if it is not specified by the user.","parameters":{"tagName":{"type":"String","metadata":{"description":"Name
         of the tag, such as costCenter","strongType":"tagName"}},"tagValue":{"type":"String","metadata":{"description":"Value
@@ -990,7 +1170,11 @@ interactions:
         Security Groups with too permissive rules will be monitored by Azure Security
         Center as recommendations.","metadata":{"category":"Security Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.Compute/virtualMachines","Microsoft.ClassicCompute/virtualMachines","Microsoft.Network/virtualNetworks","Microsoft.ClassicNetwork/virtualNetworks"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"permissiveNetworkAccess","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/44452482-524f-4bf4-b852-0bff7cc4a3ed","type":"Microsoft.Authorization/policyDefinitions","name":"44452482-524f-4bf4-b852-0bff7cc4a3ed"},{"properties":{"displayName":"Require
         SQL Server version 12.0","policyType":"BuiltIn","description":"This policy
-        ensures all SQL servers use version 12.0.","parameters":{},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.SQL/servers"},{"not":{"field":"Microsoft.SQL/servers/version","equals":"12.0"}}]},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/464dbb85-3d5f-4a1d-bb09-95a9b5dd19cf","type":"Microsoft.Authorization/policyDefinitions","name":"464dbb85-3d5f-4a1d-bb09-95a9b5dd19cf"},{"properties":{"displayName":"[Preview]:
+        ensures all SQL servers use version 12.0.","parameters":{},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.SQL/servers"},{"not":{"field":"Microsoft.SQL/servers/version","equals":"12.0"}}]},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/464dbb85-3d5f-4a1d-bb09-95a9b5dd19cf","type":"Microsoft.Authorization/policyDefinitions","name":"464dbb85-3d5f-4a1d-bb09-95a9b5dd19cf"},{"properties":{"displayName":"Enforce
+        automatic OS upgrade with app health checks on VMSS","policyType":"BuiltIn","mode":"All","description":"This
+        policy enforces usage of automatic OS upgrade with application health checks
+        through health probes, which enables safer rollout by evaluating application
+        health after each OS upgrade batch.","metadata":null,"parameters":{},"policyRule":{"if":{"allOf":[{"field":"type","equals":"Microsoft.Compute/virtualMachineScaleSets"},{"anyOf":[{"not":{"field":"Microsoft.Compute/VirtualMachineScaleSets/upgradePolicy.automaticOSUpgrade","equals":"True"}},{"field":"Microsoft.Compute/VirtualMachineScaleSets/networkProfile.healthProbe.id","exists":"False"}]}]},"then":{"effect":"deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/465f0161-0087-490a-9ad9-ad6217f4f43a","type":"Microsoft.Authorization/policyDefinitions","name":"465f0161-0087-490a-9ad9-ad6217f4f43a"},{"properties":{"displayName":"[Preview]:
         Monitor possible app Whitelisting in Security Center","policyType":"BuiltIn","mode":"All","description":"Possible
         Application Whitelist configuration will be monitored by Azure Security Center.","metadata":{"category":"Security
         Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.Compute/virtualMachines","Microsoft.ClassicCompute/virtualMachines"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"applicationWhitelisting","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/47a6b606-51aa-4496-8bb7-64b11cf66adc","type":"Microsoft.Authorization/policyDefinitions","name":"47a6b606-51aa-4496-8bb7-64b11cf66adc"},{"properties":{"displayName":"Allow
@@ -1038,6 +1222,11 @@ interactions:
         Monitor unencrypted SQL database in Security Center","policyType":"BuiltIn","mode":"All","description":"Unencrypted
         SQL servers or databases will be monitored by Azure Security Center as recommendations.","metadata":{"category":"Security
         Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","in":["Microsoft.SQL/servers","Microsoft.SQL/servers/databases"]},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"encryption","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/a8bef009-a5c9-4d0f-90d7-6018734e8a16","type":"Microsoft.Authorization/policyDefinitions","name":"a8bef009-a5c9-4d0f-90d7-6018734e8a16"},{"properties":{"displayName":"[Preview]:
+        Deploy network watcher when virtual networks are created","policyType":"BuiltIn","mode":"Indexed","description":"This
+        policy creates a network watcher resource in regions with virtual networks.
+        You need to ensure existence of a resource group named networkWatcherRG, which
+        will be used to deploy network watcher instances.","metadata":{"category":"Network"},"parameters":{},"policyRule":{"if":{"field":"type","equals":"Microsoft.Network/virtualNetworks"},"then":{"effect":"DeployIfNotExists","details":{"type":"Microsoft.Network/networkWatchers","resourceGroupName":"networkWatcherRG","existenceCondition":{"field":"location","equals":"[field(''location'')]"},"deployment":{"properties":{"mode":"incremental","template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json","contentVersion":"1.0.0.0","parameters":{"location":{"type":"string"}},"resources":[{"apiVersion":"2016-09-01","type":"Microsoft.Network/networkWatchers","name":"[concat(''networkWacher_'',
+        parameters(''location''))]","location":"[parameters(''location'')]"}]},"parameters":{"location":{"value":"[field(''location'')]"}}}}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/a9b99dd8-06c5-4317-8629-9d86a3c6e7d9","type":"Microsoft.Authorization/policyDefinitions","name":"a9b99dd8-06c5-4317-8629-9d86a3c6e7d9"},{"properties":{"displayName":"[Preview]:
         Automatic provisioning of security monitoring agent","policyType":"BuiltIn","mode":"All","description":"Installs
         security agent on VMs for advanced security alerts and preventions in Azure
         Security Center. Applies only for subscriptions that use Azure Security Center.","metadata":{"category":"Security
@@ -1057,7 +1246,14 @@ interactions:
         recommendations.","metadata":{"category":"Security Center","preview":true},"parameters":{},"policyRule":{"if":{"field":"type","equals":"Microsoft.Compute/virtualMachines"},"then":{"effect":"AuditIfNotExists","details":{"type":"Microsoft.Security/complianceResults","name":"jitNetworkAccess","existenceCondition":{"field":"Microsoft.Security/complianceResults/resourceStatus","equals":"Monitored"}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/b0f33259-77d7-4c9e-aac6-3aabcfae693c","type":"Microsoft.Authorization/policyDefinitions","name":"b0f33259-77d7-4c9e-aac6-3aabcfae693c"},{"properties":{"displayName":"Allow
         resource creation only in Asia data centers","policyType":"BuiltIn","description":"Allows
         resource creation in the following locations only: East Asia, Southeast Asia,
-        West India, South India, Central India, Japan East, Japan West","metadata":{"deprecated":true},"parameters":{},"policyRule":{"if":{"not":{"field":"location","in":["eastasia","southeastasia","westindia","southindia","centralindia","japaneast","japanwest"]}},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/c1b9cbed-08e3-427d-b9ce-7c535b1e9b94","type":"Microsoft.Authorization/policyDefinitions","name":"c1b9cbed-08e3-427d-b9ce-7c535b1e9b94"},{"properties":{"displayName":"Allowed
+        West India, South India, Central India, Japan East, Japan West","metadata":{"deprecated":true},"parameters":{},"policyRule":{"if":{"not":{"field":"location","in":["eastasia","southeastasia","westindia","southindia","centralindia","japaneast","japanwest"]}},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/c1b9cbed-08e3-427d-b9ce-7c535b1e9b94","type":"Microsoft.Authorization/policyDefinitions","name":"c1b9cbed-08e3-427d-b9ce-7c535b1e9b94"},{"properties":{"displayName":"[Preview]:
+        Apply Diagnostic Settings for Network Security Groups","policyType":"BuiltIn","mode":"Indexed","description":"This
+        policy automatically deploys diagnostic settings to network security groups.","metadata":{"category":"Monitoring"},"parameters":{"storagePrefix":{"type":"String","metadata":{"displayName":"Storage
+        Account Prefix for Regional Storage Accounts"}},"rgName":{"type":"String","metadata":{"displayName":"Resource
+        Group Name for Storage Accounts( must exists) ","description":"Make sure that
+        this resource group exists"}}},"policyRule":{"if":{"field":"type","equals":"Microsoft.Network/networkSecurityGroups"},"then":{"effect":"DeployIfNotExists","details":{"type":"Microsoft.Insights/diagnosticSettings","name":"setbypolicy","existenceCondition":{"field":"name","notlike":"*"},"deployment":{"properties":{"mode":"incremental","template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","parameters":{"location":{"type":"string"},"storagePrefix":{"type":"string"},"nsgName":{"type":"string"},"rgName":{"type":"string"}},"resources":[{"type":"Microsoft.Network/networkSecurityGroups/providers/diagnosticSettings","name":"[concat(parameters(''nsgName''),''/Microsoft.Insights/setbypolicy'')]","apiVersion":"2017-05-01-preview","location":"[parameters(''location'')]","dependsOn":["deployStorageAccount"],"properties":{"storageAccountId":"[reference(''deployStorageAccount'').outputs.storageAccountId.value]","logs":[{"category":"NetworkSecurityGroupEvent","enabled":true,"retentionPolicy":{"enabled":false,"days":0}},{"category":"NetworkSecurityGroupRuleCounter","enabled":true,"retentionPolicy":{"enabled":false,"days":0}}]}},{"apiVersion":"2017-05-10","name":"deployStorageAccount","type":"Microsoft.Resources/deployments","resourceGroup":"[parameters(''rgName'')]","properties":{"mode":"incremental","parameters":{"location":{"value":"[parameters(''location'')]"},"storagePrefix":{"value":"[parameters(''storagePrefix'')]"}},"template":{"$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json","contentVersion":"1.0.0.0","parameters":{"location":{"type":"string"},"storagePrefix":{"type":"string"}},"resources":[{"apiVersion":"2017-06-01","type":"Microsoft.Storage/storageAccounts","name":"[concat(parameters(''storageprefix''),
+        parameters(''location''))]","sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","location":"[parameters(''location'')]","tags":{"created-by":"policy"},"scale":null,"properties":{"networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"supportsHttpsTrafficOnly":false}}],"outputs":{"storageAccountId":{"type":"string","value":"[resourceId(''Microsoft.Storage/storageAccounts'',concat(parameters(''storagePrefix''),
+        parameters(''location'')))]"}}}}}]},"parameters":{"location":{"value":"[field(''location'')]"},"storagePrefix":{"value":"[parameters(''storagePrefix'')]"},"rgName":{"value":"[parameters(''rgName'')]"},"nsgName":{"value":"[field(''name'')]"}}}}}}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/c9c29499-c1d1-4195-99bd-2ec9e3a9dc89","type":"Microsoft.Authorization/policyDefinitions","name":"c9c29499-c1d1-4195-99bd-2ec9e3a9dc89"},{"properties":{"displayName":"Allowed
         virtual machine SKUs","policyType":"BuiltIn","description":"This policy enables
         you to specify a set of virtual machine SKUs that your organization can deploy.","parameters":{"listOfAllowedSKUs":{"type":"Array","metadata":{"description":"The
         list of SKUs that can be specified for virtual machines.","displayName":"Allowed
@@ -1073,22 +1269,80 @@ interactions:
         restrict the locations your organization can specify when deploying resources.
         Use to enforce your geo-compliance requirements.","parameters":{"listOfAllowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources.","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''listOfAllowedLocations'')]"}},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4c","type":"Microsoft.Authorization/policyDefinitions","name":"e56962a6-4747-49cd-b67b-bf8b01975c4c"},{"properties":{"displayName":"test_policyyype4jfip","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''listOfAllowedLocations'')]"}},"then":{"effect":"Deny"}}},"id":"/providers/Microsoft.Authorization/policyDefinitions/e56962a6-4747-49cd-b67b-bf8b01975c4c","type":"Microsoft.Authorization/policyDefinitions","name":"e56962a6-4747-49cd-b67b-bf8b01975c4c"},{"properties":{"displayName":"test_policy_123","policyType":"Custom","description":"test_policy_123_new","policyRule":{"then":{"effect":"deny"},"if":{"source":"action","equals":"Microsoft.Storage/storageAccounts/write"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy"},{"properties":{"displayName":"test_policy7toqexs4l","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy7jwftmifj","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy7jwftmifj"},{"properties":{"displayName":"test_policyfwe33kqnp","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy5bv5xqq2s","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy5bv5xqq2s"},{"properties":{"displayName":"test_policyjzzwqm4y6","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy6n4lauim4","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy6n4lauim4"},{"properties":{"displayName":"test_policyd3chinmpo","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy7gag66w2c","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy7gag66w2c"},{"properties":{"displayName":"test_policyu5qycnwlf","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyc4umbzyhc","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyc4umbzyhc"},{"properties":{"displayName":"test_policya4fzrevz3","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyc5rc55x4p","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyc5rc55x4p"},{"properties":{"displayName":"test_policyk2pzv6c47","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydbeyd5nrs","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydbeyd5nrs"},{"properties":{"displayName":"test_policy5wdd7p44s","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydwllppxro","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydwllppxro"},{"properties":{"displayName":"test_policykqgncz42o","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyen4kpwjri","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyen4kpwjri"},{"properties":{"displayName":"test_policy27aocag4g","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyt47o36wqj","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyt47o36wqj"},{"properties":{"displayName":"test_policy5b2y566sk","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyeo24r3ah2","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyeo24r3ah2"},{"properties":{"displayName":"test_policyojil4bfhq","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyguhpc2m5m","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyguhpc2m5m"},{"properties":{"displayName":"test_policyefslsptce","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyv3tsinwfz","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyv3tsinwfz"},{"properties":{"displayName":"testDisplay","policyType":"Custom","description":"testDescription","policyRule":{"if":{"source":"action","equals":"Microsoft.Resources/Subscriptions/00000000-0000-0000-0000-000000000000/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/onesdk8248","type":"Microsoft.Authorization/policyDefinitions","name":"onesdk8248"},{"properties":{"policyType":"Custom","policyRule":{"if":{"source":"action","equals":"blah"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/test2","type":"Microsoft.Authorization/policyDefinitions","name":"test2"}]}'}
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policygz5kk3f55","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policygz5kk3f55"},{"properties":{"displayName":"test_policyx4niz5vcs","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policykg3zihtqy","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policykg3zihtqy"},{"properties":{"displayName":"test_policylhbmrfp7w","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyksyxxdyya","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyksyxxdyya"},{"properties":{"displayName":"test_policyrzb2xkuhz","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policylkrr6nhlt","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policylkrr6nhlt"},{"properties":{"displayName":"test_policyhgogvepjw","policyType":"Custom","description":"desc_for_test_policyfqy7r5mevl_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policynu7qdqhyx","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policynu7qdqhyx"},{"properties":{"displayName":"test_policy3tahlkd4m","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyolabnf6yy","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyolabnf6yy"},{"properties":{"displayName":"test_policymkzeabila","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyomrb4sutu","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyomrb4sutu"},{"properties":{"displayName":"test_policyk75qnukyv","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyoyvpdhear","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyoyvpdhear"},{"properties":{"displayName":"test_policykh4s2a4ui","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyqb5zw2eww","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyqb5zw2eww"},{"properties":{"displayName":"test_policyzflwtkscw","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyqccgcpztw","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyqccgcpztw"},{"properties":{"displayName":"test_policynmaaabsby","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyqd7cpusnm","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyqd7cpusnm"},{"properties":{"displayName":"test_policy7gsfjonhc","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyrsj7lfr2i","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyrsj7lfr2i"},{"properties":{"displayName":"test_policywxbyfsjzc","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyt7cuhddjz","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyt7cuhddjz"},{"properties":{"displayName":"test_policyz2xf2xsbl","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policytmvrvgr3a","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policytmvrvgr3a"},{"properties":{"displayName":"test_policyynmv24m7h","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyuqflm5wvo","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyuqflm5wvo"},{"properties":{"displayName":"test_policyxo4pjk6go","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyuwg53dgxl","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyuwg53dgxl"},{"properties":{"displayName":"test_policytoadasrnk","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyvzg2lmmuj","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyvzg2lmmuj"},{"properties":{"displayName":"test_policy34l3jvnur","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policywmqiqdaub","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policywmqiqdaub"},{"properties":{"displayName":"test_policyh63lq22yy","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyxlkjobh5l","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyxlkjobh5l"},{"properties":{"displayName":"test_policyyxqr7mttl","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
+        locations","strongType":"location","description":"The list of locations that
+        can be specified when deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyy4snzm2ry","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyy4snzm2ry"},{"properties":{"displayName":"My
+        Policy","policyType":"Custom","description":"This is my policy","policyRule":{"if":{"not":{"field":"location","in":["northeurope","westeurope"]}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy1","type":"Microsoft.Authorization/policyDefinitions","name":"policy1"},{"properties":{"displayName":"useless
+        policy just for tetsing","policyType":"Custom","description":"some testing
+        policy","policyRule":{"if":{"source":"action","equals":"Microsoft.Storage/storageAccounts/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/yugangw-policy","type":"Microsoft.Authorization/policyDefinitions","name":"yugangw-policy"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['27527']
+      content-length: ['56016']
       content-type: [application/json; charset=utf-8]
-      date: ['Mon, 09 Oct 2017 21:29:40 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:41 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1099,9 +1353,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.14
-          msrest_azure/0.4.14 resourcemanagementclient/1.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.17+dev]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
+          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.23]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy000001?api-version=2017-05-10
@@ -1110,11 +1364,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Mon, 09 Oct 2017 21:29:41 GMT']
+      date: ['Wed, 13 Dec 2017 21:11:42 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUE9MSUNZWlpVRVhDQ1dMS0RHNE9ZMjVCVlcyT0I1QVBGUXwzNkFGNDQwNzA3NzRBRTg4LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUE9MSUNZSFI2WUVTR0NVWVYySUFBNTRYV01FTE9UREpIT3xBNEFBNjM1MEJEQTU3NEQ5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1183']
+      x-ms-ratelimit-remaining-subscription-writes: ['1192']
     status: {code: 202, message: Accepted}
 version: 1

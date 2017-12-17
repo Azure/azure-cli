@@ -24,7 +24,7 @@ from azure.cli.command_modules.vm._validators import \
      process_vmss_create_namespace, process_image_create_namespace,
      process_disk_or_snapshot_create_namespace, validate_vm_disk, validate_asg_names_or_ids,
      process_disk_encryption_namespace, process_assign_identity_namespace,
-     process_vm_secret_namespace)
+     process_vm_secret_namespace, process_msi_namespace, process_remove_identity_namespace)
 
 
 def get_urn_aliases_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
@@ -216,7 +216,7 @@ register_cli_argument('vmss create', 'single_placement_group', default=None, hel
 for scope in ['vm create', 'vmss create']:
     register_cli_argument(scope, 'location', location_type, help='Location in which to create VM and related resources. If default location is not configured, will default to the resource group\'s location')
     register_cli_argument(scope, 'tags', tags_type)
-    register_cli_argument(scope, 'no_wait', help='Do not wait for the long running operation to finish.')
+    register_cli_argument(scope, 'no_wait', help='Do not wait for the long-running operation to finish.')
     register_cli_argument(scope, 'validate', options_list=('--validate',), help='Generate and validate the ARM template without creating any resources.', action='store_true')
     register_cli_argument(scope, 'size', help='The VM size to be created. See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
     register_cli_argument(scope, 'image', completer=get_urn_aliases_completion_list)
@@ -263,21 +263,28 @@ for scope in ['vm create', 'vmss create']:
 
     register_cli_argument(scope, 'license_type', help="license type if the Windows image or disk used was licensed on-premises", **enum_choice_list(['Windows_Server', 'Windows_Client']))
 
-    register_cli_argument(scope, 'assign_identity', action='store_true', arg_group='Managed Service Identity',
-                          help='enables the VM/VMSS to autonomously, using its own managed identity, to directly authenticate and interact with other Azure services using bearer tokens')
+    register_cli_argument(scope, 'assign_identity', nargs='*', arg_group='Managed Service Identity',
+                          help="accept system or user assigned identities with space separated. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
 
 for scope in ['vm create', 'vmss create', 'vm assign-identity', 'vmss assign-identity']:
     arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
-    register_cli_argument(scope, 'identity_scope', options_list='--scope', arg_group=arg_group,
-                          help="The scope the managed identity has access to")
-    register_cli_argument(scope, 'identity_role', options_list='--role', arg_group=arg_group,
-                          help="Role name or id the managed identity will be assigned")
+    register_cli_argument(scope, 'identity_scope', options_list=('--scope',), arg_group=arg_group,
+                          help="Scope that the system assigned identity can access")
+    register_cli_argument(scope, 'identity_role', options_list=('--role',), arg_group=arg_group,
+                          help="Role name or id the system assigned identity will have")
     register_cli_argument(scope, 'identity_role_id', ignore_type)
 
+for scope in ['vm remove-identity', 'vmss remove-identity']:
+    register_cli_argument(scope, 'identities', nargs='+', help="space separated user assigned identities to remove")
+
 for scope in ['vm assign-identity', 'vmss assign-identity']:
+    register_cli_argument(scope, 'assign_identity', options_list=('--identities',), nargs='*', help="the identities to assign")
     register_cli_argument(scope, 'port', type=int, help="The port to fetch AAD token. Default: 50342")
+
 register_cli_argument('vm assign-identity', 'vm_name', existing_vm_name, validator=process_assign_identity_namespace)
+register_cli_argument('vm remove-identity', 'vm_name', existing_vm_name, validator=process_remove_identity_namespace)
 register_cli_argument('vmss assign-identity', 'vmss_name', vmss_name_type, validator=process_assign_identity_namespace)
+register_cli_argument('vmss remove-identity', 'vmss_name', vmss_name_type, validator=process_remove_identity_namespace)
 
 register_cli_argument('vm create', 'vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', validator=process_vm_create_namespace, completer=None)
 register_cli_argument('vm create', 'os_disk_size_gb', type=int, help='the size of the os disk in GB', arg_group='Storage')
@@ -366,3 +373,7 @@ register_cli_argument('vm secret', 'certificate_store', help='Windows certificat
 register_cli_argument('vm run-command invoke', 'parameters', nargs='+', help="space separated parameters in the format of '[name=]value'")
 register_cli_argument('vm run-command invoke', 'scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
 register_cli_argument('vm run-command', 'command_id', completer=get_vm_run_command_completion_list, help="The run command id")
+
+# TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
+register_cli_argument('identity', 'resource_name', arg_type=name_arg_type, id_part='name')
+register_cli_argument('identity create', 'location', location_type, validator=process_msi_namespace)

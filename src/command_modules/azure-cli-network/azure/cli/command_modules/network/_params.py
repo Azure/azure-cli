@@ -37,7 +37,7 @@ from azure.cli.command_modules.network._validators import \
      validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
      get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_network_watcher_from_vm, get_network_watcher_from_location,
-     get_asg_validator)
+     get_asg_validator, validate_ip_tags)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.mgmt.trafficmanager.models import MonitorProtocol
 from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
@@ -251,6 +251,7 @@ register_cli_argument('network application-gateway rule create', 'http_listener'
 register_cli_argument('network lb rule create', 'backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
 register_cli_argument('network lb rule create', 'frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
 register_cli_argument('network lb inbound-nat-rule create', 'frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
+register_cli_argument('network lb inbound-nat-pool create', 'frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
 
 register_cli_argument('network application-gateway http-settings', 'cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie-based affinity.')
 register_cli_argument('network application-gateway http-settings', 'timeout', help='Request timeout in seconds.')
@@ -491,6 +492,9 @@ register_cli_argument('network public-ip create', 'name', completer=None)
 register_cli_argument('network public-ip create', 'dns_name', validator=process_public_ip_create_namespace)
 register_cli_argument('network public-ip create', 'dns_name_type', ignore_type)
 
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-11-01') as c:
+    c.register_cli_argument('network public-ip', 'ip_tags', nargs='+', help="Space separated list of IP tags in 'TYPE=VAL' format.", validator=validate_ip_tags)
+
 with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
     c.register_cli_argument('network public-ip', 'zone', zone_type)
     c.register_cli_argument('network lb create', 'frontend_ip_zone', CliArgumentType(overrides=zone_type, options_list=('--frontend-ip-zone'), help='used to create internal facing Load balancer'))
@@ -512,7 +516,8 @@ register_extra_cli_argument('network route-table create', 'tags')
 register_extra_cli_argument('network route-table create', 'location')
 
 register_cli_argument('network route-table create', 'location', location_type, validator=process_route_table_create_namespace)
-register_cli_argument('network route-table create', 'parameters', ignore_type)
+with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-10-01') as c:
+    c.register_cli_argument('network route-table', 'disable_bgp_route_propagation', help='Disable routes learned by BGP.', **three_state_flag())
 
 # Route Operation
 register_cli_argument('network route-table route', 'route_name', name_arg_type, id_part='child_name_1', help='Route name')

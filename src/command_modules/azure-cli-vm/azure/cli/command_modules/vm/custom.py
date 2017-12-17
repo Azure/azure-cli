@@ -34,7 +34,7 @@ from ._vm_diagnostics_templates import get_default_diag_config
 from ._actions import (load_images_from_aliases_doc,
                        load_extension_images_thru_services,
                        load_images_thru_services)
-from ._client_factory import _compute_client_factory, cf_public_ip_addresses
+from ._client_factory import _compute_client_factory, cf_public_ip_addresses, msi_client_factory
 
 logger = azlogging.get_az_logger(__name__)
 
@@ -1583,7 +1583,7 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
               storage_profile=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
-              plan_promotion_code=None, license_type=None, assign_identity=False, identity_scope=None,
+              plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role=DefaultStr('Contributor'), identity_role_id=None, application_security_groups=None,
               zone=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -1711,8 +1711,9 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
             'promotionCode': plan_promotion_code
         }
 
-    if assign_identity:
-        vm_resource['identity'] = {"type": "systemAssigned"}
+    enable_local_identity, external_identities = None, None
+    if assign_identity is not None:
+        vm_resource['identity'], _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
         role_assignment_guid = None
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
@@ -1745,10 +1746,11 @@ def create_vm(vm_name, resource_group_name, image=None, size='Standard_DS1_v2', 
         LongRunningOperation()(client.create_or_update(
             resource_group_name, deployment_name, properties, raw=no_wait))
     vm = get_vm_details(resource_group_name, vm_name)
-    if assign_identity:
-        if not identity_scope:
+    if assign_identity is not None:
+        if enable_local_identity and not identity_scope:
             _show_missing_access_warning(resource_group_name, vm_name, 'vm')
-        setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, _MSI_PORT))
+        setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role,
+                                                         _MSI_PORT, external_identities))
     return vm
 
 
@@ -1786,7 +1788,7 @@ def create_vmss(vmss_name, resource_group_name, image,
                 public_ip_type=None, storage_profile=None,
                 single_placement_group=None, custom_data=None, secrets=None,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
-                assign_identity=False, identity_scope=None, identity_role=DefaultStr('Contributor'),
+                assign_identity=None, identity_scope=None, identity_role=DefaultStr('Contributor'),
                 identity_role_id=None, zones=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1991,9 +1993,10 @@ def create_vmss(vmss_name, resource_group_name, image,
             'promotionCode': plan_promotion_code
         }
 
-    if assign_identity:
-        vmss_resource['identity'] = {"type": "systemAssigned"}
-        role_assignment_guid = None
+    enable_local_identity, external_identities = None, None
+    if assign_identity is not None:
+        vmss_resource['identity'], _, external_identities, enable_local_identity = _build_identities_info(
+            assign_identity)
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
             master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
@@ -2033,12 +2036,28 @@ def create_vmss(vmss_name, resource_group_name, image,
     # creates the VMSS deployment
     deployment_result = DeploymentOutputLongRunningOperation()(
         client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait))
-    if assign_identity:
-        if not identity_scope:
+    if assign_identity is not None:
+        if enable_local_identity and not identity_scope:
             _show_missing_access_warning(resource_group_name, vmss_name, 'vmss')
-        deployment_result['vmss']['identity'] = _construct_identity_info(identity_scope, identity_role,
-                                                                         _MSI_PORT)
+        deployment_result['vmss']['identity'] = _construct_identity_info(identity_scope, identity_role, _MSI_PORT,
+                                                                         external_identities)
     return deployment_result
+
+
+def _build_identities_info(identities):
+    from ._vm_utils import MSI_LOCAL_ID
+    identities = identities or []
+    identity_types = []
+    if not identities or MSI_LOCAL_ID in identities:
+        identity_types.append('SystemAssigned')
+    external_identities = [x for x in identities if x != MSI_LOCAL_ID]
+    if external_identities:
+        identity_types.append('UserAssigned')
+    identity_types = ','.join(identity_types)
+    info = {'type': identity_types}
+    if external_identities:
+        info['identityIds'] = external_identities
+    return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
 
 
 def create_av_set(availability_set_name, resource_group_name,
@@ -2130,9 +2149,9 @@ def get_vm_format_secret(secrets, certificate_store=None):
 
 def add_vm_secret(resource_group_name, vm_name, keyvault, certificate, certificate_store=None):
     from ._vm_utils import create_keyvault_data_plane_client, get_key_vault_base_url
-    VaultSecretGroup, SourceVault, VaultCertificate = get_sdk(ResourceType.MGMT_COMPUTE, 'VaultSecretGroup',
-                                                              'SourceVault', 'VaultCertificate', mod='models',
-                                                              operation_group='virtual_machines')
+    VaultSecretGroup, VaultCertificate, SubResource = get_sdk(ResourceType.MGMT_COMPUTE, 'VaultSecretGroup',
+                                                              'VaultCertificate', 'SubResource',
+                                                              mod='models', operation_group='virtual_machines')
     vm = get_vm(resource_group_name, vm_name)
 
     if '://' not in certificate:  # has a cert name rather a full url?
@@ -2151,7 +2170,7 @@ def add_vm_secret(resource_group_name, vm_name, keyvault, certificate, certifica
     if vault_secret_group:
         vault_secret_group.vault_certificates.append(vault_cert)
     else:
-        vault_secret_group = VaultSecretGroup(source_vault=SourceVault(keyvault), vault_certificates=[vault_cert])
+        vault_secret_group = VaultSecretGroup(source_vault=SubResource(keyvault), vault_certificates=[vault_cert])
         vm.os_profile.secrets.append(vault_secret_group)
     vm = set_vm(vm)
     return vm.os_profile.secrets
@@ -2192,21 +2211,41 @@ def remove_vm_secret(resource_group_name, vm_name, keyvault, certificate=None):
     return vm.os_profile.secrets
 
 
-def assign_vm_identity(resource_group_name, vm_name, identity_role=DefaultStr('Contributor'),
+def assign_vm_identity(resource_group_name, vm_name, assign_identity=None, identity_role=DefaultStr('Contributor'),
                        identity_role_id=None, identity_scope=None, port=None):
-    VirtualMachineIdentity = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualMachineIdentity', mod='models',
-                                     operation_group='virtual_machines')
-    from azure.cli.core.commands.arm import assign_implict_identity
+    VirtualMachineIdentity, ResourceIdentityType = get_sdk(ResourceType.MGMT_COMPUTE,
+                                                           'VirtualMachineIdentity', 'ResourceIdentityType',
+                                                           mod='models', operation_group='virtual_machines')
+    from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
     client = _compute_client_factory()
+    _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
 
     def getter():
         return client.virtual_machines.get(resource_group_name, vm_name)
 
     def setter(vm):
-        vm.identity = VirtualMachineIdentity(type='SystemAssigned')
+        if vm.identity and vm.identity.identity_ids:
+            for i in vm.identity.identity_ids:
+                external_identities.append(i)
+        if vm.identity and vm.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif vm.identity and vm.identity.type == ResourceIdentityType.system_assigned and external_identities:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif vm.identity and vm.identity.type == ResourceIdentityType.user_assigned and enable_local_identity:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif external_identities and enable_local_identity:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif external_identities:
+            identity_types = ResourceIdentityType.user_assigned
+        else:
+            identity_types = ResourceIdentityType.system_assigned
+
+        vm.identity = VirtualMachineIdentity(type=identity_types)
+        if external_identities:
+            vm.identity.identity_ids = external_identities
         return set_vm(vm)
 
-    vm = assign_implict_identity(getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
+    vm = assign_identity_helper(getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
 
     port = port or _MSI_PORT
     ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if _is_linux_vm(vm) else 'Windows')
@@ -2217,26 +2256,45 @@ def assign_vm_identity(resource_group_name, vm_name, identity_role=DefaultStr('C
                            version=_MSI_EXTENSION_VERSION,
                            settings={'port': port})
     LongRunningOperation()(poller)
-    return _construct_identity_info(identity_scope, identity_role, port)
+    return _construct_identity_info(identity_scope, identity_role, port, external_identities)
 
 
-def assign_vmss_identity(resource_group_name, vmss_name, identity_role=DefaultStr('Contributor'),
+def assign_vmss_identity(resource_group_name, vmss_name, assign_identity=None, identity_role=DefaultStr('Contributor'),
                          identity_role_id=None, identity_scope=None, port=None):
-    VirtualMachineScaleSetIdentity, UpgradeMode = get_sdk(ResourceType.MGMT_COMPUTE, 'VirtualMachineScaleSetIdentity',
-                                                          'UpgradeMode', mod='models',
-                                                          operation_group='virtual_machine_scale_sets')
-    from azure.cli.core.commands.arm import assign_implict_identity
+    VirtualMachineScaleSetIdentity, UpgradeMode, ResourceIdentityType = get_sdk(
+        ResourceType.MGMT_COMPUTE, 'VirtualMachineScaleSetIdentity', 'UpgradeMode', 'ResourceIdentityType',
+        mod='models', operation_group='virtual_machine_scale_sets')
+    from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
     client = _compute_client_factory()
+    _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
 
     def getter():
         return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
 
     def setter(vmss):
-        vmss.identity = VirtualMachineScaleSetIdentity(type='SystemAssigned')
+        if vmss.identity and vmss.identity.identity_ids:
+            for i in vmss.identity.identity_ids:
+                external_identities.append(i)
+        if vmss.identity and vmss.identity.type == ResourceIdentityType.system_assigned_user_assigned:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif vmss.identity and vmss.identity.type == ResourceIdentityType.system_assigned and external_identities:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif vmss.identity and vmss.identity.type == ResourceIdentityType.user_assigned and enable_local_identity:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif external_identities and enable_local_identity:
+            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        elif external_identities:
+            identity_types = ResourceIdentityType.user_assigned
+        else:
+            identity_types = ResourceIdentityType.system_assigned
+        vmss.identity = VirtualMachineScaleSetIdentity(type=identity_types)
+        if external_identities:
+            vmss.identity.identity_ids = external_identities
+
         poller = client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
         return LongRunningOperation()(poller)
 
-    vmss = assign_implict_identity(getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
+    vmss = assign_identity_helper(getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
 
     port = port or _MSI_PORT
     ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if vmss.virtual_machine_profile.os_profile.linux_configuration
@@ -2251,15 +2309,53 @@ def assign_vmss_identity(resource_group_name, vmss_name, identity_role=DefaultSt
     if vmss.upgrade_policy.mode == UpgradeMode.manual:
         logger.warning("With manual upgrade mode, you will need to run 'az vmss update-instances -g %s -n %s "
                        "--instance-ids *' to propagate the change", resource_group_name, vmss_name)
-    return _construct_identity_info(identity_scope, identity_role, port)
+    return _construct_identity_info(identity_scope, identity_role, port, external_identities)
 
 
-def _construct_identity_info(identity_scope, identity_role, port):
-    return {
+def remove_vm_identity(resource_group_name, vm_name, identities):
+    return _remove_identities(resource_group_name, vm_name, identities, get_vm, set_vm)
+
+
+def remove_vmss_identity(resource_group_name, vmss_name, identities):
+    client = _compute_client_factory()
+
+    def set_vmss(vmss_instance):
+        return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
+                                                                  vmss_name, vmss_instance)
+
+    return _remove_identities(resource_group_name, vmss_name, identities,
+                              client.virtual_machine_scale_sets.get,
+                              set_vmss)
+
+
+def _remove_identities(resource_group_name, name, identities, getter, setter):
+    ResourceIdentityType = get_sdk(ResourceType.MGMT_COMPUTE, 'ResourceIdentityType',
+                                   mod='models', operation_group='virtual_machines')
+    resource = getter(resource_group_name, name)
+    existing = set([x.lower() for x in resource.identity.identity_ids])
+    to_remove = set([x.lower() for x in identities])
+    non_existing = to_remove.difference(existing)
+    if non_existing:
+        raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
+    resource.identity.identity_ids = list(existing - to_remove)
+    if not resource.identity.identity_ids:
+        resource.identity.identity_ids = None
+        if resource.identity.type == ResourceIdentityType.user_assigned:
+            resource.identity.type = ResourceIdentityType.none
+        else:  # has to be 'system_assigned_user_assigned'
+            resource.identity.type = ResourceIdentityType.system_assigned
+    return setter(resource)
+
+
+def _construct_identity_info(identity_scope, identity_role, port, external_identities):
+    info = {
         'scope': identity_scope or '',
         'role': str(identity_role),  # could be DefaultStr, so convert to string
         'port': port
     }
+    if external_identities:
+        info['externalIdentities'] = external_identities
+    return info
 
 
 # for injecting test seams to produce predicatable role assignment id for playback
@@ -2303,3 +2399,10 @@ def run_command_invoke(resource_group_name, vm_name, command_id, scripts=None, p
     return client.virtual_machines.run_command(resource_group_name, vm_name,
                                                RunCommandInput(command_id=command_id, script=scripts,
                                                                parameters=run_command_input_parameters))
+
+
+def list_user_assigned_identities(resource_group_name=None):
+    client = msi_client_factory()
+    if resource_group_name:
+        return client.user_assigned_identities.list_by_resource_group(resource_group_name)
+    return client.user_assigned_identities.list_by_subscription()

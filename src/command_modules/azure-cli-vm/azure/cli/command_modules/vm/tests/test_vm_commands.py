@@ -1557,6 +1557,17 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             JMESPathCheckV2('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].applicationGatewayBackendAddressPools[0].resourceGroup', resource_group)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_lb')
+    def test_vmss_existing_lb(self, resource_group):
+        vmss_name = 'vmss1'
+        lb_name = 'lb1'
+        self.cmd('network lb create -g {} -n {} --backend-pool-name test'.format(resource_group, lb_name))
+        self.cmd('vmss create -g {} -n {} --load-balancer {} --image UbuntuLTS --admin-username clitester --admin-password TestTest12#$'.format(resource_group, vmss_name, lb_name))
+
+
+# TODO: change back to ScenarioTest and re-record when issue #5111 is fixed
+class VMSSCreatePublicIpPerVm(LiveScenarioTest):  # pylint: disable=too-many-instance-attributes
+
     @ResourceGroupPreparer()
     def test_vmss_public_ip_per_vm_custom_domain_name(self, resource_group):
         vmss_name = 'vmss1'
@@ -1574,13 +1585,6 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         result = self.cmd('vmss list-instance-public-ips -n {} -g {}'.format(vmss_name, resource_group)).get_output_in_json()
         self.assertEqual(len(result[0]['ipAddress'].split('.')), 4)
         self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith('.clitestnewnetwork'))
-
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_lb')
-    def test_vmss_existing_lb(self, resource_group):
-        vmss_name = 'vmss1'
-        lb_name = 'lb1'
-        self.cmd('network lb create -g {} -n {} --backend-pool-name test'.format(resource_group, lb_name))
-        self.cmd('vmss create -g {} -n {} --load-balancer {} --image UbuntuLTS --admin-username clitester --admin-password TestTest12#$'.format(resource_group, vmss_name, lb_name))
 
 
 class VMSSCreateAcceleratedNetworkingTest(ScenarioTest):
@@ -2050,7 +2054,7 @@ class MSIScenarioTest(ScenarioTest):
                 JMESPathCheckV2('[0].settings.port', 50343)
             ])
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(random_name_length=20)
     def test_vmss_msi(self, resource_group):
         subscription_id = self.get_subscription_id()
 
@@ -2061,10 +2065,10 @@ class MSIScenarioTest(ScenarioTest):
         vmss3 = 'vmss3'
         # Fixing the role assignment guids so test can run under playback. The assignments will
         # be auto-deleted when the RG gets recycled, so the same ids can be reused.
-        guids = [uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C121'),
-                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C122'),
-                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C123'),
-                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C124')]
+        guids = [uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C138'),
+                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C137'),
+                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C136'),
+                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C135')]
         with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=guids, autospec=True):
             # create linux vm with default configuration
             self.cmd('vmss create -g {} -n {} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {}'.format(resource_group, vmss1, default_scope), checks=[
@@ -2163,6 +2167,99 @@ class MSIScenarioTest(ScenarioTest):
                 JMESPathCheckV2('[0].type', 'ManagedIdentityExtensionForLinux'),
                 JMESPathCheckV2('[0].settings.port', 50342)
             ])
+
+    @ResourceGroupPreparer(random_name_length=20, location='westcentralus')
+    def test_vm_explicit_msi(self, resource_group):
+        emsi = 'id1'
+        emsi2 = 'id2'
+        vm = 'vm1'
+        subscription_id = self.get_subscription_id()
+        default_scope = '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)
+
+        # create a managed identity
+        emsi_result = self.cmd('identity create -g {} -n {}'.format(resource_group, emsi), checks=[
+            JMESPathCheckV2('name', emsi)
+        ]).get_output_in_json()
+        emsi2_result = self.cmd('identity create -g {} -n {}'.format(resource_group, emsi2)).get_output_in_json()
+
+        # create a vm with system + user assigned identities
+        result = self.cmd('vm create -g {} -n {} --image ubuntults --assign-identity {} [system] --role reader --scope {} --generate-ssh-keys'.format(
+            resource_group, vm, emsi, default_scope)).get_output_in_json()
+        self.assertEqual(result['identity']['externalIdentities'][0].lower(), emsi_result['id'].lower())
+        result = self.cmd('vm show -g {} -n {}'.format(resource_group, vm), checks=[
+            JMESPathCheckV2('length(identity.identityIds)', 1),
+            JMESPathCheckV2('identity.type', 'SystemAssigned, UserAssigned')
+        ]).get_output_in_json()
+        self.assertEqual(result['identity']['identityIds'][0].lower(), emsi_result['id'].lower())
+        # assign a new managed identity
+        self.cmd('vm assign-identity -g {} -n {} --identities {}'.format(resource_group, vm, emsi2))
+        self.cmd('vm show -g {} -n {}'.format(resource_group, vm), checks=[
+            JMESPathCheckV2('length(identity.identityIds)', 2),
+        ])
+        # remove the 1st user assigned identity
+        self.cmd('vm remove-identity -g {} -n {} --identities {}'.format(resource_group, vm, emsi))
+        result = self.cmd('vm show -g {} -n {}'.format(resource_group, vm), checks=[
+            JMESPathCheckV2('length(identity.identityIds)', 1),
+        ]).get_output_in_json()
+        self.assertEqual(result['identity']['identityIds'][0].lower(), emsi2_result['id'].lower())
+
+        # remove the 2nd
+        self.cmd('vm remove-identity -g {} -n {} --identities {}'.format(resource_group, vm, emsi2))
+        # verify the VM still has the system assigned identity
+        result = self.cmd('vm show -g {} -n {}'.format(resource_group, vm), checks=[
+            # blocked by https://github.com/Azure/azure-cli/issues/5103
+            # JMESPathCheckV2('length(identity.identityIds)', 0)
+            JMESPathCheckV2('identity.type', 'SystemAssigned'),
+        ])
+        pass
+
+    @ResourceGroupPreparer(random_name_length=20, location='westcentralus')
+    def test_vmss_explicit_msi(self, resource_group):
+        emsi = 'id1'
+        emsi2 = 'id2'
+        vmss = 'vmss1'
+        subscription_id = self.get_subscription_id()
+        default_scope = '/subscriptions/{}/resourceGroups/{}'.format(subscription_id, resource_group)
+
+        # create a managed identity
+        emsi_result = self.cmd('identity create -g {} -n {}'.format(resource_group, emsi)).get_output_in_json()
+        emsi2_result = self.cmd('identity create -g {} -n {}'.format(resource_group, emsi2)).get_output_in_json()
+
+        # create a vmss with system + user assigned identities
+        result = self.cmd('vmss create -g {} -n {} --image ubuntults --assign-identity {} [system] --role reader --scope {} --instance-count 1 --generate-ssh-keys'.format(
+            resource_group, vmss, emsi, default_scope)).get_output_in_json()
+        self.assertEqual(result['vmss']['identity']['externalIdentities'][0].lower(), emsi_result['id'].lower())
+
+        result = self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss), checks=[
+            JMESPathCheckV2('length(identity.identityIds)', 1),
+            JMESPathCheckV2('identity.type', 'SystemAssigned, UserAssigned')
+        ]).get_output_in_json()
+        self.assertEqual(result['identity']['identityIds'][0].lower(), emsi_result['id'].lower())
+
+        # assign a new managed identity
+        self.cmd('vmss assign-identity -g {} -n {} --identities {}'.format(resource_group, vmss, emsi2))
+        self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss), checks=[
+            JMESPathCheckV2('length(identity.identityIds)', 2)
+        ])
+
+        # update instances
+        self.cmd('vmss update-instances -g {} -n {} --instance-ids *'.format(resource_group, vmss))
+
+        # remove the 1st user assigned identity
+        self.cmd('vmss remove-identity -g {} -n {} --identities {}'.format(resource_group, vmss, emsi))
+        result = self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss), checks=[
+            JMESPathCheckV2('length(identity.identityIds)', 1)
+        ]).get_output_in_json()
+        self.assertEqual(result['identity']['identityIds'][0].lower(), emsi2_result['id'].lower())
+
+        # remove the 2nd
+        self.cmd('vmss remove-identity -g {} -n {} --identities {}'.format(resource_group, vmss, emsi2))
+        # verify the vmss still has the system assigned identity
+        self.cmd('vmss show -g {} -n {}'.format(resource_group, vmss), checks=[
+            # blocked by https://github.com/Azure/azure-cli/issues/5103
+            # JMESPathCheckV2('length(identity.identityIds)', 0)
+            JMESPathCheckV2('identity.type', 'SystemAssigned'),
+        ])
 
 
 class VMLiveScenarioTest(LiveScenarioTest):

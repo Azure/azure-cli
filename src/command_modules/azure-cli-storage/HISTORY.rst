@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.21
+++++++
+* Update managed storage SDK to 1.5.0
+* Support storage v2
+
 2.0.20
 ++++++
 * Update multiapi storage package dependency to 0.1.7
