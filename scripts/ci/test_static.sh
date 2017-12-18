@@ -48,7 +48,7 @@ run_style azure.cli.command_modules.cognitiveservices
 run_style azure.cli.command_modules.configure
 run_style azure.cli.command_modules.container
 run_style azure.cli.command_modules.consumption
-#run_style azure.cli.command_modules.cosmosdb
+run_style azure.cli.command_modules.cosmosdb
 run_style azure.cli.command_modules.dla
 run_style azure.cli.command_modules.dls
 run_style azure.cli.command_modules.eventgrid
