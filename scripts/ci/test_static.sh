@@ -37,7 +37,7 @@ run_style azure.cli.core
 run_style azure.cli.command_modules.acr
 run_style azure.cli.command_modules.acs
 run_style azure.cli.command_modules.advisor
-#run_style azure.cli.command_modules.appservice
+run_style azure.cli.command_modules.appservice
 run_style azure.cli.command_modules.backup
 run_style azure.cli.command_modules.batch
 run_style azure.cli.command_modules.batchai
@@ -59,7 +59,7 @@ run_style azure.cli.command_modules.interactive
 run_style azure.cli.command_modules.iot
 run_style azure.cli.command_modules.keyvault
 run_style azure.cli.command_modules.lab
-#run_style azure.cli.command_modules.monitor
+run_style azure.cli.command_modules.monitor
 run_style azure.cli.command_modules.network
 run_style azure.cli.command_modules.profile
 run_style azure.cli.command_modules.rdbms
