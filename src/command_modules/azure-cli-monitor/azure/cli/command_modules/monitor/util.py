@@ -9,12 +9,12 @@ from datetime import datetime, timedelta
 DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 
-def get_resource_group_location(name):
+def get_resource_group_location(cli_ctx, name):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
 
     # pylint: disable=no-member
-    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups.get(name).location
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups.get(name).location
 
 
 def get_operator_map():
