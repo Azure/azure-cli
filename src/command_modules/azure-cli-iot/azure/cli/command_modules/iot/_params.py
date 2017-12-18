@@ -24,7 +24,7 @@ hub_name_type = CLIArgumentType(
     completer=get_resource_name_completion_list('Microsoft.Devices/IotHubs'),
     help='IoT Hub name.')
 
-dps_name_type = CliArgumentType(
+dps_name_type = CLIArgumentType(
     options_list=['--dps-name'],
     completer=get_resource_name_completion_list('Microsoft.Devices/ProvisioningServices'),
     help='IoT Provisioning Service name')

@@ -34,14 +34,16 @@ def load_command_table(self, _):
     # iot dps commands
     with self.command_group('iot dps', client_factory=iot_service_provisioning_factory) as g:
         g.custom_command('list', 'iot_dps_list')
-        g.custom_command('show', 'iot_dps_show')
+        g.custom_command('show', 'iot_dps_get')
         g.custom_command('create', 'iot_dps_create')
         g.custom_command('delete', 'iot_dps_delete')
+        g.generic_update_command('update', getter_name='iot_dps_get', setter_name='iot_dps_update',
+                                 command_type=update_custom_util)
 
     # iot dps access-policy commands
     with self.command_group('iot dps access-policy', client_factory=iot_service_provisioning_factory) as g:
         g.custom_command('list', 'iot_dps_access_policy_list')
-        g.custom_command('show', 'iot_dps_access_policy_show')
+        g.custom_command('show', 'iot_dps_access_policy_get')
         g.custom_command('create', 'iot_dps_access_policy_create')
         g.custom_command('update', 'iot_dps_access_policy_update')
         g.custom_command('delete', 'iot_dps_access_policy_delete')
@@ -49,14 +51,14 @@ def load_command_table(self, _):
     # iot dps linked-hub commands
     with self.command_group('iot dps linked-hub', client_factory=iot_service_provisioning_factory) as g:
         g.custom_command('list', 'iot_dps_linked_hub_list')
-        g.custom_command('show', 'iot_dps_linked_hub_show')
+        g.custom_command('show', 'iot_dps_linked_hub_get')
         g.custom_command('create', 'iot_dps_linked_hub_create')
         g.custom_command('update', 'iot_dps_linked_hub_update')
         g.custom_command('delete', 'iot_dps_linked_hub_delete')
 
     # iot dps allocation-policy commands
     with self.command_group('iot dps allocation-policy', client_factory=iot_service_provisioning_factory) as g:
-        g.custom_command('show', 'iot_dps_allocation_policy_show')
+        g.custom_command('show', 'iot_dps_allocation_policy_get')
         g.custom_command('update', 'iot_dps_allocation_policy_update')
 
     # iot dps certificate commands

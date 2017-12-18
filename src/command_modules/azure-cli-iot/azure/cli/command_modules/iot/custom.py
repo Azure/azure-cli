@@ -77,7 +77,7 @@ def iot_dps_access_policy_list(client, dps_name, resource_group_name):
     return client.iot_dps_resource.list_keys(dps_name, resource_group_name)
 
 
-def iot_dps_access_policy_show(client, dps_name, resource_group_name, access_policy_name):
+def iot_dps_access_policy_get(client, dps_name, resource_group_name, access_policy_name):
     iot_dps_get(client, dps_name, resource_group_name)
     return client.iot_dps_resource.list_keys_for_key_name(dps_name, access_policy_name, resource_group_name)
 
@@ -97,7 +97,7 @@ def iot_dps_access_policy_create(client, dps_name, resource_group_name, access_p
     dps_description = ProvisioningServiceDescription(dps.location, dps_property, dps.sku)
     
     client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
-    return iot_dps_access_policy_show(client, dps_name, resource_group_name, access_policy_name)
+    return iot_dps_access_policy_get(client, dps_name, resource_group_name, access_policy_name)
 
 
 def iot_dps_access_policy_update(client, dps_name, resource_group_name, access_policy_name, primary_key=None, secondary_key=None, rights=None):
@@ -120,7 +120,7 @@ def iot_dps_access_policy_update(client, dps_name, resource_group_name, access_p
     dps_description = ProvisioningServiceDescription(dps.location, dps_property, dps.sku)
     
     client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
-    return iot_dps_access_policy_show(client, dps_name, resource_group_name, access_policy_name)
+    return iot_dps_access_policy_get(client, dps_name, resource_group_name, access_policy_name)
 
 
 def iot_dps_access_policy_delete(client, dps_name, resource_group_name, access_policy_name):
@@ -144,7 +144,7 @@ def iot_dps_linked_hub_list(client, dps_name, resource_group_name):
     return dps.properties.iot_hubs
 
 
-def iot_dps_linked_hub_show(client, dps_name, resource_group_name, linked_hub_name):
+def iot_dps_linked_hub_get(client, dps_name, resource_group_name, linked_hub_name):
     dps = iot_dps_get(client, dps_name, resource_group_name)
     for hub in dps.properties.iot_hubs:
         if hub.name == linked_hub_name:
@@ -183,7 +183,7 @@ def iot_dps_linked_hub_update(client, dps_name, resource_group_name, linked_hub_
     dps_description = ProvisioningServiceDescription(dps.location, dps_property, dps.sku)
     
     client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
-    return iot_dps_linked_hub_show(client, dps_name, resource_group_name, linked_hub_name)
+    return iot_dps_linked_hub_get(client, dps_name, resource_group_name, linked_hub_name)
 
 
 def iot_dps_linked_hub_delete(client, dps_name, resource_group_name, linked_hub_name):
@@ -201,7 +201,7 @@ def iot_dps_linked_hub_delete(client, dps_name, resource_group_name, linked_hub_
     return iot_dps_linked_hub_list(client, dps_name, resource_group_name)
 
 # DPS allocation policy methods
-def iot_dps_allocation_policy_show(client, dps_name, resource_group_name):
+def iot_dps_allocation_policy_get(client, dps_name, resource_group_name):
     dps = iot_dps_get(client, dps_name, resource_group_name)
     return dps.properties.allocation_policy
 
@@ -213,7 +213,7 @@ def iot_dps_allocation_policy_update(client, dps_name, resource_group_name, allo
     dps_property = IotDpsPropertiesDescription(None, None, dps_iothubs, allocation_policy, dps_access_policy)
     dps_description = ProvisioningServiceDescription(dps.location, dps_property, dps.sku)
     client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
-    return iot_dps_allocation_policy_show(client, dps_name, resource_group_name)
+    return iot_dps_allocation_policy_get(client, dps_name, resource_group_name)
 
 
 # DPS certificate methods
