@@ -107,10 +107,9 @@ EOL
 for name in $(ls src/command_modules | grep azure-cli-); do
     if [ "$name" == "azure-cli-appservice" ]; then continue; fi
     if [ "$name" == "azure-cli-backup" ]; then continue; fi
-	if [ "$name" == "azure-cli-batchai" ]; then continue; fi
-    if [ "$name" == "azure-cli-cosmosdb" ]; then continue; fi
-	if [ "$name" == "azure-cli-dla" ]; then continue; fi
-	if [ "$name" == "azure-cli-dls" ]; then continue; fi
+    if [ "$name" == "azure-cli-batchai" ]; then continue; fi
+    if [ "$name" == "azure-cli-dla" ]; then continue; fi
+    if [ "$name" == "azure-cli-dls" ]; then continue; fi
     if [ "$name" == "azure-cli-eventgrid" ]; then continue; fi
     if [ "$name" == "azure-cli-find" ]; then continue; fi
     if [ "$name" == "azure-cli-interactive" ]; then continue; fi

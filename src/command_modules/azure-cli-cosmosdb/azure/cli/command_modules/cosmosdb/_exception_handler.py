@@ -4,7 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 import json
+
+from knack.log import get_logger
 from knack.util import CLIError
+
+
+logger = get_logger(__name__)
 
 
 def duplicate_resource_exception_handler(ex):

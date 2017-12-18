@@ -6,8 +6,6 @@
 from azure.cli.core.decorators import Completer
 from azure.cli.core._profile import Profile
 
-from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
-
 
 def _get_token(cli_ctx, server, resource, scope):  # pylint: disable=unused-argument
     return Profile(cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
@@ -17,6 +15,7 @@ def get_keyvault_name_completion_list(resource_name):
 
     @Completer
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+        from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
         client = KeyVaultClient(KeyVaultAuthentication(_get_token))
         func_name = 'get_{}s'.format(resource_name)
         vault = namespace.vault_base_url
@@ -33,6 +32,7 @@ def get_keyvault_version_completion_list(resource_name):
 
     @Completer
     def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+        from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
         client = KeyVaultClient(KeyVaultAuthentication(_get_token))
         func_name = 'get_{}_versions'.format(resource_name)
         vault = namespace.vault_base_url
