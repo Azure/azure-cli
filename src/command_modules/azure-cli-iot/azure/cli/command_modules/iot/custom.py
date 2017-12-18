@@ -20,6 +20,12 @@ from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
 from ._client_factory import resource_service_factory
 from ._utils import create_self_signed_certificate, open_certificate
 
+from azure.mgmt.provisioningservices.models.provisioning_service_description import ProvisioningServiceDescription
+from azure.mgmt.provisioningservices.models.iot_dps_properties_description import IotDpsPropertiesDescription
+from azure.mgmt.provisioningservices.models.iot_hub_definition_description import IotHubDefinitionDescription
+from azure.mgmt.provisioningservices.models.iot_dps_sku_info import IotDpsSkuInfo
+from azure.mgmt.provisioningservices.models.iot_dps_client_enums import IotDpsSku
+from azure.mgmt.provisioningservices.models.shared_access_signature_authorization_rule_access_rights_description import SharedAccessSignatureAuthorizationRuleAccessRightsDescription
 
 # CUSTOM TYPE
 class KeyType(Enum):
@@ -39,6 +45,11 @@ class SimpleAccessRights(Enum):
     service_connect = AccessRights.service_connect.value
     device_connect = AccessRights.device_connect.value
 
+# CUSTOM METHODS FOR DPS
+def iot_dps_list(client, resource_group_name=None):
+    if resource_group_name is None:
+        return client.iot_dps_resource.list_by_subscription()
+    return client.iot_dps_resource.list_by_resource_group(resource_group_name)
 
 # CUSTOM METHODS
 def iot_hub_certificate_list(client, hub_name, resource_group_name=None):

@@ -5,7 +5,7 @@
 
 from azure.cli.core.commands import LongRunningOperation, CliCommandType
 from ._client_factory import iot_hub_service_factory
-
+from ._client_factory import iot_service_provisioning_factory as dpsFactory
 
 class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
@@ -30,6 +30,10 @@ class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few
 def load_command_table(self, _):
 
     update_custom_util = CliCommandType(operations_tmpl='azure.cli.command_modules.iot.custom#{}')
+
+    # iot dps commands
+    with self.command_group('iot dps', client_factory=dpsFactory) as g:
+        g.custom_command('list', 'iot_dps_list')
 
     # iot hub certificate commands
     with self.command_group('iot hub certificate', client_factory=iot_hub_service_factory) as g:
