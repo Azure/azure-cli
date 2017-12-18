@@ -6,13 +6,15 @@
 # pylint: disable=line-too-long
 
 from argcomplete.completers import FilesCompleter
+
+from knack.arguments import CLIArgumentType
+
 from azure.cli.core.commands.parameters import \
     (get_resource_name_completion_list, file_type, get_location_type, get_three_state_flag,
      get_enum_type)
 from azure.cli.command_modules.backup._validators import \
     (datetime_type)
 
-from knack.arguments import CLIArgumentType
 
 # ARGUMENT DEFINITIONS
 

@@ -9,7 +9,11 @@ import re
 import os
 from datetime import datetime, timedelta
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+
+from knack.log import get_logger
+
 from msrest.paging import Paged
+from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, BackupStorageConfig
 from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, AzureIaaSComputeVMProtectedItem, \
@@ -22,10 +26,6 @@ from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_p
     protection_policies_cf, virtual_machines_cf, recovery_points_cf, protection_containers_cf, \
     backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf, job_details_cf, \
     protection_container_refresh_operation_results_cf, backup_protection_containers_cf
-
-from knack.log import get_logger
-
-from msrestazure.tools import parse_resource_id, is_valid_resource_id
 
 logger = get_logger(__name__)
 
@@ -455,6 +455,7 @@ def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):
     return storage_account.id
 
 
+# pylint: disable=inconsistent-return-statements
 def _get_disable_protection_request(item):
     if item.properties.workload_type == WorkloadType.vm.value:
         vm_item_properties = _get_vm_item_properties_from_vm_id(item.properties.virtual_machine_id)
@@ -465,6 +466,7 @@ def _get_disable_protection_request(item):
         return vm_item
 
 
+# pylint: disable=inconsistent-return-statements
 def _get_vm_item_properties_from_vm_type(vm_type):
     if vm_type == 'Microsoft.Compute/virtualMachines':
         return AzureIaaSComputeVMProtectedItem()
@@ -472,6 +474,7 @@ def _get_vm_item_properties_from_vm_type(vm_type):
         return AzureIaaSClassicComputeVMProtectedItem()
 
 
+# pylint: disable=inconsistent-return-statements
 def _get_vm_item_properties_from_vm_id(vm_id):
     if 'Microsoft.Compute/virtualMachines' in vm_id:
         return AzureIaaSComputeVMProtectedItem()
@@ -572,9 +575,9 @@ def _get_resource_name_and_rg(resource_group_name, name_or_id):
         resource_group = resource_group_name
     return name, resource_group
 
+
 # Tracking Utilities
-
-
+# pylint: disable=inconsistent-return-statements
 def _track_backup_ilr(cli_ctx, result, vault_name, resource_group):
     operation_status = _track_backup_operation(cli_ctx, resource_group, result, vault_name)
 
@@ -583,6 +586,7 @@ def _track_backup_ilr(cli_ctx, result, vault_name, resource_group):
         return recovery_target.client_scripts
 
 
+# pylint: disable=inconsistent-return-statements
 def _track_backup_job(cli_ctx, result, vault_name, resource_group):
     job_details_client = job_details_cf(None)
 
