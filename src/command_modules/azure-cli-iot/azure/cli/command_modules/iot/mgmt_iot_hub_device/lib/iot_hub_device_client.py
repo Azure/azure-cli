@@ -58,7 +58,9 @@ class IotHubDeviceClientConfiguration(AzureConfiguration):
         if accept_language is not None and not isinstance(accept_language, str):
             raise TypeError("Optional parameter 'accept_language' must be str.")
         if not base_url:
-            base_url = 'https://example.azure-devices.net'
+            from azure.cli.core._profile import CLOUD
+            suffix = CLOUD.suffixes.iot_device_hostname
+            base_url = 'https://example{}'.format(suffix)
 
         super(IotHubDeviceClientConfiguration, self).__init__(base_url, filepath)
 

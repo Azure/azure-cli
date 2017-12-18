@@ -99,12 +99,14 @@ class CloudSuffixes(object):  # pylint: disable=too-few-public-methods
                  storage_endpoint=None,
                  keyvault_dns=None,
                  sql_server_hostname=None,
+                 iot_device_hostname=None,
                  azure_datalake_store_file_system_endpoint=None,
                  azure_datalake_analytics_catalog_and_job_endpoint=None):
         # Attribute names are significant. They are used when storing/retrieving clouds from config
         self.storage_endpoint = storage_endpoint
         self.keyvault_dns = keyvault_dns
         self.sql_server_hostname = sql_server_hostname
+        self.iot_device_hostname = iot_device_hostname
         self.azure_datalake_store_file_system_endpoint = azure_datalake_store_file_system_endpoint
         self.azure_datalake_analytics_catalog_and_job_endpoint = azure_datalake_analytics_catalog_and_job_endpoint
 
@@ -161,6 +163,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
         storage_endpoint='core.windows.net',
         keyvault_dns='.vault.azure.net',
         sql_server_hostname='.database.windows.net',
+        iot_device_hostname='.azure-devices.net',
         azure_datalake_store_file_system_endpoint='azuredatalakestore.net',
         azure_datalake_analytics_catalog_and_job_endpoint='azuredatalakeanalytics.net'))
 
@@ -179,7 +182,8 @@ AZURE_CHINA_CLOUD = Cloud(
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
         keyvault_dns='.vault.azure.cn',
-        sql_server_hostname='.database.chinacloudapi.cn'))
+        sql_server_hostname='.database.chinacloudapi.cn',
+        iot_device_hostname='.azure-devices.cn'))
 
 AZURE_US_GOV_CLOUD = Cloud(
     'AzureUSGovernment',
