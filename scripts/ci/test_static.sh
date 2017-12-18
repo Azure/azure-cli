@@ -38,9 +38,9 @@ run_style azure.cli.command_modules.acr
 run_style azure.cli.command_modules.acs
 run_style azure.cli.command_modules.advisor
 #run_style azure.cli.command_modules.appservice
-#run_style azure.cli.command_modules.backup
+run_style azure.cli.command_modules.backup
 run_style azure.cli.command_modules.batch
-#run_style azure.cli.command_modules.batchai
+run_style azure.cli.command_modules.batchai
 run_style azure.cli.command_modules.billing
 run_style azure.cli.command_modules.cdn
 run_style azure.cli.command_modules.cloud
