@@ -162,7 +162,7 @@ class MainCommandsLoader(CLICommandsLoader):
 
                         for cmd_name, cmd in extension_command_table.items():
                             cmd.command_source = ExtensionCommandSource(
-                                extension_name=ext_mod,
+                                extension_name=ext_name,
                                 overrides_command=cmd_name in cmd_to_mod_map)
 
                         self.command_table.update(extension_command_table)
