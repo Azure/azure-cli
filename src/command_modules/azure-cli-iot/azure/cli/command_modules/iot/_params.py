@@ -49,8 +49,42 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('iot dps access-policy') as c:
         c.argument('access_policy_name', options_list=['--name', '-n'], help='A friendly name for DPS access policy.')
 
+    with self.argument_context('iot dps access-policy create') as c:
+        c.argument('dps_name', completer=None)
+        c.argument('rights', options_list=['--rights', '-r'], nargs='+', arg_type=get_enum_type(AccessRightsDescription),
+                    help='Access rights for the IoT provisioning service. Use space separated list for multiple rights.')
+        c.argument('primary_key', help='Primary SAS key value.', type=str)
+        c.argument('secondary_key', help='Secondary SAS key value.', type=str)
+
+    with self.argument_context('iot dps access-policy update') as c:
+        c.argument('dps_name', completer=None)
+        c.argument('rights', options_list=['--rights', '-r'], nargs='+', arg_type=get_enum_type(AccessRightsDescription),
+                    help='Access rights for the IoT provisioning service. Use space separated list for multiple rights.')
+        c.argument('primary_key', help='Primary SAS key value.', type=str)
+        c.argument('secondary_key', help='Secondary SAS key value.', type=str)
+
     with self.argument_context('iot dps linked-hub') as c:
-        c.argument('linked_hub_name', options_list=['--name', '-n'], help='Host name of linked IoT hub.')
+        c.argument('linked_hub_name', options_list=['--name', '-n'], help='Host name of linked IoT Hub.')
+
+    with self.argument_context('iot dps linked-hub create') as c:
+        c.argument('dps_name', completer=None)
+        c.argument('connection_string', help='Connection string of the Iot Hub.', type=str)
+        c.argument('location', get_location_type(self.cli_ctx),
+                   help='Location of the Iot Hub.')
+        c.argument('apply_allocation_policy', 
+                   help='A boolean indicating whether to apply allocation policy to the Iot Hub.', type=bool)
+        c.argument('allocation_weight', help='Allocation weight of the Iot Hub.', type=int)
+
+    with self.argument_context('iot dps linked-hub update') as c:
+        c.argument('dps_name', completer=None)
+        c.argument('apply_allocation_policy', 
+                   help='A boolean indicating whether to apply allocation policy to the Iot Hub.', type=bool)
+        c.argument('allocation_weight', help='Allocation weight of the Iot Hub.', type=int)
+
+    with self.argument_context('iot dps allocation-policy update') as c:
+        c.argument('dps_name', completer=None)
+        c.argument('allocation_policy', options_list=['--policy', '-p'], arg_type=get_enum_type(AllocationPolicy),
+                    help='Allocation policy for the Iot Provisioning Service.')
 
     with self.argument_context('iot dps certificate') as c:
         c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,
