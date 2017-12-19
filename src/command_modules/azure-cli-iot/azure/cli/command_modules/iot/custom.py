@@ -62,11 +62,6 @@ def iot_dps_get(client, dps_name, resource_group_name=None):
     return client.iot_dps_resource.get(dps_name, resource_group_name)
 
 
-def iot_dps_delete(client, dps_name, resource_group_name):
-    iot_dps_get(client, dps_name, resource_group_name)
-    return client.iot_dps_resource.delete(dps_name, resource_group_name)
-
-
 def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None, sku=IotDpsSku.s1.value, unit=1):
     cli_ctx = cmd.cli_ctx
     _check_dps_name_availability(client.iot_dps_resource, dps_name)
@@ -75,8 +70,14 @@ def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None, sk
     dps_description = ProvisioningServiceDescription(location, dps_property, IotDpsSkuInfo(sku, unit))
     return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
 
+
 def iot_dps_update(client, dps_name, parameters, resource_group_name):
     return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, parameters)
+
+
+def iot_dps_delete(client, dps_name, resource_group_name):
+    return client.iot_dps_resource.delete(dps_name, resource_group_name)
+
 
 # DPS access policy methods
 def iot_dps_access_policy_list(client, dps_name, resource_group_name):
