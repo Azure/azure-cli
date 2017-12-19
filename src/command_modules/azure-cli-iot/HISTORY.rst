@@ -3,7 +3,7 @@
 Release History
 ===============
 
-0.1.14
+0.1.15
 ++++++
 * Adds support for IoT DPS commands.
 
