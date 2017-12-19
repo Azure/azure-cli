@@ -5,6 +5,10 @@ Release History
 
 0.1.14
 ++++++
+* Adds support for IoT DPS commands.
+
+0.1.14
+++++++
 * Adds support for certificate authorities (CA) and certificate chains.
 * Minor fixes.
 
