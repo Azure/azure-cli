@@ -26,7 +26,7 @@ import azure.cli.core.telemetry as telemetry
 logger = get_logger(__name__)
 
 CLI_COMMAND_KWARGS = ['transform', 'table_transformer', 'confirmation', 'exception_handler', 'min_api', 'max_api',
-                      'client_factory', 'operations_tmpl', 'no_wait_param', 'validator', 'resource_type']
+                      'client_factory', 'operations_tmpl', 'no_wait_param', 'validator', 'resource_type', 'client_arg_name']
 
 CONFIRM_PARAM_NAME = 'yes'
 
