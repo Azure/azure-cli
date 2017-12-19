@@ -13,7 +13,7 @@ import azure.cli.core.azlogging as azlogging
 from azure.cli.core.util import CLIError
 
 from ._utils import validate_managed_registry
-from ._docker_utils import get_access_credentials
+from ._docker_utils import get_access_credentials, log_registry_response
 
 
 logger = azlogging.get_az_logger(__name__)
@@ -56,6 +56,7 @@ def _delete_data_from_registry(login_server, path, username, password, retry_tim
                 'https://{}/{}'.format(login_server, path),
                 headers=_get_authorization_header(username, password)
             )
+            log_registry_response(response)
 
             if response.status_code == 200 or response.status_code == 202:
                 return
@@ -83,6 +84,7 @@ def _get_manifest_digest(login_server, path, username, password, retry_times=3, 
                 'https://{}/{}'.format(login_server, path),
                 headers=headers
             )
+            log_registry_response(response)
 
             if response.status_code == 200 and response.headers and 'Docker-Content-Digest' in response.headers:
                 return response.headers['Docker-Content-Digest']
@@ -121,6 +123,7 @@ def _obtain_data_from_registry(login_server,
                     headers=_get_authorization_header(username, password),
                     params=_get_pagination_params(pagination)
                 )
+                log_registry_response(response)
 
                 if response.status_code == 200:
                     result = response.json()[result_index]

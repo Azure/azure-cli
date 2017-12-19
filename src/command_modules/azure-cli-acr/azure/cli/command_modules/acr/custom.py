@@ -251,14 +251,35 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
         p = Popen(["docker", "login",
                    "--username", username,
                    "--password-stdin",
-                   login_server], stdin=PIPE)
-        p.communicate(input=password.encode())
+                   login_server], stdin=PIPE, stderr=PIPE)
+        _, stderr = p.communicate(input=password.encode())
     else:
         p = Popen(["docker", "login",
                    "--username", username,
                    "--password", password,
-                   login_server])
-        p.wait()
+                   login_server], stderr=PIPE)
+        _, stderr = p.communicate()
+
+    if stderr:
+        if b'error storing credentials' in stderr and b'stub received bad data' in stderr \
+           and _check_wincred(login_server):
+            # Retry once after disabling wincred
+            if use_password_stdin:
+                p = Popen(["docker", "login",
+                           "--username", username,
+                           "--password-stdin",
+                           login_server], stdin=PIPE)
+                p.communicate(input=password.encode())
+            else:
+                p = Popen(["docker", "login",
+                           "--username", username,
+                           "--password", password,
+                           login_server])
+                p.wait()
+        else:
+            import sys
+            output = getattr(sys.stderr, 'buffer', sys.stderr)
+            output.write(stderr)
 
 
 def acr_show_usage(registry_name, resource_group_name=None):
@@ -271,3 +292,46 @@ def acr_show_usage(registry_name, resource_group_name=None):
     client = get_acr_service_client().registries
 
     return client.list_usages(resource_group_name, registry_name)
+
+
+def _check_wincred(login_server):
+    import platform
+    if platform.system() == 'Windows':
+        import json
+        from os.path import expanduser, isfile, join
+        config_path = join(expanduser('~'), '.docker', 'config.json')
+        logger.debug("Docker config file path %s", config_path)
+        if isfile(config_path):
+            with open(config_path) as input_file:
+                content = json.load(input_file)
+                input_file.close()
+            wincred = content.pop('credsStore', None)
+            if wincred and wincred.lower() == 'wincred':
+                # Ask for confirmation
+                from azure.cli.core.prompting import NoTTYException, prompt_y_n
+                message = "This operation will disable wincred and use file system to store docker credentials." \
+                          " All registries that are currently logged in will be logged out." \
+                          "\nAre you sure you want to continue?"
+                try:
+                    if prompt_y_n(message):
+                        with open(config_path, 'w') as output_file:
+                            json.dump(content, output_file, indent=4)
+                            output_file.close()
+                            return True
+                    return False
+                except NoTTYException:
+                    return False
+            # Don't update config file or retry as this doesn't seem to be a wincred issue
+            return False
+        else:
+            content = {
+                "auths": {
+                    login_server: {}
+                }
+            }
+            with open(config_path, 'w') as output_file:
+                json.dump(content, output_file, indent=4)
+                output_file.close()
+            return True
+
+    return False
