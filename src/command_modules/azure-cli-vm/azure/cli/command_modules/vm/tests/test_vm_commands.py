@@ -1355,6 +1355,14 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].ipConfigurations[0].applicationGatewayBackendAddressPools[0].resourceGroup', '{rg}')
         ])
 
+    @ResourceGroupPreparer()
+    def test_vmss_create_default_app_gateway(self, resource_group):
+        vmss_name = 'vmss1'
+        res = self.cmd("vmss create -g {} --name {} --image UbuntuLTS --disable-overprovision --instance-count 101 "
+                       "--single-placement-group false --validate".format(resource_group, vmss_name)).get_output_in_json()
+        # Ensure generated template is valid. "Quota Exceeding" is expected on most subscriptions, so we allow that.
+        self.assertTrue(not res['error'] or (res['error']['details'][0]['code'] == 'QuotaExceeded'))
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_w_ips')
     def test_vmss_public_ip_per_vm_custom_domain_name(self, resource_group):
 
