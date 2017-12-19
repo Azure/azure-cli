@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.21
+++++++
+vmss: ensure app-gateway has a name when defaults to it for large scalesets
 
 2.0.19
 ++++++
