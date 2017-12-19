@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.20
 ++++++
+* VMSS: ensure app-gateway has a name when default to it for large scalesets
 * VM/VMSS: (Preview) support user assigned identity
 * add missing hyphen to help message
 * Minor fixes
