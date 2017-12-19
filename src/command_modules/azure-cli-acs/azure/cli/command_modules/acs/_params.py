@@ -88,8 +88,7 @@ def load_arguments(self, _):
         c.argument('master_profile', options_list=['--master-profile', '-m'], type=validate_file_or_dict,
                    help=_get_feature_in_preview_message() + 'The file or dictionary representation of the master profile. Note it will override any master settings once set')
         c.argument('master_vm_size', completer=get_vm_size_completion_list, help=_get_feature_in_preview_message())
-        c.argument('agent_count', type=int,
-                   help='Set default number of agents for the agent pools.  Note, for DC/OS clusters you will also get 1 or 2 public agents in addition to these selected masters.')
+        c.argument('agent_count', type=int)
         c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters,
                    help='Generate SSH public and private key files if missing')
         c.argument('master_osdisk_size', type=int,
@@ -100,8 +99,6 @@ def load_arguments(self, _):
                    help=_get_feature_in_preview_message() + 'The first consecutive ip used to specify static ip block.')
         c.argument('master_storage_profile', get_enum_type(storage_profile_types),
                    help=_get_feature_in_preview_message() + 'Default: varies based on Orchestrator')
-        c.argument('agent_count', type=int,
-                   help='Set default number of agents for the agent pools.  Note, for DC/OS clusters you will also get 1 or 2 public agents in addition to these selected masters.')
         c.argument('agent_profiles', options_list=['--agent-profiles', '-a'], type=validate_file_or_dict,
                    help=_get_feature_in_preview_message() + 'The file or dictionary representation of the agent profiles. Note it will override any agent settings once set')
         c.argument('agent_vm_size', completer=get_vm_size_completion_list,
@@ -120,11 +117,9 @@ def load_arguments(self, _):
                    help='Generate and validate the ARM template without creating any resources')
         c.argument('orchestrator_version',
                    help=_get_feature_in_preview_message() + 'Use Orchestrator Version to specify the semantic version for your choice of orchestrator.')
-        c.argument('service_principal', help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
-        c.argument('client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
 
     with self.argument_context('acs scale') as c:
-        c.argument('new_agent_count', type=int, help='The number of agents for the cluster')
+        c.argument('new_agent_count', type=int)
 
     with self.argument_context('acs dcos browse') as c:
         c.argument('ssh_key_file', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa'),
@@ -156,8 +151,7 @@ def load_arguments(self, _):
         c.argument('name', validator=validate_linux_host_name)
         c.argument('admin_username', options_list=['--admin-username', '-u'], default='azureuser')
         c.argument('dns_name_prefix', options_list=['--dns-name-prefix', '-p'])
-        c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters,
-                   help='Generate SSH public and private key files if missing')
+        c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters)
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
         c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
                    completer=FilesCompleter(), validator=validate_ssh_key)
@@ -172,19 +166,12 @@ def load_arguments(self, _):
         c.argument('install_location', default=_get_default_install_location('kubectl'))
 
     with self.argument_context('aks install-connector') as c:
-        c.argument('chart_url', default=aci_connector_chart_url, help='URL to the chart')
-        c.argument('client_secret',
-                   help='Client secret to use with the service principal for making calls to Azure APIs')
-        c.argument('connector_name', help='The name for the ACI Connector')
-        c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
-        c.argument('service_principal',
-                   help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
+        c.argument('chart_url', default=aci_connector_chart_url)
+        c.argument('os_type', get_enum_type(aci_connector_os_type))
 
     with self.argument_context('aks remove-connector') as c:
-        c.argument('connector_name', help='The name for the ACI Connector')
-        c.argument('graceful', action='store_true',
-                   help='Mention if you want to drain/uncordon your aci-connector to move your applications')
-        c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
+        c.argument('graceful', action='store_true')
+        c.argument('os_type', get_enum_type(aci_connector_os_type))
 
 
 def _get_default_install_location(exe_name):
