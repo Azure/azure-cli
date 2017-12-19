@@ -37,7 +37,7 @@ helps['iot dps create'] = """
             az iot dps create --name MyDps --resource-group MyResourceGroup
         - name: Create an Azure IoT provisioning service with the standard pricing tier S1, in the 'eastus' region.
           text: >
-            az iot dps create --name MyDps --resource-group MyResourceGroup --location eastus  
+            az iot dps create --name MyDps --resource-group MyResourceGroup --location eastus
 """
 
 helps['iot dps list'] = """
@@ -70,10 +70,14 @@ helps['iot dps delete'] = """
             az iot dps delete --name MyDps --resource-group MyResourceGroup
 """
 
-#helps['iot dps update'] = """
-#    type: command
-#    short-summary: Update an Azure IoT provisioning service.
-#"""
+helps['iot dps update'] = """
+    type: command
+    short-summary: Update an Azure IoT provisioning service.
+    examples:
+        - name: Update Allocation Policy to 'GeoLatency' of an Azure IoT provisioning service 'MyDps'
+          text: >
+            az iot dps delete --name MyDps --resource-group MyResourceGroup --set properties.allocationPolicy="GeoLatency"
+"""
 
 helps['iot dps access-policy'] = """
     type: group
@@ -104,7 +108,7 @@ helps['iot dps access-policy list'] = """
     examples:
         - name: List all shared access policies in MyDps
           text: >
-            az iot dps access-policy list --dps-name MyDps --resource-group MyResourceGroup 
+            az iot dps access-policy list --dps-name MyDps --resource-group MyResourceGroup
 """
 
 helps['iot dps access-policy show'] = """
@@ -162,7 +166,7 @@ helps['iot dps linked-hub list'] = """
     examples:
         - name: List all linked IoT hubs in MyDps
           text: >
-            az iot dps linked-hub list --dps-name MyDps --resource-group MyResourceGroup 
+            az iot dps linked-hub list --dps-name MyDps --resource-group MyResourceGroup
 """
 
 helps['iot dps linked-hub show'] = """
@@ -181,29 +185,6 @@ helps['iot dps linked-hub delete'] = """
         - name: Delete linked IoT hub 'MyLinkedHub' in an Azure IoT provisioning service
           text: >
             az iot dps linked-hub delete --dps-name MyDps --resource-group MyResourceGroup --name MyLinkedHub
-"""
-
-helps['iot dps allocation-policy'] = """
-    type: group
-    short-summary: Manage Azure IoT Provisioning Service allocation policies.
-"""
-
-helps['iot dps allocation-policy show'] = """
-    type: command
-    short-summary: Show the details allocation policy of an Azure IoT provisioning service.
-    examples: 
-        - name: Show the details allocation policy of an Azure IoT provisioning service
-          text: >
-             az iot dps allocation-policy show --dps-name MyDps --resource-group MyResourceGroup 
-"""
-
-helps['iot dps allocation-policy update'] = """
-    type: command
-    short-summary: Update the details of Azure IoT Provisioning Service allocation policies.
-    examples: 
-        - name: Update the allocation policy of an Azure IoT provisioning service 
-          text: >
-             az iot dps allocation-policy update --dps-name MyDps --resource-group MyResourceGroup --policy GeoLatency
 """
 
 helps['iot dps certificate'] = """
@@ -226,15 +207,15 @@ helps['iot dps certificate create'] = """
 helps['iot dps certificate update'] = """
     type: command
     short-summary: Update an Azure IoT Provisioning Service certificate.
-    long-summary: Uploads a new certificate to replace the existing certificate with the same name. 
+    long-summary: Uploads a new certificate to replace the existing certificate with the same name.
     examples:
         - name: Updates a CA certificate in an Azure IoT provisioning service by uploading a new PEM file.
           text: >
-            az iot dps certificate update --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate 
+            az iot dps certificate update --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate
             --path /certificates/NewCertificate.pem --etag AAAAAAAAAAA=
         - name: Updates a CA certificate in an Azure IoT provisioning service by uploading a new CER file.
           text: >
-            az iot dps certificate update --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate 
+            az iot dps certificate update --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate
             --path /certificates/NewCertificate.cer --etag AAAAAAAAAAA=
 """
 
@@ -269,11 +250,11 @@ helps['iot dps certificate generate-verification-code'] = """
     type: command
     short-summary: Generates a verification code for an Azure IoT Provisioning Service certificate.
     long-summary: This verification code is used to complete the proof of possession step for a certificate. Use this
-                  verification code as the CN of a new certificate signed with the root certificates private key. 
+                  verification code as the CN of a new certificate signed with the root certificates private key.
     examples:
         - name: Generates a verification code for MyCertificate
           text: >
-            az iot dps certificate generate-verification-code --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate 
+            az iot dps certificate generate-verification-code --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate
             --etag AAAAAAAAAAA=
 """
 
@@ -281,11 +262,11 @@ helps['iot dps certificate verify'] = """
     type: command
     short-summary: Verifies an Azure IoT Provisioning Service certificate.
     long-summary: Verifies a certificate by uploading a verification certificate containing the verification code obtained
-                  by calling generate-verification-code. This is the last step in the proof of possession process. 
+                  by calling generate-verification-code. This is the last step in the proof of possession process.
     examples:
         - name: Verifies ownership of the MyCertificate private key.
           text: >
-            az iot dps certificate verify --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate 
+            az iot dps certificate verify --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate
             --path /certificates/Verification.pem --etag AAAAAAAAAAA=
 """
 

@@ -1,0 +1,564 @@
+interactions:
+- request:
+    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['50']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['328']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:56:48 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: 'b''{"name": "iot-dps-for-dps-test000002"}'''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps create]
+      Connection: [keep-alive]
+      Content-Length: ['60']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/checkProvisioningServiceNameAvailability?api-version=2017-11-15
+  response:
+    body: {string: '{"nameAvailable":true,"reason":"Invalid","message":null}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['56']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:56:49 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['328']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:56:50 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"location": "westus", "sku": {"capacity": 1, "name": "S1"}, "properties":
+      {}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps create]
+      Connection: [keep-alive]
+      Content-Length: ['78']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002?api-version=2017-11-15
+  response:
+    body: {string: '{"name":"iot-dps-for-dps-test000002","location":"westus","properties":{"state":"Activating","provisioningState":"Accepted","allocationPolicy":"Hashed","idScope":null},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002","subscriptionid":"b9ed95d7-5b40-413f-8e72-74721213a06c","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/operationResults/b3NfaWRfNTFiZjZkNzktMTBlMi00Njc1LWFmYWEtOWIzZjRkMjE2MTZm?api-version=2017-11-15&asyncinfo']
+      cache-control: [no-cache]
+      content-length: ['696']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:56:52 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['4999']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/operationResults/b3NfaWRfNTFiZjZkNzktMTBlMi00Njc1LWFmYWEtOWIzZjRkMjE2MTZm?api-version=2017-11-15&asyncinfo
+  response:
+    body: {string: '{"status":"Succeeded"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['22']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:57:22 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002?api-version=2017-11-15
+  response:
+    body: {string: '{"etag":"AAAAAAAG9LA=","name":"iot-dps-for-dps-test000002","location":"westus","properties":{"state":"Active","iotHubs":[],"allocationPolicy":"Hashed","serviceOperationsHostName":"iot-dps-for-dps-test000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne000062E2"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002","subscriptionid":"b9ed95d7-5b40-413f-8e72-74721213a06c","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['884']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:57:24 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps certificate create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates?api-version=2017-11-15
+  response:
+    body: {string: '{"value":[]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['12']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:57:25 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"certificate": "-----BEGIN CERTIFICATE-----\r\nMIIDHTCCAgWgAwIBAgIIGNM1lhyEDWQwDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlQ0d3llY3dndWVycXJpaXV2MB4XDTE3MTIxODAxNTcyNVoXDTE3\r\nMTIyMjAxNTcyNVowIzEhMB8GA1UEAwwYVEVTVENFUlQ0d3llY3dndWVycXJpaXV2\r\nMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQAxlquFtUQ03Sm3hN2T2+wr\r\nsdevinlc08TP50Cz/tMAEobm1oVMq7/XXfe34lf7mje99DLVuhNxd95ui9Lnx6Uh\r\nnjwYB3pCcAORMgL6K1nUaqhGosVgvxCHjD8tI2vdicCLDWmwI3lffmf46j9Y5uc5\r\nD0LTD4KPF4CA63K+FEW0OjHRRr3mKzs69spQXbsXLeO+kOWuaUGx5F2xwF/SxbBK\r\nZxGE/DO06Zs6fU6vlp8CMawMfdlvOaPZ//s8oBWA54QZQJ028phcCnWclYUM+Q7G\r\nwwuPaTYZExQx+VWq47GKgS930fY0vTLaNevmGvFAd9hWR+UO0kQUMfXf2CyMsfLr\r\nAgMBAAGjVjBUMBIGA1UdEwEB/wQIMAYBAf8CAQEwHQYDVR0OBBYEFNo5o+5ea0sN\r\nMlW/75VgGJCv2AcJMB8GA1UdIwQYMBaAFNo5o+5ea0sNMlW/75VgGJCv2AcJMA0G\r\nCSqGSIb3DQEBCwUAA4IBAQAd4YbCXBiywuyKks2AoluhXPqNepaFexer5Jsm4q2b\r\nVbKs0t72xj60WUuYGGxfnYvE5BDVANx2T49pB7j+ShDpOqv/S0RvANTrdHPkg6Od\r\n1LDnl3l4q9hq0ir3rWJw0QrLuRx3rqgQthdd1lGod4agHYH7yNfZGhOWPUfek3S1\r\nC+DwH3atfdDcTUfJ/lpTNoykefjb7j3+cUUAcBvMCtgCr8TgA2eqBZVdp7xfntnJ\r\nZDqThLMghG38gWymx0vGsXm77fOlUVAl1/Vtm/yBHQe6T8FzmqeZz10Pb2Gpp5Fs\r\n5YTOh54DOeQ9X1NxOu4OfUipwE3jbJci7oFzF95BJylN\r\n-----END
+      CERTIFICATE-----\r\n"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps certificate create]
+      Connection: [keep-alive]
+      Content-Length: ['1215']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates/certificate000003?api-version=2017-11-15
+  response:
+    body: {string: '{"properties":{"subject":"CN=TESTCERT000004","expiry":"Fri, 22
+        Dec 2017 01:57:25 GMT","thumbprint":"D832F38EAEDDCA8DDF699F2735E78667D2CAC5A0","isVerified":false,"created":"Tue,
+        19 Dec 2017 01:57:27 GMT","updated":"Tue, 19 Dec 2017 01:57:27 GMT"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAAAG9LE="}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['638']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:57:26 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps certificate list]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates?api-version=2017-11-15
+  response:
+    body: {string: '{"value":[{"properties":{"subject":"CN=TESTCERT000004","expiry":"Fri,
+        22 Dec 2017 01:57:25 GMT","thumbprint":"D832F38EAEDDCA8DDF699F2735E78667D2CAC5A0","isVerified":false,"created":"Tue,
+        19 Dec 2017 01:57:27 GMT","updated":"Tue, 19 Dec 2017 01:57:27 GMT"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAAAG9LE="}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['650']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:57:28 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps certificate show]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates/certificate000003?api-version=2017-11-15
+  response:
+    body: {string: '{"properties":{"subject":"CN=TESTCERT000004","expiry":"Fri, 22
+        Dec 2017 01:57:25 GMT","thumbprint":"D832F38EAEDDCA8DDF699F2735E78667D2CAC5A0","isVerified":false,"created":"Tue,
+        19 Dec 2017 01:57:27 GMT","updated":"Tue, 19 Dec 2017 01:57:27 GMT"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAAAG9LE="}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['638']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:57:28 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps certificate update]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates?api-version=2017-11-15
+  response:
+    body: {string: '{"value":[{"properties":{"subject":"CN=TESTCERT000004","expiry":"Fri,
+        22 Dec 2017 01:57:25 GMT","thumbprint":"D832F38EAEDDCA8DDF699F2735E78667D2CAC5A0","isVerified":false,"created":"Tue,
+        19 Dec 2017 01:57:27 GMT","updated":"Tue, 19 Dec 2017 01:57:27 GMT"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAAAG9LE="}]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['650']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:57:30 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"certificate": "-----BEGIN CERTIFICATE-----\r\nMIIDHTCCAgWgAwIBAgIIGNM1lhyEDWQwDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlQ0d3llY3dndWVycXJpaXV2MB4XDTE3MTIxODAxNTcyNVoXDTE3\r\nMTIyMjAxNTcyNVowIzEhMB8GA1UEAwwYVEVTVENFUlQ0d3llY3dndWVycXJpaXV2\r\nMIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQAxlquFtUQ03Sm3hN2T2+wr\r\nsdevinlc08TP50Cz/tMAEobm1oVMq7/XXfe34lf7mje99DLVuhNxd95ui9Lnx6Uh\r\nnjwYB3pCcAORMgL6K1nUaqhGosVgvxCHjD8tI2vdicCLDWmwI3lffmf46j9Y5uc5\r\nD0LTD4KPF4CA63K+FEW0OjHRRr3mKzs69spQXbsXLeO+kOWuaUGx5F2xwF/SxbBK\r\nZxGE/DO06Zs6fU6vlp8CMawMfdlvOaPZ//s8oBWA54QZQJ028phcCnWclYUM+Q7G\r\nwwuPaTYZExQx+VWq47GKgS930fY0vTLaNevmGvFAd9hWR+UO0kQUMfXf2CyMsfLr\r\nAgMBAAGjVjBUMBIGA1UdEwEB/wQIMAYBAf8CAQEwHQYDVR0OBBYEFNo5o+5ea0sN\r\nMlW/75VgGJCv2AcJMB8GA1UdIwQYMBaAFNo5o+5ea0sNMlW/75VgGJCv2AcJMA0G\r\nCSqGSIb3DQEBCwUAA4IBAQAd4YbCXBiywuyKks2AoluhXPqNepaFexer5Jsm4q2b\r\nVbKs0t72xj60WUuYGGxfnYvE5BDVANx2T49pB7j+ShDpOqv/S0RvANTrdHPkg6Od\r\n1LDnl3l4q9hq0ir3rWJw0QrLuRx3rqgQthdd1lGod4agHYH7yNfZGhOWPUfek3S1\r\nC+DwH3atfdDcTUfJ/lpTNoykefjb7j3+cUUAcBvMCtgCr8TgA2eqBZVdp7xfntnJ\r\nZDqThLMghG38gWymx0vGsXm77fOlUVAl1/Vtm/yBHQe6T8FzmqeZz10Pb2Gpp5Fs\r\n5YTOh54DOeQ9X1NxOu4OfUipwE3jbJci7oFzF95BJylN\r\n-----END
+      CERTIFICATE-----\r\n"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps certificate update]
+      Connection: [keep-alive]
+      Content-Length: ['1215']
+      Content-Type: [application/json; charset=utf-8]
+      If-Match: [AAAAAAAG9LE=]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates/certificate000003?api-version=2017-11-15
+  response:
+    body: {string: '{"properties":{"subject":"CN=TESTCERT000004","expiry":"Fri, 22
+        Dec 2017 01:57:25 GMT","thumbprint":"D832F38EAEDDCA8DDF699F2735E78667D2CAC5A0","isVerified":false,"created":"Tue,
+        19 Dec 2017 01:57:27 GMT","updated":"Tue, 19 Dec 2017 01:57:32 GMT"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAAAG9LI="}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['638']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:57:32 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps certificate generate-verification-code]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      If-Match: [AAAAAAAG9LI=]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates/certificate000003/generateVerificationCode?api-version=2017-11-15
+  response:
+    body: {string: '{"properties":{"verificationCode":"D61F9626EE9476F4A803E40D2FFA761AF20D8000BA4FBAD4","subject":"CN=TESTCERT000004","expiry":"Fri,
+        22 Dec 2017 01:57:25 GMT","thumbprint":"D832F38EAEDDCA8DDF699F2735E78667D2CAC5A0","isVerified":false,"created":"Tue,
+        19 Dec 2017 01:57:27 GMT","updated":"Tue, 19 Dec 2017 01:57:37 GMT"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAAAG9LM="}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['708']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:57:36 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: '{"certificate": "-----BEGIN CERTIFICATE-----\r\nMIIDAjCCAeqgAwIBAgIIKG7l/OjL8UkwDQYJKoZIhvcNAQELBQAwIzEhMB8GA1UE\r\nAwwYVEVTVENFUlQ0d3llY3dndWVycXJpaXV2MB4XDTE3MTIxOTAxNTczN1oXDTE3\r\nMTIyMjAxNTczN1owOzE5MDcGA1UEAwwwRDYxRjk2MjZFRTk0NzZGNEE4MDNFNDBE\r\nMkZGQTc2MUFGMjBEODAwMEJBNEZCQUQ0MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4A\r\nMIIBCQKCAQA6ymK3Au4zDYkT3tAamN7Crps2DcJTNO8a2nJhecJp6T9iDZ+ynNVI\r\nsmOmj83E6+UKUHAWVhxKszWH8X0bRhLLSTZd0OXYawV5CEWsTYqAgFlai87/6fC3\r\na9MDbgqcNKezEGRVAfjSU7FGeOH+5qfT3MZKUDJjUc/N80dKHIPWKeQ7NpppPgGo\r\nT9Q8eUdkgR4FFXoK1nNl4vyKqOcHYdH1l5QltBYI2wMxSTVnq2tvjjKNd2d0FUHG\r\n7MYdAGAzH1sc9pOTLXgPE0CGCRX6sceMJnLFDVtIyEfngE6fJTJyCTYeFDFwasB6\r\nq8J0gfOy7rgKNM6i8h5xHtBVjd8IWI3TAgMBAAGjIzAhMB8GA1UdIwQYMBaAFNo5\r\no+5ea0sNMlW/75VgGJCv2AcJMA0GCSqGSIb3DQEBCwUAA4IBAQAK3PZKzraHd/s1\r\nu6ovRZnilUiEb56R9JgoMWtkaV0kPK6DAPNXQIWYo38hFjnboHIJ6678+UAseDIh\r\nI3fZ7xk9sKh4xq8oRzM6i6hPWgTA1MCFUNKlJzkNt9ICQUuXIHq5SBkvhMca/w/A\r\n12d3FoUu1ZBd2fHSMSLlMUtVjCiQZCMvaOCGOQ21tmh54zDFcESxhN2jDBsp1cOM\r\n0DDD6fSIU1TsMHQxoCcG0y5vCpsixcQAIkViMyX0NKTcCmwNGIUWPhlQmAbX5D7E\r\nTfD92+HcprQYFdwPK2vOP475BYgUqaAxF76CpDSyOX75IZlDSJsakKEYM7r8/ZU4\r\nNuPlJXsN\r\n-----END
+      CERTIFICATE-----\r\n"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps certificate verify]
+      Connection: [keep-alive]
+      Content-Length: ['1179']
+      Content-Type: [application/json; charset=utf-8]
+      If-Match: [AAAAAAAG9LM=]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates/certificate000003/verify?api-version=2017-11-15
+  response:
+    body: {string: '{"properties":{"subject":"CN=TESTCERT000004","expiry":"Fri, 22
+        Dec 2017 01:57:25 GMT","thumbprint":"D832F38EAEDDCA8DDF699F2735E78667D2CAC5A0","isVerified":true,"created":"Tue,
+        19 Dec 2017 01:57:27 GMT","updated":"Tue, 19 Dec 2017 01:57:39 GMT"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates/certificate000003","name":"certificate000003","type":"Microsoft.Devices/IotHubs/Certificates","etag":"AAAAAAAG9LQ="}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['637']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:57:38 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps certificate delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      If-Match: [AAAAAAAG9LQ=]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/certificates/certificate000003?api-version=2017-11-15
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Tue, 19 Dec 2017 01:57:40 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002?api-version=2017-11-15
+  response:
+    body: {string: '{"etag":"AAAAAAAG9LA=","name":"iot-dps-for-dps-test000002","location":"westus","properties":{"state":"Active","iotHubs":[],"allocationPolicy":"Hashed","serviceOperationsHostName":"iot-dps-for-dps-test000002.azure-devices-provisioning.net","deviceProvisioningHostName":"global.azure-devices-provisioning.net","idScope":"0ne000062E2"},"resourcegroup":"clitest.rg000001","type":"Microsoft.Devices/provisioningServices","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002","subscriptionid":"b9ed95d7-5b40-413f-8e72-74721213a06c","tags":{},"sku":{"name":"S1","tier":"Standard","capacity":1}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['884']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:57:42 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002?api-version=2017-11-15
+  response:
+    body: {string: 'null'}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/operationResults/b3NfaWRfMWE5ODgzNjgtYjgxZi00NzI4LWEyZmYtYTUzNTFjMzEwMDFi?api-version=2017-11-15&asyncinfo']
+      cache-control: [no-cache]
+      content-length: ['4']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:57:43 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/operationResults/b3NfaWRfMWE5ODgzNjgtYjgxZi00NzI4LWEyZmYtYTUzNTFjMzEwMDFi?api-version=2017-11-15']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [iot dps delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azure-mgmt-provisioningservices/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Devices/provisioningServices/iot-dps-for-dps-test000002/operationResults/b3NfaWRfMWE5ODgzNjgtYjgxZi00NzI4LWEyZmYtYTUzNTFjMzEwMDFi?api-version=2017-11-15&asyncinfo
+  response:
+    body: {string: '{"status":"Succeeded"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['22']
+      content-type: [application/json; charset=utf-8]
+      date: ['Tue, 19 Dec 2017 01:57:59 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.22]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Tue, 19 Dec 2017 01:58:00 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdaREZRNVRLU0VLVDVYUVVRVlVRVUY2U0lCNU43TlVDS1NaUXw1MzUxMTA4OTAxMTI5RDgzLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+version: 1

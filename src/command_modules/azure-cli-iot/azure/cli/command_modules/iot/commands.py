@@ -5,7 +5,8 @@
 
 from azure.cli.core.commands import LongRunningOperation, CliCommandType
 from ._client_factory import iot_hub_service_factory
-from ._client_factory import iot_service_provisioning_factory 
+from ._client_factory import iot_service_provisioning_factory
+
 
 class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
@@ -55,11 +56,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'iot_dps_linked_hub_create')
         g.custom_command('update', 'iot_dps_linked_hub_update')
         g.custom_command('delete', 'iot_dps_linked_hub_delete')
-
-    # iot dps allocation-policy commands
-    with self.command_group('iot dps allocation-policy', client_factory=iot_service_provisioning_factory) as g:
-        g.custom_command('show', 'iot_dps_allocation_policy_get')
-        g.custom_command('update', 'iot_dps_allocation_policy_update')
 
     # iot dps certificate commands
     with self.command_group('iot dps certificate', client_factory=iot_service_provisioning_factory) as g:
