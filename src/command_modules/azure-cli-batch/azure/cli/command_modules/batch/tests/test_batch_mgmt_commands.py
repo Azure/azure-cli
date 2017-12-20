@@ -9,7 +9,8 @@ import mock
 
 from knack.util import CLIError
 from azure.cli.testsdk import TestCli
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import (
+    ScenarioTest, ResourceGroupPreparer, LiveScenarioTest)
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 from azure.mgmt.keyvault.models import SecretPermissions, KeyPermissions
 
@@ -18,7 +19,8 @@ ALL_SECRET_PERMISSIONS = ' '.join([perm.value for perm in SecretPermissions])
 ALL_KEY_PERMISSIONS = ' '.join([perm.value for perm in KeyPermissions])
 
 
-class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance-attributes
+# TODO: Convert back to ScenarioTest and re-record when issue #5142 is fixed.
+class BatchMgmtScenarioTests(LiveScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(location='northeurope')
     def test_batch_account_cmd(self, resource_group):
@@ -106,6 +108,9 @@ class BatchMgmtScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance
 
         self.cmd('batch location quotas show -l {loc}').assert_with_checks(
             [self.check('accountQuota', 1)])
+
+
+class BatchMgmtApplicationScenarioTests(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(location='ukwest')
     def test_batch_application_cmd(self, resource_group):
