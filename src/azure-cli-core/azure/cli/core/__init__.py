@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.22"
+__version__ = "2.0.24"
 
 import os
 import sys
@@ -319,7 +319,8 @@ class AzCommandsLoader(CLICommandsLoader):
 
             client = client_factory(self.cli_ctx, command_args) if client_factory else None
             if client:
-                client_arg_name = 'client' if operation.startswith(('azure.cli', 'azext')) else 'self'
+                client_arg_name = kwargs.get('client_arg_name',
+                                             'client' if operation.startswith(('azure.cli', 'azext')) else 'self')
                 if client_arg_name in op_args:
                     command_args[client_arg_name] = client
             result = op(**command_args)
