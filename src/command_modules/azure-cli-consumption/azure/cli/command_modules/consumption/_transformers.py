@@ -11,10 +11,8 @@ def transform_usage_output(result):
     result.billable_quantity = str(result.billable_quantity)
     result.pretax_cost = str(result.pretax_cost)
     if result.meter_details:
-        result.meter_details.total_included_quantity = str(
-            result.meter_details.total_included_quantity)
-        result.meter_details.pretax_standard_rate = str(
-            result.meter_details.pretax_standard_rate)
+        result.meter_details.total_included_quantity = str(result.meter_details.total_included_quantity)
+        result.meter_details.pretax_standard_rate = str(result.meter_details.pretax_standard_rate)
     return result
 
 

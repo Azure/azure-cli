@@ -11,8 +11,7 @@ import azure.cli.command_modules.consumption._help  # pylint: disable=unused-imp
 class ConsumptionCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        consumption_custom = CliCommandType(
-            operations_tmpl='azure.cli.command_modules.consumption.custom#{}')
+        consumption_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.consumption.custom#{}')
         super(ConsumptionCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=consumption_custom,
                                                         min_profile='2017-03-10-profile')
 

@@ -7,13 +7,13 @@
 from azure.cli.command_modules.consumption._transformers import transform_usage_list_output
 from azure.cli.command_modules.consumption._transformers import transform_reservation_summaries_list_output
 from azure.cli.command_modules.consumption._transformers import transform_reservation_details_list_output
+from azure.cli.command_modules.consumption._client_factory import usage_details_mgmt_client_factory
+from azure.cli.command_modules.consumption._client_factory import reservations_summaries_mgmt_client_factory
+from azure.cli.command_modules.consumption._client_factory import reservations_details_mgmt_client_factory
 from ._exception_handler import consumption_exception_handler
 from ._validators import validate_both_start_end_dates
 from ._validators import validate_reservations_summaries
 from ._validators import validate_reservations_details
-from azure.cli.command_modules.consumption._client_factory import usage_details_mgmt_client_factory
-from azure.cli.command_modules.consumption._client_factory import reservations_summaries_mgmt_client_factory
-from azure.cli.command_modules.consumption._client_factory import reservations_details_mgmt_client_factory
 
 
 def load_command_table(self, _):
