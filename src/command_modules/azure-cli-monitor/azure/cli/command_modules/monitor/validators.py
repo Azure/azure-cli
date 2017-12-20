@@ -3,9 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-
 from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+from knack.util import CLIError
 
 
 def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False):
@@ -42,12 +41,13 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
         del namespace.resource_type
         if not preserve_resource_group_parameter:
             del namespace.resource_group_name
+
     return _validator
 
 
 def validate_diagnostic_settings(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    resource_group_error = "--resource-group is required when name is provided for "\
+    resource_group_error = "--resource-group is required when name is provided for " \
                            "storage account or workspace or service bus namespace and rule. "
 
     if namespace.namespace or namespace.rule_name:
@@ -91,7 +91,8 @@ def validate_diagnostic_settings(cmd, namespace):
         namespace.workspace = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                           resource_group=namespace.resource_group,
                                           namespace='microsoft.OperationalInsights',
-                                          type='workspaces', name=namespace.workspace)
+                                          type='workspaces',
+                                          name=namespace.workspace)
 
     _validate_tags(namespace)
 
@@ -122,14 +123,14 @@ def process_action_group_detail_for_creation(namespace):
     ns = vars(namespace)
     name = ns['action_group_name']
     receivers = ns.pop('receivers') or []
-    action_group_resource_properties = {
-        'location': 'global',  # as of now, 'global' is the only available location for action group
-        'group_short_name': ns.pop('short_name') or name[:12],  # '12' is the short name length limitation
-        'email_receivers': [r for r in receivers if isinstance(r, EmailReceiver)],
-        'sms_receivers': [r for r in receivers if isinstance(r, SmsReceiver)],
-        'webhook_receivers': [r for r in receivers if isinstance(r, WebhookReceiver)],
-        'tags': ns.get('tags') or None
-    }
+    action_group_resource_properties = {'location': 'global',
+                                        # as of now, 'global' is the only available location for action group
+                                        'group_short_name': ns.pop('short_name') or name[:12],
+                                        # '12' is the short name length limitation
+                                        'email_receivers': [r for r in receivers if isinstance(r, EmailReceiver)],
+                                        'sms_receivers': [r for r in receivers if isinstance(r, SmsReceiver)],
+                                        'webhook_receivers': [r for r in receivers if isinstance(r, WebhookReceiver)],
+                                        'tags': ns.get('tags') or None}
 
     ns['action_group'] = ActionGroupResource(**action_group_resource_properties)
 

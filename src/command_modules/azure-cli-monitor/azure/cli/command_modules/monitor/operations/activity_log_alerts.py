@@ -16,7 +16,7 @@ def process_condition_parameter(namespace):
     except AttributeError:
         return
 
-    error = 'incorrect usage: --condition requires an expression in the form of FIELD=VALIE[ and FIELD=VALUE...]'
+    error = 'incorrect usage: --condition requires an expression in the form of FIELD=VALUE[ and FIELD=VALUE...]'
 
     if not expression:
         raise CLIError(error)
@@ -73,7 +73,7 @@ def create(cmd, client, resource_group_name, activity_log_alert_name, scopes=Non
     # Add action groups
     action_group_rids = _normalize_names(cmd.cli_ctx, action_groups, resource_group_name, 'microsoft.insights',
                                          'actionGroups')
-    action_groups = [ActionGroup(action_group_id=id, webhook_properties=webhook_properties) for id in action_group_rids]
+    action_groups = [ActionGroup(action_group_id=n, webhook_properties=webhook_properties) for n in action_group_rids]
     alert_actions = ActivityLogAlertActionList(action_groups=action_groups)
 
     settings = ActivityLogAlertResource(location='global', scopes=scopes, condition=condition,
@@ -172,7 +172,6 @@ def update(instance, condition=None, enabled=None, tags=None, description=None):
     return instance
 
 
-# pylint: disable=inconsistent-return-statements
 def _normalize_condition(condition_instance):
     from azure.mgmt.monitor.models import ActivityLogAlertLeafCondition
 
@@ -185,6 +184,8 @@ def _normalize_condition(condition_instance):
             raise ValueError('Condition "{}" does not follow format FIELD=VALUE'.format(condition_instance))
     elif isinstance(condition_instance, ActivityLogAlertLeafCondition):
         return '{}={}'.format(condition_instance.field.lower(), condition_instance.equals), condition_instance
+
+    raise ValueError('Unexpected condition instance type.')
 
 
 def _normalize_names(cli_ctx, resource_names, resource_group, namespace, resource_type):
