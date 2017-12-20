@@ -1656,8 +1656,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('length(@)', 1)])
 
 
-# TODO: Restore to ScenarioTest and re-record when issue #5112 is fixed.
-class SqlServerVnetMgmtScenarioTest(LiveScenarioTest):
+class SqlServerVnetMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
