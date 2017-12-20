@@ -41,14 +41,13 @@ class MonitorNameOrIdTest(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', _mock_get_subscription_id)
     def test_monitor_resource_id(self):
         from azure.cli.command_modules.monitor.validators import get_target_resource_validator
-        from azure.cli.testsdk import TestCli
 
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
+        cmd.cli_ctx = None
         validator = get_target_resource_validator('name_or_id', True)
 
-        id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Compute/' \
-             'virtualMachines/vm1'
+        rid = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Compute/' \
+              'virtualMachines/vm1'
 
         # must supply name or ID
         ns = self._build_namespace()
@@ -56,7 +55,7 @@ class MonitorNameOrIdTest(unittest.TestCase):
             validator(cmd, ns)
 
         # must only supply ID or name parameters
-        ns = self._build_namespace(id, 'my-rg', 'blahblah', 'stuff')
+        ns = self._build_namespace(rid, 'my-rg', 'blahblah', 'stuff')
         with self.assertRaises(CLIError):
             validator(cmd, ns)
 
@@ -68,20 +67,20 @@ class MonitorNameOrIdTest(unittest.TestCase):
         # allow Provider/Type syntax (same as resource commands)
         ns = self._build_namespace('vm1', 'my-rg', None, None, 'Microsoft.Compute/virtualMachines')
         validator(cmd, ns)
-        self.assertEqual(ns.name_or_id, id)
+        self.assertEqual(ns.name_or_id, rid)
 
         # allow Provider and Type separate
         ns = self._build_namespace('vm1', 'my-rg', 'Microsoft.Compute', None, 'virtualMachines')
         validator(cmd, ns)
-        self.assertEqual(ns.name_or_id, id)
+        self.assertEqual(ns.name_or_id, rid)
 
         # verify works with parent
-        id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Compute/' \
-             'fakeType/type1/anotherFakeType/type2/virtualMachines/vm1'
+        rid = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/my-rg/providers/Microsoft.Compute/' \
+              'fakeType/type1/anotherFakeType/type2/virtualMachines/vm1'
         ns = self._build_namespace('vm1', 'my-rg', 'Microsoft.Compute', 'fakeType/type1/anotherFakeType/type2',
                                    'virtualMachines')
         validator(cmd, ns)
-        self.assertEqual(ns.name_or_id, id)
+        self.assertEqual(ns.name_or_id, rid)
 
         # verify extra parameters are removed
         self.assertFalse(hasattr(ns, 'resource_name'))
