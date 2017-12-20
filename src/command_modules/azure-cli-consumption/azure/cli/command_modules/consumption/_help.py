@@ -10,6 +10,11 @@ helps['consumption'] = """
     short-summary: Manage consumption of Azure resources.
 """
 
+helps['consumption reservations'] = """
+    type: group
+    short-summary: Manage reservations for Azure resources.
+"""
+
 helps['consumption usage'] = """
     type: group
     short-summary: Inspect the usage of Azure resources.
