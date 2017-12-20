@@ -7,11 +7,13 @@ import os
 import tempfile
 import unittest
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, RoleBasedServicePrincipalPreparer)
+from azure.cli.testsdk import (
+    ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, LiveScenarioTest)
 
 # flake8: noqa
 
-class AzureKubernetesServiceScenarioTest(ScenarioTest):
+# TODO: Convert back to ScenarioTest and re-record when issue #5141 is resolved
+class AzureKubernetesServiceScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
