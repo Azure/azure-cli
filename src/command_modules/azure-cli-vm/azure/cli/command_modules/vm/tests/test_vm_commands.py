@@ -1442,8 +1442,9 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
         })
 
         message = 'Secret is missing vaultCertificates array or it is empty at index 0'
-        with six.assertRaisesRegex(self, CLIError, message):
+        with self.assertRaises(AssertionError) as ex:
             self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\'')
+        print(ex)
 
         vault_out = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
 

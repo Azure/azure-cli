@@ -29,7 +29,7 @@ class SupportedImages(Enum):  # pylint: disable=too-few-public-methods
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
 
-    with self.argument_context('batchai cluster') as c:
+    with self.argument_context('batchai') as c:
         c.argument('resource_group', resource_group_name_type)
 
     with self.argument_context('batchai cluster') as c:

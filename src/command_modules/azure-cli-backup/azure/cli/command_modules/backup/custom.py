@@ -44,6 +44,41 @@ def create_vault(client, vault_name, region, resource_group_name):
     return client.create_or_update(resource_group_name, vault_name, vault, custom_headers=_get_custom_headers())
 
 
+def _force_delete_vault(cmd, vault_name, resource_group_name):
+    from azure.cli.command_modules.backup._client_factory import (
+        backup_protection_containers_cf, backup_protected_items_cf,
+        protected_items_cf)
+    logger.warning('Attemping to force delete vault: %s', vault_name)
+    container_client = backup_protection_containers_cf(cmd.cli_ctx)
+    backup_item_client = backup_protected_items_cf(cmd.cli_ctx)
+    item_client = protected_items_cf(cmd.cli_ctx)
+    vault_client = vaults_cf(cmd.cli_ctx)
+    containers = _get_containers(
+        container_client, 'AzureIaasVM', 'Registered',
+        resource_group_name, vault_name)
+    for container in containers:
+        container_name = container.name.rsplit(';', 1)[1]
+        items = list_items(
+            cmd, backup_item_client, resource_group_name, vault_name, container_name)
+        for item in items:
+            item_name = item.name.rsplit(';', 1)[1]
+            logger.warning("Deleting backup item '%s' in container '%s'",
+                           item_name, container_name)
+            disable_protection(cmd, item_client, resource_group_name, vault_name,
+                               container.name, item_name, delete_backup_data=True)
+    # now delete the vault
+    vault_client.delete(resource_group_name, vault_name)
+
+def delete_vault(cmd, client, vault_name, resource_group_name, force=False):
+    try:
+        client.delete(resource_group_name, vault_name)
+    except Exception as ex:
+        if 'existing resources within the vault' in ex.message and force:
+            _force_delete_vault(cmd, vault_name, resource_group_name)
+        else:
+            raise ex
+
+
 def list_vaults(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name, custom_headers=_get_custom_headers())
