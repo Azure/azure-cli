@@ -15,6 +15,9 @@ from azure.cli.command_modules.batchai.custom import (
     _add_azure_file_share_to_cluster_create_parameters,
     _add_nfs_to_cluster_create_parameters)
 from azure.cli.core.util import CLIError
+
+from azure.cli.testsdk import TestCli
+
 from azure.mgmt.batchai.models import (
     ClusterCreateParameters, UserAccountSettings, NodeSetup, MountVolumes, FileServerCreateParameters,
     AzureFileShareReference, AzureBlobFileSystemReference, AzureStorageCredentialsInfo, SshConfiguration, DataDisks,
@@ -123,6 +126,7 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(result.ssh_configuration.user_account_settings.admin_user_ssh_public_key, SSH_KEY)
 
     def test_batchai_cluster_parameter_update_with_environment_variables(self):
+        cli_ctx = TestCli()
         params = ClusterCreateParameters(
             location='eastus', vm_size='STANDARD_D1',
             user_account_settings=UserAccountSettings(admin_user_name='name',
@@ -146,12 +150,12 @@ class TestBatchAICustom(unittest.TestCase):
         os.environ.pop('AZURE_BATCHAI_STORAGE_ACCOUNT', None)
         os.environ.pop('AZURE_BATCHAI_STORAGE_KEY', None)
         with self.assertRaises(CLIError):
-            _update_cluster_create_parameters_with_env_variables(params)
+            _update_cluster_create_parameters_with_env_variables(cli_ctx, params)
 
         # Set environment variables and check patching results.
         os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = 'account'
         os.environ['AZURE_BATCHAI_STORAGE_KEY'] = 'key'
-        result = _update_cluster_create_parameters_with_env_variables(params)
+        result = _update_cluster_create_parameters_with_env_variables(cli_ctx, params)
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].account_name, 'account')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'key')
         self.assertEquals(result.node_setup.mount_volumes.azure_blob_file_systems[0].account_name, 'account')
@@ -164,7 +168,7 @@ class TestBatchAICustom(unittest.TestCase):
         params.node_setup.mount_volumes.azure_blob_file_systems[0].credentials.account_key = 'some_other_key'
         os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = 'account'
         os.environ['AZURE_BATCHAI_STORAGE_KEY'] = 'key'
-        result = _update_cluster_create_parameters_with_env_variables(params)
+        result = _update_cluster_create_parameters_with_env_variables(cli_ctx, params)
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].account_name, 'some_account')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'some_key')
         self.assertEquals(result.node_setup.mount_volumes.azure_blob_file_systems[0].account_name,
@@ -178,7 +182,7 @@ class TestBatchAICustom(unittest.TestCase):
         params.node_setup.mount_volumes.azure_blob_file_systems[0].account_name = '<AZURE_BATCHAI_STORAGE_ACCOUNT>'
         params.node_setup.mount_volumes.azure_blob_file_systems[0].credentials.account_key = \
             '<AZURE_BATCHAI_STORAGE_KEY>'
-        result = _update_cluster_create_parameters_with_env_variables(params, 'account_from_cmd', 'key_from_cmd')
+        result = _update_cluster_create_parameters_with_env_variables(cli_ctx, params, 'account_from_cmd', 'key_from_cmd')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].account_name, 'account_from_cmd')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'key_from_cmd')
         self.assertEquals(result.node_setup.mount_volumes.azure_blob_file_systems[0].account_name, 'account_from_cmd')
@@ -189,7 +193,7 @@ class TestBatchAICustom(unittest.TestCase):
         params.node_setup.mount_volumes.azure_file_shares[0].account_name = '<AZURE_BATCHAI_STORAGE_ACCOUNT>'
         params.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key = '<AZURE_BATCHAI_STORAGE_KEY>'
         with self.assertRaises(CLIError):
-            _update_cluster_create_parameters_with_env_variables(params, str(uuid.uuid4()), None)
+            _update_cluster_create_parameters_with_env_variables(cli_ctx, params, str(uuid.uuid4()), None)
 
     def test_batchai_add_nfs_to_cluster_create_parameters(self):
         params = ClusterCreateParameters(location='eastus', vm_size='STANDARD_D1',
@@ -207,6 +211,7 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(result.node_setup.mount_volumes.file_servers[0].mount_options, 'rw')
 
     def test_batchai_add_azure_file_share_to_cluster_create_parameters(self):
+        cli_ctx = TestCli()
         params = ClusterCreateParameters(location='eastus', vm_size='STANDARD_D1',
                                          user_account_settings=UserAccountSettings(admin_user_name='name',
                                                                                    admin_user_password='password'))
@@ -216,17 +221,17 @@ class TestBatchAICustom(unittest.TestCase):
         os.environ.pop('AZURE_BATCHAI_STORAGE_ACCOUNT', None)
         os.environ.pop('AZURE_BATCHAI_STORAGE_KEY', None)
         with self.assertRaises(CLIError):
-            _add_azure_file_share_to_cluster_create_parameters(params, 'share', 'relative_path')
+            _add_azure_file_share_to_cluster_create_parameters(cli_ctx, params, 'share', 'relative_path')
 
         os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = 'account'
         os.environ['AZURE_BATCHAI_STORAGE_KEY'] = 'key'
 
         # No relative mount path provided.
         with self.assertRaises(CLIError):
-            _add_azure_file_share_to_cluster_create_parameters(params, 'share', '')
+            _add_azure_file_share_to_cluster_create_parameters(cli_ctx, params, 'share', '')
 
         # Check valid update.
-        result = _add_azure_file_share_to_cluster_create_parameters(params, 'share', 'relative_path')
+        result = _add_azure_file_share_to_cluster_create_parameters(cli_ctx, params, 'share', 'relative_path')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].account_name, 'account')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].azure_file_url,
                           'https://account.file.core.windows.net/share')
@@ -236,7 +241,7 @@ class TestBatchAICustom(unittest.TestCase):
         # Account name and key provided via command line args.
         os.environ.pop('AZURE_BATCHAI_STORAGE_ACCOUNT', None)
         os.environ.pop('AZURE_BATCHAI_STORAGE_KEY', None)
-        result = _add_azure_file_share_to_cluster_create_parameters(params, 'share', 'relative_path', 'account', 'key')
+        result = _add_azure_file_share_to_cluster_create_parameters(cli_ctx, params, 'share', 'relative_path', 'account', 'key')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].account_name, 'account')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].azure_file_url,
                           'https://account.file.core.windows.net/share')
@@ -244,6 +249,7 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'key')
 
     def test_batchai_add_azure_container_to_cluster_create_parameters(self):
+        cli_ctx = TestCli()
         params = ClusterCreateParameters(location='eastus', vm_size='STANDARD_D1',
                                          user_account_settings=UserAccountSettings(admin_user_name='name',
                                                                                    admin_user_password='password'))
@@ -252,17 +258,17 @@ class TestBatchAICustom(unittest.TestCase):
         os.environ.pop('AZURE_BATCHAI_STORAGE_ACCOUNT', None)
         os.environ.pop('AZURE_BATCHAI_STORAGE_KEY', None)
         with self.assertRaises(CLIError):
-            _add_azure_container_to_cluster_create_parameters(params, 'container', 'relative_path')
+            _add_azure_container_to_cluster_create_parameters(cli_ctx, params, 'container', 'relative_path')
 
         os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = 'account'
         os.environ['AZURE_BATCHAI_STORAGE_KEY'] = 'key'
 
         # No relative mount path provided.
         with self.assertRaises(CLIError):
-            _add_azure_container_to_cluster_create_parameters(params, 'container', '')
+            _add_azure_container_to_cluster_create_parameters(cli_ctx, params, 'container', '')
 
         # Check valid update.
-        result = _add_azure_container_to_cluster_create_parameters(params, 'container', 'relative_path')
+        result = _add_azure_container_to_cluster_create_parameters(cli_ctx, params, 'container', 'relative_path')
         self.assertEquals(result.node_setup.mount_volumes.azure_blob_file_systems[0].account_name, 'account')
         self.assertEquals(result.node_setup.mount_volumes.azure_blob_file_systems[0].container_name,
                           'container')
@@ -274,7 +280,7 @@ class TestBatchAICustom(unittest.TestCase):
         # Account name and key provided via command line args.
         os.environ.pop('AZURE_BATCHAI_STORAGE_ACCOUNT', None)
         os.environ.pop('AZURE_BATCHAI_STORAGE_KEY', None)
-        result = _add_azure_container_to_cluster_create_parameters(params, 'container', 'relative_path',
+        result = _add_azure_container_to_cluster_create_parameters(cli_ctx, params, 'container', 'relative_path',
                                                                    'account', 'key')
         self.assertEquals(result.node_setup.mount_volumes.azure_blob_file_systems[0].account_name, 'account')
         self.assertEquals(result.node_setup.mount_volumes.azure_blob_file_systems[0].container_name,
