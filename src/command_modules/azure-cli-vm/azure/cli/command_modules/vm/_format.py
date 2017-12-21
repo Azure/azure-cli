@@ -109,4 +109,4 @@ def get_vmss_table_output_transformer(loader, for_list=True):
                 'Overprovision:overprovision, UpgradePolicy:upgradePolicy.mode}'
     transform = transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), '
                                   if loader.supported_api_version(min_api='2017-03-30') else ' ')
-    return transform if for_list else '[].' + transform
+    return transform if not for_list else '[].' + transform

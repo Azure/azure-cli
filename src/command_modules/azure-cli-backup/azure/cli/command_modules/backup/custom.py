@@ -72,7 +72,7 @@ def delete_vault(cmd, client, vault_name, resource_group_name, force=False):
     try:
         client.delete(resource_group_name, vault_name)
     except Exception as ex:  # pylint: disable=broad-except
-        if 'existing resources within the vault' in ex.message and force:
+        if 'existing resources within the vault' in ex.message and force:  # pylint: disable=no-member
             _force_delete_vault(cmd, vault_name, resource_group_name)
         else:
             raise ex

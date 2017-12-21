@@ -31,7 +31,7 @@ with open(filename) as f:
                 path_file = path_comps[-2]
                 path_class = path_comps[-1]
                 module_name = path_comps[-4]
-                line = 'run_tests --module {} --test {}.{}.{}'.format(module_name, path_file, path_class, test_name)
+                line = 'run_tests --module {} --test {}.{}.{}\n'.format(module_name, path_file, path_class, test_name)
             except:
                 pass
             final_lines.append(line)
