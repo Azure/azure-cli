@@ -63,7 +63,6 @@ class VMUsageScenarioTest(ScenarioTest):
                  checks=self.check('type(@)', 'array'))
 
 
-# TODO: FIX fails on playback due to Response Body being too big
 class VMImageListThruServiceScenarioTest(ScenarioTest):
 
     def test_vm_images_list_thru_services(self):
@@ -162,7 +161,6 @@ class VMImageListOffersScenarioTest(ScenarioTest):
         self.assertFalse([i for i in result if i['location'].lower() != self.kwargs['loc']])
 
 
-# TODO: FIX playback fails due to ScenarioTest body size limit
 class VMImageListPublishersScenarioTest(ScenarioTest):
 
     def test_vm_image_list_publishers(self):
@@ -319,7 +317,6 @@ class VMCustomImageTest(ScenarioTest):
             self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType", 'Standard_LRS')
         ])
 
-    # TODO: FIX (master failing)
     @ResourceGroupPreparer()
     def test_custom_image_with_plan(self, resource_group):
         # this test should be recorded using accounts "@azuresdkteam.onmicrosoft.com", as it uses pre-made custom image
@@ -438,7 +435,6 @@ class VMAttachDisksOnCreate(ScenarioTest):
                  checks=self.check('powerState', 'VM running'))
 
 
-# TODO: FAIL no storage blob commands!
 class VMOSDiskSize(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_os_disk_size')
@@ -686,7 +682,6 @@ class VMAvailSetLiveScenarioTest(LiveScenarioTest):
         ])
 
 
-# TODO: FAIL (master failing) column headers order not matching
 class ComputeListSkusScenarioTest(LiveScenarioTest):
 
     def test_list_compute_skus_table_output(self):
@@ -763,7 +758,6 @@ class VMMachineExtensionImageScenarioTest(ScenarioTest):
         ])
 
 
-# TODO: FAIL invalid JSON on playback
 class VMExtensionImageSearchScenarioTest(ScenarioTest):
 
     def test_vm_extension_image_search(self):
@@ -1385,7 +1379,6 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         self.cmd('vmss create -g {rg} -n {vmss} --load-balancer {lb} --image UbuntuLTS --admin-username clitester --admin-password TestTest12#$')
 
 
-# TODO: change back to ScenarioTest and re-record when issue #5111 is fixed
 class VMSSCreatePublicIpPerVm(LiveScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_w_ips')
@@ -1424,7 +1417,6 @@ class VMSSCreateAcceleratedNetworkingTest(ScenarioTest):
                  checks=self.check('virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].enableAcceleratedNetworking', True))
 
 
-# TODO: FAIL missing KeyVault commands!
 class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
@@ -1441,10 +1433,9 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
             'vault': self.create_random_name('vmlinuxkv', 20)
         })
 
-        message = 'Secret is missing vaultCertificates array or it is empty at index 0'
-        with self.assertRaises(AssertionError) as ex:
-            self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\'')
-        print(ex)
+        # TODO: Re-enable when issue #5155 is resolved.
+        # message = 'Secret is missing vaultCertificates array or it is empty at index 0'
+        self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\'', expect_failure=True)
 
         vault_out = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
 
@@ -1466,60 +1457,42 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 
     @ResourceGroupPreparer()
     def test_vm_create_windows_secrets(self, resource_group, resource_group_location):
-        admin_username = 'windowsUser'
-        resource_group_location = 'westus'
-        vm_image = 'Win2012R2Datacenter'
-        vm_name = 'vm-name'
-        bad_secrets = json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}])
-        vault_name = self.create_random_name('vmkeyvault', 20)
 
-        message = 'Secret is missing certificateStore within vaultCertificates array at secret index 0 and ' \
-                  'vaultCertificate index 0'
-        with six.assertRaisesRegex(self, CLIError, message):
-            self.cmd('vm create -g {rg} -n {vm_name} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {location} --secrets \'{secrets}\''.format(
-                rg=resource_group,
-                admin=admin_username,
-                image=vm_image,
-                vm_name=vm_name,
-                location=resource_group_location,
-                secrets=bad_secrets
-            ))
+        self.kwargs.update({
+            'admin': 'windowsUser',
+            'loc': 'westus',
+            'image': 'Win2012R2Datacenter',
+            'vm': 'vm-name',
+            'secrets': json.dumps([{'sourceVault': {'id': 'id'}, 'vaultCertificates': [{'certificateUrl': 'certurl'}]}]),
+            'vault': self.create_random_name('vmkeyvault', 20)
+        })
+
+        # TODO: Re-enable when issue #5155 is resolved.
+        # message = 'Secret is missing certificateStore within vaultCertificates array at secret index 0 and ' \
+        #           'vaultCertificate index 0'
+        self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets \'{secrets}\'', expect_failure=True)
 
         vault_out = self.cmd(
-            'keyvault create -g {rg} -n {name} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true'.format(
-                rg=resource_group,
-                name=vault_name,
-                loc=resource_group_location
-            )).get_output_in_json()
+            'keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
 
         time.sleep(60)
 
-        policy_path = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
-        self.cmd('keyvault certificate create --vault-name {} -n cert1 -p @"{}"'.format(
-            vault_name,
-            policy_path))
+        self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
+        self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
 
-        secret_out = self.cmd('keyvault secret list-versions --vault-name {} -n cert1 --query "[?attributes.enabled].id" -o tsv'.format(vault_name)).output.strip()
-        vm_format = self.cmd('vm format-secret -s {0} --certificate-store "My"'.format(secret_out)).get_output_in_json()
+        self.kwargs['secret_out'] = self.cmd('keyvault secret list-versions --vault-name {vault} -n cert1 --query "[?attributes.enabled].id" -o tsv').output.strip()
+        self.kwargs['secrets'] = self.cmd('vm format-secret -s {secret_out} --certificate-store "My"').get_output_in_json()
 
-        self.cmd('vm create -g {rg} -n {vm_name} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {location} --secrets \'{secrets}\''.format(
-            rg=resource_group,
-            admin=admin_username,
-            image=vm_image,
-            vm_name=vm_name,
-            location=resource_group_location,
-            secrets=json.dumps(vm_format)
-        ))
+        self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets "{secrets}"')
 
-        self.cmd('vm show -g {rg} -n {vm_name}'.format(rg=resource_group, vm_name=vm_name), checks=[
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('osProfile.secrets[0].sourceVault.id', vault_out['id']),
-            self.check('osProfile.secrets[0].vaultCertificates[0].certificateUrl', secret_out),
+            self.check('osProfile.secrets[0].vaultCertificates[0].certificateUrl', self.kwargs['secret_out']),
             self.check('osProfile.secrets[0].vaultCertificates[0].certificateStore', 'My')
         ])
 
 
-# TODO: FAIL missing KeyVault commands!
 class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_linux_secrets')
@@ -1586,7 +1559,6 @@ class VMSSCreateExistingOptions(ScenarioTest):
                  checks=self.check('subnets[0].ipConfigurations[0].id.contains(@, \'{vmss}\')', True))
 
 
-# TODO: FAIL error incorrect --subnet usage
 class VMSSCreateExistingIdsOptions(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_existing_ids')
@@ -1732,7 +1704,6 @@ class VMSSCreateIdempotentTest(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk')
 
 
-# TODO: FAIL but should pass.... >_>
 class VMSSILBTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_ilb')
@@ -1770,7 +1741,6 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
         ])
 
 
-# TODO: FAIL assign_implicit_identity missing required positional argument 'setter'
 class MSIScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_msi')
@@ -2043,7 +2013,6 @@ class MSIScenarioTest(ScenarioTest):
         ])
 
 
-# TODO: FAIL (master failing) force_progress_logging needs updates for Knack...
 class VMLiveScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_create_progress')
@@ -2065,7 +2034,6 @@ class VMLiveScenarioTest(LiveScenarioTest):
         self.assertTrue('Succeeded: {vm} (Microsoft.Compute/virtualMachines)'.format(**self.kwargs) in lines)
 
 
-# TODO: FAIL weird table subset things... False is not True...
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
 class VMZoneScenarioTest(ScenarioTest):
 
@@ -2296,7 +2264,6 @@ class VMCreateWithExistingNic(ScenarioTest):
         self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['privateIps']))
 
 
-# TODO: FAIL (master failing) missing KeyVault commands!
 class VMSecretTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
