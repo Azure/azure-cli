@@ -22,10 +22,11 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
     JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest
 
 from azure.cli.core.util import CLIError
-from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_protected_items_cf, \
-    protection_policies_cf, virtual_machines_cf, recovery_points_cf, protection_containers_cf, \
-    backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf, job_details_cf, \
-    protection_container_refresh_operation_results_cf, backup_protection_containers_cf
+from azure.cli.command_modules.backup._client_factory import (
+    vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
+    protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
+    job_details_cf, protection_container_refresh_operation_results_cf, backup_protection_containers_cf,
+    protected_items_cf)
 
 logger = get_logger(__name__)
 
@@ -45,9 +46,6 @@ def create_vault(client, vault_name, region, resource_group_name):
 
 
 def _force_delete_vault(cmd, vault_name, resource_group_name):
-    from azure.cli.command_modules.backup._client_factory import (
-        backup_protection_containers_cf, backup_protected_items_cf,
-        protected_items_cf)
     logger.warning('Attemping to force delete vault: %s', vault_name)
     container_client = backup_protection_containers_cf(cmd.cli_ctx)
     backup_item_client = backup_protected_items_cf(cmd.cli_ctx)
@@ -69,10 +67,11 @@ def _force_delete_vault(cmd, vault_name, resource_group_name):
     # now delete the vault
     vault_client.delete(resource_group_name, vault_name)
 
+
 def delete_vault(cmd, client, vault_name, resource_group_name, force=False):
     try:
         client.delete(resource_group_name, vault_name)
-    except Exception as ex:
+    except Exception as ex:  # pylint: disable=broad-except
         if 'existing resources within the vault' in ex.message and force:
             _force_delete_vault(cmd, vault_name, resource_group_name)
         else:
