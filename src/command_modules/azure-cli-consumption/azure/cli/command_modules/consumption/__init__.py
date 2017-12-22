@@ -6,7 +6,6 @@
 from azure.cli.core import AzCommandsLoader
 
 import azure.cli.command_modules.consumption._help  # pylint: disable=unused-import
-from azure.cli.command_modules.consumption._client_factory import usage_details_mgmt_client_factory
 
 
 class ConsumptionCommandsLoader(AzCommandsLoader):
@@ -14,8 +13,7 @@ class ConsumptionCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         consumption_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.consumption.custom#{}')
         super(ConsumptionCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=consumption_custom,
-                                                        min_profile='2017-03-10-profile',
-                                                        client_factory=usage_details_mgmt_client_factory)
+                                                        min_profile='2017-03-10-profile')
 
     def load_command_table(self, args):
         from azure.cli.command_modules.consumption.commands import load_command_table
