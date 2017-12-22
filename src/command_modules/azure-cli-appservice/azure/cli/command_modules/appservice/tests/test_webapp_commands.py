@@ -457,9 +457,9 @@ class WebappGitScenarioTest(ScenarioTest):
             JMESPathCheck('isMercurial', False),
             JMESPathCheck('branch', 'master')
         ])
-        self.cmd('webapp deployment source delete -g {} -n {}'.format(resource_group, webapp), checks=[
-            JMESPathCheck('repoUrl', None)
-        ])
+        self.cmd('webapp deployment source delete -g {} -n {}'.format(resource_group, webapp))
+        self.cmd('webapp deployment source show -g {} -n {}'.format(resource_group, webapp),
+                 checks=JMESPathCheck('repoUrl', None))
 
 
 # TODO: Convert to ScenarioTest and re-record when issue #5145 is fixed.
