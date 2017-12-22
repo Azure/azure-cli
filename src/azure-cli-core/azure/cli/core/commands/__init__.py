@@ -769,6 +769,8 @@ class AzCommandGroup(CommandGroup):
         from azure.cli.core.commands.arm import _cli_generic_update_command, _cli_generic_wait_command
         self._check_stale()
         merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs)
+        if getter_type:
+            merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs)
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         _cli_generic_wait_command(
             self.command_loader,
