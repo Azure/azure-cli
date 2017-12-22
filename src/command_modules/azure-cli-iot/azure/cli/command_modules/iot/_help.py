@@ -196,10 +196,10 @@ helps['iot dps certificate create'] = """
     type: command
     short-summary: Create/upload an Azure IoT Provisioning Service certificate.
     examples:
-        - name: Uploads a CA certificate PEM file to an Azure IoT provisioning service.
+        - name: Upload a CA certificate PEM file to an Azure IoT provisioning service.
           text: >
             az iot dps certificate create --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/Certificate.pem
-        - name: Uploads a CA certificate CER file to an Azure IoT provisioning service.
+        - name: Upload a CA certificate CER file to an Azure IoT provisioning service.
           text: >
             az iot dps certificate create --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --path /certificates/Certificate.cer
 """
@@ -207,13 +207,13 @@ helps['iot dps certificate create'] = """
 helps['iot dps certificate update'] = """
     type: command
     short-summary: Update an Azure IoT Provisioning Service certificate.
-    long-summary: Uploads a new certificate to replace the existing certificate with the same name.
+    long-summary: Upload a new certificate to replace the existing certificate with the same name.
     examples:
-        - name: Updates a CA certificate in an Azure IoT provisioning service by uploading a new PEM file.
+        - name: Update a CA certificate in an Azure IoT provisioning service by uploading a new PEM file.
           text: >
             az iot dps certificate update --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate
             --path /certificates/NewCertificate.pem --etag AAAAAAAAAAA=
-        - name: Updates a CA certificate in an Azure IoT provisioning service by uploading a new CER file.
+        - name: Update a CA certificate in an Azure IoT provisioning service by uploading a new CER file.
           text: >
             az iot dps certificate update --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate
             --path /certificates/NewCertificate.cer --etag AAAAAAAAAAA=
@@ -221,16 +221,16 @@ helps['iot dps certificate update'] = """
 
 helps['iot dps certificate delete'] = """
     type: command
-    short-summary: Deletes an Azure IoT Provisioning Service certificate.
+    short-summary: Delete an Azure IoT Provisioning Service certificate.
     examples:
-        - name: Deletes MyCertificate in an Azure IoT provisioning service
+        - name: Delete MyCertificate in an Azure IoT provisioning service
           text: >
             az iot dps certificate delete --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate --etag AAAAAAAAAAA=
 """
 
 helps['iot dps certificate show'] = """
     type: command
-    short-summary: Shows information about a particular Azure IoT Provisioning Service certificate.
+    short-summary: Show information about a particular Azure IoT Provisioning Service certificate.
     examples:
         - name: Show details about MyCertificate in an Azure IoT provisioning service
           text: >
@@ -239,7 +239,7 @@ helps['iot dps certificate show'] = """
 
 helps['iot dps certificate list'] = """
     type: command
-    short-summary: Lists all certificates contained within an Azure IoT provisioning service
+    short-summary: List all certificates contained within an Azure IoT provisioning service
     examples:
         - name: List all certificates in MyDps
           text: >
@@ -248,11 +248,11 @@ helps['iot dps certificate list'] = """
 
 helps['iot dps certificate generate-verification-code'] = """
     type: command
-    short-summary: Generates a verification code for an Azure IoT Provisioning Service certificate.
+    short-summary: Generate a verification code for an Azure IoT Provisioning Service certificate.
     long-summary: This verification code is used to complete the proof of possession step for a certificate. Use this
                   verification code as the CN of a new certificate signed with the root certificates private key.
     examples:
-        - name: Generates a verification code for MyCertificate
+        - name: Generate a verification code for MyCertificate
           text: >
             az iot dps certificate generate-verification-code --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate
             --etag AAAAAAAAAAA=
@@ -260,11 +260,11 @@ helps['iot dps certificate generate-verification-code'] = """
 
 helps['iot dps certificate verify'] = """
     type: command
-    short-summary: Verifies an Azure IoT Provisioning Service certificate.
-    long-summary: Verifies a certificate by uploading a verification certificate containing the verification code obtained
+    short-summary: Verify an Azure IoT Provisioning Service certificate.
+    long-summary: Verify a certificate by uploading a verification certificate containing the verification code obtained
                   by calling generate-verification-code. This is the last step in the proof of possession process.
     examples:
-        - name: Verifies ownership of the MyCertificate private key.
+        - name: Verify ownership of the MyCertificate private key.
           text: >
             az iot dps certificate verify --dps-name MyDps --resource-group MyResourceGroup --name MyCertificate
             --path /certificates/Verification.pem --etag AAAAAAAAAAA=
