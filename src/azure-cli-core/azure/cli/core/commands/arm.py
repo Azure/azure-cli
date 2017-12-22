@@ -454,7 +454,7 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
             client = factory(context.cli_ctx, None) if factory else None
-        if client and client_arg_name in getter_args:
+        if client and (client_arg_name in getter_args or client_arg_name == 'self'):
             args[client_arg_name] = client
 
         getter = context.get_op_handler(getter_op)

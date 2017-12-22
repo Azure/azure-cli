@@ -6,7 +6,8 @@ from __future__ import print_function
 
 import os
 import time
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk import (
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, LiveScenarioTest)
 
 try:
     import unittest.mock as mock
@@ -189,6 +190,20 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
         # By this time the cluster should not have any nodes
         self.cmd('batchai cluster show -n cluster -g {0}'.format(resource_group),
                  checks=JMESPathCheck('currentNodeCount', 0))
+
+    def _configure_environment(self, resource_group, storage_account):
+
+        # Configure storage account related environment variables.
+        account_key = self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'.format(
+            storage_account, resource_group)).output[:-1]
+        self.set_env('AZURE_STORAGE_ACCOUNT', storage_account)
+        self.set_env('AZURE_STORAGE_KEY', account_key)
+        self.set_env('AZURE_BATCHAI_STORAGE_ACCOUNT', storage_account)
+        self.set_env('AZURE_BATCHAI_STORAGE_KEY', account_key)
+
+
+# TODO: Convert back to ScenarioTest and re-record when #5164 is addressed.
+class BatchAILiveScenariosTests(LiveScenarioTest):
 
     @ResourceGroupPreparer(location='eastus')
     @StorageAccountPreparer(location='eastus')
