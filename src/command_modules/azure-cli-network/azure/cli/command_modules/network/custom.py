@@ -3228,6 +3228,9 @@ def add_vpn_conn_ipsec_policy(cmd, resource_group_name, connection_name,
                              pfs_group=pfs_group)
     if conn.ipsec_policies:
         conn.ipsec_policies.append(new_policy)
+    else:
+        conn.ipsec_policies = [new_policy]
+    return ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
 
 
 def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_wait=False):

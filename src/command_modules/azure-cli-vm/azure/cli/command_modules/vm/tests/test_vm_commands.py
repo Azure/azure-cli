@@ -66,6 +66,11 @@ class VMUsageScenarioTest(ScenarioTest):
 class VMImageListThruServiceScenarioTest(ScenarioTest):
 
     def test_vm_images_list_thru_services(self):
+        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = 4096
+
         result = self.cmd('vm image list -l westus --publisher Canonical --offer Ubuntu_Snappy_Core -o tsv --all').output
         assert result.index('15.04') >= 0
 
@@ -164,6 +169,11 @@ class VMImageListOffersScenarioTest(ScenarioTest):
 class VMImageListPublishersScenarioTest(ScenarioTest):
 
     def test_vm_image_list_publishers(self):
+        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = 4096
+
         self.kwargs.update({
             'loc': 'westus'
         })
@@ -316,6 +326,10 @@ class VMCustomImageTest(ScenarioTest):
             self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[0].createOption", 'FromImage'),
             self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[0].managedDisk.storageAccountType", 'Standard_LRS')
         ])
+
+
+# TODO: Convert back to ScnearioTest and re-record when issue #5161 is addressed.
+class VMCustomImageWithPlanTest(LiveScenarioTest):
 
     @ResourceGroupPreparer()
     def test_custom_image_with_plan(self, resource_group):
@@ -761,6 +775,11 @@ class VMMachineExtensionImageScenarioTest(ScenarioTest):
 class VMExtensionImageSearchScenarioTest(ScenarioTest):
 
     def test_vm_extension_image_search(self):
+        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = 4096
+
         # pick this specific name, so the search will be under one publisher. This avoids
         # the parallel searching behavior that causes incomplete VCR recordings.
         self.kwargs.update({
@@ -1511,7 +1530,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
             'ssh_key': TEST_SSH_KEY_PUB
         })
 
-        vault_out = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true')
+        vault_out = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-deployment true --enabled-for-template-deployment true').get_output_in_json()
 
         time.sleep(60)
 
@@ -1519,7 +1538,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
 
         self.kwargs['secret_out'] = self.cmd('keyvault secret list-versions --vault-name {vault} -n cert1 --query "[?attributes.enabled].id" -o tsv').output.strip()
-        vm_format = self.cmd('vm format-secret -s {secret_out}')
+        vm_format = self.cmd('vm format-secret -s {secret_out}').get_output_in_json()
         self.kwargs['secrets'] = json.dumps(vm_format)
 
         self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value \'{ssh_key}\' --secrets \'{secrets}\'')

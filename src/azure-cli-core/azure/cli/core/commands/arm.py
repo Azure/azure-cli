@@ -446,12 +446,15 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         cmd = args.get('cmd')
 
         operations_tmpl = _get_operations_tmpl(cmd)
+        getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
+                                                       excluded_params=EXCLUDED_PARAMS))
+
         client_arg_name = 'client' if operations_tmpl.startswith(('azure.cli', 'azext')) else 'self'
         try:
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
             client = factory(context.cli_ctx, None) if factory else None
-        if client:
+        if client and client_arg_name in getter_args:
             args[client_arg_name] = client
 
         getter = context.get_op_handler(getter_op)

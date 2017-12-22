@@ -1153,9 +1153,9 @@ def list_vm_extension_images(
 
 
 # region VirtualMachines Identity
-def _remove_identities(cli_ctx, resource_group_name, name, identities, getter, setter):
-    ResourceIdentityType = cli_ctx.get_models('ResourceIdentityType', operation_group='virtual_machines')
-    resource = getter(resource_group_name, name)
+def _remove_identities(cmd, resource_group_name, name, identities, getter, setter):
+    ResourceIdentityType = cmd.get_models('ResourceIdentityType', operation_group='virtual_machines')
+    resource = getter(cmd, resource_group_name, name)
     existing = set([x.lower() for x in resource.identity.identity_ids])
     to_remove = set([x.lower() for x in identities])
     non_existing = to_remove.difference(existing)
@@ -1168,11 +1168,11 @@ def _remove_identities(cli_ctx, resource_group_name, name, identities, getter, s
             resource.identity.type = ResourceIdentityType.none
         else:  # has to be 'system_assigned_user_assigned'
             resource.identity.type = ResourceIdentityType.system_assigned
-    return setter(resource)
+    return setter(cmd, resource)
 
 
 def remove_vm_identity(cmd, resource_group_name, vm_name, identities):
-    return _remove_identities(cmd.cli_ctx, resource_group_name, vm_name, identities, get_vm, set_vm)
+    return _remove_identities(cmd, resource_group_name, vm_name, identities, get_vm, set_vm)
 # endregion
 
 
@@ -2238,11 +2238,14 @@ def set_vmss_extension(
 def remove_vmss_identity(cmd, resource_group_name, vmss_name, identities):
     client = _compute_client_factory(cmd.cli_ctx)
 
-    def _set_vmss(vmss_instance):
+    def _get_vmss(_, resource_group_name, vmss_name):
+        return client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+
+    def _set_vmss(_, vmss_instance):
         return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
                                                                   vmss_name, vmss_instance)
 
-    return _remove_identities(cmd.cli_ctx, resource_group_name, vmss_name, identities,
-                              client.virtual_machine_scale_sets.get,
+    return _remove_identities(cmd, resource_group_name, vmss_name, identities,
+                              _get_vmss,
                               _set_vmss)
 # endregion
