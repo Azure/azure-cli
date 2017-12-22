@@ -34,9 +34,6 @@ def force_progress_logging():
     from azure.cli.core.commands import logger as cmd_logger
     from azure.cli.testsdk import TestCli
 
-    cli_ctx = TestCli()
-    print(cli_ctx.__dict__)
-
     # register a progress logger handler to get the content to verify
     test_io = StringIO()
     test_handler = logging.StreamHandler(test_io)
