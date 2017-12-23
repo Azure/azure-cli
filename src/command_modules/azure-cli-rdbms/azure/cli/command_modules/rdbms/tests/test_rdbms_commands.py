@@ -29,6 +29,8 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True):
         super(ServerPreparer, self).__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
+        from azure.cli.testsdk import TestCli
+        self.cli_ctx = TestCli()
         self.engine_type = engine_type
         self.engine_parameter_name = engine_parameter_name
         self.location = location
@@ -41,18 +43,18 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = 'az {} server create -l {} -g {} -n {} -u {} -p {}'
-        execute(template.format(self.engine_type,
-                                self.location,
-                                group, name,
-                                self.admin_user,
-                                self.admin_password))
+        execute(self.cli_ctx, template.format(self.engine_type,
+                                              self.location,
+                                              group, name,
+                                              self.admin_user,
+                                              self.admin_password))
         return {self.parameter_name: name,
                 self.engine_parameter_name: self.engine_type}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete:
             group = self._get_resource_group(**kwargs)
-            execute('az {} server delete -g {} -n {} --yes'.format(self.engine_type, group, name))
+            execute(self.cli_ctx, 'az {} server delete -g {} -n {} --yes'.format(self.engine_type, group, name))
 
     def _get_resource_group(self, **kwargs):
         return kwargs.get(self.resource_group_parameter_name)
