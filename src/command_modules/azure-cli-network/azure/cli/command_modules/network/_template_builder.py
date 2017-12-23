@@ -201,7 +201,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(),
+        'apiVersion': str(cmd.get_api_version()),
         'dependsOn': [],
         'properties': ag_properties
     }
@@ -226,7 +226,7 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, f
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(),
+        'apiVersion': str(cmd.get_api_version()),
         'dependsOn': [],
         'properties': lb_properties
     }
@@ -242,7 +242,7 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         public_ip_properties['dnsSettings'] = {'domainNameLabel': dns_name}
 
     public_ip = {
-        'apiVersion': cmd.get_api_version(),
+        'apiVersion': str(cmd.get_api_version()),
         'type': 'Microsoft.Network/publicIPAddresses',
         'name': name,
         'location': location,

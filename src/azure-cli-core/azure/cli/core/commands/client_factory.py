@@ -10,8 +10,7 @@ from knack.util import CLIError
 
 from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
-from azure.cli.core.profiles._shared import get_client_class, SDKProfile
-from azure.cli.core.profiles import ResourceType, get_api_version, get_sdk
+from azure.cli.core.profiles import ResourceType, get_api_version, get_sdk, get_client_class
 
 logger = get_logger(__name__)
 UA_AGENT = "AZURECLI/{}".format(core_version)
@@ -24,10 +23,10 @@ def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=No
     if isinstance(client_or_resource_type, ResourceType):
         # Get the versioned client
         client_type = get_client_class(client_or_resource_type)
-        api_version = api_version or get_api_version(cli_ctx, client_or_resource_type, as_sdk_profile=True)
-        if isinstance(api_version, SDKProfile):
-            sdk_profile = api_version.profile
-            api_version = api_version.default_api_version
+        api_version = api_version or get_api_version(cli_ctx, client_or_resource_type)
+        if api_version.is_operation_group_required():
+            sdk_profile = api_version.get_sdk_profile().profile
+            api_version = api_version.get_default_version()
     else:
         # Get the non-versioned client
         client_type = client_or_resource_type
@@ -39,7 +38,7 @@ def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=No
 def get_subscription_service_client(cli_ctx):
     return _get_mgmt_service_client(cli_ctx, get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS),
                                     subscription_bound=False,
-                                    api_version=get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS))
+                                    api_version=str(get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)))
 
 
 def configure_common_settings(cli_ctx, client):
@@ -88,7 +87,7 @@ def _get_mgmt_service_client(cli_ctx,
     if base_url_bound:
         client_kwargs = {'base_url': cli_ctx.cloud.endpoints.resource_manager}
     if api_version:
-        client_kwargs['api_version'] = api_version
+        client_kwargs['api_version'] = str(api_version)
     if sdk_profile:
         client_kwargs['profile'] = sdk_profile
     if kwargs:

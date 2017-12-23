@@ -640,7 +640,7 @@ class SubscriptionFinder(object):
             from azure.cli.core._debug import change_ssl_cert_verification
             client_type = get_client_class(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
             api_version = get_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
-            return change_ssl_cert_verification(client_type(credentials, api_version=api_version,
+            return change_ssl_cert_verification(client_type(credentials, api_version=str(api_version),
                                                             base_url=self.cli_ctx.cloud.endpoints.resource_manager))
 
         self._arm_client_factory = create_arm_client_factory

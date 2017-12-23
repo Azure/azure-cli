@@ -771,7 +771,7 @@ def get_network_watcher_from_vm(namespace):
 def get_network_watcher_from_resource(namespace):
     resource_client = get_mgmt_service_client(namespace.cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources
     resource = resource_client.get_by_id(namespace.resource,
-                                         namespace.cmd.get_api_version(ResourceType.MGMT_NETWORK))
+                                         str(namespace.cmd.get_api_version(ResourceType.MGMT_NETWORK)))
     namespace.location = resource.location  # pylint: disable=no-member
     get_network_watcher_from_location(remove=True)(namespace)
 

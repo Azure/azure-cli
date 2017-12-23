@@ -4,9 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # TODO Move this to a package shared by CLI and SDK
-from collections import namedtuple
 from enum import Enum
-from functools import total_ordering, partial
 from importlib import import_module
 
 
@@ -98,103 +96,28 @@ AZURE_API_PROFILES = {
 }
 
 
-def _get_api_version_tuple(resource_type, sdk_profile, post_process=lambda x: x):
-    """Return a namedtuple where key are operation group and value are api version.
-    """
-    class_type = get_client_class(resource_type)
-    operations_groups_value = {}
-    for operation_group_name, operation_type in class_type.__dict__.items():
-        if not isinstance(operation_type, property):
-            continue
-        value_to_save = sdk_profile.profile.get(
-            operation_group_name,
-            sdk_profile.default_api_version
-        )
-        operations_groups_value[operation_group_name] = post_process(value_to_save)
-    api_version_tuple_class = namedtuple("ApiVersions", list(operations_groups_value.keys()))
-    return api_version_tuple_class(**operations_groups_value)
-
-
-def get_api_version(api_profile, resource_type, as_sdk_profile=False):
+def get_api_version(api_profile, resource_type):
     """Get the API version of a resource type given an API profile.
 
     :param api_profile: The name of the API profile.
     :type api_profile: str.
     :param resource_type: The resource type.
     :type resource_type: ResourceType.
-    :returns:  str -- the API version.
+    :returns: A structure represents the api version of specific resource type. The structure can be
+              converted to an API version string. When the api version data is of type SDKProfile, the
+              structure will support api version for specific operation groups.
+    :rtype: ApiVersions
     :raises: APIVersionException
     """
     try:
-        api_version = AZURE_API_PROFILES[api_profile][resource_type]
-        if as_sdk_profile:
-            return api_version  # Could be SDKProfile or string
-        if isinstance(api_version, SDKProfile):
-            api_version = _get_api_version_tuple(resource_type, api_version)
-        return api_version
+        from ._apiversions import ApiVersions
+        return ApiVersions(api_version_data=AZURE_API_PROFILES[api_profile][resource_type],
+                           resource_type=resource_type)
     except KeyError:
         raise APIVersionException(resource_type, api_profile)
 
 
-@total_ordering  # pylint: disable=too-few-public-methods
-class _DateAPIFormat(object):
-    """ Class to support comparisons for API versions in
-        YYYY-MM-DD, YYYY-MM-DD-preview, YYYY-MM-DD-profile, YYYY-MM-DD-profile-preview
-        or any string that starts with YYYY-MM-DD format. A special case is made for 'latest'.
-    """
-
-    def __init__(self, api_version_str):
-        try:
-            self.latest = self.preview = False
-            self.yyyy = self.mm = self.dd = None
-            if api_version_str == 'latest':
-                self.latest = True
-            else:
-                if 'preview' in api_version_str:
-                    self.preview = True
-                parts = api_version_str.split('-')
-                self.yyyy = int(parts[0])
-                self.mm = int(parts[1])
-                self.dd = int(parts[2])
-        except (ValueError, TypeError):
-            raise ValueError('The API version {} is not in a '
-                             'supported format'.format(api_version_str))
-
-    def __eq__(self, other):
-        return self.latest == other.latest and self.yyyy == other.yyyy and self.mm == other.mm and \
-            self.dd == other.dd and self.preview == other.preview
-
-    def __lt__(self, other):  # pylint: disable=too-many-return-statements
-        if self.latest or other.latest:
-            if not self.latest and other.latest:
-                return True
-            if self.latest and not other.latest:
-                return False
-            return False
-        if self.yyyy < other.yyyy:
-            return True
-        if self.yyyy == other.yyyy:
-            if self.mm < other.mm:
-                return True
-            if self.mm == other.mm:
-                if self.dd < other.dd:
-                    return True
-                if self.dd == other.dd:
-                    if self.preview and not other.preview:
-                        return True
-        return False
-
-
-def _validate_api_version(api_version_str, min_api=None, max_api=None):
-    api_version = _DateAPIFormat(api_version_str)
-    if min_api and api_version < _DateAPIFormat(min_api):
-        return False
-    if max_api and api_version > _DateAPIFormat(max_api):
-        return False
-    return True
-
-
-def supported_api_version(api_profile, resource_type, min_api=None, max_api=None):
+def supported_api_version(api_profile, resource_type, min_api=None, max_api=None, operation_group=None):
     """
     Returns True if current API version for the resource type satisfies min/max range.
     To compare profile versions, set resource type to None.
@@ -206,15 +129,14 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
         raise TypeError()
     if min_api is None and max_api is None:
         raise ValueError('At least a min or max version must be specified')
-    api_version_obj = get_api_version(api_profile, resource_type, as_sdk_profile=True) \
-        if isinstance(resource_type, ResourceType) else api_profile
-    if isinstance(api_version_obj, SDKProfile):
-        return _get_api_version_tuple(
-            resource_type,
-            api_version_obj,
-            partial(_validate_api_version, min_api=min_api, max_api=max_api)
-        )
-    return _validate_api_version(api_version_obj, min_api, max_api)
+
+    if isinstance(resource_type, ResourceType):
+        api_versions = get_api_version(api_profile, resource_type)
+    else:
+        from ._apiversions import ApiVersions
+        api_versions = ApiVersions(api_profile)
+
+    return api_versions.is_supported(min_api=min_api, max_api=max_api, operation_group=operation_group)
 
 
 def _get_attr(sdk_path, mod_attr_path, checked=True):
@@ -244,11 +166,7 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
         e.g. Converts azure.mgmt.storage.operations.storage_accounts_operations to
                       azure.mgmt.storage.v2016_12_01.operations.storage_accounts_operations
     """
-    api_version = get_api_version(api_profile, resource_type)
-    if isinstance(api_version, tuple):
-        if operation_group is None:
-            raise ValueError("operation_group is required for resource type '{}'".format(resource_type))
-        api_version = getattr(api_version, operation_group)
+    api_version = get_api_version(api_profile, resource_type).get_version(operation_group)
     return '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_'))
 
 

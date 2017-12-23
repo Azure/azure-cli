@@ -176,9 +176,10 @@ class AzCliCommand(CLICommand):
         resource_type = resource_type or self.command_kwargs.get('resource_type', None)
         return self.loader.get_api_version(resource_type=resource_type)
 
-    def supported_api_version(self, resource_type=None, min_api=None, max_api=None):
+    def supported_api_version(self, resource_type=None, min_api=None, max_api=None, operation_group=None):
         resource_type = resource_type or self.command_kwargs.get('resource_type', None)
-        return self.loader.supported_api_version(resource_type=resource_type, min_api=min_api, max_api=max_api)
+        return self.loader.supported_api_version(resource_type=resource_type, min_api=min_api, max_api=max_api,
+                                                 operation_group=operation_group)
 
     def get_models(self, *attr_args, **kwargs):
         resource_type = kwargs.get('resource_type', self.command_kwargs.get('resource_type', None))

@@ -4,40 +4,43 @@
 # --------------------------------------------------------------------------------------------
 
 #  pylint: disable=unused-import
-from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType, PROFILE_TYPE
+from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType, PROFILE_TYPE, get_client_class
+from azure.cli.core.profiles._apiversions import ApiVersions
 
 
-def get_api_version(cli_ctx, resource_type, as_sdk_profile=False):
+def get_api_version(cli_ctx, resource_type):
     """ Get the current API version for a given resource_type.
 
+    :param cli_ctx: The CLI context
     :param resource_type: The resource type.
     :type resource_type: ResourceType.
-    :param bool as_sdk_profile: Return SDKProfile instance.
     :returns: The API version
-     Can return a tuple<operation_group, str> if the resource_type supports SDKProfile.
-    :rtype: str or tuple[str]
+    :rtype: ApiVersions
     """
     from azure.cli.core.profiles._shared import get_api_version as _sdk_get_api_version
-    return _sdk_get_api_version(cli_ctx.cloud.profile, resource_type, as_sdk_profile)
+    return _sdk_get_api_version(cli_ctx.cloud.profile, resource_type)
 
 
-def supported_api_version(cli_ctx, resource_type, min_api=None, max_api=None):
+def supported_api_version(cli_ctx, resource_type, min_api=None, max_api=None, operation_group=None):
     """ Method to check if the current API version for a given resource_type is supported.
         If resource_type is set to None, the current profile version will be used as the basis of
         the comparison.
 
+    :param cli_ctx: The CLI context
     :param resource_type: The resource type.
     :type resource_type: ResourceType.
     :param min_api: The minimum API that is supported (inclusive). Omit for no minimum constraint.
     "type min_api: str
     :param max_api: The maximum API that is supported (inclusive). Omit for no maximum constraint.
     :type max_api: str
+    :param operation_group: The operation group to be tested.
+    :type operation_group: str
     :returns: True if the current API version of resource_type satisfies the min/max constraints. False otherwise.
      Can return a tuple<operation_group, bool> if the resource_type supports SDKProfile.
     :rtype: bool or tuple[bool]
     """
     from azure.cli.core.profiles._shared import supported_api_version as _sdk_supported_api_version
-    return _sdk_supported_api_version(cli_ctx.cloud.profile, resource_type, min_api, max_api)
+    return _sdk_supported_api_version(cli_ctx.cloud.profile, resource_type, min_api, max_api, operation_group)
 
 
 def get_sdk(cli_ctx, resource_type, *attr_args, **kwargs):
@@ -67,6 +70,7 @@ def get_sdk(cli_ctx, resource_type, *attr_args, **kwargs):
                                      mod='models',
                                      operation_group='virtual_machines')
 
+    :param cli_ctx: The CLI context
     :param resource_type: The resource type.
     :type resource_type: ResourceType.
     :param attr_args: Positional arguments for paths to objects to get.

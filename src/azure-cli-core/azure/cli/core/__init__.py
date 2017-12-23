@@ -274,13 +274,14 @@ class AzCommandsLoader(CLICommandsLoader):
         resource_type = resource_type or self._get_resource_type()
         return get_api_version(self.cli_ctx, resource_type)
 
-    def supported_api_version(self, resource_type=None, min_api=None, max_api=None):
+    def supported_api_version(self, resource_type=None, min_api=None, max_api=None, operation_group=None):
         from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
         return supported_api_version(
             cli_ctx=self.cli_ctx,
             resource_type=resource_type or self._get_resource_type() or PROFILE_TYPE,
             min_api=min_api or self.min_profile,
-            max_api=max_api or self.max_profile)
+            max_api=max_api or self.max_profile,
+            operation_group=operation_group)
 
     def get_sdk(self, *attr_args, **kwargs):
         from azure.cli.core.profiles import get_sdk
@@ -344,10 +345,9 @@ class AzCommandsLoader(CLICommandsLoader):
 
         if self.supported_api_version(resource_type=kwargs.get('resource_type'),
                                       min_api=kwargs.get('min_api'),
-                                      max_api=kwargs.get('max_api')):
-            self.command_table[name] = self.command_cls(self, name,
-                                                        handler or default_command_handler,
-                                                        **kwargs)
+                                      max_api=kwargs.get('max_api'),
+                                      operation_group=kwargs.get('operation_group', None)):
+            self.command_table[name] = self.command_cls(self, name, handler or default_command_handler, **kwargs)
 
     def get_op_handler(self, operation):
         """ Import and load the operation handler """

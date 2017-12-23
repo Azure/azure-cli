@@ -135,7 +135,7 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         public_ip_properties['dnsSettings'] = {'domainNameLabel': dns_name}
 
     public_ip = {
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_NETWORK),
+        'apiVersion': str(cmd.get_api_version(ResourceType.MGMT_NETWORK)),
         'type': 'Microsoft.Network/publicIPAddresses',
         'name': name,
         'location': location,
@@ -294,7 +294,7 @@ def build_vm_msi_extension(cmd, vm_name, location, role_assignment_guid, port, i
     return {
         'type': 'Microsoft.Compute/virtualMachines/extensions',
         'name': vm_name + '/' + ext_type_name,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE).virtual_machine_extensions,
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE).get_version('virtual_machine_extensions'),
         'location': location,
         'dependsOn': [role_assignment_guid or 'Microsoft.Compute/virtualMachines/' + vm_name],
         'properties': {
@@ -440,7 +440,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         vm_properties['licenseType'] = license_type
 
     vm = {
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE).virtual_machines,
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE).get_version('virtual_machines'),
         'type': 'Microsoft.Compute/virtualMachines',
         'name': name,
         'location': location,
@@ -655,7 +655,7 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_NETWORK),
+        'apiVersion': str(cmd.get_api_version(ResourceType.MGMT_NETWORK)),
         'dependsOn': [],
         'properties': lb_properties
     }
@@ -804,7 +804,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         }
     }
 
-    if cmd.supported_api_version(min_api='2017-03-30').virtual_machine_scale_sets:  # pylint: disable=no-member
+    if cmd.supported_api_version(min_api='2017-03-30', operation_group='virtual_machine_scale_sets'):
         if dns_servers:
             nic_config['properties']['dnsSettings'] = {'dnsServers': dns_servers}
 
@@ -831,10 +831,10 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     if license_type:
         vmss_properties['virtualMachineProfile']['licenseType'] = license_type
 
-    if health_probe and cmd.supported_api_version(min_api='2017-03-30').virtual_machine_scale_sets:  # pylint: disable=no-member
+    if health_probe and cmd.supported_api_version(min_api='2017-03-30', operation_group='virtual_machine_scale_sets'):
         vmss_properties['virtualMachineProfile']['networkProfile']['healthProbe'] = {'id': health_probe}
 
-    if cmd.supported_api_version(min_api='2016-04-30-preview').virtual_machine_scale_sets:  # pylint: disable=no-member
+    if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='virtual_machine_scale_sets'):
         vmss_properties['singlePlacementGroup'] = single_placement_group
 
     vmss = {
@@ -842,7 +842,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets,  # pylint: disable=no-member
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE).get_version('virtual_machine_scale_sets'),
         'dependsOn': [],
         'sku': {
             'name': vm_sku,
@@ -862,13 +862,13 @@ def build_av_set_resource(cmd, name, location, tags,
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE).availability_sets,  # pylint: disable=no-member
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE).get_version('availability_sets'),
         "properties": {
             'platformFaultDomainCount': platform_fault_domain_count,
         }
     }
 
-    if cmd.supported_api_version(min_api='2016-04-30-preview').availability_sets:  # pylint: disable=no-member
+    if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='availability_sets'):
         av_set['sku'] = {
             'name': 'Classic' if unmanaged else 'Aligned'
         }
