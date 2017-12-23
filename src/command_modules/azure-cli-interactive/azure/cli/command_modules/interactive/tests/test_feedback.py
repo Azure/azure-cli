@@ -40,7 +40,6 @@ class FeedbackTest(unittest.TestCase):
         self.norm_update = fh.update_frequency
         self.shell_ctx = AzInteractiveShell(TestCli(), None)
 
-
     def test_heuristic(self):
         # test the correct logging of time for frequency
         fh.update_frequency = _mock_update
