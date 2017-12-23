@@ -65,7 +65,7 @@ def load_command_table(self, _):
         client_factory=cf_postgres_db
     )
 
-    with self.command_group('mysql server', mysql_servers_sdk) as g:
+    with self.command_group('mysql server', mysql_servers_sdk, client_factory=cf_mysql_servers) as g:
         g.command('create', 'create_or_update')
         g.custom_command('restore', '_server_restore')
         g.command('delete', 'delete', confirmation=True)
@@ -74,7 +74,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='update',
                                  custom_func_name='_server_update_custom_func')
 
-    with self.command_group('postgres server', postgres_servers_sdk) as g:
+    with self.command_group('postgres server', postgres_servers_sdk, client_factory=cf_postgres_servers) as g:
         g.command('create', 'create_or_update')
         g.custom_command('restore', '_server_restore')
         g.command('delete', 'delete', confirmation=True)

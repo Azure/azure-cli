@@ -9,22 +9,19 @@ import unittest
 import tempfile
 
 import azclishell.frequency_heuristic as fh
-from azclishell.configuration import CONFIGURATION, get_config_dir as shell_config
-
-SHELL_CONFIG = CONFIGURATION
 
 
-def _mock_update():
+def _mock_update(_):
     return {fh.day_format(datetime.datetime.utcnow()): 1}
 
 
-def _mock_update2():
+def _mock_update2(_):
     return {
         fh.day_format(datetime.datetime.utcnow()): 2,
         fh.day_format(datetime.datetime.utcnow() - datetime.timedelta(days=2)): 1}
 
 
-def _mock_update3():
+def _mock_update3(_):
     return {
         fh.day_format(datetime.datetime.utcnow()): 19,
         fh.day_format(datetime.datetime.utcnow() - datetime.timedelta(days=18)): 5,
@@ -38,18 +35,22 @@ class FeedbackTest(unittest.TestCase):
     """ tests the frequncy heuristic """
     def __init__(self, *args, **kwargs):
         super(FeedbackTest, self).__init__(*args, **kwargs)
+        from azure.cli.testsdk import TestCli
+        from azclishell.app import AzInteractiveShell
         self.norm_update = fh.update_frequency
+        self.shell_ctx = AzInteractiveShell(TestCli(), None)
+
 
     def test_heuristic(self):
         # test the correct logging of time for frequency
         fh.update_frequency = _mock_update
-        self.assertEqual(1, fh.frequency_measurement())
+        self.assertEqual(1, fh.frequency_measurement(self.shell_ctx))
 
         fh.update_frequency = _mock_update2
-        self.assertEqual(2, fh.frequency_measurement())
+        self.assertEqual(2, fh.frequency_measurement(self.shell_ctx))
 
         fh.update_frequency = _mock_update3
-        self.assertEqual(3, fh.frequency_measurement())
+        self.assertEqual(3, fh.frequency_measurement(self.shell_ctx))
 
     def test_update_freq(self):
         # tests updating the files for frequency
@@ -59,9 +60,9 @@ class FeedbackTest(unittest.TestCase):
         _, fh.FREQUENCY_PATH = tempfile.mkstemp()
 
         # with a file
-        json_freq = fh.update_frequency()
+        json_freq = fh.update_frequency(self.shell_ctx)
         self.assertEqual(json_freq, {now: 1})
-        json_freq = fh.update_frequency()
+        json_freq = fh.update_frequency(self.shell_ctx)
         self.assertEqual(json_freq, {now: 2})
 
     def test_update_freq_no_file(self):
@@ -74,7 +75,7 @@ class FeedbackTest(unittest.TestCase):
             os.remove(fh.FREQUENCY_PATH)
 
         # without a file already written
-        json_freq = fh.update_frequency()
+        json_freq = fh.update_frequency(self.shell_ctx)
         now = fh.day_format(datetime.datetime.now())
         self.assertEqual(json_freq, {now: 1})
 

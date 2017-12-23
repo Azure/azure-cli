@@ -22,7 +22,7 @@ from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.document import Document
 from prompt_toolkit.enums import DEFAULT_BUFFER
 from prompt_toolkit.filters import Always
-from prompt_toolkit.history import FileHistory
+from prompt_toolkit.history import FileHistory, InMemoryHistory
 from prompt_toolkit.interface import Application
 from prompt_toolkit.shortcuts import create_eventloop
 
@@ -88,23 +88,25 @@ def restart_completer(shell_ctx):
 # pylint: disable=too-many-instance-attributes
 class AzInteractiveShell(object):
 
-    def __init__(self, cli_ctx, style=None):
+    def __init__(self, cli_ctx, style=None, completer=None, styles=None,
+                 lexer=None, history=InMemoryHistory(),
+                 app=None, input_custom=sys.stdin, output_custom=None,
+                 user_feedback=False, intermediate_sleep=.25, final_sleep=4):
 
         from azclishell.color_styles import style_factory
 
         self.cli_ctx = cli_ctx
         self.config = Configuration(cli_ctx.config)
         self.config.set_style(style)
-        self.styles = style_factory(self.config.get_style())
-        self.lexer = get_az_lexer(self.config) if self.styles else None
+        self.styles = style or style_factory(self.config.get_style())
+        self.lexer = lexer or get_az_lexer(self.config) if self.styles else None
         try:
             from azclishell.gather_commands import GatherCommands
             from azclishell.az_completer import AzCompleter
-            self.completer = AzCompleter(self, GatherCommands(self.config))
+            self.completer = completer or AzCompleter(self, GatherCommands(self.config))
         except IOError:  # if there is no cache
             self.completer = None
-        self.completer = None
-        self.history = FileHistory(os.path.join(self.config.config_dir, self.config.get_history()))
+        self.history = history or FileHistory(os.path.join(self.config.config_dir, self.config.get_history()))
         os.environ[ENV_ADDITIONAL_USER_AGENT] = 'AZURECLISHELL/' + __version__
         self.telemetry = Telemetry(self.cli_ctx)
 
@@ -118,16 +120,16 @@ class AzInteractiveShell(object):
         self._env = os.environ
         self.last = None
         self.last_exit = 0
-        self.user_feedback = False
-        self.input = sys.stdin
-        self.output = None
+        self.user_feedback = user_feedback
+        self.input = input_custom
+        self.output = output_custom
         self.config_default = ""
         self.default_command = ""
         self.threads = []
         self.curr_thread = None
         self.spin_val = -1
-        self.intermediate_sleep = 0.25
-        self.final_sleep = 4
+        self.intermediate_sleep = intermediate_sleep
+        self.final_sleep = final_sleep
 
         # try to consolidate state information here...
         # These came from key bindings...
