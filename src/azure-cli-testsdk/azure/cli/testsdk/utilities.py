@@ -32,7 +32,6 @@ def force_progress_logging():
     from six import StringIO
     import logging
     from azure.cli.core.commands import logger as cmd_logger
-    from azure.cli.testsdk import TestCli
 
     # register a progress logger handler to get the content to verify
     test_io = StringIO()

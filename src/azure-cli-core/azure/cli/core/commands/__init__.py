@@ -681,7 +681,7 @@ class AzCommandGroup(CommandGroup):
 
     def custom_command(self, name, method_name, **kwargs):
         """
-        Register a custome CLI command.
+        Register a custom CLI command.
         :param name: Name of the command as it will be called on the command line
         :type name: str
         :param method_name: Name of the method the command maps to

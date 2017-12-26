@@ -189,7 +189,7 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
                                                             timeout=timeout, existing_dirs=existing_dirs)
 
         return list(filter_none(
-            action_file_copy(file) for file in collect_files(cmd.cli_ctx, source_client, source_share, pattern)))
+            action_file_copy(file) for file in collect_files(cmd, source_client, source_share, pattern)))
     else:
         # won't happen, the validator should ensure either source_container or source_share is set
         raise ValueError('Fail to find source. Neither blob container or file share is specified.')
