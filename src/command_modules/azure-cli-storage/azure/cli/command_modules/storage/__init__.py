@@ -158,7 +158,10 @@ class StorageCommandGroup(AzCommandGroup):
     def _register_data_plane_account_arguments(self, command_name):
         """ Add parameters required to create a storage client """
         from azure.cli.command_modules.storage._validators import validate_client_parameters
-        command = self.command_loader.command_table[command_name]
+        command = self.command_loader.command_table.get(command_name, None)
+        if not command:
+            return
+
         group_name = 'Storage Account'
         command.add_argument('account_name', '--account-name', required=False, default=None,
                              arg_group=group_name,
