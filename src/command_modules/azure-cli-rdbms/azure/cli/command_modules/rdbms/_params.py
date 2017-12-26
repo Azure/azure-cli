@@ -57,7 +57,7 @@ def load_arguments(self, _):
     for scope in ['mysql', 'postgres']:
         with self.argument_context(scope) as c:
             c.argument('name', options_list=['--sku-name'])
-            c.argument('server_name', completer=server_completers[scope], options_list=['--server-name', '-s'])
+            c.argument('server_name', completer=server_completers[scope], options_list=['--server-name', '-s'], help='Name of the server.')
 
     for scope in ['mysql server', 'postgres server']:
         with self.argument_context(scope) as c:
@@ -72,9 +72,10 @@ def load_arguments(self, _):
 
     for scope in ['mysql server-logs', 'postgres server-logs']:
         with self.argument_context(scope) as c:
-            c.argument('file_name', options_list=['--name', '-n'], nargs='+')
-            c.argument('max_file_size', type=int)
-            c.argument('file_last_written', type=int)
+            c.argument('file_name', options_list=['--name', '-n'], nargs='+', help='Space separated list of log filenames on the server to download.')
+            c.argument('max_file_size', type=int, help='The file size limitation to filter files.')
+            c.argument('file_last_written', type=int, help='Integer in hours to indicate file last modify time, default value is 72.')
+            c.argument('filename_contains', help='The pattern that file name should match.')
 
     for scope in ['mysql db', 'postgres db']:
         with self.argument_context(scope) as c:
