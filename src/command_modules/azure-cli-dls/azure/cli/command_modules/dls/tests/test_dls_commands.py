@@ -120,9 +120,10 @@ class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
 class DataLakeStoreFileScenarioTest(ScenarioTest):
 
     def tearDown(self):
-        if os.path.exists(self.kwargs['local_folder']):
-            rmtree(self.kwargs['local_folder'])
-        return super().tearDown()
+        local_folder = self.kwargs.get('local_folder', None)
+        if local_folder and os.path.exists(local_folder):
+            rmtree(local_folder)
+        return super(DataLakeStoreFileScenarioTest, self).tearDown()
 
     @ResourceGroupPreparer(name_prefix='cls_test_adls_file')
     def test_dls_file_mgmt(self):

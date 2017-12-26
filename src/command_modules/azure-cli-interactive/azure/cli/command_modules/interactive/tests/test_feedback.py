@@ -56,7 +56,14 @@ class FeedbackTest(unittest.TestCase):
         fh.update_frequency = self.norm_update
         now = fh.day_format(datetime.datetime.now())
 
-        _, fh.FREQUENCY_PATH = tempfile.mkstemp()
+        _, freq_path = tempfile.mkstemp()
+        freq_dir, freq_file = freq_path.rsplit(os.path.sep, 1)
+
+        def _get_freq():
+            return freq_file
+
+        self.shell_ctx.config.config_dir = freq_dir
+        self.shell_ctx.config.get_frequency = _get_freq
 
         # with a file
         json_freq = fh.update_frequency(self.shell_ctx)
@@ -64,22 +71,32 @@ class FeedbackTest(unittest.TestCase):
         json_freq = fh.update_frequency(self.shell_ctx)
         self.assertEqual(json_freq, {now: 2})
 
+        if os.path.exists(freq_path):
+            os.remove(freq_path)
+
     def test_update_freq_no_file(self):
         # tests updating the files for frequency with no file written
         fh.update_frequency = self.norm_update
 
-        _, fh.FREQUENCY_PATH = tempfile.mkstemp()
+        _, freq_path = tempfile.mkstemp()
+        freq_dir, freq_file = freq_path.rsplit(os.path.sep, 1)
 
-        if os.path.exists(fh.FREQUENCY_PATH):
-            os.remove(fh.FREQUENCY_PATH)
+        def _get_freq():
+            return freq_file
+
+        self.shell_ctx.config.config_dir = freq_dir
+        self.shell_ctx.config.get_frequency = _get_freq
+
+        if os.path.exists(freq_path):
+            os.remove(freq_path)
 
         # without a file already written
         json_freq = fh.update_frequency(self.shell_ctx)
         now = fh.day_format(datetime.datetime.now())
         self.assertEqual(json_freq, {now: 1})
 
-        if os.path.exists(fh.FREQUENCY_PATH):
-            os.remove(fh.FREQUENCY_PATH)
+        if os.path.exists(freq_path):
+            os.remove(freq_path)
 
 
 if __name__ == '__main__':
