@@ -28,12 +28,15 @@ from azure.cli.core.profiles import ResourceType
 logger = get_logger(__name__)
 
 
-def _update_progress(cli_ctx, current, total):
-    hook = cli_ctx.get_progress_controller(det=True)
-    if total:
-        hook.add(message='Alive', value=current, total_val=total)
-        if total == current:
-            hook.end()
+def get_update_progress(cli_ctx):
+
+    def _update_progress(current, total):
+        hook = cli_ctx.get_progress_controller(det=True)
+        if total:
+            hook.add(message='Alive', value=current, total_val=total)
+            if total == current:
+                hook.end()
+    return _update_progress
 
 
 # region account
@@ -157,7 +160,7 @@ def append_adls_item(cmd, account_name, path, content):
 
 
 def upload_to_adls(cmd, account_name, source_path, destination_path, chunk_size, buffer_size, block_size,
-                   thread_count=None, overwrite=False, progress_callback=_update_progress):
+                   thread_count=None, overwrite=False, progress_callback=None):
     client = cf_dls_filesystem(cmd.cli_ctx, account_name)
     ADLUploader(
         client,
@@ -168,7 +171,7 @@ def upload_to_adls(cmd, account_name, source_path, destination_path, chunk_size,
         buffersize=buffer_size,
         blocksize=block_size,
         overwrite=overwrite,
-        progress_callback=progress_callback)
+        progress_callback=progress_callback or get_update_progress(cmd.cli_ctx))
 
 
 def remove_adls_item(cmd, account_name, path, recurse=False):
@@ -176,7 +179,7 @@ def remove_adls_item(cmd, account_name, path, recurse=False):
 
 
 def download_from_adls(cmd, account_name, source_path, destination_path, chunk_size, buffer_size, block_size,
-                       thread_count=None, overwrite=False, progress_callback=_update_progress):
+                       thread_count=None, overwrite=False, progress_callback=None):
     client = cf_dls_filesystem(cmd.cli_ctx, account_name)
     ADLDownloader(
         client,
@@ -187,7 +190,7 @@ def download_from_adls(cmd, account_name, source_path, destination_path, chunk_s
         buffersize=buffer_size,
         blocksize=block_size,
         overwrite=overwrite,
-        progress_callback=progress_callback)
+        progress_callback=progress_callback or get_update_progress(cmd.cli_ctx))
 
 
 def test_adls_item(cmd, account_name, path):
