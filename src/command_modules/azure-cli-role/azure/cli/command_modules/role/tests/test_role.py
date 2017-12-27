@@ -239,6 +239,7 @@ class RoleAssignmentListScenarioTest(ScenarioTest):
         large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
         if large_resp_body:
             large_resp_body._max_response_body = 1024
+
         result = self.cmd('role assignment list --include-classic-administrator').get_output_in_json()
         self.assertTrue([x for x in result if x['properties']['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
         self.cmd('role assignment list -g {}'.format(resource_group), checks=[

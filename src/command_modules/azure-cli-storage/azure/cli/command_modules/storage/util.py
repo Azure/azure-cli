@@ -22,7 +22,17 @@ def collect_blobs(blob_service, container, pattern=None):
     if not _pattern_has_wildcards(pattern):
         return [pattern] if blob_service.exists(container, pattern) else []
 
-    return (blob.name for blob in blob_service.list_blobs(container) if _match_path(pattern, blob.name))
+    results = []
+    for blob in blob_service.list_blobs(container):
+        try:
+            blob_name = blob.name.encode('utf-8') if isinstance(blob.name, unicode) else blob.name
+        except NameError:
+            blob_name = blob.name
+
+        if _match_path(pattern, blob_name):
+            results.append(blob_name)
+
+    return results
 
 
 def collect_files(cmd, file_service, share, pattern=None):

@@ -105,22 +105,6 @@ setup(
 EOL
 
 for name in $(ls src/command_modules | grep azure-cli-); do
-    if [ "$name" == "azure-cli-appservice" ]; then continue; fi
-    if [ "$name" == "azure-cli-backup" ]; then continue; fi
-    if [ "$name" == "azure-cli-batchai" ]; then continue; fi
-    if [ "$name" == "azure-cli-dla" ]; then continue; fi
-    if [ "$name" == "azure-cli-dls" ]; then continue; fi
-    if [ "$name" == "azure-cli-eventgrid" ]; then continue; fi
-    if [ "$name" == "azure-cli-find" ]; then continue; fi
-    if [ "$name" == "azure-cli-interactive" ]; then continue; fi
-    if [ "$name" == "azure-cli-keyvault" ]; then continue; fi
-    if [ "$name" == "azure-cli-lab" ]; then continue; fi
-    if [ "$name" == "azure-cli-monitor" ]; then continue; fi
-    if [ "$name" == "azure-cli-profile" ]; then continue; fi
-    if [ "$name" == "azure-cli-rdbms" ]; then continue; fi
-    if [ "$name" == "azure-cli-role" ]; then continue; fi
-    if [ "$name" == "azure-cli-sql" ]; then continue; fi
-    if [ "$name" == "azure-cli-vm" ] ; then continue; fi
     module_name=${name##azure-cli-}
     if [ -d src/command_modules/$name/azure/cli/command_modules/$module_name/tests ]; then
         echo "        'azure.cli.command_modules.$module_name.tests'," >>$testsrc_dir/setup.py

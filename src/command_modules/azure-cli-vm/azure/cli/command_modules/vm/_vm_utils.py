@@ -12,6 +12,9 @@ from knack.util import CLIError
 logger = get_logger(__name__)
 
 
+MSI_LOCAL_ID = '[system]'
+
+
 def read_content_if_is_file(string_or_file):
     content = string_or_file
     if os.path.exists(string_or_file):

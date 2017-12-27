@@ -60,15 +60,19 @@ class KeyVaultCommandGroup(AzCommandGroup):
         merged_kwargs = self._flatten_kwargs(kwargs, command_type_name)
         operations_tmpl = merged_kwargs['operations_tmpl']
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
-        op = self.command_loader.get_op_handler(operations_tmpl.format(method_name))
+
+        def get_op_handler():
+            return self.command_loader.get_op_handler(operations_tmpl.format(method_name))
 
         def keyvault_arguments_loader():
+            op = get_op_handler()
             self.command_loader._apply_doc_string(op, merged_kwargs)  # pylint: disable=protected-access
             cmd_args = list(
                 extract_args_from_signature(op, excluded_params=self.command_loader.excluded_command_handler_args))
             return cmd_args
 
         def keyvault_description_loader():
+            op = get_op_handler()
             self.command_loader._apply_doc_string(op, merged_kwargs)  # pylint: disable=protected-access
             return extract_full_summary_from_signature(op)
 
@@ -77,6 +81,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
             from msrest.paging import Paged
             from msrestazure.azure_operation import AzureOperationPoller
 
+            op = get_op_handler()
             op_args = get_arg_list(op)
             command_type = merged_kwargs.get('command_type', None)
             client_factory = command_type.settings.get('client_factory', None) if command_type \

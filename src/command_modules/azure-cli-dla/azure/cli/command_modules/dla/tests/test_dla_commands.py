@@ -13,46 +13,14 @@ except ImportError:
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
-from azure_devtools.scenario_tests import RecordingProcessor, mock_in_unit_test
-
 from knack.util import CLIError
-
-
-MOCK_JOB_ID = '00000000-0000-0000-0000-000000000000'
-
-
-class JobIdReplacer(RecordingProcessor):
-
-    """Replace the random job id with a fixed mock name."""
-    def process_request(self, request):
-        import re
-        request.uri = re.sub('/Jobs/([^/?]+)', '/Jobs/{}'.format(MOCK_JOB_ID), request.uri)
-        return request
-
-    def process_response(self, response):
-        if response['body']['string']:
-            response['body']['string'] = self._replace_job_id(response['body']['string'])
-        return response
-
-    def _replace_job_id(self, val):
-        import re
-        if 'jobId' in val:
-            return re.sub(r'"jobId":"([^"]+)"', r'"jobId":"{}"'.format(MOCK_JOB_ID), val, flags=re.IGNORECASE)
-        return val
-
-
-def patch_uuid_str(unit_test):
-
-    def _mock_get_uuid_str(*args, **kwargs):  # pylint: disable=unused-argument
-        return MOCK_JOB_ID
-
-    mock_in_unit_test(unit_test, 'azure.cli.command_modules.dla.custom._get_uuid_str', _mock_get_uuid_str)
 
 
 # pylint: disable=too-many-instance-attributes
 class DataLakeAnalyticsScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
+        from azure.cli.command_modules.dla.tests.recording_processors import JobIdReplacer, patch_uuid_str
         return super(DataLakeAnalyticsScenarioTest, self).__init__(method_name,
                                                                    recording_processors=JobIdReplacer(),
                                                                    replay_patches=patch_uuid_str)
@@ -430,6 +398,21 @@ CREATE PROCEDURE {0}.dbo.{4}() AS BEGIN CREATE VIEW {0}.dbo.{3} AS SELECT * FROM
             # live in production.
         ])
 
+        # test wasb add, get delete
+        self.cmd('dla account blob-storage add -g {rg} -n {dla} --storage-account-name {wasb} --access-key {wasb_key}')
+        self.cmd('dla account blob-storage show -g {rg} -n {dla} --storage-account-name {wasb}', checks=[
+            self.check('name', '{wasb}')
+        ])
+        self.cmd('dla account blob-storage list -g {rg} -n {dla}', checks=[
+            self.check('type(@)', 'array'),
+            self.check('length(@)', 1),
+        ])
+        self.cmd('dla account blob-storage delete -g {rg} -n {dla} --storage-account-name {wasb}')
+        self.cmd('dla account blob-storage list -g {rg} -n {dla}', checks=[
+            self.check('type(@)', 'array'),
+            self.check('length(@)', 0),
+        ])
+
         # test adls acct add get, delete
         self.cmd('dla account data-lake-store add -g {rg} -n {dla} --data-lake-store-account-name {dls2}')
         self.cmd('dla account data-lake-store show -g {rg} -n {dla} --data-lake-store-account-name {dls2}', checks=[
@@ -443,20 +426,6 @@ CREATE PROCEDURE {0}.dbo.{4}() AS BEGIN CREATE VIEW {0}.dbo.{3} AS SELECT * FROM
         self.cmd('dla account data-lake-store list -g {rg} -n {dla}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 1),
-        ])
-        # test wasb add, get delete
-        self.cmd('dla account blob-storage add -g {rg} -n {dla} --storage-account-name {wasb} --access-key {wasb_key}')
-        self.cmd('dla account blob-storage show -g {rg} -n {wasb} --storage-account-name {wasb}', checks=[
-            self.check('name', '{wasb}')
-        ])
-        self.cmd('dla account blob-storage list -g {rg} -n {dla}', checks=[
-            self.check('type(@)', 'array'),
-            self.check('length(@)', 1),
-        ])
-        self.cmd('dla account blob-storage delete -g {rg} -n {dla} --storage-account-name {wasb}')
-        self.cmd('dla account blob-storage list -g {rg} -n {dla}', checks=[
-            self.check('type(@)', 'array'),
-            self.check('length(@)', 0),
         ])
 
         # test compute policy

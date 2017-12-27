@@ -97,7 +97,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     import requests
 
     # quick argument usage check
-    if (any([username, password, service_principal, tenant, allow_no_subscriptions]) and
+    if (any([password, service_principal, tenant, allow_no_subscriptions]) and
             any([msi, not getattr(msi_port, 'is_default', None)])):
         raise CLIError("usage error: '--msi/--msi-port' are not applicable with other arguments")
 
@@ -113,7 +113,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         return
 
     if msi:
-        return profile.find_subscriptions_in_vm_with_msi(msi_port)
+        return profile.find_subscriptions_in_vm_with_msi(msi_port, username)
 
     if username:
         if not password:

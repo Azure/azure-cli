@@ -57,7 +57,6 @@ from azure.mgmt.containerservice.models import ContainerServiceSshConfiguration
 from azure.mgmt.containerservice.models import ContainerServiceSshPublicKey
 from azure.mgmt.containerservice.models import ContainerServiceStorageProfileTypes
 from azure.mgmt.containerservice.models import ManagedCluster
-from azure.mgmt.containerservice.models import ManagedClusterProperties
 
 from ._client_factory import get_auth_management_client
 from ._client_factory import get_graph_rbac_management_client
@@ -318,8 +317,8 @@ def k8s_install_connector(cmd, client, name, resource_group_name, connector_name
                           location=None, service_principal=None, client_secret=None,
                           chart_url=None, os_type='Linux'):
     from subprocess import PIPE, Popen
-    helm_not_installed = "Helm not detected, please verify if it is installed."
-    image_tag = 'latest'
+    helm_not_installed = 'Helm not detected, please verify if it is installed.'
+    node_prefix = 'virtual-kubelet-' + connector_name.lower()
     url_chart = chart_url
     # Check if Helm is installed locally
     try:
@@ -346,18 +345,34 @@ def k8s_install_connector(cmd, client, name, resource_group_name, connector_name
     # Get the TenantID
     profile = Profile(cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials()
+    # Check if we want the linux connector
+    if os_type.lower() in ['linux', 'both']:
+        _helm_install_aci_connector(url_chart, connector_name, service_principal, client_secret,
+                                    subscription_id, tenant_id, rgkaci.name, location,
+                                    node_prefix + '-linux', 'Linux')
+
     # Check if we want the windows connector
     if os_type.lower() in ['windows', 'both']:
-        # The current connector will deploy two connectors, one for Windows and another one for Linux
-        image_tag = 'canary'
-    logger.warning('Deploying the aci-connector using Helm')
+        _helm_install_aci_connector(url_chart, connector_name, service_principal, client_secret,
+                                    subscription_id, tenant_id, rgkaci.name, location,
+                                    node_prefix + '-win', 'Windows')
+
+
+def _helm_install_aci_connector(url_chart, connector_name, service_principal, client_secret,
+                                subscription_id, tenant_id, aci_resource_group, aci_region,
+                                node_name, os_type):
+    image_tag = 'latest'
+    node_taint = 'azure.com/aci'
+    helm_release_name = connector_name.lower() + "-" + os_type.lower()
+    logger.warning("Deploying the ACI connector for '%s' using Helm", os_type)
     try:
-        subprocess.call(["helm", "install", url_chart, "--name", connector_name, "--set", "env.azureClientId=" +
+        subprocess.call(["helm", "install", url_chart, "--name", helm_release_name, "--set", "env.azureClientId=" +
                          service_principal + ",env.azureClientKey=" + client_secret + ",env.azureSubscriptionId=" +
-                         subscription_id + ",env.azureTenantId=" + tenant_id + ",env.aciResourceGroup=" + rgkaci.name +
-                         ",env.aciRegion=" + location + ",image.tag=" + image_tag])
+                         subscription_id + ",env.azureTenantId=" + tenant_id + ",env.aciResourceGroup=" +
+                         aci_resource_group + ",env.aciRegion=" + aci_region + ",image.tag=" + image_tag +
+                         ",env.nodeName=" + node_name + ",env.nodeTaint=" + node_taint + ",env.nodeOsType=" + os_type])
     except subprocess.CalledProcessError as err:
-        raise CLIError('Could not deploy the ACI Chart: {}'.format(err))
+        raise CLIError('Could not deploy the ACI connector Chart: {}'.format(err))
 
 
 def k8s_uninstall_connector(cmd, client, name, connector_name, resource_group_name,
@@ -372,36 +387,43 @@ def k8s_uninstall_connector(cmd, client, name, connector_name, resource_group_na
     # Get the credentials from a AKS instance
     _, browse_path = tempfile.mkstemp()
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
+
+    node_prefix = 'virtual-kubelet-' + connector_name.lower()
+
+    if os_type.lower() in ['linux', 'both']:
+        _undeploy_connector(graceful, node_prefix + '-linux', connector_name.lower() + '-linux')
+
+    if os_type.lower() in ['windows', 'both']:
+        _undeploy_connector(graceful, node_prefix + '-win', connector_name.lower() + '-windows')
+
+
+def _undeploy_connector(graceful, node_name, helm_release_name):
     if graceful:
         logger.warning('Graceful option selected, will try to drain the node first')
-        kubectl_not_installed = "Kubectl not detected, please verify if it is installed."
+        from subprocess import PIPE, Popen
+        kubectl_not_installed = 'Kubectl not detected, please verify if it is installed.'
         try:
             Popen(["kubectl"], stdout=PIPE, stderr=PIPE)
         except OSError:
             raise CLIError(kubectl_not_installed)
+
         try:
-            if os_type.lower() in ['windows', 'both']:
-                nodes = ['-0', '-1']
-                for n in nodes:
-                    drain_node = subprocess.check_output(
-                        ["kubectl", "drain", "aci-connector{}".format(n), "--force"],
-                        universal_newlines=True)
-            else:
-                drain_node = subprocess.check_output(
-                    ["kubectl", "drain", "aci-connector", "--force"],
-                    universal_newlines=True)
+            drain_node = subprocess.check_output(
+                ['kubectl', 'drain', node_name, '--force'],
+                universal_newlines=True)
+
+            if not drain_node:
+                raise CLIError('Could not find the node, make sure you' +
+                               ' are using the correct --os-type')
         except subprocess.CalledProcessError as err:
             raise CLIError('Could not find the node, make sure you' +
                            ' are using the correct --os-type option: {}'.format(err))
-        if not drain_node:
-            raise CLIError('Could not find the node, make sure you' +
-                           ' are using the correct --os-type')
 
-    logger.warning('Undeploying the aci-connector using Helm')
+    logger.warning("Undeploying the '%s' using Helm", helm_release_name)
     try:
-        subprocess.call(["helm", "del", connector_name, "--purge"])
+        subprocess.call(['helm', 'del', helm_release_name, '--purge'])
     except subprocess.CalledProcessError as err:
-        raise CLIError('Could not deploy the ACI Chart: {}'.format(err))
+        raise CLIError('Could not undeploy the ACI connector Chart: {}'.format(err))
 
 
 def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
@@ -1277,13 +1299,13 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         secret=principal_obj.get("client_secret"),
         key_vault_secret_ref=None)
 
-    props = ManagedClusterProperties(
+    mc = ManagedCluster(
+        location=location, tags=tags,
         dns_prefix=dns_name_prefix,
         kubernetes_version=kubernetes_version,
         agent_pool_profiles=[agent_pool_profile],
         linux_profile=linux_profile,
         service_principal_profile=service_principal_profile)
-    mc = ManagedCluster(location=location, tags=tags, properties=props)
 
     # Due to SPN replication latency, we do a few retries here
     max_retry = 30
@@ -1332,20 +1354,20 @@ def aks_show(cmd, client, resource_group_name, name):
 def aks_scale(cmd, client, resource_group_name, name, node_count, no_wait=False):
     instance = client.get(resource_group_name, name)
     # TODO: change this approach when we support multiple agent pools.
-    instance.properties.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
+    instance.agent_pool_profiles[0].count = int(node_count)  # pylint: disable=no-member
 
     # null out the service principal because otherwise validation complains
-    instance.properties.service_principal_profile = None
+    instance.service_principal_profile = None
 
     return client.create_or_update(resource_group_name, name, instance, raw=no_wait)
 
 
 def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
     instance = client.get(resource_group_name, name)
-    instance.properties.kubernetes_version = kubernetes_version
+    instance.kubernetes_version = kubernetes_version
 
     # null out the service principal because otherwise validation complains
-    instance.properties.service_principal_profile = None
+    instance.service_principal_profile = None
 
     return client.create_or_update(resource_group_name, name, instance, raw=no_wait)
 
@@ -1439,12 +1461,11 @@ def _remove_nulls(managed_clusters):
         for attr in attrs:
             if getattr(managed_cluster, attr, None) is None:
                 delattr(managed_cluster, attr)
-        props = managed_cluster.properties
-        for ap_profile in props.agent_pool_profiles:
+        for ap_profile in managed_cluster.agent_pool_profiles:
             for attr in ap_attrs:
                 if getattr(ap_profile, attr, None) is None:
                     delattr(ap_profile, attr)
         for attr in sp_attrs:
-            if getattr(props.service_principal_profile, attr, None) is None:
-                delattr(props.service_principal_profile, attr)
+            if getattr(managed_cluster.service_principal_profile, attr, None) is None:
+                delattr(managed_cluster.service_principal_profile, attr)
     return managed_clusters

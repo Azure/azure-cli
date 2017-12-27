@@ -230,7 +230,8 @@ class AppServicePlanScenarioTest(ScenarioTest):
         self.cmd('appservice plan list -g {}'.format(resource_group), checks=[JMESPathCheck('length(@)', 0)])
 
 
-class WebappConfigureTest(ScenarioTest):
+# TODO: Convert to ScenarioTest and re-record when issue #5145 is fixed.
+class WebappConfigureTest(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_config')
     def test_webapp_config(self, resource_group):
         webapp_name = self.create_random_name('webapp-config-test', 40)
@@ -370,8 +371,9 @@ class AppServiceBadErrorPolishTest(ScenarioTest):
         # allowed_exceptions='Website with given name {} already exists'.format(webapp_name)
 
 
+# TODO: Convert to ScenarioTest and re-record when issue #5145 is fixed.
 # this test doesn't contain the ultimate verification which you need to manually load the frontpage in a browser
-class LinuxWebappSceanrioTest(ScenarioTest):
+class LinuxWebappSceanrioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp(self, resource_group):
@@ -455,12 +457,13 @@ class WebappGitScenarioTest(ScenarioTest):
             JMESPathCheck('isMercurial', False),
             JMESPathCheck('branch', 'master')
         ])
-        self.cmd('webapp deployment source delete -g {} -n {}'.format(resource_group, webapp), checks=[
-            JMESPathCheck('repoUrl', None)
-        ])
+        self.cmd('webapp deployment source delete -g {} -n {}'.format(resource_group, webapp))
+        self.cmd('webapp deployment source show -g {} -n {}'.format(resource_group, webapp),
+                 checks=JMESPathCheck('repoUrl', None))
 
 
-class WebappSlotScenarioTest(ScenarioTest):
+# TODO: Convert to ScenarioTest and re-record when issue #5145 is fixed.
+class WebappSlotScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer()
     def test_webapp_slot(self, resource_group):
         plan = self.create_random_name(prefix='slot-test-plan', length=24)

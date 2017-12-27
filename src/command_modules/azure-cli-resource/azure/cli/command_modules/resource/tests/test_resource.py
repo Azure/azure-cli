@@ -60,6 +60,10 @@ class ResourceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_resource_scenario', location='southcentralus')
     def test_resource_scenario(self, resource_group, resource_group_location):
+        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = 4096
 
         self.kwargs.update({
             'loc': resource_group_location,
@@ -104,6 +108,7 @@ class ResourceScenarioTest(ScenarioTest):
 
         # delete and verify
         self.cmd('resource delete -n {vnet} -g {rg} --resource-type {rt}')
+        time.sleep(10)
         self.cmd('resource list', checks=self.check("length([?name=='{vnet}'])", 0))
 
 
@@ -586,7 +591,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             self.check('description', '{ad_desc}'),
             self.check('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
             self.check('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
-            self.check('artifacts[0].name', 'ApplianceResourceTemplate'),
+            self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
             self.check('artifacts[0].type', 'Template'),
             self.check('artifacts[1].name', 'CreateUiDefinition'),
             self.check('artifacts[1].type', 'Custom')
@@ -601,7 +606,7 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
             self.check('description', '{ad_desc}'),
             self.check('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
             self.check('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
-            self.check('artifacts[0].name', 'ApplianceResourceTemplate'),
+            self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
             self.check('artifacts[0].type', 'Template'),
             self.check('artifacts[1].name', 'CreateUiDefinition'),
             self.check('artifacts[1].type', 'Custom')
@@ -657,7 +662,8 @@ class ManagedAppDefinitionScenarioTest(ScenarioTest):
         self.cmd('managedapp definition list -g {rg}', checks=self.is_empty())
 
 
-class ManagedAppScenarioTest(ScenarioTest):
+# TODO: Change back to ScenarioTest and re-record when issue #5110 is fixed.
+class ManagedAppScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer()
     def test_managedapp(self, resource_group):
 

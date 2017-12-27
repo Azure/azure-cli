@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.15
+++++++
+* Fix incorrect order of parameters for container logs
+
 0.1.14
 ++++++
 * Fixed default ports regression

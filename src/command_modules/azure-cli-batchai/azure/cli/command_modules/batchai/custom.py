@@ -334,7 +334,7 @@ def create_cluster(cmd, client,  # pylint: disable=too-many-locals
             params = _get_deserializer()('ClusterCreateParameters', json_obj)
     else:
         params = models.ClusterCreateParameters(None, None, None)
-    params = _update_cluster_create_parameters_with_env_variables(params, account_name, account_key)
+    params = _update_cluster_create_parameters_with_env_variables(cmd.cli_ctx, params, account_name, account_key)
     params = _update_user_account_settings(params, user_name, ssh_key, password)
     if location:
         params.location = location

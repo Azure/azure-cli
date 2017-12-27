@@ -85,20 +85,11 @@ def _firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_ad
 
 
 #        Custom funcs for server logs        #
-
 def _download_log_files(
         client,
         resource_group_name,
         server_name,
         file_name):
-    # :param resource_group_name: The name of the resource group that
-    # contains the resource. You can obtain this value from the Azure
-    # Resource Manager API or the portal.
-    # :type resource_group_name: str
-    # :param server_name: Name of the server.
-    # :type server_name: str
-    # :param file_name: Space separated list of log filenames on the server to download.
-    # :type filename_contains: str
     from six.moves.urllib.request import urlretrieve  # pylint: disable=import-error
 
     # list all files
@@ -111,19 +102,6 @@ def _download_log_files(
 
 def _list_log_files_with_filter(client, resource_group_name, server_name, filename_contains=None,
                                 file_last_written=None, max_file_size=None):
-    # :param resource_group_name: The name of the resource group that
-    # contains the resource. You can obtain this value from the Azure
-    # Resource Manager API or the portal.
-    # :type resource_group_name: str
-    # :param server_name: The name of the server.
-    # :type server_name: str
-    # :param filename_contains: The pattern that file name should match.
-    # :type filename_contains: str
-    # :param file_last_written: Interger in hours to indicate file last modify time,
-    # default value is 72.
-    # :type file_last_written: int
-    # :param max_file_size: The file size limitation to filter files.
-    # :type max_file_size: int
     import re
     from datetime import datetime, timedelta
     from dateutil.tz import tzutc

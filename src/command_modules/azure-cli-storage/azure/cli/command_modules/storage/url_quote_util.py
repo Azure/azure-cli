@@ -36,5 +36,8 @@ def make_encoded_file_url_and_params(file_service, share, file_dir, file_name, s
         file_dir = file_dir.encode('utf-8')
         file_name = file_name.encode('utf-8')
         file_url = file_service.make_file_url(share, file_dir, file_name, sas_token=sas_token)
-    file_url = file_url.replace('//', '/')
+
+    if not file_dir:
+        sep = file_url.find('://')
+        file_url = file_url[:sep + 3] + file_url[sep + 3:].replace('//', '/')
     return encode_url_path(file_url, safe), file_dir, file_name

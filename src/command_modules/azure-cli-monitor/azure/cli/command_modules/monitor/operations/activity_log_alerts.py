@@ -73,7 +73,7 @@ def create(cmd, client, resource_group_name, activity_log_alert_name, scopes=Non
     # Add action groups
     action_group_rids = _normalize_names(cmd.cli_ctx, action_groups, resource_group_name, 'microsoft.insights',
                                          'actionGroups')
-    action_groups = [ActionGroup(action_group_id=id, webhook_properties=webhook_properties) for id in action_group_rids]
+    action_groups = [ActionGroup(action_group_id=i, webhook_properties=webhook_properties) for i in action_group_rids]
     alert_actions = ActivityLogAlertActionList(action_groups=action_groups)
 
     settings = ActivityLogAlertResource(location='global', scopes=scopes, condition=condition,
