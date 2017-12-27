@@ -430,6 +430,21 @@ CREATE PROCEDURE {0}.dbo.{4}() AS BEGIN CREATE VIEW {0}.dbo.{3} AS SELECT * FROM
             # live in production.
         ])
 
+        # test wasb add, get delete
+        self.cmd('dla account blob-storage add -g {rg} -n {dla} --storage-account-name {wasb} --access-key {wasb_key}')
+        self.cmd('dla account blob-storage show -g {rg} -n {dla} --storage-account-name {wasb}', checks=[
+            self.check('name', '{wasb}')
+        ])
+        self.cmd('dla account blob-storage list -g {rg} -n {dla}', checks=[
+            self.check('type(@)', 'array'),
+            self.check('length(@)', 1),
+        ])
+        self.cmd('dla account blob-storage delete -g {rg} -n {dla} --storage-account-name {wasb}')
+        self.cmd('dla account blob-storage list -g {rg} -n {dla}', checks=[
+            self.check('type(@)', 'array'),
+            self.check('length(@)', 0),
+        ])
+
         # test adls acct add get, delete
         self.cmd('dla account data-lake-store add -g {rg} -n {dla} --data-lake-store-account-name {dls2}')
         self.cmd('dla account data-lake-store show -g {rg} -n {dla} --data-lake-store-account-name {dls2}', checks=[
@@ -443,20 +458,6 @@ CREATE PROCEDURE {0}.dbo.{4}() AS BEGIN CREATE VIEW {0}.dbo.{3} AS SELECT * FROM
         self.cmd('dla account data-lake-store list -g {rg} -n {dla}', checks=[
             self.check('type(@)', 'array'),
             self.check('length(@)', 1),
-        ])
-        # test wasb add, get delete
-        self.cmd('dla account blob-storage add -g {rg} -n {dla} --storage-account-name {wasb} --access-key {wasb_key}')
-        self.cmd('dla account blob-storage show -g {rg} -n {wasb} --storage-account-name {wasb}', checks=[
-            self.check('name', '{wasb}')
-        ])
-        self.cmd('dla account blob-storage list -g {rg} -n {dla}', checks=[
-            self.check('type(@)', 'array'),
-            self.check('length(@)', 1),
-        ])
-        self.cmd('dla account blob-storage delete -g {rg} -n {dla} --storage-account-name {wasb}')
-        self.cmd('dla account blob-storage list -g {rg} -n {dla}', checks=[
-            self.check('type(@)', 'array'),
-            self.check('length(@)', 0),
         ])
 
         # test compute policy

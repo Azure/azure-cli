@@ -107,11 +107,11 @@ def load_command_table(self, _):
         g.command('show', 'get')
         g.command('list', 'list_by_server')
 
-    with self.command_group('mysql server-logs', mysql_log_sdk) as g:
+    with self.command_group('mysql server-logs', mysql_log_sdk, client_factory=cf_mysql_log) as g:
         g.custom_command('list', '_list_log_files_with_filter')
         g.custom_command('download', '_download_log_files')
 
-    with self.command_group('postgres server-logs', postgres_log_sdk) as g:
+    with self.command_group('postgres server-logs', postgres_log_sdk, client_factory=cf_postgres_log) as g:
         g.custom_command('list', '_list_log_files_with_filter')
         g.custom_command('download', '_download_log_files')
 
