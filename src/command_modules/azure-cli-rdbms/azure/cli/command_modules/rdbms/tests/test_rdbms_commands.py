@@ -309,11 +309,8 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
         rg = resource_group
 
-        check = NoneCheck() if database_engine == 'mysql' else JMESPathCheck('type(@)', 'array')
-
-        self.cmd('{} db list -g {} -s {}'
-                 .format(database_engine, rg, server),
-                 checks=[check])
+        self.cmd('{} db list -g {} -s {}'.format(database_engine, rg, server),
+                 checks=JMESPathCheck('type(@)', 'array'))
 
     def _test_configuration_mgmt(self, resource_group, server, database_engine):
         rg = resource_group
