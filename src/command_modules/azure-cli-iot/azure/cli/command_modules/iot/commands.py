@@ -67,15 +67,19 @@ def load_command_table(self, _):
 
     # iot device commands
     with self.command_group('iot device', client_factory=iot_hub_service_factory) as g:
-        g.custom_command('create', 'iot_device_create', deprecate_info='az iot hub device-identity create (via IoT Extension)')
-        g.custom_command('list', 'iot_device_list', deprecate_info='az iot hub device-identity list (via IoT Extension)')
+        g.custom_command('create', 'iot_device_create',
+                         deprecate_info='az iot hub device-identity create (via IoT Extension)')
+        g.custom_command('list', 'iot_device_list',
+                         deprecate_info='az iot hub device-identity list (via IoT Extension)')
         g.custom_command('show-connection-string', 'iot_device_show_connection_string',
                          deprecate_info='az iot hub device-identity show-connection-string (via IoT Extension)')
-        g.custom_command('show', 'iot_device_get', deprecate_info='az iot hub device-identity show (via IoT Extension)')
+        g.custom_command('show', 'iot_device_get',
+                         deprecate_info='az iot hub device-identity show (via IoT Extension)')
         g.generic_update_command('update', getter_name='iot_device_get', setter_name='iot_device_update',
                                  command_type=update_custom_util,
                                  deprecate_info='az iot hub device-identity update (via IoT Extension)')
-        g.custom_command('delete', 'iot_device_delete', deprecate_info='az iot hub device-identity delete (via IoT Extension)')
+        g.custom_command('delete', 'iot_device_delete',
+                         deprecate_info='az iot hub device-identity delete (via IoT Extension)')
         g.custom_command('message send', 'iot_device_send_message',
                          deprecate_info='az iot device send-d2c-message (via IoT Extension)')
         g.custom_command('message receive', 'iot_device_receive_message',
