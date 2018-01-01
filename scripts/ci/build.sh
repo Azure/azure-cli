@@ -6,7 +6,7 @@
 set -e
 
 ##############################################
-# clean up
+# clean up and dir search
 mkdir -p ./artifacts
 echo `git rev-parse --verify HEAD` > ./artifacts/build.sha
 
@@ -19,16 +19,15 @@ output_dir=$(cd artifacts/build && pwd)
 sdist_dir=$(cd artifacts/source && pwd)
 testsrc_dir=$(cd artifacts/testsrc && pwd)
 app_dir=$(cd artifacts/app && pwd)
+script_dir=`cd $(dirname $0); pwd`
 
 ##############################################
 # Copy app scripts for batch run - To be retired in the future
-cp $(cd $(dirname $0); pwd)/app/* $app_dir
+cp $script_dir/app/* $app_dir
 
 ##############################################
 # Update version strings
-if $TRAVIS; then
-    $(cd $(dirname $0); pwd)/version.sh $1
-fi
+. $script_dir/version.sh $1
 
 ##############################################
 # build product packages
@@ -70,7 +69,7 @@ cat >$testsrc_dir/setup.py <<EOL
 
 from setuptools import setup
 
-VERSION = "1.0.0.dev$TRAVIS_BUILD_NUMBER"
+VERSION = "1.0.0.dev$version"
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
@@ -139,6 +138,11 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '**/*.txt']},
     install_requires=DEPENDENCIES
 )
+EOL
+
+cat >>$testsrc_dir/setup.cfg <<EOL
+[bdist_wheel]
+universal=1
 EOL
 
 pushd $testsrc_dir
