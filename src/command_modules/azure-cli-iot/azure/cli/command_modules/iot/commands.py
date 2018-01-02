@@ -28,7 +28,7 @@ class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few
         return None
 
 
-def load_command_table(self, _):
+def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     update_custom_util = CliCommandType(operations_tmpl='azure.cli.command_modules.iot.custom#{}')
 
