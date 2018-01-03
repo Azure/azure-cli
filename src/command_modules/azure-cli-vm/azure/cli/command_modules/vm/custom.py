@@ -855,6 +855,22 @@ def set_vm(cmd, instance, lro_operation=None, no_wait=False):
 def show_vm(cmd, resource_group_name, vm_name, show_details=False):
     return get_vm_details(cmd, resource_group_name, vm_name) if show_details \
         else get_vm(cmd, resource_group_name, vm_name)
+
+
+def set_vm(cmd, resource_group_name, vm_name, os_disk=None, no_wait=False, **kwargs):
+    vm = kwargs['parameters']
+    if os_disk is not None:
+        if is_valid_resource_id(os_disk):
+            disk_id, disk_name = os_disk, parse_resource_id(os_disk)['name']
+        else:
+            res = parse_resource_id(vm.id)
+            disk_id = resource_id(subscription=res['subscription'], resource_group=res['resource_group'],
+                                  namespace='Microsoft.Compute', type='disks', name=os_disk)
+            disk_name = os_disk
+        vm.storage_profile.os_disk.managed_disk.id = disk_id
+        vm.storage_profile.os_disk.name = disk_name
+    return _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update(
+        resource_group_name, vm_name, raw=no_wait, **kwargs)
 # endregion
 
 
