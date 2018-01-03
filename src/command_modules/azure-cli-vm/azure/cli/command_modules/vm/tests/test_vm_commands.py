@@ -328,8 +328,7 @@ class VMCustomImageTest(ScenarioTest):
         ])
 
 
-# TODO: Convert back to ScnearioTest and re-record when issue #5161 is addressed.
-class VMCustomImageWithPlanTest(LiveScenarioTest):
+class VMCustomImageWithPlanTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_custom_image_with_plan(self, resource_group):
@@ -339,9 +338,7 @@ class VMCustomImageWithPlanTest(LiveScenarioTest):
             'plan': 'linuxdsvmubuntu'
         })
 
-        with self.assertRaises(AssertionError):
-            self.cmd('vm create -g {rg} -n vm1 --image {prepared_image_with_plan_info} --generate-ssh-keys --plan-promotion-code 99percentoff --plan-publisher microsoft-ads --plan-name {plan} --plan-product linux-data-science-vm-ubuntu')
-        self.cmd('vm create -g {rg} -n vm1 --image {prepared_image_with_plan_info} --generate-ssh-keys --plan-publisher microsoft-ads --plan-name {plan} --plan-product linux-data-science-vm-ubuntu')
+        self.cmd('vm create -g {rg} -n vm1 --admin-username cliuser --image {prepared_image_with_plan_info} --generate-ssh-keys --plan-publisher microsoft-ads --plan-name {plan} --plan-product linux-data-science-vm-ubuntu')
         self.cmd('vm show -g {rg} -n vm1',
                  checks=self.check('plan.name', '{plan}'))
 
@@ -1384,7 +1381,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'vmss': 'vmss1'
         })
 
-        res = self.cmd("vmss create -g {rg} --name {vmss} --image UbuntuLTS --disable-overprovision --instance-count 101 --single-placement-group false --validate").get_output_in_json()
+        res = self.cmd("vmss create -g {rg} --name {vmss} --validate --image UbuntuLTS --disable-overprovision --instance-count 101 --single-placement-group false --admin-username ubuntuadmin").get_output_in_json()
         # Ensure generated template is valid. "Quota Exceeding" is expected on most subscriptions, so we allow that.
         self.assertTrue(not res['error'] or (res['error']['details'][0]['code'] == 'QuotaExceeded'))
 
@@ -1961,7 +1958,7 @@ class MSIScenarioTest(ScenarioTest):
         emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
 
         # create a vm with system + user assigned identities
-        result = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys').get_output_in_json()
+        result = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys --admin-username ubuntuadmin').get_output_in_json()
         self.assertEqual(result['identity']['externalIdentities'][0].lower(), emsi_result['id'].lower())
         result = self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('length(identity.identityIds)', 1),
@@ -2003,7 +2000,7 @@ class MSIScenarioTest(ScenarioTest):
         emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
 
         # create a vmss with system + user assigned identities
-        result = self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --instance-count 1 --generate-ssh-keys').get_output_in_json()
+        result = self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --instance-count 1 --generate-ssh-keys --admin-username ubuntuadmin').get_output_in_json()
         self.assertEqual(result['vmss']['identity']['externalIdentities'][0].lower(), emsi_result['id'].lower())
 
         result = self.cmd('vmss show -g {rg} -n {vmss}', checks=[
@@ -2237,9 +2234,9 @@ class VMLBIntegrationTesting(ScenarioTest):
         })
         # provision 2 web servers
         self.cmd('vm availability-set create -g {rg} -n {avset}')
-        self.cmd('vm create -g {rg} -n {vm1} --image ubuntults --public-ip-address "" --availability-set {avset} --generate-ssh-keys')
+        self.cmd('vm create -g {rg} -n {vm1} --image ubuntults --public-ip-address "" --availability-set {avset} --generate-ssh-keys --admin-username ubuntuadmin')
         self.cmd('vm open-port -g {rg} -n {vm1} --port 80')
-        self.cmd('vm create -g {rg} -n {vm2} --image ubuntults --public-ip-address "" --availability-set {avset} --generate-ssh-keys')
+        self.cmd('vm create -g {rg} -n {vm2} --image ubuntults --public-ip-address "" --availability-set {avset} --generate-ssh-keys --admin-username ubuntuadmin')
         self.cmd('vm open-port -g {rg} -n {vm2} --port 80')
 
         # provision 1 LB
@@ -2281,7 +2278,7 @@ class VMCreateWithExistingNic(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n my-vnet --subnet-name my-subnet1')
         self.cmd('network nic create -g {rg} -n my-nic --subnet my-subnet1 --vnet-name my-vnet --public-ip-address my-pip')
         self.cmd('network nic ip-config create -n my-ipconfig2 -g {rg} --nic-name my-nic --private-ip-address-version IPv6')
-        self.cmd('vm create -g {rg} -n vm1 --image ubuntults --nics my-nic --generate-ssh-keys')
+        self.cmd('vm create -g {rg} -n vm1 --image ubuntults --nics my-nic --generate-ssh-keys --admin-username ubuntuadmin')
         result = self.cmd('vm show -g {rg} -n vm1 -d').get_output_in_json()
         self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['publicIps']))
         self.assertTrue(re.match(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', result['privateIps']))
@@ -2301,7 +2298,7 @@ class VMSecretTest(ScenarioTest):
         vault_result = self.cmd('keyvault create -g {rg} -n {vault} -l {loc} --enabled-for-disk-encryption true --enabled-for-deployment true').get_output_in_json()
         self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
 
-        self.cmd('vm create -g {rg} -n {vm} --image rhel')
+        self.cmd('vm create -g {rg} -n {vm} --image rhel --generate-ssh-keys --admin-username rheladmin')
         time.sleep(60)  # ensure we don't hit the DNS exception (ignored under playback)
 
         self.cmd('keyvault certificate create --vault-name {vault} -n {cert} -p @"{policy_path}"')
