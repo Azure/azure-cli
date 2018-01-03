@@ -421,7 +421,7 @@ class LinuxWebappSceanrioTest(LiveScenarioTest):
         self.assertEqual(result2, [])
 
 
-class WebappACRSceanrioTest:  # (ScenarioTest):
+class WebappACRSceanrioTest(ScenarioTest):
     @ResourceGroupPreparer(location='japanwest')
     def test_acr_integration(self, resource_group):
         plan = self.create_random_name(prefix='acrtestplan', length=24)
