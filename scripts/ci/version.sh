@@ -12,8 +12,8 @@ if [ -z $version ]; then
 fi
 
 if [ -z $version ]; then
-    echo 'Missing version string'
-    exit 1
+    echo 'Use utc timestamp as version'
+    version=`date -u '+%Y%m%d%H%M%S'`
 fi
 
 echo "Replace with version: $version"
