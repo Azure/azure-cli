@@ -7,7 +7,7 @@ from azure.cli.core.commands import CliCommandType
 
 from azure.cli.command_modules.rdbms._client_factory import (
     cf_mysql_servers, cf_postgres_servers, cf_mysql_firewall_rules, cf_postgres_firewall_rules,
-    cf_mysql_config, cf_postgres_config, cf_mysql_log, cf_postgres_log, cf_mysql_db, cf_postgres_db)
+    cf_mysql_config, cf_postgres_config, cf_mysql_log, cf_postgres_log, cf_mysql_db, cf_postgres_db, cf_postgres_virtual_network_rules_operations)
 
 
 # pylint: disable=too-many-locals, too-many-statements, line-too-long
@@ -65,6 +65,11 @@ def load_command_table(self, _):
         client_factory=cf_postgres_db
     )
 
+    postgres_vnet_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.rdbms.postgresql.operations.virtual_network_rules_operations#VirtualNetworkRulesOperations.{}',
+        client_factory=cf_postgres_virtual_network_rules_operations
+    )
+
     with self.command_group('mysql server', mysql_servers_sdk) as g:
         g.command('create', 'create_or_update')
         g.custom_command('restore', '_server_restore')
@@ -75,7 +80,7 @@ def load_command_table(self, _):
                                  custom_func_name='_server_update_custom_func')
 
     with self.command_group('postgres server', postgres_servers_sdk) as g:
-        g.command('create', 'create_or_update')
+        g.command('create', 'create')
         g.custom_command('restore', '_server_restore')
         g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get')
@@ -126,3 +131,10 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get')
         g.command('list', 'list_by_server')
+
+    with self.command_group('postgres server vnet-rule', postgres_vnet_sdk) as g:
+         g.command('create', 'create_or_update')
+         g.command('delete', 'delete', confirmation=True)
+         g.command('show', 'get')
+         g.command('list', 'list_by_server')
+         g.generic_update_command('update')

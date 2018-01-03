@@ -167,7 +167,24 @@ def add_helps(command_group, server_type):
                 type: command
                 short-summary: List the databases for a server.
                 """
+    helps['{} server vnet-rule'.format(command_group)] = """
+                type: group
+                short-summary: Manage a server's virtual network rules.
+                """
+    helps['{} server vnet-rule update'.format(command_group)] = """
+                type: command
+                short-summary: Update a virtual network rule.
+                """
+    helps['{} server vnet-rule create'.format(command_group)] = """
+                type: command
+                short-summary: Create a virtual network rule to allows access to a server.
 
+                examples:
+                    - name: Create a virtual network rule by providing the subnet id.
+                      text: az sql server vnet-rule create --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgName/providers/Microsoft.Network/virtualNetworks/vnetName/subnets/subnetName
+                    - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the server.
+                      text: az {} vnet-rule create --subnet subnetName --vnet-name vnetName
+                """.format(command_group)
 
 add_helps("mysql", "MySQL")
 add_helps("postgres", "PostgreSQL")
