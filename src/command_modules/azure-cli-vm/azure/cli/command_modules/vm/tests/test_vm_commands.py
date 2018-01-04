@@ -1395,7 +1395,7 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         self.cmd('vmss create -g {rg} -n {vmss} --load-balancer {lb} --image UbuntuLTS --admin-username clitester --admin-password TestTest12#$')
 
 
-class VMSSCreatePublicIpPerVm(LiveScenarioTest):  # pylint: disable=too-many-instance-attributes
+class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_w_ips')
     def test_vmss_public_ip_per_vm_custom_domain_name(self, resource_group):
@@ -1403,10 +1403,11 @@ class VMSSCreatePublicIpPerVm(LiveScenarioTest):  # pylint: disable=too-many-ins
         self.kwargs.update({
             'vmss': 'vmss1',
             'nsg': 'testnsg',
-            'ssh_key': TEST_SSH_KEY_PUB
+            'ssh_key': TEST_SSH_KEY_PUB,
+            'dns_label': self.create_random_name('clivmss', 20)
         })
         nsg_result = self.cmd('network nsg create -g {rg} -n {nsg}').get_output_in_json()
-        self.cmd("vmss create -n {vmss} -g {rg} --image Debian --admin-username clittester --ssh-key-value '{ssh_key}' --vm-domain-name clitestnewnetwork --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg}",
+        self.cmd("vmss create -n {vmss} -g {rg} --image Debian --admin-username clittester --ssh-key-value '{ssh_key}' --vm-domain-name {dns_label} --public-ip-per-vm --dns-servers 10.0.0.6 10.0.0.5 --nsg {nsg}",
                  checks=self.check('vmss.provisioningState', 'Succeeded'))
         result = self.cmd("vmss show -n {vmss} -g {rg}", checks=[
             self.check('length(virtualMachineProfile.networkProfile.networkInterfaceConfigurations[0].dnsSettings.dnsServers)', 2),
@@ -1417,7 +1418,7 @@ class VMSSCreatePublicIpPerVm(LiveScenarioTest):  # pylint: disable=too-many-ins
         # spot check we have the domain name and have a public ip
         result = self.cmd('vmss list-instance-public-ips -n {vmss} -g {rg}').get_output_in_json()
         self.assertEqual(len(result[0]['ipAddress'].split('.')), 4)
-        self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith('.clitestnewnetwork'))
+        self.assertTrue(result[0]['dnsSettings']['domainNameLabel'].endswith(self.kwargs['dns_label']))
 
 
 class VMSSCreateAcceleratedNetworkingTest(ScenarioTest):
