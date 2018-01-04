@@ -814,14 +814,14 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
 
 
 def store_acs_service_principal(subscription_id, client_secret, service_principal,
-                                config_path=os.path.join(get_config_dir(),
-                                                         'acsServicePrincipal.json')):
+                                file_name='acsServicePrincipal.json'):
     obj = {}
     if client_secret:
         obj['client_secret'] = client_secret
     if service_principal:
         obj['service_principal'] = service_principal
 
+    config_path = os.path.join(get_config_dir(), file_name)
     fullConfig = load_service_principals(config_path=config_path)
     if not fullConfig:
         fullConfig = {}
@@ -832,8 +832,8 @@ def store_acs_service_principal(subscription_id, client_secret, service_principa
         json.dump(full_config, spFile)
 
 
-def load_acs_service_principal(subscription_id, config_path=os.path.join(get_config_dir(),
-                                                                         'acsServicePrincipal.json')):
+def load_acs_service_principal(subscription_id, file_name='acsServicePrincipal.json'):
+    config_path = os.path.join(get_config_dir(), file_name)
     config = load_service_principals(config_path)
     if not config:
         return None
