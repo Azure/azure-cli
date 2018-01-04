@@ -822,10 +822,10 @@ def store_acs_service_principal(subscription_id, client_secret, service_principa
     if service_principal:
         obj['service_principal'] = service_principal
 
-    full_config = load_acs_service_principals(config_path=config_path)
-    if not full_config:
-        full_config = {}
-    full_config[subscription_id] = obj
+    fullConfig = load_service_principals(config_path=config_path)
+    if not fullConfig:
+        fullConfig = {}
+    fullConfig[subscription_id] = obj
 
     with os.fdopen(os.open(config_path, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
                    'w+') as spFile:
@@ -834,13 +834,13 @@ def store_acs_service_principal(subscription_id, client_secret, service_principa
 
 def load_acs_service_principal(subscription_id, config_path=os.path.join(get_config_dir(),
                                                                          'acsServicePrincipal.json')):
-    config = load_acs_service_principals(config_path)
+    config = load_service_principals(config_path)
     if not config:
         return None
     return config.get(subscription_id)
 
 
-def load_acs_service_principals(config_path):
+def load_service_principals(config_path):
     if not os.path.exists(config_path):
         return None
     fd = os.open(config_path, os.O_RDONLY)
@@ -1368,6 +1368,43 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
     instance.service_principal_profile = None
 
     return client.create_or_update(resource_group_name, name, instance, raw=no_wait)
+
+def _ensure_service_principal_aks(service_principal=None,
+                              client_secret=None,
+                              subscription_id=None,
+                              dns_name_prefix=None,
+                              location=None,
+                              name=None):
+    # TODO: This really needs to be unit tested.
+    client = _graph_client_factory()
+    if not service_principal:
+        # --service-principal not specified, try to load it from local disk
+        principal_obj = load_acs_service_principal(subscription_id)
+        if principal_obj:
+            service_principal = principal_obj.get('service_principal')
+            client_secret = principal_obj.get('client_secret')
+        else:
+            # Nothing to load, make one.
+            if not client_secret:
+                client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
+            salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
+            url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+
+            service_principal = _build_service_principal(client, name, url, client_secret)
+            if not service_principal:
+                raise CLIError('Could not create a service principal with the right permissions. '
+                               'Are you an Owner on this project?')
+            logger.info('Created a service principal: %s', service_principal)
+            # add role first before save it
+            if not _add_role_assignment('Contributor', service_principal):
+                logger.warning('Could not create a service principal with the right permissions. '
+                               'Are you an Owner on this project?')
+    else:
+        # --service-principal specfied, validate --client-secret was too
+        if not client_secret:
+            raise CLIError('--client-secret is required if --service-principal is specified')
+    store_acs_service_principal(subscription_id, client_secret, service_principal)
+    return load_acs_service_principal(subscription_id)
 
 
 def _ensure_service_principal(cli_ctx,
