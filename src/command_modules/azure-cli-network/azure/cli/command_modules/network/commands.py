@@ -540,7 +540,7 @@ def load_command_table(self, _):
 
     # region RouteTables
     with self.command_group('network route-table', network_rt_sdk) as g:
-        g.command('create', 'create_or_update', validator=process_route_table_create_namespace)
+        g.custom_command('create', 'create_route_table', validator=process_route_table_create_namespace)
         g.command('delete', 'delete')
         g.command('show', 'get', exception_handler=empty_on_404)
         g.custom_command('list', 'list_route_tables')

@@ -3,12 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.arm import is_valid_resource_id, resource_id, parse_resource_id
 from knack.util import CLIError
+
+from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
 
 
 def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False):
-    def _validator(namespace):
+    def _validator(cmd, namespace):
         name_or_id = getattr(namespace, dest)
         rg = namespace.resource_group_name
         res_ns = namespace.namespace
@@ -33,7 +34,7 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
 
                 setattr(namespace, dest,
                         '/subscriptions/{}/resourceGroups/{}/providers/{}/{}{}/{}'.format(
-                            get_subscription_id(), rg, res_ns, parent + '/' if parent else '',
+                            get_subscription_id(cmd.cli_ctx), rg, res_ns, parent + '/' if parent else '',
                             res_type, name_or_id))
 
         del namespace.namespace
@@ -44,7 +45,7 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
     return _validator
 
 
-def validate_diagnostic_settings(namespace):
+def validate_diagnostic_settings(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     resource_group_error = "--resource-group is required when name is provided for "\
                            "storage account or workspace or service bus namespace and rule. "
@@ -58,7 +59,7 @@ def validate_diagnostic_settings(namespace):
             raise CLIError(resource_group_error)
 
         if not is_valid_resource_id(namespace.namespace):
-            namespace.service_bus_rule_id = resource_id(subscription=get_subscription_id(),
+            namespace.service_bus_rule_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                                         resource_group=namespace.resource_group,
                                                         namespace='microsoft.ServiceBus',
                                                         type='namespaces',
@@ -78,7 +79,7 @@ def validate_diagnostic_settings(namespace):
     if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
         if namespace.resource_group is None:
             raise CLIError(resource_group_error)
-        namespace.storage_account = resource_id(subscription=get_subscription_id(),
+        namespace.storage_account = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                                 resource_group=namespace.resource_group,
                                                 namespace='microsoft.Storage',
                                                 type='storageAccounts',
@@ -87,7 +88,7 @@ def validate_diagnostic_settings(namespace):
     if namespace.workspace and not is_valid_resource_id(namespace.workspace):
         if namespace.resource_group is None:
             raise CLIError(resource_group_error)
-        namespace.workspace = resource_id(subscription=get_subscription_id(),
+        namespace.workspace = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                           resource_group=namespace.resource_group,
                                           namespace='microsoft.OperationalInsights',
                                           type='workspaces', name=namespace.workspace)
@@ -170,3 +171,19 @@ def process_metric_dimension(namespace):
         raise CLIError('usage: --dimension and --filter parameters are mutually exclusive.')
 
     ns['filter'] = ' and '.join("{} eq '*'".format(d) for d in dimensions)
+
+
+def process_webhook_prop(namespace):
+    if not isinstance(namespace.webhook_properties, list):
+        return
+
+    result = {}
+    for each in namespace.webhook_properties:
+        if each:
+            if '=' in each:
+                key, value = each.split('=', 1)
+            else:
+                key, value = each, ''
+            result[key] = value
+
+    namespace.webhook_properties = result

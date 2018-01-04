@@ -12,7 +12,7 @@ import time
 from shutil import rmtree
 from msrestazure.azure_exceptions import CloudError
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
 
 from knack.util import CLIError
 
@@ -117,12 +117,14 @@ class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
         assert 3 == len(remove_result['entries'])
 
 
-class DataLakeStoreFileScenarioTest(ScenarioTest):
+# Convert back to ScenarioTest and re-record when #5175 is addressed
+class DataLakeStoreFileScenarioTest(LiveScenarioTest):
 
     def tearDown(self):
-        if os.path.exists(self.kwargs['local_folder']):
-            rmtree(self.kwargs['local_folder'])
-        return super().tearDown()
+        local_folder = self.kwargs.get('local_folder', None)
+        if local_folder and os.path.exists(local_folder):
+            rmtree(local_folder)
+        return super(DataLakeStoreFileScenarioTest, self).tearDown()
 
     @ResourceGroupPreparer(name_prefix='cls_test_adls_file')
     def test_dls_file_mgmt(self):
@@ -131,6 +133,7 @@ class DataLakeStoreFileScenarioTest(ScenarioTest):
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
             'loc': 'eastus2',
+            'dir': local_folder,
             'local_folder': os.path.join(os.getcwd(), local_folder),
             'local_file': os.path.join(local_folder, 'sample_file.txt'),
             'local_file_content': 'Local File Content',
@@ -251,7 +254,7 @@ class DataLakeStoreFileScenarioTest(ScenarioTest):
             self.check('length', len(self.kwargs['local_file_content'])),
         ])
         # join the uploaded file to the created file
-        self.cmd('dls fs join -n {dls} --destination-path "{folder1}/{join_file}" --source-paths "{folder1}/{upload_file}","{folder2}/{file}"')
+        self.cmd('dls fs join -n {dls} --destination-path "{folder1}/{join_file}" --source-paths "{folder1}/{upload_file}" "{folder2}/{file}"')
         self.cmd('dls fs show -n {dls} --path "{folder1}/{join_file}"', checks=[
             self.check('name', '{folder1}/{join_file}'),
             self.check('type', 'FILE'),
@@ -273,11 +276,15 @@ class DataLakeStoreFileScenarioTest(ScenarioTest):
         self.cmd('dls fs create -n {dls} --path "{folder2}" --folder')
         self.cmd('dls fs create -n {dls} --path "{folder2}/tempfile01.txt"')
         self.cmd('dls fs delete -n {dls} --path "{folder2}" --recurse')
+        time.sleep(10)
+
         # test that the path is gone
-        assert not self.cmd('dls fs test -n {dls} --path "{folder2}"')
+        result = self.cmd('dls fs test -n {dls} --path "{folder2}"').get_output_in_json()
+        self.assertTrue(not result)
 
         # test that the other folder still exists
-        assert self.cmd('dls fs test -n {dls} --path "{folder1}"')
+        result = self.cmd('dls fs test -n {dls} --path "{folder1}"').get_output_in_json()
+        self.assertTrue(result)
 
 
 class DataLakeStoreAccountScenarioTest(ScenarioTest):

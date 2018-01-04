@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_protection_containers_cf, \
     protection_policies_cf, backup_policies_cf, protected_items_cf, backups_cf, backup_jobs_cf, \
@@ -15,6 +13,7 @@ from azure.cli.command_modules.backup._format import (
     transform_recovery_point_list)
 
 
+# pylint: disable=line-too-long
 def load_command_table(self, _):
 
     backup_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.backup.custom#{}')
@@ -33,7 +32,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vaults')
         g.command('backup-properties show', 'get', command_type=backup_storage_config_sdk)
         g.custom_command('backup-properties set', 'set_backup_properties', client_factory=backup_storage_configs_cf)
-        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('delete', 'delete_vault', confirmation=True)
 
     with self.command_group('backup container', backup_custom, client_factory=backup_protection_containers_cf) as g:
         g.command('show', 'show_container')

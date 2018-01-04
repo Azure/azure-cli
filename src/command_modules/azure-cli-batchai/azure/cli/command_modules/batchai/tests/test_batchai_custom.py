@@ -8,13 +8,16 @@ import os
 import unittest
 
 from azure.cli.command_modules.batchai.custom import (
-    update_cluster_create_parameters_with_env_variables,
-    update_nodes_information,
-    update_user_account_settings,
-    add_azure_container_to_cluster_create_parameters,
-    add_azure_file_share_to_cluster_create_parameters,
-    add_nfs_to_cluster_create_parameters)
+    _update_cluster_create_parameters_with_env_variables,
+    _update_nodes_information,
+    _update_user_account_settings,
+    _add_azure_container_to_cluster_create_parameters,
+    _add_azure_file_share_to_cluster_create_parameters,
+    _add_nfs_to_cluster_create_parameters)
 from azure.cli.core.util import CLIError
+
+from azure.cli.testsdk import TestCli
+
 from azure.mgmt.batchai.models import (
     ClusterCreateParameters, UserAccountSettings, NodeSetup, MountVolumes, FileServerCreateParameters,
     AzureFileShareReference, AzureBlobFileSystemReference, AzureStorageCredentialsInfo, SshConfiguration, DataDisks,
@@ -34,25 +37,21 @@ def _data_file(filename):
 
 
 class TestBatchAICustom(unittest.TestCase):
-    def __init__(self, method):
-        super(TestBatchAICustom, self).__init__(method)
-        pass
 
     def test_batchai_update_cluster_create_parameters_with_user_account_settings(self):
-        """Test updating of user account settings."""
         params = ClusterCreateParameters(location='eastus', vm_size='STANDARD_D1',
                                          user_account_settings=UserAccountSettings(admin_user_name='name',
                                                                                    admin_user_password='password'))
 
         # No update.
-        result = update_user_account_settings(params, None, None, None)
+        result = _update_user_account_settings(params, None, None, None)
         self.assertEquals(result.user_account_settings.admin_user_name, 'name')
         self.assertEquals(result.user_account_settings.admin_user_password, 'password')
         self.assertIsNone(result.user_account_settings.admin_user_ssh_public_key)
 
         # Updating.
         params.user_account_settings = None
-        result = update_user_account_settings(params, 'user', SSH_KEY, None)
+        result = _update_user_account_settings(params, 'user', SSH_KEY, None)
         self.assertEquals(result.user_account_settings.admin_user_name, 'user')
         self.assertIsNone(result.user_account_settings.admin_user_password)
         self.assertEquals(result.user_account_settings.admin_user_ssh_public_key, SSH_KEY)
@@ -60,24 +59,23 @@ class TestBatchAICustom(unittest.TestCase):
         # Incorrect ssh public key.
         params.user_account_settings = None  # user may emit user account settings in config file
         with self.assertRaises(CLIError):
-            update_user_account_settings(params, 'user', 'wrong' + SSH_KEY, 'password')
+            _update_user_account_settings(params, 'user', 'wrong' + SSH_KEY, 'password')
 
         # No user account.
         params.user_account_settings = None
         with self.assertRaises(CLIError):
-            update_user_account_settings(params, None, SSH_KEY, None)
+            _update_user_account_settings(params, None, SSH_KEY, None)
 
         # No credentials.
         params.user_account_settings = None
         with self.assertRaises(CLIError):
-            update_user_account_settings(params, 'user', None, None)
+            _update_user_account_settings(params, 'user', None, None)
 
         # ssh public key from a file.
-        result = update_user_account_settings(params, 'user', _data_file('key.txt'), None)
+        result = _update_user_account_settings(params, 'user', _data_file('key.txt'), None)
         self.assertEquals(result.user_account_settings.admin_user_ssh_public_key, SSH_KEY)
 
     def test_batchai_update_file_server_create_parameters_with_user_account_settings(self):
-        """Test updating of user account settings."""
         params = FileServerCreateParameters(location='eastus', vm_size='STANDARD_D1',
                                             ssh_configuration=SshConfiguration(
                                                 user_account_settings=UserAccountSettings(
@@ -85,19 +83,19 @@ class TestBatchAICustom(unittest.TestCase):
                                             data_disks=DataDisks(10, 2, 'Standard_LRS'))
 
         # No update.
-        result = update_user_account_settings(params, None, None, None)
+        result = _update_user_account_settings(params, None, None, None)
         self.assertEqual(params, result)
 
         # Updating when user_account_setting are omitted.
         params.ssh_configuration.user_account_settings = None
-        result = update_user_account_settings(params, 'user', SSH_KEY, None)
+        result = _update_user_account_settings(params, 'user', SSH_KEY, None)
         self.assertEquals(result.ssh_configuration.user_account_settings.admin_user_name, 'user')
         self.assertIsNone(result.ssh_configuration.user_account_settings.admin_user_password)
         self.assertEquals(result.ssh_configuration.user_account_settings.admin_user_ssh_public_key, SSH_KEY)
 
         # Updating when ssh_configuration is omitted.
         params.ssh_configuration = None
-        result = update_user_account_settings(params, 'user', SSH_KEY, 'password')
+        result = _update_user_account_settings(params, 'user', SSH_KEY, 'password')
         self.assertEquals(result.ssh_configuration.user_account_settings.admin_user_name, 'user')
         self.assertEquals(result.ssh_configuration.user_account_settings.admin_user_password, 'password')
         self.assertEquals(result.ssh_configuration.user_account_settings.admin_user_ssh_public_key, SSH_KEY)
@@ -105,30 +103,30 @@ class TestBatchAICustom(unittest.TestCase):
         # Incorrect ssh public key.
         params.ssh_configuration = SshConfiguration(None)  # user may emit user account settings in config file
         with self.assertRaises(CLIError):
-            update_user_account_settings(params, 'user', 'wrong' + SSH_KEY, None)
+            _update_user_account_settings(params, 'user', 'wrong' + SSH_KEY, None)
 
         # No user account.
         params.ssh_configuration.user_account_settings = None
         with self.assertRaises(CLIError):
-            update_user_account_settings(params, None, SSH_KEY, None)
+            _update_user_account_settings(params, None, SSH_KEY, None)
 
         # No credentials.
         params.ssh_configuration.user_account_settings = None
         with self.assertRaises(CLIError):
-            update_user_account_settings(params, 'user', None, None)
+            _update_user_account_settings(params, 'user', None, None)
 
         # Only password.
         params.ssh_configuration.user_account_settings = None
-        result = update_user_account_settings(params, 'user', None, 'password')
+        result = _update_user_account_settings(params, 'user', None, 'password')
         self.assertEquals(result.ssh_configuration.user_account_settings.admin_user_name, 'user')
         self.assertEquals(result.ssh_configuration.user_account_settings.admin_user_password, 'password')
 
         # ssh public key from a file.
-        result = update_user_account_settings(params, 'user', _data_file('key.txt'), None)
+        result = _update_user_account_settings(params, 'user', _data_file('key.txt'), None)
         self.assertEquals(result.ssh_configuration.user_account_settings.admin_user_ssh_public_key, SSH_KEY)
 
     def test_batchai_cluster_parameter_update_with_environment_variables(self):
-        """Test patching of cluster create parameters with environment variables."""
+        cli_ctx = TestCli()
         params = ClusterCreateParameters(
             location='eastus', vm_size='STANDARD_D1',
             user_account_settings=UserAccountSettings(admin_user_name='name',
@@ -152,12 +150,12 @@ class TestBatchAICustom(unittest.TestCase):
         os.environ.pop('AZURE_BATCHAI_STORAGE_ACCOUNT', None)
         os.environ.pop('AZURE_BATCHAI_STORAGE_KEY', None)
         with self.assertRaises(CLIError):
-            update_cluster_create_parameters_with_env_variables(params)
+            _update_cluster_create_parameters_with_env_variables(cli_ctx, params)
 
         # Set environment variables and check patching results.
         os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = 'account'
         os.environ['AZURE_BATCHAI_STORAGE_KEY'] = 'key'
-        result = update_cluster_create_parameters_with_env_variables(params)
+        result = _update_cluster_create_parameters_with_env_variables(cli_ctx, params)
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].account_name, 'account')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'key')
         self.assertEquals(result.node_setup.mount_volumes.azure_blob_file_systems[0].account_name, 'account')
@@ -170,7 +168,7 @@ class TestBatchAICustom(unittest.TestCase):
         params.node_setup.mount_volumes.azure_blob_file_systems[0].credentials.account_key = 'some_other_key'
         os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = 'account'
         os.environ['AZURE_BATCHAI_STORAGE_KEY'] = 'key'
-        result = update_cluster_create_parameters_with_env_variables(params)
+        result = _update_cluster_create_parameters_with_env_variables(cli_ctx, params)
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].account_name, 'some_account')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'some_key')
         self.assertEquals(result.node_setup.mount_volumes.azure_blob_file_systems[0].account_name,
@@ -184,7 +182,7 @@ class TestBatchAICustom(unittest.TestCase):
         params.node_setup.mount_volumes.azure_blob_file_systems[0].account_name = '<AZURE_BATCHAI_STORAGE_ACCOUNT>'
         params.node_setup.mount_volumes.azure_blob_file_systems[0].credentials.account_key = \
             '<AZURE_BATCHAI_STORAGE_KEY>'
-        result = update_cluster_create_parameters_with_env_variables(params, 'account_from_cmd', 'key_from_cmd')
+        result = _update_cluster_create_parameters_with_env_variables(cli_ctx, params, 'account_from_cmd', 'key_from_cmd')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].account_name, 'account_from_cmd')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'key_from_cmd')
         self.assertEquals(result.node_setup.mount_volumes.azure_blob_file_systems[0].account_name, 'account_from_cmd')
@@ -195,26 +193,25 @@ class TestBatchAICustom(unittest.TestCase):
         params.node_setup.mount_volumes.azure_file_shares[0].account_name = '<AZURE_BATCHAI_STORAGE_ACCOUNT>'
         params.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key = '<AZURE_BATCHAI_STORAGE_KEY>'
         with self.assertRaises(CLIError):
-            update_cluster_create_parameters_with_env_variables(params, str(uuid.uuid4()), None)
+            _update_cluster_create_parameters_with_env_variables(cli_ctx, params, str(uuid.uuid4()), None)
 
     def test_batchai_add_nfs_to_cluster_create_parameters(self):
-        """Test adding of nfs into cluster create parameters."""
         params = ClusterCreateParameters(location='eastus', vm_size='STANDARD_D1',
                                          user_account_settings=UserAccountSettings(admin_user_name='name',
                                                                                    admin_user_password='password'))
 
         # No relative mount path provided.
         with self.assertRaises(CLIError):
-            add_nfs_to_cluster_create_parameters(params, 'id', '')
+            _add_nfs_to_cluster_create_parameters(params, 'id', '')
 
         # Check valid update.
-        result = add_nfs_to_cluster_create_parameters(params, 'id', 'relative_path')
+        result = _add_nfs_to_cluster_create_parameters(params, 'id', 'relative_path')
         self.assertEquals(result.node_setup.mount_volumes.file_servers[0].file_server.id, 'id')
         self.assertEquals(result.node_setup.mount_volumes.file_servers[0].relative_mount_path, 'relative_path')
         self.assertEquals(result.node_setup.mount_volumes.file_servers[0].mount_options, 'rw')
 
     def test_batchai_add_azure_file_share_to_cluster_create_parameters(self):
-        """Test adding of azure file share into cluster create parameters."""
+        cli_ctx = TestCli()
         params = ClusterCreateParameters(location='eastus', vm_size='STANDARD_D1',
                                          user_account_settings=UserAccountSettings(admin_user_name='name',
                                                                                    admin_user_password='password'))
@@ -224,17 +221,17 @@ class TestBatchAICustom(unittest.TestCase):
         os.environ.pop('AZURE_BATCHAI_STORAGE_ACCOUNT', None)
         os.environ.pop('AZURE_BATCHAI_STORAGE_KEY', None)
         with self.assertRaises(CLIError):
-            add_azure_file_share_to_cluster_create_parameters(params, 'share', 'relative_path')
+            _add_azure_file_share_to_cluster_create_parameters(cli_ctx, params, 'share', 'relative_path')
 
         os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = 'account'
         os.environ['AZURE_BATCHAI_STORAGE_KEY'] = 'key'
 
         # No relative mount path provided.
         with self.assertRaises(CLIError):
-            add_azure_file_share_to_cluster_create_parameters(params, 'share', '')
+            _add_azure_file_share_to_cluster_create_parameters(cli_ctx, params, 'share', '')
 
         # Check valid update.
-        result = add_azure_file_share_to_cluster_create_parameters(params, 'share', 'relative_path')
+        result = _add_azure_file_share_to_cluster_create_parameters(cli_ctx, params, 'share', 'relative_path')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].account_name, 'account')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].azure_file_url,
                           'https://account.file.core.windows.net/share')
@@ -244,7 +241,7 @@ class TestBatchAICustom(unittest.TestCase):
         # Account name and key provided via command line args.
         os.environ.pop('AZURE_BATCHAI_STORAGE_ACCOUNT', None)
         os.environ.pop('AZURE_BATCHAI_STORAGE_KEY', None)
-        result = add_azure_file_share_to_cluster_create_parameters(params, 'share', 'relative_path', 'account', 'key')
+        result = _add_azure_file_share_to_cluster_create_parameters(cli_ctx, params, 'share', 'relative_path', 'account', 'key')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].account_name, 'account')
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].azure_file_url,
                           'https://account.file.core.windows.net/share')
@@ -252,7 +249,7 @@ class TestBatchAICustom(unittest.TestCase):
         self.assertEquals(result.node_setup.mount_volumes.azure_file_shares[0].credentials.account_key, 'key')
 
     def test_batchai_add_azure_container_to_cluster_create_parameters(self):
-        """Test adding of azure file share into cluster create parameters."""
+        cli_ctx = TestCli()
         params = ClusterCreateParameters(location='eastus', vm_size='STANDARD_D1',
                                          user_account_settings=UserAccountSettings(admin_user_name='name',
                                                                                    admin_user_password='password'))
@@ -261,17 +258,17 @@ class TestBatchAICustom(unittest.TestCase):
         os.environ.pop('AZURE_BATCHAI_STORAGE_ACCOUNT', None)
         os.environ.pop('AZURE_BATCHAI_STORAGE_KEY', None)
         with self.assertRaises(CLIError):
-            add_azure_container_to_cluster_create_parameters(params, 'container', 'relative_path')
+            _add_azure_container_to_cluster_create_parameters(cli_ctx, params, 'container', 'relative_path')
 
         os.environ['AZURE_BATCHAI_STORAGE_ACCOUNT'] = 'account'
         os.environ['AZURE_BATCHAI_STORAGE_KEY'] = 'key'
 
         # No relative mount path provided.
         with self.assertRaises(CLIError):
-            add_azure_container_to_cluster_create_parameters(params, 'container', '')
+            _add_azure_container_to_cluster_create_parameters(cli_ctx, params, 'container', '')
 
         # Check valid update.
-        result = add_azure_container_to_cluster_create_parameters(params, 'container', 'relative_path')
+        result = _add_azure_container_to_cluster_create_parameters(cli_ctx, params, 'container', 'relative_path')
         self.assertEquals(result.node_setup.mount_volumes.azure_blob_file_systems[0].account_name, 'account')
         self.assertEquals(result.node_setup.mount_volumes.azure_blob_file_systems[0].container_name,
                           'container')
@@ -283,8 +280,8 @@ class TestBatchAICustom(unittest.TestCase):
         # Account name and key provided via command line args.
         os.environ.pop('AZURE_BATCHAI_STORAGE_ACCOUNT', None)
         os.environ.pop('AZURE_BATCHAI_STORAGE_KEY', None)
-        result = add_azure_container_to_cluster_create_parameters(params, 'container', 'relative_path',
-                                                                  'account', 'key')
+        result = _add_azure_container_to_cluster_create_parameters(cli_ctx, params, 'container', 'relative_path',
+                                                                   'account', 'key')
         self.assertEquals(result.node_setup.mount_volumes.azure_blob_file_systems[0].account_name, 'account')
         self.assertEquals(result.node_setup.mount_volumes.azure_blob_file_systems[0].container_name,
                           'container')
@@ -294,19 +291,18 @@ class TestBatchAICustom(unittest.TestCase):
                           'key')
 
     def test_batchai_update_nodes_information(self):
-        """Test updating of nodes information."""
         params = ClusterCreateParameters(location='eastus', vm_size='STANDARD_D1',
                                          user_account_settings=UserAccountSettings(admin_user_name='name',
                                                                                    admin_user_password='password'))
         # Update to autoscale Ubuntu DSVM.
-        result = update_nodes_information(params, 'ubuntudsvm', 'Standard_NC6', 1, 3)
+        result = _update_nodes_information(params, 'ubuntudsvm', 'Standard_NC6', 1, 3)
         self.assertEquals(result.vm_size, 'Standard_NC6')
         self.assertEquals(result.virtual_machine_configuration.image_reference,
                           ImageReference('microsoft-ads', 'linux-data-science-vm-ubuntu', 'linuxdsvmubuntu'))
         self.assertEquals(result.scale_settings, ScaleSettings(auto_scale=AutoScaleSettings(1, 3)))
 
         # Update to manual scale Ubuntu LTS.
-        result = update_nodes_information(params, 'UbuntuLTS', 'Standard_NC6', 2, 2)
+        result = _update_nodes_information(params, 'UbuntuLTS', 'Standard_NC6', 2, 2)
         self.assertEquals(result.vm_size, 'Standard_NC6')
         self.assertEquals(result.virtual_machine_configuration.image_reference,
                           ImageReference('Canonical', 'UbuntuServer', '16.04-LTS'))
@@ -314,26 +310,26 @@ class TestBatchAICustom(unittest.TestCase):
 
         # Update image.
         params.scale_settings = ScaleSettings(manual=ManualScaleSettings(2))
-        result = update_nodes_information(params, 'UbuntuDsvm', None, 0, None)
+        result = _update_nodes_information(params, 'UbuntuDsvm', None, 0, None)
         self.assertEquals(result.virtual_machine_configuration.image_reference,
                           ImageReference('microsoft-ads', 'linux-data-science-vm-ubuntu', 'linuxdsvmubuntu'))
         self.assertEquals(result.scale_settings, ScaleSettings(manual=ManualScaleSettings(2)))
 
         # Update nothing.
-        result = update_nodes_information(params, None, None, 0, None)
+        result = _update_nodes_information(params, None, None, 0, None)
         self.assertEqual(params, result)
 
         # Wrong image.
         with self.assertRaises(CLIError):
-            update_nodes_information(params, 'unsupported', None, 0, None)
+            _update_nodes_information(params, 'unsupported', None, 0, None)
 
         # No VM size.
         params.vm_size = None
         with self.assertRaises(CLIError):
-            update_nodes_information(params, 'unsupported', None, 0, None)
+            _update_nodes_information(params, 'unsupported', None, 0, None)
 
         # No scale settings.
         params.vm_size = 'Standard_NC6'
         params.scale_settings = None
         with self.assertRaises(CLIError):
-            update_nodes_information(params, None, None, 0, None)
+            _update_nodes_information(params, None, None, 0, None)

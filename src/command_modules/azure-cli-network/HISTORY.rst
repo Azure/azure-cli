@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.19
+++++++
+* `route-table create/update`: Add support for `--disable-bgp-route-propagation`.
+* `public-ip create/update`: Add support for `--ip-tags`
+
 2.0.18
 ++++++
 * `dns`: Add support for CAA records.

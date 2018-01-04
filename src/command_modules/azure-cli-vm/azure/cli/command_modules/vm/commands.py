@@ -9,7 +9,9 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_vmss, cf_vmss_vm,
                                                           cf_vm_sizes, cf_disks, cf_snapshots,
                                                           cf_images, cf_run_commands,
-                                                          cf_rolling_upgrade_commands)
+                                                          cf_rolling_upgrade_commands,
+                                                          cf_msi_user_identities_operations,
+                                                          cf_msi_operations_operations)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
     transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
@@ -17,7 +19,7 @@ from azure.cli.command_modules.vm._format import (
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
-    process_vm_secret_namespace)
+    process_vm_secret_namespace, process_msi_namespace, process_remove_identity_namespace)
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import deployment_validate_table_format
@@ -28,18 +30,30 @@ from azure.cli.core.commands import CliCommandType
 # pylint: disable=line-too-long, too-many-statements
 def load_command_table(self, _):
 
-    compute_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.vm.custom#{}')
+    custom_tmpl = 'azure.cli.command_modules.vm.custom#{}'
 
-    compute_disk_encryption_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.vm.disk_encryption#{}')
+    compute_custom = CliCommandType(operations_tmpl=custom_tmpl)
+
+    compute_disk_encryption_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.vm.disk_encryption#{}',
+        operation_group='virtual_machines'
+    )
 
     compute_availset_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations.availability_sets_operations#AvailabilitySetsOperations.{}',
-        client_factory=cf_avail_set
+        client_factory=cf_avail_set,
+        operation_group='availability_sets'
     )
 
     compute_disk_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations.disks_operations#DisksOperations.{}',
-        client_factory=cf_disks
+        client_factory=cf_disks,
+        operation_group='disks'
+    )
+
+    compute_identity_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.msi.operations.user_assigned_identities_operations#UserAssignedIdentitiesOperations.{}',
+        client_factory=cf_msi_user_identities_operations
     )
 
     compute_image_sdk = CliCommandType(
@@ -89,17 +103,20 @@ def load_command_table(self, _):
 
     compute_vmss_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations.virtual_machine_scale_sets_operations#VirtualMachineScaleSetsOperations.{}',
-        client_factory=cf_vmss
+        client_factory=cf_vmss,
+        operation_group='virtual_machine_scale_sets'
     )
 
     compute_vmss_rolling_upgrade_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations.virtual_machine_scale_set_rolling_upgrades_operations#VirtualMachineScaleSetRollingUpgradesOperations.{}',
-        client_factory=cf_rolling_upgrade_commands
+        client_factory=cf_rolling_upgrade_commands,
+        operation_group='virtual_machine_scale_sets'
     )
 
     compute_vmss_vm_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations.virtual_machine_scale_set_vms_operations#VirtualMachineScaleSetVMsOperations.{}',
-        client_factory=cf_vmss_vm
+        client_factory=cf_vmss_vm,
+        operation_group='virtual_machine_scale_sets'
     )
 
     network_nic_sdk = CliCommandType(
@@ -107,7 +124,7 @@ def load_command_table(self, _):
         client_factory=cf_ni
     )
 
-    with self.command_group('disk', compute_disk_sdk, min_api='2017-03-30') as g:
+    with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
         g.custom_command('create', 'create_managed_disk', no_wait_param='no_wait', table_transformer=transform_disk_show_table_output, validator=process_disk_or_snapshot_create_namespace)
         g.command('delete', 'delete', no_wait_param='raw', confirmation=True)
         g.custom_command('grant-access', 'grant_disk_access')
@@ -117,13 +134,21 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_managed_disk', setter_arg_name='disk', no_wait_param='raw')
         g.generic_wait_command('wait')
 
+    # TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
+    with self.command_group('identity', compute_identity_sdk, min_api='2017-12-01') as g:
+        g.command('create', 'create_or_update', validator=process_msi_namespace)
+        g.command('show', 'get')
+        g.command('delete', 'delete')
+        g.custom_command('list', 'list_user_assigned_identities')
+        g.command('list-operations', 'list', operations_tmpl='azure.mgmt.msi.operations.operations#Operations.{}', client_factory=cf_msi_operations_operations)
+
     with self.command_group('image', compute_image_sdk) as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
         g.custom_command('list', 'list_images')
         g.command('show', 'get', exception_handler=empty_on_404)
         g.command('delete', 'delete')
 
-    with self.command_group('snapshot', compute_snapshot_sdk) as g:
+    with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots') as g:
         g.custom_command('create', 'create_snapshot', validator=process_disk_or_snapshot_create_namespace)
         g.command('delete', 'delete')
         g.custom_command('grant-access', 'grant_snapshot_access')
@@ -134,6 +159,7 @@ def load_command_table(self, _):
 
     with self.command_group('vm', compute_vm_sdk) as g:
         g.custom_command('assign-identity', 'assign_vm_identity', validator=process_assign_identity_namespace)
+        g.custom_command('remove-identity', 'remove_vm_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
         g.custom_command('capture', 'capture_vm')
         g.custom_command('create', 'create_vm', transform=transform_vm_create_output, no_wait_param='no_wait', table_transformer=deployment_validate_table_format, validator=process_vm_create_namespace)
         g.command('convert', 'convert_to_managed_disks', min_api='2016-04-30-preview')
@@ -157,7 +183,7 @@ def load_command_table(self, _):
         g.command('start', 'start', no_wait_param='raw')
         g.command('stop', 'power_off', no_wait_param='raw')
         g.generic_update_command('update', no_wait_param='raw')
-        g.generic_wait_command('wait', 'get_instance_view', getter_type=compute_custom)
+        g.generic_wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
 
     with self.command_group('vm availability-set', compute_availset_sdk) as g:
         g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')
@@ -235,6 +261,7 @@ def load_command_table(self, _):
 
     with self.command_group('vmss', compute_vmss_sdk) as g:
         g.custom_command('assign-identity', 'assign_vmss_identity', validator=process_assign_identity_namespace)
+        g.custom_command('remove-identity', 'remove_vmss_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
         g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), no_wait_param='no_wait', table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace)
         g.custom_command('deallocate', 'deallocate_vmss', no_wait_param='no_wait')
         g.command('delete', 'delete', no_wait_param='raw')

@@ -14,7 +14,7 @@ from dateutil import tz
 from azure.cli.command_modules.keyvault.custom import _asn1_to_iso8601
 from azure.cli.command_modules.keyvault._params import secret_encoding_values
 
-from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest
+from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, LiveScenarioTest
 
 from knack.util import CLIError
 
@@ -425,7 +425,8 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
             self.cmd('keyvault certificate pending show --vault-name {kv} -n pending-cert')
 
 
-class KeyVaultCertificateDownloadScenarioTest(ScenarioTest):
+# TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
+class KeyVaultCertificateDownloadScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_download')
     def test_keyvault_certificate_download(self, resource_group):
@@ -563,7 +564,8 @@ class KeyVaultCertificateScenarioTest(ScenarioTest):
                  checks=self.is_empty())
 
 
-class KeyVaultCertificateImportScenario(ScenarioTest):
+# TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
+class KeyVaultCertificateImportScenario(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sd')
     def test_keyvault_certificate_import(self, resource_group):
@@ -592,7 +594,8 @@ class KeyVaultCertificateImportScenario(ScenarioTest):
         self.cmd('keyvault certificate import --vault-name {kv} -n pfx-cert --file "{pfx_plain_file}" -p @"{pfx_policy_path}"')
 
 
-class KeyVaultSoftDeleteScenarioTest(ScenarioTest):
+# TODO: Convert to ScenarioTest and re-record when issue #5146 is fixed.
+class KeyVaultSoftDeleteScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_sd')
     def test_keyvault_softdelete(self, resource_group):

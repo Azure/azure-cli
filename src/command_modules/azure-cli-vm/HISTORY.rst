@@ -3,8 +3,25 @@
 Release History
 ===============
 
+2.0.23
+++++++
+* vmss: ensure app-gateway has a name when defaults to it for large scalesets
+
+2.0.22
+++++++
+* VM/VMSS: (Preview) support user assigned identity
+
+2.0.21
+++++++
+* Minor fixes
+
+2.0.20
+++++++
+* Minor fixes
+
 2.0.19
 ++++++
+* show zone information on `az vm list-skus -otable`
 * Update the storage multiapi package reference
 
 2.0.18

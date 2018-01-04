@@ -5,7 +5,7 @@
 
 # TODO Move this to a package shared by CLI and SDK
 from enum import Enum
-from functools import total_ordering
+from functools import total_ordering, partial
 from importlib import import_module
 
 
@@ -50,11 +50,29 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
         self.client_name = client_name
 
 
+class SDKProfile(object):  # pylint: disable=too-few-public-methods
+
+    def __init__(self, default_api_version, profile=None):
+        """Constructor.
+
+        :param str default_api_version: Default API version if not overriden by a profile. Nullable.
+        :param profile: A dict operation group name to API version.
+        :type profile: dict[str, str]
+        """
+        self.default_api_version = default_api_version
+        self.profile = profile if profile is not None else {}
+
+
 AZURE_API_PROFILES = {
     'latest': {
-        ResourceType.MGMT_STORAGE: '2017-06-01',
-        ResourceType.MGMT_NETWORK: '2017-09-01',
-        ResourceType.MGMT_COMPUTE: '2017-03-30',
+        ResourceType.MGMT_STORAGE: '2017-10-01',
+        ResourceType.MGMT_NETWORK: '2017-11-01',
+        ResourceType.MGMT_COMPUTE: SDKProfile('2017-12-01', {
+            'resource_skus': '2017-09-01',
+            'disks': '2017-03-30',
+            'snapshots': '2017-03-30',
+            'virtual_machine_run_commands': '2017-03-30'
+        }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
@@ -67,7 +85,7 @@ AZURE_API_PROFILES = {
     '2017-03-09-profile': {
         ResourceType.MGMT_STORAGE: '2016-01-01',
         ResourceType.MGMT_NETWORK: '2015-06-15',
-        ResourceType.MGMT_COMPUTE: '2016-03-30',
+        ResourceType.MGMT_COMPUTE: SDKProfile('2016-03-30'),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2015-01-01',
@@ -79,7 +97,46 @@ AZURE_API_PROFILES = {
 }
 
 
-def get_api_version(api_profile, resource_type):
+class _ApiVersions(object):  # pylint: disable=too-few-public-methods
+    def __init__(self, client_type, sdk_profile, post_process):
+        self._client_type = client_type
+        self._sdk_profile = sdk_profile
+        self._post_process = post_process
+        self._operations_groups_value = None
+        self._resolved = False
+
+    def _resolve(self):
+        if self._resolved:
+            return
+
+        self._operations_groups_value = {}
+        for operation_group_name, operation_type in self._client_type.__dict__.items():
+            if not isinstance(operation_type, property):
+                continue
+
+            value_to_save = self._sdk_profile.profile.get(
+                operation_group_name,
+                self._sdk_profile.default_api_version
+            )
+            self._operations_groups_value[operation_group_name] = self._post_process(value_to_save)
+        self._resolved = True
+
+    def __getattr__(self, item):
+        try:
+            self._resolve()
+            return self._operations_groups_value[item]
+        except KeyError:
+            raise AttributeError('Attribute {} does not exist.'.format(item))
+
+
+def _get_api_version_tuple(resource_type, sdk_profile, post_process=lambda x: x):
+    """Return a _ApiVersion instance where key are operation group and value are api version."""
+    return _ApiVersions(client_type=get_client_class(resource_type),
+                        sdk_profile=sdk_profile,
+                        post_process=post_process)
+
+
+def get_api_version(api_profile, resource_type, as_sdk_profile=False):
     """Get the API version of a resource type given an API profile.
 
     :param api_profile: The name of the API profile.
@@ -90,7 +147,12 @@ def get_api_version(api_profile, resource_type):
     :raises: APIVersionException
     """
     try:
-        return AZURE_API_PROFILES[api_profile][resource_type]
+        api_version = AZURE_API_PROFILES[api_profile][resource_type]
+        if as_sdk_profile:
+            return api_version  # Could be SDKProfile or string
+        if isinstance(api_version, SDKProfile):
+            api_version = _get_api_version_tuple(resource_type, api_version)
+        return api_version
     except KeyError:
         raise APIVersionException(resource_type, api_profile)
 
@@ -144,10 +206,20 @@ class _DateAPIFormat(object):
         return False
 
 
+def _validate_api_version(api_version_str, min_api=None, max_api=None):
+    api_version = _DateAPIFormat(api_version_str)
+    if min_api and api_version < _DateAPIFormat(min_api):
+        return False
+    if max_api and api_version > _DateAPIFormat(max_api):
+        return False
+    return True
+
+
 def supported_api_version(api_profile, resource_type, min_api=None, max_api=None):
     """
     Returns True if current API version for the resource type satisfies min/max range.
     To compare profile versions, set resource type to None.
+    Can return a tuple<operation_group, bool> if the resource_type supports SDKProfile.
     note: Currently supports YYYY-MM-DD, YYYY-MM-DD-preview, YYYY-MM-DD-profile
     or YYYY-MM-DD-profile-preview  formatted strings.
     """
@@ -155,14 +227,15 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
         raise TypeError()
     if min_api is None and max_api is None:
         raise ValueError('At least a min or max version must be specified')
-    api_version_str = get_api_version(api_profile, resource_type) \
+    api_version_obj = get_api_version(api_profile, resource_type, as_sdk_profile=True) \
         if isinstance(resource_type, ResourceType) else api_profile
-    api_version = _DateAPIFormat(api_version_str)
-    if min_api and api_version < _DateAPIFormat(min_api):
-        return False
-    if max_api and api_version > _DateAPIFormat(max_api):
-        return False
-    return True
+    if isinstance(api_version_obj, SDKProfile):
+        return _get_api_version_tuple(
+            resource_type,
+            api_version_obj,
+            partial(_validate_api_version, min_api=min_api, max_api=max_api)
+        )
+    return _validate_api_version(api_version_obj, min_api, max_api)
 
 
 def _get_attr(sdk_path, mod_attr_path, checked=True):
@@ -186,32 +259,32 @@ def get_client_class(resource_type):
     return _get_attr(resource_type.import_prefix, '#' + resource_type.client_name)
 
 
-def get_versioned_sdk_path(api_profile, resource_type):
+def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
     """ Patch the unversioned sdk path to include the appropriate API version for the
         resource type in question.
         e.g. Converts azure.mgmt.storage.operations.storage_accounts_operations to
                       azure.mgmt.storage.v2016_12_01.operations.storage_accounts_operations
     """
-    return '{}.v{}'.format(
-        resource_type.import_prefix,
-        get_api_version(api_profile, resource_type).replace('-', '_')
-    )
+    api_version = get_api_version(api_profile, resource_type)
+    if isinstance(api_version, _ApiVersions):
+        if operation_group is None:
+            raise ValueError("operation_group is required for resource type '{}'".format(resource_type))
+        api_version = getattr(api_version, operation_group)
+    return '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_'))
 
 
 def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
     checked = kwargs.get('checked', True)
     sub_mod_prefix = kwargs.get('mod', None)
-    sdk_path = get_versioned_sdk_path(api_profile, resource_type)
+    operation_group = kwargs.get('operation_group', None)
+    sdk_path = get_versioned_sdk_path(api_profile, resource_type, operation_group)
     if not attr_args:
         # No attributes to load. Return the versioned sdk
         return import_module(sdk_path)
     results = []
     for mod_attr_path in attr_args:
-        try:
-            if sub_mod_prefix and '#' not in mod_attr_path:
-                mod_attr_path = '{}#{}'.format(sub_mod_prefix, mod_attr_path)
-            loaded_obj = _get_attr(sdk_path, mod_attr_path, checked)
-            results.append(loaded_obj)
-        except Exception:
-            raise
+        if sub_mod_prefix and '#' not in mod_attr_path:
+            mod_attr_path = '{}#{}'.format(sub_mod_prefix, mod_attr_path)
+        loaded_obj = _get_attr(sdk_path, mod_attr_path, checked)
+        results.append(loaded_obj)
     return results[0] if len(results) == 1 else results

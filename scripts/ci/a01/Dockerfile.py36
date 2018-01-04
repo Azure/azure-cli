@@ -1,0 +1,7 @@
+FROM troydai/azurecli-a01-droid:python3.6-stable
+
+COPY build /tmp/build
+
+RUN find /tmp/build -name '*.whl' | xargs pip install
+
+COPY app /app

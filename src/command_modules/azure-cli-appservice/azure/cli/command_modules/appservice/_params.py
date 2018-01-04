@@ -85,7 +85,7 @@ def load_arguments(self, _):
         c.argument('distribution', options_list=['--distribution', '-d'], nargs='+', help='space separated slot routings in a format of <slot-name>=<percentage> e.g. staging=50. Unused traffic percentage will go to the Production slot')
 
     with self.argument_context('webapp update') as c:
-        c.argument('client_affinity_enabled', help="Enables sending session affinity cookies.", arg_type=get_three_state_flag())
+        c.argument('client_affinity_enabled', help="Enables sending session affinity cookies.", arg_type=get_three_state_flag(return_label=True))
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true', help='Enable viewing the log stream immediately after launching the web app')
     with self.argument_context('webapp delete') as c:
@@ -157,9 +157,9 @@ def load_arguments(self, _):
         c.argument('action', help="swap types. use 'preview' to apply target slot's settings on the source slot first; use 'swap' to complete it; use 'reset' to reset the swap",
                    arg_type=get_enum_type(['swap', 'preview', 'reset']))
     with self.argument_context('webapp log config') as c:
-        c.argument('application_logging', help='configure application logging to file system', arg_type=get_three_state_flag())
-        c.argument('detailed_error_messages', help='configure detailed error messages', arg_type=get_three_state_flag())
-        c.argument('failed_request_tracing', help='configure failed request tracing', arg_type=get_three_state_flag())
+        c.argument('application_logging', help='configure application logging to file system', arg_type=get_three_state_flag(return_label=True))
+        c.argument('detailed_error_messages', help='configure detailed error messages', arg_type=get_three_state_flag(return_label=True))
+        c.argument('failed_request_tracing', help='configure failed request tracing', arg_type=get_three_state_flag(return_label=True))
         c.argument('level', help='logging level', arg_type=get_enum_type(['error', 'warning', 'information', 'verbose']))
         c.argument('web_server_logging', help='configure Web server logging', arg_type=get_enum_type(['off', 'filesystem']))
         c.argument('docker_container_logging', help='configure gathering STDOUT and STDERR output from container', arg_type=get_enum_type(['off', 'filesystem']))
@@ -183,14 +183,14 @@ def load_arguments(self, _):
         c.argument('docker_custom_image_name', options_list=['--docker-custom-image-name', '-c', '-i'], help='the container custom image name and optionally the tag name')
         c.argument('docker_registry_server_user', options_list=['--docker-registry-server-user', '-u'], help='the container registry server username')
         c.argument('docker_registry_server_password', options_list=['--docker-registry-server-password', '-p'], help='the container registry server password')
-        c.argument('websites_enable_app_service_storage', options_list=['--enable-app-service-storage', '-t'], help='enables platform storage (custom container only)', arg_type=get_three_state_flag())
+        c.argument('websites_enable_app_service_storage', options_list=['--enable-app-service-storage', '-t'], help='enables platform storage (custom container only)', arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('webapp config set') as c:
-        c.argument('remote_debugging_enabled', help='enable or disable remote debugging', arg_type=get_three_state_flag())
-        c.argument('web_sockets_enabled', help='enable or disable web sockets', arg_type=get_three_state_flag())
-        c.argument('always_on', help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', arg_type=get_three_state_flag())
-        c.argument('auto_heal_enabled', help='enable or disable auto heal', arg_type=get_three_state_flag())
-        c.argument('use32_bit_worker_process', options_list=['--use-32bit-worker-process'], help='use 32 bits worker process or not', arg_type=get_three_state_flag())
+        c.argument('remote_debugging_enabled', help='enable or disable remote debugging', arg_type=get_three_state_flag(return_label=True))
+        c.argument('web_sockets_enabled', help='enable or disable web sockets', arg_type=get_three_state_flag(return_label=True))
+        c.argument('always_on', help='ensure webapp gets loaded all the time, rather unloaded after been idle. Recommended when you have continuous web jobs running', arg_type=get_three_state_flag(return_label=True))
+        c.argument('auto_heal_enabled', help='enable or disable auto heal', arg_type=get_three_state_flag(return_label=True))
+        c.argument('use32_bit_worker_process', options_list=['--use-32bit-worker-process'], help='use 32 bits worker process or not', arg_type=get_three_state_flag(return_label=True))
         c.argument('php_version', help='The version used to run your web app if using PHP, e.g., 5.5, 5.6, 7.0')
         c.argument('python_version', help='The version used to run your web app if using Python, e.g., 2.7, 3.4')
         c.argument('net_framework_version', help="The version used to run your web app if using .NET Framework, e.g., 'v4.0' for .NET 4.6 and 'v3.0' for .NET 3.5")
@@ -212,7 +212,7 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp config backup update') as c:
         c.argument('frequency', help='How often to backup. Use a number followed by d or h, e.g. 5d = 5 days, 2h = 2 hours')
-        c.argument('keep_at_least_one_backup', help='Always keep one backup, regardless of how old it is', options_list=['--retain-one'], arg_type=get_three_state_flag())
+        c.argument('keep_at_least_one_backup', help='Always keep one backup, regardless of how old it is', options_list=['--retain-one'], arg_type=get_three_state_flag(return_label=True))
         c.argument('retention_period_in_days', help='How many days to keep a backup before automatically deleting it. Set to 0 for indefinite retention', options_list=['--retention'])
 
     with self.argument_context('webapp config backup restore') as c:
@@ -222,8 +222,8 @@ def load_arguments(self, _):
         c.argument('ignore_hostname_conflict', help='Ignores custom hostnames stored in the backup', action='store_true')
 
     with self.argument_context('webapp auth update') as c:
-        c.argument('enabled', arg_type=get_three_state_flag())
-        c.argument('token_store_enabled', options_list=['--token-store'], arg_type=get_three_state_flag())
+        c.argument('enabled', arg_type=get_three_state_flag(return_label=True))
+        c.argument('token_store_enabled', options_list=['--token-store'], arg_type=get_three_state_flag(return_label=True))
         c.argument('action', arg_type=get_enum_type(AUTH_TYPES))
         c.argument('token_refresh_extension_hours', type=float, help="Hours, must be formattable into a float")
         c.argument('allowed_external_redirect_urls', nargs='+', help="One or more urls (space delimited).")

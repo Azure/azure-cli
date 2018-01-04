@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.22"
+__version__ = "2.0.24"
 
 import os
 import sys
@@ -162,7 +162,7 @@ class MainCommandsLoader(CLICommandsLoader):
 
                         for cmd_name, cmd in extension_command_table.items():
                             cmd.command_source = ExtensionCommandSource(
-                                extension_name=ext_mod,
+                                extension_name=ext_name,
                                 overrides_command=cmd_name in cmd_to_mod_map)
 
                         self.command_table.update(extension_command_table)
@@ -235,6 +235,7 @@ class AzCommandsLoader(CLICommandsLoader):
                 command.update_argument(argument_name, overrides)
 
     def _apply_doc_string(self, dest, command_kwargs):
+        from azure.cli.core.profiles._shared import APIVersionException
         doc_string_source = command_kwargs.get('doc_string_source', None)
         if not doc_string_source:
             return
@@ -245,7 +246,7 @@ class AzCommandsLoader(CLICommandsLoader):
         model = doc_string_source
         try:
             model = self.get_models(doc_string_source)
-        except AttributeError:
+        except APIVersionException:
             model = None
         if not model:
             from importlib import import_module
@@ -287,9 +288,10 @@ class AzCommandsLoader(CLICommandsLoader):
                        *attr_args, **kwargs)
 
     def get_models(self, *attr_args, **kwargs):
-        resource_type = kwargs.get('resource_type', self._get_resource_type())
         from azure.cli.core.profiles import get_sdk
-        return get_sdk(self.cli_ctx, resource_type, *attr_args, mod='models')
+        resource_type = kwargs.get('resource_type', self._get_resource_type())
+        operation_group = kwargs.get('operation_group', self.module_kwargs.get('operation_group', None))
+        return get_sdk(self.cli_ctx, resource_type, *attr_args, mod='models', operation_group=operation_group)
 
     def command_group(self, group_name, command_type=None, **kwargs):
         if command_type:
@@ -319,7 +321,8 @@ class AzCommandsLoader(CLICommandsLoader):
 
             client = client_factory(self.cli_ctx, command_args) if client_factory else None
             if client:
-                client_arg_name = 'client' if operation.startswith(('azure.cli', 'azext')) else 'self'
+                client_arg_name = kwargs.get('client_arg_name',
+                                             'client' if operation.startswith(('azure.cli', 'azext')) else 'self')
                 if client_arg_name in op_args:
                     command_args[client_arg_name] = client
             result = op(**command_args)
@@ -357,7 +360,13 @@ class AzCommandsLoader(CLICommandsLoader):
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
         for rt in ResourceType:
-            if operation.startswith(rt.import_prefix):
+            if operation.startswith(rt.import_prefix + ".operations."):
+                subs = operation[len(rt.import_prefix + ".operations."):]
+                operation_group = subs[:subs.index('_operations')]
+                operation = operation.replace(
+                    rt.import_prefix,
+                    get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt, operation_group=operation_group))
+            elif operation.startswith(rt.import_prefix):
                 operation = operation.replace(rt.import_prefix,
                                               get_versioned_sdk_path(self.cli_ctx.cloud.profile, rt))
 

@@ -12,3 +12,11 @@ def cf_consumption(cli_ctx, **_):
 
 def usage_details_mgmt_client_factory(cli_ctx, kwargs):
     return cf_consumption(cli_ctx, **kwargs).usage_details
+
+
+def reservations_summaries_mgmt_client_factory(cli_ctx, kwargs):
+    return cf_consumption(cli_ctx, **kwargs).reservations_summaries
+
+
+def reservations_details_mgmt_client_factory(cli_ctx, kwargs):
+    return cf_consumption(cli_ctx, **kwargs).reservations_details

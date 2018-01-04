@@ -446,12 +446,15 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         cmd = args.get('cmd')
 
         operations_tmpl = _get_operations_tmpl(cmd)
+        getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
+                                                       excluded_params=EXCLUDED_PARAMS))
+
         client_arg_name = 'client' if operations_tmpl.startswith(('azure.cli', 'azext')) else 'self'
         try:
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
             client = factory(context.cli_ctx, None) if factory else None
-        if client:
+        if client and (client_arg_name in getter_args or client_arg_name == 'self'):
             args[client_arg_name] = client
 
         getter = context.get_op_handler(getter_op)
@@ -756,7 +759,7 @@ def _find_property(instance, path):
     return instance
 
 
-def assign_implict_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
+def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
     import time
     from azure.mgmt.authorization import AuthorizationManagementClient
     from azure.mgmt.authorization.models import RoleAssignmentProperties
@@ -764,10 +767,7 @@ def assign_implict_identity(cli_ctx, getter, setter, identity_role=None, identit
 
     # get
     resource = getter()
-    if resource.identity:
-        logger.warning('Implict identity is already configured')
-    else:
-        resource = setter(resource)
+    resource = setter(resource)
 
     # create role assignment:
     if identity_scope:

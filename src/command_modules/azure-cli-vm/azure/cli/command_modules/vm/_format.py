@@ -77,6 +77,8 @@ def transform_sku_for_table_output(skus):
         order_dict['resourceType'] = k['resourceType']
         order_dict['locations'] = str(k['locations']) if len(k['locations']) > 1 else k['locations'][0]
         order_dict['name'] = k['name']
+        if k.get('locationInfo'):
+            order_dict['zones'] = ','.join(sorted(k['locationInfo'][0].get('zones', [])))
         order_dict['tier'] = k['tier']
         order_dict['size'] = k['size']
         if k['capabilities']:
@@ -107,4 +109,4 @@ def get_vmss_table_output_transformer(loader, for_list=True):
                 'Overprovision:overprovision, UpgradePolicy:upgradePolicy.mode}'
     transform = transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), '
                                   if loader.supported_api_version(min_api='2017-03-30') else ' ')
-    return transform if for_list else '[].' + transform
+    return transform if not for_list else '[].' + transform
