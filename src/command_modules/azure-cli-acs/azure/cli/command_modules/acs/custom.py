@@ -1291,8 +1291,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
     linux_profile = ContainerServiceLinuxProfile(admin_username, ssh=ssh_config)
     principal_obj = _ensure_aks_service_principal(service_principal=service_principal, client_secret=client_secret,
-                                              subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
-                                              location=location, name=name)
+                                                  subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
+                                                  location=location, name=name)
     service_principal_profile = ContainerServiceServicePrincipalProfile(
         client_id=principal_obj.get("service_principal"),
         secret=principal_obj.get("client_secret"),
