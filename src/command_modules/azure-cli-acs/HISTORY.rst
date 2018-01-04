@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.24
+++++++
+* aks doesn't need to add role for SPN now
 
 2.0.24
 ++++++
