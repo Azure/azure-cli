@@ -9,6 +9,9 @@ from azure.cli.core.util import CLIError
 from msrestazure.tools import parse_resource_id
 
 
+MSI_LOCAL_ID = '[system]'
+
+
 def read_content_if_is_file(string_or_file):
     content = string_or_file
     if os.path.exists(string_or_file):

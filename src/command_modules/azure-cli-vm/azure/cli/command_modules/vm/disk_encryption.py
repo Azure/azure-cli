@@ -409,7 +409,7 @@ def encrypt_vmss(resource_group_name, vmss_name,  # pylint: disable=too-many-loc
     # pylint: disable=no-member
     UpgradeMode, VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = get_sdk(
         ResourceType.MGMT_COMPUTE, 'UpgradeMode', 'VirtualMachineScaleSetExtension',
-        'VirtualMachineScaleSetExtensionProfile', mod='models')
+        'VirtualMachineScaleSetExtensionProfile', mod='models', operation_group='virtual_machine_scale_sets')
 
     compute_client = _compute_client_factory()
     vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
@@ -471,7 +471,8 @@ def encrypt_vmss(resource_group_name, vmss_name,  # pylint: disable=too-many-loc
 def decrypt_vmss(resource_group_name, vmss_name, volume_type=None, force=False):
     from azure.cli.core.profiles import get_sdk, ResourceType
     UpgradeMode, VirtualMachineScaleSetExtension = get_sdk(
-        ResourceType.MGMT_COMPUTE, 'UpgradeMode', 'VirtualMachineScaleSetExtension', mod='models')
+        ResourceType.MGMT_COMPUTE, 'UpgradeMode', 'VirtualMachineScaleSetExtension', mod='models',
+        operation_group='virtual_machine_scale_sets')
     compute_client = _compute_client_factory()
     vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     os_type = 'Linux' if vmss.virtual_machine_profile.os_profile.linux_configuration else 'Windows'

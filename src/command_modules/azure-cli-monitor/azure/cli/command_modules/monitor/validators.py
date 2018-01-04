@@ -7,7 +7,7 @@ from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_
 from azure.cli.core.util import CLIError
 
 
-def get_target_resource_validator(dest, required):
+def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False):
     def _validator(namespace):
         name_or_id = getattr(namespace, dest)
         rg = namespace.resource_group_name
@@ -39,6 +39,8 @@ def get_target_resource_validator(dest, required):
         del namespace.namespace
         del namespace.parent
         del namespace.resource_type
+        if not preserve_resource_group_parameter:
+            del namespace.resource_group_name
     return _validator
 
 
@@ -129,3 +131,42 @@ def process_action_group_detail_for_creation(namespace):
     }
 
     ns['action_group'] = ActionGroupResource(**action_group_resource_properties)
+
+
+def process_metric_timespan(namespace):
+    from .util import validate_time_range_and_add_defaults
+
+    ns = vars(namespace)
+    start_time = ns.pop('start_time', None)
+    end_time = ns.pop('end_time', None)
+    ns['timespan'] = validate_time_range_and_add_defaults(start_time, end_time, formatter='{}/{}')
+
+
+def process_metric_aggregation(namespace):
+    ns = vars(namespace)
+    aggregation = ns.pop('aggregation', None)
+    if aggregation:
+        ns['aggregation'] = ','.join(aggregation)
+
+
+def process_metric_result_type(namespace):
+    from azure.mgmt.monitor.models.monitor_management_client_enums import ResultType
+
+    ns = vars(namespace)
+    metadata_only = ns.pop('metadata', False)
+    if metadata_only:
+        ns['result_type'] = ResultType.metadata
+
+
+def process_metric_dimension(namespace):
+    ns = vars(namespace)
+
+    dimensions = ns.pop('dimension', None)
+    if not dimensions:
+        return
+
+    param_filter = ns.pop('filter', None)
+    if param_filter:
+        raise CLIError('usage: --dimension and --filter parameters are mutually exclusive.')
+
+    ns['filter'] = ' and '.join("{} eq '*'".format(d) for d in dimensions)

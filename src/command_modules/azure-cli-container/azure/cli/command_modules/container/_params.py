@@ -43,7 +43,7 @@ register_cli_argument('container create', 'cpu', type=int, help='The required nu
 register_cli_argument('container create', 'memory', type=float, help='The required memory of the containers in GB')
 register_cli_argument('container create', 'os_type', help='The OS type of the containers', **enum_choice_list(OperatingSystemTypes))
 register_cli_argument('container create', 'ip_address', help='The IP address type of the container group', **enum_choice_list(IP_ADDRESS_TYPES))
-register_cli_argument('container create', 'ports', type=int, nargs='+', help='The ports to open')
+register_cli_argument('container create', 'ports', type=int, nargs='+', default=[80], help='The ports to open')
 register_cli_argument('container create', 'restart_policy', help='Restart policy for all containers within the container group', **enum_choice_list(ContainerGroupRestartPolicy))
 register_cli_argument('container create', 'command_line', help='The command line to run when the container is started, e.g. \'/bin/bash -c myscript.sh\'')
 register_cli_argument('container create', 'environment_variables', nargs='+', options_list=('--environment-variables', '-e'), type=environment_variables_format, help='A list of environment variable for the container. Space separated values in \'key=value\' format.')

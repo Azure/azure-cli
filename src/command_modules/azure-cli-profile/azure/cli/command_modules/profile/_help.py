@@ -22,9 +22,12 @@ helps['login'] = """
         - name: Log in with a service principal using client certificate.
           text: >
             az login --service-principal -u http://azure-cli-2016-08-05-14-31-15 -p ~/mycertfile.pem --tenant contoso.onmicrosoft.com
-        - name: Log in using a VM's managed service identity (MSI)
+        - name: Log in using a VM's system assigned identity
           text: >
             az login --msi
+        - name: Log in using a VM's user assigned identity. Client or object ids of the service identity also work
+          text: >
+            az login --msi -u /subscriptions/<subscriptionId>/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
     """
 
 helps['account'] = """

@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.0
++++++
+* Release of new GA api version 2017-11-30.
+
 0.1.6
 +++++
 * minor fixes

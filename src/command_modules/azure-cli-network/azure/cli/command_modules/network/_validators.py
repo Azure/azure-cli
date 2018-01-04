@@ -217,6 +217,17 @@ def validate_inbound_nat_rule_name_or_id(namespace):
             namespace, 'inboundNatRules', rule_name)
 
 
+def validate_ip_tags(namespace):
+    ''' Extracts multiple space-separated tags in TYPE=VALUE format '''
+    IpTag = get_sdk(ResourceType.MGMT_NETWORK, 'IpTag', mod='models')
+    if namespace.ip_tags and IpTag:
+        ip_tags = []
+        for item in namespace.ip_tags:
+            tag_type, tag_value = item.split('=', 1)
+            ip_tags.append(IpTag(ip_tag_type=tag_type, tag=tag_value))
+        namespace.ip_tags = ip_tags
+
+
 def validate_metadata(namespace):
     if namespace.metadata:
         namespace.metadata = dict(x.split('=', 1) for x in namespace.metadata)
@@ -557,10 +568,8 @@ def process_public_ip_create_namespace(namespace):
 
 
 def process_route_table_create_namespace(namespace):
-    RouteTable = get_sdk(ResourceType.MGMT_NETWORK, 'RouteTable', mod='models')
     get_default_location_from_resource_group(namespace)
     validate_tags(namespace)
-    namespace.parameters = RouteTable(location=namespace.location, tags=namespace.tags)
 
 
 def process_tm_endpoint_create_namespace(namespace):

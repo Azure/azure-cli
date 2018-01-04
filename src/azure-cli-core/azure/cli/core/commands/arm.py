@@ -461,13 +461,13 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None, excepti
     cmd.add_argument('interval', '--interval', default=30, arg_group=group_name, type=int,
                      help='polling interval in seconds')
     cmd.add_argument('deleted', '--deleted', action='store_true', arg_group=group_name,
-                     help='wait till deleted')
+                     help='wait until deleted')
     cmd.add_argument('created', '--created', action='store_true', arg_group=group_name,
-                     help="wait till created with 'provisioningState' at 'Succeeded'")
+                     help="wait until created with 'provisioningState' at 'Succeeded'")
     cmd.add_argument('updated', '--updated', action='store_true', arg_group=group_name,
-                     help="wait till updated with provisioningState at 'Succeeded'")
+                     help="wait until updated with provisioningState at 'Succeeded'")
     cmd.add_argument('exists', '--exists', action='store_true', arg_group=group_name,
-                     help="wait till the resource exists")
+                     help="wait until the resource exists")
     cmd.add_argument('custom', '--custom', arg_group=group_name,
                      help=("Wait until the condition satisfies a custom JMESPath query. E.g. "
                            "provisioningState!='InProgress', "
@@ -732,7 +732,7 @@ def _find_property(instance, path):
     return instance
 
 
-def assign_implict_identity(getter, setter, identity_role=None, identity_scope=None):
+def assign_identity(getter, setter, identity_role=None, identity_scope=None):
     import time
     from azure.mgmt.authorization import AuthorizationManagementClient
     from azure.mgmt.authorization.models import RoleAssignmentProperties
@@ -740,10 +740,7 @@ def assign_implict_identity(getter, setter, identity_role=None, identity_scope=N
 
     # get
     resource = getter()
-    if resource.identity:
-        logger.warning('Implict identity is already configured')
-    else:
-        resource = setter(resource)
+    resource = setter(resource)
 
     # create role assignment:
     if identity_scope:

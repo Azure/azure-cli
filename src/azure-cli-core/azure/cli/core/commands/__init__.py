@@ -41,14 +41,15 @@ DEFAULT_QUERY_TIME_RANGE = 3600000
 
 CONFIRM_PARAM_NAME = 'yes'
 
-BLACKLISTED_MODS = ['context', 'shell', 'documentdb']
+BLACKLISTED_MODS = ['context', 'shell', 'documentdb', 'component']
 
 
 class VersionConstraint(object):
-    def __init__(self, resource_type, min_api=None, max_api=None):
+    def __init__(self, resource_type, min_api=None, max_api=None, operation_group=None):
         self._type = resource_type
         self._min_api = min_api
         self._max_api = max_api
+        self._operation_group = operation_group
 
     def __enter__(self):
         return self
@@ -57,7 +58,8 @@ class VersionConstraint(object):
         pass
 
     def register_cli_argument(self, *args, **kwargs):
-        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+        is_supported = supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api)
+        if (isinstance(is_supported, tuple) and getattr(is_supported, self._operation_group)) or is_supported:
             register_cli_argument(*args, **kwargs)
         else:
             from azure.cli.core.commands.parameters import ignore_type
@@ -66,11 +68,13 @@ class VersionConstraint(object):
             register_cli_argument(*args, **kwargs)
 
     def register_extra_cli_argument(self, *args, **kwargs):
-        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+        is_supported = supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api)
+        if (isinstance(is_supported, tuple) and getattr(is_supported, self._operation_group)) or is_supported:
             register_extra_cli_argument(*args, **kwargs)
 
     def cli_command(self, *args, **kwargs):
-        if supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api):
+        is_supported = supported_api_version(self._type, min_api=self._min_api, max_api=self._max_api)
+        if (isinstance(is_supported, tuple) and getattr(is_supported, self._operation_group)) or is_supported:
             cli_command(*args, **kwargs)
 
 
@@ -148,7 +152,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
     def _generate_template_progress(self, correlation_id):  # pylint: disable=no-self-use
         """ gets the progress for template deployments """
         from azure.cli.core.commands.client_factory import get_mgmt_service_client
-        from azure.monitor import MonitorClient
+        from azure.mgmt.monitor import MonitorManagementClient
 
         if correlation_id is not None:  # pylint: disable=too-many-nested-blocks
             formatter = "eventTimestamp ge {}"
@@ -159,7 +163,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
             odata_filters = "{} and {} eq '{}'".format(odata_filters, 'correlationId', correlation_id)
 
-            activity_log = get_mgmt_service_client(MonitorClient).activity_logs.list(filter=odata_filters)
+            activity_log = get_mgmt_service_client(MonitorManagementClient).activity_logs.list(filter=odata_filters)
 
             results = []
             max_events = 50  # default max value for events in list_activity_log
@@ -238,7 +242,7 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                 self._delay()
             except KeyboardInterrupt:
                 self.progress_controller.stop()
-                logger.error('Long running operation wait cancelled.  %s', correlation_message)
+                logger.error('Long-running operation wait cancelled.  %s', correlation_message)
                 raise
 
         try:
@@ -529,7 +533,13 @@ def get_op_handler(operation):
     import types
 
     for rt in ResourceType:
-        if operation.startswith(rt.import_prefix):
+        if operation.startswith(rt.import_prefix + ".operations."):
+            subs = operation[len(rt.import_prefix + ".operations."):]
+            operation_group = subs[:subs.index('_operations')]
+            operation = operation.replace(
+                rt.import_prefix,
+                get_versioned_sdk_path(CLOUD.profile, rt, operation_group=operation_group))
+        elif operation.startswith(rt.import_prefix):
             operation = operation.replace(rt.import_prefix,
                                           get_versioned_sdk_path(CLOUD.profile, rt))
     try:
