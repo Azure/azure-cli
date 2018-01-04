@@ -3,6 +3,10 @@
 Release History
 ===============
 
+unreleased
++++++
+* Consolidated event subscription operations into a single category, and added support for update commands.
+
 0.1.6
 +++++
 * minor fixes
