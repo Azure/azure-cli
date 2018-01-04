@@ -338,7 +338,7 @@ def k8s_install_connector(cmd, client, name, resource_group_name, connector_name
     subscription_id = _get_subscription_id(cmd.cli_ctx)
     dns_name_prefix = _get_default_dns_prefix(connector_name, resource_group_name, subscription_id)
     # Ensure that the SPN exists
-    principal_obj = _ensure_service_principal(service_principal, client_secret, subscription_id,
+    principal_obj = _ensure_aks_service_principal(service_principal, client_secret, subscription_id,
                                               dns_name_prefix, location, connector_name)
     client_secret = principal_obj.get("client_secret")
     service_principal = principal_obj.get("service_principal")
@@ -1290,8 +1290,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
 
     linux_profile = ContainerServiceLinuxProfile(admin_username, ssh=ssh_config)
-    principal_obj = _ensure_service_principal(cmd.cli_ctx, service_principal=service_principal,
-                                              client_secret=client_secret,
+    principal_obj = _ensure_aks_service_principal(service_principal=service_principal, client_secret=client_secret,
                                               subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
                                               location=location, name=name)
     service_principal_profile = ContainerServiceServicePrincipalProfile(
@@ -1369,17 +1368,19 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
 
     return client.create_or_update(resource_group_name, name, instance, raw=no_wait)
 
-def _ensure_service_principal_aks(service_principal=None,
-                              client_secret=None,
-                              subscription_id=None,
-                              dns_name_prefix=None,
-                              location=None,
-                              name=None):
+
+def _ensure_aks_service_principal(service_principal=None,
+                                  client_secret=None,
+                                  subscription_id=None,
+                                  dns_name_prefix=None,
+                                  location=None,
+                                  name=None):
+    file_name_aks = 'aksServicePrincipal.json'
     # TODO: This really needs to be unit tested.
     client = _graph_client_factory()
     if not service_principal:
         # --service-principal not specified, try to load it from local disk
-        principal_obj = load_acs_service_principal(subscription_id)
+        principal_obj = load_acs_service_principal(subscription_id, file_name=file_name_aks)
         if principal_obj:
             service_principal = principal_obj.get('service_principal')
             client_secret = principal_obj.get('client_secret')
@@ -1395,16 +1396,13 @@ def _ensure_service_principal_aks(service_principal=None,
                 raise CLIError('Could not create a service principal with the right permissions. '
                                'Are you an Owner on this project?')
             logger.info('Created a service principal: %s', service_principal)
-            # add role first before save it
-            if not _add_role_assignment('Contributor', service_principal):
-                logger.warning('Could not create a service principal with the right permissions. '
-                               'Are you an Owner on this project?')
+            # We don't need to add role assignment for this created SPN
     else:
         # --service-principal specfied, validate --client-secret was too
         if not client_secret:
             raise CLIError('--client-secret is required if --service-principal is specified')
-    store_acs_service_principal(subscription_id, client_secret, service_principal)
-    return load_acs_service_principal(subscription_id)
+    store_acs_service_principal(subscription_id, client_secret, service_principal, file_name=file_name_aks)
+    return load_acs_service_principal(subscription_id, file_name=file_name_aks)
 
 
 def _ensure_service_principal(cli_ctx,
