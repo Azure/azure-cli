@@ -37,7 +37,12 @@ class EventGridTests(ScenarioTest):
             'event_subscription_name': event_subscription_name
         })
 
-        self.cmd('az eventgrid topic create --name {topic_name} --resource-group {rg} --location {location}')
+        self.cmd('az eventgrid topic create --name {topic_name} --resource-group {rg} --location {location}', checks=[
+            self.check('type', 'Microsoft.EventGrid/topics'),
+            self.check('name', self.kwargs['topic_name']),
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
         self.cmd('az eventgrid topic show --name {topic_name} --resource-group {rg}', checks=[
             self.check('type', 'Microsoft.EventGrid/topics'),
             self.check('name', self.kwargs['topic_name']),
@@ -54,13 +59,23 @@ class EventGridTests(ScenarioTest):
         #    self.check('[0].name', self.kwargs['topic_name']),
         # ])
 
-        self.cmd('az eventgrid topic key list --name {topic_name} --resource-group {rg}')
-        self.cmd('az eventgrid topic key regenerate --name {topic_name} --resource-group {rg} --key-name key1')
-        self.cmd('az eventgrid topic key regenerate --name {topic_name} --resource-group {rg} --key-name key2')
+        output = self.cmd('az eventgrid topic key list --name {topic_name} --resource-group {rg}').get_output_in_json()
+        self.assertIsNotNone(output['key1'])
+        self.assertIsNotNone(output['key2'])
+
+        output = self.cmd('az eventgrid topic key regenerate --name {topic_name} --resource-group {rg} --key-name key1').get_output_in_json()
+        self.assertIsNotNone(output['key1'])
+        self.assertIsNotNone(output['key2'])
+
+        self.cmd('az eventgrid topic key regenerate --name {topic_name} --resource-group {rg} --key-name key2').get_output_in_json()
+        self.assertIsNotNone(output['key1'])
+        self.assertIsNotNone(output['key2'])
+
         self.cmd('az eventgrid event-subscription create --topic-name {topic_name} -g {rg} --name {event_subscription_name} --endpoint https://requestb.in/18zmdhv1', checks=[
             self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
             self.check('provisioningState', 'Succeeded'),
             self.check('name', self.kwargs['event_subscription_name']),
+            self.check('destination.endpointBaseUrl', 'https://requestb.in/18zmdhv1')
         ])
 
         self.cmd('az eventgrid event-subscription show --topic-name {topic_name} -g {rg} --name {event_subscription_name}', checks=[
@@ -68,8 +83,10 @@ class EventGridTests(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
             self.check('name', self.kwargs['event_subscription_name']),
         ])
+
         self.cmd('az eventgrid event-subscription show --topic-name {topic_name} -g {rg} --name {event_subscription_name} --include-full-endpoint-url', checks=[
             self.check('destination.endpointUrl', 'https://requestb.in/18zmdhv1'),
+            self.check('destination.endpointBaseUrl', 'https://requestb.in/18zmdhv1')
         ])
 
         self.cmd('az eventgrid event-subscription update --topic-name {topic_name} -g {rg} --name {event_subscription_name} --endpoint https://requestb.in/18zmdhv2', checks=[
@@ -96,7 +113,12 @@ class EventGridTests(ScenarioTest):
             'endpoint_url': endpoint_url
         })
 
-        self.cmd('az eventgrid event-subscription create -g {rg} --name {event_subscription_name} --endpoint {endpoint_url} --subject-begins-with mysubject_prefix')
+        self.cmd('az eventgrid event-subscription create -g {rg} --name {event_subscription_name} --endpoint {endpoint_url} --subject-begins-with mysubject_prefix', checks=[
+            self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('name', self.kwargs['event_subscription_name']),
+            self.check('destination.endpointBaseUrl', self.kwargs['endpoint_url'])
+        ])
 
         self.cmd('az eventgrid event-subscription show -g {rg} --name {event_subscription_name}', checks=[
             self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),
@@ -123,7 +145,9 @@ class EventGridTests(ScenarioTest):
 
     def test_create_event_subscriptions_to_resource(self):
         event_subscription_name = self.create_random_name(prefix='cli', length=40)
-        resource_id = '/subscriptions/55f3dcd4-cac7-43b4-990b-a139d62a1eb2/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsegblob'
+        # Switch to real resource ID when running in the --live mode
+        # resource_id = '/subscriptions/55f3dcd4-cac7-43b4-990b-a139d62a1eb2/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsegblob'
+        resource_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsegblob'
 
         self.kwargs.update({
             'resource_id': resource_id,
