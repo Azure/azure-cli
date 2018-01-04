@@ -1315,7 +1315,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 resource_group_name=resource_group_name, resource_name=name, parameters=mc, raw=no_wait)
         except CloudError as ex:
             retry_exception = ex
-            if 'The credentials in ServicePrincipalProfile were invalid' in ex.message:
+            if 'not found in Active Directory tenant' in ex.message:
                 time.sleep(3)
             else:
                 raise ex
