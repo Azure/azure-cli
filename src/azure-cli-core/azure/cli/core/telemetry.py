@@ -292,7 +292,7 @@ def _get_installation_id():
 @decorators.suppress_all_exceptions(fallback_return=None)
 def _get_profile():
     from azure.cli.core._profile import Profile
-    return Profile(_session.application)
+    return Profile(cli_ctx=_session.application)
 
 
 @decorators.suppress_all_exceptions(fallback_return='')

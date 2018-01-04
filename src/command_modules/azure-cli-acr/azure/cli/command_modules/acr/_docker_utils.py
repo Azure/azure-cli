@@ -53,7 +53,7 @@ def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, p
     authhost = urlunparse((authurl[0], authurl[1], '/oauth2/exchange', '', '', ''))
 
     from azure.cli.core._profile import Profile
-    profile = Profile(cli_ctx)
+    profile = Profile(cli_ctx=cli_ctx)
     sp_id, refresh, access, tenant = profile.get_refresh_token()
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}

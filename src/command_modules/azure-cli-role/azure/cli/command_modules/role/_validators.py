@@ -36,7 +36,7 @@ def validate_member_id(namespace):
     cli_ctx = namespace.cmd.cli_ctx
     try:
         uuid.UUID(namespace.url)
-        profile = Profile(cli_ctx)
+        profile = Profile(cli_ctx=cli_ctx)
         _, _, tenant_id = profile.get_login_credentials()
         graph_url = cli_ctx.cloud.endpoints.active_directory_graph_resource_id
         namespace.url = '{}{}/directoryObjects/{}'.format(graph_url, tenant_id,

@@ -343,7 +343,7 @@ def k8s_install_connector(cmd, client, name, resource_group_name, connector_name
     client_secret = principal_obj.get("client_secret")
     service_principal = principal_obj.get("service_principal")
     # Get the TenantID
-    profile = Profile(cmd.cli_ctx)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials()
     # Check if we want the linux connector
     if os_type.lower() in ['linux', 'both']:
@@ -475,7 +475,7 @@ def _add_role_assignment(cli_ctx, role, service_principal, delay=2):
 
 
 def _get_subscription_id(cli_ctx):
-    _, sub_id, _ = Profile(cli_ctx).get_login_credentials(subscription_id=None)
+    _, sub_id, _ = Profile(cli_ctx=cli_ctx).get_login_credentials(subscription_id=None)
     return sub_id
 
 

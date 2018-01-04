@@ -26,7 +26,7 @@ def cf_dls_filesystem(cli_ctx, account_name):
     from azure.datalake.store import core
     from azure.cli.core._profile import Profile
 
-    profile = Profile(cli_ctx)
+    profile = Profile(cli_ctx=cli_ctx)
     subscription_id = None
     cred, subscription_id, _ = profile.get_login_credentials(
         subscription_id=subscription_id,

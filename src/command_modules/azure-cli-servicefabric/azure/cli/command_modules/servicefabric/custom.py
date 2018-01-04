@@ -1566,7 +1566,7 @@ def _get_keyVault_not_arm_client(cli_ctx):
     from azure.cli.core._profile import Profile
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
 
     client = KeyVaultClient(KeyVaultAuthentication(get_token))
     return client
@@ -1584,7 +1584,7 @@ def _create_keyvault(cli_ctx,
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
     from azure.cli.core._profile import Profile
     from azure.graphrbac.models import GraphErrorException
-    profile = Profile(cli_ctx)
+    profile = Profile(cli_ctx=cli_ctx)
     cred, _, tenant_id = profile.get_login_credentials(
         resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     graph_client = GraphRbacManagementClient(cred,

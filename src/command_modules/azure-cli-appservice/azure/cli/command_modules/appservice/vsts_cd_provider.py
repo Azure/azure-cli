@@ -22,7 +22,7 @@ class VstsContinuousDeliveryProvider(object):
         """
 
         # Gather information about the Azure connection
-        profile = Profile(cli_ctx)
+        profile = Profile(cli_ctx=cli_ctx)
         subscription = profile.get_subscription()
         user = profile.get_current_account_user()
         cred, _, _ = profile.get_login_credentials(subscription_id=None)

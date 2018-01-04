@@ -1044,7 +1044,7 @@ def server_ad_admin_set(
         server_name,
         **kwargs):
 
-    profile = Profile(cmd.cli_ctx)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     sub = profile.get_subscription()
     kwargs['tenant_id'] = sub['tenantId']
 

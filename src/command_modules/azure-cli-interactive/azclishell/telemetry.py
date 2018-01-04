@@ -39,7 +39,7 @@ class Telemetry(TelemetryClient):
         # adding context
         self.context.application.id = 'Azure CLI Shell'
         self.context.application.ver = __version__
-        self.context.user.id = Profile(cli_ctx).get_installation_id()
+        self.context.user.id = Profile(cli_ctx=cli_ctx).get_installation_id()
         self.context.instrumentation_key = INSTRUMENTATION_KEY
 
     def _track_event(self, name, properties=None, measurements=None):

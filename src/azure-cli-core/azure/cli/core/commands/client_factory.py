@@ -81,7 +81,7 @@ def _get_mgmt_service_client(cli_ctx,
     from azure.cli.core._profile import Profile
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
     resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
-    profile = Profile(cli_ctx)
+    profile = Profile(cli_ctx=cli_ctx)
     cred, subscription_id, _ = profile.get_login_credentials(subscription_id=subscription_id, resource=resource)
 
     client_kwargs = {}
@@ -129,7 +129,7 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
 
 def get_subscription_id(cli_ctx):
     from azure.cli.core._profile import Profile
-    _, subscription_id, _ = Profile(cli_ctx).get_login_credentials()
+    _, subscription_id, _ = Profile(cli_ctx=cli_ctx).get_login_credentials()
     return subscription_id
 
 
