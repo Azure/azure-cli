@@ -339,9 +339,9 @@ def k8s_install_connector(cmd, client, name, resource_group_name, connector_name
     dns_name_prefix = _get_default_dns_prefix(connector_name, resource_group_name, subscription_id)
     # Ensure that the SPN exists
     principal_obj = _ensure_aks_service_principal(service_principal, client_secret, subscription_id,
-                                              dns_name_prefix, location, connector_name)
-    client_secret = principal_obj.get("client_secret")
-    service_principal = principal_obj.get("service_principal")
+                                                  dns_name_prefix, location, connector_name)
+    client_secret = principal_obj.get('client_secret')
+    service_principal = principal_obj.get('service_principal')
     # Get the TenantID
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials()
