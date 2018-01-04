@@ -53,11 +53,10 @@ class EventGridTests(ScenarioTest):
             self.check('tags', {'Dept': 'IT'}),
         ])
 
-        # TODO Uncomment this after understanding why topic list is failing
-        # self.cmd('az eventgrid topic list --resource-group {rg}', checks=[
-        #    self.check('[0].type', 'Microsoft.EventGrid/topics'),
-        #    self.check('[0].name', self.kwargs['topic_name']),
-        # ])
+        self.cmd('az eventgrid topic list --resource-group {rg}', checks=[
+            self.check('[0].type', 'Microsoft.EventGrid/topics'),
+            self.check('[0].name', self.kwargs['topic_name']),
+        ])
 
         output = self.cmd('az eventgrid topic key list --name {topic_name} --resource-group {rg}').get_output_in_json()
         self.assertIsNotNone(output['key1'])
