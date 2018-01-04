@@ -2952,8 +2952,8 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
         instance.ip_configurations = []
         for i, public_ip in enumerate(public_ip_address):
             ip_configuration = VirtualNetworkGatewayIPConfiguration(
-                SubResource(subnet_id),
-                SubResource(public_ip),
+                subnet=SubResource(subnet_id),
+                public_ip_address=SubResource(public_ip),
                 private_ip_allocation_method='Dynamic', name='vnetGatewayConfig{}'.format(i))
             instance.ip_configurations.append(ip_configuration)
 
