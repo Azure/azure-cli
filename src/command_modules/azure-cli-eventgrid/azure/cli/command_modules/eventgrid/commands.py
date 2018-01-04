@@ -20,7 +20,7 @@ def load_command_table(self, _):
         client_factory=topic_types_factory
     )
 
-    with self.command_group('eventgrid topic', topics_mgmt_util) as g:
+    with self.command_group('eventgrid topic', topics_mgmt_util, client_factory=topics_factory) as g:
         g.command('create', 'create_or_update')
         g.command('show', 'get')
         g.command('key list', 'list_shared_access_keys')
