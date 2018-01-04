@@ -206,7 +206,7 @@ def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argume
 def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters, CreateMode
     from azure.cli.core._profile import Profile
-    profile = Profile(cmd.cli_ctx)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
@@ -231,7 +231,7 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
     from azure.cli.core._profile import Profile
     from azure.graphrbac.models import GraphErrorException
-    profile = Profile(cmd.cli_ctx)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     cred, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
@@ -341,7 +341,7 @@ def update_keyvault(instance, enabled_for_deployment=None, enabled_for_disk_encr
 def _object_id_args_helper(cli_ctx, object_id, spn, upn):
     if not object_id:
         from azure.cli.core._profile import Profile
-        profile = Profile(cli_ctx)
+        profile = Profile(cli_ctx=cli_ctx)
         cred, _, tenant_id = profile.get_login_credentials(
             resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
         graph_client = GraphRbacManagementClient(cred,

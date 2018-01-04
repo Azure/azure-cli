@@ -58,7 +58,7 @@ def _config_env_public_azure(cli_ctx, _):
             method_index = prompt_choice_list(MSG_PROMPT_LOGIN, LOGIN_METHOD_LIST)
             answers['login_index'] = method_index
             answers['login_options'] = str(LOGIN_METHOD_LIST)
-            profile = Profile(cli_ctx)
+            profile = Profile(cli_ctx=cli_ctx)
             interactive = False
             username = None
             password = None

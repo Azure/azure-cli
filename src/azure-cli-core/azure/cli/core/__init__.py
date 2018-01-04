@@ -380,3 +380,20 @@ class AzCommandsLoader(CLICommandsLoader):
             return six.get_method_function(op)
         except (ValueError, AttributeError):
             raise ValueError("The operation '{}' is invalid.".format(operation))
+
+
+def get_default_cli():
+    from azure.cli.core.azlogging import AzCliLogging
+    from azure.cli.core.commands import AzCliCommandInvoker
+    from azure.cli.core.parser import AzCliCommandParser
+    from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
+    from azure.cli.core._help import AzCliHelp
+
+    return AzCli(cli_name='az',
+                 config_dir=GLOBAL_CONFIG_DIR,
+                 config_env_var_prefix=ENV_VAR_PREFIX,
+                 commands_loader_cls=MainCommandsLoader,
+                 invocation_cls=AzCliCommandInvoker,
+                 parser_cls=AzCliCommandParser,
+                 logging_cls=AzCliLogging,
+                 help_cls=AzCliHelp)

@@ -43,7 +43,7 @@ class TestCloud(unittest.TestCase):
         with self.assertRaises(CloudEndpointNotSetException):
             cli = TestCli()
             cli.cloud = Cloud('AzureCloud')
-            profile = Profile(cli)
+            profile = Profile(cli_ctx=cli)
             profile.get_login_credentials()
 
     @mock.patch('azure.cli.core.cloud.get_custom_clouds', lambda: [])

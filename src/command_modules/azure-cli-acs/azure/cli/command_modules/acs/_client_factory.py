@@ -44,7 +44,7 @@ def get_graph_rbac_management_client(cli_ctx, **_):
     from azure.cli.core._profile import Profile
     from azure.graphrbac import GraphRbacManagementClient
 
-    profile = Profile(cli_ctx)
+    profile = Profile(cli_ctx=cli_ctx)
     cred, _, tenant_id = profile.get_login_credentials(
         resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     client = GraphRbacManagementClient(

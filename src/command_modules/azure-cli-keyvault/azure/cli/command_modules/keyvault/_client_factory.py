@@ -23,7 +23,7 @@ def keyvault_data_plane_factory(cli_ctx, _):
         import adal
         from azure.cli.core._profile import Profile
         try:
-            return Profile(cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+            return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
         except adal.AdalError as err:
             # pylint: disable=no-member
             if (hasattr(err, 'error_response') and

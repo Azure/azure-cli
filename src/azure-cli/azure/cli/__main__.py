@@ -8,12 +8,7 @@ import sys
 from knack.completion import ARGCOMPLETE_ENV_NAME
 from knack.log import get_logger
 
-from azure.cli.core import MainCommandsLoader, AzCli
-from azure.cli.core.azlogging import AzCliLogging
-from azure.cli.core.commands import AzCliCommandInvoker
-from azure.cli.core.parser import AzCliCommandParser
-from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
-from azure.cli.core._help import AzCliHelp
+from azure.cli.core import get_default_cli
 
 import azure.cli.core.telemetry as telemetry
 
@@ -24,14 +19,7 @@ def cli_main(cli, args):
     return cli.invoke(args)
 
 
-az_cli = AzCli(cli_name='az',
-               config_dir=GLOBAL_CONFIG_DIR,
-               config_env_var_prefix=ENV_VAR_PREFIX,
-               commands_loader_cls=MainCommandsLoader,
-               invocation_cls=AzCliCommandInvoker,
-               parser_cls=AzCliCommandParser,
-               logging_cls=AzCliLogging,
-               help_cls=AzCliHelp)
+az_cli = get_default_cli()
 
 telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
 
