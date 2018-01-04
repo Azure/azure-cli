@@ -230,8 +230,7 @@ class AppServicePlanScenarioTest(ScenarioTest):
         self.cmd('appservice plan list -g {}'.format(resource_group), checks=[JMESPathCheck('length(@)', 0)])
 
 
-# TODO: Convert to ScenarioTest and re-record when issue #5145 is fixed.
-class WebappConfigureTest(LiveScenarioTest):
+class WebappConfigureTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_config')
     def test_webapp_config(self, resource_group):
         webapp_name = self.create_random_name('webapp-config-test', 40)
@@ -282,7 +281,7 @@ class WebappConfigureTest(LiveScenarioTest):
         self.assertEqual(s2['name'], 's2')
         self.assertEqual(s2['slotSetting'], False)
         self.assertEqual(s2['value'], 'bar')
-        self.assertEqual(set([x['name'] for x in result]), set(['s1', 's2', 's3']))
+        self.assertEqual(set([x['name'] for x in result]), set(['s1', 's2', 's3', 'WEBSITE_NODE_DEFAULT_VERSION']))
         # delete
         self.cmd('webapp config appsettings delete -g {} -n {} --setting-names s1 s2'
                  .format(resource_group, webapp_name)).assert_with_checks([
@@ -371,9 +370,8 @@ class AppServiceBadErrorPolishTest(ScenarioTest):
         # allowed_exceptions='Website with given name {} already exists'.format(webapp_name)
 
 
-# TODO: Convert to ScenarioTest and re-record when issue #5145 is fixed.
 # this test doesn't contain the ultimate verification which you need to manually load the frontpage in a browser
-class LinuxWebappSceanrioTest(LiveScenarioTest):
+class LinuxWebappSceanrioTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp(self, resource_group):
@@ -387,6 +385,7 @@ class LinuxWebappSceanrioTest(LiveScenarioTest):
         self.cmd('webapp create -g {} -n {} --plan {} --runtime {}'.format(resource_group, webapp, plan, runtime), checks=[
             JMESPathCheck('name', webapp),
         ])
+        time.sleep(30)  # workaround the fact that a new linux web's "kind" won't be settled instantaneously
         self.cmd('webapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length([])', 1),
             JMESPathCheck('[0].name', webapp),
@@ -462,8 +461,7 @@ class WebappGitScenarioTest(ScenarioTest):
                  checks=JMESPathCheck('repoUrl', None))
 
 
-# TODO: Convert to ScenarioTest and re-record when issue #5145 is fixed.
-class WebappSlotScenarioTest(LiveScenarioTest):
+class WebappSlotScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_webapp_slot(self, resource_group):
         plan = self.create_random_name(prefix='slot-test-plan', length=24)
@@ -489,7 +487,7 @@ class WebappSlotScenarioTest(LiveScenarioTest):
         # swap with prod and verify the git branch also switched
         self.cmd('webapp deployment slot swap -g {} -n {} -s {}'.format(resource_group, webapp, slot))
         result = self.cmd('webapp config appsettings list -g {} -n {} -s {}'.format(resource_group, webapp, slot)).get_output_in_json()
-        self.assertEqual(set([x['name'] for x in result]), set(['s1']))
+        self.assertEqual(set([x['name'] for x in result]), set(['s1', 'WEBSITE_NODE_DEFAULT_VERSION']))
         # create a new slot by cloning from prod slot
         self.cmd('webapp config set -g {} -n {} --php-version {}'.format(resource_group, webapp, test_php_version))
         self.cmd('webapp deployment slot create -g {} -n {} --slot {} --configuration-source {}'.format(resource_group, webapp, slot2, webapp))
@@ -505,7 +503,7 @@ class WebappSlotScenarioTest(LiveScenarioTest):
         # verify we can swap with non production slot
         self.cmd('webapp deployment slot swap -g {} -n {} --slot {} --target-slot {}'.format(resource_group, webapp, slot, slot2))
         result = self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, webapp, slot2)).get_output_in_json()
-        self.assertEqual(set([x['name'] for x in result]), set(['s1', 's4']))
+        self.assertEqual(set([x['name'] for x in result]), set(['s1', 's4', 'WEBSITE_NODE_DEFAULT_VERSION']))
         result = self.cmd('webapp config connection-string list -g {} -n {} --slot {}'.format(resource_group, webapp, slot2)).get_output_in_json()
         self.assertEqual(set([x['name'] for x in result]), set(['c2']))
         result = self.cmd('webapp config appsettings list -g {} -n {} --slot {}'.format(resource_group, webapp, slot)).get_output_in_json()
