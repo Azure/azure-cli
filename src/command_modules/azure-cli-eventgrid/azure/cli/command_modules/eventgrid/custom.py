@@ -70,6 +70,7 @@ def cli_eventgrid_event_subscription_create(
     created_event_subscription = async_event_subscription_create.result()
     return created_event_subscription
 
+
 def event_subscription_setter(
         cmd,
         client,
@@ -87,6 +88,7 @@ def event_subscription_setter(
     updated_event_subscription = async_event_subscription_update.result()
     return updated_event_subscription
 
+
 def cli_eventgrid_event_subscription_get(
         cmd,
         client,
@@ -94,7 +96,7 @@ def cli_eventgrid_event_subscription_get(
         resource_id=None,
         resource_group_name=None,
         topic_name=None,
-        include_full_endpoint_url=False):    
+        include_full_endpoint_url=False):
     scope = _get_scope_for_event_subscription(cmd.cli_ctx, resource_id, topic_name, resource_group_name)
     retrieved_event_subscription = client.get(scope, event_subscription_name)
     destination = retrieved_event_subscription.destination
@@ -214,10 +216,10 @@ def _get_scope(
 
 
 def _get_scope_for_event_subscription(
-    cli_ctx, 
-    resource_id, 
-    topic_name, 
-    resource_group_name):
+        cli_ctx,
+        resource_id,
+        topic_name,
+        resource_group_name):
     if resource_id:
         # Resource ID is provided, use that as the scope for the event subscription.
         scope = resource_id
@@ -235,6 +237,7 @@ def _get_scope_for_event_subscription(
 
     return scope
 
+
 def event_subscription_getter(
         cmd,
         client,
@@ -246,6 +249,7 @@ def event_subscription_getter(
     retrieved_event_subscription = client.get(scope, event_subscription_name)
     return retrieved_event_subscription
 
+
 def update_event_subscription(
         instance,
         endpoint=None,
@@ -254,29 +258,32 @@ def update_event_subscription(
         subject_ends_with=None,
         included_event_types=None,
         labels=None):
-    destination = None
-    labels = instance.labels
-    filter = instance.filter
+    event_subscription_destination = None
+    event_subscription_labels = instance.labels
+    event_subscription_filter = instance.filter
 
     if endpoint is not None:
         if endpoint_type.lower() == WEBHOOK_DESTINATION.lower():
-            destination = WebHookEventSubscriptionDestination(endpoint)
+            event_subscription_destination = WebHookEventSubscriptionDestination(endpoint)
         elif endpoint_type.lower() == EVENTHUB_DESTINATION.lower():
-            destination = EventHubEventSubscriptionDestination(endpoint)
+            event_subscription_destination = EventHubEventSubscriptionDestination(endpoint)
 
     if subject_begins_with is not None:
-        filter.subject_begins_with = subject_begins_with
+        event_subscription_filter.subject_begins_with = subject_begins_with
 
     if subject_ends_with is not None:
-        filter.subject_ends_with = subject_ends_with
+        event_subscription_filter.subject_ends_with = subject_ends_with
 
     if included_event_types is not None:
-        filter.included_event_types = included_event_types
+        event_subscription_filter.included_event_types = included_event_types
+
+    if labels is not None:
+        event_subscription_labels = labels
 
     params = EventSubscriptionUpdateParameters(
-        destination = destination,
-        filter = filter,
-        labels = labels
+        destination=event_subscription_destination,
+        filter=event_subscription_filter,
+        labels=event_subscription_labels
     )
 
-    return params    
+    return params

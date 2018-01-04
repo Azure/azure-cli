@@ -119,7 +119,7 @@ helps['eventgrid event-subscription update'] = """
         - name: Update an event subscription for a resource group to specify a new endpoint and a new subject-ends-with filter.
           text: |
             az eventgrid event-subscription update -g rg1 --name es3  --subject-ends-with .png \\
-                --endpoint https://contoso.azurewebsites.net/api/f1?code=code                
+                --endpoint https://contoso.azurewebsites.net/api/f1?code=code
         - name: Update an event subscription for a storage account to specify a new list of included event types.
           text: |
             az eventgrid event-subscription update --resource-id "/subscriptions/55f3dcd4-cac7-43b4-990b-a139d62a1eb2/resourceGroups/kalstest/providers/microsoft.storage/storageaccounts/kalsegblob" --name es3 \\
