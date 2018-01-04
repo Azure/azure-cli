@@ -120,7 +120,7 @@ def validate_claim_vm(namespace):
 def _get_owner_object_id(cli_ctx):
     from azure.cli.core._profile import Profile
     from azure.graphrbac.models import GraphErrorException
-    profile = Profile(cli_ctx)
+    profile = Profile(cli_ctx=cli_ctx)
     cred, _, tenant_id = profile.get_login_credentials(
         resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     graph_client = GraphRbacManagementClient(cred,

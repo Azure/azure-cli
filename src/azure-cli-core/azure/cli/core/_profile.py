@@ -104,8 +104,11 @@ def get_credential_types(cli_ctx):
 
 
 class Profile(object):
-    def __init__(self, cli_ctx, storage=None, auth_ctx_factory=None, use_global_creds_cache=True):
-        self.cli_ctx = cli_ctx
+
+    def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True, cli_ctx=None):
+        from azure.cli.core import get_default_cli
+
+        self.cli_ctx = cli_ctx or get_default_cli()
         self._storage = storage or ACCOUNT
         self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
         if use_global_creds_cache:
@@ -160,7 +163,7 @@ class Profile(object):
         if allow_no_subscriptions:
             t_list = [s.tenant_id for s in subscriptions]
             bare_tenants = [t for t in subscription_finder.tenants if t not in t_list]
-            profile = Profile(self.cli_ctx)
+            profile = Profile(cli_ctx=self.cli_ctx)
             subscriptions = profile._build_tenant_level_accounts(bare_tenants)  # pylint: disable=protected-access
             if not subscriptions:
                 return []

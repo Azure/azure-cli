@@ -102,7 +102,7 @@ def login_account(cmd, client, resource_group_name, account_name, shared_key_aut
         cmd.cli_ctx.config.set_value('batch', 'auth_mode', 'aad')
         if show:
             resource = cmd.cli_ctx.cloud.endpoints.batch_resource_id
-            profile = Profile(cmd.cli_ctx)
+            profile = Profile(cli_ctx=cmd.cli_ctx)
             creds, subscription, tenant = profile.get_raw_token(resource=resource)
             return {
                 'tokenType': creds[0],

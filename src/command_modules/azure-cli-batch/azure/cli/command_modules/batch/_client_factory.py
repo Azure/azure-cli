@@ -74,7 +74,7 @@ def batch_data_service_factory(cli_ctx, kwargs):
     credentials = None
     if not account_key:
         from azure.cli.core._profile import Profile
-        profile = Profile(cli_ctx)
+        profile = Profile(cli_ctx=cli_ctx)
         credentials, _, _ = profile.get_login_credentials(
             resource=cli_ctx.cloud.endpoints.batch_resource_id)
     else:

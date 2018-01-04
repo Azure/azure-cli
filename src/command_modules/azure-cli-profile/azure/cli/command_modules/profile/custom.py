@@ -21,7 +21,7 @@ _CLOUD_CONSOLE_WARNING_TEMPLATE = ("Azure Cloud Shell automatically authenticate
 
 
 def _load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
-    profile = Profile(cli_ctx)
+    profile = Profile(cli_ctx=cli_ctx)
     if refresh:
         subscriptions = profile.refresh_accounts()
     subscriptions = profile.load_cached_subscriptions(all_clouds)
@@ -47,7 +47,7 @@ def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefi
 # pylint: disable=inconsistent-return-statements
 def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
     import json
-    profile = Profile(cmd.cli_ctx)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     if not show_auth_for_sdk:
         return profile.get_subscription(subscription)
 
@@ -62,7 +62,7 @@ def get_access_token(cmd, subscription=None, resource=None):
     Use 'az cloud show' command for other Azure resources
     '''
     resource = (resource or cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
-    profile = Profile(cmd.cli_ctx)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource)
     return {
         'tokenType': creds[0],
@@ -75,7 +75,7 @@ def get_access_token(cmd, subscription=None, resource=None):
 
 def set_active_subscription(cmd, subscription):
     """Set the current subscription"""
-    profile = Profile(cmd.cli_ctx)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     if not id:
         raise CLIError('Please provide subscription id or unique name.')
     profile.set_active_subscription(subscription)
@@ -83,7 +83,7 @@ def set_active_subscription(cmd, subscription):
 
 def account_clear(cmd):
     """Clear all stored subscriptions. To clear individual, use 'logout'"""
-    profile = Profile(cmd.cli_ctx)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     profile.logout_all()
 
 
@@ -103,7 +103,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
     interactive = False
 
-    profile = Profile(cmd.cli_ctx)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
 
     if in_cloud_console():
         console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
@@ -125,7 +125,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         interactive = True
 
     try:
-        profile = Profile(cmd.cli_ctx)
+        profile = Profile(cli_ctx=cmd.cli_ctx)
         subscriptions = profile.find_subscriptions_on_login(
             interactive,
             username,
@@ -157,7 +157,7 @@ def logout(cmd, username=None):
         logger.warning(_CLOUD_CONSOLE_WARNING_TEMPLATE, 'logout')
         return
 
-    profile = Profile(cmd.cli_ctx)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     if not username:
         username = profile.get_current_account_user()
     profile.logout(username)

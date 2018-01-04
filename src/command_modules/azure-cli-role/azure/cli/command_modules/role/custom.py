@@ -717,7 +717,7 @@ def create_service_principal_for_rbac(
     if show_auth_for_sdk:
         import json
         from azure.cli.core._profile import Profile
-        profile = Profile(cmd.cli_ctx)
+        profile = Profile(cli_ctx=cmd.cli_ctx)
         result = profile.get_sp_auth_info(scopes[0].split('/')[2] if scopes else None,
                                           app_id, password, cert_file)
         # sdk-auth file should be in json format all the time, hence the print
@@ -744,7 +744,7 @@ def _get_keyvault_client(cli_ctx):
     from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
 
     def _get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile(cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
 
     return KeyVaultClient(KeyVaultAuthentication(_get_token))
 

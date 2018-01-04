@@ -263,7 +263,7 @@ class AzInteractiveShell(object):
     def _toolbar_info(self):
         sub_name = ""
         try:
-            profile = Profile(self.cli_ctx)
+            profile = Profile(cli_ctx=self.cli_ctx)
             sub_name = profile.get_subscription()[_SUBSCRIPTION_NAME]
         except CLIError:
             pass
