@@ -7,6 +7,7 @@ Release History
 +++++
 * BC: Removed the `az eventgrid topic event-subscription` commands. The corresponding `az eventgrid event-subscription` commands can now be used to manage event subscriptions for topics.
 * BC: Removed the `az eventgrid resource event-subscription` commands. The corresponding `az eventgrid event-subscription` commands can now be used to manage event subscriptions for Azure resources.
+* BC: Removed the `az eventgrid event-subscription show-endpoint-url` command. This can now be achieved using `az eventgrid event-subscription show` command with the --include-full-endpoint-url parameter.
 * Added a new command `az eventgrid topic update`.
 * Added a new command `az eventgrid event-subscription update`.
 * Added --ids parameter for `az eventgrid topic` commands.
