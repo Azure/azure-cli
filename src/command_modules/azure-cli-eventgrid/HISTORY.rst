@@ -5,7 +5,12 @@ Release History
 
 0.1.7
 +++++
-* Consolidated event subscription operations into a single category, and added support for update commands.
+* BC: Removed the `az eventgrid topic event-subscription` commands. The corresponding `az eventgrid event-subscription` commands can now be used to manage event subscriptions for topics.
+* BC: Removed the `az eventgrid resource event-subscription` commands. The corresponding `az eventgrid event-subscription` commands can now be used to manage event subscriptions for Azure resources.
+* Added a new command `az eventgrid topic update`.
+* Added a new command `az eventgrid event-subscription update`.
+* Added --ids parameter for `az eventgrid topic` commands.
+* Added tab completion support for topic names.
 
 0.1.6
 +++++
