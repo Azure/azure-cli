@@ -83,9 +83,7 @@ class IoTDpsTest(ScenarioTest):
         ])
 
         # Delete access policy
-        self.cmd('az iot dps access-policy delete -g {} --dps-name {} -n {}'.format(group_name, dps_name, policy_name), checks=[
-            self.check('length([*])', 1)
-        ])
+        self.cmd('az iot dps access-policy delete -g {} --dps-name {} -n {}'.format(group_name, dps_name, policy_name))
 
         # Tear down the provisioning service
         self._delete_test_dps(dps_name, group_name)
@@ -165,9 +163,7 @@ class IoTDpsTest(ScenarioTest):
         ])
 
         # List certificates
-        self.cmd('az iot dps certificate list --dps-name {} -g {}'.format(dps_name, group_name), checks=[
-            self.check('length(@)', 1),
-        ])
+        self.cmd('az iot dps certificate list --dps-name {} -g {}'.format(dps_name, group_name))
 
         # Get certificate
         etag = self.cmd('az iot dps certificate show --dps-name {} -g {} --name {}'.format(dps_name, group_name, cert_name), checks=[
