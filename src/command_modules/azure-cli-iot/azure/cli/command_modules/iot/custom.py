@@ -17,11 +17,11 @@ from azure.mgmt.iothub.models.iot_hub_sku_info import IotHubSkuInfo
 from azure.mgmt.iothub.models.shared_access_signature_authorization_rule import SharedAccessSignatureAuthorizationRule
 
 from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDescription,
-                                                    IotDpsPropertiesDescription,
-                                                    IotHubDefinitionDescription,
-                                                    IotDpsSkuInfo,
-                                                    IotDpsSku,
-                                                    SharedAccessSignatureAuthorizationRuleAccessRightsDescription)
+                                                          IotDpsPropertiesDescription,
+                                                          IotHubDefinitionDescription,
+                                                          IotDpsSkuInfo,
+                                                          IotDpsSku,
+                                                          SharedAccessSignatureAuthorizationRuleAccessRightsDescription)
 
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.iot_hub_device_client import IotHubDeviceClient
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.authentication import Authentication
