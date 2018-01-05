@@ -31,6 +31,7 @@ def get_active_api_profile(cli_ctx):
 def force_progress_logging():
     from six import StringIO
     import logging
+    from knack.log import get_logger
     from azure.cli.core.commands import logger as cmd_logger
 
     # register a progress logger handler to get the content to verify
@@ -41,7 +42,7 @@ def force_progress_logging():
     cmd_logger.setLevel(logging.INFO)
 
     # this tells progress logger we are under verbose, so should log
-    az_logger = logging.getLogger('az')
+    az_logger = get_logger()
     old_az_level = az_logger.handlers[0].level
     az_logger.handlers[0].level = logging.INFO
 

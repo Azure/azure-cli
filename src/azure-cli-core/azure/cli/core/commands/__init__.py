@@ -438,7 +438,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
         self.cli_ctx.get_progress_controller().begin()
         correlation_id = None
 
-        is_verbose = any(handler.level <= logs.INFO for handler in logger.handlers)
+        cli_logger = get_logger()  # get CLI logger which has the level set through command lines
+        is_verbose = any(handler.level <= logs.INFO for handler in cli_logger.handlers)
 
         while not poller.done():
             self.cli_ctx.get_progress_controller().add(message='Running')
