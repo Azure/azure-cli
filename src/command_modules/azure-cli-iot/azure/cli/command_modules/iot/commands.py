@@ -5,6 +5,7 @@
 
 from azure.cli.core.commands import LongRunningOperation, CliCommandType
 from ._client_factory import iot_hub_service_factory
+from ._client_factory import iot_service_provisioning_factory
 
 
 class PolicyUpdateResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
@@ -27,9 +28,44 @@ class HubDeleteResultTransform(LongRunningOperation):  # pylint: disable=too-few
         return None
 
 
-def load_command_table(self, _):
+def load_command_table(self, _):  # pylint: disable=too-many-statements
 
     update_custom_util = CliCommandType(operations_tmpl='azure.cli.command_modules.iot.custom#{}')
+
+    # iot dps commands
+    with self.command_group('iot dps', client_factory=iot_service_provisioning_factory) as g:
+        g.custom_command('list', 'iot_dps_list')
+        g.custom_command('show', 'iot_dps_get')
+        g.custom_command('create', 'iot_dps_create')
+        g.custom_command('delete', 'iot_dps_delete')
+        g.generic_update_command('update', getter_name='iot_dps_get', setter_name='iot_dps_update',
+                                 command_type=update_custom_util)
+
+    # iot dps access-policy commands
+    with self.command_group('iot dps access-policy', client_factory=iot_service_provisioning_factory) as g:
+        g.custom_command('list', 'iot_dps_access_policy_list')
+        g.custom_command('show', 'iot_dps_access_policy_get')
+        g.custom_command('create', 'iot_dps_access_policy_create')
+        g.custom_command('update', 'iot_dps_access_policy_update')
+        g.custom_command('delete', 'iot_dps_access_policy_delete')
+
+    # iot dps linked-hub commands
+    with self.command_group('iot dps linked-hub', client_factory=iot_service_provisioning_factory) as g:
+        g.custom_command('list', 'iot_dps_linked_hub_list')
+        g.custom_command('show', 'iot_dps_linked_hub_get')
+        g.custom_command('create', 'iot_dps_linked_hub_create')
+        g.custom_command('update', 'iot_dps_linked_hub_update')
+        g.custom_command('delete', 'iot_dps_linked_hub_delete')
+
+    # iot dps certificate commands
+    with self.command_group('iot dps certificate', client_factory=iot_service_provisioning_factory) as g:
+        g.custom_command('list', 'iot_dps_certificate_list')
+        g.custom_command('show', 'iot_dps_certificate_get')
+        g.custom_command('create', 'iot_dps_certificate_create')
+        g.custom_command('delete', 'iot_dps_certificate_delete')
+        g.custom_command('generate-verification-code', 'iot_dps_certificate_gen_code')
+        g.custom_command('verify', 'iot_dps_certificate_verify')
+        g.custom_command('update', 'iot_dps_certificate_update')
 
     # iot hub certificate commands
     with self.command_group('iot hub certificate', client_factory=iot_hub_service_factory) as g:
