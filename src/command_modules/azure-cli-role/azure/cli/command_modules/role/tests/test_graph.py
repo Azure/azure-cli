@@ -7,12 +7,13 @@ import json
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest
 
 
-class ServicePrincipalExpressCreateScenarioTest(LiveScenarioTest):
+class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
 
     def test_sp_create_scenario(self):
-        self.kwargs['app_id_uri'] = 'http://azureclitest-graph'
+        app_id_uri = 'http://' + self.create_random_name('clisp-test-', 20)
+        self.kwargs['app_id_uri'] = app_id_uri
         # create app through express option
-        self.cmd('ad sp create-for-rbac -n {app_id_uri}',
+        self.cmd('ad sp create-for-rbac -n {app_id_uri} --skip-assignment',
                  checks=self.check('name', '{app_id_uri}'))
 
         # show/list app
@@ -33,10 +34,9 @@ class ServicePrincipalExpressCreateScenarioTest(LiveScenarioTest):
         self.cmd('ad sp reset-credentials -n {app_id_uri}',
                  checks=self.check('name', '{app_id_uri}'))
         # cleanup
-        self.cmd('ad sp delete --id {app_id_uri}')
+        self.cmd('ad sp delete --id {app_id_uri}')  # this whould auto-delete the app as well
         self.cmd('ad sp list --spn {app_id_uri}',
                  checks=self.is_empty())
-        self.cmd('ad app delete --id {app_id_uri}')
         self.cmd('ad app list --identifier-uri {app_id_uri}',
                  checks=self.is_empty())
 
@@ -101,12 +101,14 @@ class GraphGroupScenarioTest(ScenarioTest):
 
     def test_graph_group_scenario(self):
 
-        upn = self.cmd('account show --query "user.name"').get_output_in_json()
+        account_info = self.cmd('account show').get_output_in_json()
+        if account_info['user']['type'] == 'servicePrincipal':
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+        upn = account_info['user']['name']
 
         self.kwargs = {
             'user1': 'deleteme1',
             'user2': 'deleteme2',
-            'upn': upn,
             'domain': upn.split('@', 1)[1],
             'group': 'deleteme_g',
             'pass': 'Test1234!!'
