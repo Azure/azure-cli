@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.26
+++++++
+provider operation list/show: (breaking change)`api-version` is no longer required to run the command
 
 2.0.25
 ++++++

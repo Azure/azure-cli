@@ -15,14 +15,14 @@ from ._client_factory import (_auth_client_factory, _graph_client_factory)
 
 
 def transform_definition_list(result):
-    return [OrderedDict([('Name', r['properties']['roleName']), ('Type', r['properties']['type']),
-                         ('Description', r['properties']['description'])]) for r in result]
+    return [OrderedDict([('Name', r['roleName']), ('Type', r['type']),
+                         ('Description', r['description'])]) for r in result]
 
 
 def transform_assignment_list(result):
-    return [OrderedDict([('Principal', r['properties']['principalName']),
-                         ('Role', r['properties']['roleDefinitionName']),
-                         ('Scope', r['properties']['scope'])]) for r in result]
+    return [OrderedDict([('Principal', r['principalName']),
+                         ('Role', r['roleDefinitionName']),
+                         ('Scope', r['scope'])]) for r in result]
 
 
 def get_role_definition_op(operation_name):
