@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.0.20
+++++++
+* Update for CLI core changes.
+
 2.0.19
 ++++++
 * `resource show`: expose `--include-response-body` to show the response body in the output
