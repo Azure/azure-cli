@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.23
+++++++
+* Update for CLI core changes.
+
 2.0.22
 ++++++
 * add korea south and korea central to preview regions

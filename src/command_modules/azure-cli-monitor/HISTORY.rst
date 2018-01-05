@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.0.14
+++++++
+* Update for CLI core changes.
+
 0.0.13
 ++++++
 * Update managed SDK reference to 0.4.0

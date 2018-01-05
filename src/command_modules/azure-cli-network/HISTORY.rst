@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.20
+++++++
+* Update for CLI core changes.
+
 2.0.19
 ++++++
 * `route-table create/update`: Add support for `--disable-bgp-route-propagation`.
