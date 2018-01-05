@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.0.16
+++++++
+* Update for CLI core changes.
+
 2.0.15
 ++++++
 * `role assignment list`: show default assignments for classic administrators
