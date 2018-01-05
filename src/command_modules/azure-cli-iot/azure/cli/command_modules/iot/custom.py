@@ -18,12 +18,12 @@ from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.device_descrip
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.x509_thumbprint import X509Thumbprint
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
 
-from azure.mgmt.provisioningservices.models.provisioning_service_description import ProvisioningServiceDescription
-from azure.mgmt.provisioningservices.models.iot_dps_properties_description import IotDpsPropertiesDescription
-from azure.mgmt.provisioningservices.models.iot_hub_definition_description import IotHubDefinitionDescription
-from azure.mgmt.provisioningservices.models.iot_dps_sku_info import IotDpsSkuInfo
-from azure.mgmt.provisioningservices.models.iot_dps_client_enums import IotDpsSku
-from azure.mgmt.provisioningservices.models.shared_access_signature_authorization_rule_access_rights_description import SharedAccessSignatureAuthorizationRuleAccessRightsDescription
+from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDescription,
+                                                    IotDpsPropertiesDescription,
+                                                    IotHubDefinitionDescription,
+                                                    IotDpsSkuInfo,
+                                                    IotDpsSku,
+                                                    SharedAccessSignatureAuthorizationRuleAccessRightsDescription)
 
 
 from ._client_factory import resource_service_factory

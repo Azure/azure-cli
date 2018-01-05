@@ -12,7 +12,7 @@ from azure.cli.core.commands.parameters import (get_location_type,
                                                 get_enum_type,
                                                 get_three_state_flag)
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
-from azure.mgmt.provisioningservices.models.iot_dps_client_enums import (IotDpsSku,
+from azure.mgmt.iothubprovisioningservices.models.iot_dps_client_enums import (IotDpsSku,
                                                                          AllocationPolicy,
                                                                          AccessRightsDescription)
 
@@ -55,33 +55,33 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('rights', options_list=['--rights', '-r'], nargs='+',
                    arg_type=get_enum_type(AccessRightsDescription),
                    help='Access rights for the IoT provisioning service. Use space separated list for multiple rights.')
-        c.argument('primary_key', help='Primary SAS key value.', type=str)
-        c.argument('secondary_key', help='Secondary SAS key value.', type=str)
+        c.argument('primary_key', help='Primary SAS key value.')
+        c.argument('secondary_key', help='Secondary SAS key value.')
 
     with self.argument_context('iot dps access-policy update') as c:
         c.argument('rights', options_list=['--rights', '-r'], nargs='+',
                    arg_type=get_enum_type(AccessRightsDescription),
                    help='Access rights for the IoT provisioning service. Use space separated list for multiple rights.')
-        c.argument('primary_key', help='Primary SAS key value.', type=str)
-        c.argument('secondary_key', help='Secondary SAS key value.', type=str)
+        c.argument('primary_key', help='Primary SAS key value.')
+        c.argument('secondary_key', help='Secondary SAS key value.')
 
     with self.argument_context('iot dps linked-hub') as c:
         c.argument('linked_hub', options_list=['--linked-hub'], help='Host name of linked IoT Hub.')
 
     with self.argument_context('iot dps linked-hub create') as c:
-        c.argument('connection_string', help='Connection string of the IoT hub.', type=str)
+        c.argument('connection_string', help='Connection string of the IoT hub.')
         c.argument('location', get_location_type(self.cli_ctx),
                    help='Location of the IoT hub.')
         c.argument('apply_allocation_policy',
                    help='A boolean indicating whether to apply allocation policy to the IoT hub.',
                    arg_type=get_three_state_flag())
-        c.argument('allocation_weight', help='Allocation weight of the IoT hub.', type=int)
+        c.argument('allocation_weight', help='Allocation weight of the IoT hub.')
 
     with self.argument_context('iot dps linked-hub update') as c:
         c.argument('apply_allocation_policy',
                    help='A boolean indicating whether to apply allocation policy to the Iot hub.',
                    arg_type=get_three_state_flag())
-        c.argument('allocation_weight', help='Allocation weight of the IoT hub.', type=int)
+        c.argument('allocation_weight', help='Allocation weight of the IoT hub.')
 
     with self.argument_context('iot dps allocation-policy update') as c:
         c.argument('allocation_policy', options_list=['--policy', '-p'], arg_type=get_enum_type(AllocationPolicy),
