@@ -22,30 +22,36 @@ app_dir=$(cd artifacts/app && pwd)
 script_dir=`cd $(dirname $0); pwd`
 
 ##############################################
-# Copy app scripts for batch run - To be retired in the future
-cp $script_dir/app/* $app_dir
+# Define colored output func
+function title {
+    LGREEN='\033[1;32m'
+    CLEAR='\033[0m'
+
+    echo -e ${LGREEN}$1${CLEAR}
+}
+
 
 ##############################################
 # Update version strings
+title 'Determine version'
 . $script_dir/version.sh $1
+echo -n $version > ./artifacts/version
 
 ##############################################
 # build product packages
-echo 'Build Azure CLI and its command modules'
+title 'Build Azure CLI and its command modules'
 for setup_file in $(find src -name 'setup.py'); do
-    pushd $(dirname $setup_file)
-    echo ""
+    pushd $(dirname $setup_file) >/dev/null
     echo "Building module at $(pwd) ..."
     python setup.py -q bdist_wheel -d $output_dir
     python setup.py -q sdist -d $sdist_dir
-    popd
+    popd >/dev/null
 done
 
 ##############################################
 # build test packages
-echo 'Build Azure CLI tests package'
+title 'Build Azure CLI tests package'
 
-echo "Copy test source code into $build_src ..."
 for test_src in $(find src/command_modules -name tests -type d); do
     rel_path=${test_src##src/command_modules/}
     rel_path=(${rel_path/\// })
@@ -145,10 +151,14 @@ cat >>$testsrc_dir/setup.cfg <<EOL
 universal=1
 EOL
 
-pushd $testsrc_dir
+cat >>$testsrc_dir/README.txt <<EOL
+Azure CLI Test Cases
+EOL
+
+pushd $testsrc_dir >/dev/null
 python setup.py -q bdist_wheel -d $output_dir
 python setup.py -q sdist -d $sdist_dir
-popd
+popd >/dev/null
 
 ##############################################
 # clear afterwards
@@ -157,5 +167,5 @@ git checkout src
 
 ##############################################
 # summary
-echo 'Build result:'
-ls -R ./artifacts
+title 'Results'
+echo $(ls $sdist_dir | wc -l) packages created.
