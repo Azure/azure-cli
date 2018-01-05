@@ -5,7 +5,8 @@ Release History
 
 2.0.21
 ++++++
-* Knack conversion
+* Update managed storage SDK to 1.5.0
+* Support storage v2
 
 2.0.20
 ++++++

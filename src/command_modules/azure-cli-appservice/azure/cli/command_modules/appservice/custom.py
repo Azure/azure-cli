@@ -164,8 +164,8 @@ def assign_identity(cmd, resource_group_name, name, role='Contributor', scope=No
         poller = client.web_apps.create_or_update(resource_group_name, name, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
-    from azure.cli.core.commands.arm import assign_implict_identity
-    webapp = assign_implict_identity(cmd.cli_ctx, getter, setter, role, scope)
+    from azure.cli.core.commands.arm import assign_identity as _assign_identity
+    webapp = _assign_identity(cmd.cli_ctx, getter, setter, role, scope)
     update_app_settings(cmd, resource_group_name, name, ['WEBSITE_DISABLE_MSI={}'.format(disable_msi)])
     return webapp.identity
 

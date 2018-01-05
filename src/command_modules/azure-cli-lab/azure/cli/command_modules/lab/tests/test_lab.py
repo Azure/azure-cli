@@ -5,7 +5,7 @@
 
 import os
 from azure.cli.testsdk import record_only
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer
 
 TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 TEMPLATE = os.path.join(TEST_DIR, 'lab_template.json').replace('\\', '\\\\')
@@ -13,9 +13,8 @@ ENV_PARAMETERS = os.path.join('@' + TEST_DIR, 'lab_template.json').replace('\\',
 LAB_NAME = 'cliautomationlab'
 
 
-class LabGalleryVMMgmtScenarioTest(ScenarioTest):
+class LabGalleryVMMgmtScenarioTest(LiveScenarioTest):
 
-    @record_only()
     @ResourceGroupPreparer(name_prefix='cliautomation')
     def test_lab_gallery_vm_mgmt(self, resource_group):
         self.kwargs.update({
@@ -106,8 +105,8 @@ class LabGalleryVMMgmtScenarioTest(ScenarioTest):
         ])
 
 
-class LabEnvironmentMgmtScenarioTest(ScenarioTest):
-    @record_only()
+class LabEnvironmentMgmtScenarioTest(LiveScenarioTest):
+
     @ResourceGroupPreparer(name_prefix='cliautomation01')
     def test_lab_environment_mgmt(self, resource_group):
         self.kwargs.update({

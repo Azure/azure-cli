@@ -7,16 +7,14 @@
 from __future__ import print_function
 from os.path import exists
 from enum import Enum
+from knack.config import CLIConfig
 from knack.util import CLIError
+from knack.log import get_logger
+
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku, AccessRights
 from azure.mgmt.iothub.models.iot_hub_description import IotHubDescription
 from azure.mgmt.iothub.models.iot_hub_sku_info import IotHubSkuInfo
 from azure.mgmt.iothub.models.shared_access_signature_authorization_rule import SharedAccessSignatureAuthorizationRule
-from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.iot_hub_device_client import IotHubDeviceClient
-from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.authentication import Authentication
-from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.device_description import DeviceDescription
-from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.x509_thumbprint import X509Thumbprint
-from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
 
 from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDescription,
                                                     IotDpsPropertiesDescription,
@@ -25,9 +23,32 @@ from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDes
                                                     IotDpsSku,
                                                     SharedAccessSignatureAuthorizationRuleAccessRightsDescription)
 
+from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.iot_hub_device_client import IotHubDeviceClient
+from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.authentication import Authentication
+from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.device_description import DeviceDescription
+from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.x509_thumbprint import X509Thumbprint
+from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
+from azure.cli.core.extension import extension_exists
+from azure.cli.core._environment import get_config_dir
 
 from ._client_factory import resource_service_factory
 from ._utils import create_self_signed_certificate, open_certificate
+
+logger = get_logger(__name__)
+
+
+# IoT Extension run once awareness
+if not extension_exists('azure_cli_iot_ext'):
+    config = CLIConfig(get_config_dir())
+    ran_before = config.getboolean('iot', 'first_run', fallback=False)
+    if not ran_before:
+        extension_text = """
+                         Comprehensive IoT data-plane functionality is available
+                         in the Azure IoT CLI Extension. For more info and install guide
+                         go to https://github.com/Azure/azure-iot-cli-extension
+                         """
+        logger.warning(extension_text)
+        config.set_value('iot', 'first_run', 'yes')
 
 
 # CUSTOM TYPE

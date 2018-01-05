@@ -126,7 +126,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         for item in ['blob', 'file', 'queue', 'table']:
             c.argument('{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
 
-    with self.argument_context('storage account key renew') as c:
+    with self.argument_context('storage account keys renew') as c:
         c.argument('key_name', options_list=['--key'], help='The key to regenerate.', validator=validate_key,
                    arg_type=get_enum_type(list(storage_account_key_options.keys())))
         c.argument('account_name', acct_name_type, id_part=None)

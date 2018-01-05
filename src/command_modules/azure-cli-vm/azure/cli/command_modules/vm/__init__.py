@@ -13,7 +13,10 @@ class ComputeCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        compute_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.vm.custom#{}')
+        compute_custom = CliCommandType(
+            operations_tmpl='azure.cli.command_modules.vm.custom#{}',
+            operation_group='virtual_machines'
+        )
         super(ComputeCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                     resource_type=ResourceType.MGMT_COMPUTE,
                                                     custom_command_type=compute_custom)

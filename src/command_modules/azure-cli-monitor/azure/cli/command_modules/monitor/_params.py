@@ -3,229 +3,216 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import ParametersContext
+from knack.arguments import CLIArgumentType
+
 from azure.cli.core.util import get_json_object
 
-from azure.cli.core.commands import register_cli_argument, register_extra_cli_argument
-from azure.cli.core.commands.parameters import location_type, tags_type, get_three_state_flag
+from azure.cli.core.commands.parameters import get_location_type, tags_type, get_three_state_flag, get_enum_type
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
-from azure.cli.command_modules.monitor.operations.actions import (AlertAddAction, AlertRemoveAction, ConditionAction,
-                                                                  period_type)
+from azure.cli.command_modules.monitor.operations.actions import (
+    AlertAddAction, AlertRemoveAction, ConditionAction, period_type)
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
-from azure.cli.command_modules.monitor.validators import validate_diagnostic_settings, get_target_resource_validator
+from azure.cli.command_modules.monitor.validators import validate_diagnostic_settings, process_webhook_prop
 from azure.mgmt.monitor.models.monitor_management_client_enums import ConditionOperator, TimeAggregationOperator
 from azure.mgmt.monitor.models import LogProfileResource, RetentionPolicy
 
-from knack.arguments import CLIArgumentType, enum_choice_list
 
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, too-many-statements
+def load_arguments(self, _):
 
+    name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
 
-def register_resource_parameter_context(context, dest, arg_group=None, required=True):
-    context.register(dest, options_list='--resource', arg_group=arg_group, required=required,
-                     validator=get_target_resource_validator(dest, required), help="Name or ID of the target resource.")
-    context.extra('namespace', options_list='--resource-namespace', arg_group=arg_group,
-                  help="Target resource provider namespace.")
-    context.extra('parent', options_list='--resource-parent', arg_group=arg_group,
-                  help="Target resource parent path, if applicable.")
-    context.extra('resource_type', options_list='--resource-type', arg_group=arg_group,
-                  help="Target resource type. Can also accept namespace/type format "
-                       "(Ex: 'Microsoft.Compute/virtualMachines)')")
-    context.extra('resource_group_name', options_list=('--resource-group', '-g'), arg_group='Target Resource')
+    webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
 
+    with self.argument_context('monitor') as c:
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+        c.argument('tags', tags_type)
 
-def register_resource_parameter(command, dest, arg_group=None, required=True):
-    """ Helper method to add the extra parameters needed to support specifying name or ID for target resources. """
-    register_cli_argument(command, dest, options_list=['--{}'.format(dest)], arg_group=arg_group, required=required, validator=get_target_resource_validator(dest, required, preserve_resource_group_parameter=True), help="Name or ID of the target resource.")
-    register_extra_cli_argument(command, 'namespace', options_list=['--{}-namespace'.format(dest)], arg_group=arg_group, help="Target resource provider namespace.")
-    register_extra_cli_argument(command, 'parent', options_list=['--{}-parent'.format(dest)], arg_group=arg_group, help="Target resource parent path, if applicable.")
-    register_extra_cli_argument(command, 'resource_type', options_list=['--{}-type'.format(dest)], arg_group=arg_group, help="Target resource type. Can also accept namespace/type format (Ex: 'Microsoft.Compute/virtualMachines)')")
+    # region Alerts
+    with self.argument_context('monitor alert') as c:
+        c.argument('rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
 
+    with self.argument_context('monitor alert create') as c:
+        c.resource_parameter('target', arg_group='Target Resource')
+        c.argument('rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
+        c.argument('disabled', arg_type=get_three_state_flag())
+        c.argument('condition', action=ConditionAction, nargs='+')
 
-name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
+    with self.argument_context('monitor alert create', arg_group='Action') as c:
+        c.argument('custom_emails', nargs='+')
+        c.argument('email_service_owners', arg_type=get_three_state_flag())
+        c.argument('actions', options_list=['--action', '-a'], action=AlertAddAction, nargs='+')
 
-register_cli_argument('monitor', 'location', location_type, validator=get_default_location_from_resource_group)
-register_cli_argument('monitor', 'tags', tags_type)
+    with self.argument_context('monitor alert create', arg_group='Condition') as c:
+        c.argument('metric_name')
+        c.argument('operator', arg_type=get_enum_type(ConditionOperator))
+        c.argument('threshold')
+        c.argument('time_aggregation', arg_type=get_enum_type(TimeAggregationOperator))
+        c.argument('window_size')
 
-# region Alerts
+    with self.argument_context('monitor alert update') as c:
+        c.argument('rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
+        c.resource_parameter('target', arg_group='Target Resource', required=False)
 
-register_cli_argument('monitor alert', 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
+    with self.argument_context('monitor alert update', arg_group='Action') as c:
+        c.argument('email_service_owners', arg_type=get_three_state_flag())
+        c.argument('add_actions', options_list=['--add-action', '-a'], nargs='+', action=AlertAddAction,)
+        c.argument('remove_actions', options_list=['--remove-action', '-r'], nargs='+', action=AlertRemoveAction)
 
-register_cli_argument('monitor alert create', 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
+    with self.argument_context('monitor alert update', arg_group='Condition') as c:
+        c.argument('condition', action=ConditionAction, nargs='+')
+        c.argument('metric')
+        c.argument('operator', arg_type=get_enum_type(get_operator_map().keys()))
+        c.argument('threshold')
+        c.argument('aggregation', arg_type=get_enum_type(get_aggregation_map().keys()))
+        c.argument('period', type=period_type)
 
-register_cli_argument('monitor alert create', 'custom_emails', nargs='+', arg_group='Action')
-register_cli_argument('monitor alert create', 'disabled', arg_type=get_three_state_flag())
-register_cli_argument('monitor alert create', 'email_service_owners', arg_group='Action', arg_type=get_three_state_flag())
-register_cli_argument('monitor alert create', 'actions', options_list=['--action', '-a'], action=AlertAddAction, nargs='+', arg_group='Action')
-register_cli_argument('monitor alert create', 'condition', action=ConditionAction, nargs='+')
-register_cli_argument('monitor alert create', 'metric_name', arg_group='Condition')
-register_cli_argument('monitor alert create', 'operator', arg_group='Condition', **enum_choice_list(ConditionOperator))
-register_cli_argument('monitor alert create', 'threshold', arg_group='Condition')
-register_cli_argument('monitor alert create', 'time_aggregation', arg_group='Condition', **enum_choice_list(TimeAggregationOperator))
-register_cli_argument('monitor alert create', 'window_size', arg_group='Condition')
-register_resource_parameter('monitor alert create', 'target', 'Target Resource')
+    for scope in ['monitor alert show-incident', 'monitor alert list-incidents']:
+        with self.argument_context(scope) as c:
+            c.argument('rule_name', options_list=['--rule-name'], id_part='name')
+            c.argument('incident_name', name_arg_type, id_part='child_name_1')
 
-register_cli_argument('monitor alert update', 'rule_name', name_arg_type, id_part='name', help='Name of the alert rule.')
-register_cli_argument('monitor alert update', 'email_service_owners', arg_group='Action', arg_type=get_three_state_flag())
-register_cli_argument('monitor alert update', 'add_actions', options_list=['--add-action', '-a'], nargs='+', action=AlertAddAction, arg_group='Action')
-register_cli_argument('monitor alert update', 'remove_actions', options_list=['--remove-action', '-r'], nargs='+', action=AlertRemoveAction, arg_group='Action')
-register_cli_argument('monitor alert update', 'condition', action=ConditionAction, nargs='+', arg_group='Condition')
-register_cli_argument('monitor alert update', 'metric', arg_group='Condition')
-register_cli_argument('monitor alert update', 'operator', arg_group='Condition', **enum_choice_list(get_operator_map().keys()))
-register_cli_argument('monitor alert update', 'threshold', arg_group='Condition')
-register_cli_argument('monitor alert update', 'aggregation', arg_group='Condition', **enum_choice_list(get_aggregation_map().keys()))
-register_cli_argument('monitor alert update', 'period', type=period_type, arg_group='Condition')
-register_resource_parameter('monitor alert update', 'target', 'Target Resource', required=False)
+    with self.argument_context('monitor alert list-incidents') as c:
+        c.argument('rule_name', options_list=['--rule-name'], id_part=None)
+    # endregion
 
-for item in ['show-incident', 'list-incidents']:
-    register_cli_argument('monitor alert {}'.format(item), 'rule_name', options_list=['--rule-name'], id_part='name')
-    register_cli_argument('monitor alert {}'.format(item), 'incident_name', name_arg_type, id_part='child_name_1')
+    # region Metrics
+    with self.argument_context('monitor metrics list-definitions') as c:
+        c.resource_parameter_context('resource_uri', arg_group='Target Resource')
 
-register_cli_argument('monitor alert list-incidents', 'rule_name', options_list=['--rule-name'], id_part=None)
+    with self.argument_context('monitor metrics list') as c:
+        from .validators import (process_metric_timespan, process_metric_aggregation, process_metric_result_type,
+                                 process_metric_dimension)
+        from azure.mgmt.monitor.models.monitor_management_client_enums import AggregationType
+        c.resource_parameter_context('resource_uri', arg_group='Target Resource')
+        c.extra('start_time', options_list=['--start-time'], validator=process_metric_timespan, arg_group='Time')
+        c.extra('end_time', options_list=['--end-time'], arg_group='Time')
+        c.extra('metadata', options_list=['--metadata'], action='store_true', validator=process_metric_result_type)
+        c.extra('dimension', options_list=['--dimension'], nargs='*', validator=process_metric_dimension)
+        c.argument('interval', arg_group='Time')
+        c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*', validator=process_metric_aggregation)
+        c.ignore('timespan', 'result_type', 'top', 'orderby')
+    # endregion
 
-# endregion
+    # region Autoscale
+    with self.argument_context('monitor autoscale-settings') as c:
+        c.argument('name', options_list=['--azure-resource-name'])
+        c.argument('autoscale_setting_name', options_list=['--name', '-n'])
 
-with ParametersContext(command='monitor metrics list-definitions') as c:
-    register_resource_parameter_context(c, dest='resource_uri', arg_group='Target Resource')
+    with self.argument_context('monitor autoscale-settings create') as c:
+        c.argument('parameters', type=get_json_object, help='JSON encoded parameters configuration. Use @{file} to load from a file. Use az autoscale-settings get-parameters-template to export json template.')
 
-with ParametersContext(command='monitor metrics list') as c:
-    from .validators import (process_metric_timespan, process_metric_aggregation, process_metric_result_type,
-                             process_metric_dimension)
-    from azure.mgmt.monitor.models.monitor_management_client_enums import AggregationType
-    register_resource_parameter_context(c, dest='resource_uri', arg_group='Target Resource')
-    c.extra('start_time', options_list='--start-time', validator=process_metric_timespan, arg_group='Time')
-    c.extra('end_time', options_list='--end-time', arg_group='Time')
-    c.extra('metadata', options_list='--metadata', action='store_true', validator=process_metric_result_type)
-    c.extra('dimension', options_list='--dimension', nargs='*', validator=process_metric_dimension)
-    c.argument('interval', arg_group='Time')
-    c.argument('aggregation', nargs='*', validator=process_metric_aggregation,
-               **enum_choice_list(t for t in AggregationType if t.name != 'none'))
-    c.ignore('timespan')
-    c.ignore('result_type')
-    c.ignore('top')
-    c.ignore('orderby')
+    for scope in ['monitor autoscale-settings show', 'monitor autoscale-settings delete']:
+        with self.argument_context(scope) as c:
+            c.argument('autoscale_setting_name', id_part='name')
 
-with ParametersContext(command='monitor autoscale-settings') as c:
-    c.register_alias('name', ('--azure-resource-name',))
-    c.register_alias('autoscale_setting_name', ('--name', '-n'))
+    #  https://github.com/Azure/azure-rest-api-specs/issues/1017
+    with self.argument_context('monitor autoscale-settings list') as c:
+        c.ignore('filter')
+    # endregion
 
-with ParametersContext(command='monitor autoscale-settings create') as c:
-    c.register('parameters', ('--parameters',),
-               type=get_json_object,
-               help='JSON encoded parameters configuration. Use @{file} to load from a file.'
-                    'Use az autoscale-settings get-parameters-template to export json template.')
+    # region Diagnostics
+    with self.argument_context('monitor diagnostic-settings') as c:
+        c.argument('resource_uri', options_list=['--resource-id'])
 
-with ParametersContext(command='monitor autoscale-settings show') as c:
-    c.argument('autoscale_setting_name', id_part='name')
+    with self.argument_context('monitor diagnostic-settings create') as c:
+        c.argument('target_resource_id', options_list=['--resource-id'], validator=validate_diagnostic_settings)
+        c.argument('logs', type=get_json_object)
+        c.argument('metrics', type=get_json_object)
+        c.argument('tags', nargs='*')
 
-with ParametersContext(command='monitor autoscale-settings delete') as c:
-    c.argument('autoscale_setting_name', id_part='name')
+    with self.argument_context('monitor diagnostic-settings create', arg_group='Service Bus') as c:
+        c.ignore('service_bus_rule_id')
+        c.argument('namespace')
+        c.argument('rule_name')
+    # endregion
 
-#  https://github.com/Azure/azure-rest-api-specs/issues/1017
-with ParametersContext(command='monitor autoscale-settings list') as c:
-    c.ignore('filter')
+    # region LogProfiles
+    with self.argument_context('monitor log-profiles') as c:
+        c.argument('log_profile_name', options_list=['--name', '-n'])
 
-with ParametersContext(command='monitor diagnostic-settings') as c:
-    c.register_alias('resource_uri', ('--resource-id',))
+    with self.argument_context('monitor log-profiles create') as c:
+        c.argument('name', options_list=['--log-profile-name'])
+        c.expand('retention_policy', RetentionPolicy)
+        c.expand('parameters', LogProfileResource)
+        c.argument('name', options_list=['--log-profile-resource-name'])
+        c.argument('log_profile_name', options_list=['--name', '-n'])
+        c.argument('categories', nargs='+', help="Space separated categories of the logs.Some values are: 'Write', 'Delete', and/or 'Action.'")
+        c.argument('locations', nargs='+', help="Space separated list of regions for which Activity Log events should be stored.")
+    # endregion
 
-with ParametersContext(command='monitor diagnostic-settings create') as c:
-    c.register_alias('resource_group', ('--resource-group', '-g'))
-    c.register_alias('target_resource_id', ('--resource-id',), validator=validate_diagnostic_settings)
-    c.register('logs', ('--logs',), type=get_json_object)
-    c.register('metrics', ('--metrics',), type=get_json_object)
-    c.argument('tags', nargs='*')
+    # region ActivityLog
+    with self.argument_context('monitor activity-log list') as c:
+        c.argument('select', nargs='+')
 
-    # Service Bus argument group
-    c.ignore('service_bus_rule_id')
-    c.argument('namespace', arg_group='Service Bus')
-    c.argument('rule_name', arg_group='Service Bus')
+    with self.argument_context('monitor activity-log list', arg_group='OData Filter') as c:
+        c.argument('correlation_id')
+        c.argument('resource_group')
+        c.argument('resource_id')
+        c.argument('resource_provider')
+        c.argument('start_time')
+        c.argument('end_time')
+        c.argument('caller')
+        c.argument('status')
+    # endregion
 
-with ParametersContext(command='monitor log-profiles') as c:
-    c.register_alias('log_profile_name', ('--name', '-n'))
+    # region ActionGroup
+    with self.argument_context('monitor action-group') as c:
+        c.argument('action_group_name', options_list=['--name', '-n'], id_part='name')
 
-with ParametersContext(command='monitor log-profiles create') as c:
-    c.register_alias('name', ('--log-profile-name',))
-    c.expand('retention_policy', RetentionPolicy)
-    c.expand('parameters', LogProfileResource)
-    c.register_alias('name', ('--log-profile-resource-name',))
-    c.register_alias('log_profile_name', ('--name', '-n'))
-    c.argument('categories', nargs='+',
-               help="Space separated categories of the logs.Some values are: "
-                    "'Write', 'Delete', and/or 'Action.'")
-    c.argument('locations', nargs='+',
-               help="Space separated list of regions for which Activity Log events "
-                    "should be stored.")
+    with self.argument_context('monitor action-group create') as c:
+        from .validators import process_action_group_detail_for_creation
+        from .operations.actions import ActionGroupReceiverParameterAction
+        c.extra('receivers', options_list=['--action', '-a'], nargs='+', arg_group='Actions', action=ActionGroupReceiverParameterAction, validator=process_action_group_detail_for_creation)
+        c.extra('short_name')
+        c.extra('tags')
+        c.ignore('action_group')
 
-with ParametersContext(command='monitor activity-log list') as c:
-    c.register_alias('resource_group', ('--resource-group', '-g'))
-    c.argument('select', None, nargs='+')
-    filter_arg_group_name = 'OData Filter'
-    c.argument('correlation_id', arg_group=filter_arg_group_name)
-    c.argument('resource_group', arg_group=filter_arg_group_name)
-    c.argument('resource_id', arg_group=filter_arg_group_name)
-    c.argument('resource_provider', arg_group=filter_arg_group_name)
-    c.argument('start_time', arg_group=filter_arg_group_name)
-    c.argument('end_time', arg_group=filter_arg_group_name)
-    c.argument('caller', arg_group=filter_arg_group_name)
-    c.argument('status', arg_group=filter_arg_group_name)
+    with self.argument_context('monitor action-group update', arg_group='Actions') as c:
+        c.extra('add_receivers', options_list=['--add-action', '-a'], nargs='+', action=ActionGroupReceiverParameterAction)
+        c.extra('remove_receivers', options_list=['--remove-action', '-r'], nargs='+')
+        c.ignore('action_group')
 
+    with self.argument_context('monitor action-group enable-receiver') as c:
+        c.argument('receiver_name', options_list=['--name', '-n'])
+        c.argument('action_group_name', options_list=['--action-group'])
+    # endregion
 
-register_cli_argument('monitor action-group', 'action_group_name', options_list=('--name', '-n'), id_part='name')
+    # region ActivityLog Alerts
+    with self.argument_context('monitor activity-log alert') as c:
+        c.argument('activity_log_alert_name', options_list=['--name', '-n'], id_part='name')
 
-with ParametersContext(command='monitor action-group create') as c:
-    from .validators import process_action_group_detail_for_creation
-    from .operations.actions import ActionGroupReceiverParameterAction
+    with self.argument_context('monitor activity-log alert create') as c:
+        from .operations.activity_log_alerts import process_condition_parameter
+        c.argument('disable', action='store_true')
+        c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
+        c.argument('condition', options_list=['--condition', '-c'], nargs='+', validator=process_condition_parameter)
+        c.argument('action_groups', options_list=['--action-group', '-a'], nargs='+')
+        c.argument('webhook_properties', options_list=['--webhook-properties', '-w'], arg_type=webhook_prop_type)
 
-    c.extra('receivers', options_list=('--action', '-a'), nargs='+', arg_group='Actions',
-            action=ActionGroupReceiverParameterAction, validator=process_action_group_detail_for_creation)
-    c.extra('short_name')
-    c.extra('tags')
-    c.ignore('action_group')
+    with self.argument_context('monitor activity-log alert update-condition') as c:
+        c.argument('reset', action='store_true')
+        c.argument('add_conditions', options_list=['--add-condition', '-a'], nargs='+')
+        c.argument('remove_conditions', options_list=['--remove-condition', '-r'], nargs='+')
 
-with ParametersContext(command='monitor action-group update') as c:
-    c.extra('add_receivers', options_list=('--add-action', '-a'), nargs='+', arg_group='Actions',
-            action=ActionGroupReceiverParameterAction)
-    c.extra('remove_receivers', options_list=('--remove-action', '-r'), nargs='+', arg_group='Actions')
-    c.ignore('action_group')
+    with self.argument_context('monitor activity-log alert update') as c:
+        from .operations.activity_log_alerts import process_condition_parameter
+        c.argument('condition', options_list=['--condition', '-c'], nargs='+', validator=process_condition_parameter)
+        c.argument('enabled', arg_type=get_three_state_flag())
 
-with ParametersContext(command='monitor action-group enable-receiver') as c:
-    c.register_alias('receiver_name', ('--name', '-n'))
-    c.register_alias('action_group_name', options_list='--action-group')
+    with self.argument_context('monitor activity-log alert action-group add') as c:
+        c.argument('reset', action='store_true')
+        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+')
+        c.argument('webhook_properties', options_list=['--webhook-properties', '-w'], arg_type=webhook_prop_type)
 
-register_cli_argument('monitor activity-log alert', 'activity_log_alert_name', options_list=('--name', '-n'),
-                      id_part='name')
+    with self.argument_context('monitor activity-log alert action-group remove') as c:
+        c.argument('action_group_ids', options_list=['--action-group', '-a'], nargs='+')
 
-with ParametersContext(command='monitor activity-log alert create') as c:
-    from .operations.activity_log_alerts import webhook_prop_type, process_condition_parameter
-    c.register('disable', options_list='--disable', action='store_true')
-    c.register('scopes', options_list=('--scope', '-s'), nargs='+')
-    c.register('condition', options_list=('--condition', '-c'), nargs='+', validator=process_condition_parameter)
-    c.register('action_groups', options_list=('--action-group', '-a'), nargs='+')
-    c.register('webhook_properties', options_list=('--webhook-properties', '-w'), arg_type=webhook_prop_type)
+    with self.argument_context('monitor activity-log alert scope add') as c:
+        c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
+        c.argument('reset', action='store_true')
 
-with ParametersContext(command='monitor activity-log alert update-condition') as c:
-    c.register('reset', options_list='--reset', action='store_true')
-    c.register('add_conditions', options_list=('--add-condition', '-a'), nargs='+')
-    c.register('remove_conditions', options_list=('--remove-condition', '-r'), nargs='+')
-
-with ParametersContext(command='monitor activity-log alert update') as c:
-    from .operations.activity_log_alerts import process_condition_parameter
-    c.register('condition', options_list=('--condition', '-c'), nargs='+', validator=process_condition_parameter)
-    c.register('enabled', options_list='--enabled', **three_state_flag())
-
-with ParametersContext(command='monitor activity-log alert action-group add') as c:
-    from .operations.activity_log_alerts import webhook_prop_type
-    c.register('reset', options_list='--reset', action='store_true')
-    c.register('action_group_ids', options_list=('--action-group', '-a'), nargs='+')
-    c.register('webhook_properties', options_list=('--webhook-properties', '-w'), arg_type=webhook_prop_type)
-
-with ParametersContext(command='monitor activity-log alert action-group remove') as c:
-    c.register('action_group_ids', options_list=('--action-group', '-a'), nargs='+')
-
-with ParametersContext(command='monitor activity-log alert scope add') as c:
-    c.register('scopes', options_list=('--scope', '-s'), nargs='+')
-    c.register('reset', options_list='--reset', action='store_true')
-
-with ParametersContext(command='monitor activity-log alert scope remove') as c:
-    c.register('scopes', options_list=('--scope', '-s'), nargs='+')
+    with self.argument_context('monitor activity-log alert scope remove') as c:
+        c.argument('scopes', options_list=['--scope', '-s'], nargs='+')
+    # endregion

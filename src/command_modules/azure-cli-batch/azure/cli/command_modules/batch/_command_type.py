@@ -58,7 +58,7 @@ def _join_prefix(prefix, name):
 def _build_prefix(arg, param, path):
     """Recursively build a command line argument prefix from the request
     parameter object to avoid name conflicts.
-    :param str arg: Currenct argument name.
+    :param str arg: Current argument name.
     :param str param: Original request parameter name.
     :param str path: Request parameter namespace.
     """
@@ -104,7 +104,6 @@ def find_param_help(model, param):
 def find_return_type(model):
     """Parse the parameter help info from the model docstring.
     :param class model: Model class.
-    :param str param: The name of the parameter.
     :returns: str
     """
     # Search for :rtype: in the docstring
@@ -162,8 +161,8 @@ def group_title(path):
     group_path = path.split('.')
     group_path = list(map(filter_group, group_path))
     title = ': '.join(group_path)
-    for group in group_path:
-        title = title.replace(group, " ".join([n.title() for n in group.split('_')]), 1)
+    for each in group_path:
+        title = title.replace(each, " ".join([n.title() for n in each.split('_')]), 1)
     return title
 
 
@@ -430,7 +429,7 @@ class BatchArgumentTree(object):
 
 class AzureBatchDataPlaneCommand(object):
     # pylint: disable=too-many-instance-attributes, too-few-public-methods, too-many-statements
-    def __init__(self, name, operation, op_handler, client_factory=None, validator=None, **kwargs):
+    def __init__(self, name, operation, command_loader, client_factory=None, validator=None, **kwargs):
 
         if not isinstance(operation, string_types):
             raise ValueError("Operation must be a string. Got '{}'".format(operation))
@@ -442,6 +441,7 @@ class AzureBatchDataPlaneCommand(object):
         self.validator = validator
         self.client_factory = client_factory
         self.confirmation = 'delete' in operation
+        self._operation_func = None
 
         # The name of the request options parameter
         self._options_param = format_options_name(operation)
@@ -450,11 +450,17 @@ class AzureBatchDataPlaneCommand(object):
         # The loaded options model to populate for the request
         self._options_model = None
 
+        def _get_operation():
+            if not self._operation_func:
+                self._operation_func = command_loader.get_op_handler(operation)
+
+            return self._operation_func
+
         def _load_arguments():
-            return self._load_transformed_arguments(op_handler)
+            return self._load_transformed_arguments(_get_operation())
 
         def _load_descriptions():
-            return extract_full_summary_from_signature(op_handler)
+            return extract_full_summary_from_signature(_get_operation())
 
         # pylint: disable=inconsistent-return-statements
         def _execute_command(kwargs):
@@ -494,7 +500,7 @@ class AzureBatchDataPlaneCommand(object):
                 # Make request
                 if self._head_cmd:
                     kwargs['raw'] = True
-                result = op_handler(client, **kwargs)
+                result = _get_operation()(client, **kwargs)
 
                 # Head output
                 if self._head_cmd:
@@ -550,7 +556,7 @@ class AzureBatchDataPlaneCommand(object):
 
     def _build_parameters(self, path, kwargs, param, value):
         """Recursively build request parameter dictionary from command line args.
-        :param str arg_path: Current parameter namespace.
+        :param str path: Current parameter namespace.
         :param dict kwargs: The request arguments being built.
         :param param: The name of the request parameter.
         :param value: The value of the request parameter.
@@ -669,7 +675,7 @@ class AzureBatchDataPlaneCommand(object):
         """Flatten a complex parameter object into command line arguments.
         :param str path: The complex parameter namespace.
         :param class param_model: The complex parameter class.
-        :param list conflict_name: List of argument names that conflict.
+        :param list conflict_names: List of argument names that conflict.
         """
         conflict_names = conflict_names or []
 
@@ -825,6 +831,6 @@ class BatchCommandGroup(AzCommandGroup):
         operations_tmpl = merged_kwargs.get('operations_tmpl')
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         operation = operations_tmpl.format(method_name) if operations_tmpl else None
-        op_handler = self.command_loader.get_op_handler(operation)
-        command = AzureBatchDataPlaneCommand(name, operation, op_handler, **merged_kwargs)
+        command = AzureBatchDataPlaneCommand(name, operation, self.command_loader, **merged_kwargs)
+
         self.command_loader._cli_command(command_name, **command.get_kwargs())  # pylint: disable=protected-access

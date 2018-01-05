@@ -5,6 +5,9 @@
 
 import sys
 
+from knack.completion import ARGCOMPLETE_ENV_NAME
+from knack.log import get_logger
+
 from azure.cli.core import MainCommandsLoader, AzCli
 from azure.cli.core.azlogging import AzCliLogging
 from azure.cli.core.commands import AzCliCommandInvoker
@@ -13,9 +16,6 @@ from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
 from azure.cli.core._help import AzCliHelp
 
 import azure.cli.core.telemetry as telemetry
-
-from knack.completion import ARGCOMPLETE_ENV_NAME
-from knack.log import get_logger
 
 logger = get_logger(__name__)
 

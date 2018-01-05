@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-from ..util import get_operator_map, get_aggregation_map
+from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 
 
 def create_metric_rule(client, resource_group_name, rule_name, target, condition, description=None, disabled=False,

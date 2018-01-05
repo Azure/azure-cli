@@ -36,14 +36,14 @@ NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, Instance
                            'VirtualMachineExtension', 'ImageReference', 'DiskCreateOptionTypes',
                            'VirtualMachineScaleSetVMProfile', 'VirtualMachineScaleSetOSProfile', 'LinuxConfiguration',
                            'CachingTypes',
-                           mod='models')
+                           mod='models', operation_group='virtual_machines')  # FIXME split into loading by RT
 
 
 def _get_test_cmd():
     cli_ctx = TestCli()
     loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_COMPUTE)
     cmd = AzCliCommand(loader, 'test', None)
-    cmd.command_kwargs = {'resource_type': ResourceType.MGMT_COMPUTE}
+    cmd.command_kwargs = {'resource_type': ResourceType.MGMT_COMPUTE, 'operation_group': 'virtual_machines'}
     cmd.cli_ctx = cli_ctx
     return cmd
 

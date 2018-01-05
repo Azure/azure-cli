@@ -1,0 +1,10 @@
+sudo: true
+dist: trusty
+jobs:
+  include:
+    - stage: build droid image
+      script:
+      - if [ -n $AZURE_CLI_BUILD_CR ]; then 
+          docker login $AZURE_CLI_BUILD_CR -u $AZURE_CLI_CR_SP_USENAME -p $AZURE_CLI_CR_SP_PASSWORD; 
+        fi
+      - ./scripts/ci/build_droid.sh

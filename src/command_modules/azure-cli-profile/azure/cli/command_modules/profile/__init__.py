@@ -42,7 +42,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
         with self.argument_context('login') as c:
             c.argument('password', options_list=('--password', '-p'), help="Credentials like user password, or for a service principal, provide client secret or a pem file with key and public certificate. Will prompt if not given.")
             c.argument('service_principal', action='store_true', help='The credential representing a service principal.')
-            c.argument('username', options_list=('--username', '-u'), help='Organization id or service principal')
+            c.argument('username', options_list=('--username', '-u'), help='user name, service principal, or managed service identity ID')
             c.argument('tenant', options_list=('--tenant', '-t'), help='The AAD tenant, must provide when using service principals.')
             c.argument('allow_no_subscriptions', action='store_true', help="Support access tenants without subscriptions. It's uncommon but useful to run tenant level commands, such as 'az ad'")
             c.argument('msi', action='store_true', help="Log in using the Virtual Machine's identity", arg_group='Managed Service Identity')

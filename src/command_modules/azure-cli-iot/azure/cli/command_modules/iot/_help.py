@@ -11,6 +11,9 @@ from ._constants import certificate_help
 helps['iot'] = """
     type: group
     short-summary: (PREVIEW) Manage Internet of Things (IoT) assets.
+    long-summary: Comprehensive IoT data-plane functionality is available
+                  in the Azure IoT CLI Extension. For more info and install guide
+                  go to https://github.com/Azure/azure-iot-cli-extension
 """
 
 helps['iot device'] = """
@@ -518,6 +521,7 @@ helps['iot hub show-stats'] = """
 helps['iot device create'] = """
     type: command
     short-summary: Register a device for an IoT hub.
+    long-summary: This command is deprecating. Use 'az iot hub device-identity create' via the IoT Extension instead.
     examples:
         - name: Create a device authenticating with symmetric key.
           text: >
@@ -539,11 +543,13 @@ helps['iot device create'] = """
 helps['iot device show'] = """
     type: command
     short-summary: Get the details for a device in an IoT hub.
+    long-summary: This command is deprecating. Use 'az iot hub device-identity show' via the IoT Extension instead.
 """
 
 helps['iot device update'] = """
     type: command
     short-summary: Update the metadata of a device in an IoT hub.
+    long-summary: This command is deprecating. Use 'az iot hub device-identity update' via the IoT Extension instead.
     examples:
         - name: Disable a device.
           text: >
@@ -553,16 +559,20 @@ helps['iot device update'] = """
 helps['iot device list'] = """
     type: command
     short-summary: List devices in an IoT hub.
+    long-summary: This command is deprecating. Use 'az iot hub device-identity list' via the IoT Extension instead.
 """
 
 helps['iot device delete'] = """
     type: command
     short-summary: Delete a device from an IoT hub.
+    long-summary: This command is deprecating. Use 'az iot hub device-identity delete' via the IoT Extension instead.
 """
 
 helps['iot device show-connection-string'] = """
     type: command
     short-summary: Show the connection strings for devices in an IoT hub.
+    long-summary: This command is deprecating.
+                  Use 'az iot hub device-identity show-connection-string' via the IoT Extension instead.
     examples:
         - name: Show the connection string of a device in an IoT Hub using the primary key.
           text: >
@@ -586,6 +596,7 @@ helps['iot device message'] = """
 helps['iot device message send'] = """
     type: command
     short-summary: Send a device-to-cloud message.
+    long-summary: This command is deprecating. Use 'az iot device send-d2c-message' via the IoT Extension instead.
     examples:
         - name: Send a device-to-cloud message to an IoT hub with a default message.
           text: >
@@ -598,6 +609,7 @@ helps['iot device message send'] = """
 helps['iot device message receive'] = """
     type: command
     short-summary: Receive a cloud-to-device message.
+    long-summary: This command is deprecating. Use 'az iot device c2d-message receive' via the IoT Extension instead.
     examples:
         - name: Receive a cloud-to-device message from an IoT hub with a default timeout.
           text: >
@@ -610,26 +622,31 @@ helps['iot device message receive'] = """
 helps['iot device message complete'] = """
     type: command
     short-summary: Complete a cloud-to-device message.
+    long-summary: This command is deprecating. Use 'az iot device c2d-message complete' via the IoT Extension instead.
 """
 
 helps['iot device message reject'] = """
     type: command
     short-summary: Reject a cloud-to-device message.
+    long-summary: This command is deprecating. Use 'az iot device c2d-message reject' via the IoT Extension instead.
 """
 
 helps['iot device message abandon'] = """
     type: command
     short-summary: Abandon a cloud-to-device message.
+    long-summary: This command is deprecating. Use 'az iot device c2d-message abandon' via the IoT Extension instead.
 """
 
 helps['iot device export'] = """
     type: command
     short-summary: Export all the device identities in the IoT hub identity registry to an Azure Storage blob container.
-    long-summary: For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities
+    long-summary: This command is deprecating. Use 'az iot hub device-identity export' via the IoT Extension instead.
+                  For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities
 """
 
 helps['iot device import'] = """
     type: command
     short-summary: Import, update, or delete device identities in the IoT hub identity registry from a blob.
-    long-summary: For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities
+    long-summary: This command is deprecating. Use 'az iot hub device-identity import' via the IoT Extension instead.
+                  For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-identity-registry#import-and-export-device-identities
 """

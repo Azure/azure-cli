@@ -5,7 +5,9 @@
 
 import unittest
 import re
-from azure.cli.core.util import CLIError
+
+from knack.util import CLIError
+
 from azure.cli.command_modules.monitor.operations.activity_log import (_build_activity_log_odata_filter,
                                                                        _activity_log_select_filter_builder,
                                                                        _build_odata_filter)

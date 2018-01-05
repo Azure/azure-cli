@@ -3,6 +3,15 @@
 Release History
 ===============
 
+0.1.16
+++++++
+* Added deprecation messages in commands and command help.
+* Added IoT run once check to warn users about the availability of the IoT Extension.
+
+0.1.15
+++++++
+* Minor fixes.
+
 0.1.14
 ++++++
 * Adds support for certificate authorities (CA) and certificate chains.

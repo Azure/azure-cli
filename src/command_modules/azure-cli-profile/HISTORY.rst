@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.16
+++++++
+* support login with user assigned identities
+
 2.0.15
 ++++++
 * minor fixes
