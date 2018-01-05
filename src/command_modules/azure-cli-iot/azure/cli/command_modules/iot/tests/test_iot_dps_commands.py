@@ -15,6 +15,12 @@ class IoTDpsTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
     def test_dps_lifecycle(self, group_name, group_location):
         dps_name = self.create_random_name('dps', 20)
+        hub_name = self.create_random_name('iot', 20)
+
+        self.cmd('iot hub create -n {} -g {} --sku S1'.format(hub_name, group_name),
+                 checks=[self.check('resourceGroup', group_name),
+                         self.check('name', hub_name),
+                         self.check('sku.name', 'S1')])
 
         # Create DPS
         self.cmd('az iot dps create -g {} -n {}'.format(group_name, dps_name), checks=[
@@ -134,12 +140,13 @@ class IoTDpsTest(ScenarioTest):
         # Delete certificate
         self.cmd('az iot dps certificate delete --dps-name {} -g {} --name {} --etag {}'.format(dps_name, group_name, cert_name, etag))
 
+        _delete_test_cert(cert_file, key_file, verification_file)
+
         # Test DPS Linked Hub Lifecycle
         key_name = self.create_random_name('key', 20)
         permission = 'RegistryWrite'
 
         # Set up a hub with a policy to be link
-        hub_name = self._create_test_hub(group_name)
         hub_host_name = '{}.azure-devices.net'.format(hub_name)
 
         self.cmd('az iot hub policy create --hub-name {} -n {} --permissions {}'.format(hub_name, key_name, permission))
@@ -175,23 +182,8 @@ class IoTDpsTest(ScenarioTest):
 
         self.cmd('az iot dps linked-hub delete --dps-name {} -g {} --linked-hub {}'.format(dps_name, group_name, hub_host_name))
 
-        # Tear down the hub
-        self._delete_test_hub(hub_name)
-
         # Delete DPS
         self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dps_name))
-
-    def _create_test_hub(self, group_name):
-        hub_name = self.create_random_name(prefix='iot-hub-for-dps-test', length=48)
-        self.cmd('az iot hub create -n {} -g {} --sku S1'.format(hub_name, group_name), checks=[
-            self.check('resourceGroup', group_name),
-            self.check('name', hub_name),
-            self.check('sku.name', 'S1')
-        ])
-        return hub_name
-
-    def _delete_test_hub(self, hub_name):
-        self.cmd('az iot hub delete -n {}'.format(hub_name))
 
     def _get_hub_policy_primary_key(self, hub_name, key_name):
         output = self.cmd('az iot hub policy show --hub-name {} -n {}'.format(hub_name, key_name))
