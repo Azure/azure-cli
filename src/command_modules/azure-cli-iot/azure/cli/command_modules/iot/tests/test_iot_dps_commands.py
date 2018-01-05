@@ -14,47 +14,40 @@ class IoTDpsTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
     def test_dps_lifecycle(self, group_name, group_location):
-        name = self.create_random_name('dps', 20)
+        dps_name = self.create_random_name('dps', 20)
 
         # Create DPS
-        self.cmd('az iot dps create -g {} -n {}'.format(group_name, name), checks=[
-            self.check('name', name),
+        self.cmd('az iot dps create -g {} -n {}'.format(group_name, dps_name), checks=[
+            self.check('name', dps_name),
             self.check('location', group_location)
         ])
 
         # List DPS
         self.cmd('az iot dps list -g {}'.format(group_name), checks=[
             self.check('length([*])', 1),
-            self.check('[0].name', name),
+            self.check('[0].name', dps_name),
             self.check('[0].location', group_location)
         ])
 
         # Get DPS
-        self.cmd('az iot dps show -g {} -n {}'.format(group_name, name), checks=[
-            self.check('name', name),
+        self.cmd('az iot dps show -g {} -n {}'.format(group_name, dps_name), checks=[
+            self.check('name', dps_name),
             self.check('location', group_location)
         ])
 
         property_to_update = 'properties.allocationPolicy'
         updated_value = 'GeoLatency'
         # Update DPS
-        self.cmd('az iot dps update -g {} -n {} --set {}="{}"'.format(group_name, name, property_to_update, updated_value), checks=[
-            self.check('name', name),
+        self.cmd('az iot dps update -g {} -n {} --set {}="{}"'.format(group_name, dps_name, property_to_update, updated_value), checks=[
+            self.check('name', dps_name),
             self.check('location', group_location),
             self.check(property_to_update, updated_value)
         ])
 
-        # Delete DPS
-        self.cmd('az iot dps delete -g {} -n {}'.format(group_name, name))
-
-    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
-    def test_dps_access_policy_lifecycle(self, group_name, group_location):
+        # Test DPS Access Policy Lifecycle
         policy_name = self.create_random_name('policy', 20)
         right = 'EnrollmentRead'
         new_right = 'EnrollmentWrite'
-
-        # Set up a provisioning service
-        dps_name = self._create_test_dps(group_name, group_location)
 
         # Create access policy
         self.cmd('az iot dps access-policy create -g {} --dps-name {} -n {} -r {}'.format(group_name, dps_name, policy_name, right), checks=[
@@ -82,70 +75,10 @@ class IoTDpsTest(ScenarioTest):
                      self.check('rights', new_right)
         ])
 
-        # Delete access policy
+        # Delete policy
         self.cmd('az iot dps access-policy delete -g {} --dps-name {} -n {}'.format(group_name, dps_name, policy_name))
 
-        # Tear down the provisioning service
-        self._delete_test_dps(dps_name, group_name)
-
-    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
-    def test_dps_linked_hub_lifecycle(self, group_name, group_location):
-        key_name = self.create_random_name('key', 20)
-        permission = 'RegistryWrite'
-
-        # Set up a hub with a policy to be link
-        hub_name = self._create_test_hub(group_name)
-        hub_host_name = '{}.azure-devices.net'.format(hub_name)
-
-        self.cmd('az iot hub policy create --hub-name {} -n {} --permissions {}'.format(hub_name, key_name, permission))
-
-        primary_key = self._get_hub_policy_primary_key(hub_name, key_name)
-        connection_string = 'HostName={};SharedAccessKeyName={};SharedAccessKey={}'.format(hub_host_name, key_name, primary_key)
-
-        # Set up a provisioning service
-        dps_name = self._create_test_dps(group_name, group_location)
-
-        self.cmd('az iot dps linked-hub create --dps-name {} -g {} --connection-string {} -l {}'
-                 .format(dps_name, group_name, connection_string, group_location))
-        # Service bug here preventing us doing the self.check:
-        # 1. "create" returns an array instead of the object
-        # 2. "create" returns an empty array sometimes
-
-        self.cmd('az iot dps linked-hub list --dps-name {} -g {}'.format(dps_name, group_name), checks=[
-            self.check('length([*])', 1),
-            self.check('[0].name', '{}.azure-devices.net'.format(hub_name)),
-            self.check('[0].location', group_location)
-        ])
-
-        self.cmd('az iot dps linked-hub show --dps-name {} -g {} --linked-hub {}'.format(dps_name, group_name, hub_host_name), checks=[
-            self.check('name', hub_host_name),
-            self.check('location', group_location)
-        ])
-
-        allocationWeight = 10
-        applyAllocationPolicy = True
-        self.cmd('az iot dps linked-hub update --dps-name {} -g {} --linked-hub {} --allocation-weight {} --apply-allocation-policy {}'
-                 .format(dps_name, group_name, hub_host_name, allocationWeight, applyAllocationPolicy))
-
-        self.cmd('az iot dps linked-hub show --dps-name {} -g {} --linked-hub {}'.format(dps_name, group_name, hub_host_name), checks=[
-            self.check('name', hub_host_name),
-            self.check('location', group_location),
-            self.check('allocationWeight', allocationWeight),
-            self.check('applyAllocationPolicy', applyAllocationPolicy)
-        ])
-
-        self.cmd('az iot dps linked-hub delete --dps-name {} -g {} --linked-hub {}'.format(dps_name, group_name, hub_host_name))
-
-        # Tear down the provisioning service
-        self._delete_test_dps(dps_name, group_name)
-
-        # Tear down the hub
-        self._delete_test_hub(hub_name)
-
-    @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
-    def test_dps_certificate_lifecycle(self, group_name, group_location):
-        # Set up a provisioning service
-        dps_name = self._create_test_dps(group_name, group_location)
+        # Test DPS Certificate Lifecycle
         cert_name = self.create_random_name('certificate', 20)
 
         # Set up cert file for test
@@ -201,17 +134,52 @@ class IoTDpsTest(ScenarioTest):
         # Delete certificate
         self.cmd('az iot dps certificate delete --dps-name {} -g {} --name {} --etag {}'.format(dps_name, group_name, cert_name, etag))
 
-        # Tear down the provisioning service
-        self._delete_test_dps(dps_name, group_name)
-        _delete_test_cert(cert_file, key_file, verification_file)
+        # Test DPS Linked Hub Lifecycle
+        key_name = self.create_random_name('key', 20)
+        permission = 'RegistryWrite'
 
-    def _create_test_dps(self, group_name, group_location):
-        dps_name = dps_name = self.create_random_name('iot-dps-for-dps-test', length=48)
-        self.cmd('az iot dps create -g {} -n {}'.format(group_name, dps_name), checks=[
-            self.check('name', dps_name),
+        # Set up a hub with a policy to be link
+        hub_name = self._create_test_hub(group_name)
+        hub_host_name = '{}.azure-devices.net'.format(hub_name)
+
+        self.cmd('az iot hub policy create --hub-name {} -n {} --permissions {}'.format(hub_name, key_name, permission))
+
+        primary_key = self._get_hub_policy_primary_key(hub_name, key_name)
+        connection_string = 'HostName={};SharedAccessKeyName={};SharedAccessKey={}'.format(hub_host_name, key_name, primary_key)
+
+        self.cmd('az iot dps linked-hub create --dps-name {} -g {} --connection-string {} -l {}'
+                 .format(dps_name, group_name, connection_string, group_location))
+
+        self.cmd('az iot dps linked-hub list --dps-name {} -g {}'.format(dps_name, group_name), checks=[
+            self.check('length([*])', 1),
+            self.check('[0].name', '{}.azure-devices.net'.format(hub_name)),
+            self.check('[0].location', group_location)
+        ])
+
+        self.cmd('az iot dps linked-hub show --dps-name {} -g {} --linked-hub {}'.format(dps_name, group_name, hub_host_name), checks=[
+            self.check('name', hub_host_name),
             self.check('location', group_location)
         ])
-        return dps_name
+
+        allocationWeight = 10
+        applyAllocationPolicy = True
+        self.cmd('az iot dps linked-hub update --dps-name {} -g {} --linked-hub {} --allocation-weight {} --apply-allocation-policy {}'
+                 .format(dps_name, group_name, hub_host_name, allocationWeight, applyAllocationPolicy))
+
+        self.cmd('az iot dps linked-hub show --dps-name {} -g {} --linked-hub {}'.format(dps_name, group_name, hub_host_name), checks=[
+            self.check('name', hub_host_name),
+            self.check('location', group_location),
+            self.check('allocationWeight', allocationWeight),
+            self.check('applyAllocationPolicy', applyAllocationPolicy)
+        ])
+
+        self.cmd('az iot dps linked-hub delete --dps-name {} -g {} --linked-hub {}'.format(dps_name, group_name, hub_host_name))
+
+        # Tear down the hub
+        self._delete_test_hub(hub_name)
+
+        # Delete DPS
+        self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dps_name))
 
     def _create_test_hub(self, group_name):
         hub_name = self.create_random_name(prefix='iot-hub-for-dps-test', length=48)
@@ -221,9 +189,6 @@ class IoTDpsTest(ScenarioTest):
             self.check('sku.name', 'S1')
         ])
         return hub_name
-
-    def _delete_test_dps(self, dps_name, group_name):
-        self.cmd('az iot dps delete -g {} -n {}'.format(group_name, dps_name))
 
     def _delete_test_hub(self, hub_name):
         self.cmd('az iot hub delete -n {}'.format(hub_name))
