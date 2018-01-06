@@ -375,77 +375,66 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self.assertIsNotNone(result[0]['name'])
 
     def _test_vnet_mgmt(self, resource_group, server, database_engine):
-        rg = resource_group
-        vnet_rule_1 = 'rule1'
-        vnet_rule_2 = 'rule2'
-
         # Create vnet's - vnet1 and vnet2
-
-        vnetName1 = 'vnet1'
-        vnetName2 = 'vnet2'
-        subnetName = 'subnet1'
-        addressPrefix = '10.0.1.0/24'
-        endpoint = database_engine
+        
+        self.kwargs.update({
+            'vnetName1': 'vnet1',
+            'vnetName2': 'vnet2',
+            'subnetName': 'subnet1',
+            'addressPrefix': '10.0.1.0/24',
+            'endpoint': database_engine,
+            'rg': resource_group,
+            'vnet_rule_1': 'rule1',
+            'vnet_rule_2': 'rule2'
+        })
 
         # Vnet 1
-        self.cmd('network vnet create -g {} -n {}'.format(rg, vnetName1))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {}'
-                 .format(rg, vnetName1, subnetName, addressPrefix, endpoint),
-                 checks=JMESPathCheck('serviceEndpoints[0].service', endpoint))
+        self.cmd('network vnet create -g {rg} -n {vnetName1}')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnetName1} -n {subnetName} --address-prefix {addressPrefix} --service-endpoints {endpoint}',
+                 checks=self.check('serviceEndpoints[0].service', '{endpoint}'))
 
-        vnet1 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'
-                         .format(subnetName, vnetName1, rg)).get_output_in_json()
+        vnet1 = self.cmd('network vnet subnet show -n {subnetName} --vnet-name {vnetName1} -g {rg}').get_output_in_json()
         vnet_id_1 = vnet1['id']
 
         # Vnet 2
-        self.cmd('network vnet create -g {} -n {}'.format(rg, vnetName2))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {}'
-                 .format(rg, vnetName2, subnetName, addressPrefix, endpoint),
-                 checks=JMESPathCheck('serviceEndpoints[0].service', 'Microsoft.Sql'))
+        self.cmd('network vnet create -g {rg} -n {vnetName2}')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnetName2} -n {subnetName} --address-prefix {addressPrefix} --service-endpoints {endpoint}',
+                 checks=self.check('serviceEndpoints[0].service', 'Microsoft.Sql'))
 
-        vnet2 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'
-                         .format(subnetName, vnetName2, rg)).get_output_in_json()
+        vnet2 = self.cmd('network vnet subnet show -n {subnetName} --vnet-name {vnetName2} -g {rg}').get_output_in_json()
         vnet_id_2 = vnet2['id']
 
         # test vnet-rule create using subnet name and vnet name
-        self.cmd('{} server vnet-rule create --name {} -g {} --server {} --subnet {} --vnet-name {}'
-                 .format(database_engine, vnet_rule_1, rg, server, subnetName, vnetName1))
+        self.cmd('{database_engine} server vnet-rule create --name {vnet_rule_1} -g {rg} --server {server} --subnet {subnetName} --vnet-name {vnetName1}')
 
         # test vnet-rule show rule 1
-        self.cmd('{} server vnet-rule show --name {} -g {} --server {}'
-                 .format(database_engine, vnet_rule_1, rg, server),
+        self.cmd('{database_engine} server vnet-rule show --name {vnet_rule_1} -g {rg} --server {server}',
                  checks=[
-                     JMESPathCheck('name', vnet_rule_1),
-                     JMESPathCheck('resourceGroup', rg)])
+                     self.check('name', '{vnet_rule_1}'),
+                     self.check('resourceGroup', '{rg}')])
 
         # test vnet-rule create using subnet id
-        self.cmd('{} server vnet-rule create --name {} -g {} --server {} --subnet {}'
-                 .format(database_engine, vnet_rule_2, rg, server, vnet_id_1),
+        self.cmd('{database_engine} server vnet-rule create --name {vnet_rule_2} -g {rg} --server {server} --subnet {vnet_id_1}',
                  checks=[
-                     JMESPathCheck('name', vnet_rule_2),
-                     JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_1)])
+                     self.check('name', '{vnet_rule_2}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('virtualNetworkSubnetId', '{vnet_id_1}')])
 
         # test vnet-rule update rule 1 with vnet 2
-        self.cmd('{} server vnet-rule update --name {} -g {} --server {} --subnet {}'
-                 .format(database_engine, vnet_rule_1, rg, server, vnet_id_2),
-
+        self.cmd('{database_engine} server vnet-rule update --name {vnet_rule_1} -g {rg} --server {server} --subnet {vnet_id_2}',
                  checks=[
-                     JMESPathCheck('name', vnet_rule_1),
-                     JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('virtualNetworkSubnetId', vnet_id_2)])
+                     self.check('name', '{vnet_rule_1}'),
+                     self.check('resourceGroup', '{rg}'),
+                     self.check('virtualNetworkSubnetId', '{vnet_id_2}')])
 
         # test vnet-rule list
-        self.cmd('{} server vnet-rule list -g {} --server {}'
-                 .format(database_engine, rg, server), checks=[JMESPathCheck('length(@)', 2)])
+        self.cmd('{database_engine} server vnet-rule list -g {rg} --server {server}', checks=[JMESPathCheck('length(@)', 2)])
 
         # test vnet-rule delete rule 1
-        self.cmd('{} server vnet-rule delete --name {} -g {} --server {}'
-                 .format(database_engine, vnet_rule_1, rg, server), checks=NoneCheck())
+        self.cmd('{database_engine} server vnet-rule delete --name {vnet_rule_1} -g {rg} --server {server}', checks=NoneCheck())
 
         # test vnet-rule delete rule 2
-        self.cmd('{} server vnet-rule delete --name {} -g {} --server {}'
-                 .format(database_engine, vnet_rule_2, rg, server), checks=NoneCheck())
+        self.cmd('{database_engine} server vnet-rule delete --name {vnet_rule_2} -g {rg} --server {server}', checks=NoneCheck())
 
 if __name__ == '__main__':
     import unittest

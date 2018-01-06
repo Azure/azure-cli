@@ -93,7 +93,7 @@ def load_arguments(self, _):
             c.argument('server_name', options_list=['--server-name', '-s'])
             c.argument('configuration_name', id_part='child_name_1', options_list=['--name', '-n'])
 
-    for scope in ['postgres server vnet-rule', 'postgres server vnet-rule']:
+    for scope in ['mysql server vnet-rule', 'postgres server vnet-rule']:
         with self.argument_context(scope) as c:
             c.argument('server_name', options_list=['--server-name', '-s'])
             c.argument('virtual_network_rule_name', options_list=['--name', '-n'], id_part='child_name_1', help='The name of the vnet rule.')
