@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.21
+++++++
+* `vnet-gateway update`: Fix issue when trying to change to/from active-standby mode.
+
 2.0.20
 ++++++
 * Update for CLI core changes.
