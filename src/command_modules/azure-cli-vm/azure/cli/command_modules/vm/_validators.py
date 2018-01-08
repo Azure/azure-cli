@@ -167,25 +167,20 @@ def _validate_secrets(secrets, os_type):
 
 # region VM Create Validators
 
+
 def _parse_image_argument(cmd, namespace):
     """ Systematically determines what type is supplied for the --image parameter. Updates the
         namespace and returns the type for subsequent processing. """
     from msrestazure.tools import is_valid_resource_id
     from msrestazure.azure_exceptions import CloudError
+
     # 1 - easy check for URI
     if namespace.image.lower().endswith('.vhd'):
         return 'uri'
 
-    # 2 - attempt to match an URN alias (most likely)
-    from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
-    images = load_images_from_aliases_doc(cmd.cli_ctx)
-    matched = next((x for x in images if x['urnAlias'].lower() == namespace.image.lower()), None)
-    if matched:
-        namespace.os_publisher = matched['publisher']
-        namespace.os_offer = matched['offer']
-        namespace.os_sku = matched['sku']
-        namespace.os_version = matched['version']
-        return 'urn'
+    # 2 - check if a fully-qualified ID (assumes it is an image ID)
+    if is_valid_resource_id(namespace.image):
+        return 'image_id'
 
     # 3 - attempt to match an URN pattern
     urn_match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', namespace.image)
@@ -204,9 +199,16 @@ def _parse_image_argument(cmd, namespace):
 
         return 'urn'
 
-    # 4 - check if a fully-qualified ID (assumes it is an image ID)
-    if is_valid_resource_id(namespace.image):
-        return 'image_id'
+    # 4 - attempt to match an URN alias (most likely)
+    from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
+    images = load_images_from_aliases_doc(cmd.cli_ctx)
+    matched = next((x for x in images if x['urnAlias'].lower() == namespace.image.lower()), None)
+    if matched:
+        namespace.os_publisher = matched['publisher']
+        namespace.os_offer = matched['offer']
+        namespace.os_sku = matched['sku']
+        namespace.os_version = matched['version']
+        return 'urn'
 
     # 5 - check if an existing managed disk image resource
     compute_client = _compute_client_factory(cmd.cli_ctx)
@@ -1028,10 +1030,10 @@ def process_image_create_namespace(cmd, namespace):
     validate_tags(namespace)
     try:
         # try capturing from VM, a most common scenario
-        compute_client = _compute_client_factory(cmd.cli_ctx)
         res_id = _get_resource_id(cmd.cli_ctx, namespace.source, namespace.resource_group_name,
                                   'virtualMachines', 'Microsoft.Compute')
         res = parse_resource_id(res_id)
+        compute_client = _compute_client_factory(cmd.cli_ctx, subscription_id=res['subscription'])
         vm_info = compute_client.virtual_machines.get(res['resource_group'], res['name'])
         # pylint: disable=no-member
         namespace.os_type = vm_info.storage_profile.os_disk.os_type.value

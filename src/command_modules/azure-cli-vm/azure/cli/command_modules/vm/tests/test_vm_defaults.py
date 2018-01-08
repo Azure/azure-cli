@@ -17,7 +17,8 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.vm._validators import (_validate_vm_vmss_create_vnet,
                                                       _validate_vmss_create_subnet,
                                                       _validate_vm_create_storage_account,
-                                                      _validate_vm_vmss_create_auth)
+                                                      _validate_vm_vmss_create_auth,
+                                                      _validate_vm_create_storage_profile)
 
 
 def _get_test_cmd():
@@ -281,6 +282,30 @@ class TestVMDefaultAuthType(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             _validate_vm_vmss_create_auth(ns)
         self.assertTrue("incorrect usage for authentication-type 'password':" in str(context.exception))
+
+
+class TestVMImageDefaults(unittest.TestCase):
+    @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
+    def test_vm_validator_retrieve_image_info_cross_subscription(self, factory_mock):
+        ns = argparse.Namespace()
+        cmd = mock.MagicMock()
+
+        image_info = mock.MagicMock()
+        client_mock = mock.MagicMock()
+        image_info.storage_profile.os_disk.os_type.value = 'someOS'
+        image_info.storage_profile.data_disks = ['does not matter']
+        client_mock.images.get.return_value = image_info
+        factory_mock.return_value = client_mock
+
+        ns.image = '/subscriptions/0b1f6471-1bf0-4dda-aec3-xxxxxxxxxxxx/resourceGroups/foo/providers/Microsoft.Compute/images/bar'
+        ns.admin_username = 'admin123'
+        ns.admin_password = 'verySecret!'
+        ns.storage_sku = 'Premium_LRS'
+        ns.os_type, ns.attach_os_disk, ns.storage_account, ns.storage_container_name, ns.use_unmanaged_disk = None, None, None, None, False
+        _validate_vm_create_storage_profile(cmd, ns, False)
+
+        self.assertEqual(ns.os_type, 'someOS')
+        self.assertEqual(ns.image_data_disks, ['does not matter'])
 
 
 if __name__ == '__main__':
