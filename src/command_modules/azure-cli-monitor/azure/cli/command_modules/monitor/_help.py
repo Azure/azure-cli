@@ -215,36 +215,33 @@ helps['monitor diagnostic-settings create'] = """
             type: command
             short-summary: Create diagnostic settings for the specified resource.
             parameters:
+                - name: --name -n
+                  short-summary: The name of the diagnostic settings.
                 - name: --resource-id
                   type: string
                   short-summary: The identifier of the resource.
                 - name: --resource-group -g
                   type: string
-                  short-summary: Name of the resource group.
+                  short-summary: Name of the resource group for the Log Analytics and Storage Account when the name of
+                                 the service instead of a full resource ID is given.
                 - name: --logs
                   type: string
                   short-summary: JSON encoded list of logs settings. Use @{file} to load from a file.
-                - name: --event-hub-name
-                  type: string
-                  short-summary: The name of the event hub. If none is specified, the default event hub will be
-                                 selected.
                 - name: --metrics
                   type: string
                   short-summary: JSON encoded list of metric settings. Use @{file} to load from a file.
                 - name: --storage-account
                   type: string
                   short-summary: Name or ID of the storage account to send diagnostic logs to.
-                - name: --namespace
-                  type: string
-                  short-summary: Name or ID of the Service Bus namespace.
-                - name: --rule-name
-                  type: string
-                  short-summary: Name of the Service Bus authorization rule.
                 - name: --workspace
                   type: string
                   short-summary: Name or ID of the Log Analytics workspace to send diagnostic logs to.
-                - name: --tags
-                  short-summary: Space separated tags in 'key[=value]' format. Use '' to clear existing tags
+                - name: --event-hub
+                  type: string
+                  short-summary: The name of the event hub. If none is specified, the default event hub will be
+                                 selected.
+                - name: --event-hub-rule
+                  short-summary: The resource Id for the event hub authorization rule
             """
 helps['monitor diagnostic-settings update'] = """
             type: command

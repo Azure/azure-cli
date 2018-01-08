@@ -55,6 +55,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.monitor.operations.diagnostic_settings_operations#DiagnosticSettingsOperations.{}',
         client_factory=cf_diagnostics)
 
+    diagnostics_categories_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.monitor.operations.diagnostic_settings_category_operations#DiagnosticSettingsCategoryOperations.{}',
+        client_factory=cf_diagnostics)
+
     diagnostics_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.monitor.operations.diagnostics_settings#{}',
         client_factory=cf_diagnostics)
@@ -117,9 +121,16 @@ def load_command_table(self, _):
         g.generic_update_command('update', exception_handler=monitor_exception_handler)
 
     with self.command_group('monitor diagnostic-settings', diagnostics_sdk, custom_command_type=diagnostics_custom) as g:
-        g.custom_command('create', 'create_diagnostics_settings')
+        from .validators import validate_diagnostic_settings
+        g.custom_command('create', 'create_diagnostics_settings', validator=validate_diagnostic_settings)
         g.command('show', 'get')
+        g.command('list', 'list')
+        g.command('delete', 'delete')
         g.generic_update_command('update', exception_handler=monitor_exception_handler)
+
+    with self.command_group('monitor diagnostic-settings categories', diagnostics_categories_sdk) as g:
+        g.command('show', 'get')
+        g.command('list', 'list')
 
     with self.command_group('monitor log-profiles', log_profiles_sdk) as g:
         g.command('create', 'create_or_update')

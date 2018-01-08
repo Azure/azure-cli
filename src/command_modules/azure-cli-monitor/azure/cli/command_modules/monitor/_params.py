@@ -13,7 +13,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.command_modules.monitor.operations.actions import (
     AlertAddAction, AlertRemoveAction, ConditionAction, period_type)
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
-from azure.cli.command_modules.monitor.validators import validate_diagnostic_settings, process_webhook_prop
+from azure.cli.command_modules.monitor.validators import process_webhook_prop
 from azure.mgmt.monitor.models.monitor_management_client_enums import ConditionOperator, TimeAggregationOperator
 from azure.mgmt.monitor.models import LogProfileResource, RetentionPolicy
 
@@ -112,20 +112,32 @@ def load_arguments(self, _):
         c.ignore('filter')
     # endregion
 
-    # region Diagnostics
+    # region Diagnostic
     with self.argument_context('monitor diagnostic-settings') as c:
-        c.argument('resource_uri', options_list=['--resource-id'])
+        c.argument('name', options_list=('-n', '--name'))
+
+    with self.argument_context('monitor diagnostic-settings show') as c:
+        c.resource_parameter_context('resource_uri', required=True, arg_group='Target Resource')
+
+    with self.argument_context('monitor diagnostic-settings list') as c:
+        c.resource_parameter_context('resource_uri', required=True)
+
+    with self.argument_context('monitor diagnostic-settings delete') as c:
+        c.resource_parameter_context('resource_uri', required=True, arg_group='Target Resource')
+
+    with self.argument_context('monitor diagnostic-settings update') as c:
+        c.resource_parameter_context('resource_uri', required=True, arg_group='Target Resource')
 
     with self.argument_context('monitor diagnostic-settings create') as c:
-        c.argument('target_resource_id', options_list=['--resource-id'], validator=validate_diagnostic_settings)
+        c.resource_parameter_context('resource_uri', required=True, arg_group='Target Resource', skip_validator=True)
         c.argument('logs', type=get_json_object)
         c.argument('metrics', type=get_json_object)
-        c.argument('tags', nargs='*')
 
-    with self.argument_context('monitor diagnostic-settings create', arg_group='Service Bus') as c:
-        c.ignore('service_bus_rule_id')
-        c.argument('namespace')
-        c.argument('rule_name')
+    with self.argument_context('monitor diagnostic-settings categories list') as c:
+        c.resource_parameter_context('resource_uri', required=True)
+
+    with self.argument_context('monitor diagnostic-settings categories show') as c:
+        c.resource_parameter_context('resource_uri', required=True)
     # endregion
 
     # region LogProfiles
