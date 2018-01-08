@@ -1325,15 +1325,13 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
 
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config')):
-    mc = aks_show(cmd, client, resource_group_name, name)
-    access_profiles = mc.properties.access_profiles
-    if not access_profiles:
-        msg = "No Kubernetes access profiles found. Cluster provisioning state is \"{}\"."
-        raise CLIError(msg.format(mc.properties.provisioning_state))
+    access_profile = client.get_access_profiles(
+        resource_group_name, name, "clusterAdmin" if admin else "clusterUser")
+
+    if not access_profile:
+        raise CLIError("No Kubernetes access profile found.")
     else:
-        access_profiles = access_profiles.as_dict()
-        access_profile = access_profiles.get('cluster_admin' if admin else 'cluster_user')
-        encoded_kubeconfig = access_profile.get('kube_config')
+        encoded_kubeconfig = access_profile.kube_config
         kubeconfig = base64.b64decode(encoded_kubeconfig).decode(encoding='UTF-8')
         _print_or_merge_credentials(path, kubeconfig)
 
