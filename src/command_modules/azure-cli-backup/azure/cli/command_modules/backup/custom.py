@@ -637,6 +637,7 @@ def _validate_object(obj, error_message):
     if obj is None:
         raise ValueError(error_message)
 
+
 # Tracking Utilities
 # pylint: disable=inconsistent-return-statements
 def _track_backup_ilr(cli_ctx, result, vault_name, resource_group):
