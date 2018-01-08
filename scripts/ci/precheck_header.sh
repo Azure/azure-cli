@@ -13,7 +13,8 @@ azdev verify document-map
 echo "Verify readme history"
 python -m automation.tests.verify_readme_history
 
-if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+# Only verify package version or PRs to Azure/azure-cli (not other forks)
+if [ $TRAVIS_EVENT_TYPE == "pull_request" ] && [ $TRAVIS_REPO_SLUG == "Azure/azure-cli" ]; then
     echo "Verify package versions"
     python -m automation.tests.verify_package_versions
 fi
