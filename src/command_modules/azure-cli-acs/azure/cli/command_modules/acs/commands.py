@@ -3,121 +3,68 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-from collections import OrderedDict
-
-from azure.cli.core.commands import cli_command
+from azure.cli.core.commands import CliCommandType
+from azure.cli.core.commands.arm import deployment_validate_table_format
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.commands.arm import \
-    (cli_generic_wait_command, deployment_validate_table_format)
-from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
-from ._client_factory import _acs_client_factory
-from ._client_factory import _aks_client_factory
+
+from ._client_factory import cf_container_services
+from ._client_factory import cf_managed_clusters
+from ._format import aks_get_versions_table_format
+from ._format import aks_list_table_format
+from ._format import aks_show_table_format
 
 
-def aks_list_table_format(results):
-    """"Format a list of managed clusters as summary results for display with "-o table"."""
-    return [_aks_table_format(r) for r in results]
+def load_command_table(self, _):
 
+    container_services_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.containerservice.operations.'
+                        'container_services_operations#ContainerServicesOperations.{}',
+        client_factory=cf_container_services
+    )
 
-def aks_show_table_format(result):
-    """Format a managed cluster as summary results for display with "-o table"."""
-    return [_aks_table_format(result)]
+    managed_clusters_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.containerservice.operations.'
+                        'managed_clusters_operations#ManagedClustersOperations.{}',
+        client_factory=cf_managed_clusters
+    )
 
+    # ACS base commands
+    with self.command_group('acs', container_services_sdk, client_factory=cf_container_services) as g:
+        g.custom_command('browse', 'acs_browse')
+        g.custom_command('create', 'acs_create', no_wait_param='no_wait',
+                         table_transformer=deployment_validate_table_format)
+        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('list', 'list_container_services')
+        g.custom_command('list-locations', 'list_acs_locations')
+        g.custom_command('scale', 'update_acs')
+        g.command('show', 'get', exception_handler=empty_on_404)
+        g.generic_wait_command('wait')
 
-def _aks_table_format(result):
-    # put results in an ordered dict so the headers are predictable
-    table_row = OrderedDict()
-    for k in ['name', 'location', 'resourceGroup', 'kubernetesVersion', 'provisioningState', 'fqdn']:
-        table_row[k] = result.get(k)
-    return table_row
+    # ACS Mesos DC/OS commands
+    with self.command_group('acs dcos', container_services_sdk, client_factory=cf_container_services) as g:
+        g.custom_command('browse', 'dcos_browse')
+        g.custom_command('install-cli', 'dcos_install_cli')
 
+    # ACS Kubernetes commands
+    with self.command_group('acs kubernetes', container_services_sdk, client_factory=cf_container_services) as g:
+        g.custom_command('browse', 'k8s_browse')
+        g.custom_command('get-credentials', 'k8s_get_credentials')
+        g.custom_command('install-cli', 'k8s_install_cli')
 
-def aks_get_versions_table_format(result):
-    """Format get-versions upgrade results as a summary for display with "-o table"."""
-    master = result.get('controlPlaneProfile', {})
-    result['masterVersion'] = master.get('kubernetesVersion', 'unknown')
-    master_upgrades = master.get('upgrades', [])
-    result['masterUpgrades'] = ', '.join(master_upgrades) if master_upgrades else 'None available'
-
-    agents = result.get('agentPoolProfiles', [])
-    versions, upgrades = [], []
-    for agent in agents:
-        version = agent.get('kubernetesVersion', 'unknown')
-        agent_upgrades = agent.get('upgrades', [])
-        upgrade = ', '.join(agent_upgrades) if agent_upgrades else 'None available'
-        name = agent.get('name')
-        if name:  # multiple agent pools, presumably
-            version = "{}: {}".format(name, version)
-            upgrade = "{}: {}".format(name, upgrades)
-        versions.append(version)
-        upgrades.append(upgrade)
-
-    result['nodePoolVersion'] = ', '.join(versions)
-    result['nodePoolUpgrades'] = ', '.join(upgrades)
-
-    # put results in an ordered dict so the headers are predictable
-    table_row = OrderedDict()
-    for k in ['name', 'resourceGroup', 'masterVersion', 'masterUpgrades', 'nodePoolVersion', 'nodePoolUpgrades']:
-        table_row[k] = result.get(k)
-    return [table_row]
-
-
-if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
-    # Container services commands
-    cli_command(__name__, 'acs show', 'azure.mgmt.containerservice.operations.container_services_operations#ContainerServicesOperations.get', _acs_client_factory, exception_handler=empty_on_404)
-    cli_command(__name__, 'acs delete', 'azure.mgmt.containerservice.operations.container_services_operations#ContainerServicesOperations.delete', _acs_client_factory)
-
-    # Per conversation with ACS team, hide the update till we have something meaningful to tweak
-    # from azure.cli.command_modules.acs.custom import update_acs
-    # cli_generic_update_command(__name__, 'acs update', ContainerServicesOperations.get, ContainerServicesOperations.create_or_update, cf_acs)
-
-    # custom commands
-    cli_command(__name__, 'acs list-locations', 'azure.cli.command_modules.acs.custom#list_acs_locations')
-    cli_command(__name__, 'acs scale', 'azure.cli.command_modules.acs.custom#update_acs', _acs_client_factory)
-    cli_command(__name__, 'acs list', 'azure.cli.command_modules.acs.custom#list_container_services', _acs_client_factory)
-    cli_command(__name__, 'acs browse', 'azure.cli.command_modules.acs.custom#acs_browse')
-    cli_command(__name__, 'acs install-cli', 'azure.cli.command_modules.acs.custom#acs_install_cli')
-    cli_command(__name__, 'acs dcos browse', 'azure.cli.command_modules.acs.custom#dcos_browse')
-    cli_command(__name__, 'acs dcos install-cli', 'azure.cli.command_modules.acs.custom#dcos_install_cli')
-    cli_command(__name__, 'acs create', 'azure.cli.command_modules.acs.custom#acs_create', no_wait_param='no_wait', table_transformer=deployment_validate_table_format)
-    cli_generic_wait_command(__name__, 'acs wait', 'azure.mgmt.containerservice.operations.container_services_operations#ContainerServicesOperations.get', _acs_client_factory)
-    cli_command(__name__, 'acs kubernetes browse', 'azure.cli.command_modules.acs.custom#k8s_browse')
-    cli_command(__name__, 'acs kubernetes install-cli', 'azure.cli.command_modules.acs.custom#k8s_install_cli')
-    cli_command(__name__, 'acs kubernetes get-credentials', 'azure.cli.command_modules.acs.custom#k8s_get_credentials')
-
-    # Managed clusters commands
-    cli_command(__name__, 'aks browse',
-                'azure.cli.command_modules.acs.custom#aks_browse', _aks_client_factory)
-    cli_command(__name__, 'aks create',
-                'azure.cli.command_modules.acs.custom#aks_create', _aks_client_factory, no_wait_param='no_wait')
-    cli_command(__name__, 'aks delete', 'azure.mgmt.containerservice.operations.managed_clusters_operations' +
-                '#ManagedClustersOperations.delete', _aks_client_factory, no_wait_param='raw',
-                confirmation='Are you sure you want to perform this operation?')
-    cli_command(__name__, 'aks get-credentials',
-                'azure.cli.command_modules.acs.custom#aks_get_credentials', _aks_client_factory)
-    cli_command(__name__, 'aks get-versions', 'azure.mgmt.containerservice.operations.managed_clusters_operations' +
-                '#ManagedClustersOperations.get_upgrade_profile', _aks_client_factory,
-                table_transformer=aks_get_versions_table_format)
-    cli_command(__name__, 'aks install-cli',
-                'azure.cli.command_modules.acs.custom#k8s_install_cli')
-    cli_command(__name__, 'aks install-connector',
-                'azure.cli.command_modules.acs.custom#k8s_install_connector', _aks_client_factory)
-    cli_command(__name__, 'aks remove-connector',
-                'azure.cli.command_modules.acs.custom#k8s_uninstall_connector', _aks_client_factory)
-    cli_command(__name__, 'aks list',
-                'azure.cli.command_modules.acs.custom#aks_list', _aks_client_factory,
-                table_transformer=aks_list_table_format)
-    cli_command(__name__, 'aks scale',
-                'azure.cli.command_modules.acs.custom#aks_scale', _aks_client_factory, no_wait_param='no_wait')
-    cli_command(__name__, 'aks show',
-                'azure.cli.command_modules.acs.custom#aks_show', _aks_client_factory,
-                table_transformer=aks_show_table_format)
-    cli_command(__name__, 'aks upgrade',
-                'azure.cli.command_modules.acs.custom#aks_upgrade', _aks_client_factory, no_wait_param='no_wait',
-                confirmation='Kubernetes may be unavailable during cluster upgrades.\n' +
-                'Are you sure you want to perform this operation?')
-    cli_generic_wait_command(__name__, 'aks wait',
-                             'azure.mgmt.containerservice.operations.managed_clusters_operations' +
-                             '#ManagedClustersOperations.get',
-                             _aks_client_factory)
+    # AKS commands
+    with self.command_group('aks', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
+        g.custom_command('browse', 'aks_browse')
+        g.custom_command('create', 'aks_create', no_wait_param='no_wait')
+        g.command('delete', 'delete', no_wait_param='raw', confirmation=True)
+        g.custom_command('get-credentials', 'aks_get_credentials')
+        g.command('get-versions', 'get_upgrade_profile', table_transformer=aks_get_versions_table_format)
+        g.custom_command('install-cli', 'k8s_install_cli')
+        g.custom_command('install-connector', 'k8s_install_connector')
+        g.custom_command('list', 'aks_list', table_transformer=aks_list_table_format)
+        g.custom_command('remove-connector', 'k8s_uninstall_connector')
+        g.custom_command('scale', 'aks_scale', no_wait_param='no_wait')
+        g.custom_command('show', 'aks_show', table_transformer=aks_show_table_format)
+        g.custom_command('upgrade', 'aks_upgrade', no_wait_param='no_wait',
+                         confirmation='Kubernetes may be unavailable during cluster upgrades.\n' +
+                         'Are you sure you want to perform this operation?')
+        g.generic_wait_command('wait')

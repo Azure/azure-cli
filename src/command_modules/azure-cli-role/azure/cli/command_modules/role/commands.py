@@ -6,8 +6,9 @@
 
 from collections import OrderedDict
 
-from azure.cli.core.commands import cli_command
-from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
+from azure.cli.core.profiles import PROFILE_TYPE
+from azure.cli.core.commands import CliCommandType
+
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import (_auth_client_factory, _graph_client_factory)
@@ -29,100 +30,83 @@ def get_role_definition_op(operation_name):
            '#RoleDefinitionsOperations.{}'.format(operation_name)
 
 
-def get_role_definitions(_):
-    return _auth_client_factory().role_definitions
+def get_role_definitions(cli_ctx, _):
+    return _auth_client_factory(cli_ctx, ).role_definitions
 
 
-def get_graph_client_applications(_):
-    return _graph_client_factory().applications
+def get_graph_client_applications(cli_ctx, _):
+    return _graph_client_factory(cli_ctx).applications
 
 
-def get_graph_client_service_principals(_):
-    return _graph_client_factory().service_principals
+def get_graph_client_service_principals(cli_ctx, _):
+    return _graph_client_factory(cli_ctx).service_principals
 
 
-def get_graph_client_users(_):
-    return _graph_client_factory().users
+def get_graph_client_users(cli_ctx, _):
+    return _graph_client_factory(cli_ctx).users
 
 
-def get_graph_client_groups(_):
-    return _graph_client_factory().groups
+def get_graph_client_groups(cli_ctx, _):
+    return _graph_client_factory(cli_ctx).groups
 
 
-cli_command(__name__, 'role definition list',
-            'azure.cli.command_modules.role.custom#list_role_definitions',
-            table_transformer=transform_definition_list)
-cli_command(__name__, 'role definition delete',
-            'azure.cli.command_modules.role.custom#delete_role_definition')
-cli_command(__name__, 'role definition create',
-            'azure.cli.command_modules.role.custom#create_role_definition')
-cli_command(__name__, 'role definition update',
-            'azure.cli.command_modules.role.custom#update_role_definition')
+# pylint: disable=line-too-long
+def load_command_table(self, _):
 
-cli_command(__name__, 'role assignment delete',
-            'azure.cli.command_modules.role.custom#delete_role_assignments')
-cli_command(__name__, 'role assignment list',
-            'azure.cli.command_modules.role.custom#list_role_assignments',
-            table_transformer=transform_assignment_list)
-cli_command(__name__, 'role assignment create',
-            'azure.cli.command_modules.role.custom#create_role_assignment')
+    role_users_sdk = CliCommandType(
+        operations_tmpl='azure.graphrbac.operations.users_operations#UsersOperations.{}',
+        client_factory=get_graph_client_users
+    )
 
-if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
-    cli_command(__name__, 'ad app create', 'azure.cli.command_modules.role.custom#create_application',
-                get_graph_client_applications)
-    cli_command(__name__, 'ad app delete', 'azure.cli.command_modules.role.custom#delete_application',
-                get_graph_client_applications)
-    cli_command(__name__, 'ad app list', 'azure.cli.command_modules.role.custom#list_apps',
-                get_graph_client_applications)
-    cli_command(__name__, 'ad app show', 'azure.cli.command_modules.role.custom#show_application',
-                get_graph_client_applications, exception_handler=empty_on_404)
-    cli_command(__name__, 'ad app update', 'azure.cli.command_modules.role.custom#update_application',
-                get_graph_client_applications)
+    role_group_sdk = CliCommandType(
+        operations_tmpl='azure.graphrbac.operations.groups_operations#GroupsOperations.{}',
+        client_factory=get_graph_client_groups
+    )
 
-    cli_command(__name__, 'ad sp create',
-                'azure.cli.command_modules.role.custom#create_service_principal')
-    cli_command(__name__, 'ad sp delete',
-                'azure.cli.command_modules.role.custom#delete_service_principal')
-    cli_command(__name__, 'ad sp list', 'azure.cli.command_modules.role.custom#list_sps',
-                get_graph_client_service_principals)
-    cli_command(__name__, 'ad sp show', 'azure.cli.command_modules.role.custom#show_service_principal',
-                get_graph_client_service_principals, exception_handler=empty_on_404)
+    with self.command_group('role definition') as g:
+        g.custom_command('list', 'list_role_definitions', table_transformer=transform_definition_list)
+        g.custom_command('delete', 'delete_role_definition')
+        g.custom_command('create', 'create_role_definition')
+        g.custom_command('update', 'update_role_definition')
+
+    with self.command_group('role assignment') as g:
+        g.custom_command('delete', 'delete_role_assignments')
+        g.custom_command('list', 'list_role_assignments', table_transformer=transform_assignment_list)
+        g.custom_command('create', 'create_role_assignment')
+
+    with self.command_group('ad app', client_factory=get_graph_client_applications, resource_type=PROFILE_TYPE, min_api='2017-03-10') as g:
+        g.custom_command('create', 'create_application')
+        g.custom_command('delete', 'delete_application')
+        g.custom_command('list', 'list_apps')
+        g.custom_command('show', 'show_application', exception_handler=empty_on_404)
+        g.custom_command('update', 'update_application')
+
+    with self.command_group('ad sp', resource_type=PROFILE_TYPE, min_api='2017-03-10') as g:
+        g.custom_command('create', 'create_service_principal')
+        g.custom_command('delete', 'delete_service_principal')
+        g.custom_command('list', 'list_sps', client_factory=get_graph_client_service_principals)
+        g.custom_command('show', 'show_service_principal', client_factory=get_graph_client_service_principals, exception_handler=empty_on_404)
 
     # RBAC related
-    cli_command(__name__, 'ad sp create-for-rbac',
-                'azure.cli.command_modules.role.custom#create_service_principal_for_rbac')
-    cli_command(__name__, 'ad sp reset-credentials',
-                'azure.cli.command_modules.role.custom#reset_service_principal_credential')
+    with self.command_group('ad sp') as g:
+        g.custom_command('create-for-rbac', 'create_service_principal_for_rbac')
+        g.custom_command('reset-credentials', 'reset_service_principal_credential')
 
-    cli_command(__name__, 'ad user delete',
-                'azure.graphrbac.operations.users_operations#UsersOperations.delete',
-                get_graph_client_users)
-    cli_command(__name__, 'ad user show',
-                'azure.graphrbac.operations.users_operations#UsersOperations.get',
-                get_graph_client_users,
-                exception_handler=empty_on_404)
-    cli_command(__name__, 'ad user list', 'azure.cli.command_modules.role.custom#list_users',
-                get_graph_client_users)
-    cli_command(__name__, 'ad user create', 'azure.cli.command_modules.role.custom#create_user',
-                get_graph_client_users)
+    with self.command_group('ad user', role_users_sdk) as g:
+        g.command('delete', 'delete')
+        g.command('show', 'get', exception_handler=empty_on_404)
+        g.custom_command('list', 'list_users', client_factory=get_graph_client_users)
+        g.custom_command('create', 'create_user', client_factory=get_graph_client_users, doc_string_source='azure.graphrbac.models#UserCreateParameters')
 
-    group_path = 'azure.graphrbac.operations.groups_operations#GroupsOperations.{}'
-    cli_command(__name__, 'ad group create', group_path.format('create'), get_graph_client_groups)
-    cli_command(__name__, 'ad group delete', group_path.format('delete'), get_graph_client_groups)
-    cli_command(__name__, 'ad group show', group_path.format('get'), get_graph_client_groups,
-                exception_handler=empty_on_404)
-    cli_command(__name__, 'ad group list',
-                'azure.cli.command_modules.role.custom#list_groups',
-                get_graph_client_groups)
+    with self.command_group('ad group', role_group_sdk) as g:
+        g.command('create', 'create')
+        g.command('delete', 'delete')
+        g.command('show', 'get', exception_handler=empty_on_404)
+        g.command('get-member-groups', 'get_member_groups')
+        g.custom_command('list', 'list_groups', client_factory=get_graph_client_groups)
 
-    cli_command(__name__, 'ad group get-member-groups', group_path.format('get_member_groups'),
-                get_graph_client_groups)
-
-    cli_command(__name__, 'ad group member list', group_path.format('get_group_members'),
-                get_graph_client_groups)
-    cli_command(__name__, 'ad group member add', group_path.format('add_member'),
-                get_graph_client_groups)
-    cli_command(__name__, 'ad group member remove', group_path.format('remove_member'),
-                get_graph_client_groups)
-    cli_command(__name__, 'ad group member check', group_path.format('is_member_of'),
-                get_graph_client_groups)
+    with self.command_group('ad group member', role_group_sdk) as g:
+        g.command('list', 'get_group_members')
+        g.command('add', 'add_member')
+        g.command('remove', 'remove_member')
+        g.command('check', 'is_member_of')

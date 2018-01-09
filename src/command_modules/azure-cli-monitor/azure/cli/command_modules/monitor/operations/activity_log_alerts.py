@@ -3,8 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import CLIError
-from azure.cli.core.commands import CliArgumentType
+from knack.util import CLIError
 
 
 def process_condition_parameter(namespace):
@@ -45,28 +44,6 @@ def process_condition_parameter(namespace):
     setattr(namespace, 'condition', ActivityLogAlertAllOfCondition(all_of=list(conditions.values())))
 
 
-def _process_webhook_prop(namespace):
-    if not isinstance(namespace.webhook_properties, list):
-        return
-
-    result = {}
-    for each in namespace.webhook_properties:
-        if each:
-            if '=' in each:
-                key, value = each.split('=', 1)
-            else:
-                key, value = each, ''
-            result[key] = value
-
-    namespace.webhook_properties = result
-
-
-webhook_prop_type = CliArgumentType(
-    validator=_process_webhook_prop,
-    nargs='*'
-)
-
-
 def list_activity_logs_alert(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
@@ -74,7 +51,7 @@ def list_activity_logs_alert(client, resource_group_name=None):
     return client.list_by_subscription_id()
 
 
-def create(client, resource_group_name, activity_log_alert_name, scopes=None, condition=None,
+def create(cmd, client, resource_group_name, activity_log_alert_name, scopes=None, condition=None,
            action_groups=frozenset(), tags=None, disable=False, description=None, webhook_properties=None):
     from msrestazure.tools import resource_id
     from azure.mgmt.monitor.models import (ActivityLogAlertResource, ActivityLogAlertAllOfCondition,
@@ -83,7 +60,7 @@ def create(client, resource_group_name, activity_log_alert_name, scopes=None, co
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if not scopes:
-        scopes = [resource_id(subscription=get_subscription_id(), resource_group=resource_group_name)]
+        scopes = [resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name)]
 
     if _get_alert_settings(client, resource_group_name, activity_log_alert_name, throw_if_missing=False):
         raise CLIError('The activity log alert {} already exists in resource group {}.'.format(activity_log_alert_name,
@@ -94,8 +71,9 @@ def create(client, resource_group_name, activity_log_alert_name, scopes=None, co
                                                                                                   'ServiceHealth')])
 
     # Add action groups
-    action_group_rids = _normalize_names(action_groups, resource_group_name, 'microsoft.insights', 'actionGroups')
-    action_groups = [ActionGroup(action_group_id=id, webhook_properties=webhook_properties) for id in action_group_rids]
+    action_group_rids = _normalize_names(cmd.cli_ctx, action_groups, resource_group_name, 'microsoft.insights',
+                                         'actionGroups')
+    action_groups = [ActionGroup(action_group_id=i, webhook_properties=webhook_properties) for i in action_group_rids]
     alert_actions = ActivityLogAlertActionList(action_groups=action_groups)
 
     settings = ActivityLogAlertResource(location='global', scopes=scopes, condition=condition,
@@ -134,14 +112,14 @@ def remove_scope(client, resource_group_name, activity_log_alert_name, scopes):
                                    activity_log_alert=settings)
 
 
-def add_action_group(client, resource_group_name, activity_log_alert_name, action_group_ids, reset=False,
+def add_action_group(cmd, client, resource_group_name, activity_log_alert_name, action_group_ids, reset=False,
                      webhook_properties=None, strict=False):
     from azure.mgmt.monitor.models import ActivityLogAlertActionGroup as ActionGroup
 
     settings = _get_alert_settings(client, resource_group_name, activity_log_alert_name)
 
     # normalize the action group ids
-    rids = _normalize_names(action_group_ids, resource_group_name, 'microsoft.insights', 'actionGroups')
+    rids = _normalize_names(cmd.cli_ctx, action_group_ids, resource_group_name, 'microsoft.insights', 'actionGroups')
 
     if reset:
         action_groups = [ActionGroup(action_group_id=rid, webhook_properties=webhook_properties) for rid in rids]
@@ -161,14 +139,15 @@ def add_action_group(client, resource_group_name, activity_log_alert_name, actio
                                    activity_log_alert=settings)
 
 
-def remove_action_group(client, resource_group_name, activity_log_alert_name, action_group_ids):
+def remove_action_group(cmd, client, resource_group_name, activity_log_alert_name, action_group_ids):
     settings = _get_alert_settings(client, resource_group_name, activity_log_alert_name)
 
     if len(action_group_ids) == 1 and action_group_ids[0] == '*':
         settings.actions.action_groups = []
     else:
         # normalize the action group ids
-        rids = _normalize_names(action_group_ids, resource_group_name, 'microsoft.insights', 'actionGroups')
+        rids = _normalize_names(cmd.cli_ctx, action_group_ids, resource_group_name, 'microsoft.insights',
+                                'actionGroups')
         action_groups = [each for each in settings.actions.action_groups if each.action_group_id not in rids]
         settings.actions.action_groups = action_groups
 
@@ -193,6 +172,7 @@ def update(instance, condition=None, enabled=None, tags=None, description=None):
     return instance
 
 
+# pylint: disable=inconsistent-return-statements
 def _normalize_condition(condition_instance):
     from azure.mgmt.monitor.models import ActivityLogAlertLeafCondition
 
@@ -207,7 +187,7 @@ def _normalize_condition(condition_instance):
         return '{}={}'.format(condition_instance.field.lower(), condition_instance.equals), condition_instance
 
 
-def _normalize_names(resource_names, resource_group, namespace, resource_type):
+def _normalize_names(cli_ctx, resource_names, resource_group, namespace, resource_type):
     """Normalize a group of resource names. Returns a set of resource ids. Throws if any of the name can't be correctly
     converted to a resource id."""
     from msrestazure.tools import is_valid_resource_id, resource_id
@@ -219,7 +199,7 @@ def _normalize_names(resource_names, resource_group, namespace, resource_type):
         if is_valid_resource_id(name):
             rids.add(name)
         else:
-            rid = resource_id(subscription=get_subscription_id(),
+            rid = resource_id(subscription=get_subscription_id(cli_ctx),
                               resource_group=resource_group,
                               namespace=namespace,
                               type=resource_type,
@@ -244,4 +224,4 @@ def _get_alert_settings(client, resource_group_name, activity_log_alert_name, th
             else:
                 return None
         else:
-            raise CLIError(ex.message, ex)
+            raise CLIError(ex.message)

@@ -3,103 +3,35 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import register_cli_argument
-from azure.cli.core.commands.parameters import \
-    (resource_group_name_type, enum_choice_list)
-from azure.cli.core.util import CLIError
+from knack.arguments import CLIArgumentType
+
+from azure.cli.core.commands.parameters import get_enum_type
+
+from ._validators import validate_include_or_exclude, validate_ids_or_resource_group
 
 
-def validate_include_or_exclude(namespace):
-    if namespace.include and namespace.exclude:
-        raise CLIError('usage error: --include | --exclude')
+def load_arguments(self, _):
+    ids_arg_type = CLIArgumentType(nargs='+', options_list=['--ids'],
+                                   help='One or more resource IDs (space delimited). If provided, no other '
+                                        '"Resource Id" arguments should be specified.')
 
+    with self.argument_context('advisor recommendation list') as c:
+        c.argument('ids', ids_arg_type, validator=validate_ids_or_resource_group)
+        c.argument('category', options_list=['--category', '-c'], help='Name of recommendation category.',
+                   arg_type=get_enum_type(['Cost', 'HighAvailability', 'Performance', 'Security']))
 
-def validate_ids_or_resource_group(namespace):
-    if namespace.ids and namespace.resource_group_name:
-        raise CLIError('usage error: --ids | --resource-group')
+    with self.argument_context('advisor recommendation disable') as c:
+        c.argument('ids', ids_arg_type)
+        c.argument('days', options_list=['--days', '-d'], type=int,
+                   help='Number of days to disable. If not specified, the recommendation is disabled forever.')
 
+    with self.argument_context('advisor recommendation enable') as c:
+        c.argument('ids', ids_arg_type)
 
-register_cli_argument(
-    'advisor recommendation list',
-    'ids',
-    nargs='+',
-    options_list=('--ids'),
-    help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.'  # pylint: disable=line-too-long
-)
-
-register_cli_argument(
-    'advisor recommendation list',
-    'resource_group_name',
-    resource_group_name_type,
-    validator=validate_ids_or_resource_group
-)
-
-register_cli_argument(
-    'advisor recommendation list',
-    'category',
-    options_list=('--category', '-c'),
-    help='Name of recommendation category.',
-    **enum_choice_list(['Cost', 'HighAvailability', 'Performance', 'Security'])
-)
-
-register_cli_argument(
-    'advisor recommendation disable',
-    'ids',
-    nargs='+',
-    options_list=('--ids'),
-    help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.'  # pylint: disable=line-too-long
-)
-
-register_cli_argument(
-    'advisor recommendation disable',
-    'days',
-    options_list=('--days', '-d'),
-    type=int,
-    help='Number of days to disable. If not specified, the recommendation is disabled forever.'
-)
-
-register_cli_argument(
-    'advisor recommendation enable',
-    'ids',
-    nargs='+',
-    options_list=('--ids'),
-    help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.'  # pylint: disable=line-too-long
-)
-
-register_cli_argument(
-    'advisor configuration get',
-    'resource_group_name',
-    resource_group_name_type
-)
-
-register_cli_argument(
-    'advisor configuration set',
-    'resource_group_name',
-    resource_group_name_type
-)
-
-register_cli_argument(
-    'advisor configuration set',
-    'low_cpu_threshold',
-    options_list=('--low-cpu-threshold', '-l'),
-    help='Value for low CPU threshold.',
-    **enum_choice_list(['5', '10', '15', '20'])
-)
-
-register_cli_argument(
-    'advisor configuration set',
-    'exclude',
-    options_list=('--exclude', '-e'),
-    action='store_true',
-    help='Exclude from recommendation generation.',
-    validator=validate_include_or_exclude
-)
-
-register_cli_argument(
-    'advisor configuration set',
-    'include',
-    options_list=('--include', '-i'),
-    action='store_true',
-    help='Include in recommendation generation.',
-    validator=validate_include_or_exclude
-)
+    with self.argument_context('advisor configuration set') as c:
+        c.argument('low_cpu_threshold', options_list=['--low-cpu-threshold', '-l'],
+                   help='Value for low CPU threshold.', arg_type=get_enum_type(['5', '10', '15', '20']))
+        c.argument('exclude', options_list=['--exclude', '-e'], action='store_true',
+                   help='Exclude from recommendation generation.')
+        c.argument('include', options_list=['--include', '-i'], action='store_true',
+                   help='Include in recommendation generation.', validator=validate_include_or_exclude)

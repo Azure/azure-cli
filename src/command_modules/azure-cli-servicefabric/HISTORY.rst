@@ -3,9 +3,13 @@
 Release History
 ===============
 
+0.0.8
+++++++
+* Update for CLI core changes.
+
 0.0.7
 +++++
-* add missing hyphen to status messages
+* Minor fixes.
 
 0.0.6
 +++++

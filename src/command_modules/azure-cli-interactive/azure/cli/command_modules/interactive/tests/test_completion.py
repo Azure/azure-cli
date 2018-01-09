@@ -12,6 +12,13 @@ from prompt_toolkit.document import Document
 from prompt_toolkit.completion import Completion
 
 
+def _build_completer(commands, global_params):
+    from azure.cli.testsdk import TestCli
+    from azclishell.app import AzInteractiveShell
+    shell_ctx = AzInteractiveShell(TestCli(), None)
+    return AzCompleter(shell_ctx, commands, global_params)
+
+
 class _Commands():
     """ mock model for testing completer """
     def __init__(self, descrip=None, completable=None, command_param=None,
@@ -48,7 +55,7 @@ class CompletionTest(unittest.TestCase):
             command_tree=com_tree3,
             descrip=command_description
         )
-        self.completer = AzCompleter(commands, global_params=False)
+        self.completer = _build_completer(commands, global_params=False)
 
     def init2(self):
         """ a variation of initializing """
@@ -78,7 +85,7 @@ class CompletionTest(unittest.TestCase):
             param_descript=param_descript,
             descrip=command_description
         )
-        self.completer = AzCompleter(commands, global_params=False)
+        self.completer = _build_completer(commands, global_params=False)
 
     def init3(self):
         """ a variation of initializing """
@@ -116,7 +123,7 @@ class CompletionTest(unittest.TestCase):
             same_param_doubles=same_param_doubles,
             descrip=command_description
         )
-        self.completer = AzCompleter(commands, global_params=False)
+        self.completer = _build_completer(commands, global_params=False)
 
     def init4(self):
         """ a variation of initializing """
@@ -152,7 +159,7 @@ class CompletionTest(unittest.TestCase):
             same_param_doubles=same_param_doubles,
             descrip=command_description
         )
-        self.completer = AzCompleter(commands, global_params=False)
+        self.completer = _build_completer(commands, global_params=False)
 
     def test_command_completion(self):
         # tests general command completion

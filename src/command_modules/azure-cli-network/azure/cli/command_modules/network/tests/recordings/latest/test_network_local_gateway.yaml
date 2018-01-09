@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
+    body: '{"location": "westus", "tags": {"use": "az-test"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -8,9 +8,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/local_gateway_scenario000001?api-version=2017-05-10
@@ -20,11 +20,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:33:00 GMT']
+      date: ['Tue, 19 Dec 2017 04:25:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1190']
+      x-ms-ratelimit-remaining-subscription-writes: ['1158']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -34,9 +34,9 @@ interactions:
       CommandName: [network local-gateway create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/local_gateway_scenario000001?api-version=2017-05-10
@@ -46,15 +46,15 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:33:00 GMT']
+      date: ['Tue, 19 Dec 2017 04:25:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "westus", "properties": {"localNetworkAddressSpace": {"addressPrefixes":
-      []}, "gatewayIpAddress": "10.1.1.1"}}'
+    body: '{"location": "westus", "properties": {"gatewayIpAddress": "10.1.1.1", "localNetworkAddressSpace":
+      {"addressPrefixes": []}}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -62,30 +62,30 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['123']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"name\": \"lgw1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1\"\
-        ,\r\n  \"etag\": \"W/\\\"563ee009-bb8c-4ac8-9def-1267633dd811\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"78adc6e7-06a5-4e47-9a81-48f23e22eb02\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/localNetworkGateways\",\r\n  \"location\"\
         : \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\"\
-        ,\r\n    \"resourceGuid\": \"60ea70d5-feab-41e8-8c40-d20702865796\",\r\n \
+        ,\r\n    \"resourceGuid\": \"be175f9c-3841-4534-af3a-50ad7ab5de55\",\r\n \
         \   \"localNetworkAddressSpace\": {\r\n      \"addressPrefixes\": []\r\n \
         \   },\r\n    \"gatewayIpAddress\": \"10.1.1.1\"\r\n  }\r\n}"}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7466dbbd-5e29-4e18-9aaf-b653d8592dd0?api-version=2017-11-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/63f41571-86db-4cb6-9a2f-52f3bfe1492c?api-version=2017-11-01']
       cache-control: [no-cache]
       content-length: ['598']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:33:01 GMT']
+      date: ['Tue, 19 Dec 2017 04:25:11 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1190']
+      x-ms-ratelimit-remaining-subscription-writes: ['1189']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -95,18 +95,18 @@ interactions:
       CommandName: [network local-gateway create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/7466dbbd-5e29-4e18-9aaf-b653d8592dd0?api-version=2017-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/63f41571-86db-4cb6-9a2f-52f3bfe1492c?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['29']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:33:12 GMT']
+      date: ['Tue, 19 Dec 2017 04:25:22 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -122,25 +122,25 @@ interactions:
       CommandName: [network local-gateway create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"name\": \"lgw1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1\"\
-        ,\r\n  \"etag\": \"W/\\\"4dc28a30-cac9-4f64-a92b-79ee640db89a\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"ff47425c-0a43-48d8-8aa9-314c77e0bdc2\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/localNetworkGateways\",\r\n  \"location\"\
         : \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\"\
-        ,\r\n    \"resourceGuid\": \"60ea70d5-feab-41e8-8c40-d20702865796\",\r\n \
+        ,\r\n    \"resourceGuid\": \"be175f9c-3841-4534-af3a-50ad7ab5de55\",\r\n \
         \   \"localNetworkAddressSpace\": {\r\n      \"addressPrefixes\": []\r\n \
         \   },\r\n    \"gatewayIpAddress\": \"10.1.1.1\"\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['599']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:33:12 GMT']
-      etag: [W/"4dc28a30-cac9-4f64-a92b-79ee640db89a"]
+      date: ['Tue, 19 Dec 2017 04:25:22 GMT']
+      etag: [W/"ff47425c-0a43-48d8-8aa9-314c77e0bdc2"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -156,25 +156,25 @@ interactions:
       CommandName: [network local-gateway show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"name\": \"lgw1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1\"\
-        ,\r\n  \"etag\": \"W/\\\"4dc28a30-cac9-4f64-a92b-79ee640db89a\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"ff47425c-0a43-48d8-8aa9-314c77e0bdc2\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/localNetworkGateways\",\r\n  \"location\"\
         : \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\"\
-        ,\r\n    \"resourceGuid\": \"60ea70d5-feab-41e8-8c40-d20702865796\",\r\n \
+        ,\r\n    \"resourceGuid\": \"be175f9c-3841-4534-af3a-50ad7ab5de55\",\r\n \
         \   \"localNetworkAddressSpace\": {\r\n      \"addressPrefixes\": []\r\n \
         \   },\r\n    \"gatewayIpAddress\": \"10.1.1.1\"\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['599']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:33:13 GMT']
-      etag: [W/"4dc28a30-cac9-4f64-a92b-79ee640db89a"]
+      date: ['Tue, 19 Dec 2017 04:25:23 GMT']
+      etag: [W/"ff47425c-0a43-48d8-8aa9-314c77e0bdc2"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -190,9 +190,9 @@ interactions:
       CommandName: [network local-gateway create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/local_gateway_scenario000001?api-version=2017-05-10
@@ -202,15 +202,15 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:33:13 GMT']
+      date: ['Tue, 19 Dec 2017 04:25:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "westus", "properties": {"localNetworkAddressSpace": {"addressPrefixes":
-      ["10.0.1.0/24"]}, "gatewayIpAddress": "10.1.1.2"}}'
+    body: '{"location": "westus", "properties": {"gatewayIpAddress": "10.1.1.2", "localNetworkAddressSpace":
+      {"addressPrefixes": ["10.0.1.0/24"]}}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -218,31 +218,31 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['136']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw2?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"name\": \"lgw2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw2\"\
-        ,\r\n  \"etag\": \"W/\\\"1de23281-4613-42f7-9dda-90614d695617\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"3cb2bcf6-c8f6-4eb2-88f3-237a4be7f237\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/localNetworkGateways\",\r\n  \"location\"\
         : \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\"\
-        ,\r\n    \"resourceGuid\": \"13284102-a6ff-4203-a68e-73af29434936\",\r\n \
+        ,\r\n    \"resourceGuid\": \"f4dc119e-be6e-4ae5-84c2-15f4ad3176f6\",\r\n \
         \   \"localNetworkAddressSpace\": {\r\n      \"addressPrefixes\": [\r\n  \
         \      \"10.0.1.0/24\"\r\n      ]\r\n    },\r\n    \"gatewayIpAddress\": \"\
         10.1.1.2\"\r\n  }\r\n}"}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c25e7a6e-e343-4930-a60d-19c802ca4828?api-version=2017-11-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/74c298ba-935b-421a-95d6-c746e035ca3a?api-version=2017-11-01']
       cache-control: [no-cache]
       content-length: ['629']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:33:19 GMT']
+      date: ['Tue, 19 Dec 2017 04:25:24 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+      x-ms-ratelimit-remaining-subscription-writes: ['1194']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -252,18 +252,18 @@ interactions:
       CommandName: [network local-gateway create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/c25e7a6e-e343-4930-a60d-19c802ca4828?api-version=2017-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/74c298ba-935b-421a-95d6-c746e035ca3a?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['29']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:33:30 GMT']
+      date: ['Tue, 19 Dec 2017 04:25:35 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -279,17 +279,17 @@ interactions:
       CommandName: [network local-gateway create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw2?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"name\": \"lgw2\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw2\"\
-        ,\r\n  \"etag\": \"W/\\\"2b3d2e54-643f-45d2-8dbb-311a550dce14\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"8a7a9019-8a86-4cdf-add9-e4f57785831b\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/localNetworkGateways\",\r\n  \"location\"\
         : \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\"\
-        ,\r\n    \"resourceGuid\": \"13284102-a6ff-4203-a68e-73af29434936\",\r\n \
+        ,\r\n    \"resourceGuid\": \"f4dc119e-be6e-4ae5-84c2-15f4ad3176f6\",\r\n \
         \   \"localNetworkAddressSpace\": {\r\n      \"addressPrefixes\": [\r\n  \
         \      \"10.0.1.0/24\"\r\n      ]\r\n    },\r\n    \"gatewayIpAddress\": \"\
         10.1.1.2\"\r\n  }\r\n}"}
@@ -297,8 +297,8 @@ interactions:
       cache-control: [no-cache]
       content-length: ['630']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:33:29 GMT']
-      etag: [W/"2b3d2e54-643f-45d2-8dbb-311a550dce14"]
+      date: ['Tue, 19 Dec 2017 04:25:35 GMT']
+      etag: [W/"8a7a9019-8a86-4cdf-add9-e4f57785831b"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -314,25 +314,25 @@ interactions:
       CommandName: [network local-gateway list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"lgw1\",\r\n\
         \      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1\"\
-        ,\r\n      \"etag\": \"W/\\\"4dc28a30-cac9-4f64-a92b-79ee640db89a\\\"\",\r\
+        ,\r\n      \"etag\": \"W/\\\"ff47425c-0a43-48d8-8aa9-314c77e0bdc2\\\"\",\r\
         \n      \"type\": \"Microsoft.Network/localNetworkGateways\",\r\n      \"\
         location\": \"westus\",\r\n      \"properties\": {\r\n        \"provisioningState\"\
-        : \"Succeeded\",\r\n        \"resourceGuid\": \"60ea70d5-feab-41e8-8c40-d20702865796\"\
+        : \"Succeeded\",\r\n        \"resourceGuid\": \"be175f9c-3841-4534-af3a-50ad7ab5de55\"\
         ,\r\n        \"localNetworkAddressSpace\": {\r\n          \"addressPrefixes\"\
         : []\r\n        },\r\n        \"gatewayIpAddress\": \"10.1.1.1\"\r\n     \
         \ }\r\n    },\r\n    {\r\n      \"name\": \"lgw2\",\r\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw2\"\
-        ,\r\n      \"etag\": \"W/\\\"2b3d2e54-643f-45d2-8dbb-311a550dce14\\\"\",\r\
+        ,\r\n      \"etag\": \"W/\\\"8a7a9019-8a86-4cdf-add9-e4f57785831b\\\"\",\r\
         \n      \"type\": \"Microsoft.Network/localNetworkGateways\",\r\n      \"\
         location\": \"westus\",\r\n      \"properties\": {\r\n        \"provisioningState\"\
-        : \"Succeeded\",\r\n        \"resourceGuid\": \"13284102-a6ff-4203-a68e-73af29434936\"\
+        : \"Succeeded\",\r\n        \"resourceGuid\": \"f4dc119e-be6e-4ae5-84c2-15f4ad3176f6\"\
         ,\r\n        \"localNetworkAddressSpace\": {\r\n          \"addressPrefixes\"\
         : [\r\n            \"10.0.1.0/24\"\r\n          ]\r\n        },\r\n      \
         \  \"gatewayIpAddress\": \"10.1.1.2\"\r\n      }\r\n    }\r\n  ]\r\n}"}
@@ -340,7 +340,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1385']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:33:30 GMT']
+      date: ['Tue, 19 Dec 2017 04:25:36 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -357,24 +357,24 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw1?api-version=2017-11-01
   response:
     body: {string: ''}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f5946a4e-d2f7-48f5-9018-eede83b1817e?api-version=2017-11-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ce1c7915-e93e-42be-9cdb-66fb4a680313?api-version=2017-11-01']
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 13 Dec 2017 21:33:31 GMT']
+      date: ['Tue, 19 Dec 2017 04:25:36 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/f5946a4e-d2f7-48f5-9018-eede83b1817e?api-version=2017-11-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/ce1c7915-e93e-42be-9cdb-66fb4a680313?api-version=2017-11-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+      x-ms-ratelimit-remaining-subscription-writes: ['1192']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -384,18 +384,18 @@ interactions:
       CommandName: [network local-gateway delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f5946a4e-d2f7-48f5-9018-eede83b1817e?api-version=2017-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ce1c7915-e93e-42be-9cdb-66fb4a680313?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['29']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:33:41 GMT']
+      date: ['Tue, 19 Dec 2017 04:25:47 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -411,18 +411,18 @@ interactions:
       CommandName: [network local-gateway list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"lgw2\",\r\n\
         \      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/local_gateway_scenario000001/providers/Microsoft.Network/localNetworkGateways/lgw2\"\
-        ,\r\n      \"etag\": \"W/\\\"2b3d2e54-643f-45d2-8dbb-311a550dce14\\\"\",\r\
+        ,\r\n      \"etag\": \"W/\\\"8a7a9019-8a86-4cdf-add9-e4f57785831b\\\"\",\r\
         \n      \"type\": \"Microsoft.Network/localNetworkGateways\",\r\n      \"\
         location\": \"westus\",\r\n      \"properties\": {\r\n        \"provisioningState\"\
-        : \"Succeeded\",\r\n        \"resourceGuid\": \"13284102-a6ff-4203-a68e-73af29434936\"\
+        : \"Succeeded\",\r\n        \"resourceGuid\": \"f4dc119e-be6e-4ae5-84c2-15f4ad3176f6\"\
         ,\r\n        \"localNetworkAddressSpace\": {\r\n          \"addressPrefixes\"\
         : [\r\n            \"10.0.1.0/24\"\r\n          ]\r\n        },\r\n      \
         \  \"gatewayIpAddress\": \"10.1.1.2\"\r\n      }\r\n    }\r\n  ]\r\n}"}
@@ -430,7 +430,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['723']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:33:42 GMT']
+      date: ['Tue, 19 Dec 2017 04:25:48 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -447,9 +447,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/local_gateway_scenario000001?api-version=2017-05-10
@@ -458,11 +458,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 13 Dec 2017 21:33:43 GMT']
+      date: ['Tue, 19 Dec 2017 04:25:49 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1MT0NBTDo1RkdBVEVXQVk6NUZTQ0VOQVJJT0dKMkxEUzNNVFFMUjVFR0VPNUNWRXw5RDA1MDhFNUI5RjdBN0JELVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1MT0NBTDo1RkdBVEVXQVk6NUZTQ0VOQVJJT0FCUkFGTDNUVE81S0hQWDRDQ1FTRXw1ODc4OTdFQzZDRDhDNjQ3LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1191']
+      x-ms-ratelimit-remaining-subscription-writes: ['1194']
     status: {code: 202, message: Accepted}
 version: 1

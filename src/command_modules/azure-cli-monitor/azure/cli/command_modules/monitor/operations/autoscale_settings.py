@@ -8,7 +8,8 @@ def scaffold_autoscale_settings_parameters(client):  # pylint: disable=unused-ar
     """Scaffold fully formed autoscale-settings' parameters as json template """
 
     import os.path
-    from azure.cli.core.util import CLIError, get_file_json
+    from knack.util import CLIError
+    from azure.cli.core.util import get_file_json
 
     # Autoscale settings parameter scaffold file path
     curr_dir = os.path.dirname(os.path.realpath(__file__))

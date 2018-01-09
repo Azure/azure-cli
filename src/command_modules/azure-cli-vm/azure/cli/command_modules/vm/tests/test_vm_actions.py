@@ -8,9 +8,6 @@ import tempfile
 import unittest
 import mock
 
-from msrestazure.azure_exceptions import CloudError
-from azure.cli.core.util import CLIError
-from azure.cli.core.commands.validators import DefaultStr
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _figure_out_storage_source,
@@ -21,6 +18,9 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       _validate_vmss_create_subnet,
                                                       _get_next_subnet_addr_suffix,
                                                       _validate_vm_vmss_msi)
+from azure.cli.testsdk import TestCli
+
+from knack.util import CLIError
 
 
 class TestActions(unittest.TestCase):
@@ -69,23 +69,27 @@ class TestActions(unittest.TestCase):
 
     def test_figure_out_storage_source(self):
         test_data = 'https://av123images.blob.core.windows.net/images/TDAZBET.vhd'
-        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source('tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(TestCli(), 'tg1', test_data)
         self.assertFalse(src_disk)
         self.assertFalse(src_snapshot)
         self.assertEqual(src_blob_uri, test_data)
 
     def test_source_storage_account_err_case(self):
         np = mock.MagicMock()
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
+        np._cmd = cmd
         np.source_storage_account_id = '/subscriptions/123/resourceGroups/ygsrc/providers/Microsoft.Storage/storageAccounts/s123'
         np.source = '/subscriptions/123/resourceGroups/yugangw/providers/Microsoft.Compute/disks/d2'
 
         # action (should throw)
+        kwargs = {'namespace': np}
         with self.assertRaises(CLIError):
-            process_disk_or_snapshot_create_namespace(np)
+            process_disk_or_snapshot_create_namespace(cmd, **kwargs)
 
         # with blob uri, should be fine
         np.source = 'https://s1.blob.core.windows.net/vhds/s1.vhd'
-        process_disk_or_snapshot_create_namespace(np)
+        process_disk_or_snapshot_create_namespace(cmd, **kwargs)
 
     def test_validate_admin_username_linux(self):
         # pylint: disable=line-too-long
@@ -155,6 +159,8 @@ class TestActions(unittest.TestCase):
     def test_parse_image_argument(self, client_factory_mock):
         compute_client = mock.MagicMock()
         image = mock.MagicMock()
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
         image.plan.name = 'plan1'
         image.plan.product = 'product1'
         image.plan.publisher = 'publisher1'
@@ -167,7 +173,7 @@ class TestActions(unittest.TestCase):
         np.image = 'publisher1:offer1:sku1:1.0.0'
 
         # action
-        _parse_image_argument(np)
+        _parse_image_argument(cmd, np)
 
         # assert
         self.assertEqual('plan1', np.plan_name)
@@ -177,8 +183,11 @@ class TestActions(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.vm._validators.logger.warning', autospec=True)
     def test_parse_staging_image_argument(self, logger_mock, client_factory_mock):
+        from msrestazure.azure_exceptions import CloudError
         compute_client = mock.MagicMock()
         resp = mock.MagicMock()
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
         resp.status_code = 404
         resp.text = '{"Message": "Not Found"}'
 
@@ -191,7 +200,7 @@ class TestActions(unittest.TestCase):
         np.plan_name, np.plan_publisher, np.plan_product = '', '', ''
 
         # action
-        _parse_image_argument(np)
+        _parse_image_argument(cmd, np)
 
         # assert
         logger_mock.assert_called_with("Querying the image of '%s' failed for an error '%s'. "
@@ -240,12 +249,14 @@ class TestActions(unittest.TestCase):
     def test_validate_msi_on_create(self, mock_get_subscription, mock_resolve_role_id):
         # check throw on : az vm/vmss create --assign-identity --role reader --scope ""
         np_mock = mock.MagicMock()
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
         np_mock.assign_identity = []
         np_mock.identity_scope = None
         np_mock.identity_role = 'reader'
 
         with self.assertRaises(CLIError) as err:
-            _validate_vm_vmss_msi(np_mock)
+            _validate_vm_vmss_msi(cmd, np_mock)
         self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is "
                         "not provided" in str(err.exception))
 
@@ -254,7 +265,7 @@ class TestActions(unittest.TestCase):
         np_mock.assign_identity = None
         np_mock.identity_scope = 'foo-scope'
         with self.assertRaises(CLIError) as err:
-            _validate_vm_vmss_msi(np_mock)
+            _validate_vm_vmss_msi(cmd, np_mock)
         self.assertTrue('usage error: --assign-identity [--scope SCOPE] [--role ROLE]' in str(err.exception))
 
         # check throw on : az vm/vmss create --role "reader"
@@ -262,7 +273,7 @@ class TestActions(unittest.TestCase):
         np_mock.assign_identity = None
         np_mock.identity_role = 'reader'
         with self.assertRaises(CLIError) as err:
-            _validate_vm_vmss_msi(np_mock)
+            _validate_vm_vmss_msi(cmd, np_mock)
         self.assertTrue('usage error: --assign-identity [--scope SCOPE] [--role ROLE]' in str(err.exception))
 
         # check we set right role id
@@ -271,20 +282,22 @@ class TestActions(unittest.TestCase):
         np_mock.identity_scope = 'foo-scope'
         np_mock.identity_role = 'reader'
         mock_resolve_role_id.return_value = 'foo-role-id'
-        _validate_vm_vmss_msi(np_mock)
+        _validate_vm_vmss_msi(cmd, np_mock)
         self.assertEqual(np_mock.identity_role_id, 'foo-role-id')
         self.assertEqual(np_mock.identity_role, 'reader')
-        mock_resolve_role_id.assert_called_with('reader', 'foo-scope')
+        mock_resolve_role_id.assert_called_with(cmd.cli_ctx, 'reader', 'foo-scope')
 
     @mock.patch('azure.cli.command_modules.vm._validators._resolve_role_id', autospec=True)
     def test_validate_msi_on_assign_identity_command(self, mock_resolve_role_id):
         # check throw on : az vm/vmss assign-identity --role reader --scope ""
         np_mock = mock.MagicMock()
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
         np_mock.identity_scope = ''
         np_mock.identity_role = 'reader'
 
         with self.assertRaises(CLIError) as err:
-            _validate_vm_vmss_msi(np_mock, from_set_command=True)
+            _validate_vm_vmss_msi(cmd, np_mock, from_set_command=True)
         self.assertTrue("usage error: '--role reader' is not applicable as the '--scope' is set to None",
                         str(err.exception))
 
@@ -294,9 +307,9 @@ class TestActions(unittest.TestCase):
         np_mock.identity_role = 'reader'
         np_mock.assign_identity = []
         mock_resolve_role_id.return_value = 'foo-role-id'
-        _validate_vm_vmss_msi(np_mock, from_set_command=True)
+        _validate_vm_vmss_msi(cmd, np_mock, from_set_command=True)
         self.assertEqual(np_mock.identity_role_id, 'foo-role-id')
-        mock_resolve_role_id.assert_called_with('reader', 'foo-scope')
+        mock_resolve_role_id.assert_called_with(cmd.cli_ctx, 'reader', 'foo-scope')
 
 
 if __name__ == '__main__':

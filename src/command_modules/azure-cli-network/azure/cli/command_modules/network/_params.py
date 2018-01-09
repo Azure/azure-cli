@@ -6,859 +6,909 @@
 # pylint: disable=line-too-long
 from argcomplete.completers import FilesCompleter
 
-from azure.cli.core.commands import \
-    (VersionConstraint, CliArgumentType, register_cli_argument, register_extra_cli_argument)
-from azure.cli.core.commands.parameters import (location_type, get_resource_name_completion_list,
-                                                enum_choice_list, tags_type, ignore_type,
+from knack.arguments import CLIArgumentType, ignore_type
+
+from azure.cli.core.commands.parameters import (get_location_type, get_resource_name_completion_list,
+                                                tags_type, zone_type,
                                                 file_type, get_resource_group_completion_list,
-                                                three_state_flag, model_choice_list, zone_type)
+                                                get_three_state_flag, get_enum_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
-from azure.cli.command_modules.network._client_factory import _network_client_factory
 from azure.cli.command_modules.network._validators import \
     (dns_zone_name_type,
-     process_ag_create_namespace, process_ag_listener_create_namespace,
-     process_ag_http_settings_create_namespace, process_ag_url_path_map_create_namespace,
-     process_nic_create_namespace, process_lb_create_namespace, process_ag_rule_create_namespace,
-     process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace,
-     process_public_ip_create_namespace, validate_private_ip_address,
-     process_lb_frontend_ip_namespace, process_local_gateway_create_namespace,
-     process_tm_endpoint_create_namespace, process_vnet_create_namespace,
-     process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
-     process_vpn_connection_create_namespace,
-     process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
-     process_nw_flow_log_set_namespace, process_nw_flow_log_show_namespace,
-     process_ag_ssl_policy_set_namespace, process_route_table_create_namespace,
-     process_nw_topology_namespace, process_nw_packet_capture_create_namespace,
-     process_nw_test_connectivity_namespace,
      validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
      validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
      validate_address_pool_name_or_id, load_cert_file, validate_metadata,
      validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
+     validate_private_ip_address,
      get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_network_watcher_from_vm, get_network_watcher_from_location,
      get_asg_validator, validate_ip_tags)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.mgmt.trafficmanager.models import MonitorProtocol
-from azure.cli.command_modules.network.custom import list_traffic_manager_endpoints
-from azure.cli.core.profiles import ResourceType, get_sdk, supported_api_version
+from azure.cli.command_modules.network._completers import (
+    subnet_completion_list, get_lb_subresource_completion_list, get_ag_subresource_completion_list,
+    ag_url_map_rule_completion_list, tm_endpoint_completion_list)
 from azure.cli.core.util import get_json_object
 
-(ApplicationGatewaySkuName, ApplicationGatewayCookieBasedAffinity, ApplicationGatewayFirewallMode,
- ApplicationGatewayProtocol, ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySslProtocol,
- ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, ExpressRouteCircuitPeeringType, IPVersion, LoadDistribution,
- ProbeProtocol, TransportProtocol, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection,
- VirtualNetworkGatewayType, VirtualNetworkGatewaySkuName, VpnType, IPAllocationMethod, RouteNextHopType, Direction,
- Protocol, IPVersion) = get_sdk(ResourceType.MGMT_NETWORK,
-                                'ApplicationGatewaySkuName',
-                                'ApplicationGatewayCookieBasedAffinity',
-                                'ApplicationGatewayFirewallMode',
-                                'ApplicationGatewayProtocol',
-                                'ApplicationGatewayRequestRoutingRuleType',
-                                'ApplicationGatewaySslProtocol',
-                                'ExpressRouteCircuitSkuFamily',
-                                'ExpressRouteCircuitSkuTier',
-                                'ExpressRouteCircuitPeeringType',
-                                'IPVersion',
-                                'LoadDistribution', 'ProbeProtocol',
-                                'TransportProtocol',
-                                'SecurityRuleAccess',
-                                'SecurityRuleProtocol',
-                                'SecurityRuleDirection',
-                                'VirtualNetworkGatewayType',
-                                'VirtualNetworkGatewaySkuName',
-                                'VpnType', 'IPAllocationMethod',
-                                'RouteNextHopType',
-                                'Direction', 'Protocol', 'IPVersion',
-                                mod='models')
 
-# CHOICE LISTS
+# pylint: disable=too-many-locals, too-many-branches, too-many-statements
+def load_arguments(self, _):
 
-# taken from Xplat. No enums in SDK
-routing_registry_values = ['ARIN', 'APNIC', 'AFRINIC', 'LACNIC', 'RIPENCC', 'RADB', 'ALTDB', 'LEVEL3']
-device_path_values = ['primary', 'secondary']
+    (Access, ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, ApplicationGatewayRedirectType,
+     ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySkuName, AuthenticationMethod, Direction,
+     ExpressRouteCircuitPeeringType, ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, IPAllocationMethod,
+     IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName,
+     RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
+     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType) = self.get_models(
+         'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
+         'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'AuthenticationMethod', 'Direction',
+         'ExpressRouteCircuitPeeringType', 'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier', 'IPAllocationMethod',
+         'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName',
+         'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
+         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType')
 
-# COMPLETERS
+    default_existing = 'If only one exists, omit to use as default.'
 
+    # taken from Xplat. No enums in SDK
+    routing_registry_values = ['ARIN', 'APNIC', 'AFRINIC', 'LACNIC', 'RIPENCC', 'RADB', 'ALTDB', 'LEVEL3']
+    device_path_values = ['primary', 'secondary']
 
-def get_subnet_completion_list():
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = _network_client_factory()
-        if parsed_args.resource_group_name and parsed_args.virtual_network_name:
-            rg = parsed_args.resource_group_name
-            vnet = parsed_args.virtual_network_name
-            return [r.name for r in client.subnets.list(resource_group_name=rg, virtual_network_name=vnet)]
-    return completer
+    name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
+    nic_type = CLIArgumentType(options_list=('--nic-name',), metavar='NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
+    nsg_name_type = CLIArgumentType(options_list=('--nsg-name',), metavar='NAME', help='Name of the network security group.')
+    circuit_name_type = CLIArgumentType(options_list=('--circuit-name',), metavar='NAME', help='ExpressRoute circuit name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'))
+    virtual_network_name_type = CLIArgumentType(options_list=('--vnet-name',), metavar='NAME', help='The virtual network (VNet) name.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'))
+    subnet_name_type = CLIArgumentType(options_list=('--subnet-name',), metavar='NAME', help='The subnet name.')
+    load_balancer_name_type = CLIArgumentType(options_list=('--lb-name',), metavar='NAME', help='The load balancer name.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), id_part='name')
+    private_ip_address_type = CLIArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
+    cookie_based_affinity_type = CLIArgumentType(arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True))
+    http_protocol_type = CLIArgumentType(get_enum_type(ApplicationGatewayProtocol))
+    ag_servers_type = CLIArgumentType(nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
 
+    # region NetworkRoot
+    with self.argument_context('network') as c:
+        c.argument('subnet_name', subnet_name_type)
+        c.argument('virtual_network_name', virtual_network_name_type, id_part='name')
+        c.argument('tags', tags_type)
+        c.argument('network_security_group_name', nsg_name_type, id_part='name')
+        c.argument('private_ip_address', private_ip_address_type)
+        c.argument('private_ip_address_version', arg_type=get_enum_type(IPVersion))
+    # endregion
 
-def get_lb_subresource_completion_list(prop):
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = _network_client_factory()
-        try:
-            lb_name = parsed_args.load_balancer_name
-        except AttributeError:
-            lb_name = parsed_args.resource_name
-        if parsed_args.resource_group_name and lb_name:
-            lb = client.load_balancers.get(parsed_args.resource_group_name, lb_name)
-            return [r.name for r in getattr(lb, prop)]
-    return completer
+    # region ApplicationGateways
+    with self.argument_context('network application-gateway') as c:
+        c.argument('application_gateway_name', name_arg_type, help='The name of the application gateway.', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
+        c.argument('sku', arg_group='Gateway', help='The name of the SKU.', arg_type=get_enum_type(ApplicationGatewaySkuName), default=ApplicationGatewaySkuName.standard_medium.value)
+        c.ignore('virtual_network_type', 'private_ip_address_allocation')
 
+    with self.argument_context('network application-gateway', arg_group='Network') as c:
+        c.argument('virtual_network_name', virtual_network_name_type)
+        c.argument('private_ip_address')
+        c.argument('public_ip_address_allocation', help='The kind of IP allocation to use when creating a new public IP.', default=IPAllocationMethod.dynamic.value)
+        c.argument('subnet_address_prefix', help='The CIDR prefix to use when creating a new subnet.')
+        c.argument('vnet_address_prefix', help='The CIDR prefix to use when creating a new VNet.')
 
-def get_ag_subresource_completion_list(prop):
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = _network_client_factory()
-        try:
-            ag_name = parsed_args.application_gateway_name
-        except AttributeError:
-            ag_name = parsed_args.resource_name
-        if parsed_args.resource_group_name and ag_name:
-            ag = client.application_gateways.get(parsed_args.resource_group_name, ag_name)
-            return [r.name for r in getattr(ag, prop)]
-    return completer
+    with self.argument_context('network application-gateway', arg_group='Gateway') as c:
+        c.argument('servers', ag_servers_type)
+        c.argument('capacity', help='The number of instances to use with the application gateway.')
+        c.argument('http_settings_cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable HTTP settings cookie-based affinity.')
+        c.argument('http_settings_protocol', http_protocol_type, help='The HTTP settings protocol.')
+        c.argument('enable_http2', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled'), options_list=['--http2'], help='Use HTTP2 for the application gateway.', min_api='2017-10-01')
 
+    with self.argument_context('network application-gateway create') as c:
+        c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
+        c.argument('routing_rule_type', arg_group='Gateway', help='The request routing rule type.', arg_type=get_enum_type(ApplicationGatewayRequestRoutingRuleType))
+        public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True, default_none=True)
+        c.argument('public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), arg_group='Network')
+        c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
+        subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_new=True)
+        c.argument('subnet', help=subnet_help, completer=subnet_completion_list, arg_group='Network')
 
-def get_ag_url_map_rule_completion_list():
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = _network_client_factory()
-        try:
-            ag_name = parsed_args.application_gateway_name
-        except AttributeError:
-            ag_name = parsed_args.resource_name
-        if parsed_args.resource_group_name and ag_name:
-            ag = client.application_gateways.get(parsed_args.resource_group_name, ag_name)
-            url_map = next((x for x in ag.url_path_maps if x.name == parsed_args.url_path_map_name), None)  # pylint: disable=no-member
-            return [r.name for r in url_map.path_rules]
-    return completer
+    with self.argument_context('network application-gateway create', arg_group='Gateway') as c:
+        c.argument('cert_data', options_list=('--cert-file',), type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.')
+        c.argument('frontend_port', help='The front end port number.')
+        c.argument('cert_password', help='The certificate password')
+        c.argument('http_settings_port', help='The HTTP settings port.')
+        c.argument('servers', ag_servers_type)
 
+    with self.argument_context('network application-gateway update', arg_group=None) as c:
+        c.argument('sku')
+        c.argument('enable_http2')
+        c.argument('capacity')
 
-def get_tm_endpoint_completion_list():
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        return list_traffic_manager_endpoints(parsed_args.resource_group_name, parsed_args.profile_name) \
-            if parsed_args.resource_group_name and parsed_args.profile_name \
-            else []
-    return completer
+    ag_subresources = [
+        {'name': 'auth-cert', 'display': 'authentication certificate', 'ref': 'authentication_certificates'},
+        {'name': 'ssl-cert', 'display': 'SSL certificate', 'ref': 'ssl_certificates'},
+        {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
+        {'name': 'frontend-port', 'display': 'frontend port', 'ref': 'frontend_ports'},
+        {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
+        {'name': 'http-settings', 'display': 'backed HTTP settings', 'ref': 'backend_http_settings_collection'},
+        {'name': 'http-listener', 'display': 'HTTP listener', 'ref': 'http_listeners'},
+        {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
+        {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
+        {'name': 'url-path-map', 'display': 'URL path map', 'ref': 'url_path_maps'},
+        {'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'}
+    ]
 
+    for item in ag_subresources:
+        with self.argument_context('network application-gateway {}'.format(item['name'])) as c:
+            c.argument('item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=get_ag_subresource_completion_list(item['ref']), id_part='child_name_1')
+            c.argument('resource_name', options_list=('--gateway-name',), help='The name of the application gateway.')
+            c.argument('application_gateway_name', options_list=('--gateway-name',), help='The name of the application gateway.')
+            c.argument('private_ip_address', arg_group=None)
+            c.argument('virtual_network_name', arg_group=None)
 
-# BASIC PARAMETER CONFIGURATION
+        with self.argument_context('network application-gateway {} create'.format(item['name'])) as c:
+            c.argument('item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=None)
 
-name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-nic_type = CliArgumentType(options_list=('--nic-name',), metavar='NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
-nsg_name_type = CliArgumentType(options_list=('--nsg-name',), metavar='NAME', help='Name of the network security group.')
-circuit_name_type = CliArgumentType(options_list=('--circuit-name',), metavar='NAME', help='ExpressRoute circuit name.', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/expressRouteCircuits'))
-virtual_network_name_type = CliArgumentType(options_list=('--vnet-name',), metavar='NAME', help='The virtual network (VNet) name.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworks'))
-subnet_name_type = CliArgumentType(options_list=('--subnet-name',), metavar='NAME', help='The subnet name.')
-load_balancer_name_type = CliArgumentType(options_list=('--lb-name',), metavar='NAME', help='The load balancer name.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), id_part='name')
-private_ip_address_type = CliArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
-cookie_based_affinity_type = CliArgumentType(**three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True))
-http_protocol_type = CliArgumentType(**enum_choice_list(ApplicationGatewayProtocol))
-ag_servers_type = CliArgumentType(nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
+        with self.argument_context('network application-gateway {} list'.format(item['name'])) as c:
+            c.argument('resource_name', options_list=('--gateway-name',))
 
-# ARGUMENT REGISTRATION
-
-register_cli_argument('network', 'subnet_name', subnet_name_type)
-register_cli_argument('network', 'virtual_network_name', virtual_network_name_type, id_part='name')
-register_cli_argument('network', 'network_security_group_name', nsg_name_type, id_part='name')
-register_cli_argument('network', 'private_ip_address', private_ip_address_type)
-register_cli_argument('network', 'private_ip_address_version', **enum_choice_list(IPVersion))
-register_cli_argument('network', 'tags', tags_type)
-
-register_cli_argument('network application-gateway', 'application_gateway_name', name_arg_type, help='The name of the application gateway.', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
-register_cli_argument('network application-gateway', 'sku', arg_group='Gateway', help='The name of the SKU.', **enum_choice_list(ApplicationGatewaySkuName))
-register_cli_argument('network application-gateway', 'virtual_network_name', virtual_network_name_type, arg_group='Network')
-register_cli_argument('network application-gateway', 'private_ip_address', arg_group='Network')
-register_cli_argument('network application-gateway', 'private_ip_address_allocation', ignore_type, arg_group='Network')
-register_cli_argument('network application-gateway', 'public_ip_address_allocation', help='The kind of IP allocation to use when creating a new public IP.', arg_group='Network')
-register_cli_argument('network application-gateway', 'servers', ag_servers_type, arg_group='Gateway')
-register_cli_argument('network application-gateway', 'http_settings_cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable HTTP settings cookie-based affinity.', arg_group='Gateway')
-register_cli_argument('network application-gateway', 'http_settings_protocol', http_protocol_type, help='The HTTP settings protocol.', arg_group='Gateway')
-register_cli_argument('network application-gateway', 'subnet_address_prefix', help='The CIDR prefix to use when creating a new subnet.', arg_group='Network')
-register_cli_argument('network application-gateway', 'vnet_address_prefix', help='The CIDR prefix to use when creating a new VNet.', arg_group='Network')
-register_cli_argument('network application-gateway', 'virtual_network_type', ignore_type, arg_group='Network')
-
-register_cli_argument('network application-gateway create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true', validator=process_ag_create_namespace)
-register_cli_argument('network application-gateway create', 'routing_rule_type', arg_group='Gateway', help='The request routing rule type.', **enum_choice_list(ApplicationGatewayRequestRoutingRuleType))
-register_cli_argument('network application-gateway create', 'cert_data', options_list=('--cert-file',), type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', arg_group='Gateway')
-register_cli_argument('network application-gateway create', 'frontend_type', ignore_type, arg_group='Gateway')
-register_cli_argument('network application-gateway create', 'frontend_port', help='The front end port number.', arg_group='Gateway')
-register_cli_argument('network application-gateway create', 'capacity', help='The number of instances to use with the application gateway.', arg_group='Gateway')
-register_cli_argument('network application-gateway create', 'cert_password', help='The certificate password', arg_group='Gateway')
-register_cli_argument('network application-gateway create', 'http_settings_port', help='The HTTP settings port.', arg_group='Gateway')
-register_cli_argument('network application-gateway create', 'servers', ag_servers_type, validator=get_servers_validator(camel_case=True), arg_group='Gateway')
-
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-12-01') as c:
     for item in ['create', 'http-settings']:
-        c.register_cli_argument('network application-gateway {}'.format(item), 'connection_draining_timeout', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway' if item == 'create' else None)
-
-register_cli_argument('network application-gateway update', 'sku', arg_group=None)
-
-public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True, default_none=True)
-register_cli_argument('network application-gateway create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), arg_group='Network')
-register_cli_argument('network application-gateway create', 'public_ip_address_type', ignore_type)
-
-subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_new=True)
-register_cli_argument('network application-gateway create', 'subnet', help=subnet_help, completer=get_subnet_completion_list(), arg_group='Network')
-register_cli_argument('network application-gateway create', 'subnet_type', ignore_type)
-
-ag_subresources = [
-    {'name': 'auth-cert', 'display': 'authentication certificate', 'ref': 'authentication_certificates'},
-    {'name': 'ssl-cert', 'display': 'SSL certificate', 'ref': 'ssl_certificates'},
-    {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
-    {'name': 'frontend-port', 'display': 'frontend port', 'ref': 'frontend_ports'},
-    {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
-    {'name': 'http-settings', 'display': 'backed HTTP settings', 'ref': 'backend_http_settings_collection'},
-    {'name': 'http-listener', 'display': 'HTTP listener', 'ref': 'http_listeners'},
-    {'name': 'rule', 'display': 'request routing rule', 'ref': 'request_routing_rules'},
-    {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
-    {'name': 'url-path-map', 'display': 'URL path map', 'ref': 'url_path_maps'},
-    {'name': 'redirect-config', 'display': 'redirect configuration', 'ref': 'redirect_configurations'}
-]
-
-for item in ag_subresources:
-    register_cli_argument('network application-gateway {}'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=get_ag_subresource_completion_list(item['ref']), id_part='child_name_1')
-    register_cli_argument('network application-gateway {} create'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}.'.format(item['display']), completer=None)
-    register_cli_argument('network application-gateway {}'.format(item['name']), 'resource_name', options_list=('--gateway-name',), help='The name of the application gateway.')
-    register_cli_argument('network application-gateway {}'.format(item['name']), 'application_gateway_name', options_list=('--gateway-name',), help='The name of the application gateway.')
-    register_cli_argument('network application-gateway {} list'.format(item['name']), 'resource_name', options_list=('--gateway-name',))
-    register_cli_argument('network application-gateway {}'.format(item['name']), 'private_ip_address', arg_group=None)
-    register_cli_argument('network application-gateway {}'.format(item['name']), 'virtual_network_name', arg_group=None)
-
-register_cli_argument('network application-gateway address-pool', 'servers', ag_servers_type, arg_group=None)
-
-register_cli_argument('network application-gateway auth-cert', 'cert_data', options_list=['--cert-file'], help='Certificate file path.', type=file_type, completer=FilesCompleter(), validator=validate_auth_cert)
-
-register_cli_argument('network application-gateway frontend-ip', 'subnet', validator=get_subnet_validator(), help='The name or ID of the subnet.')
-register_cli_argument('network application-gateway frontend-ip', 'public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-register_cli_argument('network application-gateway frontend-ip', 'virtual_network_name', help='The name of the virtual network corresponding to the subnet.', id_part=None, arg_group=None)
-
-for item in ['frontend-port', 'http-settings']:
-    register_cli_argument('network application-gateway {}'.format(item), 'port', help='The port number.', type=int)
-
-for item in ['http-settings', 'probe']:
-    register_cli_argument('network application-gateway {}'.format(item), 'protocol', http_protocol_type, help='The HTTP settings protocol.')
-
-register_cli_argument('network application-gateway http-listener', 'frontend_ip', help='The name or ID of the frontend IP configuration.', validator=process_ag_listener_create_namespace, completer=get_ag_subresource_completion_list('frontend_ip_configurations'))
-register_cli_argument('network application-gateway http-listener', 'frontend_port', help='The name or ID of the frontend port.', completer=get_ag_subresource_completion_list('frontend_ports'))
-register_cli_argument('network application-gateway http-listener', 'ssl_cert', help='The name or ID of the SSL certificate to use.', completer=get_ag_subresource_completion_list('ssl_certificates'))
-register_cli_argument('network application-gateway http-listener', 'protocol', ignore_type)
-register_cli_argument('network application-gateway http-listener', 'host_name', help='Host name to use for multisite gateways.')
-
-# Add help text to clarify the "default if one" policy.
-default_existing = 'If only one exists, omit to use as default.'
-register_cli_argument('network application-gateway http-listener create', 'frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
-register_cli_argument('network application-gateway rule create', 'address_pool', help='The name or ID of the backend address pool. {}'.format(default_existing))
-register_cli_argument('network application-gateway rule create', 'http_settings', help='The name or ID of the HTTP settings. {}'.format(default_existing))
-register_cli_argument('network application-gateway rule create', 'http_listener', help='The name or ID of the HTTP listener. {}'.format(default_existing))
-register_cli_argument('network lb rule create', 'backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
-register_cli_argument('network lb rule create', 'frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
-register_cli_argument('network lb inbound-nat-rule create', 'frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
-register_cli_argument('network lb inbound-nat-pool create', 'frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
-
-register_cli_argument('network application-gateway http-settings', 'cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie-based affinity.')
-register_cli_argument('network application-gateway http-settings', 'timeout', help='Request timeout in seconds.')
-register_cli_argument('network application-gateway http-settings', 'probe', help='Name or ID of the probe to associate with the HTTP settings.', validator=process_ag_http_settings_create_namespace, completer=get_ag_subresource_completion_list('probes'))
-
-register_cli_argument('network application-gateway probe', 'host', help='The name of the host to send the probe.')
-register_cli_argument('network application-gateway probe', 'path', help='The relative path of the probe. Valid paths start from "/"')
-register_cli_argument('network application-gateway probe', 'interval', help='The time interval in seconds between consecutive probes.')
-register_cli_argument('network application-gateway probe', 'threshold', help='The number of failed probes after which the back end server is marked down.')
-register_cli_argument('network application-gateway probe', 'timeout', help='The probe timeout in seconds.')
-
-register_cli_argument('network application-gateway rule', 'address_pool', help='The name or ID of the backend address pool.', validator=process_ag_rule_create_namespace, completer=get_ag_subresource_completion_list('backend_address_pools'))
-register_cli_argument('network application-gateway rule', 'http_listener', help='The name or ID of the HTTP listener.', completer=get_ag_subresource_completion_list('http_listeners'))
-register_cli_argument('network application-gateway rule', 'http_settings', help='The name or ID of the backend HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-register_cli_argument('network application-gateway rule', 'rule_type', help='The rule type (Basic, PathBasedRouting).')
-register_cli_argument('network application-gateway rule', 'url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
-
-register_cli_argument('network application-gateway ssl-cert', 'cert_data', options_list=('--cert-file',), type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_cert)
-register_cli_argument('network application-gateway ssl-cert', 'cert_password', help='Certificate password.')
-
-register_cli_argument('network application-gateway ssl-policy', 'clear', action='store_true', help='Clear SSL policy.', validator=process_ag_ssl_policy_set_namespace)
-register_cli_argument('network application-gateway ssl-policy', 'disabled_ssl_protocols', nargs='+', help='Space separated list of protocols to disable.', **enum_choice_list(ApplicationGatewaySslProtocol))
-
-register_cli_argument('network application-gateway url-path-map create', 'default_address_pool', help='The name or ID of the default backend address pool, if different from --address-pool.', validator=process_ag_url_path_map_create_namespace, completer=get_ag_subresource_completion_list('backend_address_pools'))
-register_cli_argument('network application-gateway url-path-map create', 'default_http_settings', help='The name or ID of the default HTTP settings, if different from --http-settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-
-register_cli_argument('network application-gateway url-path-map update', 'default_address_pool', help='The name or ID of the default backend address pool.', validator=process_ag_url_path_map_create_namespace, completer=get_ag_subresource_completion_list('backend_address_pools'))
-register_cli_argument('network application-gateway url-path-map update', 'default_http_settings', help='The name or ID of the default HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-
-register_cli_argument('network application-gateway url-path-map', 'rule_name', help='The name of the url-path-map rule.', arg_group='First Rule')
-register_cli_argument('network application-gateway url-path-map', 'paths', nargs='+', help='Space separated list of paths to associate with the rule. Valid paths start and end with "/" (ex: "/bar/")', arg_group='First Rule')
-register_cli_argument('network application-gateway url-path-map', 'address_pool', help='The name or ID of the backend address pool to use with the created rule.', completer=get_ag_subresource_completion_list('backend_address_pools'), arg_group='First Rule')
-register_cli_argument('network application-gateway url-path-map', 'http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'), arg_group='First Rule')
-
-register_cli_argument('network application-gateway url-path-map rule', 'item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=get_ag_url_map_rule_completion_list(), id_part='child_name_2')
-register_cli_argument('network application-gateway url-path-map rule create', 'item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=None, validator=process_ag_url_path_map_rule_create_namespace)
-register_cli_argument('network application-gateway url-path-map rule', 'url_path_map_name', options_list=('--path-map-name',), help='The name of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'), id_part='child_name_1')
-register_cli_argument('network application-gateway url-path-map rule', 'address_pool', help='The name or ID of the backend address pool. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_address_pools'))
-register_cli_argument('network application-gateway url-path-map rule', 'http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
-
-register_cli_argument('network application-gateway waf-config', 'enabled', help='Specify whether the application firewall is enabled.', **enum_choice_list(['true', 'false']))
-
-if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
-    register_cli_argument('network application-gateway waf-config', 'firewall_mode', help='Web application firewall mode.', default=ApplicationGatewayFirewallMode.detection.value, **enum_choice_list(ApplicationGatewayFirewallMode))
-else:
-    register_cli_argument('network application-gateway waf-config', 'firewall_mode', ignore_type)
-
-for item in ['ssl-policy', 'waf-config']:
-    register_cli_argument('network application-gateway {}'.format(item), 'application_gateway_name', options_list=('--gateway-name',), help='The name of the application gateway.')
-
-register_cli_argument('network application-gateway waf-config', 'disabled_rule_groups', nargs='+')
-register_cli_argument('network application-gateway waf-config', 'disabled_rules', nargs='+')
-register_cli_argument('network application-gateway waf-config list-rule-sets', '_type', options_list=['--type'])
-
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
-    c.register_cli_argument('network application-gateway ssl-policy predefined', 'predefined_policy_name', name_arg_type)
-
-    c.register_cli_argument('network application-gateway redirect-config', 'redirect_type', options_list=['--type', '-t'], help='HTTP redirection type', **model_choice_list(ResourceType.MGMT_NETWORK, 'ApplicationGatewayRedirectType'))
-    c.register_cli_argument('network application-gateway redirect-config', 'include_path', **three_state_flag())
-    c.register_cli_argument('network application-gateway redirect-config', 'include_query_string', **three_state_flag())
-    c.register_cli_argument('network application-gateway redirect-config', 'target_listener', validator=validate_target_listener, help='Name or ID of the HTTP listener to redirect the request to.')
-    c.register_cli_argument('network application-gateway redirect-config', 'target_url', help='URL to redirect the request to.')
-
-    c.register_cli_argument('network application-gateway ssl-policy', 'policy_name', name_arg_type)
-    c.register_cli_argument('network application-gateway ssl-policy', 'cipher_suites', nargs='+')
-    c.register_cli_argument('network application-gateway ssl-policy', 'min_protocol_version')
-    c.register_cli_argument('network application-gateway ssl-policy', 'disabled_ssl_protocols', nargs='+', help='Space separated list of protocols to disable.')
-
-    c.register_cli_argument('network application-gateway http-settings', 'host_name', help='Host header sent to the backend servers.')
-    c.register_cli_argument('network application-gateway http-settings', 'host_name_from_backend_pool', help='Use host name of the backend server as the host header.', **three_state_flag())
-    c.register_cli_argument('network application-gateway http-settings', 'affinity_cookie_name', help='Name used for the affinity cookie.')
-    c.register_cli_argument('network application-gateway http-settings', 'enable_probe', help='Whether the probe is enabled.', **three_state_flag())
-    c.register_cli_argument('network application-gateway http-settings', 'path', help='Path that will prefix all HTTP requests.')
-
-    c.register_cli_argument('network application-gateway probe', 'host', default=None, required=False, help='The name of the host to send the probe.')
-    c.register_cli_argument('network application-gateway probe', 'host_name_from_http_settings', help='Use host header from HTTP settings.', **three_state_flag())
-    c.register_cli_argument('network application-gateway probe', 'min_servers', type=int, help='Minimum number of servers that are always marked healthy.')
-    c.register_cli_argument('network application-gateway probe', 'match_body', help='Body that must be contained in the health response.')
-    c.register_cli_argument('network application-gateway probe', 'match_status_codes', nargs='+', help='Space-separated list of allowed ranges of healthy status codes for the health response.')
-
-    c.register_cli_argument('network application-gateway url-path-map', 'default_redirect_config', help='The name or ID of the default redirect configuration.')
-    c.register_cli_argument('network application-gateway url-path-map', 'redirect_config', help='The name or ID of the redirect configuration to use with the created rule.', arg_group='First Rule')
-
-    c.register_cli_argument('network application-gateway rule', 'redirect_config', help='The name or ID of the redirect configuration to use with the created rule.')
-
-for item in ['address_pool', 'http_settings', 'redirect_config', 'paths']:
-    register_cli_argument('network application-gateway url-path-map rule', item, arg_group=None)
-
-# ApplicationSecurityGroups
-register_cli_argument('network asg', 'application_security_group_name', name_arg_type, id_part='name')
-register_cli_argument('network asg', 'location', location_type, validator=get_default_location_from_resource_group)
-
-# ExpressRoutes
-register_cli_argument('network express-route', 'circuit_name', circuit_name_type, options_list=('--name', '-n'))
-register_cli_argument('network express-route', 'sku_family', help='Chosen SKU family of ExpressRoute circuit.', **enum_choice_list(ExpressRouteCircuitSkuFamily))
-register_cli_argument('network express-route', 'sku_tier', help='SKU Tier of ExpressRoute circuit.', **enum_choice_list(ExpressRouteCircuitSkuTier))
-register_cli_argument('network express-route', 'bandwidth_in_mbps', options_list=('--bandwidth',), help="Bandwidth in Mbps of the circuit.")
-register_cli_argument('network express-route', 'service_provider_name', options_list=('--provider',), help="Name of the ExpressRoute Service Provider.")
-register_cli_argument('network express-route', 'peering_location', help="Name of the peering location.")
-register_cli_argument('network express-route', 'device_path', options_list=('--path',), **enum_choice_list(device_path_values))
-register_cli_argument('network express-route', 'vlan_id', type=int)
-register_cli_argument('network express-route', 'location', location_type, validator=get_default_location_from_resource_group)
-
-register_cli_argument('network express-route auth', 'circuit_name', circuit_name_type)
-register_cli_argument('network express-route auth', 'authorization_name', name_arg_type, id_part='child_name_1', help='Authorization name')
-
-register_cli_argument('network express-route auth create', 'authorization_parameters', ignore_type, validator=process_auth_create_namespace)
-
-register_cli_argument('network express-route peering', 'circuit_name', circuit_name_type)
-register_cli_argument('network express-route peering', 'peering_name', name_arg_type, id_part='child_name_1')
-register_cli_argument('network express-route peering', 'peering_type', validator=validate_peering_type, **enum_choice_list(ExpressRouteCircuitPeeringType))
-register_cli_argument('network express-route peering', 'sku_family', **enum_choice_list(ExpressRouteCircuitSkuFamily))
-register_cli_argument('network express-route peering', 'sku_tier', **enum_choice_list(ExpressRouteCircuitSkuTier))
-register_cli_argument('network express-route peering', 'primary_peer_address_prefix', options_list=['--primary-peer-subnet'])
-register_cli_argument('network express-route peering', 'secondary_peer_address_prefix', options_list=['--secondary-peer-subnet'])
-
-register_cli_argument('network express-route peering', 'advertised_public_prefixes', arg_group='Microsoft Peering', nargs='+')
-register_cli_argument('network express-route peering', 'customer_asn', arg_group='Microsoft Peering')
-register_cli_argument('network express-route peering', 'routing_registry_name', arg_group='Microsoft Peering', **enum_choice_list(routing_registry_values))
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-12-01') as c:
-    c.register_cli_argument('network express-route peering', 'route_filter', arg_group='Microsoft Peering', help='Name or ID of a route filter to apply to the peering settings.', validator=validate_route_filter)
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
-    register_cli_argument('network express-route peering', 'ip_version', help='The IP version to update Microsoft Peering settings for.', arg_group='Microsoft Peering', **enum_choice_list(['IPv4', 'IPv6']))
-
-# Local Gateway
-register_cli_argument('network local-gateway', 'local_network_gateway_name', name_arg_type, help='Name of the local network gateway.', completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
-register_cli_argument('network local-gateway', 'local_address_prefix', nargs='+', options_list=('--local-address-prefixes',), help='List of CIDR block prefixes representing the address space of the OnPremise VPN\'s subnet.')
-register_cli_argument('network local-gateway', 'gateway_ip_address', help='Gateway\'s public IP address. (e.g. 10.1.1.1).')
-register_cli_argument('network local-gateway', 'bgp_peering_address', arg_group='BGP Peering', help='IP address from the OnPremise VPN\'s subnet to use for BGP peering.')
-
-register_cli_argument('network local-gateway create', 'use_bgp_settings', ignore_type)
-register_cli_argument('network local-gateway create', 'asn', validator=process_local_gateway_create_namespace)
-
-
-for item in ['local-gateway', 'vnet-gateway']:
-    register_cli_argument('network {}'.format(item), 'asn', arg_group='BGP Peering', help='Autonomous System Number to use for the BGP settings.')
-    register_cli_argument('network {}'.format(item), 'peer_weight', arg_group='BGP Peering', help='Weight (0-100) added to routes learned through BGP peering.')
-
-# NIC
-
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2016-09-01') as c:
-    IPVersion = get_sdk(ResourceType.MGMT_NETWORK, 'IPVersion', mod='models')
-    c.register_cli_argument('network nic create', 'private_ip_address_version', help='The private IP address version to use.', default=IPVersion.ipv4.value if IPVersion else '')
-    c.register_cli_argument('network nic', 'enable_accelerated_networking', options_list=['--accelerated-networking'], help='Enable accelerated networking.', **three_state_flag())
-
-register_cli_argument('network nic', 'network_interface_name', nic_type, options_list=('--name', '-n'))
-register_cli_argument('network nic', 'internal_dns_name_label', options_list=('--internal-dns-name',), help='The internal DNS name label.', arg_group='DNS')
-register_cli_argument('network nic', 'dns_servers', help='Space separated list of DNS server IP addresses.', nargs='+', arg_group='DNS')
-register_cli_argument('network nic', 'enable_ip_forwarding', options_list=('--ip-forwarding',), help='Enable IP forwarding.', **three_state_flag())
-
-register_cli_argument('network nic create', 'network_interface_name', nic_type, options_list=('--name', '-n'), id_part=None, validator=process_nic_create_namespace)
-
-public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, default_none=True)
-register_cli_argument('network nic create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-
-nsg_help = get_folded_parameter_help_string('network security group', allow_none=True, default_none=True)
-register_cli_argument('network nic create', 'network_security_group', help=nsg_help, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
-
-subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name')
-register_cli_argument('network nic create', 'subnet', help=subnet_help, completer=get_subnet_completion_list())
-
-register_cli_argument('network nic update', 'network_security_group', help='Name or ID of the associated network security group.', validator=get_nsg_validator(), completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
-register_cli_argument('network nic update', 'dns_servers', help='Space separated list of DNS server IP addresses. Use "" to revert to default Azure servers.', nargs='+', arg_group='DNS')
-
-for item in ['create', 'ip-config update', 'ip-config create']:
-    register_extra_cli_argument('network nic {}'.format(item), 'load_balancer_name', options_list=('--lb-name',), completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), help='The name of the load balancer to use when adding NAT rules or address pools by name (ignored when IDs are specified).')
-    register_cli_argument('network nic {}'.format(item), 'load_balancer_backend_address_pool_ids', options_list=('--lb-address-pools',), nargs='+', validator=validate_address_pool_id_list, help='Space separated list of names or IDs of load balancer address pools to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('backendAddresPools'))
-    register_cli_argument('network nic {}'.format(item), 'load_balancer_inbound_nat_rule_ids', options_list=('--lb-inbound-nat-rules',), nargs='+', validator=validate_inbound_nat_rule_id_list, help='Space separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('inboundNatRules'))
-
-    with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-09-01') as c:
-        c.register_cli_argument('network nic {}'.format(item), 'application_security_groups', help='Space separated list of application security groups.', nargs='+', validator=get_asg_validator('application_security_groups'))
-
-
-register_cli_argument('network nic ip-config', 'network_interface_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
-register_cli_argument('network nic ip-config', 'ip_config_name', options_list=('--name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name_1')
-register_cli_argument('network nic ip-config', 'resource_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
-register_cli_argument('network nic ip-config', 'item_name', options_list=('--name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name_1')
-register_cli_argument('network nic ip-config', 'subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
-register_cli_argument('network nic ip-config', 'virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
-register_cli_argument('network nic ip-config', 'public_ip_address', help='Name or ID of the public IP to use.', validator=get_public_ip_validator())
-register_cli_argument('network nic ip-config', 'private_ip_address_allocation', ignore_type)
-register_cli_argument('network nic ip-config', 'make_primary', action='store_true', help='Set to make this configuration the primary one for the NIC.')
-
-for item in ['address-pool', 'inbound-nat-rule']:
-    register_cli_argument('network nic ip-config {}'.format(item), 'ip_config_name', options_list=('--ip-config-name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name_1')
-    register_cli_argument('network nic ip-config {}'.format(item), 'network_interface_name', nic_type)
-
-register_cli_argument('network nic ip-config address-pool remove', 'network_interface_name', nic_type, id_part=None)
-register_cli_argument('network nic ip-config inbound-nat-rule remove', 'network_interface_name', nic_type, id_part=None)
-
-register_cli_argument('network nic ip-config address-pool', 'load_balancer_name', options_list=('--lb-name',), help='The name of the load balancer associated with the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-register_cli_argument('network nic ip-config inbound-nat-rule', 'load_balancer_name', options_list=('--lb-name',), help='The name of the load balancer associated with the NAT rule (Omit if suppying a NAT rule ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-
-register_cli_argument('network nic ip-config address-pool', 'backend_address_pool', options_list=('--address-pool',), help='The name or ID of an existing backend address pool.', validator=validate_address_pool_name_or_id)
-register_cli_argument('network nic ip-config inbound-nat-rule', 'inbound_nat_rule', options_list=('--inbound-nat-rule',), help='The name or ID of an existing inbound NAT rule.', validator=validate_inbound_nat_rule_name_or_id)
-
-# NSG
-register_cli_argument('network nsg', 'network_security_group_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'), id_part='name')
-register_cli_argument('network nsg create', 'name', name_arg_type)
-register_cli_argument('network nsg create', 'location', location_type, validator=get_default_location_from_resource_group)
-
-# NSG Rule
-register_cli_argument('network nsg rule', 'security_rule_name', name_arg_type, id_part='child_name_1', help='Name of the network security group rule')
-register_cli_argument('network nsg rule', 'network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part='name')
-
-for item in ['create', 'update']:
-    register_cli_argument('network nsg rule {}'.format(item), 'priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
-    register_cli_argument('network nsg rule {}'.format(item), 'description', help='Rule description')
-    register_cli_argument('network nsg rule {}'.format(item), 'access', help=None, **enum_choice_list(SecurityRuleAccess))
-    register_cli_argument('network nsg rule {}'.format(item), 'protocol', help='Network protocol this rule applies to.', **enum_choice_list(SecurityRuleProtocol))
-    register_cli_argument('network nsg rule {}'.format(item), 'direction', help=None, **enum_choice_list(SecurityRuleDirection))
-
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
-        register_cli_argument('network nsg rule {}'.format(item), 'source_port_ranges', nargs='+', help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.", arg_group='Source')
-        register_cli_argument('network nsg rule {}'.format(item), 'source_address_prefixes', nargs='+', help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs.", arg_group='Source')
-        register_cli_argument('network nsg rule {}'.format(item), 'destination_port_ranges', nargs='+', help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.", arg_group='Destination')
-        register_cli_argument('network nsg rule {}'.format(item), 'destination_address_prefixes', nargs='+', help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs.", arg_group='Destination')
-    else:
-        register_cli_argument('network nsg rule {}'.format(item), 'source_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Source')
-        register_cli_argument('network nsg rule {}'.format(item), 'source_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Source')
-        register_cli_argument('network nsg rule {}'.format(item), 'destination_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Destination')
-        register_cli_argument('network nsg rule {}'.format(item), 'destination_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Destination')
-
-    with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-09-01') as c:
-        c.register_cli_argument('network nsg rule {}'.format(item), 'source_asgs', nargs='+', help="Space-separated list of application security group names or IDs.", arg_group='Source', validator=get_asg_validator('source_asgs'))
-        c.register_cli_argument('network nsg rule {}'.format(item), 'destination_asgs', nargs='+', help="Space-separated list of application security group names or IDs.", arg_group='Destination', validator=get_asg_validator('destination_asgs'))
-
-register_cli_argument('network nsg rule create', 'network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part=None)
-
-# Public IP
-register_cli_argument('network public-ip', 'public_ip_address_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), id_part='name', help='The name of the public IP address.')
-register_cli_argument('network public-ip', 'name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), help='The name of the public IP address.')
-register_cli_argument('network public-ip', 'reverse_fqdn', help='Reverse FQDN (fully qualified domain name).')
-register_cli_argument('network public-ip', 'dns_name', help='Globally unique DNS entry.')
-register_cli_argument('network public-ip', 'idle_timeout', help='Idle timeout in minutes.')
-
-register_cli_argument('network public-ip create', 'name', completer=None)
-register_cli_argument('network public-ip create', 'dns_name', validator=process_public_ip_create_namespace)
-register_cli_argument('network public-ip create', 'dns_name_type', ignore_type)
-
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-11-01') as c:
-    c.register_cli_argument('network public-ip', 'ip_tags', nargs='+', help="Space separated list of IP tags in 'TYPE=VAL' format.", validator=validate_ip_tags)
-
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
-    c.register_cli_argument('network public-ip', 'zone', zone_type)
-    c.register_cli_argument('network lb create', 'frontend_ip_zone', CliArgumentType(overrides=zone_type, options_list=('--frontend-ip-zone'), help='used to create internal facing Load balancer'))
-    c.register_cli_argument('network lb create', 'public_ip_zone', CliArgumentType(overrides=zone_type, options_list=('--public-ip-zone'), help='used to created a new public ip for the load balancer, a.k.a public facing Load balancer'))
-    c.register_cli_argument('network lb frontend-ip', 'zone', zone_type)
-
-for item in ['create', 'update']:
-    register_cli_argument('network public-ip {}'.format(item), 'allocation_method', help='IP address allocation method', **enum_choice_list(IPAllocationMethod))
-    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2016-09-01'):
-        register_cli_argument('network public-ip {}'.format(item), 'version', help='IP address type.', default=IPVersion.ipv4.value, **enum_choice_list(IPVersion))
-    else:
-        register_cli_argument('network public-ip {}'.format(item), 'version', ignore_type)
-    with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:
-        c.register_cli_argument('network public-ip {}'.format(item), 'sku', help='Public IP SKU', default='Basic')  # **model_choice_list(ResourceType.MGMT_NETWORK, 'PublicIPAddressSkuName'))
-
-# Route table
-register_cli_argument('network route-table', 'route_table_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
-register_extra_cli_argument('network route-table create', 'tags')
-register_extra_cli_argument('network route-table create', 'location')
-
-register_cli_argument('network route-table create', 'location', location_type, validator=process_route_table_create_namespace)
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-10-01') as c:
-    c.register_cli_argument('network route-table', 'disable_bgp_route_propagation', help='Disable routes learned by BGP.', **three_state_flag())
-
-# Route Operation
-register_cli_argument('network route-table route', 'route_name', name_arg_type, id_part='child_name_1', help='Route name')
-register_cli_argument('network route-table route', 'route_table_name', options_list=('--route-table-name',), help='Route table name')
-register_cli_argument('network route-table route', 'next_hop_type', help='The type of Azure hop the packet should be sent to.', **enum_choice_list(RouteNextHopType))
-register_cli_argument('network route-table route', 'next_hop_ip_address', help='The IP address packets should be forwarded to when using the VirtualAppliance hop type.')
-register_cli_argument('network route-table route', 'address_prefix', help='The destination CIDR to which the route applies.')
-
-# Route Filter
-register_cli_argument('network route-filter', 'route_filter_name', name_arg_type, help='Name of the route filter.')
-register_cli_argument('network route-filter', 'expand', **enum_choice_list(['peerings']))
-
-register_cli_argument('network route-filter create', 'location', location_type, validator=get_default_location_from_resource_group)
-
-register_cli_argument('network route-filter rule', 'route_filter_name', options_list=['--filter-name'], help='Name of the route filter.', id_part='name')
-register_cli_argument('network route-filter rule', 'rule_name', name_arg_type, help='Name of the route filter rule.', id_part='child_name_1')
-register_cli_argument('network route-filter rule', 'access', help='The access type of the rule.', **model_choice_list(ResourceType.MGMT_NETWORK, 'Access'))
-register_cli_argument('network route-filter rule', 'communities', nargs='+')
-
-register_cli_argument('network route-filter rule create', 'location', location_type, validator=get_default_location_from_resource_group)
-
-# VNET
-register_cli_argument('network vnet', 'virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')
-register_cli_argument('network vnet', 'vnet_prefixes', nargs='+', help='Space separated list of IP address prefixes for the VNet.', options_list=('--address-prefixes',), metavar='PREFIX')
-register_cli_argument('network vnet', 'dns_servers', nargs='+', help='Space separated list of DNS server IP addresses.', metavar='IP')
-
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-09-01') as c:
-    c.register_cli_argument('network vnet', 'ddos_protection', help='Enable DDoS protection for protected resources in the VNet.', **three_state_flag())
-    c.register_cli_argument('network vnet', 'vm_protection', help='Enable VM protection for all subnets in the VNet.', **three_state_flag())
-
-register_cli_argument('network vnet create', 'location', location_type)
-register_cli_argument('network vnet create', 'subnet_name', help='Name of a new subnet to create within the VNet.', validator=process_vnet_create_namespace)
-register_cli_argument('network vnet create', 'subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIX')
-register_cli_argument('network vnet create', 'vnet_name', virtual_network_name_type, options_list=('--name', '-n'), completer=None)
-
-register_cli_argument('network vnet update', 'address_prefixes', nargs='+')
-
-register_cli_argument('network vnet peering', 'virtual_network_name', virtual_network_name_type)
-register_cli_argument('network vnet peering', 'virtual_network_peering_name', options_list=('--name', '-n'), help='The name of the VNet peering.', id_part='child_name_1')
-register_cli_argument('network vnet peering', 'remote_virtual_network', options_list=('--remote-vnet-id',), help='ID of the remote VNet.')
-
-register_cli_argument('network vnet peering create', 'allow_virtual_network_access', options_list=('--allow-vnet-access',), action='store_true', help='Allows VMs in the remote VNet to access all VMs in the local VNet.')
-register_cli_argument('network vnet peering create', 'allow_gateway_transit', action='store_true', help='Allows gateway link to be used in the remote VNet.')
-register_cli_argument('network vnet peering create', 'allow_forwarded_traffic', action='store_true', help='Allows forwarded traffic from the VMs in the remote VNet.')
-register_cli_argument('network vnet peering create', 'use_remote_gateways', action='store_true', help='Allows VNet to use the remote VNet\'s gateway. Remote VNet gateway must have --allow-gateway-transit enabled for remote peering. Only 1 peering can have this flag enabled. Cannot be set if the VNet already has a gateway.')
-
-register_cli_argument('network vnet subnet', 'subnet_name', arg_type=subnet_name_type, options_list=('--name', '-n'), id_part='child_name_1')
-register_cli_argument('network vnet subnet', 'address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')
-register_cli_argument('network vnet subnet', 'virtual_network_name', virtual_network_name_type)
-register_cli_argument('network vnet subnet', 'network_security_group', validator=get_nsg_validator())
-register_cli_argument('network vnet subnet', 'route_table', help='Name or ID of a route table to associate with the subnet.')
-
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
-    c.register_cli_argument('network vnet subnet', 'service_endpoints', nargs='+')
-
-lb_subresources = [
-    {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
-    {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
-    {'name': 'inbound-nat-rule', 'display': 'inbound NAT rule', 'ref': 'inbound_nat_rules'},
-    {'name': 'inbound-nat-pool', 'display': 'inbound NAT pool', 'ref': 'inbound_nat_pools'},
-    {'name': 'rule', 'display': 'load balancing rule', 'ref': 'load_balancing_rules'},
-    {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
-]
-for item in lb_subresources:
-    register_cli_argument('network lb {}'.format(item['name']), 'item_name', options_list=('--name', '-n'), help='The name of the {}'.format(item['display']), completer=get_lb_subresource_completion_list(item['ref']), id_part='child_name_1')
-    register_cli_argument('network lb {}'.format(item['name']), 'resource_name', options_list=('--lb-name',), help='The name of the load balancer.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
-    register_cli_argument('network lb {}'.format(item['name']), 'load_balancer_name', load_balancer_name_type)
-
-register_cli_argument('network lb', 'load_balancer_name', load_balancer_name_type, options_list=('--name', '-n'))
-register_cli_argument('network lb', 'frontend_port', help='Port number')
-register_cli_argument('network lb', 'frontend_port_range_start', help='Port number')
-register_cli_argument('network lb', 'frontend_port_range_end', help='Port number')
-register_cli_argument('network lb', 'backend_port', help='Port number')
-register_cli_argument('network lb', 'frontend_ip_name', help='The name of the frontend IP configuration.', completer=get_lb_subresource_completion_list('frontend_ip_configurations'))
-register_cli_argument('network lb', 'floating_ip', help='Enable floating IP.', **enum_choice_list(['true', 'false']))
-register_cli_argument('network lb', 'idle_timeout', help='Idle timeout in minutes.')
-register_cli_argument('network lb', 'protocol', help='', **enum_choice_list(TransportProtocol))
-
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:
-    c.register_cli_argument('network lb', 'sku', help='Load balancer SKU', default='Basic')  # **model_choice_list(ResourceType.MGMT_NETWORK, 'LoadBalancerSkuName'))
-
-for item in ['backend_pool_name', 'backend_address_pool_name']:
-    register_cli_argument('network lb', item, options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
-
-register_cli_argument('network lb create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true', validator=process_lb_create_namespace)
-register_cli_argument('network lb create', 'public_ip_address_allocation', **enum_choice_list(IPAllocationMethod))
-register_cli_argument('network lb create', 'public_ip_dns_name', help='Globally unique DNS name for a new public IP.')
-
-public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True)
-register_cli_argument('network lb create', 'public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-register_cli_argument('network lb create', 'public_ip_type', ignore_type)
-
-subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_new=True, allow_none=True, default_none=True)
-register_cli_argument('network lb create', 'subnet', help=subnet_help, completer=get_subnet_completion_list())
-register_cli_argument('network lb create', 'subnet_address_prefix', help='The CIDR address prefix to use when creating a new subnet.')
-register_cli_argument('network lb create', 'vnet_name', virtual_network_name_type)
-register_cli_argument('network lb create', 'vnet_address_prefix', help='The CIDR address prefix to use when creating a new VNet.')
-register_cli_argument('network lb create', 'vnet_type', ignore_type)
-
-for item in ['create', 'update']:
-    register_cli_argument('network lb frontend-ip {}'.format(item), 'public_ip_address', help='Name or ID of the existing public IP to associate with the configuration.', validator=process_lb_frontend_ip_namespace)
-    register_cli_argument('network lb frontend-ip {}'.format(item), 'subnet', help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
-    register_cli_argument('network lb frontend-ip {}'.format(item), 'virtual_network_name', virtual_network_name_type, help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
-    register_cli_argument('network lb frontend-ip {}'.format(item), 'private_ip_address', help='Static private IP address to associate with the configuration.')
-    register_cli_argument('network lb frontend-ip {}'.format(item), 'private_ip_address_allocation', ignore_type)
-
-register_cli_argument('network lb probe', 'interval', help='Probing time interval in seconds.')
-register_cli_argument('network lb probe', 'path', help='The endpoint to interrogate (http only).')
-register_cli_argument('network lb probe', 'port', help='The port to interrogate.')
-register_cli_argument('network lb probe', 'protocol', help='The protocol to probe.', **enum_choice_list(ProbeProtocol))
-register_cli_argument('network lb probe', 'threshold', help='The number of consecutive probe failures before an instance is deemed unhealthy.')
-
-register_cli_argument('network lb rule', 'load_distribution', help='Affinity rule settings.', **enum_choice_list(LoadDistribution))
-
-register_cli_argument('network nsg create', 'name', name_arg_type)
-
-# VNET gateway
-
-register_cli_argument('network vnet-gateway', 'virtual_network_gateway_name', options_list=('--name', '-n'), help='Name of the VNet gateway.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'), id_part='name')
-register_cli_argument('network vnet-gateway', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
-register_cli_argument('network vnet-gateway', 'gateway_name', help='Virtual network gateway name')
-register_cli_argument('network vnet-gateway', 'gateway_type', help='The gateway type.', **enum_choice_list(VirtualNetworkGatewayType))
-register_cli_argument('network vnet-gateway', 'sku', help='VNet gateway SKU.', **enum_choice_list(VirtualNetworkGatewaySkuName))
-register_cli_argument('network vnet-gateway', 'vpn_type', help='VPN routing type.', **enum_choice_list(VpnType))
-register_cli_argument('network vnet-gateway', 'bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')
-register_cli_argument('network vnet-gateway', 'public_ip_address', options_list=['--public-ip-addresses'], nargs='+', help='Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-register_cli_argument('network vnet-gateway', 'address_prefixes', help='Space separated list of CIDR prefixes representing the address space for the P2S client.', nargs='+', arg_group='VPN Client')
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01') as c:
-    c.register_cli_argument('network vnet-gateway', 'radius_server', help='Radius server address to connect to.', arg_group='VPN Client')
-    c.register_cli_argument('network vnet-gateway', 'radius_secret', help='Radius secret to use for authentication.', arg_group='VPN Client')
-    c.register_cli_argument('network vnet-gateway', 'client_protocol', help='Protocols to use for connecting', nargs='+', arg_group='VPN Client', **model_choice_list(ResourceType.MGMT_NETWORK, 'VpnClientProtocol'))
-
-register_cli_argument('network vnet-gateway create', 'asn', validator=process_vnet_gateway_create_namespace)
-
-register_cli_argument('network vnet-gateway update', 'enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_group='BGP Peering', **enum_choice_list(['true', 'false']))
-register_cli_argument('network vnet-gateway update', 'virtual_network', virtual_network_name_type, options_list=('--vnet',), help="Name or ID of a virtual network that contains a subnet named 'GatewaySubnet'.", validator=process_vnet_gateway_update_namespace)
-
-vnet_help = "Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'."
-register_cli_argument('network vnet-gateway create', 'virtual_network', options_list=('--vnet',), help=vnet_help)
-
-register_cli_argument('network vnet-gateway root-cert create', 'public_cert_data', help='Base64 contents of the root certificate file or file path.', type=file_type, completer=FilesCompleter(), validator=load_cert_file('public_cert_data'))
-register_cli_argument('network vnet-gateway root-cert create', 'cert_name', help='Root certificate name', options_list=('--name', '-n'))
-register_cli_argument('network vnet-gateway root-cert create', 'gateway_name', help='Virtual network gateway name')
-
-register_cli_argument('network vnet-gateway revoked-cert create', 'thumbprint', help='Certificate thumbprint.')
-
-register_extra_cli_argument('network vnet-gateway update', 'address_prefixes', options_list=('--address-prefixes',), help='List of address prefixes for the VPN gateway.  Prerequisite for uploading certificates.', nargs='+')
-
-register_cli_argument('network vnet-gateway vpn-client', 'processor_architecture', **model_choice_list(ResourceType.MGMT_NETWORK, 'ProcessorArchitecture'))
-register_cli_argument('network vnet-gateway vpn-client', 'authentication_method', **model_choice_list(ResourceType.MGMT_NETWORK, 'AuthenticationMethod'))
-register_cli_argument('network vnet-gateway vpn-client', 'radius_server_auth_certificate', help='Public certificate data for the Radius server auth certificate in Base-64 format. Required only if external Radius auth has been configured with EAPTLS auth.')
-register_cli_argument('network vnet-gateway vpn-client', 'client_root_certificates', nargs='+', help='Space separated list of client root certificate public certificate data in Base-64 format. Optional for external Radius-based auth with EAPTLS')
-
-with VersionConstraint(ResourceType.MGMT_NETWORK, '2017-06-01') as c:
-    c.register_cli_argument('network vnet-gateway vpn-client', 'use_legacy', help='Generate VPN client package using legacy implementation.', **three_state_flag())
-
-# VPN connection
-register_cli_argument('network vpn-connection', 'virtual_network_gateway_connection_name', options_list=('--name', '-n'), metavar='NAME', id_part='name', help='Connection name.')
-register_cli_argument('network vpn-connection', 'shared_key', help='Shared IPSec key.')
-register_cli_argument('network vpn-connection', 'connection_name', help='Connection name.')
-
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-03-01') as c:
-    c.register_cli_argument('network vpn-connection', 'use_policy_based_traffic_selectors', help='Enable policy-based traffic selectors.', **three_state_flag())
-
-register_cli_argument('network vpn-connection create', 'connection_name', options_list=('--name', '-n'), metavar='NAME', help='Connection name.')
-register_cli_argument('network vpn-connection create', 'vnet_gateway1', validator=process_vpn_connection_create_namespace)
-register_cli_argument('network vpn-connection create', 'connection_type', ignore_type)
-
-for item in ['vnet_gateway2', 'local_gateway2', 'express_route_circuit2']:
-    register_cli_argument('network vpn-connection create', item, arg_group='Destination')
-
-register_cli_argument('network vpn-connection update', 'routing_weight', type=int, help='Connection routing weight')
-register_cli_argument('network vpn-connection update', 'enable_bgp', help='Enable BGP (Border Gateway Protocol)', **enum_choice_list(['true', 'false']))
-
-# VPN connection shared key
-register_cli_argument('network vpn-connection shared-key', 'connection_shared_key_name', options_list=('--name', '-n'), id_part='name')
-register_cli_argument('network vpn-connection shared-key', 'virtual_network_gateway_connection_name', options_list=('--connection-name',), metavar='NAME', id_part='name')
-register_cli_argument('network vpn-connection shared-key', 'key_length', type=int)
-
-# VPN connection IPSec policy
-param_map = {
-    'dh_group': 'DhGroup',
-    'ike_encryption': 'IkeEncryption',
-    'ike_integrity': 'IkeIntegrity',
-    'ipsec_encryption': 'IpsecEncryption',
-    'ipsec_integrity': 'IpsecIntegrity',
-    'pfs_group': 'PfsGroup'
-}
-for dest, model_name in param_map.items():
-    register_cli_argument('network vpn-connection ipsec-policy', dest, **model_choice_list(ResourceType.MGMT_NETWORK, model_name))
-register_cli_argument('network vpn-connection ipsec-policy', 'sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int)
-register_cli_argument('network vpn-connection ipsec-policy', 'sa_life_time_seconds', options_list=['--sa-lifetime'], type=int)
-
-# Traffic manager profiles
-register_cli_argument('network traffic-manager profile', 'traffic_manager_profile_name', name_arg_type, id_part='name', help='Traffic manager profile name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
-register_cli_argument('network traffic-manager profile', 'profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
-register_cli_argument('network traffic-manager profile', 'monitor_path', help='Path to monitor.')
-register_cli_argument('network traffic-manager profile', 'monitor_port', help='Port to monitor.', type=int)
-register_cli_argument('network traffic-manager profile', 'monitor_protocol', help='Monitor protocol.', **enum_choice_list(MonitorProtocol))
-register_cli_argument('network traffic-manager profile', 'profile_status', options_list=('--status',), help='Status of the Traffic Manager profile.', **enum_choice_list(['Enabled', 'Disabled']))
-register_cli_argument('network traffic-manager profile', 'routing_method', help='Routing method.', **enum_choice_list(['Performance', 'Weighted', 'Priority', 'Geographic']))
-register_cli_argument('network traffic-manager profile', 'unique_dns_name', help="Relative DNS name for the traffic manager profile. Resulting FQDN will be `<unique-dns-name>.trafficmanager.net` and must be globally unique.")
-register_cli_argument('network traffic-manager profile', 'ttl', help='DNS config time-to-live in seconds.', type=int)
-
-register_cli_argument('network traffic-manager profile create', 'status', help='Create an enabled or disabled profile.', **enum_choice_list(['Enabled', 'Disabled']))
-
-register_cli_argument('network traffic-manager profile check-dns', 'name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
-register_cli_argument('network traffic-manager profile check-dns', 'type', ignore_type, default='Microsoft.Network/trafficManagerProfiles')
-
-# Traffic manager endpoints
-endpoint_types = ['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']
-register_cli_argument('network traffic-manager endpoint', 'endpoint_name', name_arg_type, id_part='child_name_1', help='Endpoint name.', completer=get_tm_endpoint_completion_list())
-register_cli_argument('network traffic-manager endpoint', 'endpoint_type', options_list=['--type', '-t'], help='Endpoint type.', id_part='child_name_1', **enum_choice_list(endpoint_types))
-register_cli_argument('network traffic-manager endpoint', 'profile_name', help='Name of parent profile.', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'), id_part='name')
-register_cli_argument('network traffic-manager endpoint', 'endpoint_location', help="Location of the external or nested endpoints when using the 'Performance' routing method.")
-register_cli_argument('network traffic-manager endpoint', 'endpoint_monitor_status', help='The monitoring status of the endpoint.')
-register_cli_argument('network traffic-manager endpoint', 'endpoint_status', help="The status of the endpoint. If enabled the endpoint is probed for endpoint health and included in the traffic routing method.")
-register_cli_argument('network traffic-manager endpoint', 'min_child_endpoints', help="The minimum number of endpoints that must be available in the child profile for the parent profile to be considered available. Only applicable to an endpoint of type 'NestedEndpoints'.")
-register_cli_argument('network traffic-manager endpoint', 'priority', help="Priority of the endpoint when using the 'Priority' traffic routing method. Values range from 1 to 1000, with lower values representing higher priority.", type=int)
-register_cli_argument('network traffic-manager endpoint', 'target', help='Fully-qualified DNS name of the endpoint.')
-register_cli_argument('network traffic-manager endpoint', 'target_resource_id', help="The Azure Resource URI of the endpoint. Not applicable for endpoints of type 'ExternalEndpoints'.")
-register_cli_argument('network traffic-manager endpoint', 'weight', help="Weight of the endpoint when using the 'Weighted' traffic routing method. Values range from 1 to 1000.", type=int)
-register_cli_argument('network traffic-manager endpoint', 'geo_mapping', nargs='+')
-
-register_cli_argument('network traffic-manager endpoint create', 'target', help='Fully-qualified DNS name of the endpoint.', validator=process_tm_endpoint_create_namespace)
-
-# DNS
-register_cli_argument('network dns', 'record_set_name', name_arg_type, help='The name of the record set, relative to the name of the zone.')
-register_cli_argument('network dns', 'relative_record_set_name', name_arg_type, help='The name of the record set, relative to the name of the zone.')
-register_cli_argument('network dns', 'zone_name', options_list=('--zone-name', '-z'), help='The name of the zone.', type=dns_zone_name_type)
-register_cli_argument('network dns', 'metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
-
-register_cli_argument('network dns zone', 'zone_name', name_arg_type)
-register_cli_argument('network dns zone', 'location', ignore_type)
-
-# TODO: remove when feature ready
-register_cli_argument('network dns zone', 'zone_type', ignore_type)
-register_cli_argument('network dns zone', 'registration_vnets', ignore_type)
-register_cli_argument('network dns zone', 'resolution_vnets', ignore_type)
-
-# TODO: Uncomment when feature is ready
-# register_cli_argument('network dns zone', 'zone_type', help='Type of DNS zone to create.', **enum_choice_list(ZoneType))
-# register_cli_argument('network dns zone', 'registration_vnets', arg_group='Private Zone', nargs='+', help='Space separated names or IDs of virtual networks that register hostnames in this DNS zone.', validator=get_vnet_validator('registration_vnets'))
-# register_cli_argument('network dns zone', 'resolution_vnets', arg_group='Private Zone', nargs='+', help='Space separated names or IDs of virtual networks that resolve records in this DNS zone.', validator=get_vnet_validator('resolution_vnets'))
-
-register_cli_argument('network dns zone import', 'file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
-register_cli_argument('network dns zone export', 'file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to save')
-register_cli_argument('network dns zone update', 'if_none_match', ignore_type)
-
-for item in ['record_type', 'record_set_type']:
-    register_cli_argument('network dns record-set', item, ignore_type, validator=validate_dns_record_type)
-
-register_cli_argument('network dns record-set create', 'ttl', help='Record set TTL (time-to-live)')
-register_cli_argument('network dns record-set create', 'if_none_match', help='Create the record set only if it does not already exist.', action='store_true')
-
-for item in ['a', 'aaaa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt', 'caa']:
-    register_cli_argument('network dns record-set {} add-record'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
-    register_cli_argument('network dns record-set {} remove-record'.format(item), 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone.')
-    register_cli_argument('network dns record-set {} remove-record'.format(item), 'keep_empty_record_set', action='store_true', help='Keep the empty record set if the last record is removed.')
-register_cli_argument('network dns record-set cname set-record', 'record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
-
-register_cli_argument('network dns record-set soa', 'relative_record_set_name', ignore_type, default='@')
-
-register_cli_argument('network dns record-set a', 'ipv4_address', options_list=('--ipv4-address', '-a'), help='IPV4 address in string notation.')
-register_cli_argument('network dns record-set aaaa', 'ipv6_address', options_list=('--ipv6-address', '-a'), help='IPV6 address in string notation.')
-register_cli_argument('network dns record-set caa', 'value', help='Value of the CAA record.')
-register_cli_argument('network dns record-set caa', 'flags', help='Integer flags for the record.', type=int)
-register_cli_argument('network dns record-set caa', 'tag', help='Record tag')
-register_cli_argument('network dns record-set cname', 'cname', options_list=('--cname', '-c'), help='Canonical name.')
-register_cli_argument('network dns record-set mx', 'exchange', options_list=('--exchange', '-e'), help='Exchange metric.')
-register_cli_argument('network dns record-set mx', 'preference', options_list=('--preference', '-p'), help='Preference metric.')
-register_cli_argument('network dns record-set ns', 'dname', options_list=('--nsdname', '-d'), help='Name server domain name.')
-register_cli_argument('network dns record-set ptr', 'dname', options_list=('--ptrdname', '-d'), help='PTR target domain name.')
-register_cli_argument('network dns record-set soa', 'host', options_list=('--host', '-t'), help='Host name.')
-register_cli_argument('network dns record-set soa', 'email', options_list=('--email', '-e'), help='Email address.')
-register_cli_argument('network dns record-set soa', 'expire_time', options_list=('--expire-time', '-x'), help='Expire time (seconds).')
-register_cli_argument('network dns record-set soa', 'minimum_ttl', options_list=('--minimum-ttl', '-m'), help='Minimum TTL (time-to-live, seconds).')
-register_cli_argument('network dns record-set soa', 'refresh_time', options_list=('--refresh-time', '-f'), help='Refresh value (seconds).')
-register_cli_argument('network dns record-set soa', 'retry_time', options_list=('--retry-time', '-r'), help='Retry time (seconds).')
-register_cli_argument('network dns record-set soa', 'serial_number', options_list=('--serial-number', '-s'), help='Serial number.')
-register_cli_argument('network dns record-set srv', 'priority', options_list=('--priority', '-p'), help='Priority metric.')
-register_cli_argument('network dns record-set srv', 'weight', options_list=('--weight', '-w'), help='Weight metric.')
-register_cli_argument('network dns record-set srv', 'port', options_list=('--port', '-r'), help='Service port.')
-register_cli_argument('network dns record-set srv', 'target', options_list=('--target', '-t'), help='Target domain name.')
-register_cli_argument('network dns record-set txt', 'value', options_list=('--value', '-v'), nargs='+', help='Space separated list of text values which will be concatenated together.')
-
-# NetworkWatcher commands
-register_cli_argument('network watcher', 'network_watcher_name', name_arg_type, help='Name of the Network Watcher.')
-
-register_cli_argument('network watcher configure', 'locations', location_type, options_list=['--locations', '-l'], nargs='+')
-register_cli_argument('network watcher configure', 'enabled', **three_state_flag())
-
-register_cli_argument('network watcher show-topology', 'network_watcher_name', ignore_type, options_list=['--watcher'])
-register_cli_argument('network watcher show-topology', 'resource_group_name', ignore_type, options_list=['--watcher-resource-group'])
-register_cli_argument('network watcher show-topology', 'target_resource_group_name', options_list=['--resource-group', '-g'], completer=get_resource_group_completion_list)
-register_extra_cli_argument('network watcher show-topology', 'location', validator=process_nw_topology_namespace)
-
-register_cli_argument('network watcher create', 'location', validator=get_default_location_from_resource_group)
-
-register_cli_argument('network watcher', 'watcher_rg', ignore_type)
-register_cli_argument('network watcher', 'watcher_name', ignore_type)
-
-for item in ['test-ip-flow', 'show-next-hop', 'show-security-group-view', 'packet-capture create']:
-    register_cli_argument('network watcher {}'.format(item), 'watcher_name', ignore_type, validator=get_network_watcher_from_vm)
-    register_cli_argument('network watcher {}'.format(item), 'location', ignore_type)
-    register_cli_argument('network watcher {}'.format(item), 'watcher_rg', ignore_type)
-    register_cli_argument('network watcher {}'.format(item), 'vm', help='Name or ID of the VM to target.')
-    register_cli_argument('network watcher {}'.format(item), 'resource_group_name', help='Name of the resource group the target VM is in. Do not use when supplying VM ID.')
-    register_cli_argument('network watcher {}'.format(item), 'nic', help='Name or ID of the NIC resource to test. If the VM has multiple NICs and IP forwarding is enabled on any of them, this parameter is required.')
-
-register_cli_argument('network watcher test-connectivity', 'source_resource', validator=process_nw_test_connectivity_namespace)
-register_cli_argument('network watcher test-connectivity', 'source_port', type=int)
-register_cli_argument('network watcher test-connectivity', 'dest_resource', arg_group='Destination')
-register_cli_argument('network watcher test-connectivity', 'dest_address', arg_group='Destination')
-register_cli_argument('network watcher test-connectivity', 'dest_port', type=int, arg_group='Destination')
-
-register_cli_argument('network watcher packet-capture', 'capture_name', name_arg_type, help='Name of the packet capture session.')
-register_cli_argument('network watcher packet-capture', 'storage_account', arg_group='Storage')
-register_cli_argument('network watcher packet-capture', 'storage_path', arg_group='Storage')
-register_cli_argument('network watcher packet-capture', 'file_path', arg_group='Storage')
-register_cli_argument('network watcher packet-capture', 'filters', type=get_json_object)
-
-register_cli_argument('network watcher flow-log', 'enabled', validator=process_nw_flow_log_set_namespace, **three_state_flag())
-
-register_cli_argument('network watcher flow-log show', 'nsg', validator=process_nw_flow_log_show_namespace)
-
-for item in ['list', 'stop', 'delete', 'show', 'show-status']:
-    register_extra_cli_argument('network watcher packet-capture {}'.format(item), 'location')
-    register_cli_argument('network watcher packet-capture {}'.format(item), 'location', location_type, required=True)
-    register_cli_argument('network watcher packet-capture {}'.format(item), 'packet_capture_name', name_arg_type)
-    register_cli_argument('network watcher packet-capture {}'.format(item), 'network_watcher_name', ignore_type, options_list=['--network-watcher-name'], validator=get_network_watcher_from_location(remove=True, rg_name='resource_group_name', watcher_name='network_watcher_name'))
-    register_cli_argument('network watcher packet-capture {}'.format(item), 'resource_group_name', ignore_type)
-
-register_cli_argument('network watcher packet-capture create', 'vm', validator=process_nw_packet_capture_create_namespace)
-
-register_cli_argument('network watcher test-ip-flow', 'direction', **enum_choice_list(Direction))
-register_cli_argument('network watcher test-ip-flow', 'protocol', **enum_choice_list(Protocol))
-
-register_cli_argument('network watcher show-next-hop', 'source_ip', help='Source IPv4 address.')
-register_cli_argument('network watcher show-next-hop', 'dest_ip', help='Destination IPv4 address.')
-
-register_cli_argument('network watcher troubleshooting', 'resource_type', options_list=['--resource-type', '-t'], id_part='resource_type', **enum_choice_list(['vnetGateway', 'vpnConnection']))
-register_cli_argument('network watcher troubleshooting start', 'resource', help='Name or ID of the resource to troubleshoot.', validator=process_nw_troubleshooting_start_namespace)
-register_cli_argument('network watcher troubleshooting show', 'resource', help='Name or ID of the resource to troubleshoot.', validator=process_nw_troubleshooting_show_namespace)
+        with self.argument_context('network application-gateway {}'.format(item)) as c:
+            c.argument('connection_draining_timeout', min_api='2016-12-01', type=int, help='The time in seconds after a backend server is removed during which on open connection remains active. Range: 0 (disabled) to 3600', arg_group='Gateway' if item == 'create' else None)
+
+    with self.argument_context('network application-gateway address-pool') as c:
+        c.argument('servers', ag_servers_type, arg_group=None)
+
+    with self.argument_context('network application-gateway auth-cert') as c:
+        c.argument('cert_data', options_list=['--cert-file'], help='Certificate file path.', type=file_type, completer=FilesCompleter(), validator=validate_auth_cert)
+
+    with self.argument_context('network application-gateway frontend-ip') as c:
+        c.argument('subnet', validator=get_subnet_validator(), help='The name or ID of the subnet.')
+        c.argument('public_ip_address', validator=get_public_ip_validator(), help='The name or ID of the public IP address.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
+        c.argument('virtual_network_name', help='The name of the virtual network corresponding to the subnet.', id_part=None, arg_group=None)
+
+    for item in ['frontend-port', 'http-settings']:
+        with self.argument_context('network application-gateway {}'.format(item)) as c:
+            c.argument('port', help='The port number.', type=int)
+
+    for item in ['http-settings', 'probe']:
+        with self.argument_context('network application-gateway {}'.format(item)) as c:
+            c.argument('protocol', http_protocol_type, help='The HTTP settings protocol.')
+
+    with self.argument_context('network application-gateway http-listener') as c:
+        c.argument('frontend_ip', help='The name or ID of the frontend IP configuration.', completer=get_ag_subresource_completion_list('frontend_ip_configurations'))
+        c.argument('frontend_port', help='The name or ID of the frontend port.', completer=get_ag_subresource_completion_list('frontend_ports'))
+        c.argument('ssl_cert', help='The name or ID of the SSL certificate to use.', completer=get_ag_subresource_completion_list('ssl_certificates'))
+        c.ignore('protocol')
+        c.argument('host_name', help='Host name to use for multisite gateways.')
+
+    with self.argument_context('network application-gateway http-listener create') as c:
+        c.argument('frontend_ip', help='The name or ID of the frontend IP configuration. {}'.format(default_existing))
+
+    with self.argument_context('network application-gateway rule create') as c:
+        c.argument('address_pool', help='The name or ID of the backend address pool. {}'.format(default_existing))
+        c.argument('http_settings', help='The name or ID of the HTTP settings. {}'.format(default_existing))
+        c.argument('http_listener', help='The name or ID of the HTTP listener. {}'.format(default_existing))
+
+    with self.argument_context('network lb rule create') as c:
+        c.argument('backend_address_pool_name', help='The name of the backend address pool. {}'.format(default_existing))
+        c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
+
+    for item in ['rule', 'pool']:
+        with self.argument_context('network lb inbound-nat-{} create'.format(item)) as c:
+            c.argument('frontend_ip_name', help='The name of the frontend IP configuration. {}'.format(default_existing))
+
+    with self.argument_context('network application-gateway http-settings') as c:
+        c.argument('cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie-based affinity.')
+        c.argument('timeout', help='Request timeout in seconds.')
+        c.argument('probe', help='Name or ID of the probe to associate with the HTTP settings.', completer=get_ag_subresource_completion_list('probes'))
+
+    with self.argument_context('network application-gateway probe') as c:
+        c.argument('host', help='The name of the host to send the probe.')
+        c.argument('path', help='The relative path of the probe. Valid paths start from "/"')
+        c.argument('interval', help='The time interval in seconds between consecutive probes.')
+        c.argument('threshold', help='The number of failed probes after which the back end server is marked down.')
+        c.argument('timeout', help='The probe timeout in seconds.')
+
+    with self.argument_context('network application-gateway rule') as c:
+        c.argument('address_pool', help='The name or ID of the backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
+        c.argument('http_listener', help='The name or ID of the HTTP listener.', completer=get_ag_subresource_completion_list('http_listeners'))
+        c.argument('http_settings', help='The name or ID of the backend HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+        c.argument('rule_type', help='The rule type (Basic, PathBasedRouting).')
+        c.argument('url_path_map', help='The name or ID of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'))
+
+    with self.argument_context('network application-gateway ssl-cert') as c:
+        c.argument('cert_data', options_list=('--cert-file',), type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', validator=validate_cert)
+        c.argument('cert_password', help='Certificate password.')
+
+    with self.argument_context('network application-gateway ssl-policy') as c:
+        c.argument('clear', action='store_true', help='Clear SSL policy.')
+        c.argument('disabled_ssl_protocols', nargs='+', help='Space separated list of protocols to disable.', arg_type=get_enum_type(ApplicationGatewaySslProtocol))
+
+    with self.argument_context('network application-gateway url-path-map') as c:
+        c.argument('rule_name', help='The name of the url-path-map rule.', arg_group='First Rule')
+        c.argument('paths', nargs='+', help='Space separated list of paths to associate with the rule. Valid paths start and end with "/" (ex: "/bar/")', arg_group='First Rule')
+        c.argument('address_pool', help='The name or ID of the backend address pool to use with the created rule.', completer=get_ag_subresource_completion_list('backend_address_pools'), arg_group='First Rule')
+        c.argument('http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'), arg_group='First Rule')
+
+    with self.argument_context('network application-gateway url-path-map create') as c:
+        c.argument('default_address_pool', help='The name or ID of the default backend address pool, if different from --address-pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
+        c.argument('default_http_settings', help='The name or ID of the default HTTP settings, if different from --http-settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+
+    with self.argument_context('network application-gateway url-path-map update') as c:
+        c.argument('default_address_pool', help='The name or ID of the default backend address pool.', completer=get_ag_subresource_completion_list('backend_address_pools'))
+        c.argument('default_http_settings', help='The name or ID of the default HTTP settings.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+
+    with self.argument_context('network application-gateway url-path-map rule') as c:
+        c.argument('item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=ag_url_map_rule_completion_list, id_part='child_name_2')
+        c.argument('url_path_map_name', options_list=('--path-map-name',), help='The name of the URL path map.', completer=get_ag_subresource_completion_list('url_path_maps'), id_part='child_name_1')
+        c.argument('address_pool', help='The name or ID of the backend address pool. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_address_pools'))
+        c.argument('http_settings', help='The name or ID of the HTTP settings. If not specified, the default for the map will be used.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'))
+        for item in ['address_pool', 'http_settings', 'redirect_config', 'paths']:
+            c.argument(item, arg_group=None)
+
+    with self.argument_context('network application-gateway url-path-map rule create') as c:
+        c.argument('item_name', options_list=('--name', '-n'), help='The name of the url-path-map rule.', completer=None)
+
+    with self.argument_context('network application-gateway waf-config') as c:
+        c.argument('disabled_rule_groups', nargs='+')
+        c.argument('disabled_rules', nargs='+')
+        c.argument('enabled', help='Specify whether the application firewall is enabled.', arg_type=get_enum_type(['true', 'false']))
+        c.argument('firewall_mode', min_api='2016-09-01', help='Web application firewall mode.', arg_type=get_enum_type(ApplicationGatewayFirewallMode, default='detection'))
+
+    for item in ['ssl-policy', 'waf-config']:
+        with self.argument_context('network application-gateway {}'.format(item)) as c:
+            c.argument('application_gateway_name', options_list=['--gateway-name'], help='The name of the application gateway.')
+
+    with self.argument_context('network application-gateway waf-config list-rule-sets') as c:
+        c.argument('_type', options_list=['--type'])
+
+    with self.argument_context('network application-gateway redirect-config', min_api='2017-06-01') as c:
+        c.argument('redirect_type', options_list=['--type', '-t'], help='HTTP redirection type', arg_type=get_enum_type(ApplicationGatewayRedirectType))
+        c.argument('include_path', arg_type=get_three_state_flag())
+        c.argument('include_query_string', arg_type=get_three_state_flag())
+        c.argument('target_listener', validator=validate_target_listener, help='Name or ID of the HTTP listener to redirect the request to.')
+        c.argument('target_url', help='URL to redirect the request to.')
+
+    with self.argument_context('network application-gateway ssl-policy predefined', min_api='2017-06-01') as c:
+        c.argument('predefined_policy_name', name_arg_type)
+
+    with self.argument_context('network application-gateway ssl-policy', min_api='2017-06-01') as c:
+        c.argument('policy_name', name_arg_type)
+        c.argument('cipher_suites', nargs='+')
+        c.argument('min_protocol_version')
+        c.argument('disabled_ssl_protocols', nargs='+', help='Space separated list of protocols to disable.')
+
+    with self.argument_context('network application-gateway http-settings', min_api='2017-06-01') as c:
+        c.argument('host_name', help='Host header sent to the backend servers.')
+        c.argument('host_name_from_backend_pool', help='Use host name of the backend server as the host header.', arg_type=get_three_state_flag())
+        c.argument('affinity_cookie_name', help='Name used for the affinity cookie.')
+        c.argument('enable_probe', help='Whether the probe is enabled.', arg_type=get_three_state_flag())
+        c.argument('path', help='Path that will prefix all HTTP requests.')
+
+    with self.argument_context('network application-gateway probe', min_api='2017-06-01') as c:
+        c.argument('host', default=None, required=False, help='The name of the host to send the probe.')
+        c.argument('host_name_from_http_settings', help='Use host header from HTTP settings.', arg_type=get_three_state_flag())
+        c.argument('min_servers', type=int, help='Minimum number of servers that are always marked healthy.')
+        c.argument('match_body', help='Body that must be contained in the health response.')
+        c.argument('match_status_codes', nargs='+', help='Space-separated list of allowed ranges of healthy status codes for the health response.')
+
+    with self.argument_context('network application-gateway url-path-map', min_api='2017-06-01') as c:
+        c.argument('default_redirect_config', help='The name or ID of the default redirect configuration.')
+        c.argument('redirect_config', help='The name or ID of the redirect configuration to use with the created rule.', arg_group='First Rule')
+
+    with self.argument_context('network application-gateway rule', min_api='2017-06-01') as c:
+        c.argument('redirect_config', help='The name or ID of the redirect configuration to use with the created rule.')
+
+    # endregion
+
+    # region ApplicationSecurityGroups
+    with self.argument_context('network asg') as c:
+        c.argument('application_security_group_name', name_arg_type, id_part='name')
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+
+    # endregion
+
+    # region DNS
+    with self.argument_context('network dns') as c:
+        c.argument('record_set_name', name_arg_type, help='The name of the record set, relative to the name of the zone.')
+        c.argument('relative_record_set_name', name_arg_type, help='The name of the record set, relative to the name of the zone.')
+        c.argument('zone_name', options_list=('--zone-name', '-z'), help='The name of the zone.', type=dns_zone_name_type)
+        c.argument('metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
+
+    with self.argument_context('network dns zone') as c:
+        c.argument('zone_name', name_arg_type)
+        c.ignore('location')
+
+        # TODO: remove when feature ready
+        c.ignore('zone_type')
+        c.ignore('registration_vnets')
+        c.ignore('resolution_vnets')
+
+        # TODO: Uncomment when feature is ready
+        # c.argument('zone_type', help='Type of DNS zone to create.', arg_type=get_enum_type(ZoneType))
+        # c.argument('registration_vnets', arg_group='Private Zone', nargs='+', help='Space separated names or IDs of virtual networks that register hostnames in this DNS zone.', validator=get_vnet_validator('registration_vnets'))
+        # c.argument('resolution_vnets', arg_group='Private Zone', nargs='+', help='Space separated names or IDs of virtual networks that resolve records in this DNS zone.', validator=get_vnet_validator('resolution_vnets'))
+
+    with self.argument_context('network dns zone import') as c:
+        c.argument('file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
+
+    with self.argument_context('network dns zone export') as c:
+        c.argument('file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to save')
+
+    with self.argument_context('network dns zone update') as c:
+        c.ignore('if_none_match')
+
+    with self.argument_context('network dns record-set') as c:
+        for item in ['record_type', 'record_set_type']:
+            c.argument(item, ignore_type, validator=validate_dns_record_type)
+
+    with self.argument_context('network dns record-set create') as c:
+        c.argument('ttl', help='Record set TTL (time-to-live)')
+        c.argument('if_none_match', help='Create the record set only if it does not already exist.', action='store_true')
+
+    for item in ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+        with self.argument_context('network dns record-set {} add-record'.format(item)) as c:
+            c.argument('record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
+
+        with self.argument_context('network dns record-set {} remove-record'.format(item)) as c:
+            c.argument('record_set_name', options_list=('--record-set-name', '-n'), help='The name of the record set relative to the zone.')
+            c.argument('keep_empty_record_set', action='store_true', help='Keep the empty record set if the last record is removed.')
+
+    with self.argument_context('network dns record-set cname set-record') as c:
+        c.argument('record_set_name', options_list=['--record-set-name', '-n'], help='The name of the record set relative to the zone. Creates a new record set if one does not exist.')
+
+    with self.argument_context('network dns record-set soa') as c:
+        c.argument('relative_record_set_name', ignore_type, default='@')
+
+    with self.argument_context('network dns record-set a') as c:
+        c.argument('ipv4_address', options_list=('--ipv4-address', '-a'), help='IPV4 address in string notation.')
+
+    with self.argument_context('network dns record-set aaaa') as c:
+        c.argument('ipv6_address', options_list=('--ipv6-address', '-a'), help='IPV6 address in string notation.')
+
+    with self.argument_context('network dns record-set caa') as c:
+        c.argument('value', help='Value of the CAA record.')
+        c.argument('flags', help='Integer flags for the record.', type=int)
+        c.argument('tag', help='Record tag')
+
+    with self.argument_context('network dns record-set cname') as c:
+        c.argument('cname', options_list=('--cname', '-c'), help='Canonical name.')
+
+    with self.argument_context('network dns record-set mx') as c:
+        c.argument('exchange', options_list=('--exchange', '-e'), help='Exchange metric.')
+        c.argument('preference', options_list=('--preference', '-p'), help='Preference metric.')
+
+    with self.argument_context('network dns record-set ns') as c:
+        c.argument('dname', options_list=('--nsdname', '-d'), help='Name server domain name.')
+
+    with self.argument_context('network dns record-set ptr') as c:
+        c.argument('dname', options_list=('--ptrdname', '-d'), help='PTR target domain name.')
+
+    with self.argument_context('network dns record-set soa') as c:
+        c.argument('host', options_list=('--host', '-t'), help='Host name.')
+        c.argument('email', options_list=('--email', '-e'), help='Email address.')
+        c.argument('expire_time', options_list=('--expire-time', '-x'), help='Expire time (seconds).')
+        c.argument('minimum_ttl', options_list=('--minimum-ttl', '-m'), help='Minimum TTL (time-to-live, seconds).')
+        c.argument('refresh_time', options_list=('--refresh-time', '-f'), help='Refresh value (seconds).')
+        c.argument('retry_time', options_list=('--retry-time', '-r'), help='Retry time (seconds).')
+        c.argument('serial_number', options_list=('--serial-number', '-s'), help='Serial number.')
+
+    with self.argument_context('network dns record-set srv') as c:
+        c.argument('priority', options_list=('--priority', '-p'), help='Priority metric.')
+        c.argument('weight', options_list=('--weight', '-w'), help='Weight metric.')
+        c.argument('port', options_list=('--port', '-r'), help='Service port.')
+        c.argument('target', options_list=('--target', '-t'), help='Target domain name.')
+
+    with self.argument_context('network dns record-set txt') as c:
+        c.argument('value', options_list=('--value', '-v'), nargs='+', help='Space separated list of text values which will be concatenated together.')
+
+    # endregion
+
+    # region ExpressRoutes
+    with self.argument_context('network express-route') as c:
+        c.argument('circuit_name', circuit_name_type, options_list=('--name', '-n'))
+        c.argument('sku_family', help='Chosen SKU family of ExpressRoute circuit.', arg_type=get_enum_type(ExpressRouteCircuitSkuFamily), default=ExpressRouteCircuitSkuFamily.metered_data.value)
+        c.argument('sku_tier', help='SKU Tier of ExpressRoute circuit.', arg_type=get_enum_type(ExpressRouteCircuitSkuTier), default=ExpressRouteCircuitSkuTier.standard.value)
+        c.argument('bandwidth_in_mbps', options_list=('--bandwidth',), help="Bandwidth in Mbps of the circuit.")
+        c.argument('service_provider_name', options_list=('--provider',), help="Name of the ExpressRoute Service Provider.")
+        c.argument('peering_location', help="Name of the peering location.")
+        c.argument('device_path', options_list=('--path',), arg_type=get_enum_type(device_path_values))
+        c.argument('vlan_id', type=int)
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+
+    with self.argument_context('network express-route auth') as c:
+        c.argument('circuit_name', circuit_name_type)
+        c.argument('authorization_name', name_arg_type, id_part='child_name_1', help='Authorization name')
+
+    with self.argument_context('network express-route auth create') as c:
+        c.argument('authorization_parameters', ignore_type)
+        c.extra('cmd')
+
+    with self.argument_context('network express-route peering') as c:
+        c.argument('peer_asn', help='Autonomous system number of the customer/connectivity provider.')
+        c.argument('vlan_id', help='Identifier used to identify the customer.')
+        c.argument('circuit_name', circuit_name_type)
+        c.argument('peering_name', name_arg_type, id_part='child_name_1')
+        c.argument('peering_type', validator=validate_peering_type, arg_type=get_enum_type(ExpressRouteCircuitPeeringType), help='BGP peering type for the circuit.')
+        c.argument('sku_family', arg_type=get_enum_type(ExpressRouteCircuitSkuFamily))
+        c.argument('sku_tier', arg_type=get_enum_type(ExpressRouteCircuitSkuTier))
+        c.argument('primary_peer_address_prefix', options_list=['--primary-peer-subnet'], help='/30 subnet used to configure IP addresses for primary interface.')
+        c.argument('secondary_peer_address_prefix', options_list=['--secondary-peer-subnet'], help='/30 subnet used to configure IP addresses for secondary interface.')
+        c.argument('advertised_public_prefixes', arg_group='Microsoft Peering', nargs='+', help='Space separated list of prefixes to be advertised through the BGP peering.')
+        c.argument('customer_asn', arg_group='Microsoft Peering', help='Autonomous system number of the customer.')
+        c.argument('routing_registry_name', arg_group='Microsoft Peering', arg_type=get_enum_type(routing_registry_values), help='Internet Routing Registry / Regional Internet Registry')
+        c.argument('route_filter', min_api='2016-12-01', arg_group='Microsoft Peering', help='Name or ID of a route filter to apply to the peering settings.', validator=validate_route_filter)
+        c.argument('ip_version', min_api='2017-06-01', help='The IP version to update Microsoft Peering settings for.', arg_group='Microsoft Peering', arg_type=get_enum_type(['IPv4', 'IPv6']))
+        c.argument('shared_key', help='Key for generating an MD5 for the BGP session.')
+
+    # endregion
+
+    # region LoadBalancers
+    lb_subresources = [
+        {'name': 'address-pool', 'display': 'backend address pool', 'ref': 'backend_address_pools'},
+        {'name': 'frontend-ip', 'display': 'frontend IP configuration', 'ref': 'frontend_ip_configurations'},
+        {'name': 'inbound-nat-rule', 'display': 'inbound NAT rule', 'ref': 'inbound_nat_rules'},
+        {'name': 'inbound-nat-pool', 'display': 'inbound NAT pool', 'ref': 'inbound_nat_pools'},
+        {'name': 'rule', 'display': 'load balancing rule', 'ref': 'load_balancing_rules'},
+        {'name': 'probe', 'display': 'probe', 'ref': 'probes'},
+    ]
+    for item in lb_subresources:
+        with self.argument_context('network lb {}'.format(item['name'])) as c:
+            c.argument('item_name', options_list=('--name', '-n'), help='The name of the {}'.format(item['display']), completer=get_lb_subresource_completion_list(item['ref']), id_part='child_name_1')
+            c.argument('resource_name', options_list=('--lb-name',), help='The name of the load balancer.', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
+            c.argument('load_balancer_name', load_balancer_name_type)
+
+    with self.argument_context('network lb') as c:
+        c.argument('load_balancer_name', load_balancer_name_type, options_list=('--name', '-n'))
+        c.argument('frontend_port', help='Port number')
+        c.argument('frontend_port_range_start', help='Port number')
+        c.argument('frontend_port_range_end', help='Port number')
+        c.argument('backend_port', help='Port number')
+        c.argument('frontend_ip_name', help='The name of the frontend IP configuration.', completer=get_lb_subresource_completion_list('frontend_ip_configurations'))
+        c.argument('floating_ip', help='Enable floating IP.', arg_type=get_enum_type(['true', 'false']))
+        c.argument('idle_timeout', help='Idle timeout in minutes.')
+        c.argument('protocol', help='', arg_type=get_enum_type(TransportProtocol))
+        c.argument('sku', min_api='2017-08-01', help='Load balancer SKU', arg_type=get_enum_type(LoadBalancerSkuName, default='basic'))
+        for item in ['backend_pool_name', 'backend_address_pool_name']:
+            c.argument(item, options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
+
+    with self.argument_context('network lb create') as c:
+        c.argument('frontend_ip_zone', zone_type, min_api='2017-06-01', options_list=('--frontend-ip-zone'), help='used to create internal facing Load balancer')
+        c.argument('public_ip_zone', zone_type, min_api='2017-06-01', options_list=('--public-ip-zone'), help='used to created a new public ip for the load balancer, a.k.a public facing Load balancer')
+        c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
+        c.argument('public_ip_address_allocation', arg_type=get_enum_type(IPAllocationMethod))
+        c.argument('public_ip_dns_name', help='Globally unique DNS name for a new public IP.')
+
+        public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True)
+        c.argument('public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
+        c.ignore('public_ip_type')
+
+        subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_new=True, allow_none=True, default_none=True)
+        c.argument('subnet', help=subnet_help, completer=subnet_completion_list)
+        c.argument('subnet_address_prefix', help='The CIDR address prefix to use when creating a new subnet.')
+        c.argument('vnet_name', virtual_network_name_type)
+        c.argument('vnet_address_prefix', help='The CIDR address prefix to use when creating a new VNet.')
+        c.ignore('vnet_type')
+
+    with self.argument_context('network lb frontend-ip') as c:
+        c.argument('zone', zone_type, min_api='2017-06-01')
+
+    for item in ['create', 'update']:
+        with self.argument_context('network lb frontend-ip {}'.format(item)) as c:
+            c.argument('public_ip_address', help='Name or ID of the existing public IP to associate with the configuration.')
+            c.argument('subnet', help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
+            c.argument('virtual_network_name', virtual_network_name_type, help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
+            c.argument('private_ip_address', help='Static private IP address to associate with the configuration.')
+            c.ignore('private_ip_address_allocation')
+
+    with self.argument_context('network lb probe') as c:
+        c.argument('interval', help='Probing time interval in seconds.')
+        c.argument('path', help='The endpoint to interrogate (http only).')
+        c.argument('port', help='The port to interrogate.')
+        c.argument('protocol', help='The protocol to probe.', arg_type=get_enum_type(ProbeProtocol))
+        c.argument('threshold', help='The number of consecutive probe failures before an instance is deemed unhealthy.')
+
+    with self.argument_context('network lb rule') as c:
+        c.argument('load_distribution', help='Affinity rule settings.', arg_type=get_enum_type(LoadDistribution))
+
+    # endregion
+
+    # region LocalGateway
+    with self.argument_context('network local-gateway') as c:
+        c.argument('local_network_gateway_name', name_arg_type, help='Name of the local network gateway.', completer=get_resource_name_completion_list('Microsoft.Network/localNetworkGateways'), id_part='name')
+        c.argument('local_address_prefix', nargs='+', options_list=('--local-address-prefixes',), help='List of CIDR block prefixes representing the address space of the OnPremise VPN\'s subnet.')
+        c.argument('gateway_ip_address', help='Gateway\'s public IP address. (e.g. 10.1.1.1).')
+        c.argument('bgp_peering_address', arg_group='BGP Peering', help='IP address from the OnPremise VPN\'s subnet to use for BGP peering.')
+
+    with self.argument_context('network local-gateway create') as c:
+        c.ignore('use_bgp_settings')
+
+    for item in ['local-gateway', 'vnet-gateway']:
+        with self.argument_context('network {}'.format(item)) as c:
+            c.argument('asn', arg_group='BGP Peering', help='Autonomous System Number to use for the BGP settings.')
+            c.argument('peer_weight', arg_group='BGP Peering', help='Weight (0-100) added to routes learned through BGP peering.')
+
+    # endregion
+
+    # region NetworkInterfaces (NIC)
+    with self.argument_context('network nic') as c:
+        c.argument('enable_accelerated_networking', min_api='2016-09-01', options_list=['--accelerated-networking'], help='Enable accelerated networking.', arg_type=get_three_state_flag())
+        c.argument('network_interface_name', nic_type, options_list=('--name', '-n'))
+        c.argument('internal_dns_name_label', options_list=('--internal-dns-name',), help='The internal DNS name label.', arg_group='DNS')
+        c.argument('dns_servers', help='Space separated list of DNS server IP addresses.', nargs='+', arg_group='DNS')
+        c.argument('enable_ip_forwarding', options_list=('--ip-forwarding',), help='Enable IP forwarding.', arg_type=get_three_state_flag())
+
+    with self.argument_context('network nic create') as c:
+        c.argument('private_ip_address_version', min_api='2016-09-01', help='The private IP address version to use.', default=IPVersion.ipv4.value if IPVersion else '')
+        c.argument('network_interface_name', nic_type, options_list=('--name', '-n'), id_part=None)
+
+        public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, default_none=True)
+        c.argument('public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
+
+        nsg_help = get_folded_parameter_help_string('network security group', allow_none=True, default_none=True)
+        c.argument('network_security_group', help=nsg_help, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
+
+        subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name')
+        c.argument('subnet', help=subnet_help, completer=subnet_completion_list)
+
+    with self.argument_context('network nic update') as c:
+        c.argument('network_security_group', help='Name or ID of the associated network security group.', validator=get_nsg_validator(), completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
+        c.argument('dns_servers', help='Space separated list of DNS server IP addresses. Use "" to revert to default Azure servers.', nargs='+', arg_group='DNS')
+
+    for item in ['create', 'ip-config update', 'ip-config create']:
+        with self.argument_context('network nic {}'.format(item)) as c:
+            c.extra('load_balancer_name', options_list=('--lb-name',), completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), help='The name of the load balancer to use when adding NAT rules or address pools by name (ignored when IDs are specified).')
+            c.argument('load_balancer_backend_address_pool_ids', options_list=('--lb-address-pools',), nargs='+', validator=validate_address_pool_id_list, help='Space separated list of names or IDs of load balancer address pools to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('backendAddresPools'))
+            c.argument('load_balancer_inbound_nat_rule_ids', options_list=('--lb-inbound-nat-rules',), nargs='+', validator=validate_inbound_nat_rule_id_list, help='Space separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('inboundNatRules'))
+            c.argument('application_security_groups', min_api='2017-09-01', help='Space separated list of application security groups.', nargs='+', validator=get_asg_validator(self, 'application_security_groups'))
+
+    with self.argument_context('network nic ip-config') as c:
+        c.argument('network_interface_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
+        c.argument('ip_config_name', options_list=('--name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name_1')
+        c.argument('resource_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
+        c.argument('item_name', options_list=('--name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name_1')
+        c.argument('subnet', validator=get_subnet_validator(), help='Name or ID of an existing subnet. If name is specified, also specify --vnet-name.')
+        c.argument('virtual_network_name', help='The virtual network (VNet) associated with the subnet (Omit if supplying a subnet id).', id_part=None, metavar='')
+        c.argument('public_ip_address', help='Name or ID of the public IP to use.', validator=get_public_ip_validator())
+        c.argument('private_ip_address_allocation', ignore_type, default=IPAllocationMethod.dynamic.value)
+        c.argument('make_primary', action='store_true', help='Set to make this configuration the primary one for the NIC.')
+
+    with self.argument_context('network nic ip-config address-pool') as c:
+        c.argument('load_balancer_name', options_list=('--lb-name',), help='The name of the load balancer associated with the address pool (Omit if suppying an address pool ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
+        c.argument('backend_address_pool', options_list=('--address-pool',), help='The name or ID of an existing backend address pool.', validator=validate_address_pool_name_or_id)
+
+    with self.argument_context('network nic ip-config inbound-nat-rule') as c:
+        c.argument('load_balancer_name', options_list=('--lb-name',), help='The name of the load balancer associated with the NAT rule (Omit if suppying a NAT rule ID).', completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'))
+        c.argument('inbound_nat_rule', options_list=('--inbound-nat-rule',), help='The name or ID of an existing inbound NAT rule.', validator=validate_inbound_nat_rule_name_or_id)
+
+    for item in ['address-pool', 'inbound-nat-rule']:
+        with self.argument_context('network nic ip-config {}'.format(item)) as c:
+            c.argument('ip_config_name', options_list=('--ip-config-name', '-n'), metavar='IP_CONFIG_NAME', help='The name of the IP configuration.', id_part='child_name_1')
+            c.argument('network_interface_name', nic_type)
+
+    for item in ['address-pool', 'inbound-nat-rule']:
+        with self.argument_context('network nic ip-config {} remove'.format(item)) as c:
+            c.argument('network_interface_name', nic_type, id_part=None)
+
+    # endregion
+
+    # region NetworkSecurityGroups
+    with self.argument_context('network nsg') as c:
+        c.argument('network_security_group_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'), id_part='name')
+
+    with self.argument_context('network nsg create') as c:
+        c.argument('name', name_arg_type)
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+
+    with self.argument_context('network nsg rule') as c:
+        c.argument('security_rule_name', name_arg_type, id_part='child_name_1', help='Name of the network security group rule')
+        c.argument('network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part='name')
+
+    with self.argument_context('network nsg rule create') as c:
+        c.argument('network_security_group_name', options_list=('--nsg-name',), metavar='NSGNAME', help='Name of the network security group', id_part=None)
+
+    for item in ['create', 'update']:
+        with self.argument_context('network nsg rule {}'.format(item)) as c:
+            c.argument('priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
+            c.argument('description', help='Rule description')
+            c.argument('access', help=None, arg_type=get_enum_type(SecurityRuleAccess), default=SecurityRuleAccess.allow.value)
+            c.argument('protocol', help='Network protocol this rule applies to.', arg_type=get_enum_type(SecurityRuleProtocol), default=SecurityRuleProtocol.asterisk.value)
+            c.argument('direction', help=None, arg_type=get_enum_type(SecurityRuleDirection), default=SecurityRuleDirection.inbound.value)
+
+        with self.argument_context('network nsg rule {}'.format(item), min_api='2017-06-01') as c:
+            c.argument('source_port_ranges', nargs='+', help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.", arg_group='Source')
+            c.argument('source_address_prefixes', nargs='+', help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs.", arg_group='Source')
+            c.argument('destination_port_ranges', nargs='+', help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.", arg_group='Destination')
+            c.argument('destination_address_prefixes', nargs='+', help="Space-separated list of CIDR prefixes or IP ranges. Alternatively, specify ONE of 'VirtualNetwork', 'AzureLoadBalancer', 'Internet' or '*' to match all IPs.", arg_group='Destination')
+
+        with self.argument_context('network nsg rule {}'.format(item), max_api='2017-03-01') as c:
+            c.argument('source_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Source')
+            c.argument('source_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Source')
+            c.argument('destination_port_range', help="Port or port range between 0-65535. Use '*' to match all ports.", arg_group='Destination')
+            c.argument('destination_address_prefix', help="CIDR prefix or IP range. Use '*' to match all IPs. Can also use 'VirtualNetwork', 'AzureLoadBalancer', and 'Internet'.", arg_group='Destination')
+
+        with self.argument_context('network nsg rule {}'.format(item), min_api='2017-09-01') as c:
+            c.argument('source_asgs', nargs='+', help="Space-separated list of application security group names or IDs.", arg_group='Source', validator=get_asg_validator(self, 'source_asgs'))
+            c.argument('destination_asgs', nargs='+', help="Space-separated list of application security group names or IDs.", arg_group='Destination', validator=get_asg_validator(self, 'destination_asgs'))
+
+    # endregion
+
+    # region NetworkWatchers
+    with self.argument_context('network watcher') as c:
+        c.argument('network_watcher_name', name_arg_type, help='Name of the Network Watcher.')
+        c.ignore('watcher_rg')
+        c.ignore('watcher_name')
+
+    with self.argument_context('network watcher configure') as c:
+        c.argument('locations', get_location_type(self.cli_ctx), options_list=['--locations', '-l'], nargs='+')
+        c.argument('enabled', arg_type=get_three_state_flag())
+
+    with self.argument_context('network watcher show-topology') as c:
+        c.argument('network_watcher_name', ignore_type, options_list=['--watcher'])
+        c.argument('resource_group_name', ignore_type, options_list=['--watcher-resource-group'])
+        c.argument('target_resource_group_name', options_list=['--resource-group', '-g'], completer=get_resource_group_completion_list)
+        c.extra('location')
+
+    with self.argument_context('network watcher create') as c:
+        c.argument('location', validator=get_default_location_from_resource_group)
+
+    for item in ['test-ip-flow', 'show-next-hop', 'show-security-group-view', 'packet-capture create']:
+        with self.argument_context('network watcher {}'.format(item)) as c:
+            c.argument('watcher_name', ignore_type, validator=get_network_watcher_from_vm)
+            c.ignore('location')
+            c.ignore('watcher_rg')
+            c.argument('vm', help='Name or ID of the VM to target.')
+            c.argument('resource_group_name', help='Name of the resource group the target VM is in. Do not use when supplying VM ID.')
+            c.argument('nic', help='Name or ID of the NIC resource to test. If the VM has multiple NICs and IP forwarding is enabled on any of them, this parameter is required.')
+
+    with self.argument_context('network watcher test-connectivity') as c:
+        c.argument('source_port', type=int)
+        c.argument('dest_resource', arg_group='Destination')
+        c.argument('dest_address', arg_group='Destination')
+        c.argument('dest_port', type=int, arg_group='Destination')
+
+    with self.argument_context('network watcher packet-capture') as c:
+        c.argument('capture_name', name_arg_type, help='Name of the packet capture session.')
+        c.argument('storage_account', arg_group='Storage')
+        c.argument('storage_path', arg_group='Storage')
+        c.argument('file_path', arg_group='Storage')
+        c.argument('filters', type=get_json_object)
+
+    with self.argument_context('network watcher flow-log') as c:
+        c.argument('enabled', arg_type=get_three_state_flag())
+
+    for item in ['list', 'stop', 'delete', 'show', 'show-status']:
+        with self.argument_context('network watcher packet-capture {}'.format(item)) as c:
+            c.extra('location')
+            c.argument('location', get_location_type(self.cli_ctx), required=True)
+            c.argument('packet_capture_name', name_arg_type)
+            c.argument('network_watcher_name', ignore_type, options_list=['--network-watcher-name'], validator=get_network_watcher_from_location(remove=True, rg_name='resource_group_name', watcher_name='network_watcher_name'))
+            c.ignore('resource_group_name')
+
+    with self.argument_context('network watcher test-ip-flow') as c:
+        c.argument('direction', arg_type=get_enum_type(Direction))
+        c.argument('protocol', arg_type=get_enum_type(Protocol))
+
+    with self.argument_context('network watcher show-next-hop') as c:
+        c.argument('source_ip', help='Source IPv4 address.')
+        c.argument('dest_ip', help='Destination IPv4 address.')
+
+    with self.argument_context('network watcher troubleshooting') as c:
+        c.argument('resource_type', options_list=['--resource-type', '-t'], id_part='resource_type', arg_type=get_enum_type(['vnetGateway', 'vpnConnection']))
+
+    with self.argument_context('network watcher troubleshooting start') as c:
+        c.argument('resource', help='Name or ID of the resource to troubleshoot.')
+
+    with self.argument_context('network watcher troubleshooting stop') as c:
+        c.argument('resource', help='Name or ID of the resource to troubleshoot.')
+
+    # endregion
+
+    # region PublicIPAddresses
+    with self.argument_context('network public-ip') as c:
+        c.argument('public_ip_address_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), id_part='name', help='The name of the public IP address.')
+        c.argument('name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), help='The name of the public IP address.')
+        c.argument('reverse_fqdn', help='Reverse FQDN (fully qualified domain name).')
+        c.argument('dns_name', help='Globally unique DNS entry.')
+        c.argument('idle_timeout', help='Idle timeout in minutes.')
+        c.argument('zone', zone_type, min_api='2017-06-01')
+        c.argument('ip_tags', nargs='+', min_api='2017-11-01', help="Space separated list of IP tags in 'TYPE=VAL' format.", validator=validate_ip_tags)
+
+    with self.argument_context('network public-ip create') as c:
+        c.argument('name', completer=None)
+        c.ignore('dns_name_type')
+
+    for item in ['create', 'update']:
+        with self.argument_context('network public-ip {}'.format(item)) as c:
+            c.argument('allocation_method', help='IP address allocation method', arg_type=get_enum_type(IPAllocationMethod))
+            c.argument('sku', min_api='2017-08-01', help='Public IP SKU', default='Basic', arg_type=get_enum_type(PublicIPAddressSkuName))
+            c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
+
+    # endregion
+
+    # region RouteFilters
+    with self.argument_context('network route-filter') as c:
+        c.argument('route_filter_name', name_arg_type, help='Name of the route filter.')
+        c.argument('expand', arg_type=get_enum_type(['peerings']))
+
+    with self.argument_context('network route-filter create') as c:
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+
+    with self.argument_context('network route-filter rule') as c:
+        c.argument('route_filter_name', options_list=['--filter-name'], help='Name of the route filter.', id_part='name')
+        c.argument('rule_name', name_arg_type, help='Name of the route filter rule.', id_part='child_name_1')
+        c.argument('access', help='The access type of the rule.', arg_type=get_enum_type(Access))
+        c.argument('communities', nargs='+')
+
+    with self.argument_context('network route-filter rule create') as c:
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+
+    # endregion
+
+    # region RouteTables
+    with self.argument_context('network route-table') as c:
+        c.argument('route_table_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Network/routeTables'), id_part='name')
+        c.argument('disable_bgp_propagation', arg_type=get_three_state_flag(), min_api='2017-10-01', help='Disable routes learned by BGP.')
+
+    with self.argument_context('network route-table create') as c:
+        c.extra('tags')
+        c.extra('location')
+        c.extra('cmd')
+        c.argument('location', get_location_type(self.cli_ctx))
+        c.ignore('parameters')
+
+    with self.argument_context('network route-table route') as c:
+        c.argument('route_name', name_arg_type, id_part='child_name_1', help='Route name')
+        c.argument('route_table_name', options_list=('--route-table-name',), help='Route table name')
+        c.argument('next_hop_type', help='The type of Azure hop the packet should be sent to.', arg_type=get_enum_type(RouteNextHopType))
+        c.argument('next_hop_ip_address', help='The IP address packets should be forwarded to when using the VirtualAppliance hop type.')
+        c.argument('address_prefix', help='The destination CIDR to which the route applies.')
+
+    # endregion
+
+    # region TrafficManagers
+    with self.argument_context('network traffic-manager profile') as c:
+        c.argument('traffic_manager_profile_name', name_arg_type, id_part='name', help='Traffic manager profile name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
+        c.argument('profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
+        c.argument('monitor_path', help='Path to monitor.')
+        c.argument('monitor_port', help='Port to monitor.', type=int)
+        c.argument('monitor_protocol', help='Monitor protocol.', arg_type=get_enum_type(MonitorProtocol, default='http'))
+        c.argument('profile_status', options_list=('--status',), help='Status of the Traffic Manager profile.', arg_type=get_enum_type(['Enabled', 'Disabled']))
+        c.argument('routing_method', help='Routing method.', arg_type=get_enum_type(['Performance', 'Weighted', 'Priority', 'Geographic']))
+        c.argument('unique_dns_name', help="Relative DNS name for the traffic manager profile. Resulting FQDN will be `<unique-dns-name>.trafficmanager.net` and must be globally unique.")
+        c.argument('ttl', help='DNS config time-to-live in seconds.', type=int)
+
+    with self.argument_context('network traffic-manager profile check-dns') as c:
+        c.argument('name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
+        c.argument('type', ignore_type, default='Microsoft.Network/trafficManagerProfiles')
+
+    endpoint_types = ['azureEndpoints', 'externalEndpoints', 'nestedEndpoints']
+    with self.argument_context('network traffic-manager endpoint') as c:
+        c.argument('endpoint_name', name_arg_type, id_part='child_name_1', help='Endpoint name.', completer=tm_endpoint_completion_list)
+        c.argument('endpoint_type', options_list=['--type', '-t'], help='Endpoint type.', id_part='child_name_1', arg_type=get_enum_type(endpoint_types))
+        c.argument('profile_name', help='Name of parent profile.', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'), id_part='name')
+        c.argument('endpoint_location', help="Location of the external or nested endpoints when using the 'Performance' routing method.")
+        c.argument('endpoint_monitor_status', help='The monitoring status of the endpoint.')
+        c.argument('endpoint_status', help="The status of the endpoint. If enabled the endpoint is probed for endpoint health and included in the traffic routing method.")
+        c.argument('min_child_endpoints', help="The minimum number of endpoints that must be available in the child profile for the parent profile to be considered available. Only applicable to an endpoint of type 'NestedEndpoints'.")
+        c.argument('priority', help="Priority of the endpoint when using the 'Priority' traffic routing method. Values range from 1 to 1000, with lower values representing higher priority.", type=int)
+        c.argument('target', help='Fully-qualified DNS name of the endpoint.')
+        c.argument('target_resource_id', help="The Azure Resource URI of the endpoint. Not applicable for endpoints of type 'ExternalEndpoints'.")
+        c.argument('weight', help="Weight of the endpoint when using the 'Weighted' traffic routing method. Values range from 1 to 1000.", type=int)
+        c.argument('geo_mapping', nargs='+')
+
+    with self.argument_context('network traffic-manager endpoint create') as c:
+        c.argument('target', help='Fully-qualified DNS name of the endpoint.')
+
+    # endregion
+
+    # region VirtualNetworks
+    with self.argument_context('network vnet') as c:
+        c.argument('virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')
+        c.argument('vnet_prefixes', nargs='+', help='Space separated list of IP address prefixes for the VNet.', options_list=('--address-prefixes',), metavar='PREFIX')
+        c.argument('dns_servers', nargs='+', help='Space separated list of DNS server IP addresses.', metavar='IP')
+        c.argument('ddos_protection', arg_type=get_three_state_flag(), help='Enable DDoS protection for protected resources in the VNet.', min_api='2017-09-01')
+        c.argument('vm_protection', arg_type=get_three_state_flag(), help='Enable VM protection for all subnets in the VNet.', min_api='2017-09-01')
+
+    with self.argument_context('network vnet create') as c:
+        c.argument('location', get_location_type(self.cli_ctx))
+        c.argument('subnet_name', help='Name of a new subnet to create within the VNet.')
+        c.argument('subnet_prefix', help='IP address prefix for the new subnet. If omitted, automatically reserves a /24 (or as large as available) block within the VNet address space.', metavar='PREFIX')
+        c.argument('vnet_name', virtual_network_name_type, options_list=('--name', '-n'), completer=None)
+
+    with self.argument_context('network vnet update') as c:
+        c.argument('address_prefixes', nargs='+')
+
+    with self.argument_context('network vnet peering') as c:
+        c.argument('virtual_network_name', virtual_network_name_type)
+        c.argument('virtual_network_peering_name', options_list=('--name', '-n'), help='The name of the VNet peering.', id_part='child_name_1')
+        c.argument('remote_virtual_network', options_list=('--remote-vnet-id',), help='ID of the remote VNet.')
+
+    with self.argument_context('network vnet peering create') as c:
+        c.argument('allow_virtual_network_access', options_list=('--allow-vnet-access',), action='store_true', help='Allows VMs in the remote VNet to access all VMs in the local VNet.')
+        c.argument('allow_gateway_transit', action='store_true', help='Allows gateway link to be used in the remote VNet.')
+        c.argument('allow_forwarded_traffic', action='store_true', help='Allows forwarded traffic from the VMs in the remote VNet.')
+        c.argument('use_remote_gateways', action='store_true', help='Allows VNet to use the remote VNet\'s gateway. Remote VNet gateway must have --allow-gateway-transit enabled for remote peering. Only 1 peering can have this flag enabled. Cannot be set if the VNet already has a gateway.')
+
+    with self.argument_context('network vnet subnet') as c:
+        c.argument('subnet_name', arg_type=subnet_name_type, options_list=('--name', '-n'), id_part='child_name_1')
+        c.argument('address_prefix', metavar='PREFIX', help='the address prefix in CIDR format.')
+        c.argument('virtual_network_name', virtual_network_name_type)
+        c.argument('network_security_group', validator=get_nsg_validator())
+        c.argument('route_table', help='Name or ID of a route table to associate with the subnet.')
+        c.argument('service_endpoints', nargs='+', min_api='2017-06-01')
+
+    # endregion
+
+    # region VirtualNetworkGateways
+    with self.argument_context('network vnet-gateway') as c:
+        c.argument('virtual_network_gateway_name', options_list=('--name', '-n'), help='Name of the VNet gateway.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'), id_part='name')
+        c.argument('cert_name', help='Root certificate name', options_list=('--name', '-n'))
+        c.argument('gateway_name', help='Virtual network gateway name')
+        c.argument('gateway_type', help='The gateway type.', arg_type=get_enum_type(VirtualNetworkGatewayType), default=VirtualNetworkGatewayType.vpn.value)
+        c.argument('sku', help='VNet gateway SKU.', arg_type=get_enum_type(VirtualNetworkGatewaySkuName), default=VirtualNetworkGatewaySkuName.basic.value)
+        c.argument('vpn_type', help='VPN routing type.', arg_type=get_enum_type(VpnType), default=VpnType.route_based.value)
+        c.argument('bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')
+        c.argument('public_ip_address', options_list=['--public-ip-addresses'], nargs='+', help='Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
+        c.argument('address_prefixes', help='Space separated list of CIDR prefixes representing the address space for the P2S client.', nargs='+', arg_group='VPN Client')
+        c.argument('radius_server', min_api='2017-06-01', help='Radius server address to connect to.', arg_group='VPN Client')
+        c.argument('radius_secret', min_api='2017-06-01', help='Radius secret to use for authentication.', arg_group='VPN Client')
+        c.argument('client_protocol', min_api='2017-06-01', help='Protocols to use for connecting', nargs='+', arg_group='VPN Client', arg_type=get_enum_type(VpnClientProtocol))
+
+    with self.argument_context('network vnet-gateway create') as c:
+        vnet_help = "Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'."
+        c.argument('virtual_network', options_list=('--vnet',), help=vnet_help)
+
+    with self.argument_context('network vnet-gateway update') as c:
+        c.argument('enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_group='BGP Peering', arg_type=get_enum_type(['true', 'false']))
+        c.argument('virtual_network', virtual_network_name_type, options_list=('--vnet',), help="Name or ID of a virtual network that contains a subnet named 'GatewaySubnet'.")
+        c.extra('address_prefixes', options_list=('--address-prefixes',), help='List of address prefixes for the VPN gateway.  Prerequisite for uploading certificates.', nargs='+')
+
+    with self.argument_context('network vnet-gateway root-cert create') as c:
+        c.argument('public_cert_data', help='Base64 contents of the root certificate file or file path.', type=file_type, completer=FilesCompleter(), validator=load_cert_file('public_cert_data'))
+        c.argument('cert_name', help='Root certificate name', options_list=('--name', '-n'))
+        c.argument('gateway_name', help='Virtual network gateway name')
+
+    with self.argument_context('network vnet-gateway revoked-cert create') as c:
+        c.argument('thumbprint', help='Certificate thumbprint.')
+
+    with self.argument_context('network vnet-gateway vpn-client') as c:
+        c.argument('processor_architecture', arg_type=get_enum_type(ProcessorArchitecture))
+        c.argument('authentication_method', arg_type=get_enum_type(AuthenticationMethod))
+        c.argument('radius_server_auth_certificate', help='Public certificate data for the Radius server auth certificate in Base-64 format. Required only if external Radius auth has been configured with EAPTLS auth.')
+        c.argument('client_root_certificates', nargs='+', help='Space separated list of client root certificate public certificate data in Base-64 format. Optional for external Radius-based auth with EAPTLS')
+        c.argument('use_legacy', min_api='2017-06-01', help='Generate VPN client package using legacy implementation.', arg_type=get_three_state_flag())
+
+    # endregion
+
+    # region VirtualNetworkGatewayConnections
+    with self.argument_context('network vpn-connection') as c:
+        c.argument('virtual_network_gateway_connection_name', options_list=('--name', '-n'), metavar='NAME', id_part='name', help='Connection name.')
+        c.argument('shared_key', help='Shared IPSec key.')
+        c.argument('connection_name', help='Connection name.')
+        c.argument('use_policy_based_traffic_selectors', min_api='2017-03-01', help='Enable policy-based traffic selectors.', arg_type=get_three_state_flag())
+
+    with self.argument_context('network vpn-connection create') as c:
+        c.argument('connection_name', options_list=('--name', '-n'), metavar='NAME', help='Connection name.')
+        c.ignore('connection_type')
+        for item in ['vnet_gateway2', 'local_gateway2', 'express_route_circuit2']:
+            c.argument(item, arg_group='Destination')
+
+    with self.argument_context('network vpn-connection update') as c:
+        c.argument('routing_weight', type=int, help='Connection routing weight')
+        c.argument('enable_bgp', help='Enable BGP (Border Gateway Protocol)', arg_type=get_enum_type(['true', 'false']))
+
+    with self.argument_context('network vpn-connection shared-key') as c:
+        c.argument('connection_shared_key_name', options_list=('--name', '-n'), id_part='name')
+        c.argument('virtual_network_gateway_connection_name', options_list=('--connection-name',), metavar='NAME', id_part='name')
+        c.argument('key_length', type=int)
+
+    param_map = {
+        'dh_group': 'DhGroup',
+        'ike_encryption': 'IkeEncryption',
+        'ike_integrity': 'IkeIntegrity',
+        'ipsec_encryption': 'IpsecEncryption',
+        'ipsec_integrity': 'IpsecIntegrity',
+        'pfs_group': 'PfsGroup'
+    }
+    with self.argument_context('network vpn-connection ipsec-policy') as c:
+        for dest, model_name in param_map.items():
+            model = self.get_models(model_name)
+            c.argument(dest, arg_type=get_enum_type(model))
+        c.argument('sa_data_size_kilobytes', options_list=['--sa-max-size'], type=int)
+        c.argument('sa_life_time_seconds', options_list=['--sa-lifetime'], type=int)
+    # endregion

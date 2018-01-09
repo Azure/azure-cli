@@ -7,15 +7,39 @@ The document provides instructions and guidelines on how to author individual co
 
 The basic process of adding commands is presented below, and elaborated upon later in this document.
 
-1. Create an \_\_init__.py file for your command module.
+1. Create an \_\_init__.py file for your command module and create your CommandLoader class.
 2. Write your command as a standard Python function.
-3. Register your command using the `cli_command` (or similar) function.
+3. Register your command.
 4. Write up your command's help entry.
-5. Use the `register_cli_argument` function to add the following enhancements to your arguments, as needed:
-    - option names, including short names
+5. Register argument metadata to add enhancements to your arguments, as needed:
+    - option names, aliases, or short names
     - validators, actions or types
     - choice lists
     - completers
+
+**Writing the Command Loader**
+
+Azure CLI 2.0 is based on the Knack framework (https://github.com/Microsoft/knack), which uses the `CLICommandsLoader` class as the mechanism for loading a module. In Azure CLI 2.0, you will create your own loader which will inherit from the `AzCommandsLoader` class.  The basic structure is:
+
+```Python
+class MyCommandsLoader(AzCommandsLoader):
+
+    def __init__(self, cli_ctx=None):
+        from azure.cli.core.sdk.util import CliCommandType
+        mymod_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.mymod.custom#{}')
+        super(MyCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                                               min_profile='2017-03-10-profile',
+                                               custom_command_type=mymod_custom)
+
+    def load_command_table(self, args):
+        super(MyCommandsLoader, self).load_command_table(args)
+        # TODO: Register command groups and commands here
+        return self.command_table
+
+    def load_arguments(self, command):
+        super(MyCommandsLoader, self).load_arguments(command)
+        # TODO: Register argument contexts and arguments here
+```
 
 **Writing a Command**
 
@@ -23,15 +47,56 @@ Write your command as a simple function, specifying your arguments as the parame
 
 When choosing names, it is recommended that you look at similiar commands and follow those naming conventions to take advantage of any aliasing that may already be in place. For example, you should choose `resource_group_name` over `rg`, `resource_group` or some other shorthand, because this parameter is globally aliased and you will inherit the `-g` short option and the completer.
 
-If you specify a default value in your function signature, this will flag the argument as optional and will automatically display the default value in the help text for the command. Any parameters that do not have a default value are required and will automatically appear in help with the [Required] label. The required and default behaviors for arguments can be overridden if needed with the `register_cli_argument` function (see Argument Customization below) but this is not generally needed.
+If you specify a default value in your function signature, this will flag the argument as optional and will automatically display the default value in the help text for the command. Any parameters that do not have a default value are required and will automatically appear in help with the [Required] label. The required and default behaviors for arguments can be overridden (see Argument Customization below) but this is not generally needed.
+
+***Special Arguments***
+
+There are two arguments you may include in your custom command that are reserved by the infrastructure and have special meaning.
+
+`cmd`: If used, this should be the first argument in your custom command, and allows you to access the command instance within your custom command. This will allow you to access the CLI context and numerous helper methods to make writing your command simpler, particularly when working with a multi-API style module.
+
+`client`: If your command has registered the `client_factory` keyword argument, that factory will be passed into this variable. It can appear anywhere in your command signature.
 
 **Registering Commands**
 
-Before your command can be used in the CLI, it must be registered. Insert the following statement in your file:
+Before your command can be used in the CLI, it must be registered. Within the `load_command_table` method of your command loader, you will have something like:
 
 ```Python
-from azure.cli.core.commands import cli_command
+# (1) Registering a command type for reuse among groups
+mymod_sdk = CliCommandType(
+    operations_tmpl='azure.mgmt.mymod.operations.myoperations#MyOperations.{}',
+    client_factory=cf_mymod
+)
+
+# (2) Registering a command group
+with self.command_group('mymod', mymod_sdk) as g:
+    # (3) Registering different types of commands
+    g.command('command1', 'do_something_1')
+    g.custom_command('command2', 'do_something_2')
+    g.generic_update('update', custom_function_name='my_custom_update')
+    g.generic_wait('wait')
 ```
+
+***(1) CliCommandType***
+
+CliCommandType is a way to group and reuse and keyword arguments supported by commands. Earlier, in the `__init__` method of the `MyCommandsLoader` class, we created a `mymod_custom` variable and assigned it to the `custom_command_type` keyword argument. This will be used any time you use the `custom_command` method within a command group. It is registered with the loader since most modules typically put all of their custom methods in a single file.
+
+***(2) Command Group Helper***
+
+
+
+***(3) Command Registration Helpers***
+
+****command****
+```Python
+def command(self, name, method_name=None, command_type=None, **kwargs):
+```
+
+- `name`: The name of the command within the command group
+- `method_name`: The name of the SDK or custom method, relative to the path specified in `operations_tmpl`.
+- `command_type`: An `AzCommandType` object to apply to this command. If not specified, then the group command type is
+
+==================================
 
 The signature of this method is 
 ```Python

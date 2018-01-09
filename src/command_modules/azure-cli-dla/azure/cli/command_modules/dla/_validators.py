@@ -5,10 +5,12 @@
 from msrest.serialization import Deserializer
 from msrest.exceptions import DeserializationError
 
+from msrestazure.tools import parse_resource_id
+
+from knack.util import CLIError
+
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
-from azure.cli.core.util import CLIError
-from msrestazure.tools import parse_resource_id
 
 
 # Helpers
@@ -29,10 +31,10 @@ def _get_resource_group_from_account_name(client, account_name):
 
 
 # COMMAND NAMESPACE VALIDATORS
-def validate_resource_group_name(ns):
+def validate_resource_group_name(cmd, ns):
     if not ns.resource_group_name:
         account_name = ns.account_name
-        client = get_mgmt_service_client(DataLakeAnalyticsAccountManagementClient).account
+        client = get_mgmt_service_client(cmd.cli_ctx, DataLakeAnalyticsAccountManagementClient).account
         group_name = _get_resource_group_from_account_name(client, account_name)
         ns.resource_group_name = group_name
 

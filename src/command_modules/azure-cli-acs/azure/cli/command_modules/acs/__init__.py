@@ -4,12 +4,26 @@
 # --------------------------------------------------------------------------------------------
 
 
+from azure.cli.core import AzCommandsLoader
+
 import azure.cli.command_modules.acs._help  # pylint: disable=unused-import
 
 
-def load_params(_):
-    import azure.cli.command_modules.acs._params  # pylint: disable=redefined-outer-name, unused-variable
+class ContainerServiceCommandsLoader(AzCommandsLoader):
+
+    def __init__(self, cli_ctx=None):
+        from azure.cli.core.commands import CliCommandType
+        acs_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.acs.custom#{}')
+        super(ContainerServiceCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=acs_custom)
+
+    def load_command_table(self, args):
+        from azure.cli.command_modules.acs.commands import load_command_table
+        load_command_table(self, args)
+        return self.command_table
+
+    def load_arguments(self, command):
+        from azure.cli.command_modules.acs._params import load_arguments
+        load_arguments(self, command)
 
 
-def load_commands():
-    import azure.cli.command_modules.acs.commands  # pylint: disable=redefined-outer-name, unused-variable
+COMMAND_LOADER_CLS = ContainerServiceCommandsLoader

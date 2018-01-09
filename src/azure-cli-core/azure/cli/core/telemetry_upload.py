@@ -16,11 +16,12 @@ import os
 import sys
 import json
 import six
-import azure.cli.core.decorators as decorators
 
 from applicationinsights import TelemetryClient
 from applicationinsights.exceptions import enable
 from applicationinsights.channel import SynchronousSender, SynchronousQueue, TelemetryChannel
+
+import azure.cli.core.decorators as decorators
 
 DIAGNOSTICS_TELEMETRY_ENV_NAME = 'AZURE_CLI_DIAGNOSTICS_TELEMETRY'
 INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'

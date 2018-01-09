@@ -4,13 +4,28 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+from knack import CLI
+
+from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
+from azure.cli.core.cloud import get_active_cloud
+
 from azure.cli.command_modules.storage.storage_url_helpers import StorageResourceIdentifier
 
 
+class MockCLI(CLI):
+    def __init__(self):
+        super(MockCLI, self).__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
+                                      config_env_var_prefix=ENV_VAR_PREFIX)
+        self.cloud = get_active_cloud(self)
+
+
 class TestStorageUrlHelpers(unittest.TestCase):
+    def setUp(self):
+        self.cli = MockCLI()
+
     def test_is_url(self):
         def _check_is_url(moniker, expectation):
-            assert StorageResourceIdentifier(moniker).is_url() == expectation
+            assert StorageResourceIdentifier(self.cli.cloud, moniker).is_url() == expectation
 
         _check_is_url('sample', False)
         _check_is_url('http://test.blob.core.windows.net/cont', True)
@@ -19,7 +34,7 @@ class TestStorageUrlHelpers(unittest.TestCase):
 
     def test_container_parsing(self):
         def _test(moniker, expected_container=None, expected_blob=None, expected_snapshot=None):
-            i = StorageResourceIdentifier(moniker)
+            i = StorageResourceIdentifier(self.cli.cloud, moniker)
 
             if expected_container is not None:
                 assert i.container == expected_container
@@ -43,7 +58,7 @@ class TestStorageUrlHelpers(unittest.TestCase):
 
     def test_share_parsing(self):
         def _test(moniker, expected_share=None, expected_dir=None, expected_file=None):
-            i = StorageResourceIdentifier(moniker)
+            i = StorageResourceIdentifier(self.cli.cloud, moniker)
 
             if expected_share is not None:
                 assert i.container is None
@@ -67,7 +82,7 @@ class TestStorageUrlHelpers(unittest.TestCase):
 
     def test_account_name(self):
         def _test(moniker, expected_account=None):
-            i = StorageResourceIdentifier(moniker)
+            i = StorageResourceIdentifier(self.cli.cloud, moniker)
             assert i.account_name == expected_account
 
         _test('sample')
@@ -77,7 +92,7 @@ class TestStorageUrlHelpers(unittest.TestCase):
         _test('http://momba.file.core.windows.net/snake/d/e/f.txt?s=t', 'momba')
 
     def test_default_value(self):
-        i = StorageResourceIdentifier('')
+        i = StorageResourceIdentifier(self.cli.cloud, '')
         assert not i.is_url()
         assert not i.is_valid
         assert i.account_name is None
@@ -89,7 +104,7 @@ class TestStorageUrlHelpers(unittest.TestCase):
 
     def test_get_sas_token(self):
         def _test(moniker, expected_sas=None):
-            i = StorageResourceIdentifier(moniker)
+            i = StorageResourceIdentifier(self.cli.cloud, moniker)
             assert i.sas_token == expected_sas
 
         _test('https://momba.blob.core.windows.net/blob?sv=2015-04-05&ss=bfqt&srt=sco&sp=rwdlacup&se='

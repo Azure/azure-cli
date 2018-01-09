@@ -15,5 +15,7 @@ echo '=== List installed packages'
 pip freeze
 
 echo '=== Begin testing'
-python -m automation.tests.verify_packages $share_folder/build
-python -m automation.tests.verify_dependencies
+unset AZURE_CLI_DIAGNOSTICS_TELEMETRY
+azdev verify package $share_folder/build/
+azdev verify commands
+azdev verify dependencies

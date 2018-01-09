@@ -1,0 +1,759 @@
+interactions:
+- request:
+    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['50']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_kv_cert_issuer000001?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_issuer000001","name":"cli_test_kv_cert_issuer000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['328']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:25:41 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1185']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/me?api-version=1.6
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.User/@Element","odata.type":"Microsoft.DirectoryServices.User","objectType":"User","objectId":"5963f50c-7c43-405c-af7e-53294de76abd","deletionTimestamp":null,"accountEnabled":true,"assignedLicenses":[{"disabledPlans":[],"skuId":"a403ebcc-fae0-4ca2-8c8c-7a907fd6c235"}],"assignedPlans":[{"assignedTimestamp":"2017-12-07T23:01:21Z","capabilityStatus":"Enabled","service":"AzureAnalysis","servicePlanId":"2049e525-b859-401b-b2a0-e0a31c4b1fe4"}],"city":null,"companyName":null,"country":null,"creationType":null,"department":null,"dirSyncEnabled":null,"displayName":"Admin2","employeeId":null,"facsimileTelephoneNumber":null,"givenName":"Admin2","immutableId":null,"isCompromised":null,"jobTitle":null,"lastDirSyncTime":null,"legalAgeGroupClassification":null,"mail":null,"mailNickname":"admin2","mobile":null,"onPremisesDistinguishedName":null,"onPremisesSecurityIdentifier":null,"otherMails":["destanko@microsoft.com"],"passwordPolicies":"None","passwordProfile":null,"physicalDeliveryOfficeName":null,"postalCode":null,"preferredLanguage":"en-US","provisionedPlans":[],"provisioningErrors":[],"proxyAddresses":[],"refreshTokensValidFromDateTime":"2017-12-05T17:57:50Z","showInAddressList":null,"signInNames":[],"sipProxyAddress":null,"state":null,"streetAddress":null,"surname":"Admin2","telephoneNumber":null,"usageLocation":"US","userIdentities":[],"userPrincipalName":"admin2@AzureSDKTeam.onmicrosoft.com","userType":"Member"}'}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['1565']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Wed, 20 Dec 2017 07:25:43 GMT']
+      duration: ['637053']
+      expires: ['-1']
+      ocp-aad-diagnostics-server-name: [QOIMKIIdK/ceXUr9GAU3ThLEQHRhyDj1NpVX1Mv+k1o=]
+      ocp-aad-session-key: [4qXPE2OSuw6anadY5aNvn4ngSw2kFyE9oVX8erka9ItOq959TJ67SCw9upy9eIV81CaDebMcrvbHwMDtJdoAtKCZ909uIr3JXHfwwQ4In_ncUTB3g5GrnErA8FytxikP.0kpDHsbNfMLGADdQWnbWQYsqFodkQcKuM43F2c285oo]
+      pragma: [no-cache]
+      request-id: [84ea471d-178e-4cf7-87c7-f4848c1165b0]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"location": "westus", "properties": {"sku": {"name": "premium", "family":
+      "A"}, "tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "accessPolicies":
+      [{"tenantId": "54826b22-38d6-4fb2-bad9-b7b93a3e9c5a", "objectId": "5963f50c-7c43-405c-af7e-53294de76abd",
+      "permissions": {"secrets": ["get", "list", "set", "delete", "backup", "restore",
+      "recover"], "keys": ["get", "create", "delete", "list", "update", "import",
+      "backup", "restore", "recover"], "certificates": ["get", "list", "delete", "create",
+      "import", "update", "managecontacts", "getissuers", "listissuers", "setissuers",
+      "deleteissuers", "manageissuers", "recover"], "storage": ["get", "list", "delete",
+      "set", "update", "regeneratekey", "setsas", "listsas", "getsas", "deletesas"]}}]}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [keyvault create]
+      Connection: [keep-alive]
+      Content-Length: ['745']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultmanagementclient/0.40.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_issuer000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_kv_cert_issuer000001/providers/Microsoft.KeyVault/vaults/cli-test-keyvault-000002","name":"cli-test-keyvault-000002","type":"Microsoft.KeyVault/vaults","location":"westus","tags":{},"properties":{"sku":{"family":"A","name":"premium"},"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","accessPolicies":[{"tenantId":"54826b22-38d6-4fb2-bad9-b7b93a3e9c5a","objectId":"5963f50c-7c43-405c-af7e-53294de76abd","permissions":{"secrets":["get","list","set","delete","backup","restore","recover"],"keys":["get","create","delete","list","update","import","backup","restore","recover"],"certificates":["get","list","delete","create","import","update","managecontacts","getissuers","listissuers","setissuers","deleteissuers","manageissuers","recover"],"storage":["get","list","delete","set","update","regeneratekey","setsas","listsas","getsas","deletesas"]}}],"enabledForDeployment":false,"vaultUri":"https://cli-test-keyvault-000002.vault.azure.net"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1068']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:25:44 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-service-version: [1.0.0.197]
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/keys?api-version=2016-10-01
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Wed, 20 Dec 2017 07:25:54 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      www-authenticate: ['Bearer authorization="https://login.windows.net/54826b22-38d6-4fb2-bad9-b7b93a3e9c5a",
+          resource="https://vault.azure.net"']
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 401, message: Unauthorized}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/keys?api-version=2016-10-01
+  response:
+    body: {string: '{"value":null,"nextLink":null}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['30']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:25:57 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"org_details": {"admin_details": []}, "attributes": {"enabled": true},
+      "provider": "Test", "credentials": {}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['110']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{},"org_details":{"zip":0,"admin_details":[]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754759}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['236']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:25:59 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{},"org_details":{"zip":0,"admin_details":[]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754759}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['236']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:25:59 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{},"org_details":{"zip":0,"admin_details":[]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754759}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['236']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:00 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"org_details": {"id": "TestOrg", "admin_details": []}, "attributes": {"enabled":
+      true}, "provider": "Test", "credentials": {"account_id": "test_account"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['155']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{"account_id":"test_account"},"org_details":{"id":"TestOrg","zip":0,"admin_details":[]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754761}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['278']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:00 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/notexist?api-version=2016-10-01
+  response:
+    body: {string: '{"error":{"code":"CertificateIssuerNotFound","message":"Issuer
+        not found"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['75']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:02 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 404, message: Not Found}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{"account_id":"test_account"},"org_details":{"id":"TestOrg","zip":0,"admin_details":[]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754761}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['278']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:03 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"org_details": {"id": "TestOrg", "admin_details": []}, "attributes": {"enabled":
+      true}, "provider": "Test", "credentials": {}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['127']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{},"org_details":{"id":"TestOrg","zip":0,"admin_details":[]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754764}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['251']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:04 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers?api-version=2016-10-01
+  response:
+    body: {string: '{"value":[{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test"}],"nextLink":null}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['132']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:04 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{},"org_details":{"id":"TestOrg","zip":0,"admin_details":[]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754764}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['251']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:05 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"org_details": {"id": "TestOrg", "admin_details": [{"email": "test@test.com",
+      "first_name": "Test", "phone": "123-456-7890", "last_name": "Admin"}]}, "attributes":
+      {"enabled": true}, "provider": "Test", "credentials": {}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['222']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{},"org_details":{"id":"TestOrg","zip":0,"admin_details":[{"first_name":"Test","last_name":"Admin","email":"test@test.com","phone":"123-456-7890"}]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754766}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['339']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:06 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{},"org_details":{"id":"TestOrg","zip":0,"admin_details":[{"first_name":"Test","last_name":"Admin","email":"test@test.com","phone":"123-456-7890"}]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754766}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['339']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:06 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{},"org_details":{"id":"TestOrg","zip":0,"admin_details":[{"first_name":"Test","last_name":"Admin","email":"test@test.com","phone":"123-456-7890"}]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754766}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['339']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:07 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"org_details": {"id": "TestOrg", "admin_details": [{"email": "test@test.com",
+      "first_name": "Test", "phone": "123-456-7890", "last_name": "Admin"}, {"email":
+      "test2@test.com"}]}, "attributes": {"enabled": true}, "provider": "Test", "credentials":
+      {}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['251']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{},"org_details":{"id":"TestOrg","zip":0,"admin_details":[{"first_name":"Test","last_name":"Admin","email":"test@test.com","phone":"123-456-7890"},{"email":"test2@test.com"}]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754768}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['366']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:08 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{},"org_details":{"id":"TestOrg","zip":0,"admin_details":[{"first_name":"Test","last_name":"Admin","email":"test@test.com","phone":"123-456-7890"},{"email":"test2@test.com"}]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754768}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['366']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:08 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{},"org_details":{"id":"TestOrg","zip":0,"admin_details":[{"first_name":"Test","last_name":"Admin","email":"test@test.com","phone":"123-456-7890"},{"email":"test2@test.com"}]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754768}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['366']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:09 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"org_details": {"id": "TestOrg", "admin_details": [{"email": "test2@test.com"}]},
+      "attributes": {"enabled": true}, "provider": "Test", "credentials": {}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['154']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{},"org_details":{"id":"TestOrg","zip":0,"admin_details":[{"email":"test2@test.com"}]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754772}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['277']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:11 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{},"org_details":{"id":"TestOrg","zip":0,"admin_details":[{"email":"test2@test.com"}]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754772}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['277']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:12 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1?api-version=2016-10-01
+  response:
+    body: {string: '{"id":"https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers/issuer1","provider":"Test","credentials":{},"org_details":{"id":"TestOrg","zip":0,"admin_details":[{"email":"test2@test.com"}]},"attributes":{"enabled":true,"created":1513754759,"updated":1513754772}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['277']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:12 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 keyvaultclient/0.3.7 Azure-SDK-For-Python]
+      accept-language: [en-US]
+    method: GET
+    uri: https://cli-test-keyvault-000002.vault.azure.net/certificates/issuers?api-version=2016-10-01
+  response:
+    body: {string: '{"value":[],"nextLink":null}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['28']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 20 Dec 2017 07:26:14 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000;includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-keyvault-region: [westus]
+      x-ms-keyvault-service-version: [1.0.0.837]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_kv_cert_issuer000001?api-version=2017-05-10
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Wed, 20 Dec 2017 07:26:14 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGS1Y6NUZDRVJUOjVGSVNTVUVSUk43T003VEJMUk1YMzVXTHwyRjk0RUU0M0MzMTdEMTc0LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+    status: {code: 202, message: Accepted}
+version: 1

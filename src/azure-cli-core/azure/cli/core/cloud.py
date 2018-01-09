@@ -7,15 +7,16 @@ import os
 from pprint import pformat
 from six.moves import configparser
 
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core._config import \
-    (GLOBAL_CONFIG_DIR, GLOBAL_CONFIG_PATH, set_global_config_value, get_config_parser)
-from azure.cli.core.util import CLIError
+from knack.log import get_logger
+from knack.util import CLIError
+from knack.config import get_config_parser
+
 from azure.cli.core.profiles import API_PROFILES
+from azure.cli.core._config import GLOBAL_CONFIG_DIR
+
+logger = get_logger(__name__)
 
 CLOUD_CONFIG_FILE = os.path.join(GLOBAL_CONFIG_DIR, 'clouds.config')
-
-logger = azlogging.get_az_logger(__name__)
 
 
 class CloudNotRegisteredException(Exception):
@@ -219,30 +220,32 @@ AZURE_GERMAN_CLOUD = Cloud(
 KNOWN_CLOUDS = [AZURE_PUBLIC_CLOUD, AZURE_CHINA_CLOUD, AZURE_US_GOV_CLOUD, AZURE_GERMAN_CLOUD]
 
 
-def _set_active_cloud(cloud_name):
-    set_global_config_value('cloud', 'name', cloud_name)
+def _set_active_cloud(cli_ctx, cloud_name):
+    cli_ctx.config.set_value('cloud', 'name', cloud_name)
 
 
-def get_active_cloud_name():
-    global_config = get_config_parser()
-    global_config.read(GLOBAL_CONFIG_PATH)
+def get_active_cloud_name(cli_ctx):
     try:
-        return global_config.get('cloud', 'name')
+        return cli_ctx.config.config_parser.get('cloud', 'name')
     except (configparser.NoOptionError, configparser.NoSectionError):
-        _set_active_cloud(AZURE_PUBLIC_CLOUD.name)
+        _set_active_cloud(cli_ctx, AZURE_PUBLIC_CLOUD.name)
         return AZURE_PUBLIC_CLOUD.name
 
 
-def _get_cloud(cloud_name):
-    return next((x for x in get_clouds() if x.name == cloud_name), None)
+def _get_cloud(cli_ctx, cloud_name):
+    return next((x for x in get_clouds(cli_ctx) if x.name == cloud_name), None)
 
 
-def get_custom_clouds():
+def cloud_is_registered(cli_ctx, cloud_name):
+    return bool(_get_cloud(cli_ctx, cloud_name))
+
+
+def get_custom_clouds(cli_ctx):
     known_cloud_names = [c.name for c in KNOWN_CLOUDS]
-    return [c for c in get_clouds() if c.name not in known_cloud_names]
+    return [c for c in get_clouds(cli_ctx) if c.name not in known_cloud_names]
 
 
-def get_clouds():
+def get_clouds(cli_ctx):
     clouds = []
     config = get_config_parser()
     # Start off with known clouds and apply config file on top of current config
@@ -268,7 +271,7 @@ def get_clouds():
             # If management endpoint not set, use resource manager endpoint
             c.endpoints.management = c.endpoints.resource_manager
         clouds.append(c)
-    active_cloud_name = get_active_cloud_name()
+    active_cloud_name = get_active_cloud_name(cli_ctx)
     for c in clouds:
         if c.name == active_cloud_name:
             c.is_active = True
@@ -276,21 +279,24 @@ def get_clouds():
     return clouds
 
 
-def get_cloud(cloud_name):
-    cloud = _get_cloud(cloud_name)
+def get_cloud(cli_ctx, cloud_name):
+    cloud = _get_cloud(cli_ctx, cloud_name)
     if not cloud:
         raise CloudNotRegisteredException(cloud_name)
     return cloud
 
 
-def get_active_cloud():
+def get_active_cloud(cli_ctx=None):
+    if not cli_ctx:
+        from azure.cli.core import get_default_cli
+        cli_ctx = get_default_cli()
     try:
-        return get_cloud(get_active_cloud_name())
+        return get_cloud(cli_ctx, get_active_cloud_name(cli_ctx))
     except CloudNotRegisteredException as err:
         logger.warning(err)
         logger.warning("Resetting active cloud to'%s'.", AZURE_PUBLIC_CLOUD.name)
-        _set_active_cloud(AZURE_PUBLIC_CLOUD.name)
-        return get_cloud(AZURE_PUBLIC_CLOUD.name)
+        _set_active_cloud(cli_ctx, AZURE_PUBLIC_CLOUD.name)
+        return get_cloud(cli_ctx, AZURE_PUBLIC_CLOUD.name)
 
 
 def get_cloud_subscription(cloud_name):
@@ -302,8 +308,8 @@ def get_cloud_subscription(cloud_name):
         return None
 
 
-def set_cloud_subscription(cloud_name, subscription):
-    if not _get_cloud(cloud_name):
+def set_cloud_subscription(cli_ctx, cloud_name, subscription):
+    if not _get_cloud(cli_ctx, cloud_name):
         raise CloudNotRegisteredException(cloud_name)
     config = get_config_parser()
     config.read(CLOUD_CONFIG_FILE)
@@ -324,10 +330,10 @@ def set_cloud_subscription(cloud_name, subscription):
         config.write(configfile)
 
 
-def _set_active_subscription(cloud_name):
+def _set_active_subscription(cli_ctx, cloud_name):
     from azure.cli.core._profile import (Profile, _ENVIRONMENT_NAME, _SUBSCRIPTION_ID,
                                          _STATE, _SUBSCRIPTION_NAME)
-    profile = Profile()
+    profile = Profile(cli_ctx=cli_ctx)
     subscription_to_use = get_cloud_subscription(cloud_name) or \
                           next((s[_SUBSCRIPTION_ID] for s in profile.load_cached_subscriptions()  # noqa
                                 if s[_STATE] == 'Enabled'),
@@ -347,14 +353,14 @@ def _set_active_subscription(cloud_name):
         logger.warning("Use 'az account set' to set the active subscription.")
 
 
-def switch_active_cloud(cloud_name):
-    if get_active_cloud_name() == cloud_name:
+def switch_active_cloud(cli_ctx, cloud_name):
+    if cli_ctx.cloud.name == cloud_name:
         return
-    if not _get_cloud(cloud_name):
+    if not _get_cloud(cli_ctx, cloud_name):
         raise CloudNotRegisteredException(cloud_name)
-    _set_active_cloud(cloud_name)
+    _set_active_cloud(cli_ctx, cloud_name)
     logger.warning("Switched active cloud to '%s'.", cloud_name)
-    _set_active_subscription(cloud_name)
+    _set_active_subscription(cli_ctx, cloud_name)
 
 
 def _config_add_cloud(config, cloud, overwrite=False):
@@ -384,22 +390,22 @@ def _save_cloud(cloud, overwrite=False):
         config.write(configfile)
 
 
-def add_cloud(cloud):
-    if _get_cloud(cloud.name):
+def add_cloud(cli_ctx, cloud):
+    if _get_cloud(cli_ctx, cloud.name):
         raise CloudAlreadyRegisteredException(cloud.name)
     _save_cloud(cloud)
 
 
-def update_cloud(cloud):
-    if not _get_cloud(cloud.name):
+def update_cloud(cli_ctx, cloud):
+    if not _get_cloud(cli_ctx, cloud.name):
         raise CloudNotRegisteredException(cloud.name)
     _save_cloud(cloud, overwrite=True)
 
 
-def remove_cloud(cloud_name):
-    if not _get_cloud(cloud_name):
+def remove_cloud(cli_ctx, cloud_name):
+    if not _get_cloud(cli_ctx, cloud_name):
         raise CloudNotRegisteredException(cloud_name)
-    if cloud_name == get_active_cloud_name():
+    if cloud_name == cli_ctx.cloud.name:
         raise CannotUnregisterCloudException("The cloud '{}' cannot be unregistered "
                                              "as it's currently active.".format(cloud_name))
     is_known_cloud = next((x for x in KNOWN_CLOUDS if x.name == cloud_name), None)

@@ -23,6 +23,19 @@ from functools import wraps
 is_diagnostics_mode = False
 
 
+# pylint: disable=too-few-public-methods
+class Completer(object):
+
+    def __init__(self, func):
+        self.func = func
+
+    def __call__(self, **kwargs):
+        namespace = kwargs['parsed_args']
+        prefix = kwargs['prefix']
+        cmd = namespace._cmd  # pylint: disable=protected-access
+        return self.func(cmd, prefix, namespace)
+
+
 # internal functions
 
 def _should_raise(raise_in_diagnostics):
@@ -91,11 +104,4 @@ def suppress_all_exceptions(raise_in_diagnostics=False, fallback_return=None):
 
         return _wrapped_func
 
-    return _decorator
-
-
-def transfer_doc(source_func):
-    def _decorator(func):
-        func.__doc__ = source_func.__doc__
-        return func
     return _decorator

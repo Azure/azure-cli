@@ -6,9 +6,12 @@
 from __future__ import print_function
 import platform
 
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
+from knack.log import get_logger
+from knack.util import CLIError
+
 from azure.cli.core.commands.arm import resource_exists
+
+logger = get_logger(__name__)
 
 
 def get_folded_parameter_help_string(
@@ -44,7 +47,7 @@ def get_folded_parameter_help_string(
 
 
 def _validate_name_or_id(
-        resource_group_name, property_value, property_type, parent_value, parent_type):
+        cli_ctx, resource_group_name, property_value, property_type, parent_value, parent_type):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from msrestazure.tools import parse_resource_id, is_valid_resource_id
     has_parent = parent_type is not None
@@ -57,7 +60,7 @@ def _validate_name_or_id(
             resource_group=resource_group_name,
             namespace=parent_type.split('/')[0],
             type=parent_type.split('/')[1],
-            subscription=get_subscription_id(),
+            subscription=get_subscription_id(cli_ctx),
             child_name_1=property_value,
             child_type_1=property_type)
         value_supplied_was_id = False
@@ -67,7 +70,7 @@ def _validate_name_or_id(
             resource_group=resource_group_name,
             namespace=property_type.split('/')[0],
             type=property_type.split('/')[1],
-            subscription=get_subscription_id())
+            subscription=get_subscription_id(cli_ctx))
         value_supplied_was_id = False
     return (resource_id_parts, value_supplied_was_id)
 
@@ -101,22 +104,20 @@ def get_folded_parameter_validator(
             setattr(namespace, type_field_name, 'none')
             setattr(namespace, property_name, None)
             if parent_name and parent_val:
-                logger = azlogging.get_az_logger(__name__)
                 logger.warning('Ignoring: %s %s', parent_option, parent_val)
                 setattr(namespace, parent_name, None)
             return  # SUCCESS
 
         # Create a resource ID we can check for existence.
         (resource_id_parts, value_was_id) = _validate_name_or_id(
-            namespace.resource_group_name, property_val, property_type, parent_val, parent_type)
+            namespace.cmd.cli_ctx, namespace.resource_group_name, property_val, property_type, parent_val, parent_type)
 
         # 2) resource exists
-        if resource_exists(**resource_id_parts):
+        if resource_exists(namespace.cmd.cli_ctx, **resource_id_parts):
             setattr(namespace, type_field_name, 'existingId')
             setattr(namespace, property_name, resource_id(**resource_id_parts))
             if parent_val:
                 if value_was_id:
-                    logger = azlogging.get_az_logger(__name__)
                     logger.warning('Ignoring: %s %s', parent_option, parent_val)
                 setattr(namespace, parent_name, None)
             return  # SUCCESS

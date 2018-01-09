@@ -19,11 +19,14 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
                  parameter_name_for_location='resource_group_location', location='westus',
                  dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
                  dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION',
-                 random_name_length=75):
+                 random_name_length=75, key='rg'):
         super(ResourceGroupPreparer, self).__init__(name_prefix, random_name_length)
+        from azure.cli.testsdk import TestCli
+        self.cli_ctx = TestCli()
         self.location = location
         self.parameter_name = parameter_name
         self.parameter_name_for_location = parameter_name_for_location
+        self.key = key
 
         self.dev_setting_name = os.environ.get(dev_setting_name, None)
         self.dev_setting_location = os.environ.get(dev_setting_location, location)
@@ -34,27 +37,31 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
                     self.parameter_name_for_location: self.dev_setting_location}
 
         template = 'az group create --location {} --name {} --tag use=az-test'
-        execute(template.format(self.location, name))
+        execute(self.cli_ctx, template.format(self.location, name))
+        self.test_class_instance.kwargs[self.key] = name
         return {self.parameter_name: name, self.parameter_name_for_location: self.location}
 
     def remove_resource(self, name, **kwargs):
         if not self.dev_setting_name:
-            execute('az group delete --name {} --yes --no-wait'.format(name))
+            execute(self.cli_ctx, 'az group delete --name {} --yes --no-wait'.format(name))
 
 
 # Storage Account Preparer and its shorthand decorator
 
+# pylint: disable=too-many-instance-attributes
 class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest', sku='Standard_LRS', location='westus', parameter_name='storage_account',
                  resource_group_parameter_name='resource_group', skip_delete=True,
-                 dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME'):
+                 dev_setting_name='AZURE_CLI_TEST_DEV_STORAGE_ACCOUNT_NAME', key='sa'):
         super(StorageAccountPreparer, self).__init__(name_prefix, 24)
+        from azure.cli.testsdk import TestCli
+        self.cli_ctx = TestCli()
         self.location = location
         self.sku = sku
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
         self.parameter_name = parameter_name
-
+        self.key = key
         self.dev_setting_name = os.environ.get(dev_setting_name, None)
 
     def create_resource(self, name, **kwargs):
@@ -62,18 +69,19 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
 
         if not self.dev_setting_name:
             template = 'az storage account create -n {} -g {} -l {} --sku {}'
-            execute(template.format(name, group, self.location, self.sku))
+            execute(self.cli_ctx, template.format(name, group, self.location, self.sku))
         else:
             name = self.dev_setting_name
 
-        account_key = execute('storage account keys list -n {} -g {} --query "[0].value" -otsv'
+        account_key = execute(self.cli_ctx, 'storage account keys list -n {} -g {} --query "[0].value" -otsv'
                               .format(name, group)).output
+        self.test_class_instance.kwargs[self.key] = name
         return {self.parameter_name: name, self.parameter_name + '_info': (name, account_key)}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete and not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
-            execute('az storage account delete -n {} -g {} --yes'.format(name, group))
+            execute(self.cli_ctx, 'az storage account delete -n {} -g {} --yes'.format(name, group))
 
     def _get_resource_group(self, **kwargs):
         try:
@@ -86,32 +94,36 @@ class StorageAccountPreparer(AbstractPreparer, SingleValueReplacer):
 
 # KeyVault Preparer and its shorthand decorator
 
+# pylint: disable=too-many-instance-attributes
 class KeyVaultPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest', sku='standard', location='westus', parameter_name='key_vault',
                  resource_group_parameter_name='resource_group', skip_delete=True,
-                 dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME'):
+                 dev_setting_name='AZURE_CLI_TEST_DEV_KEY_VAULT_NAME', key='kv'):
         super(KeyVaultPreparer, self).__init__(name_prefix, 24)
+        from azure.cli.testsdk import TestCli
+        self.cli_ctx = TestCli()
         self.location = location
         self.sku = sku
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
         self.parameter_name = parameter_name
-
+        self.key = key
         self.dev_setting_name = os.environ.get(dev_setting_name, None)
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
             template = 'az keyvault create -n {} -g {} -l {} --sku {}'
-            execute(template.format(name, group, self.location, self.sku))
+            execute(self.cli_ctx, template.format(name, group, self.location, self.sku))
             return {self.parameter_name: name}
 
+        self.test_class_instance.kwargs[self.key] = name
         return {self.parameter_name: self.dev_setting_name}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete and not self.dev_setting_name:
             group = self._get_resource_group(**kwargs)
-            execute('az keyvault delete -n {} -g {} --yes'.format(name, group))
+            execute(self.cli_ctx, 'az keyvault delete -n {} -g {} --yes'.format(name, group))
 
     def _get_resource_group(self, **kwargs):
         try:
@@ -124,32 +136,39 @@ class KeyVaultPreparer(AbstractPreparer, SingleValueReplacer):
 
 # Role based access control service principal preparer
 
+# pylint: disable=too-many-instance-attributes
 class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='http://clitest',
                  skip_assignment=True, parameter_name='sp_name', parameter_password='sp_password',
                  dev_setting_sp_name='AZURE_CLI_TEST_DEV_SP_NAME',
-                 dev_setting_sp_password='AZURE_CLI_TEST_DEV_SP_PASSWORD'):
+                 dev_setting_sp_password='AZURE_CLI_TEST_DEV_SP_PASSWORD', key='sp'):
         super(RoleBasedServicePrincipalPreparer, self).__init__(name_prefix, 24)
+        from azure.cli.testsdk import TestCli
+        self.cli_ctx = TestCli()
         self.skip_assignment = skip_assignment
         self.result = {}
         self.parameter_name = parameter_name
         self.parameter_password = parameter_password
         self.dev_setting_sp_name = os.environ.get(dev_setting_sp_name, None)
         self.dev_setting_sp_password = os.environ.get(dev_setting_sp_password, None)
+        self.key = key
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_sp_name:
             command = 'az ad sp create-for-rbac -n {}{}' \
                 .format(name, ' --skip-assignment' if self.skip_assignment else '')
-            self.result = execute(command).get_output_in_json()
+            self.result = execute(self.cli_ctx, command).get_output_in_json()
+            self.test_class_instance.kwargs[self.key] = name
+            self.test_class_instance.kwargs['{}_pass'.format(self.key)] = self.parameter_password
             return {self.parameter_name: name, self.parameter_password: self.result['password']}
-
+        self.test_class_instance.kwargs[self.key] = self.dev_setting_sp_name
+        self.test_class_instance.kwargs['{}_pass'.format(self.key)] = self.dev_setting_sp_password
         return {self.parameter_name: self.dev_setting_sp_name,
                 self.parameter_password: self.dev_setting_sp_password}
 
     def remove_resource(self, name, **kwargs):
         if not self.dev_setting_sp_name:
-            execute('az ad sp delete --id {}'.format(self.result['appId']))
+            execute(self.cli_ctx, 'az ad sp delete --id {}'.format(self.result['appId']))
 
 
 # Utility

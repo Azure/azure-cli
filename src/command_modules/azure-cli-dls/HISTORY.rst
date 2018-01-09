@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+0.0.19
+++++++
+* Update for CLI core changes.
+
 0.0.18
 ++++++
 * Change the return type of the account list command: a list of DataLakeStoreAccount to a list of DataLakeStoreAccountBasic

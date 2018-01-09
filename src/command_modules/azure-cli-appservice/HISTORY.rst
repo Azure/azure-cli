@@ -2,10 +2,21 @@
 
 Release History
 ===============
+
+0.1.24
+++++++
+* `webapp config ssl upload`: fix a bug where the hosting_environment_profile was null
+
+0.1.23
+++++++
+* Minor fixes.
+
 0.1.22
 ++++++
 * `appservice/webapp/functionapp docs/samples`: new commands to open docs and cli samples
 * `webapp/functionapp deployment source config-zip -h`: updating help for enabling build
+* Minor fixes.
+* `webapp config ssl upload`: fix a bug where the hosting_environment_profile was null
 
 0.1.21
 ++++++

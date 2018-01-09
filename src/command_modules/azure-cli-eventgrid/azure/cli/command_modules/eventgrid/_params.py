@@ -5,52 +5,64 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.core.commands import register_cli_argument, CliArgumentType
+from knack.arguments import CLIArgumentType
 
 from azure.cli.core.commands.parameters import (
     resource_group_name_type,
-    location_type,
-    enum_choice_list,
-    three_state_flag,
+    get_resource_name_completion_list,
+    get_three_state_flag,
+    get_location_type,
+    get_enum_type,
     tags_type,
     name_type
 )
 
-included_event_types_type = CliArgumentType(
+included_event_types_type = CLIArgumentType(
     help="A space separated list of event types. To subscribe to all event types, the string \"All\" should be specified.",
     nargs='+'
 )
 
-labels_type = CliArgumentType(
+labels_type = CLIArgumentType(
     help="A space separated list of labels to associate with this event subscription.",
     nargs='+'
 )
 
-register_cli_argument('eventgrid', 'resource_group_name', resource_group_name_type)
-register_cli_argument('eventgrid', 'location', location_type)
-register_cli_argument('eventgrid', 'tags', tags_type, help="Space separated tags in 'key[=value]' format.")
 
-register_cli_argument('eventgrid', 'endpoint', help="Endpoint where EventGrid should deliver events matching this event subscription. For webhook endpoint type, this should be the corresponding webhook URL. For eventhub endpoint type, this should be the Azure ResourceID of the event hub.")
-register_cli_argument('eventgrid', 'event_subscription_name', help="Name of the event subscription.")
-register_cli_argument('eventgrid', 'subject_begins_with', help="An optional string to filter events for an event subscription based on a prefix. Wildcard characters are not supported.")
-register_cli_argument('eventgrid', 'subject_ends_with', help="An optional string to filter events for an event subscription based on a suffix. Wildcard characters are not supported.")
-register_cli_argument('eventgrid', 'topic_type_name', help="Name of the topic type.")
+def load_arguments(self, _):
+    with self.argument_context('eventgrid') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
+        c.argument('tags', arg_type=tags_type)
+        c.argument('included_event_types', arg_type=included_event_types_type)
+        c.argument('labels', arg_type=labels_type)
+        c.argument('endpoint_type', arg_type=get_enum_type(['webhook', 'eventhub'], default='webhook'))
+        c.argument('resource_id', help="Fully qualified identifier of the Azure resource.")
+        c.argument('endpoint', help="Endpoint where EventGrid should deliver events matching this event subscription. For webhook endpoint type, this should be the corresponding webhook URL. For eventhub endpoint type, this should be the Azure ResourceID of the event hub.")
+        c.argument('event_subscription_name', help="Name of the event subscription.")
+        c.argument('subject_begins_with', help="An optional string to filter events for an event subscription based on a prefix. Wildcard characters are not supported.")
+        c.argument('subject_ends_with', help="An optional string to filter events for an event subscription based on a suffix. Wildcard characters are not supported.")
+        c.argument('topic_type_name', help="Name of the topic type.")
+        c.argument('is_subject_case_sensitive', arg_type=get_three_state_flag(), options_list=['--subject-case-sensitive'], help="Specify to indicate whether the subject fields should be compared in a case sensitive manner. True if flag present.", )
 
+    with self.argument_context('eventgrid topic') as c:
+        c.argument('topic_name', arg_type=name_type, help='Name of the topic', id_part='name', completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
 
-register_cli_argument('eventgrid topic', 'topic_name', arg_type=name_type, help='Name of the topic', id_part="name")
-register_cli_argument('eventgrid topic event-subscription', 'topic_name', options_list=['--topic-name'])
-register_cli_argument('eventgrid topic event-subscription', 'event_subscription_name', name_type, help='Name of the event subscription')
-register_cli_argument('eventgrid event-subscription', 'event_subscription_name', name_type, help='Name of the event subscription')
-register_cli_argument('eventgrid resource event-subscription', 'event_subscription_name', name_type, help='Name of the event subscription')
+    with self.argument_context('eventgrid event-subscription') as c:
+        c.argument('topic_name', help='Name of the Event Grid topic', options_list=['--topic-name'], completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
+        c.argument('event_subscription_name', arg_type=name_type, help='Name of the event subscription')
 
-register_cli_argument('eventgrid', 'is_subject_case_sensitive', options_list=['--subject-case-sensitive'], help="Specify to indicate whether the subject fields should be compared in a case sensitive manner. True if flag present.", **three_state_flag())
+    with self.argument_context('eventgrid event-subscription create') as c:
+        c.argument('topic_name', help='Name of the Event Grid topic to which the event subscription needs to be created.', options_list=['--topic-name'], completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
+        c.argument('event_subscription_name', arg_type=name_type, help='Name of the new event subscription')
+        c.argument('resource_id', help="Fully qualified identifier of the Azure resource to which the event subscription needs to be created.")
 
-register_cli_argument('eventgrid', 'included_event_types', included_event_types_type)
-register_cli_argument('eventgrid', 'labels', labels_type)
-register_cli_argument('eventgrid', 'endpoint_type', **enum_choice_list(['webhook', 'eventhub']))
+    with self.argument_context('eventgrid event-subscription delete') as c:
+        c.argument('topic_name', help='Name of the Event Grid topic whose event subscription needs to be deleted.', options_list=['--topic-name'], completer=get_resource_name_completion_list('Microsoft.EventGrid/topics'))
+        c.argument('event_subscription_name', arg_type=name_type, help='Name of the event subscription')
+        c.argument('resource_id', help="Fully qualified identifier of the Azure resource whose event subscription needs to be deleted.")
 
-register_cli_argument('eventgrid', 'provider_namespace', help="Namespace of the provider owning the resource.")
-register_cli_argument('eventgrid', 'resource_type', help="Type of the resource.")
-register_cli_argument('eventgrid', 'resource_name', help="Name of the resource whose event subscription needs to be managed.")
+    with self.argument_context('eventgrid event-subscription show') as c:
+        c.argument('include_full_endpoint_url', arg_type=get_three_state_flag(), options_list=['--include-full-endpoint-url'], help="Specify to indicate whether the full endpoint URL should be returned. True if flag present.", )
 
-register_cli_argument('eventgrid topic-type', 'topic_type_name', name_type)
+    with self.argument_context('eventgrid topic-type') as c:
+        c.argument('topic_type_name', arg_type=name_type, help="Name of the topic type.", completer=get_resource_name_completion_list('Microsoft.EventGrid/topictypes'))

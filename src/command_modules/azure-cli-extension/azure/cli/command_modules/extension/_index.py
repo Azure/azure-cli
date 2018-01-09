@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 import requests
 
-from azure.cli.core.util import CLIError
-import azure.cli.core.azlogging as azlogging
+from knack.log import get_logger
+from knack.util import CLIError
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 DEFAULT_INDEX_URL = "https://aka.ms/azure-cli-extension-index-v1"
 
@@ -19,6 +19,7 @@ ERR_TMPL_BAD_JSON = '{}Response body does not contain valid json. Error detail: 
 ERR_UNABLE_TO_GET_EXTENSIONS = 'Unable to get extensions from index. Improper index format.'
 
 
+# pylint: disable=inconsistent-return-statements
 def get_index(index_url=None):
     index_url = index_url or DEFAULT_INDEX_URL
     try:

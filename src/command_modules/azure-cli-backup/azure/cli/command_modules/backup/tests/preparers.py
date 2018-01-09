@@ -18,6 +18,8 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group',
                  dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ACCT_NAME'):
         super(VaultPreparer, self).__init__(name_prefix, 24)
+        from azure.cli.testsdk import TestCli
+        self.cli_ctx = TestCli()
         self.parameter_name = parameter_name
         self.resource_group = None
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -31,7 +33,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
             self.location = self._get_resource_group_location(**kwargs)
             cmd = 'az backup vault create -n {} -g {} --location {}'.format(name, self.resource_group, self.location)
 
-            execute(cmd)
+            execute(self.cli_ctx, cmd)
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
@@ -57,17 +59,17 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):
             raise CliTestError(template.format(ResourceGroupPreparer.__name__,
                                                self.resource_group_parameter_name))
 
-    @staticmethod
-    def _cleanup(vault_name, resource_group):
-        containers = execute('az backup container list -v {} -g {} --query [].properties.friendlyName'
+    def _cleanup(self, vault_name, resource_group):
+        containers = execute(self.cli_ctx, 'az backup container list -v {} -g {} --query [].properties.friendlyName'
                              .format(vault_name, resource_group)).get_output_in_json()
         for container in containers:
-            items = execute('az backup item list -g {} -v {} -c {} --query [].properties.friendlyName'
+            items = execute(self.cli_ctx, 'az backup item list -g {} -v {} -c {} --query [].properties.friendlyName'
                             .format(resource_group, vault_name, container)).get_output_in_json()
             for item in items:
-                execute('az backup protection disable -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
+                execute(self.cli_ctx,
+                        'az backup protection disable -g {} -v {} -c {} -i {} --delete-backup-data true --yes'
                         .format(resource_group, vault_name, container, item))
-        execute('az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
+        execute(self.cli_ctx, 'az backup vault delete -n {} -g {} --yes'.format(vault_name, resource_group))
 
 
 class VMPreparer(AbstractPreparer, SingleValueReplacer):
@@ -75,6 +77,8 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_location_parameter_name='resource_group_location',
                  resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_VM_NAME'):
         super(VMPreparer, self).__init__(name_prefix, 15)
+        from azure.cli.testsdk import TestCli
+        self.cli_ctx = TestCli()
         self.parameter_name = parameter_name
         self.resource_group = None
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -87,7 +91,7 @@ class VMPreparer(AbstractPreparer, SingleValueReplacer):
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
             cmd = 'az vm create -n {} -g {} --image Win2012R2Datacenter --admin-password %j^VYw9Q3Z@Cu$*h'
-            execute(cmd.format(name, self.resource_group))
+            execute(self.cli_ctx, cmd.format(name, self.resource_group))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
@@ -120,6 +124,8 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group',
                  dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ITEM_NAME'):
         super(ItemPreparer, self).__init__(name_prefix, 24)
+        from azure.cli.testsdk import TestCli
+        self.cli_ctx = TestCli()
         self.parameter_name = parameter_name
         self.vm_parameter_name = vm_parameter_name
         self.resource_group = None
@@ -135,7 +141,7 @@ class ItemPreparer(AbstractPreparer, SingleValueReplacer):
 
             params_format = '-g {} -v {} --vm {} -p DefaultPolicy'
             param_string = params_format.format(self.resource_group, vault, vm)
-            execute('az backup protection enable-for-vm {}'.format(param_string))
+            execute(self.cli_ctx, 'az backup protection enable-for-vm {}'.format(param_string))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
@@ -176,6 +182,8 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
                  resource_group_parameter_name='resource_group',
                  dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_POLICY_NAME'):
         super(PolicyPreparer, self).__init__(name_prefix, 24)
+        from azure.cli.testsdk import TestCli
+        self.cli_ctx = TestCli()
         self.parameter_name = parameter_name
         self.resource_group = None
         self.resource_group_parameter_name = resource_group_parameter_name
@@ -188,13 +196,14 @@ class PolicyPreparer(AbstractPreparer, SingleValueReplacer):
             self.resource_group = self._get_resource_group(**kwargs)
             self.vault = self._get_vault(**kwargs)
 
-            policy_json = execute('az backup policy show -g {} -v {} -n {}'
+            policy_json = execute(self.cli_ctx, 'az backup policy show -g {} -v {} -n {}'
                                   .format(self.resource_group, self.vault, 'DefaultPolicy')).get_output_in_json()
             policy_json['name'] = name
             policy_json = json.dumps(policy_json)
 
-            execute('az backup policy set -g {} -v {} --policy \'{}\''.format(self.resource_group, self.vault,
-                                                                              policy_json))
+            execute(self.cli_ctx, 'az backup policy set -g {} -v {} --policy \'{}\''.format(self.resource_group,
+                                                                                            self.vault,
+                                                                                            policy_json))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 
@@ -226,6 +235,8 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
                  vault_parameter_name='vault_name',
                  resource_group_parameter_name='resource_group', dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_RP_NAME'):
         super(RPPreparer, self).__init__(name_prefix, 24)
+        from azure.cli.testsdk import TestCli
+        self.cli_ctx = TestCli()
         self.parameter_name = parameter_name
         self.vm_parameter_name = vm_parameter_name
         self.resource_group = None
@@ -243,8 +254,8 @@ class RPPreparer(AbstractPreparer, SingleValueReplacer):
             command_string = 'az backup protection backup-now -g {} -v {} -c {} -i {} --retain-until {} --query name'
             command_string = command_string.format(self.resource_group, vault, vm, vm,
                                                    retain_date.strftime('%d-%m-%Y'))
-            backup_job = execute(command_string).get_output_in_json()
-            execute('az backup job wait -g {} -v {} -n {}'.format(self.resource_group, vault, backup_job))
+            backup_job = execute(self.cli_ctx, command_string).get_output_in_json()
+            execute(self.cli_ctx, 'az backup job wait -g {} -v {} -n {}'.format(self.resource_group, vault, backup_job))
             return {self.parameter_name: name}
         return {self.parameter_name: self.dev_setting_value}
 

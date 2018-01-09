@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
+from knack.log import get_logger
+
 from azure.cli.core.commands import LongRunningOperation
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
 
 from azure.mgmt.containerregistry.v2017_10_01.models import (
     RegistryUpdateParameters,
@@ -14,7 +15,6 @@ from azure.mgmt.containerregistry.v2017_10_01.models import (
     Sku
 )
 
-from ._factory import get_acr_service_client
 from ._constants import MANAGED_REGISTRY_SKU
 from ._utils import (
     arm_deploy_template_new_storage,
@@ -29,65 +29,45 @@ from ._utils import (
 )
 from ._docker_utils import get_login_credentials
 
+logger = get_logger(__name__)
 
-logger = azlogging.get_az_logger(__name__)
 
-
-def acr_check_name(registry_name):
-    """Checks whether the container registry name is available for use.
-    :param str registry_name: The name of container registry
-    """
-    client = get_acr_service_client().registries
-
+def acr_check_name(client, registry_name):
     return client.check_name_availability(registry_name)
 
 
-def acr_list(resource_group_name=None):
-    """Lists all the container registries under the current subscription.
-    :param str resource_group_name: The name of resource group
-    """
-    client = get_acr_service_client().registries
-
+def acr_list(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
-
     return client.list()
 
 
-def acr_create(registry_name,
+def acr_create(cmd,
+               client,
+               registry_name,
                resource_group_name,
                sku,
                location=None,
                storage_account_name=None,
                admin_enabled='false',
                deployment_name=None):
-    """Creates a container registry.
-    :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
-    :param str sku: The SKU of the container registry
-    :param str location: The name of location
-    :param str storage_account_name: The name of storage account
-    :param str admin_enabled: Indicates whether the admin user is enabled
-    :param str deployment_name: The name of the deployment
-    """
     if sku == SkuName.basic.value and storage_account_name:
         raise CLIError("Please specify '--sku Basic' without providing an existing storage account "
                        "to create a managed registry, or specify '--sku Classic --storage-account-name {}' "
                        "to create a Classic registry using storage account `{}`."
                        .format(storage_account_name, storage_account_name))
-
-    client = get_acr_service_client().registries
     admin_user_enabled = admin_enabled == 'true'
 
     if sku == SkuName.classic.value:
         if storage_account_name is None:
-            storage_account_name = random_storage_account_name(registry_name)
+            storage_account_name = random_storage_account_name(cmd.cli_ctx, registry_name)
             logger.warning(
                 "A new storage account '%s' will be created in resource group '%s'.",
                 storage_account_name,
                 resource_group_name)
-            LongRunningOperation()(
+            LongRunningOperation(cmd.cli_ctx)(
                 arm_deploy_template_new_storage(
+                    cmd.cli_ctx,
                     resource_group_name,
                     registry_name,
                     location,
@@ -97,8 +77,9 @@ def acr_create(registry_name,
                     deployment_name)
             )
         else:
-            LongRunningOperation()(
+            LongRunningOperation(cmd.cli_ctx)(
                 arm_deploy_template_existing_storage(
+                    cmd.cli_ctx,
                     resource_group_name,
                     registry_name,
                     location,
@@ -112,8 +93,9 @@ def acr_create(registry_name,
             logger.warning(
                 "The registry '%s' in '%s' SKU is a managed registry. The specified storage account will be ignored.",
                 registry_name, sku)
-        LongRunningOperation()(
+        LongRunningOperation(cmd.cli_ctx)(
             arm_deploy_template_managed_storage(
+                cmd.cli_ctx,
                 resource_group_name,
                 registry_name,
                 location,
@@ -135,31 +117,18 @@ def acr_create(registry_name,
     return registry
 
 
-def acr_delete(registry_name, resource_group_name=None):
-    """Deletes a container registry.
-    :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
-    """
-    resource_group_name = get_resource_group_name_by_registry_name(
-        registry_name, resource_group_name)
-    client = get_acr_service_client().registries
-
+def acr_delete(cmd, client, registry_name, resource_group_name=None):
+    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
     return client.delete(resource_group_name, registry_name)
 
 
-def acr_show(registry_name, resource_group_name=None):
-    """Gets the properties of the specified container registry.
-    :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
-    """
-    resource_group_name = get_resource_group_name_by_registry_name(
-        registry_name, resource_group_name)
-    client = get_acr_service_client().registries
-
+def acr_show(cmd, client, registry_name, resource_group_name=None):
+    resource_group_name = get_resource_group_name_by_registry_name(cmd.cli_ctx, registry_name, resource_group_name)
     return client.get(resource_group_name, registry_name)
 
 
-def acr_update_custom(instance,
+def acr_update_custom(cmd,
+                      instance,
                       sku=None,
                       storage_account_name=None,
                       admin_enabled=None,
@@ -169,7 +138,7 @@ def acr_update_custom(instance,
 
     if storage_account_name is not None:
         instance.storage_account = StorageAccountProperties(
-            get_resource_id_by_storage_account_name(storage_account_name))
+            get_resource_id_by_storage_account_name(cmd.cli_ctx, storage_account_name))
 
     if admin_enabled is not None:
         instance.admin_user_enabled = admin_enabled == 'true'
@@ -180,22 +149,16 @@ def acr_update_custom(instance,
     return instance
 
 
-def acr_update_get(client):  # pylint: disable=unused-argument
-    """Returns an empty RegistryUpdateParameters object.
-    """
+def acr_update_get():
     return RegistryUpdateParameters()
 
 
-def acr_update_set(client,
+def acr_update_set(cmd,
+                   client,
                    registry_name,
                    resource_group_name=None,
                    parameters=None):
-    """Sets the properties of the specified container registry.
-    :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
-    :param RegistryUpdateParameters parameters: The registry update parameters object
-    """
-    registry, resource_group_name = get_registry_by_name(registry_name, resource_group_name)
+    registry, resource_group_name = get_registry_by_name(cmd.cli_ctx, registry_name, resource_group_name)
 
     validate_sku_update(registry.sku.name, parameters.sku)
 
@@ -208,13 +171,7 @@ def acr_update_set(client,
     return client.update(resource_group_name, registry_name, parameters)
 
 
-def acr_login(registry_name, resource_group_name=None, username=None, password=None):
-    """Login to a container registry through Docker.
-    :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
-    :param str username: The username used to log into the container registry
-    :param str password: The password used to log into the container registry
-    """
+def acr_login(cmd, registry_name, resource_group_name=None, username=None, password=None):
     from subprocess import PIPE, Popen, CalledProcessError
     docker_not_installed = "Please verify if docker is installed."
     docker_not_available = "Please verify if docker daemon is running properly."
@@ -231,6 +188,7 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
         raise CLIError(docker_not_available)
 
     login_server, username, password = get_login_credentials(
+        cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         username=username,
@@ -261,13 +219,9 @@ def acr_login(registry_name, resource_group_name=None, username=None, password=N
         p.wait()
 
 
-def acr_show_usage(registry_name, resource_group_name=None):
-    """Gets the quota usages for the specified container registry.
-    :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
-    """
-    _, resource_group_name = validate_managed_registry(
-        registry_name, resource_group_name, "Usage is only supported for managed registries.")
-    client = get_acr_service_client().registries
-
+def acr_show_usage(cmd, client, registry_name, resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(cmd.cli_ctx,
+                                                       registry_name,
+                                                       resource_group_name,
+                                                       "Usage is only supported for managed registries.")
     return client.list_usages(resource_group_name, registry_name)

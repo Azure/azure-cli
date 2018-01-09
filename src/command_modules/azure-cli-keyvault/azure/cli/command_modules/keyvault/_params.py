@@ -5,68 +5,24 @@
 
 from argcomplete.completers import FilesCompleter
 
-from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
-    (SkuName, KeyPermissions, SecretPermissions, CertificatePermissions)
-from azure.cli.core.commands import \
-    (register_cli_argument, register_extra_cli_argument, CliArgumentType)
+from knack.arguments import CLIArgumentType
+
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (
-    get_resource_name_completion_list, resource_group_name_type,
-    tags_type, ignore_type, enum_choice_list, file_type, three_state_flag)
-from azure.cli.core._profile import Profile
+    get_resource_name_completion_list, resource_group_name_type, tags_type, file_type, get_three_state_flag,
+    get_enum_type)
 from azure.cli.core.util import get_json_object
-from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
 
-from azure.keyvault.models import JsonWebKeyOperation
-from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes
-from azure.cli.command_modules.keyvault._validators import \
-    (datetime_type, certificate_type,
-     get_attribute_validator,
-     vault_base_url_type, validate_key_import_source,
-     validate_key_type, validate_policy_permissions,
-     validate_principal, validate_resource_group_name,
-     validate_x509_certificate_chain,
-     process_certificate_cancel_namespace,
-     process_secret_set_namespace,
-     secret_text_encoding_values, secret_binary_encoding_values)
-
-
-# COMPLETERS
-
-def _get_token(server, resource, scope):  # pylint: disable=unused-argument
-    return Profile().get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
-
-
-def get_keyvault_name_completion_list(resource_name):
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = KeyVaultClient(
-            KeyVaultAuthentication(_get_token))
-        func_name = 'get_{}s'.format(resource_name)
-        vault = parsed_args.vault_base_url
-        items = []
-        for y in list(getattr(client, func_name)(vault)):
-            id_val = getattr(y, 'id', None) or getattr(y, 'kid', None)
-            items.append(id_val.rsplit('/', 1)[1])
-        return items
-
-    return completer
-
-
-def get_keyvault_version_completion_list(resource_name):
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = KeyVaultClient(
-            KeyVaultAuthentication(_get_token))
-        func_name = 'get_{}_versions'.format(resource_name)
-        vault = parsed_args.vault_base_url
-        name = getattr(parsed_args, '{}_name'.format(resource_name))
-        items = []
-        for y in list(getattr(client, func_name)(vault, name)):
-            id_val = getattr(y, 'id', None) or getattr(y, 'kid', None)
-            items.append(id_val.rsplit('/', 1)[1])
-        return items
-
-    return completer
+from azure.cli.command_modules.keyvault._completers import (
+    get_keyvault_name_completion_list, get_keyvault_version_completion_list)
+from azure.cli.command_modules.keyvault._validators import (
+    datetime_type, certificate_type,
+    get_vault_base_url_type, validate_key_import_source,
+    validate_key_type, validate_policy_permissions,
+    validate_principal, validate_resource_group_name,
+    validate_x509_certificate_chain,
+    secret_text_encoding_values, secret_binary_encoding_values)
 
 
 # CUSTOM CHOICE LISTS
@@ -75,256 +31,165 @@ secret_encoding_values = secret_text_encoding_values + secret_binary_encoding_va
 certificate_format_values = ['PEM', 'DER']
 
 
-# KEY ATTRIBUTE PARAMETER REGISTRATION
+# pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
+def load_arguments(self, _):
+    from azure.keyvault.models import JsonWebKeyOperation
+    from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes
+    from azure.mgmt.keyvault.models.key_vault_management_client_enums import (
+        SkuName, KeyPermissions, SecretPermissions, CertificatePermissions)
 
-def register_attributes_argument(scope, name, attr_class, create=False, ignore=None):
-    ignore = ignore or []
-    register_cli_argument(scope, '{}_attributes'.format(name), ignore_type,
-                          validator=get_attribute_validator(name, attr_class, create))
-    if create:
-        register_extra_cli_argument(scope, 'disabled',
-                                    help='Create {} in disabled state.'.format(name),
-                                    **three_state_flag())
-    else:
-        register_extra_cli_argument(scope, 'enabled', help='Enable the {}.'.format(name),
-                                    **three_state_flag())
-    if 'expires' not in ignore:
-        register_extra_cli_argument(scope, 'expires', default=None,
-                                    help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').',
-                                    type=datetime_type)
-    if 'not_before' not in ignore:
-        register_extra_cli_argument(scope, 'not_before', default=None,
-                                    help='Key not usable before the provided UTC datetime  '
-                                         '(Y-m-d\'T\'H:M:S\'Z\').',
-                                    type=datetime_type)
+    # ARGUMENT DEFINITIONS
+    vault_name_type = CLIArgumentType(
+        help='Name of the key vault.', options_list=['--vault-name'], metavar='NAME', id_part=None,
+        completer=get_resource_name_completion_list('Microsoft.KeyVault/vaults'))
 
+    # region vault (management)
+    with self.argument_context('keyvault') as c:
+        c.argument('resource_group_name', resource_group_name_type, id_part=None, required=False, help='Proceed only if Key Vault belongs to the specified resource group.', validator=validate_resource_group_name)
+        c.argument('vault_name', vault_name_type, options_list=['--name', '-n'])
+        c.argument('object_id', help='a GUID that identifies the principal that will receive permissions')
+        c.argument('spn', help='name of a service principal that will receive permissions')
+        c.argument('upn', help='name of a user principal that will receive permissions')
+        c.argument('tags', tags_type)
+        c.argument('enabled_for_deployment', arg_type=get_three_state_flag(), help='Allow Virtual Machines to retrieve certificates stored as secrets from the vault.')
+        c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag(), help='Allow Disk Encryption to retrieve secrets from the vault and unwrap keys.')
+        c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag(), help='Allow Resource Manager to retrieve secrets from the vault.')
+        c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help='Enable vault deletion recovery for the vault, and all contained entities')
 
-# ARGUMENT DEFINITIONS
+    with self.argument_context('keyvault create') as c:
+        c.argument('resource_group_name', resource_group_name_type, required=True, completer=None, validator=None)
+        c.argument('vault_name', completer=None)
+        c.argument('sku', arg_type=get_enum_type(SkuName))
+        c.argument('no_self_perms', arg_type=get_three_state_flag(), help="Don't add permissions for the current user/service principal in the new vault.")
+        c.argument('location', validator=get_default_location_from_resource_group)
 
-vault_name_type = CliArgumentType(help='Name of the key vault.',
-                                  options_list=('--vault-name',),
-                                  metavar='NAME',
-                                  completer=get_resource_name_completion_list(
-                                      'Microsoft.KeyVault/vaults'),
-                                  id_part=None)
+    with self.argument_context('keyvault list') as c:
+        c.argument('resource_group_name', resource_group_name_type, validator=None)
 
-# PARAMETER REGISTRATIONS
+    with self.argument_context('keyvault delete-policy') as c:
+        c.argument('object_id', validator=validate_principal)
 
-register_cli_argument('keyvault', 'resource_group_name', resource_group_name_type, id_part=None,
-                      required=False,
-                      help='Proceed only if Key Vault belongs to the specified resource group.',
-                      validator=validate_resource_group_name)
-register_cli_argument('keyvault', 'vault_name', vault_name_type, options_list=('--name', '-n'))
-register_cli_argument('keyvault', 'object_id',
-                      help='a GUID that identifies the principal that will receive permissions')
-register_cli_argument('keyvault', 'spn',
-                      help='name of a service principal that will receive permissions')
-register_cli_argument('keyvault', 'upn',
-                      help='name of a user principal that will receive permissions')
-register_cli_argument('keyvault', 'tags', tags_type)
-register_cli_argument('keyvault', 'enabled_for_deployment',
-                      help='Allow Virtual Machines to retrieve certificates stored as secrets from '
-                           'the vault.',
-                      **three_state_flag())
-register_cli_argument('keyvault', 'enabled_for_disk_encryption',
-                      help='Allow Disk Encryption to retrieve secrets from the vault and unwrap '
-                           'keys.',
-                      **three_state_flag())
-register_cli_argument('keyvault', 'enabled_for_template_deployment',
-                      help='Allow Resource Manager to retrieve secrets from the vault.',
-                      **three_state_flag())
-register_cli_argument('keyvault', 'enable_soft_delete',
-                      help='Enable vault deletion recovery for the vault, and all contained entities',
-                      **three_state_flag())
+    with self.argument_context('keyvault set-policy', arg_group='Permission') as c:
+        c.argument('key_permissions', arg_type=get_enum_type(KeyPermissions), metavar='PERM', nargs='*', help='Space separated list of key permissions to assign.', validator=validate_policy_permissions)
+        c.argument('secret_permissions', arg_type=get_enum_type(SecretPermissions), metavar='PERM', nargs='*', help='Space separated list of secret permissions to assign.')
+        c.argument('certificate_permissions', arg_type=get_enum_type(CertificatePermissions), metavar='PERM', nargs='*', help='Space separated list of certificate permissions to assign.')
+    # endregion
 
-register_cli_argument('keyvault create', 'resource_group_name', resource_group_name_type,
-                      required=True, completer=None, validator=None)
-register_cli_argument('keyvault create', 'vault_name', completer=None)
-register_cli_argument('keyvault create', 'sku', **enum_choice_list(SkuName))
-register_cli_argument('keyvault create', 'no_self_perms',
-                      help="Don't add permissions for the current user/service principal in the "
-                           "new vault",
-                      **three_state_flag())
-register_cli_argument('keyvault create', 'location',
-                      validator=get_default_location_from_resource_group)
+    # region Shared
+    for item in ['key', 'secret', 'certificate']:
+        with self.argument_context('keyvault ' + item) as c:
+            c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item), id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
+            c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+    # endregion
 
-register_cli_argument('keyvault list', 'resource_group_name', resource_group_name_type,
-                      validator=None)
+    # region keys
+    with self.argument_context('keyvault key') as c:
+        c.argument('key_ops', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*', help='Space separated list of permitted JSON web key operations.')
+        c.argument('key_version', options_list=['--version', '-v'], help='The key version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('key'))
 
-register_cli_argument('keyvault delete-policy', 'object_id', validator=validate_principal)
-register_cli_argument('keyvault set-policy', 'key_permissions', metavar='PERM', nargs='*',
-                      help='Space separated list of key permissions to assign.', arg_group='Permission',
-                      validator=validate_policy_permissions, **enum_choice_list(KeyPermissions))
-register_cli_argument('keyvault set-policy', 'secret_permissions', metavar='PERM', nargs='*',
-                      help='Space separated list of secret permissions to assign.', arg_group='Permission',
-                      **enum_choice_list(SecretPermissions))
-register_cli_argument('keyvault set-policy', 'certificate_permissions', metavar='PERM', nargs='*',
-                      help='Space separated list of certificate permissions to assign.', arg_group='Permission',
-                      **enum_choice_list(CertificatePermissions))
+    for scope in ['keyvault key create', 'keyvault key import']:
+        with self.argument_context(scope) as c:
+            c.argument('destination', arg_type=get_enum_type(['software', 'hsm']), options_list=['--protection', '-p'], help='Specifies the type of key protection.', validator=validate_key_type)
+            c.argument('disabled', arg_type=get_three_state_flag(), help='Create key in disabled state.')
+            c.argument('key_size', options_list=['--size'], type=int)
+            c.argument('expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
+            c.argument('not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
 
+    with self.argument_context('keyvault key import', arg_group='Key Source') as c:
+        c.argument('pem_file', type=file_type, help='PEM file containing the key to be imported.', completer=FilesCompleter(), validator=validate_key_import_source)
+        c.argument('pem_password', help='Password of PEM file.')
+        c.argument('byok_file', type=file_type, help='BYOK file containing the key to be imported. Must not be password protected.', completer=FilesCompleter())
 
-for item in ['key', 'secret', 'certificate']:
-    register_cli_argument('keyvault {}'.format(item), '{}_name'.format(item),
-                          options_list=('--name', '-n'), help='Name of the {}.'.format(item),
-                          id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
-    register_cli_argument('keyvault {}'.format(item), 'vault_base_url', vault_name_type,
-                          type=vault_base_url_type, id_part=None)
-# TODO: Fix once service side issue is fixed that there is no way to list pending certificates
-register_cli_argument('keyvault certificate pending', 'certificate_name',
-                      options_list=('--name', '-n'), help='Name of the pending certificate.',
-                      id_part='child_name_1', completer=None)
+    with self.argument_context('keyvault key backup') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local file path in which to store key backup.')
 
-register_cli_argument('keyvault key', 'key_ops', options_list=('--ops'), nargs='*',
-                      help='Space separated list of permitted JSON web key operations.',
-                      **enum_choice_list(JsonWebKeyOperation))
-register_cli_argument('keyvault key', 'key_version', options_list=('--version', '-v'),
-                      help='The key version. If omitted, uses the latest version.', default='',
-                      required=False, completer=get_keyvault_version_completion_list('key'))
+    with self.argument_context('keyvault key restore') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local key backup from which to restore key.')
 
-for item in ['create', 'import']:
-    register_cli_argument('keyvault key {}'.format(item), 'destination',
-                          options_list=('--protection', '-p'), choices=['software', 'hsm'],
-                          help='Specifies the type of key protection.', validator=validate_key_type,
-                          type=str.lower)
-    register_cli_argument('keyvault key {}'.format(item), 'disabled', action='store_true',
-                          help='Create key in disabled state.')
-    register_cli_argument('keyvault key {}'.format(item), 'key_size', options_list=('--size',),
-                          type=int)
-    register_cli_argument('keyvault key {}'.format(item), 'expires', default=None,
-                          help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').',
-                          type=datetime_type)
-    register_cli_argument('keyvault key {}'.format(item), 'not_before', default=None,
-                          help='Key not usable before the provided UTC datetime  '
-                               '(Y-m-d\'T\'H:M:S\'Z\').',
-                          type=datetime_type)
+    with self.argument_context('keyvault key set-attributes') as c:
+        c.attributes_argument('key', KeyAttributes)
+    # endregion
 
-register_cli_argument('keyvault key import', 'pem_file', type=file_type,
-                      help='PEM file containing the key to be imported.', arg_group='Key Source',
-                      completer=FilesCompleter(), validator=validate_key_import_source)
-register_cli_argument('keyvault key import', 'pem_password', help='Password of PEM file.',
-                      arg_group='Key Source')
-register_cli_argument('keyvault key import', 'byok_file', type=file_type,
-                      help='BYOK file containing the key to be imported. Must not be password '
-                           'protected.',
-                      completer=FilesCompleter(), arg_group='Key Source')
+    # region KeyVault Secret
+    with self.argument_context('keyvault secret') as c:
+        c.argument('secret_version', options_list=['--version', '-v'], help='The secret version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('secret'))
 
-register_cli_argument('keyvault key backup', 'file_path', options_list=('--file', '-f'),
-                      type=file_type, completer=FilesCompleter(),
-                      help='Local file path in which to store key backup.')
+    with self.argument_context('keyvault secret set') as c:
+        c.argument('content_type', options_list=['--description'], help='Description of the secret contents (e.g. password, connection string, etc)')
+        c.attributes_argument('secret', SecretAttributes, create=True)
 
-register_cli_argument('keyvault key restore', 'file_path', options_list=('--file', '-f'),
-                      type=file_type, completer=FilesCompleter(),
-                      help='Local key backup from which to restore key.')
+    with self.argument_context('keyvault secret set', arg_group='Content Source') as c:
+        c.argument('value', options_list=['--value'], help="Plain text secret value. Cannot be used with '--file' or '--encoding'", required=False)
+        c.extra('file_path', options_list=['--file', '-f'], type=file_type, help="Source file for secret. Use in conjunction with '--encoding'", completer=FilesCompleter())
+        c.extra('encoding', arg_type=get_enum_type(secret_encoding_values, default='utf-8'), options_list=['--encoding', '-e'], help='Source file encoding. The value is saved as a tag (`file-encoding=<val>`) and used during download to automatically encode the resulting file.')
 
-register_attributes_argument('keyvault key set-attributes', 'key', KeyAttributes)
+    with self.argument_context('keyvault secret set-attributes') as c:
+        c.attributes_argument('secret', SecretAttributes)
 
-register_cli_argument('keyvault secret', 'secret_version', options_list=('--version', '-v'),
-                      help='The secret version. If omitted, uses the latest version.', default='',
-                      required=False, completer=get_keyvault_version_completion_list('secret'))
+    with self.argument_context('keyvault secret download') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the secret contents.')
+        c.argument('encoding', arg_type=get_enum_type(secret_encoding_values), options_list=['--encoding', '-e'], help="Encoding of the destination file. By default, will look for the 'file-encoding' tag on the secret. Otherwise will assume 'utf-8'.", default=None)
+    # endregion
 
-register_cli_argument('keyvault secret set', 'content_type', options_list=('--description',),
-                      help='Description of the secret contents (e.g. password, connection string, '
-                           'etc)')
-register_attributes_argument('keyvault secret set', 'secret', SecretAttributes, create=True)
-register_cli_argument('keyvault secret set', 'value', options_list=('--value',),
-                      help="Plain text secret value. Cannot be used with '--file' or '--encoding'",
-                      required=False, arg_group='Content Source')
-register_extra_cli_argument('keyvault secret set', 'file_path', options_list=('--file', '-f'),
-                            type=file_type,
-                            help="Source file for secret. Use in conjunction with '--encoding'",
-                            completer=FilesCompleter(), arg_group='Content Source')
-register_extra_cli_argument('keyvault secret set', 'encoding', options_list=('--encoding', '-e'),
-                            help='Source file encoding. The value is saved as a tag '
-                                 '(`file-encoding=<val>`) and used during download to automatically '
-                                 'encode the resulting file.',
-                            default='utf-8', validator=process_secret_set_namespace,
-                            arg_group='Content Source', **enum_choice_list(secret_encoding_values))
+    # KeyVault Certificate
+    with self.argument_context('keyvault certificate') as c:
+        c.argument('certificate_version', options_list=['--version', '-v'], help='The certificate version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('certificate'))
+        c.argument('validity', type=int, help='Number of months the certificate is valid for. Overrides the value specified with --policy/-p')
 
-register_attributes_argument('keyvault secret set-attributes', 'secret', SecretAttributes)
+    # TODO: Remove workaround when https://github.com/Azure/azure-rest-api-specs/issues/1153 is fixed
+    with self.argument_context('keyvault certificate create') as c:
+        c.attributes_argument('certificate', CertificateAttributes, True, ignore=['expires', 'not_before'])
 
-register_cli_argument('keyvault secret download', 'file_path', options_list=('--file', '-f'),
-                      type=file_type, completer=FilesCompleter(),
-                      help='File to receive the secret contents.')
-register_cli_argument('keyvault secret download', 'encoding', options_list=('--encoding', '-e'),
-                      help="Encoding of the destination file. By default, will look for the "
-                           "'file-encoding' tag on the secret. Otherwise will assume 'utf-8'.",
-                      default=None, **enum_choice_list(secret_encoding_values))
+    with self.argument_context('keyvault certificate set-attributes') as c:
+        c.attributes_argument('certificate', CertificateAttributes, ignore=['expires', 'not_before'])
 
-register_cli_argument('keyvault certificate', 'certificate_version',
-                      options_list=('--version', '-v'),
-                      help='The certificate version. If omitted, uses the latest version.',
-                      default='', required=False,
-                      completer=get_keyvault_version_completion_list('certificate'))
-register_cli_argument('keyvault certificate', 'validity', type=int,
-                      help='Number of months the certificate is valid for. Overrides the value '
-                           'specified with --policy/-p')
-# TODO: Remove workaround when https://github.com/Azure/azure-rest-api-specs/issues/1153 is fixed
-register_attributes_argument('keyvault certificate create', 'certificate', CertificateAttributes,
-                             True, ignore=['expires', 'not_before'])
-register_attributes_argument('keyvault certificate set-attributes', 'certificate',
-                             CertificateAttributes, ignore=['expires', 'not_before'])
+    for item in ['create', 'set-attributes', 'import']:
+        with self.argument_context('keyvault certificate ' + item) as c:
+            c.argument('certificate_policy', options_list=['--policy', '-p'], help='JSON encoded policy defintion. Use @{file} to load from a file.', type=get_json_object)
 
-for item in ['create', 'set-attributes', 'import']:
-    register_cli_argument('keyvault certificate {}'.format(item), 'certificate_policy',
-                          options_list=('--policy', '-p'),
-                          help='JSON encoded policy defintion. Use @{file} to load from a file.',
-                          type=get_json_object)
+    with self.argument_context('keyvault certificate import') as c:
+        c.argument('certificate_data', options_list=['--file', '-f'], completer=FilesCompleter(), help='PKCS12 file or PEM file containing the certificate and private key.', type=certificate_type)
+        c.argument('password', help="If the private key in certificate is encrypted, the password used for encryption.")
+        c.extra('disabled', arg_type=get_three_state_flag(), help='Import the certificate in disabled state.')
 
-register_cli_argument('keyvault certificate import', 'certificate_data',
-                      options_list=('--file', '-f'), completer=FilesCompleter(),
-                      help='PKCS12 file or PEM file containing the certificate and private key.',
-                      type=certificate_type)
-register_cli_argument('keyvault certificate import', 'password',
-                      help="If the private key in certificate is encrypted, the password used for "
-                           "encryption.")
-register_extra_cli_argument('keyvault certificate import', 'disabled',
-                            help='Import the certificate in disabled state.', **three_state_flag())
+    with self.argument_context('keyvault certificate download') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the binary certificate contents.')
+        c.argument('encoding', arg_type=get_enum_type(certificate_format_values), options_list=['--encoding', '-e'], help='Encoding of the certificate. DER will create a binary DER formatted x509 certificate, and PEM will create a base64 PEM x509 certificate.')
 
-register_cli_argument('keyvault certificate download', 'file_path', options_list=('--file', '-f'),
-                      type=file_type, completer=FilesCompleter(),
-                      help='File to receive the binary certificate contents.')
-register_cli_argument('keyvault certificate download', 'encoding',
-                      options_list=('--encoding', '-e'),
-                      help='Encoding of the certificate. DER will create a binary DER formatted '
-                           'x509 certificate, and PEM will create a base64 PEM x509 certificate.',
-                      **enum_choice_list(certificate_format_values))
+    # TODO: Fix once service side issue is fixed that there is no way to list pending certificates
+    with self.argument_context('keyvault certificate pending') as c:
+        c.argument('certificate_name', options_list=['--name', '-n'], help='Name of the pending certificate.', id_part='child_name_1', completer=None)
 
-register_cli_argument('keyvault certificate pending merge', 'x509_certificates',
-                      options_list=('--file', '-f'), type=file_type, completer=FilesCompleter(),
-                      help='File containing the certificate or certificate chain to merge.',
-                      validator=validate_x509_certificate_chain)
-register_attributes_argument('keyvault certificate pending merge', 'certificate',
-                             CertificateAttributes, True)
+    with self.argument_context('keyvault certificate pending merge') as c:
+        c.argument('x509_certificates', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File containing the certificate or certificate chain to merge.', validator=validate_x509_certificate_chain)
+        c.attributes_argument('certificate', CertificateAttributes, True)
 
-register_cli_argument('keyvault certificate pending cancel', 'cancellation_requested', ignore_type,
-                      validator=process_certificate_cancel_namespace)
+    with self.argument_context('keyvault certificate pending cancel') as c:
+        c.ignore('cancellation_requested')
 
-register_cli_argument('keyvault certificate contact', 'contact_email', options_list=('--email',),
-                      help='Contact e-mail address. Must be unique.')
-register_cli_argument('keyvault certificate contact', 'contact_name', options_list=('--name',),
-                      help='Full contact name.')
-register_cli_argument('keyvault certificate contact', 'contact_phone', options_list=('--phone',),
-                      help='Contact phone number.')
+    with self.argument_context('keyvault certificate contact') as c:
+        c.argument('contact_email', options_list=['--email'], help='Contact e-mail address. Must be unique.')
+        c.argument('contact_name', options_list=['--name'], help='Full contact name.')
+        c.argument('contact_phone', options_list=['--phone'], help='Contact phone number.')
 
-register_cli_argument('keyvault certificate issuer admin', 'email', options_list=('--email',),
-                      help='Admin e-mail address. Must be unique within the vault.')
-register_cli_argument('keyvault certificate issuer admin', 'name', options_list=('--name',),
-                      help='Full admin name.')
-register_cli_argument('keyvault certificate issuer admin', 'phone', options_list=('--phone',),
-                      help='Amin phone number.')
+    with self.argument_context('keyvault certificate issuer admin') as c:
+        c.argument('email', options_list=['--email'], help='Admin e-mail address. Must be unique within the vault.')
+        c.argument('name', options_list=['--name'], help='Full admin name.')
+        c.argument('phone', options_list=['--phone'], help='Amin phone number.')
 
-register_cli_argument('keyvault certificate issuer', 'issuer_name', help='Certificate issuer name.')
-register_cli_argument('keyvault certificate issuer', 'disabled',
-                      help='Set issuer to disabled state.', **three_state_flag())
-register_cli_argument('keyvault certificate issuer', 'enabled', help='Set issuer enabled state.',
-                      **three_state_flag())
-register_cli_argument('keyvault certificate issuer', 'account_id', arg_group='Issuer Credential')
-register_cli_argument('keyvault certificate issuer', 'password', arg_group='Issuer Credential')
-register_cli_argument('keyvault certificate issuer', 'organization_id',
-                      arg_group='Organization Detail')
-register_cli_argument('keyvault certificate issuer', 'admin_first_name',
-                      arg_group='Organization Detail')
-register_cli_argument('keyvault certificate issuer', 'admin_last_name',
-                      arg_group='Organization Detail')
-register_cli_argument('keyvault certificate issuer', 'admin_email', arg_group='Organization Detail')
-register_cli_argument('keyvault certificate issuer', 'admin_phone', arg_group='Organization Detail')
+    with self.argument_context('keyvault certificate issuer') as c:
+        c.argument('issuer_name', help='Certificate issuer name.')
+        c.argument('disabled', arg_type=get_three_state_flag(), help='Set issuer to disabled state.')
+        c.argument('enabled', arg_type=get_three_state_flag(), help='Set issuer enabled state.')
+
+    with self.argument_context('keyvault certificate issuer', arg_group='Issuer Credential') as c:
+        c.argument('account_id')
+        c.argument('password')
+
+    with self.argument_context('keyvault certificate issuer', arg_group='Organization Detail') as c:
+        c.argument('organization_id')
+        c.argument('admin_first_name')
+        c.argument('admin_last_name')
+        c.argument('admin_email')
+        c.argument('admin_phone')
+    # endregion

@@ -1,40 +1,67 @@
 interactions:
 - request:
+    body: !!python/unicode '{"location": "westus", "tags": {"use": "az-test"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['50']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_no_wait000001?api-version=2017-05-10
+  response:
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001","name":"cli_test_vm_no_wait000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['328']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 22 Dec 2017 15:55:52 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+    status: {code: 201, message: Created}
+- request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [vm create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.21
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.23]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
-      x-ms-client-request-id: [e1de2e9c-e138-11e7-9af1-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_no_wait?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_no_wait000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait","name":"cli_test_vm_no_wait","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001","name":"cli_test_vm_no_wait000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 15 Dec 2017 01:40:08 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Vary: [Accept-Encoding]
-      content-length: ['228']
+      cache-control: [no-cache]
+      content-length: ['328']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 22 Dec 2017 15:55:56 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Connection: [close]
       Host: [raw.githubusercontent.com]
-      User-Agent: [Python-urllib/3.5]
+      User-Agent: [Python-urllib/2.7]
     method: GET
     uri: https://raw.githubusercontent.com/Azure/azure-rest-api-specs/master/arm-compute/quickstart-templates/aliases.json
   response:
-    body: {string: "{\n  \"$schema\":\"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\"\
+    body: {string: !!python/unicode "{\n  \"$schema\":\"http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json\"\
         ,\n  \"contentVersion\":\"1.0.0.0\",\n  \"parameters\":{},\n  \"variables\"\
         :{},\n  \"resources\":[],\n\n  \"outputs\":{\n    \"aliases\":{\n      \"\
         type\":\"object\",\n      \"value\":{\n\n        \"Linux\":{\n          \"\
@@ -70,138 +97,141 @@ interactions:
         \     \"version\":\"latest\"\n          }\n        }\n      }\n    }\n  }\n\
         }\n"}
     headers:
-      Accept-Ranges: [bytes]
-      Access-Control-Allow-Origin: ['*']
-      Cache-Control: [max-age=300]
-      Connection: [close]
-      Content-Length: ['2235']
-      Content-Security-Policy: [default-src 'none'; style-src 'unsafe-inline'; sandbox]
-      Content-Type: [text/plain; charset=utf-8]
-      Date: ['Fri, 15 Dec 2017 01:40:09 GMT']
-      ETag: ['"d6824855d13e27c5258a680eb60f635d088fd05e"']
-      Expires: ['Fri, 15 Dec 2017 01:45:09 GMT']
-      Source-Age: ['229']
-      Strict-Transport-Security: [max-age=31536000]
-      Vary: ['Authorization,Accept-Encoding']
-      Via: [1.1 varnish]
-      X-Cache: [HIT]
-      X-Cache-Hits: ['1']
-      X-Content-Type-Options: [nosniff]
-      X-Fastly-Request-ID: [ace61060ebaaaf7575f8e48176ace9107c3d3057]
-      X-Frame-Options: [deny]
-      X-Geo-Block-List: ['']
-      X-GitHub-Request-Id: ['B544:2BF90:67B8F0:6E733D:5A332714']
-      X-Served-By: [cache-sea1028-SEA]
-      X-Timer: ['S1513302009.376974,VS0,VE1']
-      X-XSS-Protection: [1; mode=block]
+      accept-ranges: [bytes]
+      access-control-allow-origin: ['*']
+      cache-control: [max-age=300]
+      connection: [close]
+      content-length: ['2235']
+      content-security-policy: [default-src 'none'; style-src 'unsafe-inline'; sandbox]
+      content-type: [text/plain; charset=utf-8]
+      date: ['Fri, 22 Dec 2017 15:55:58 GMT']
+      etag: ['"d6824855d13e27c5258a680eb60f635d088fd05e"']
+      expires: ['Fri, 22 Dec 2017 16:00:58 GMT']
+      source-age: ['73']
+      strict-transport-security: [max-age=31536000]
+      vary: ['Authorization,Accept-Encoding']
+      via: [1.1 varnish]
+      x-cache: [HIT]
+      x-cache-hits: ['1']
+      x-content-type-options: [nosniff]
+      x-fastly-request-id: [ca30022a9258e6ebb30d6199bd74f1f62d5fbe3f]
+      x-frame-options: [deny]
+      x-geo-block-list: ['']
+      x-github-request-id: ['80F8:5F87:EF8C59:FF87E7:5A3D2AC3']
+      x-served-by: [cache-sea1028-SEA]
+      x-timer: ['S1513958159.886804,VS0,VE0']
+      x-xss-protection: [1; mode=block]
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [vm create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.21
-          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/TEST/2.0.23]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
-      x-ms-client-request-id: [e2940f88-e138-11e7-9ffd-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/virtualNetworks?api-version=2017-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/virtualNetworks?api-version=2017-11-01
   response:
-    body: {string: '{"value":[]}'}
+    body: {string: !!python/unicode '{"value":[]}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 15 Dec 2017 01:40:09 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Vary: [Accept-Encoding]
+      cache-control: [no-cache]
       content-length: ['12']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 22 Dec 2017 15:56:05 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"parameters": {}, "template": {"outputs": {}, "$schema":
-      "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-      "variables": {}, "contentVersion": "1.0.0.0", "resources": [{"location": "westus",
-      "name": "vmnowait2VNET", "type": "Microsoft.Network/virtualNetworks", "dependsOn":
-      [], "properties": {"addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}, "subnets":
-      [{"name": "vmnowait2Subnet", "properties": {"addressPrefix": "10.0.0.0/24"}}]},
-      "apiVersion": "2015-06-15", "tags": {}}, {"location": "westus", "name": "vmnowait2NSG",
-      "type": "Microsoft.Network/networkSecurityGroups", "dependsOn": [], "properties":
-      {"securityRules": [{"name": "default-allow-ssh", "properties": {"destinationPortRange":
-      "22", "sourcePortRange": "*", "sourceAddressPrefix": "*", "protocol": "Tcp",
-      "destinationAddressPrefix": "*", "access": "Allow", "direction": "Inbound",
-      "priority": 1000}}]}, "apiVersion": "2015-06-15", "tags": {}}, {"location":
-      "westus", "name": "vmnowait2PublicIP", "type": "Microsoft.Network/publicIPAddresses",
-      "dependsOn": [], "properties": {"publicIPAllocationMethod": "dynamic"}, "apiVersion":
-      "2017-11-01", "tags": {}}, {"location": "westus", "name": "vmnowait2VMNic",
-      "type": "Microsoft.Network/networkInterfaces", "dependsOn": ["Microsoft.Network/virtualNetworks/vmnowait2VNET",
+    body: !!python/unicode '{"properties": {"mode": "Incremental", "parameters": {},
+      "template": {"parameters": {}, "outputs": {}, "variables": {}, "contentVersion":
+      "1.0.0.0", "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "resources": [{"name": "vmnowait2VNET", "tags": {}, "apiVersion": "2015-06-15",
+      "location": "westus", "dependsOn": [], "type": "Microsoft.Network/virtualNetworks",
+      "properties": {"subnets": [{"name": "vmnowait2Subnet", "properties": {"addressPrefix":
+      "10.0.0.0/24"}}], "addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}}}, {"name":
+      "vmnowait2NSG", "tags": {}, "apiVersion": "2015-06-15", "location": "westus",
+      "dependsOn": [], "type": "Microsoft.Network/networkSecurityGroups", "properties":
+      {"securityRules": [{"name": "default-allow-ssh", "properties": {"access": "Allow",
+      "direction": "Inbound", "protocol": "Tcp", "priority": 1000, "destinationPortRange":
+      "22", "sourceAddressPrefix": "*", "destinationAddressPrefix": "*", "sourcePortRange":
+      "*"}}]}}, {"name": "vmnowait2PublicIP", "tags": {}, "apiVersion": "2017-11-01",
+      "location": "westus", "dependsOn": [], "type": "Microsoft.Network/publicIPAddresses",
+      "properties": {"publicIPAllocationMethod": "dynamic"}}, {"name": "vmnowait2VMNic",
+      "tags": {}, "apiVersion": "2015-06-15", "location": "westus", "dependsOn": ["Microsoft.Network/virtualNetworks/vmnowait2VNET",
       "Microsoft.Network/networkSecurityGroups/vmnowait2NSG", "Microsoft.Network/publicIpAddresses/vmnowait2PublicIP"],
-      "properties": {"networkSecurityGroup": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkSecurityGroups/vmnowait2NSG"},
+      "type": "Microsoft.Network/networkInterfaces", "properties": {"networkSecurityGroup":
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/networkSecurityGroups/vmnowait2NSG"},
       "ipConfigurations": [{"name": "ipconfigvmnowait2", "properties": {"subnet":
-      {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/virtualNetworks/vmnowait2VNET/subnets/vmnowait2Subnet"},
-      "privateIPAllocationMethod": "Dynamic", "publicIPAddress": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/publicIPAddresses/vmnowait2PublicIP"}}}]},
-      "apiVersion": "2015-06-15", "tags": {}}, {"location": "westus", "name": "vmnowait2",
-      "type": "Microsoft.Compute/virtualMachines", "dependsOn": ["Microsoft.Network/networkInterfaces/vmnowait2VMNic"],
-      "properties": {"networkProfile": {"networkInterfaces": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic"}]},
-      "hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "osProfile": {"computerName":
-      "vmnowait2", "adminPassword": "testPassword0", "adminUsername": "user12"}, "storageProfile":
-      {"imageReference": {"sku": "16.04-LTS", "version": "latest", "offer": "UbuntuServer",
-      "publisher": "Canonical"}, "osDisk": {"caching": null, "name": null, "createOption":
-      "fromImage", "managedDisk": {"storageAccountType": null}}}}, "apiVersion": "2017-12-01",
-      "tags": {}}], "parameters": {}}, "mode": "Incremental"}}'
+      {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/virtualNetworks/vmnowait2VNET/subnets/vmnowait2Subnet"},
+      "privateIPAllocationMethod": "Dynamic", "publicIPAddress": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/publicIPAddresses/vmnowait2PublicIP"}}}]}},
+      {"name": "vmnowait2", "tags": {}, "apiVersion": "2017-12-01", "location": "westus",
+      "dependsOn": ["Microsoft.Network/networkInterfaces/vmnowait2VMNic"], "type":
+      "Microsoft.Compute/virtualMachines", "properties": {"hardwareProfile": {"vmSize":
+      "Standard_DS1_v2"}, "storageProfile": {"imageReference": {"sku": "16.04-LTS",
+      "publisher": "Canonical", "version": "latest", "offer": "UbuntuServer"}, "osDisk":
+      {"caching": "ReadWrite", "managedDisk": {"storageAccountType": null}, "name":
+      null, "createOption": "fromImage"}}, "osProfile": {"adminUsername": "user12",
+      "computerName": "vmnowait2", "adminPassword": "testPassword0"}, "networkProfile":
+      {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic"}]}}}]}}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [vm create]
       Connection: [keep-alive]
-      Content-Length: ['3057']
+      Content-Length: ['3264']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.21
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.23]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
-      x-ms-client-request-id: [e2e88826-e138-11e7-b996-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_no_wait/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_no_wait000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Resources/deployments/vm_deploy_8FLRoGV5tiM7ri53m6pCAhQUbafHw8CV","name":"vm_deploy_8FLRoGV5tiM7ri53m6pCAhQUbafHw8CV","properties":{"templateHash":"13460097442828588434","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-12-15T01:40:11.9236829Z","duration":"PT0.6826687S","correlationId":"a8c949ca-163a-4224-bd76-3ab64fa6de3c","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/virtualNetworks/vmnowait2VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmnowait2VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkSecurityGroups/vmnowait2NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vmnowait2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/publicIPAddresses/vmnowait2PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vmnowait2PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vmnowait2VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vmnowait2VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vmnowait2"}]}}'}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Resources/deployments/vm_deploy_3ZYy54JF4Di8nu1QwXSWGkzDsX0iHCLt","name":"vm_deploy_3ZYy54JF4Di8nu1QwXSWGkzDsX0iHCLt","properties":{"templateHash":"6655985877878764600","parameters":{},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-12-22T15:56:13.8208686Z","duration":"PT0.7410808S","correlationId":"5db44a74-2206-40cc-a8c1-442d1071a015","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"virtualNetworks","locations":["westus"]},{"resourceType":"networkSecurityGroups","locations":["westus"]},{"resourceType":"publicIPAddresses","locations":["westus"]},{"resourceType":"networkInterfaces","locations":["westus"]}]},{"namespace":"Microsoft.Compute","resourceTypes":[{"resourceType":"virtualMachines","locations":["westus"]}]}],"dependencies":[{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/virtualNetworks/vmnowait2VNET","resourceType":"Microsoft.Network/virtualNetworks","resourceName":"vmnowait2VNET"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/networkSecurityGroups/vmnowait2NSG","resourceType":"Microsoft.Network/networkSecurityGroups","resourceName":"vmnowait2NSG"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/publicIPAddresses/vmnowait2PublicIP","resourceType":"Microsoft.Network/publicIPAddresses","resourceName":"vmnowait2PublicIP"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vmnowait2VMNic"},{"dependsOn":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic","resourceType":"Microsoft.Network/networkInterfaces","resourceName":"vmnowait2VMNic"}],"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2","resourceType":"Microsoft.Compute/virtualMachines","resourceName":"vmnowait2"}]}}'}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourcegroups/cli_test_vm_no_wait/providers/Microsoft.Resources/deployments/vm_deploy_8FLRoGV5tiM7ri53m6pCAhQUbafHw8CV/operationStatuses/08586883048742366131?api-version=2017-05-10']
-      Cache-Control: [no-cache]
-      Content-Length: ['2424']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 15 Dec 2017 01:40:12 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_no_wait000001/providers/Microsoft.Resources/deployments/vm_deploy_3ZYy54JF4Di8nu1QwXSWGkzDsX0iHCLt/operationStatuses/08586876487123978486?api-version=2017-05-10']
+      cache-control: [no-cache]
+      content-length: ['2773']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 22 Dec 2017 15:56:14 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [vm wait]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.21
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.23]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
-      x-ms-client-request-id: [e4555194-e138-11e7-9a8a-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2?$expand=instanceView&api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2?api-version=2017-12-01&$expand=instanceView
   response:
-    body: {string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Compute/virtualMachines/vmnowait2''
-        under resource group ''cli_test_vm_no_wait'' was not found."}}'}
+    body: {string: !!python/unicode '{"error":{"code":"ResourceNotFound","message":"The
+        Resource ''Microsoft.Compute/virtualMachines/vmnowait2'' under resource group
+        ''cli_test_vm_no_wait000001'' was not found."}}'}
     headers:
-      Cache-Control: [no-cache]
-      Content-Length: ['172']
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 15 Dec 2017 01:40:11 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
+      cache-control: [no-cache]
+      content-length: ['222']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 22 Dec 2017 15:56:17 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
       x-ms-failure-cause: [gateway]
     status: {code: 404, message: Not Found}
 - request:
@@ -209,391 +239,327 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [vm wait]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.21
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.23]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
-      x-ms-client-request-id: [f678f830-e138-11e7-8402-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2?$expand=instanceView&api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2?api-version=2017-12-01&$expand=instanceView
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"070ca849-0a51-48d4-af4f-dfeb2c8c4369\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
-        ,\r\n        \"sku\": \"16.04-LTS\",\r\n        \"version\": \"latest\"\r\n\
-        \      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n   \
-        \     \"name\": \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\",\r\
-        \n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        63806c28-71af-44cd-a6c1-4e76b2c21dba\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"Canonical\"\
+        ,\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\": \"16.04-LTS\"\
+        ,\r\n        \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n\
+        \        \"osType\": \"Linux\",\r\n        \"name\": \"vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
+        ,\r\n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
         ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
-        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
         \r\n        },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\"\
         : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vmnowait2\"\
         ,\r\n      \"adminUsername\": \"user12\",\r\n      \"linuxConfiguration\"\
         : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
         \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
         }]},\r\n    \"provisioningState\": \"Creating\",\r\n    \"instanceView\":\
-        \ {\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\"\
+        \ {\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
         ,\r\n          \"statuses\": [\r\n            {\r\n              \"code\"\
         : \"ProvisioningState/succeeded\",\r\n              \"level\": \"Info\",\r\
         \n              \"displayStatus\": \"Provisioning succeeded\",\r\n       \
-        \       \"time\": \"2017-12-15T01:40:26.0045232+00:00\"\r\n            }\r\
-        \n          ]\r\n        }\r\n      ],\r\n      \"statuses\": [\r\n      \
-        \  {\r\n          \"code\": \"ProvisioningState/creating\",\r\n          \"\
+        \       \"time\": \"2017-12-22T15:56:37.587513+00:00\"\r\n            }\r\n\
+        \          ]\r\n        }\r\n      ],\r\n      \"statuses\": [\r\n       \
+        \ {\r\n          \"code\": \"ProvisioningState/creating\",\r\n          \"\
         level\": \"Info\",\r\n          \"displayStatus\": \"Creating\"\r\n      \
         \  },\r\n        {\r\n          \"code\": \"PowerState/starting\",\r\n   \
         \       \"level\": \"Info\",\r\n          \"displayStatus\": \"VM starting\"\
         \r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachines\"\
-        ,\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
         ,\r\n  \"name\": \"vmnowait2\"\r\n}"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 15 Dec 2017 01:40:42 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['2336']
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4960,Microsoft.Compute/LowCostGet30Min;39780']
+      cache-control: [no-cache]
+      content-length: ['2485']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 22 Dec 2017 15:56:51 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4798,Microsoft.Compute/LowCostGet30Min;38397']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [vm wait]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.21
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.23]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
-      x-ms-client-request-id: [08981bf0-e139-11e7-a47c-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2?$expand=instanceView&api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2?api-version=2017-12-01&$expand=instanceView
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"070ca849-0a51-48d4-af4f-dfeb2c8c4369\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
-        ,\r\n        \"sku\": \"16.04-LTS\",\r\n        \"version\": \"latest\"\r\n\
-        \      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n   \
-        \     \"name\": \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\",\r\
-        \n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        63806c28-71af-44cd-a6c1-4e76b2c21dba\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"Canonical\"\
+        ,\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\": \"16.04-LTS\"\
+        ,\r\n        \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n\
+        \        \"osType\": \"Linux\",\r\n        \"name\": \"vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
+        ,\r\n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
         ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
-        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
         \r\n        },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\"\
         : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vmnowait2\"\
         ,\r\n      \"adminUsername\": \"user12\",\r\n      \"linuxConfiguration\"\
         : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
         \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
         }]},\r\n    \"provisioningState\": \"Creating\",\r\n    \"instanceView\":\
-        \ {\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\"\
+        \ {\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
         ,\r\n          \"statuses\": [\r\n            {\r\n              \"code\"\
         : \"ProvisioningState/succeeded\",\r\n              \"level\": \"Info\",\r\
         \n              \"displayStatus\": \"Provisioning succeeded\",\r\n       \
-        \       \"time\": \"2017-12-15T01:40:26.0045232+00:00\"\r\n            }\r\
-        \n          ]\r\n        }\r\n      ],\r\n      \"statuses\": [\r\n      \
-        \  {\r\n          \"code\": \"ProvisioningState/creating\",\r\n          \"\
+        \       \"time\": \"2017-12-22T15:56:37.587513+00:00\"\r\n            }\r\n\
+        \          ]\r\n        }\r\n      ],\r\n      \"statuses\": [\r\n       \
+        \ {\r\n          \"code\": \"ProvisioningState/creating\",\r\n          \"\
         level\": \"Info\",\r\n          \"displayStatus\": \"Creating\"\r\n      \
         \  },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n    \
         \      \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\
         \r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachines\"\
-        ,\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
         ,\r\n  \"name\": \"vmnowait2\"\r\n}"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 15 Dec 2017 01:41:13 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['2334']
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4966,Microsoft.Compute/LowCostGet30Min;39778']
+      cache-control: [no-cache]
+      content-length: ['2483']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 22 Dec 2017 15:57:25 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4797,Microsoft.Compute/LowCostGet30Min;38396']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [vm get-instance-view]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.21
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.23]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
-      x-ms-client-request-id: [09125594-e139-11e7-a91d-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2?$expand=instanceView&api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2?api-version=2017-12-01&$expand=instanceView
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"070ca849-0a51-48d4-af4f-dfeb2c8c4369\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
-        ,\r\n        \"sku\": \"16.04-LTS\",\r\n        \"version\": \"latest\"\r\n\
-        \      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n   \
-        \     \"name\": \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\",\r\
-        \n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        63806c28-71af-44cd-a6c1-4e76b2c21dba\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"Canonical\"\
+        ,\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\": \"16.04-LTS\"\
+        ,\r\n        \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n\
+        \        \"osType\": \"Linux\",\r\n        \"name\": \"vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
+        ,\r\n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
         ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
-        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
         \r\n        },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\"\
         : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vmnowait2\"\
         ,\r\n      \"adminUsername\": \"user12\",\r\n      \"linuxConfiguration\"\
         : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
         \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
         }]},\r\n    \"provisioningState\": \"Creating\",\r\n    \"instanceView\":\
-        \ {\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\"\
+        \ {\r\n      \"disks\": [\r\n        {\r\n          \"name\": \"vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
         ,\r\n          \"statuses\": [\r\n            {\r\n              \"code\"\
         : \"ProvisioningState/succeeded\",\r\n              \"level\": \"Info\",\r\
         \n              \"displayStatus\": \"Provisioning succeeded\",\r\n       \
-        \       \"time\": \"2017-12-15T01:40:26.0045232+00:00\"\r\n            }\r\
-        \n          ]\r\n        }\r\n      ],\r\n      \"statuses\": [\r\n      \
-        \  {\r\n          \"code\": \"ProvisioningState/creating\",\r\n          \"\
+        \       \"time\": \"2017-12-22T15:56:37.587513+00:00\"\r\n            }\r\n\
+        \          ]\r\n        }\r\n      ],\r\n      \"statuses\": [\r\n       \
+        \ {\r\n          \"code\": \"ProvisioningState/creating\",\r\n          \"\
         level\": \"Info\",\r\n          \"displayStatus\": \"Creating\"\r\n      \
         \  },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n    \
         \      \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\
         \r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachines\"\
-        ,\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
+        ,\r\n  \"location\": \"westus\",\r\n  \"tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
         ,\r\n  \"name\": \"vmnowait2\"\r\n}"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 15 Dec 2017 01:41:13 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['2334']
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4965,Microsoft.Compute/LowCostGet30Min;39777']
+      cache-control: [no-cache]
+      content-length: ['2483']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 22 Dec 2017 15:57:37 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4796,Microsoft.Compute/LowCostGet30Min;38395']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [vm update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.21
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.23]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
-      x-ms-client-request-id: [09674af8-e139-11e7-9c4e-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2?api-version=2017-12-01
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"070ca849-0a51-48d4-af4f-dfeb2c8c4369\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
-        ,\r\n        \"sku\": \"16.04-LTS\",\r\n        \"version\": \"latest\"\r\n\
-        \      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n   \
-        \     \"name\": \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\",\r\
-        \n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        63806c28-71af-44cd-a6c1-4e76b2c21dba\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"Canonical\"\
+        ,\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\": \"16.04-LTS\"\
+        ,\r\n        \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n\
+        \        \"osType\": \"Linux\",\r\n        \"name\": \"vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
+        ,\r\n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
         ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
-        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
         \r\n        },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\"\
         : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vmnowait2\"\
         ,\r\n      \"adminUsername\": \"user12\",\r\n      \"linuxConfiguration\"\
         : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
         \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
         }]},\r\n    \"provisioningState\": \"Creating\"\r\n  },\r\n  \"type\": \"\
         Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
+        tags\": {},\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
         ,\r\n  \"name\": \"vmnowait2\"\r\n}"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 15 Dec 2017 01:41:14 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['1607']
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4964,Microsoft.Compute/LowCostGet30Min;39776']
+      cache-control: [no-cache]
+      content-length: ['1757']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 22 Dec 2017 15:57:48 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4795,Microsoft.Compute/LowCostGet30Min;38394']
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "westus", "tags": {"mytag": "tagvalue1"}, "properties": {"networkProfile":
-      {"networkInterfaces": [{"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic"}]},
-      "hardwareProfile": {"vmSize": "Standard_DS1_v2"}, "osProfile": {"computerName":
-      "vmnowait2", "linuxConfiguration": {"disablePasswordAuthentication": false},
-      "secrets": [], "adminUsername": "user12"}, "storageProfile": {"dataDisks": [],
-      "imageReference": {"version": "latest", "publisher": "Canonical", "offer": "UbuntuServer",
-      "sku": "16.04-LTS"}, "osDisk": {"osType": "Linux", "name": "vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef",
-      "createOption": "FromImage", "managedDisk": {"id": "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef",
-      "storageAccountType": "Premium_LRS"}, "caching": "ReadWrite", "diskSizeGB":
-      30}}}}'
+    body: !!python/unicode '{"location": "westus", "properties": {"storageProfile":
+      {"imageReference": {"sku": "16.04-LTS", "publisher": "Canonical", "version":
+      "latest", "offer": "UbuntuServer"}, "osDisk": {"diskSizeGB": 30, "createOption":
+      "FromImage", "name": "vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1",
+      "caching": "ReadWrite", "managedDisk": {"storageAccountType": "Premium_LRS",
+      "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1"},
+      "osType": "Linux"}, "dataDisks": []}, "hardwareProfile": {"vmSize": "Standard_DS1_v2"},
+      "osProfile": {"secrets": [], "adminUsername": "user12", "computerName": "vmnowait2",
+      "linuxConfiguration": {"disablePasswordAuthentication": false}}, "networkProfile":
+      {"networkInterfaces": [{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic"}]}},
+      "tags": {"mytag": "tagvalue1"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [vm update]
       Connection: [keep-alive]
-      Content-Length: ['1034']
+      Content-Length: ['1134']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.21
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.23]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
-      x-ms-client-request-id: [09a0c230-e139-11e7-84e5-a0b3ccf7272a]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2?api-version=2017-12-01
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"070ca849-0a51-48d4-af4f-dfeb2c8c4369\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
-        ,\r\n        \"sku\": \"16.04-LTS\",\r\n        \"version\": \"latest\"\r\n\
-        \      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n   \
-        \     \"name\": \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\",\r\
-        \n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        63806c28-71af-44cd-a6c1-4e76b2c21dba\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"Canonical\"\
+        ,\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\": \"16.04-LTS\"\
+        ,\r\n        \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n\
+        \        \"osType\": \"Linux\",\r\n        \"name\": \"vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
+        ,\r\n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
         ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
-        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
         \r\n        },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\"\
         : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vmnowait2\"\
         ,\r\n      \"adminUsername\": \"user12\",\r\n      \"linuxConfiguration\"\
         : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
         \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
         }]},\r\n    \"provisioningState\": \"Updating\"\r\n  },\r\n  \"type\": \"\
         Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {\r\n    \"mytag\": \"tagvalue1\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
+        tags\": {\r\n    \"mytag\": \"tagvalue1\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
         ,\r\n  \"name\": \"vmnowait2\"\r\n}"}
     headers:
-      Azure-AsyncOperation: ['https://management.azure.com/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/providers/Microsoft.Compute/locations/westus/operations/105b8799-eb33-4fef-abd9-8b69ecbf7ca1?api-version=2017-12-01']
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 15 Dec 2017 01:41:15 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['1637']
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/CreateUpdateVM3Min;293,Microsoft.Compute/CreateUpdateVM30Min;1466']
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/westus/operations/87d64931-6b0b-4109-a776-c244352cf677?api-version=2017-12-01']
+      cache-control: [no-cache]
+      content-length: ['1787']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 22 Dec 2017 15:57:57 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/PutVM3Min;238,Microsoft.Compute/PutVM30Min;1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1137']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [vm wait]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.21
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.23]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
-      x-ms-client-request-id: [0a60ab50-e139-11e7-b590-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2?$expand=instanceView&api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2?api-version=2017-12-01&$expand=instanceView
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"070ca849-0a51-48d4-af4f-dfeb2c8c4369\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
-        ,\r\n        \"sku\": \"16.04-LTS\",\r\n        \"version\": \"latest\"\r\n\
-        \      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n   \
-        \     \"name\": \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\",\r\
-        \n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        63806c28-71af-44cd-a6c1-4e76b2c21dba\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"Canonical\"\
+        ,\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\": \"16.04-LTS\"\
+        ,\r\n        \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n\
+        \        \"osType\": \"Linux\",\r\n        \"name\": \"vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
+        ,\r\n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
         ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
-        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
         \r\n        },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\"\
         : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vmnowait2\"\
         ,\r\n      \"adminUsername\": \"user12\",\r\n      \"linuxConfiguration\"\
         : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
         \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
         }]},\r\n    \"provisioningState\": \"Creating\",\r\n    \"instanceView\":\
         \ {\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"Unknown\",\r\n\
         \        \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/Unavailable\"\
         ,\r\n            \"level\": \"Warning\",\r\n            \"displayStatus\"\
         : \"Not Ready\",\r\n            \"message\": \"VM status blob is found but\
-        \ not yet populated.\",\r\n            \"time\": \"2017-12-15T01:41:15+00:00\"\
+        \ not yet populated.\",\r\n            \"time\": \"2017-12-22T15:58:06+00:00\"\
         \r\n          }\r\n        ]\r\n      },\r\n      \"disks\": [\r\n       \
-        \ {\r\n          \"name\": \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\"\
+        \ {\r\n          \"name\": \"vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
         ,\r\n          \"statuses\": [\r\n            {\r\n              \"code\"\
         : \"ProvisioningState/succeeded\",\r\n              \"level\": \"Info\",\r\
         \n              \"displayStatus\": \"Provisioning succeeded\",\r\n       \
-        \       \"time\": \"2017-12-15T01:41:14.2251227+00:00\"\r\n            }\r\
-        \n          ]\r\n        }\r\n      ],\r\n      \"statuses\": [\r\n      \
-        \  {\r\n          \"code\": \"ProvisioningState/creating\",\r\n          \"\
-        level\": \"Info\",\r\n          \"displayStatus\": \"Creating\"\r\n      \
-        \  },\r\n        {\r\n          \"code\": \"PowerState/running\",\r\n    \
-        \      \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\
-        \r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachines\"\
-        ,\r\n  \"location\": \"westus\",\r\n  \"tags\": {\r\n    \"mytag\": \"tagvalue1\"\
-        \r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
-        ,\r\n  \"name\": \"vmnowait2\"\r\n}"}
-    headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 15 Dec 2017 01:41:16 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['2745']
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4962,Microsoft.Compute/LowCostGet30Min;39774']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.21
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.23]
-      accept-language: [en-US]
-      x-ms-client-request-id: [1c983448-e139-11e7-b203-a0b3ccf7272a]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2?$expand=instanceView&api-version=2017-12-01
-  response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"070ca849-0a51-48d4-af4f-dfeb2c8c4369\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
-        ,\r\n        \"sku\": \"16.04-LTS\",\r\n        \"version\": \"latest\"\r\n\
-        \      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n   \
-        \     \"name\": \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\",\r\
-        \n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
-        ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
-        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\"\
-        \r\n        },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\"\
-        : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vmnowait2\"\
-        ,\r\n      \"adminUsername\": \"user12\",\r\n      \"linuxConfiguration\"\
-        : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
-        \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
-        }]},\r\n    \"provisioningState\": \"Creating\",\r\n    \"instanceView\":\
-        \ {\r\n      \"vmAgent\": {\r\n        \"vmAgentVersion\": \"Unknown\",\r\n\
-        \        \"statuses\": [\r\n          {\r\n            \"code\": \"ProvisioningState/Unavailable\"\
-        ,\r\n            \"level\": \"Warning\",\r\n            \"displayStatus\"\
-        : \"Not Ready\",\r\n            \"message\": \"VM status blob is found but\
-        \ not yet populated.\",\r\n            \"time\": \"2017-12-15T01:41:45+00:00\"\
-        \r\n          }\r\n        ]\r\n      },\r\n      \"disks\": [\r\n       \
-        \ {\r\n          \"name\": \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\"\
-        ,\r\n          \"statuses\": [\r\n            {\r\n              \"code\"\
-        : \"ProvisioningState/succeeded\",\r\n              \"level\": \"Info\",\r\
-        \n              \"displayStatus\": \"Provisioning succeeded\",\r\n       \
-        \       \"time\": \"2017-12-15T01:41:14.2251227+00:00\"\r\n            }\r\
+        \       \"time\": \"2017-12-22T15:57:57.9625282+00:00\"\r\n            }\r\
         \n          ]\r\n        }\r\n      ],\r\n      \"statuses\": [\r\n      \
         \  {\r\n          \"code\": \"ProvisioningState/creating/osProvisioningInProgress\"\
         ,\r\n          \"level\": \"Info\",\r\n          \"displayStatus\": \"OS provisioning\
@@ -601,52 +567,52 @@ interactions:
         ,\r\n          \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\
         \r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachines\"\
         ,\r\n  \"location\": \"westus\",\r\n  \"tags\": {\r\n    \"mytag\": \"tagvalue1\"\
-        \r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
+        \r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
         ,\r\n  \"name\": \"vmnowait2\"\r\n}"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 15 Dec 2017 01:41:47 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['2789']
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4966,Microsoft.Compute/LowCostGet30Min;39772']
+      cache-control: [no-cache]
+      content-length: ['2939']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 22 Dec 2017 15:58:05 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4794,Microsoft.Compute/LowCostGet30Min;38393']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [vm wait]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.21
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.23]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
-      x-ms-client-request-id: [2ec56dfa-e139-11e7-a1aa-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2?$expand=instanceView&api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2?api-version=2017-12-01&$expand=instanceView
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"070ca849-0a51-48d4-af4f-dfeb2c8c4369\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
-        ,\r\n        \"sku\": \"16.04-LTS\",\r\n        \"version\": \"latest\"\r\n\
-        \      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n   \
-        \     \"name\": \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\",\r\
-        \n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        63806c28-71af-44cd-a6c1-4e76b2c21dba\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"Canonical\"\
+        ,\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\": \"16.04-LTS\"\
+        ,\r\n        \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n\
+        \        \"osType\": \"Linux\",\r\n        \"name\": \"vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
+        ,\r\n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
         ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
-        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
         \r\n        },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\"\
         : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vmnowait2\"\
         ,\r\n      \"adminUsername\": \"user12\",\r\n      \"linuxConfiguration\"\
         : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
         \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
         }]},\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"instanceView\"\
         : {\r\n      \"computerName\": \"vmnowait2\",\r\n      \"osName\": \"ubuntu\"\
         ,\r\n      \"osVersion\": \"16.04\",\r\n      \"vmAgent\": {\r\n        \"\
@@ -654,81 +620,108 @@ interactions:
         \            \"code\": \"ProvisioningState/succeeded\",\r\n            \"\
         level\": \"Info\",\r\n            \"displayStatus\": \"Ready\",\r\n      \
         \      \"message\": \"Guest Agent is running\",\r\n            \"time\": \"\
-        2017-12-15T01:42:17+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\"\
+        2017-12-22T15:58:37+00:00\"\r\n          }\r\n        ],\r\n        \"extensionHandlers\"\
         : []\r\n      },\r\n      \"disks\": [\r\n        {\r\n          \"name\"\
-        : \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\",\r\n          \"\
+        : \"vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\",\r\n          \"\
         statuses\": [\r\n            {\r\n              \"code\": \"ProvisioningState/succeeded\"\
         ,\r\n              \"level\": \"Info\",\r\n              \"displayStatus\"\
-        : \"Provisioning succeeded\",\r\n              \"time\": \"2017-12-15T01:41:14.2251227+00:00\"\
+        : \"Provisioning succeeded\",\r\n              \"time\": \"2017-12-22T15:57:57.9625282+00:00\"\
         \r\n            }\r\n          ]\r\n        }\r\n      ],\r\n      \"statuses\"\
-        : [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded/osProvisioningInProgress\"\
-        ,\r\n          \"level\": \"Info\",\r\n          \"displayStatus\": \"OS provisioning\
-        \ in progress\",\r\n          \"time\": \"2017-12-15T01:42:08.2428244+00:00\"\
+        : [\r\n        {\r\n          \"code\": \"ProvisioningState/succeeded\",\r\
+        \n          \"level\": \"Info\",\r\n          \"displayStatus\": \"Provisioning\
+        \ succeeded\",\r\n          \"time\": \"2017-12-22T15:58:21.7438167+00:00\"\
         \r\n        },\r\n        {\r\n          \"code\": \"PowerState/running\"\
         ,\r\n          \"level\": \"Info\",\r\n          \"displayStatus\": \"VM running\"\
         \r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"type\": \"Microsoft.Compute/virtualMachines\"\
         ,\r\n  \"location\": \"westus\",\r\n  \"tags\": {\r\n    \"mytag\": \"tagvalue1\"\
-        \r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
+        \r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
         ,\r\n  \"name\": \"vmnowait2\"\r\n}"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 15 Dec 2017 01:42:17 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['2939']
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4964,Microsoft.Compute/LowCostGet30Min;39760']
+      cache-control: [no-cache]
+      content-length: ['3059']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 22 Dec 2017 15:58:39 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4790,Microsoft.Compute/LowCostGet30Min;38388']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
+      CommandName: [vm show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.21
-          msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
-          AZURECLI/TEST/2.0.23]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 computemanagementclient/3.1.0rc2 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
-      x-ms-client-request-id: [2f2d80ae-e139-11e7-a287-a0b3ccf7272a]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2?api-version=2017-12-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2?api-version=2017-12-01
   response:
-    body: {string: "{\r\n  \"properties\": {\r\n    \"vmId\": \"070ca849-0a51-48d4-af4f-dfeb2c8c4369\"\
-        ,\r\n    \"hardwareProfile\": {\r\n      \"vmSize\": \"Standard_DS1_v2\"\r\
-        \n    },\r\n    \"storageProfile\": {\r\n      \"imageReference\": {\r\n \
-        \       \"publisher\": \"Canonical\",\r\n        \"offer\": \"UbuntuServer\"\
-        ,\r\n        \"sku\": \"16.04-LTS\",\r\n        \"version\": \"latest\"\r\n\
-        \      },\r\n      \"osDisk\": {\r\n        \"osType\": \"Linux\",\r\n   \
-        \     \"name\": \"vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\",\r\
-        \n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
+    body: {string: !!python/unicode "{\r\n  \"properties\": {\r\n    \"vmId\": \"\
+        63806c28-71af-44cd-a6c1-4e76b2c21dba\",\r\n    \"hardwareProfile\": {\r\n\
+        \      \"vmSize\": \"Standard_DS1_v2\"\r\n    },\r\n    \"storageProfile\"\
+        : {\r\n      \"imageReference\": {\r\n        \"publisher\": \"Canonical\"\
+        ,\r\n        \"offer\": \"UbuntuServer\",\r\n        \"sku\": \"16.04-LTS\"\
+        ,\r\n        \"version\": \"latest\"\r\n      },\r\n      \"osDisk\": {\r\n\
+        \        \"osType\": \"Linux\",\r\n        \"name\": \"vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
+        ,\r\n        \"createOption\": \"FromImage\",\r\n        \"caching\": \"ReadWrite\"\
         ,\r\n        \"managedDisk\": {\r\n          \"storageAccountType\": \"Premium_LRS\"\
-        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_f7bd5620f65e49fa907758693fcae0ef\"\
+        ,\r\n          \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/disks/vmnowait2_OsDisk_1_767196b21c4f4513a0af1abe5b0d52c1\"\
         \r\n        },\r\n        \"diskSizeGB\": 30\r\n      },\r\n      \"dataDisks\"\
         : []\r\n    },\r\n    \"osProfile\": {\r\n      \"computerName\": \"vmnowait2\"\
         ,\r\n      \"adminUsername\": \"user12\",\r\n      \"linuxConfiguration\"\
         : {\r\n        \"disablePasswordAuthentication\": false\r\n      },\r\n  \
         \    \"secrets\": []\r\n    },\r\n    \"networkProfile\": {\"networkInterfaces\"\
-        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
+        :[{\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Network/networkInterfaces/vmnowait2VMNic\"\
         }]},\r\n    \"provisioningState\": \"Succeeded\"\r\n  },\r\n  \"type\": \"\
         Microsoft.Compute/virtualMachines\",\r\n  \"location\": \"westus\",\r\n  \"\
-        tags\": {\r\n    \"mytag\": \"tagvalue1\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
+        tags\": {\r\n    \"mytag\": \"tagvalue1\"\r\n  },\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_vm_no_wait000001/providers/Microsoft.Compute/virtualMachines/vmnowait2\"\
         ,\r\n  \"name\": \"vmnowait2\"\r\n}"}
     headers:
-      Cache-Control: [no-cache]
-      Content-Type: [application/json; charset=utf-8]
-      Date: ['Fri, 15 Dec 2017 01:42:17 GMT']
-      Expires: ['-1']
-      Pragma: [no-cache]
-      Server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
-      Strict-Transport-Security: [max-age=31536000; includeSubDomains]
-      Transfer-Encoding: [chunked]
-      Vary: [Accept-Encoding]
-      content-length: ['1638']
-      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4963,Microsoft.Compute/LowCostGet30Min;39759']
+      cache-control: [no-cache]
+      content-length: ['1788']
+      content-type: [application/json; charset=utf-8]
+      date: ['Fri, 22 Dec 2017 15:58:52 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-ms-ratelimit-remaining-resource: ['Microsoft.Compute/LowCostGet3Min;4788,Microsoft.Compute/LowCostGet30Min;38386']
     status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_vm_no_wait000001?api-version=2017-05-10
+  response:
+    body: {string: !!python/unicode ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Fri, 22 Dec 2017 15:59:02 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGVk06NUZOTzo1RldBSVRFSVRaSlhPVEVWVTM3NFo0V1lBN3w2N0JFODI5NjQ1QjBEMDNBLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1191']
+    status: {code: 202, message: Accepted}
 version: 1

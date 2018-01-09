@@ -6,8 +6,7 @@
 import os
 import os.path
 from fnmatch import fnmatch
-
-from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
+from datetime import datetime, timedelta
 
 
 def collect_blobs(blob_service, container, pattern=None):
@@ -23,10 +22,20 @@ def collect_blobs(blob_service, container, pattern=None):
     if not _pattern_has_wildcards(pattern):
         return [pattern] if blob_service.exists(container, pattern) else []
 
-    return (blob.name for blob in blob_service.list_blobs(container) if _match_path(pattern, blob.name))
+    results = []
+    for blob in blob_service.list_blobs(container):
+        try:
+            blob_name = blob.name.encode('utf-8') if isinstance(blob.name, unicode) else blob.name
+        except NameError:
+            blob_name = blob.name
+
+        if _match_path(pattern, blob_name):
+            results.append(blob_name)
+
+    return results
 
 
-def collect_files(file_service, share, pattern=None):
+def collect_files(cmd, file_service, share, pattern=None):
     """
     Search files in the the given file share recursively. Filter the files by matching their path to the given pattern.
     Returns a iterable of tuple (dir, name).
@@ -40,21 +49,21 @@ def collect_files(file_service, share, pattern=None):
     if not _pattern_has_wildcards(pattern):
         return [pattern]
 
-    return glob_files_remotely(file_service, share, pattern)
+    return glob_files_remotely(cmd, file_service, share, pattern)
 
 
-def create_blob_service_from_storage_client(client):
-    BlockBlobService = get_sdk(ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
-    return BlockBlobService(account_name=client.account_name,
+def create_blob_service_from_storage_client(cmd, client):
+    t_block_blob_svc = cmd.get_models('blob#BlockBlobService')
+    return t_block_blob_svc(account_name=client.account_name,
                             account_key=client.account_key,
                             sas_token=client.sas_token)
 
 
-def create_file_share_from_storage_client(client):
-    FileService = get_sdk(ResourceType.DATA_STORAGE, 'file.fileservice#FileService')
-    return FileService(account_name=client.account_name,
-                       account_key=client.account_key,
-                       sas_token=client.sas_token)
+def create_file_share_from_storage_client(cmd, client):
+    t_file_svc = cmd.get_models('file.fileservice#FileService')
+    return t_file_svc(account_name=client.account_name,
+                      account_key=client.account_key,
+                      sas_token=client.sas_token)
 
 
 def filter_none(iterable):
@@ -76,50 +85,71 @@ def glob_files_locally(folder_path, pattern):
                 yield (full_path, full_path[len_folder_path:])
 
 
-def glob_files_remotely(client, share_name, pattern):
+def glob_files_remotely(cmd, client, share_name, pattern):
     """glob the files in remote file share based on the given pattern"""
     from collections import deque
-    Directory, File = get_sdk(ResourceType.DATA_STORAGE, 'file.models#Directory', 'file.models#File')
+    t_dir, t_file = cmd.get_models('file.models#Directory', 'file.models#File')
 
     queue = deque([""])
     while queue:
         current_dir = queue.pop()
         for f in client.list_directories_and_files(share_name, current_dir):
-            if isinstance(f, File):
+            if isinstance(f, t_file):
                 if (pattern and fnmatch(os.path.join(current_dir, f.name), pattern)) or (not pattern):
                     yield current_dir, f.name
-            elif isinstance(f, Directory):
+            elif isinstance(f, t_dir):
                 queue.appendleft(os.path.join(current_dir, f.name))
 
 
-def create_short_lived_container_sas(account_name, account_key, container):
-    from datetime import datetime, timedelta
-    if supported_api_version(ResourceType.DATA_STORAGE, min_api='2017-04-17'):
-        SharedAccessSignature = get_sdk(ResourceType.DATA_STORAGE, 'BlobSharedAccessSignature',
-                                        mod='blob.sharedaccesssignature')
+def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob):
+    if cmd.supported_api_version(min_api='2017-04-17'):
+        t_sas = cmd.get_models('blob.sharedaccesssignature#BlobSharedAccessSignature')
     else:
-        SharedAccessSignature = get_sdk(ResourceType.DATA_STORAGE, 'SharedAccessSignature',
-                                        mod='sharedaccesssignature')
-    BlobPermissions = get_sdk(ResourceType.DATA_STORAGE, 'blob.models#BlobPermissions')
+        t_sas = cmd.get_models('shareaccesssignature#SharedAccessSignature')
+
+    t_blob_permissions = cmd.get_models('blob.models#BlobPermissions')
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    sas = t_sas(account_name, account_key)
+    return sas.generate_blob(container, blob, permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')
+
+
+def create_short_lived_file_sas(cmd, account_name, account_key, share, directory_name, file_name):
+    if cmd.supported_api_version(min_api='2017-04-17'):
+        t_sas = cmd.get_models('file.sharedaccesssignature#FileSharedAccessSignature')
+    else:
+        t_sas = cmd.get_models('sharedaccesssignature#SharedAccessSignature')
+
+    t_file_permissions = cmd.get_models('file.models#FilePermissions')
+    # if dir is empty string change it to None
+    directory_name = directory_name if directory_name else None
+    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
+    sas = t_sas(account_name, account_key)
+    return sas.generate_file(share, directory_name=directory_name, file_name=file_name,
+                             permission=t_file_permissions(read=True), expiry=expiry, protocol='https')
+
+
+def create_short_lived_container_sas(cmd, account_name, account_key, container):
+    if cmd.supported_api_version(min_api='2017-04-17'):
+        t_sas = cmd.get_models('blob.sharedaccesssignature#BlobSharedAccessSignature')
+    else:
+        t_sas = cmd.get_models('sharedaccesssignature#SharedAccessSignature')
+    t_blob_permissions = cmd.get_models('blob.models#BlobPermissions')
 
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
-    sas = SharedAccessSignature(account_name, account_key)
-    return sas.generate_container(container, permission=BlobPermissions(read=True), expiry=expiry, protocol='https')
+    sas = t_sas(account_name, account_key)
+    return sas.generate_container(container, permission=t_blob_permissions(read=True), expiry=expiry, protocol='https')
 
 
-def create_short_lived_share_sas(account_name, account_key, share):
-    from datetime import datetime, timedelta
-    if supported_api_version(ResourceType.DATA_STORAGE, min_api='2017-04-17'):
-        SharedAccessSignature = get_sdk(ResourceType.DATA_STORAGE, 'FileSharedAccessSignature',
-                                        mod='file.sharedaccesssignature')
+def create_short_lived_share_sas(cmd, account_name, account_key, share):
+    if cmd.supported_api_version(min_api='2017-04-17'):
+        t_sas = cmd.get_models('file.sharedaccesssignature#FileSharedAccessSignature')
     else:
-        SharedAccessSignature = get_sdk(ResourceType.DATA_STORAGE, 'SharedAccessSignature',
-                                        mod='sharedaccesssignature')
-    FilePermission = get_sdk(ResourceType.DATA_STORAGE, 'file.models#FilePermissions')
+        t_sas = cmd.get_models('sharedaccesssignature#SharedAccessSignature')
 
+    t_file_permissions = cmd.get_models('file.models#FilePermissions')
     expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
-    sas = SharedAccessSignature(account_name, account_key)
-    return sas.generate_share(share, permission=FilePermission(read=True), expiry=expiry, protocol='https')
+    sas = t_sas(account_name, account_key)
+    return sas.generate_share(share, permission=t_file_permissions(read=True), expiry=expiry, protocol='https')
 
 
 def mkdir_p(path):
@@ -141,10 +171,6 @@ def _match_path(pattern, *args):
     return fnmatch(os.path.join(*args), pattern) if pattern else True
 
 
-def get_blob_tier_names(model):
-    return [v for v in dir(get_sdk(ResourceType.DATA_STORAGE, 'blob.models#' + model)) if not v.startswith('_')]
-
-
 def guess_content_type(file_path, original, settings_class):
     if original.content_encoding or original.content_type:
         return original
@@ -159,3 +185,16 @@ def guess_content_type(file_path, original, settings_class):
         content_language=original.content_language,
         content_md5=original.content_md5,
         cache_control=original.cache_control)
+
+
+def get_storage_client(cli_ctx, service_type, namespace):
+    from azure.cli.command_modules.storage._client_factory import get_storage_data_service_client
+
+    az_config = cli_ctx.config
+
+    name = getattr(namespace, 'account_name', az_config.get('storage', 'account', None))
+    key = getattr(namespace, 'account_key', az_config.get('storage', 'key', None))
+    connection_string = getattr(namespace, 'connection_string', az_config.get('storage', 'connection_string', None))
+    sas_token = getattr(namespace, 'sas_token', az_config.get('storage', 'sas_token', None))
+
+    return get_storage_data_service_client(cli_ctx, service_type, name, key, connection_string, sas_token)

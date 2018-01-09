@@ -14,17 +14,18 @@ import requests
 from wheel.install import WHEEL_INFO_RE
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
+from knack.log import get_logger
+
 from azure.cli.core.util import CLIError
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions,
                                       get_extension, ext_compat_with_cli,
                                       WheelExtension, ExtensionNotInstalledException)
-import azure.cli.core.azlogging as azlogging
 
 from ._homebrew_patch import HomebrewPipPatch
 from ._index import get_index_extensions
 from ._resolve import resolve_from_index, NoExtensionCandidatesError
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 OUT_KEY_NAME = 'name'
 OUT_KEY_VERSION = 'version'
@@ -115,7 +116,7 @@ def _add_whl_ext(source, ext_sha256=None):  # pylint: disable=too-many-statement
         if not os.path.isfile(ext_file):
             raise CLIError("File {} not found.".format(source))
     # Validate the extension
-    logger.debug('Validating the extension {}'.format(ext_file))
+    logger.debug('Validating the extension %s', ext_file)
     if ext_sha256:
         valid_checksum, computed_checksum = is_valid_sha256sum(ext_file, ext_sha256)
         if valid_checksum:
@@ -132,7 +133,7 @@ def _add_whl_ext(source, ext_sha256=None):  # pylint: disable=too-many-statement
         raise CLIError('The extension is invalid. Use --debug for more information.')
     except CLIError as e:
         raise e
-    logger.debug('Validation successful on {}'.format(ext_file))
+    logger.debug('Validation successful on %s', ext_file)
     # Install with pip
     extension_path = get_extension_path(extension_name)
     pip_args = ['install', '--target', extension_path, ext_file]

@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+0.0.16
+++++++
+* Update for CLI core changes.
+
 0.0.15
 ++++++
 * Change the return type of the job list command: a list of JobInformation to a list of JobInformationBasic

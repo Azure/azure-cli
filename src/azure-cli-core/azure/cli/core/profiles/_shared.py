@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 # TODO Move this to a package shared by CLI and SDK
-from collections import namedtuple
 from enum import Enum
 from functools import total_ordering, partial
 from importlib import import_module
@@ -98,21 +97,43 @@ AZURE_API_PROFILES = {
 }
 
 
+class _ApiVersions(object):  # pylint: disable=too-few-public-methods
+    def __init__(self, client_type, sdk_profile, post_process):
+        self._client_type = client_type
+        self._sdk_profile = sdk_profile
+        self._post_process = post_process
+        self._operations_groups_value = None
+        self._resolved = False
+
+    def _resolve(self):
+        if self._resolved:
+            return
+
+        self._operations_groups_value = {}
+        for operation_group_name, operation_type in self._client_type.__dict__.items():
+            if not isinstance(operation_type, property):
+                continue
+
+            value_to_save = self._sdk_profile.profile.get(
+                operation_group_name,
+                self._sdk_profile.default_api_version
+            )
+            self._operations_groups_value[operation_group_name] = self._post_process(value_to_save)
+        self._resolved = True
+
+    def __getattr__(self, item):
+        try:
+            self._resolve()
+            return self._operations_groups_value[item]
+        except KeyError:
+            raise AttributeError('Attribute {} does not exist.'.format(item))
+
+
 def _get_api_version_tuple(resource_type, sdk_profile, post_process=lambda x: x):
-    """Return a namedtuple where key are operation group and value are api version.
-    """
-    class_type = get_client_class(resource_type)
-    operations_groups_value = {}
-    for operation_group_name, operation_type in class_type.__dict__.items():
-        if not isinstance(operation_type, property):
-            continue
-        value_to_save = sdk_profile.profile.get(
-            operation_group_name,
-            sdk_profile.default_api_version
-        )
-        operations_groups_value[operation_group_name] = post_process(value_to_save)
-    api_version_tuple_class = namedtuple("ApiVersions", list(operations_groups_value.keys()))
-    return api_version_tuple_class(**operations_groups_value)
+    """Return a _ApiVersion instance where key are operation group and value are api version."""
+    return _ApiVersions(client_type=get_client_class(resource_type),
+                        sdk_profile=sdk_profile,
+                        post_process=post_process)
 
 
 def get_api_version(api_profile, resource_type, as_sdk_profile=False):
@@ -245,14 +266,11 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
                       azure.mgmt.storage.v2016_12_01.operations.storage_accounts_operations
     """
     api_version = get_api_version(api_profile, resource_type)
-    if isinstance(api_version, tuple):
+    if isinstance(api_version, _ApiVersions):
         if operation_group is None:
-            raise ValueError("operation_group is required for RT {}".format(resource_type))
+            raise ValueError("operation_group is required for resource type '{}'".format(resource_type))
         api_version = getattr(api_version, operation_group)
-    return '{}.v{}'.format(
-        resource_type.import_prefix,
-        api_version.replace('-', '_')
-    )
+    return '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_'))
 
 
 def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):

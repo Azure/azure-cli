@@ -7,7 +7,10 @@ import json
 import base64
 from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
 
-from msrest.exceptions import DeserializationError, ValidationError, ClientRequestError
+from knack.log import get_logger
+
+from msrest.exceptions import DeserializationError
+
 from azure.mgmt.batch import BatchManagementClient
 from azure.mgmt.batch.models import (BatchAccountCreateParameters,
                                      AutoStorageBaseProperties,
@@ -17,14 +20,13 @@ from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
                                 PoolResizeOptions, JobListOptions, JobListFromJobScheduleOptions,
                                 TaskAddParameter, TaskConstraints, PoolUpdatePropertiesParameter,
-                                StartTask, BatchErrorException)
+                                StartTask)
 
-from azure.cli.core.util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
-import azure.cli.core.azlogging as azlogging
+from azure.cli.core._profile import Profile
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 MAX_TASKS_PER_REQUEST = 100
 
 
@@ -49,7 +51,7 @@ def list_accounts(client, resource_group_name=None):
 @transfer_doc(AutoStorageBaseProperties)
 def create_account(client,
                    resource_group_name, account_name, location, tags=None, storage_account=None,
-                   keyvault=None, keyvault_url=None):
+                   keyvault=None, keyvault_url=None, no_wait=False):
     properties = AutoStorageBaseProperties(storage_account_id=storage_account) \
         if storage_account else None
     parameters = BatchAccountCreateParameters(location=location,
@@ -61,7 +63,8 @@ def create_account(client,
 
     return client.create(resource_group_name=resource_group_name,
                          account_name=account_name,
-                         parameters=parameters)
+                         parameters=parameters,
+                         raw=no_wait)
 
 
 @transfer_doc(AutoStorageBaseProperties)
@@ -75,27 +78,40 @@ def update_account(client, resource_group_name, account_name,
                          auto_storage=properties)
 
 
-def login_account(client, resource_group_name, account_name, shared_key_auth=False):
-    from azure.cli.core._config import az_config, set_global_config
-
+# pylint: disable=inconsistent-return-statements
+def login_account(cmd, client, resource_group_name, account_name, shared_key_auth=False, show=False):
     account = client.get(resource_group_name=resource_group_name,
                          account_name=account_name)
-    if not az_config.config_parser.has_section('batch'):
-        az_config.config_parser.add_section('batch')
-    az_config.config_parser.set('batch', 'account', account.name)
-    az_config.config_parser.set('batch', 'endpoint',
-                                'https://{}/'.format(account.account_endpoint))
+    cmd.cli_ctx.config.set_value('batch', 'account', account.name)
+    cmd.cli_ctx.config.set_value('batch', 'endpoint',
+                                 'https://{}/'.format(account.account_endpoint))
 
     if shared_key_auth:
         keys = client.get_keys(resource_group_name=resource_group_name,
                                account_name=account_name)
-        az_config.config_parser.set('batch', 'auth_mode', 'shared_key')
-        az_config.config_parser.set('batch', 'access_key', keys.primary)
+        cmd.cli_ctx.config.set_value('batch', 'auth_mode', 'shared_key')
+        cmd.cli_ctx.config.set_value('batch', 'access_key', keys.primary)
+        if show:
+            return {
+                'account': account.name,
+                'endpoint': 'https://{}/'.format(account.account_endpoint),
+                'primaryKey': keys.primary,
+                'secondaryKey': keys.secondary
+            }
     else:
-        az_config.config_parser.set('batch', 'auth_mode', 'aad')
-        az_config.config_parser.remove_option('batch', 'access_key')
-
-    set_global_config(az_config.config_parser)
+        cmd.cli_ctx.config.set_value('batch', 'auth_mode', 'aad')
+        if show:
+            resource = cmd.cli_ctx.cloud.endpoints.batch_resource_id
+            profile = Profile(cli_ctx=cmd.cli_ctx)
+            creds, subscription, tenant = profile.get_raw_token(resource=resource)
+            return {
+                'tokenType': creds[0],
+                'accessToken': creds[1],
+                'expiresOn': creds[2]['expiresOn'],
+                'subscription': subscription,
+                'tenant': tenant,
+                'resource': resource
+            }
 
 
 @transfer_doc(ApplicationUpdateParameters)
@@ -111,9 +127,9 @@ def update_application(client,
                          parameters=parameters)
 
 
-def _upload_package_blob(package_file, url):
+def _upload_package_blob(ctx, package_file, url):
     """Upload the location file to storage url provided by autostorage"""
-    BlockBlobService = get_sdk(ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
+    BlockBlobService = get_sdk(ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
 
     uri = urlsplit(url)
     # in uri path, it always start with '/', so container name is at second block
@@ -137,11 +153,11 @@ def _upload_package_blob(package_file, url):
 
 
 @transfer_doc(ApplicationPackageOperations.create)
-def create_application_package(client,
+def create_application_package(cmd, client,
                                resource_group_name, account_name, application_id, version,
                                package_file):
     # create application if not exist
-    mgmt_client = get_mgmt_service_client(BatchManagementClient)
+    mgmt_client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
     try:
         mgmt_client.application.get(resource_group_name, account_name, application_id)
     except Exception:  # pylint:disable=broad-except
@@ -151,7 +167,7 @@ def create_application_package(client,
 
     # upload binary as application package
     logger.info('Uploading %s to storage blob %s...', package_file, result.storage_url)
-    _upload_package_blob(package_file, result.storage_url)
+    _upload_package_blob(cmd.cli_ctx, package_file, result.storage_url)
 
     # activate the application package
     client.activate(resource_group_name, account_name, application_id, version, "zip")
@@ -160,30 +176,10 @@ def create_application_package(client,
 
 # Data plane custom commands
 
-def _handle_batch_exception(action):
-    try:
-        return action()
-    except BatchErrorException as ex:
-        try:
-            message = ex.error.message.value
-            if ex.error.values:
-                for detail in ex.error.values:
-                    message += "\n{}: {}".format(detail.key, detail.value)
-            raise CLIError(message)
-        except AttributeError:
-            raise CLIError(ex)
-    except (ValidationError, ClientRequestError) as ex:
-        raise CLIError(ex)
-
 
 @transfer_doc(CertificateAddParameter)
 def create_certificate(client, certificate_file, thumbprint, password=None):
     thumbprint_algorithm = 'sha1'
-
-    def action():
-        client.add(cert)
-        return client.get(thumbprint_algorithm, thumbprint)
-
     certificate_format = 'pfx' if password else 'cer'
     with open(certificate_file, "rb") as f:
         data_bytes = f.read()
@@ -191,19 +187,15 @@ def create_certificate(client, certificate_file, thumbprint, password=None):
     cert = CertificateAddParameter(thumbprint, thumbprint_algorithm, data,
                                    certificate_format=certificate_format,
                                    password=password)
-    return _handle_batch_exception(action)
+    client.add(cert)
+    return client.get(thumbprint_algorithm, thumbprint)
 
 
 def delete_certificate(client, thumbprint, abort=False):
     thumbprint_algorithm = 'sha1'
-
-    def action():
-        if abort:
-            client.cancel_deletion(thumbprint_algorithm, thumbprint)
-        else:
-            client.delete(thumbprint_algorithm, thumbprint)
-
-    return _handle_batch_exception(action)
+    if abort:
+        return client.cancel_deletion(thumbprint_algorithm, thumbprint)
+    return client.delete(thumbprint_algorithm, thumbprint)
 
 
 @transfer_doc(PoolResizeParameter)
@@ -211,25 +203,22 @@ def resize_pool(client, pool_id, target_dedicated_nodes=None, target_low_priorit
                 resize_timeout=None, node_deallocation_option=None,
                 if_match=None, if_none_match=None, if_modified_since=None,
                 if_unmodified_since=None, abort=False):
-    def action():
-        if abort:
-            stop_resize_option = PoolStopResizeOptions(if_match=if_match,
-                                                       if_none_match=if_none_match,
-                                                       if_modified_since=if_modified_since,
-                                                       if_unmodified_since=if_unmodified_since)
-            return client.stop_resize(pool_id, pool_stop_resize_options=stop_resize_option)
+    if abort:
+        stop_resize_option = PoolStopResizeOptions(if_match=if_match,
+                                                   if_none_match=if_none_match,
+                                                   if_modified_since=if_modified_since,
+                                                   if_unmodified_since=if_unmodified_since)
+        return client.stop_resize(pool_id, pool_stop_resize_options=stop_resize_option)
 
-        param = PoolResizeParameter(target_dedicated_nodes=target_dedicated_nodes,
-                                    target_low_priority_nodes=target_low_priority_nodes,
-                                    resize_timeout=resize_timeout,
-                                    node_deallocation_option=node_deallocation_option)
-        resize_option = PoolResizeOptions(if_match=if_match,
-                                          if_none_match=if_none_match,
-                                          if_modified_since=if_modified_since,
-                                          if_unmodified_since=if_unmodified_since)
-        return client.resize(pool_id, param, pool_resize_options=resize_option)
-
-    return _handle_batch_exception(action)
+    param = PoolResizeParameter(target_dedicated_nodes=target_dedicated_nodes,
+                                target_low_priority_nodes=target_low_priority_nodes,
+                                resize_timeout=resize_timeout,
+                                node_deallocation_option=node_deallocation_option)
+    resize_option = PoolResizeOptions(if_match=if_match,
+                                      if_none_match=if_none_match,
+                                      if_modified_since=if_modified_since,
+                                      if_unmodified_since=if_unmodified_since)
+    return client.resize(pool_id, param, pool_resize_options=resize_option)
 
 
 @transfer_doc(PoolUpdatePropertiesParameter, StartTask)
@@ -238,17 +227,12 @@ def update_pool(client,
                 application_package_references=None, metadata=None,
                 start_task_environment_settings=None, start_task_wait_for_success=None,
                 start_task_max_task_retry_count=None):
-    def action():
-        client.update_properties(pool_id=pool_id, pool_update_properties_parameter=param)
-        return client.get(pool_id)
-
     if json_file:
         with open(json_file) as f:
             json_obj = json.load(f)
             param = None
             try:
-                param = client._deserialize(  # pylint: disable=protected-access
-                    'PoolUpdatePropertiesParameter', json_obj)
+                param = PoolUpdatePropertiesParameter.from_dict(json_obj)
             except DeserializationError:
                 pass
             if not param:
@@ -276,25 +260,23 @@ def update_pool(client,
                                          environment_settings=start_task_environment_settings,
                                          wait_for_success=start_task_wait_for_success,
                                          max_task_retry_count=start_task_max_task_retry_count)
-    return _handle_batch_exception(action)
+    client.update_properties(pool_id=pool_id, pool_update_properties_parameter=param)
+    return client.get(pool_id)
 
 
 def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redefined-builtin
              select=None, expand=None):
-    def action():
-        if job_schedule_id:
-            option1 = JobListFromJobScheduleOptions(filter=filter,
-                                                    select=select,
-                                                    expand=expand)
-            return list(client.list_from_job_schedule(job_schedule_id=job_schedule_id,
-                                                      job_list_from_job_schedule_options=option1))
+    if job_schedule_id:
+        option1 = JobListFromJobScheduleOptions(filter=filter,
+                                                select=select,
+                                                expand=expand)
+        return list(client.list_from_job_schedule(job_schedule_id=job_schedule_id,
+                                                  job_list_from_job_schedule_options=option1))
 
-        option2 = JobListOptions(filter=filter,
-                                 select=select,
-                                 expand=expand)
-        return list(client.list(job_list_options=option2))
-
-    return _handle_batch_exception(action)
+    option2 = JobListOptions(filter=filter,
+                             select=select,
+                             expand=expand)
+    return list(client.list(job_list_options=option2))
 
 
 @transfer_doc(TaskAddParameter, TaskConstraints)
@@ -303,32 +285,19 @@ def create_task(client,
                 environment_settings=None, affinity_info=None, max_wall_clock_time=None,
                 retention_time=None, max_task_retry_count=None,
                 application_package_references=None):
-    def action():
-        if task is not None:
-            client.add(job_id=job_id, task=task)
-            return client.get(job_id=job_id, task_id=task.id)
-
-        submitted_tasks = []
-        for i in range(0, len(tasks), MAX_TASKS_PER_REQUEST):
-            submission = client.add_collection(
-                job_id=job_id,
-                value=tasks[i:i + MAX_TASKS_PER_REQUEST])
-            submitted_tasks.extend(submission.value)  # pylint: disable=no-member
-        return submitted_tasks
-
     task = None
     tasks = []
     if json_file:
         with open(json_file) as f:
             json_obj = json.load(f)
             try:
-                task = client._deserialize(  # pylint: disable=protected-access
-                    'TaskAddParameter', json_obj)
+                task = TaskAddParameter.from_dict(json_obj)
             except DeserializationError:
+                tasks = []
                 try:
-                    tasks = client._deserialize(  # pylint: disable=protected-access
-                        '[TaskAddParameter]', json_obj)
-                except DeserializationError:
+                    for json_task in json_obj:
+                        tasks.append(TaskAddParameter.from_dict(json_task))
+                except (DeserializationError, TypeError):
                     raise ValueError("JSON file '{}' is not formatted correctly.".format(json_file))
     else:
         if command_line is None or task_id is None:
@@ -344,4 +313,14 @@ def create_task(client,
             task.constraints = TaskConstraints(max_wall_clock_time=max_wall_clock_time,
                                                retention_time=retention_time,
                                                max_task_retry_count=max_task_retry_count)
-    return _handle_batch_exception(action)
+    if task is not None:
+        client.add(job_id=job_id, task=task)
+        return client.get(job_id=job_id, task_id=task.id)
+
+    submitted_tasks = []
+    for i in range(0, len(tasks), MAX_TASKS_PER_REQUEST):
+        submission = client.add_collection(
+            job_id=job_id,
+            value=tasks[i:i + MAX_TASKS_PER_REQUEST])
+        submitted_tasks.extend(submission.value)  # pylint: disable=no-member
+    return submitted_tasks

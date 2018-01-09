@@ -15,7 +15,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.24"
+VERSION = "2.0.25"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -56,6 +56,7 @@ DEPENDENCIES = [
     'colorama',
     'humanfriendly',
     'jmespath',
+    'knack==0.3.1',
     'msrest>=0.4.4',
     'msrestazure>=0.4.7',
     'paramiko',
@@ -100,7 +101,6 @@ setup(
         'azure.cli.core',
         'azure.cli.core.commands',
         'azure.cli.core.extensions',
-        'azure.cli.core.sdk',
         'azure.cli.core.profiles',
     ],
     install_requires=DEPENDENCIES,

@@ -8,7 +8,7 @@ import os.path
 import mock
 from six import StringIO
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.command_modules.resource._validators import (
     _validate_deployment_name,
     validate_lock_parameters,
@@ -19,7 +19,7 @@ class NamespaceObject:
     pass
 
 
-class Test_resource_validators(unittest.TestCase):
+class TestResourceValidators(unittest.TestCase):
     def setUp(self):
         self.io = StringIO()
 

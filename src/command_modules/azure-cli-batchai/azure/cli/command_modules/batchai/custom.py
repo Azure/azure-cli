@@ -11,13 +11,15 @@ import os
 import signal
 import time
 import requests
-from azure.cli.core._config import az_config
-from azure.cli.core.keys import is_valid_ssh_rsa_public_key
 
-from azure.cli.core.util import CLIError
-import azure.mgmt.batchai.models as models
+from knack.util import CLIError
 
 from msrest.serialization import Deserializer
+
+import azure.mgmt.batchai.models as models
+
+from azure.cli.core.keys import is_valid_ssh_rsa_public_key
+
 
 # Environment variables for specifying azure storage account and key. We want the user to make explicit
 # decision about which storage account to use instead of using his default account specified via AZURE_STORAGE_ACCOUNT
@@ -53,7 +55,7 @@ def _get_deserializer():
     return Deserializer(client_models)
 
 
-def get_storage_account_key(account_name, account_key):
+def _get_storage_account_key(cli_ctx, account_name, account_key):
     """Returns account key for the given storage account.
 
     :param str account_name: storage account name.
@@ -63,7 +65,7 @@ def get_storage_account_key(account_name, account_key):
         return account_key
     from azure.mgmt.storage import StorageManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    storage_client = get_mgmt_service_client(StorageManagementClient)
+    storage_client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
     account = [a.id for a in list(storage_client.storage_accounts.list()) if a.name == account_name]
     if not account:
         raise CLIError('Cannot find "{0}" storage account.'.format(account_name))
@@ -74,18 +76,18 @@ def get_storage_account_key(account_name, account_key):
     return keys_list_result.keys[0].value
 
 
-def get_effective_storage_account_name_and_key(account_name, account_key):
+def _get_effective_storage_account_name_and_key(cli_ctx, account_name, account_key):
     """Returns storage account name and key to be used.
 
     :param str or None account_name: storage account name provided as command line argument.
     :param str or None account_key: storage account key provided as command line argument.
     """
     if account_name:
-        return account_name, get_storage_account_key(account_name, account_key) or ''
-    return az_config.get('batchai', 'storage_account', ''), az_config.get('batchai', 'storage_key', '')
+        return account_name, _get_storage_account_key(cli_ctx, account_name, account_key) or ''
+    return cli_ctx.config.get('batchai', 'storage_account', ''), cli_ctx.config.get('batchai', 'storage_key', '')
 
 
-def update_cluster_create_parameters_with_env_variables(params, account_name=None, account_key=None):
+def _update_cluster_create_parameters_with_env_variables(cli_ctx, params, account_name=None, account_key=None):
     """Replaces placeholders with information from the environment variables.
 
     Currently we support replacing of storage account name and key in mount volumes.
@@ -96,7 +98,8 @@ def update_cluster_create_parameters_with_env_variables(params, account_name=Non
     :return models.ClusterCreateParameters: updated parameters.
     """
     result = copy.deepcopy(params)
-    storage_account_name, storage_account_key = get_effective_storage_account_name_and_key(account_name, account_key)
+    storage_account_name, storage_account_key = _get_effective_storage_account_name_and_key(
+        cli_ctx, account_name, account_key)
     require_storage_account = False
     require_storage_account_key = False
 
@@ -142,7 +145,7 @@ def update_cluster_create_parameters_with_env_variables(params, account_name=Non
     return result
 
 
-def update_user_account_settings(params, admin_user_name, ssh_key, password):
+def _update_user_account_settings(params, admin_user_name, ssh_key, password):
     """Update account settings of cluster or file server creation parameters
 
     :param models.ClusterCreateParameters or models.FileServerCreateParameters params: params to update
@@ -187,7 +190,7 @@ def update_user_account_settings(params, admin_user_name, ssh_key, password):
     return result
 
 
-def add_nfs_to_cluster_create_parameters(params, file_server_id, mount_path):
+def _add_nfs_to_cluster_create_parameters(params, file_server_id, mount_path):
     """Adds NFS to the cluster create parameters.
 
     :param model.ClusterCreateParameters params: cluster create parameters.
@@ -211,8 +214,8 @@ def add_nfs_to_cluster_create_parameters(params, file_server_id, mount_path):
     return result
 
 
-def add_azure_file_share_to_cluster_create_parameters(params, azure_file_share, mount_path, account_name=None,
-                                                      account_key=None):
+def _add_azure_file_share_to_cluster_create_parameters(cli_ctx, params, azure_file_share, mount_path, account_name=None,
+                                                       account_key=None):
     """Add Azure File share to the cluster create parameters.
 
     :param model.ClusterCreateParameters params: cluster create parameters.
@@ -231,7 +234,8 @@ def add_azure_file_share_to_cluster_create_parameters(params, azure_file_share, 
         result.node_setup.mount_volumes = models.MountVolumes()
     if result.node_setup.mount_volumes.azure_file_shares is None:
         result.node_setup.mount_volumes.azure_file_shares = []
-    storage_account_name, storage_account_key = get_effective_storage_account_name_and_key(account_name, account_key)
+    storage_account_name, storage_account_key = _get_effective_storage_account_name_and_key(cli_ctx, account_name,
+                                                                                            account_key)
     if not storage_account_name:
         raise CLIError(MSG_CONFIGURE_STORAGE_ACCOUNT)
     if not storage_account_key:
@@ -244,8 +248,8 @@ def add_azure_file_share_to_cluster_create_parameters(params, azure_file_share, 
     return result
 
 
-def add_azure_container_to_cluster_create_parameters(params, container_name, mount_path, account_name=None,
-                                                     account_key=None):
+def _add_azure_container_to_cluster_create_parameters(cli_ctx, params, container_name, mount_path, account_name=None,
+                                                      account_key=None):
     """Add Azure Storage container to the cluster create parameters.
 
     :param model.ClusterCreateParameters params: cluster create parameters.
@@ -264,7 +268,8 @@ def add_azure_container_to_cluster_create_parameters(params, container_name, mou
         result.node_setup.mount_volumes = models.MountVolumes()
     if result.node_setup.mount_volumes.azure_blob_file_systems is None:
         result.node_setup.mount_volumes.azure_blob_file_systems = []
-    storage_account_name, storage_account_key = get_effective_storage_account_name_and_key(account_name, account_key)
+    storage_account_name, storage_account_key = _get_effective_storage_account_name_and_key(cli_ctx, account_name,
+                                                                                            account_key)
     if not storage_account_name:
         raise CLIError(MSG_CONFIGURE_STORAGE_ACCOUNT)
     if not storage_account_key:
@@ -277,7 +282,7 @@ def add_azure_container_to_cluster_create_parameters(params, container_name, mou
     return result
 
 
-def get_image_reference_or_die(image):
+def _get_image_reference_or_die(image):
     """Returns image reference for the given image alias.
 
     :param str image: image alias.
@@ -290,7 +295,7 @@ def get_image_reference_or_die(image):
     return reference
 
 
-def update_nodes_information(params, image, vm_size, min_nodes, max_nodes):
+def _update_nodes_information(params, image, vm_size, min_nodes, max_nodes):
     """Updates cluster's nodes information.
 
     :param models.ClusterCreateParameters params: cluster create parameters.
@@ -306,7 +311,7 @@ def update_nodes_information(params, image, vm_size, min_nodes, max_nodes):
     if not result.vm_size:
         raise CLIError('Please provide VM size')
     if image:
-        result.virtual_machine_configuration = models.VirtualMachineConfiguration(get_image_reference_or_die(image))
+        result.virtual_machine_configuration = models.VirtualMachineConfiguration(_get_image_reference_or_die(image))
     if min_nodes == max_nodes:
         result.scale_settings = models.ScaleSettings(manual=models.ManualScaleSettings(min_nodes))
     elif max_nodes is not None:
@@ -317,7 +322,7 @@ def update_nodes_information(params, image, vm_size, min_nodes, max_nodes):
     return result
 
 
-def create_cluster(client,  # pylint: disable=too-many-locals
+def create_cluster(cmd, client,  # pylint: disable=too-many-locals
                    resource_group, cluster_name, json_file=None, location=None, user_name=None,
                    ssh_key=None, password=None, image='UbuntuLTS', vm_size=None, min_nodes=0, max_nodes=None,
                    nfs_name=None, nfs_resource_group=None, nfs_mount_path='nfs', azure_file_share=None,
@@ -329,22 +334,22 @@ def create_cluster(client,  # pylint: disable=too-many-locals
             params = _get_deserializer()('ClusterCreateParameters', json_obj)
     else:
         params = models.ClusterCreateParameters(None, None, None)
-    params = update_cluster_create_parameters_with_env_variables(params, account_name, account_key)
-    params = update_user_account_settings(params, user_name, ssh_key, password)
+    params = _update_cluster_create_parameters_with_env_variables(cmd.cli_ctx, params, account_name, account_key)
+    params = _update_user_account_settings(params, user_name, ssh_key, password)
     if location:
         params.location = location
     if not params.location:
         raise CLIError('Please provide location for cluster creation.')
-    params = update_nodes_information(params, image, vm_size, min_nodes, max_nodes)
+    params = _update_nodes_information(params, image, vm_size, min_nodes, max_nodes)
     if nfs_name:
         file_server = client.file_servers.get(nfs_resource_group if nfs_resource_group else resource_group, nfs_name)
-        params = add_nfs_to_cluster_create_parameters(params, file_server.id, nfs_mount_path)
+        params = _add_nfs_to_cluster_create_parameters(params, file_server.id, nfs_mount_path)
     if azure_file_share:
-        params = add_azure_file_share_to_cluster_create_parameters(params, azure_file_share, afs_mount_path,
-                                                                   account_name, account_key)
+        params = _add_azure_file_share_to_cluster_create_parameters(cmd.cli_ctx, params, azure_file_share,
+                                                                    afs_mount_path, account_name, account_key)
     if container_name:
-        params = add_azure_container_to_cluster_create_parameters(params, container_name, container_mount_path,
-                                                                  account_name, account_key)
+        params = _add_azure_container_to_cluster_create_parameters(cmd.cli_ctx, params, container_name,
+                                                                   container_mount_path, account_name, account_key)
     return client.clusters.create(resource_group, cluster_name, params, raw=raw)
 
 
@@ -442,7 +447,7 @@ def create_file_server(client, resource_group, file_server_name, json_file=None,
     else:
         parameters = models.FileServerCreateParameters(None, None, None, None)
 
-    parameters = update_user_account_settings(parameters, user_name, ssh_key, password)
+    parameters = _update_user_account_settings(parameters, user_name, ssh_key, password)
     if location:
         parameters.location = location
     if not parameters.location:
