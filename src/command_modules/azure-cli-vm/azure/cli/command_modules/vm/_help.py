@@ -60,7 +60,7 @@ helps['vm create'] = """
             az vm create -g MyResourceGroup -n MyVm --attach-os-disk MyOsDisk --os-type linux
         - name: 'Create an Ubuntu Linux VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init.'
           text: >
-            az vm create -g MyResourceGroup -n MyVm --image debian --custom_data MyCloudInitScript.yml
+            az vm create -g MyResourceGroup -n MyVm --image debian --custom-data MyCloudInitScript.yml
         - name: Create a Debian VM with SSH key authentication and a public DNS entry, located on an existing virtual network and availability set.
           text: |
             az vm create -n MyVm -g MyResourceGroup --image debian --vnet-name MyVnet --subnet subnet1 \\
@@ -124,7 +124,7 @@ helps['vmss create'] = """
                 --public-ip-per-vm --vm-domain-name myvmss --dns-servers 10.0.0.6 10.0.0.5
         - name: 'Create a Linux VM scale set using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init'
           text: >
-            az vmss create -g MyResourceGroup -n MyVmss --image debian --custom_data MyCloudInitScript.yml
+            az vmss create -g MyResourceGroup -n MyVmss --image debian --custom-data MyCloudInitScript.yml
         - name: Create a Debian VM scaleset using Key Vault secrets.
           text: >
             az keyvault certificate create --vault-name vaultname -n cert1 \\
