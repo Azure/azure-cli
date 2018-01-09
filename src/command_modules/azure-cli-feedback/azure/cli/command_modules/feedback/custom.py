@@ -11,7 +11,7 @@ from knack.prompting import prompt, NoTTYException
 from knack.util import CLIError
 
 from azure.cli.core import __version__ as core_version
-from azure.cli.core.util import COMPONENT_PREFIX
+from azure.cli.core.util import COMPONENT_PREFIX, get_installed_cli_distributions
 
 logger = get_logger(__name__)
 
@@ -47,8 +47,7 @@ def _prompt_net_promoter_score():
 
 
 def _get_version_info():
-    from pip import get_installed_distributions
-    installed_dists = get_installed_distributions(local_only=True)
+    installed_dists = get_installed_cli_distributions()
 
     component_version_info = sorted([{'name': dist.key.replace(COMPONENT_PREFIX, ''),
                                       'version': dist.version}
