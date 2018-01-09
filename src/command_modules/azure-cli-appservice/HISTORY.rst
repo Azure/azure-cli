@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.1.24
+++++++
+* `webapp log tail`: fixing a bug where support for slots was not working
 
 0.1.24
 ++++++
