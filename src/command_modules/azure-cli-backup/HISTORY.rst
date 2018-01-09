@@ -3,6 +3,11 @@
 Release History
 ===============
 
+1.0.5
++++++
+* When a non-existent name is supplied for a container, commands will not fail with a stack trace. Partially fixes #4502.
+* az backup item list update: 'Health Status' of an item is now visible in the default table view.
+
 1.0.4
 +++++
 * Minor fixes.
