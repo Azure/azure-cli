@@ -51,7 +51,6 @@ def load_arguments(self, _):
         c.argument('virtual_machine_scale_set_name', options_list=['--vmss-name'], completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 
     # region MixedScopes
-
     for scope in ['vm', 'disk', 'snapshot', 'image']:
         with self.argument_context(scope) as c:
             c.argument('tags', tags_type)
@@ -66,7 +65,6 @@ def load_arguments(self, _):
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
             c.argument('source', help='source to create the disk/snapshot from, including unmanaged blob uri, managed disk id or name, or snapshot id or name')
-
     # endregion
 
     # region Disks
@@ -116,6 +114,11 @@ def load_arguments(self, _):
         c.argument('platform_fault_domain_count', type=int, help='Fault Domain count.')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
         c.argument('unmanaged', action='store_true', min_api='2016-04-30-preview', help='contained VMs should use unmanaged disks')
+
+    with self.argument_context('vm availability-set update') as c:
+        if self.supported_api_version(max_api='2016-04-30-preview', operation_group='virtual_machines'):
+            c.argument('name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
+            c.argument('availability_set_name', options_list=['--availability-set-name'])
     # endregion
 
     # region VirtualMachines
