@@ -2316,6 +2316,27 @@ class VMSecretTest(ScenarioTest):
 
         self.cmd('vm secret list -g {rg} -n {vm}',
                  checks=self.check('length([])', 0))
+
+
+class VMOsDiskSwap(ScenarioTest):
+    @ResourceGroupPreparer()
+    def test_vm_os_disk_swap(self, resource_group):
+        self.kwargs.update({
+            'vm': 'vm1',
+            'backupDisk': 'disk1',
+        })
+        self.cmd('vm create -g {rg} -n {vm} --image centos')
+        res = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        original_disk_id = res['storageProfile']['osDisk']['managedDisk']['id']
+        backup_disk_id = self.cmd('disk create -g {{rg}} -n {{backupDisk}} --source {}'.format(original_disk_id)).get_output_in_json()['id']
+
+        self.cmd('vm stop -g {rg} -n {vm}')
+        self.cmd('vm update -g {{rg}} -n {{vm}} --os-disk {}'.format(backup_disk_id))
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('storageProfile.osDisk.managedDisk.id', backup_disk_id),
+            self.check('storageProfile.osDisk.name', self.kwargs['backupDisk'])
+        ])
+        pass
 # endregion
 
 
