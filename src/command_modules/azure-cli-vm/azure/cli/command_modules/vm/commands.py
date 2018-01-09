@@ -182,7 +182,7 @@ def load_command_table(self, _):
         g.custom_command('show', 'show_vm', table_transformer=transform_vm, exception_handler=empty_on_404)
         g.command('start', 'start', no_wait_param='raw')
         g.command('stop', 'power_off', no_wait_param='raw')
-        g.generic_update_command('update', setter_name='set_vm', setter_type=compute_custom, no_wait_param='no_wait')
+        g.generic_update_command('update', setter_name='update_vm', setter_type=compute_custom, no_wait_param='no_wait')
         g.generic_wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
 
     with self.command_group('vm availability-set', compute_availset_sdk) as g:

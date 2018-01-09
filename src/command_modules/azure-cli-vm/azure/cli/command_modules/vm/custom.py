@@ -857,7 +857,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
         else get_vm(cmd, resource_group_name, vm_name)
 
 
-def set_vm(cmd, resource_group_name, vm_name, os_disk=None, no_wait=False, **kwargs):
+def update_vm(cmd, resource_group_name, vm_name, os_disk=None, no_wait=False, **kwargs):
     vm = kwargs['parameters']
     if os_disk is not None:
         if is_valid_resource_id(os_disk):

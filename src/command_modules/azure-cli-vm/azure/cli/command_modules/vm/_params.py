@@ -133,7 +133,7 @@ def load_arguments(self, _):
         c.argument('overwrite', action='store_true')
 
     with self.argument_context('vm update') as c:
-        c.argument('os_disk', help='Managed OS disk ID or name to swap to')
+        c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to. Feature registration for 'Microsoft.Compute/AllowManagedDisksReplaceOSDisk' is needed")
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
