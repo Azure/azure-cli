@@ -1231,7 +1231,7 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
 def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     url = scm_url.rstrip('/') + '/dump'
-    user_name, password = _get_site_credential(resource_group_name, name)
+    user_name, password = _get_site_credential(resource_group_name, name, slot)
     _get_log(url, user_name, password, log_file)
     logger.warning('Downloaded logs to %s', log_file)
 
