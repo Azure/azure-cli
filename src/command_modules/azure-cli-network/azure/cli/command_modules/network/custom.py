@@ -140,7 +140,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                subnet='default', subnet_address_prefix='10.0.0.0/24',
                                virtual_network_name=None, vnet_address_prefix='10.0.0.0/16',
                                public_ip_address_type=None, subnet_type=None, validate=False,
-                               connection_draining_timeout=0):
+                               connection_draining_timeout=0, enable_http2=None):
     from azure.cli.core.util import random_string
     from azure.cli.command_modules.network._template_builder import \
         (ArmTemplateBuilder, build_application_gateway_resource, build_public_ip_resource,
@@ -191,7 +191,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         private_ip_address, private_ip_allocation, cert_data, cert_password,
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
-        connection_draining_timeout)
+        connection_draining_timeout, enable_http2)
     app_gateway_resource['dependsOn'] = ag_dependencies
     master_template.add_variable(
         'appGwID',
@@ -213,7 +213,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
 
 
-def update_application_gateway(instance, sku=None, capacity=None, tags=None):
+def update_application_gateway(instance, sku=None, capacity=None, tags=None, enable_http2=None):
     if sku is not None:
         instance.sku.name = sku
         instance.sku.tier = sku.split('_', 1)[0]
@@ -221,6 +221,8 @@ def update_application_gateway(instance, sku=None, capacity=None, tags=None):
         instance.sku.capacity = capacity
     if tags is not None:
         instance.tags = tags
+    if enable_http2 is not None:
+        instance.enable_http2 = enable_http2
     return instance
 
 

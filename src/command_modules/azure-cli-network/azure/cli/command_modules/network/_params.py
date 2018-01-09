@@ -80,37 +80,42 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway') as c:
         c.argument('application_gateway_name', name_arg_type, help='The name of the application gateway.', completer=get_resource_name_completion_list('Microsoft.Network/applicationGateways'), id_part='name')
         c.argument('sku', arg_group='Gateway', help='The name of the SKU.', arg_type=get_enum_type(ApplicationGatewaySkuName), default=ApplicationGatewaySkuName.standard_medium.value)
-        c.argument('virtual_network_name', virtual_network_name_type, arg_group='Network')
-        c.argument('private_ip_address', arg_group='Network')
-        c.ignore('private_ip_address_allocation')
-        c.argument('public_ip_address_allocation', help='The kind of IP allocation to use when creating a new public IP.', arg_group='Network', default=IPAllocationMethod.dynamic.value)
-        c.argument('servers', ag_servers_type, arg_group='Gateway')
-        c.argument('http_settings_cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable HTTP settings cookie-based affinity.', arg_group='Gateway')
-        c.argument('http_settings_protocol', http_protocol_type, help='The HTTP settings protocol.', arg_group='Gateway')
-        c.argument('subnet_address_prefix', help='The CIDR prefix to use when creating a new subnet.', arg_group='Network')
-        c.argument('vnet_address_prefix', help='The CIDR prefix to use when creating a new VNet.', arg_group='Network')
-        c.ignore('virtual_network_type')
+        c.ignore('virtual_network_type', 'private_ip_address_allocation')
+
+    with self.argument_context('network application-gateway', arg_group='Network') as c:
+        c.argument('virtual_network_name', virtual_network_name_type)
+        c.argument('private_ip_address')
+        c.argument('public_ip_address_allocation', help='The kind of IP allocation to use when creating a new public IP.', default=IPAllocationMethod.dynamic.value)
+        c.argument('subnet_address_prefix', help='The CIDR prefix to use when creating a new subnet.')
+        c.argument('vnet_address_prefix', help='The CIDR prefix to use when creating a new VNet.')
+
+    with self.argument_context('network application-gateway', arg_group='Gateway') as c:
+        c.argument('servers', ag_servers_type)
+        c.argument('capacity', help='The number of instances to use with the application gateway.')
+        c.argument('http_settings_cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable HTTP settings cookie-based affinity.')
+        c.argument('http_settings_protocol', http_protocol_type, help='The HTTP settings protocol.')
+        c.argument('enable_http2', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled'), options_list=['--http2'], help='Use HTTP2 for the application gateway.', min_api='2017-10-01')
 
     with self.argument_context('network application-gateway create') as c:
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
         c.argument('routing_rule_type', arg_group='Gateway', help='The request routing rule type.', arg_type=get_enum_type(ApplicationGatewayRequestRoutingRuleType))
-        c.argument('cert_data', options_list=('--cert-file',), type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.', arg_group='Gateway')
-        c.ignore('frontend_type')
-        c.argument('frontend_port', help='The front end port number.', arg_group='Gateway')
-        c.argument('capacity', help='The number of instances to use with the application gateway.', arg_group='Gateway')
-        c.argument('cert_password', help='The certificate password', arg_group='Gateway')
-        c.argument('http_settings_port', help='The HTTP settings port.', arg_group='Gateway')
-        c.argument('servers', ag_servers_type, arg_group='Gateway')
         public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True, default_none=True)
         c.argument('public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'), arg_group='Network')
-        c.ignore('public_ip_address_type')
-
+        c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
         subnet_help = get_folded_parameter_help_string('subnet', other_required_option='--vnet-name', allow_new=True)
         c.argument('subnet', help=subnet_help, completer=subnet_completion_list, arg_group='Network')
-        c.ignore('subnet_type')
 
-    with self.argument_context('network application-gateway update') as c:
-        c.argument('sku', arg_group=None)
+    with self.argument_context('network application-gateway create', arg_group='Gateway') as c:
+        c.argument('cert_data', options_list=('--cert-file',), type=file_type, completer=FilesCompleter(), help='The path to the PFX certificate file.')
+        c.argument('frontend_port', help='The front end port number.')
+        c.argument('cert_password', help='The certificate password')
+        c.argument('http_settings_port', help='The HTTP settings port.')
+        c.argument('servers', ag_servers_type)
+
+    with self.argument_context('network application-gateway update', arg_group=None) as c:
+        c.argument('sku')
+        c.argument('enable_http2')
+        c.argument('capacity')
 
     ag_subresources = [
         {'name': 'auth-cert', 'display': 'authentication certificate', 'ref': 'authentication_certificates'},
