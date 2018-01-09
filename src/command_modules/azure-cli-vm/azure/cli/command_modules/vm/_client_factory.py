@@ -4,10 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 
-def _compute_client_factory(cli_ctx, **_):
+def _compute_client_factory(cli_ctx, **kwargs):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE, subscription_id=kwargs.get('subscription_id'))
 
 
 def cf_ni(cli_ctx, _):

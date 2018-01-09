@@ -277,9 +277,10 @@ class VMCustomImageTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image')
     def test_custom_image(self, resource_group):
         # this test should be recorded using accounts "@azuresdkteam.onmicrosoft.com", as it uses pre-made generalized vms
+        subscription_id = self.get_subscription_id()
         self.kwargs.update({
-            'prepared_vm_unmanaged': '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.Compute/virtualMachines/sdk-test-um',
-            'prepared_vm': '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.Compute/virtualMachines/sdk-test-m',
+            'prepared_vm_unmanaged': '/subscriptions/{}/resourceGroups/sdk-test/providers/Microsoft.Compute/virtualMachines/sdk-test-um'.format(subscription_id),
+            'prepared_vm': '/subscriptions/{}/resourceGroups/sdk-test/providers/Microsoft.Compute/virtualMachines/sdk-test-m'.format(subscription_id),
             'image': 'image1'  # for image captured from vm with unmanaged disk
         })
 
@@ -333,8 +334,9 @@ class VMCustomImageWithPlanTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_custom_image_with_plan(self, resource_group):
         # this test should be recorded using accounts "@azuresdkteam.onmicrosoft.com", as it uses pre-made custom image
+        subscription_id = self.get_subscription_id()
         self.kwargs.update({
-            'prepared_image_with_plan_info': '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/sdk-test/providers/Microsoft.Compute/images/custom-image-with-plan',
+            'prepared_image_with_plan_info': '/subscriptions/{}/resourceGroups/sdk-test/providers/Microsoft.Compute/images/custom-image-with-plan'.format(subscription_id),
             'plan': 'linuxdsvmubuntu'
         })
 
