@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.24
+++++++
+* [AKS] fix get-credentials command
+
 2.0.23
 ++++++
 * Update for CLI core changes.
