@@ -1290,7 +1290,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
 
     linux_profile = ContainerServiceLinuxProfile(admin_username, ssh=ssh_config)
-    principal_obj = _ensure_aks_service_principal(cmd.cli_ctx, service_principal=service_principal, client_secret=client_secret,
+    principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
+                                                  service_principal=service_principal, client_secret=client_secret,
                                                   subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
                                                   location=location, name=name)
     service_principal_profile = ContainerServiceServicePrincipalProfile(
