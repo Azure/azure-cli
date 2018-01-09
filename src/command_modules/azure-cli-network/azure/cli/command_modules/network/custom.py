@@ -989,6 +989,8 @@ def create_lb_inbound_nat_pool(
         frontend_port_range_end, backend_port, frontend_ip_name=None):
     ncf = _network_client_factory()
     lb = ncf.load_balancers.get(resource_group_name, load_balancer_name)
+    if not frontend_ip_name:
+        frontend_ip_name = _get_default_name(lb, 'frontend_ip_configurations', '--frontend-ip-name')
     frontend_ip = _get_property(lb.frontend_ip_configurations, frontend_ip_name) \
         if frontend_ip_name else None
     new_pool = InboundNatPool(
@@ -1560,7 +1562,7 @@ update_nsg_rule_2017_03_01.__doc__ = SecurityRule.__doc__
 
 def create_public_ip(resource_group_name, public_ip_address_name, location=None, tags=None,
                      allocation_method=None, dns_name=None,
-                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, zone=None):
+                     idle_timeout=4, reverse_fqdn=None, version=None, sku=None, zone=None, ip_tags=None):
     client = _network_client_factory().public_ip_addresses
     if not allocation_method:
         allocation_method = IPAllocationMethod.static.value if (sku and sku.lower() == 'standard') \
@@ -1577,6 +1579,8 @@ def create_public_ip(resource_group_name, public_ip_address_name, location=None,
         public_ip_args['public_ip_address_version'] = version
     if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-06-01'):
         public_ip_args['zones'] = zone
+    if supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-11-01'):
+        public_ip_args['ip_tags'] = ip_tags
     if sku:
         public_ip_args['sku'] = {'name': sku}
     public_ip = PublicIPAddress(**public_ip_args)
@@ -1589,7 +1593,7 @@ def create_public_ip(resource_group_name, public_ip_address_name, location=None,
 
 
 def update_public_ip(instance, dns_name=None, allocation_method=None, version=None,
-                     idle_timeout=None, reverse_fqdn=None, tags=None, sku=None):
+                     idle_timeout=None, reverse_fqdn=None, tags=None, sku=None, ip_tags=None):
     if dns_name is not None or reverse_fqdn is not None:
         if instance.dns_settings:
             if dns_name is not None:
@@ -1608,6 +1612,8 @@ def update_public_ip(instance, dns_name=None, allocation_method=None, version=No
         instance.tags = tags
     if sku is not None:
         instance.sku.name = sku
+    if ip_tags:
+        instance.ip_tags = ip_tags
     return instance
 
 
