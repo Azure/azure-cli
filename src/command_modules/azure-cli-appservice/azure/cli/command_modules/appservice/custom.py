@@ -1219,7 +1219,6 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
     if provider:
         streaming_url += ('/' + provider.lstrip('/'))
 
-    client = web_client_factory(cmd.cli_ctx)
     user, password = _get_site_credential(resource_group_name, name, slot)
     t = threading.Thread(target=_get_log, args=(streaming_url, user, password))
     t.daemon = True
