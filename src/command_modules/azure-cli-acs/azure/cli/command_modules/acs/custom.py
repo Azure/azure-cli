@@ -806,7 +806,9 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
                                       template, params, validate, no_wait)
         except CloudError as ex:
             retry_exception = ex
-            if 'is not valid according to the validation procedure' in ex.message:
+            if 'is not valid according to the validation procedure' in ex.message or \
+               'The credentials in ServicePrincipalProfile were invalid' in ex.message or \
+               'not found in Active Directory tenant' in ex.message:
                 time.sleep(3)
             else:
                 raise ex
