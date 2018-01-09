@@ -68,11 +68,15 @@ helps['lock create'] = """
     type: command
     short-summary: Create a lock.
     long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource.'
-    """
+    examples:
+        - name: Create a subscription-level lock.
+          text: az lock create --name BasicLock --resource-group Group --lock-type ReadOnly
+
+"""
 helps['lock delete'] = """
     type: command
     short-summary: Delete a lock.
-    """
+"""
 helps['lock list'] = """
     type: command
     short-summary: List lock information.
@@ -83,7 +87,7 @@ helps['lock list'] = """
     """
 helps['lock show'] = """
     type: command
-    short-summary: Show the properties of a lock
+    short-summary: Show the properties of a lock.
     """
 helps['lock update'] = """
     type: command
