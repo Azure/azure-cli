@@ -822,14 +822,14 @@ def store_acs_service_principal(subscription_id, client_secret, service_principa
         obj['service_principal'] = service_principal
 
     config_path = os.path.join(get_config_dir(), file_name)
-    fullConfig = load_service_principals(config_path=config_path)
-    if not fullConfig:
-        fullConfig = {}
-    fullConfig[subscription_id] = obj
+    full_config = load_service_principals(config_path=config_path)
+    if not full_config:
+        full_config = {}
+    full_config[subscription_id] = obj
 
     with os.fdopen(os.open(config_path, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o600),
                    'w+') as spFile:
-        json.dump(fullConfig, spFile)
+        json.dump(full_config, spFile)
 
 
 def load_acs_service_principal(subscription_id, file_name='acsServicePrincipal.json'):
