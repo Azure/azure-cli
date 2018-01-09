@@ -338,10 +338,10 @@ def k8s_install_connector(cmd, client, name, resource_group_name, connector_name
     subscription_id = _get_subscription_id(cmd.cli_ctx)
     dns_name_prefix = _get_default_dns_prefix(connector_name, resource_group_name, subscription_id)
     # Ensure that the SPN exists
-    principal_obj = _ensure_service_principal(service_principal, client_secret, subscription_id,
-                                              dns_name_prefix, location, connector_name)
-    client_secret = principal_obj.get("client_secret")
-    service_principal = principal_obj.get("service_principal")
+    principal_obj = _ensure_aks_service_principal(cmd.cli_ctx, service_principal, client_secret, subscription_id,
+                                                  dns_name_prefix, location, connector_name)
+    client_secret = principal_obj.get('client_secret')
+    service_principal = principal_obj.get('service_principal')
     # Get the TenantID
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials()
@@ -806,7 +806,9 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
                                       template, params, validate, no_wait)
         except CloudError as ex:
             retry_exception = ex
-            if 'is not valid according to the validation procedure' in ex.message:
+            if 'is not valid according to the validation procedure' in ex.message or \
+               'The credentials in ServicePrincipalProfile were invalid' in ex.message or \
+               'not found in Active Directory tenant' in ex.message:
                 time.sleep(3)
             else:
                 raise ex
@@ -814,15 +816,15 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
 
 
 def store_acs_service_principal(subscription_id, client_secret, service_principal,
-                                config_path=os.path.join(get_config_dir(),
-                                                         'acsServicePrincipal.json')):
+                                file_name='acsServicePrincipal.json'):
     obj = {}
     if client_secret:
         obj['client_secret'] = client_secret
     if service_principal:
         obj['service_principal'] = service_principal
 
-    full_config = load_acs_service_principals(config_path=config_path)
+    config_path = os.path.join(get_config_dir(), file_name)
+    full_config = load_service_principals(config_path=config_path)
     if not full_config:
         full_config = {}
     full_config[subscription_id] = obj
@@ -832,15 +834,15 @@ def store_acs_service_principal(subscription_id, client_secret, service_principa
         json.dump(full_config, spFile)
 
 
-def load_acs_service_principal(subscription_id, config_path=os.path.join(get_config_dir(),
-                                                                         'acsServicePrincipal.json')):
-    config = load_acs_service_principals(config_path)
+def load_acs_service_principal(subscription_id, file_name='acsServicePrincipal.json'):
+    config_path = os.path.join(get_config_dir(), file_name)
+    config = load_service_principals(config_path)
     if not config:
         return None
     return config.get(subscription_id)
 
 
-def load_acs_service_principals(config_path):
+def load_service_principals(config_path):
     if not os.path.exists(config_path):
         return None
     fd = os.open(config_path, os.O_RDONLY)
@@ -1290,10 +1292,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
         agent_pool_profile.os_disk_size_gb = int(node_osdisk_size)
 
     linux_profile = ContainerServiceLinuxProfile(admin_username, ssh=ssh_config)
-    principal_obj = _ensure_service_principal(cmd.cli_ctx, service_principal=service_principal,
-                                              client_secret=client_secret,
-                                              subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
-                                              location=location, name=name)
+    principal_obj = _ensure_aks_service_principal(cmd.cli_ctx,
+                                                  service_principal=service_principal, client_secret=client_secret,
+                                                  subscription_id=subscription_id, dns_name_prefix=dns_name_prefix,
+                                                  location=location, name=name)
     service_principal_profile = ContainerServiceServicePrincipalProfile(
         client_id=principal_obj.get("service_principal"),
         secret=principal_obj.get("client_secret"),
@@ -1316,7 +1318,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                 resource_group_name=resource_group_name, resource_name=name, parameters=mc, raw=no_wait)
         except CloudError as ex:
             retry_exception = ex
-            if 'The credentials in ServicePrincipalProfile were invalid' in ex.message:
+            if 'not found in Active Directory tenant' in ex.message:
                 time.sleep(3)
             else:
                 raise ex
@@ -1368,6 +1370,43 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
     instance.service_principal_profile = None
 
     return client.create_or_update(resource_group_name, name, instance, raw=no_wait)
+
+
+def _ensure_aks_service_principal(cli_ctx,
+                                  service_principal=None,
+                                  client_secret=None,
+                                  subscription_id=None,
+                                  dns_name_prefix=None,
+                                  location=None,
+                                  name=None):
+    file_name_aks = 'aksServicePrincipal.json'
+    # TODO: This really needs to be unit tested.
+    rbac_client = get_graph_rbac_management_client(cli_ctx)
+    if not service_principal:
+        # --service-principal not specified, try to load it from local disk
+        principal_obj = load_acs_service_principal(subscription_id, file_name=file_name_aks)
+        if principal_obj:
+            service_principal = principal_obj.get('service_principal')
+            client_secret = principal_obj.get('client_secret')
+        else:
+            # Nothing to load, make one.
+            if not client_secret:
+                client_secret = binascii.b2a_hex(os.urandom(10)).decode('utf-8')
+            salt = binascii.b2a_hex(os.urandom(3)).decode('utf-8')
+            url = 'http://{}.{}.{}.cloudapp.azure.com'.format(salt, dns_name_prefix, location)
+
+            service_principal = _build_service_principal(rbac_client, cli_ctx, name, url, client_secret)
+            if not service_principal:
+                raise CLIError('Could not create a service principal with the right permissions. '
+                               'Are you an Owner on this project?')
+            logger.info('Created a service principal: %s', service_principal)
+            # We don't need to add role assignment for this created SPN
+    else:
+        # --service-principal specfied, validate --client-secret was too
+        if not client_secret:
+            raise CLIError('--client-secret is required if --service-principal is specified')
+    store_acs_service_principal(subscription_id, client_secret, service_principal, file_name=file_name_aks)
+    return load_acs_service_principal(subscription_id, file_name=file_name_aks)
 
 
 def _ensure_service_principal(cli_ctx,
