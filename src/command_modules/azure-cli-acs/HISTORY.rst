@@ -2,13 +2,11 @@
 
 Release History
 ===============
-2.0.24
-++++++
-* aks doesn't need to add role for SPN now
 
 2.0.24
 ++++++
 * [AKS] fix get-credentials command
+* aks doesn't need to add role for SPN now
 
 2.0.23
 ++++++
