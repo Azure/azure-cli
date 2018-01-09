@@ -5,8 +5,8 @@ Release History
 
 1.0.5
 +++++
-* Bugfix: Supplying non-existent name or natively formatted name for container causes stack trace.
-* Enhancement: Now 'Health Status' of an item is visible in its table view.
+* When a non-existent name is supplied for a container, commands will not fail with a stack trace. Partially fixes #4502.
+* az backup item list update: 'Health Status' of an item is now visible in the default table view.
 
 1.0.4
 +++++
