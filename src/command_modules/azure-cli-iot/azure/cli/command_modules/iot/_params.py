@@ -4,158 +4,201 @@
 # --------------------------------------------------------------------------------------------
 
 from argcomplete.completers import FilesCompleter
-from azure.cli.core.commands.parameters import (location_type, enum_choice_list, file_type,
-                                                get_resource_name_completion_list, CliArgumentType)
-from azure.cli.core.commands import register_cli_argument
+from knack.arguments import CLIArgumentType
+
+from azure.cli.core.commands.parameters import (get_location_type,
+                                                file_type,
+                                                get_resource_name_completion_list,
+                                                get_enum_type,
+                                                get_three_state_flag)
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku
-from ._factory import iot_hub_service_factory
-from .custom import iot_device_list, KeyType, SimpleAccessRights
+from azure.mgmt.iothubprovisioningservices.models.iot_dps_client_enums import (IotDpsSku,
+                                                                               AllocationPolicy,
+                                                                               AccessRightsDescription)
+
+from .custom import KeyType, SimpleAccessRights
 from ._validators import validate_policy_permissions
+from ._completers import get_device_id_completion_list
 
 
-def get_device_id_completion_list(prefix, action, parsed_args,
-                                  **kwargs):  # pylint: disable=unused-argument
-    client = iot_hub_service_factory(kwargs)
-    return [d.device_id for d in
-            iot_device_list(client, parsed_args.hub_name, top=100)] if parsed_args.hub_name else []
-
-
-hub_name_type = CliArgumentType(
+hub_name_type = CLIArgumentType(
     completer=get_resource_name_completion_list('Microsoft.Devices/IotHubs'),
     help='IoT Hub name.')
 
-etag_type = CliArgumentType(
-    None, help='Entity Tag (etag) of the object.')
+dps_name_type = CLIArgumentType(
+    options_list=['--dps-name'],
+    completer=get_resource_name_completion_list('Microsoft.Devices/ProvisioningServices'),
+    help='IoT Provisioning Service name')
 
 
-register_cli_argument('iot hub', 'hub_name', hub_name_type, options_list=('--name', '-n'), id_part='name')
+def load_arguments(self, _):  # pylint: disable=too-many-statements
+    # Arguments for IoT DPS
+    with self.argument_context('iot dps') as c:
+        c.argument('dps_name', dps_name_type, options_list=['--name', '-n'], id_part='name')
 
-register_cli_argument('iot hub', 'etag', etag_type, options_list=('--etag', '-e'))
+    with self.argument_context('iot dps create') as c:
+        c.argument('location', get_location_type(self.cli_ctx),
+                   help='Location of your IoT Provisioning Service. Default is the location of target resource group.')
+        c.argument('sku', arg_type=get_enum_type(IotDpsSku),
+                   help='Pricing tier for the IoT provisioning service.')
+        c.argument('unit', help='Units in your IoT Provisioning Service.', type=int)
 
-for subgroup in ['consumer-group', 'policy', 'job', 'certificate']:
-    register_cli_argument('iot hub {}'.format(subgroup), 'hub_name', options_list=('--hub-name',))
+    for subgroup in ['access-policy', 'linked-hub', 'certificate']:
+        with self.argument_context('iot dps {}'.format(subgroup)) as c:
+            c.argument('dps_name', options_list=['--dps-name'], id_part=None)
 
-register_cli_argument('iot device', 'hub_name', hub_name_type)
+    with self.argument_context('iot dps access-policy') as c:
+        c.argument('access_policy_name', options_list=['--access-policy-name', '--name', '-n'],
+                   help='A friendly name for DPS access policy.')
 
-register_cli_argument('iot', 'device_id', options_list=('--device-id', '-d'), help='Device Id.',
-                      completer=get_device_id_completion_list)
+    with self.argument_context('iot dps access-policy create') as c:
+        c.argument('rights', options_list=['--rights', '-r'], nargs='+',
+                   arg_type=get_enum_type(AccessRightsDescription),
+                   help='Access rights for the IoT provisioning service. Use space separated list for multiple rights.')
+        c.argument('primary_key', help='Primary SAS key value.')
+        c.argument('secondary_key', help='Secondary SAS key value.')
 
-# Arguments for 'iot hub certificate' group
-register_cli_argument('iot hub certificate', 'certificate_path', options_list=('--path', '-p'), type=file_type,
-                      completer=FilesCompleter([".cer", ".pem"]),
-                      help='The path to the file containing the certificate.')
+    with self.argument_context('iot dps access-policy update') as c:
+        c.argument('rights', options_list=['--rights', '-r'], nargs='+',
+                   arg_type=get_enum_type(AccessRightsDescription),
+                   help='Access rights for the IoT provisioning service. Use space separated list for multiple rights.')
+        c.argument('primary_key', help='Primary SAS key value.')
+        c.argument('secondary_key', help='Secondary SAS key value.')
 
-register_cli_argument('iot hub certificate', 'certificate_name', options_list=('--name', '-n'),
-                      help='A friendly name for the certificate.')
+    with self.argument_context('iot dps linked-hub') as c:
+        c.argument('linked_hub', options_list=['--linked-hub'], help='Host name of linked IoT Hub.')
 
-# Arguments for 'iot hub consumer-group' group
-register_cli_argument('iot hub consumer-group', 'consumer_group_name',
-                      options_list=('--name', '-n'),
-                      id_part='child_name_2', help='Event hub consumer group name.')
-register_cli_argument('iot hub consumer-group', 'event_hub_name', id_part='child_name_1',
-                      help='Event hub endpoint name.')
+    with self.argument_context('iot dps linked-hub create') as c:
+        c.argument('connection_string', help='Connection string of the IoT hub.')
+        c.argument('location', get_location_type(self.cli_ctx),
+                   help='Location of the IoT hub.')
+        c.argument('apply_allocation_policy',
+                   help='A boolean indicating whether to apply allocation policy to the IoT hub.',
+                   arg_type=get_three_state_flag())
+        c.argument('allocation_weight', help='Allocation weight of the IoT hub.')
 
-# Arguments for 'iot hub policy' group
-register_cli_argument('iot hub policy', 'policy_name', options_list=('--name', '-n'),
-                      id_part='child_name_1',
-                      help='Shared access policy name.')
+    with self.argument_context('iot dps linked-hub update') as c:
+        c.argument('apply_allocation_policy',
+                   help='A boolean indicating whether to apply allocation policy to the Iot hub.',
+                   arg_type=get_three_state_flag())
+        c.argument('allocation_weight', help='Allocation weight of the IoT hub.')
 
-permission_values = ', '.join([x.value for x in SimpleAccessRights])
-register_cli_argument('iot hub policy', 'permissions', nargs='*',
-                      validator=validate_policy_permissions, type=str.lower,
-                      help='Permissions of shared access policy. Use space separated list for '
-                           'multiple permissions. Possible values: {}'.format(permission_values))
+    with self.argument_context('iot dps allocation-policy update') as c:
+        c.argument('allocation_policy', options_list=['--policy', '-p'], arg_type=get_enum_type(AllocationPolicy),
+                   help='Allocation policy for the IoT provisioning service.')
 
-# Arguments for 'iot hub job' group
-register_cli_argument('iot hub job', 'job_id', id_part='child_name_1', help='Job Id.')
+    with self.argument_context('iot dps certificate') as c:
+        c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,
+                   completer=FilesCompleter([".cer", ".pem"]), help='The path to the file containing the certificate.')
+        c.argument('certificate_name', options_list=['--certificate-name', '--name', '-n'],
+                   help='A friendly name for the certificate.')
+        c.argument('etag', options_list=['--etag', '-e'], help='Entity Tag (etag) of the object.')
 
-# Arguments for 'iot hub create'
-register_cli_argument('iot hub create', 'hub_name', completer=None)
-register_cli_argument('iot hub create', 'location', location_type,
-                      help='Location of your IoT Hub. Default is the location of target resource '
-                           'group.')
-register_cli_argument('iot hub create', 'sku',
-                      help='Pricing tier for Azure IoT Hub. Default value is F1, which is free. '
-                           'Note that only one free IoT Hub instance is allowed in each '
-                           'subscription. Exception will be thrown if free instances exceed one.',
-                      **enum_choice_list(IotHubSku))
-register_cli_argument('iot hub create', 'unit', help='Units in your IoT Hub.', type=int)
+    # Arguments for IoT Hub
+    with self.argument_context('iot') as c:
+        c.argument('device_id', options_list=['--device-id', '-d'], help='Device Id.',
+                   completer=get_device_id_completion_list)
 
-# Arguments for 'iot hub show-connection-string'
-register_cli_argument('iot hub show-connection-string', 'policy_name',
-                      help='Shared access policy to use.')
-register_cli_argument('iot hub show-connection-string', 'key_type', options_list=('--key',),
-                      help='The key to use.',
-                      **enum_choice_list(KeyType))
+    with self.argument_context('iot hub') as c:
+        c.argument('hub_name', hub_name_type, options_list=['--name', '-n'], id_part='name')
+        c.argument('etag', options_list=['--etag', '-e'], help='Entity Tag (etag) of the object.')
 
-# Arguments for 'iot device create'
-register_cli_argument('iot device create', 'device_id', completer=None)
-register_cli_argument('iot device create', 'x509', action='store_true',
-                      arg_group='X.509 Certificate',
-                      help='Use X.509 certificate for device authentication.')
-register_cli_argument('iot device create', 'primary_thumbprint', arg_group='X.509 Certificate',
-                      help='Primary X.509 certificate thumbprint to authenticate device.')
-register_cli_argument('iot device create', 'secondary_thumbprint', arg_group='X.509 Certificate',
-                      help='Secondary X.509 certificate thumbprint to authenticate device.')
-register_cli_argument('iot device create', 'valid_days', type=int, arg_group='X.509 Certificate',
-                      help='Number of days the generated self-signed X.509 certificate should be '
-                           'valid for. Default validity is 365 days.')
-register_cli_argument('iot device create', 'output_dir', arg_group='X.509 Certificate',
-                      help='Output directory for generated self-signed X.509 certificate. '
-                           'Default is current working directory.')
+    for subgroup in ['consumer-group', 'policy', 'job', 'certificate']:
+        with self.argument_context('iot hub {}'.format(subgroup)) as c:
+            c.argument('hub_name', options_list=['--hub-name'])
 
-# Arguments for 'iot device list'
-register_cli_argument('iot device list', 'top',
-                      help='Maximum number of device identities to return.', type=int)
+    with self.argument_context('iot device') as c:
+        c.argument('hub_name', hub_name_type)
 
-# Arguments for 'iot device delete'
-register_cli_argument('iot device delete', 'etag',
-                      help='ETag of the target device. It is used for the purpose of optimistic '
-                           'concurrency. Delete operation will be performed only if the specified '
-                           'ETag matches the value maintained by the server, indicating that the '
-                           'device identity has not been modified since it was retrieved. Default '
-                           'value is set to wildcard character (*) to force an unconditional '
-                           'delete.')
+    with self.argument_context('iot hub certificate') as c:
+        c.argument('certificate_path', options_list=['--path', '-p'], type=file_type,
+                   completer=FilesCompleter([".cer", ".pem"]), help='The path to the file containing the certificate.')
+        c.argument('certificate_name', options_list=['--name', '-n'], help='A friendly name for the certificate.')
 
-# Arguments for 'iot device show-connection-string'
-register_cli_argument('iot device show-connection-string', 'top', type=int,
-                      help='Maximum number of connection strings to return.')
-register_cli_argument('iot device show-connection-string', 'key_type', options_list=('--key',),
-                      help='The key to use.',
-                      **enum_choice_list(KeyType))
+    with self.argument_context('iot hub consumer-group') as c:
+        c.argument('consumer_group_name', options_list=['--name', '-n'], id_part='child_name_2',
+                   help='Event hub consumer group name.')
+        c.argument('event_hub_name', id_part='child_name_1', help='Event hub endpoint name.')
 
-# Arguments for 'iot device message' group
-register_cli_argument('iot device message', 'lock_token', help='Message lock token.')
+    with self.argument_context('iot hub policy') as c:
+        c.argument('policy_name', options_list=['--name', '-n'], id_part='child_name_1',
+                   help='Shared access policy name.')
+        permission_values = ', '.join([x.value for x in SimpleAccessRights])
+        c.argument('permissions', nargs='*', validator=validate_policy_permissions, type=str.lower,
+                   help='Permissions of shared access policy. Use space separated list for multiple permissions. '
+                        'Possible values: {}'.format(permission_values))
 
-# Arguments for 'iot device message send'
-register_cli_argument('iot device message send', 'data', help='Device-to-cloud message body.',
-                      arg_group='Messaging')
-register_cli_argument('iot device message send', 'message_id', help='Device-to-cloud message Id.',
-                      arg_group='Messaging')
-register_cli_argument('iot device message send', 'correlation_id',
-                      help='Device-to-cloud message correlation Id.',
-                      arg_group='Messaging')
-register_cli_argument('iot device message send', 'user_id', help='Device-to-cloud message user Id.',
-                      arg_group='Messaging')
+    with self.argument_context('iot hub job') as c:
+        c.argument('job_id', id_part='child_name_1', help='Job Id.')
 
-# Arguments for 'iot device message receive'
-register_cli_argument('iot device message receive', 'lock_timeout', type=int,
-                      help='In case a message returned to this call, this specifies the amount of '
-                           'time in seconds, the message will be invisible to other receive calls.')
+    with self.argument_context('iot hub create') as c:
+        c.argument('hub_name', completer=None)
+        c.argument('location', get_location_type(self.cli_ctx),
+                   help='Location of your IoT Hub. Default is the location of target resource group.')
+        c.argument('sku', arg_type=get_enum_type(IotHubSku),
+                   help='Pricing tier for Azure IoT Hub. Default value is F1, which is free. '
+                        'Note that only one free IoT hub instance is allowed in each '
+                        'subscription. Exception will be thrown if free instances exceed one.')
+        c.argument('unit', help='Units in your IoT Hub.', type=int)
 
-# Arguments for 'iot device export'
-register_cli_argument('iot device export', 'blob_container_uri',
-                      help='Blob Shared Access Signature URI with write access to a blob container.'
-                           'This is used to output the status of the job and the results.')
-register_cli_argument('iot device export', 'include_keys', action='store_true',
-                      help='If set, keys are exported normally. Otherwise, keys are set to null in '
-                           'export output.')
+    with self.argument_context('iot hub show-connection-string') as c:
+        c.argument('policy_name', help='Shared access policy to use.')
+        c.argument('key_type', arg_type=get_enum_type(KeyType), options_list=['--key'], help='The key to use.')
 
-# Arguments for 'iot device import'
-register_cli_argument('iot device import', 'input_blob_container_uri',
-                      help='Blob Shared Access Signature URI with read access to a blob container.'
-                           'This blob contains the operations to be performed on the identity '
-                           'registry ')
-register_cli_argument('iot device import', 'output_blob_container_uri',
-                      help='Blob Shared Access Signature URI with write access to a blob container.'
-                           'This is used to output the status of the job and the results.')
+    with self.argument_context('iot device create') as c:
+        c.argument('device_id', completer=None)
+
+    with self.argument_context('iot device create', arg_group='X.509 Certificate') as c:
+        c.argument('x509', action='store_true', help='Use X.509 certificate for device authentication.')
+        c.argument('primary_thumbprint', help='Primary X.509 certificate thumbprint to authenticate device.')
+        c.argument('secondary_thumbprint', help='Secondary X.509 certificate thumbprint to authenticate device.')
+        c.argument('valid_days', type=int, help='Number of days the generated self-signed X.509 certificate should be '
+                                                'valid for. Default validity is 365 days.')
+        c.argument('output_dir', help='Output directory for generated self-signed X.509 certificate. '
+                                      'Default is current working directory.')
+
+    with self.argument_context('iot device list') as c:
+        c.argument('top', help='Maximum number of device identities to return.', type=int)
+
+    with self.argument_context('iot device delete') as c:
+        c.argument('etag', help='ETag of the target device. It is used for the purpose of optimistic '
+                                'concurrency. Delete operation will be performed only if the specified '
+                                'ETag matches the value maintained by the server, indicating that the '
+                                'device identity has not been modified since it was retrieved. Default '
+                                'value is set to wildcard character (*) to force an unconditional '
+                                'delete.')
+
+    with self.argument_context('iot device show-connection-string') as c:
+        c.argument('top', type=int, help='Maximum number of connection strings to return.')
+        c.argument('key_type', arg_type=get_enum_type(KeyType), options_list=['--key'], help='The key to use.')
+
+    with self.argument_context('iot device message') as c:
+        c.argument('lock_token', help='Message lock token.')
+
+    with self.argument_context('iot device message send', arg_group='Messaging') as c:
+        c.argument('data', help='Device-to-cloud message body.')
+        c.argument('message_id', help='Device-to-cloud message Id.')
+        c.argument('correlation_id', help='Device-to-cloud message correlation Id.')
+        c.argument('user_id', help='Device-to-cloud message user Id.')
+
+    with self.argument_context('iot device message receive') as c:
+        c.argument('lock_timeout', type=int,
+                   help='In case a message returned to this call, this specifies the amount of '
+                        'time in seconds, the message will be invisible to other receive calls.')
+
+    with self.argument_context('iot device export') as c:
+        c.argument('blob_container_uri',
+                   help='Blob Shared Access Signature URI with write access to a blob container.'
+                        'This is used to output the status of the job and the results.')
+        c.argument('include_keys', action='store_true',
+                   help='If set, keys are exported normally. Otherwise, keys are set to null in '
+                        'export output.')
+
+    with self.argument_context('iot device import') as c:
+        c.argument('input_blob_container_uri',
+                   help='Blob Shared Access Signature URI with read access to a blob container.'
+                        'This blob contains the operations to be performed on the identity '
+                        'registry ')
+        c.argument('output_blob_container_uri',
+                   help='Blob Shared Access Signature URI with write access to a blob container.'
+                        'This is used to output the status of the job and the results.')

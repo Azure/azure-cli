@@ -3,6 +3,19 @@
 Release History
 ===============
 
+2.0.18
+++++++
+* Update for CLI core changes.
+
+2.0.17
+++++++
+* Update managed storage SDK dependency
+
+2.0.16
+++++++
+* Added az sql db list-usages and az sql db show-usage commands.
+* Added sql server conn-policy show/update commands.
+
 2.0.15
 ++++++
 * Added --ignore-missing-vnet-service-endpoint param to az sql server vnet-rule create and update commands

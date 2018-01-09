@@ -3,6 +3,20 @@
 Release History
 ===============
 
+2.0.21
+++++++
+* `vnet-gateway update`: Fix issue when trying to change to/from active-standby mode.
+* `application-gateway create/update`: Add support for HTTP2.
+
+2.0.20
+++++++
+* Update for CLI core changes.
+
+2.0.19
+++++++
+* `route-table create/update`: Add support for `--disable-bgp-route-propagation`.
+* `public-ip create/update`: Add support for `--ip-tags`
+
 2.0.18
 ++++++
 * `dns`: Add support for CAA records.

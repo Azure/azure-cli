@@ -28,7 +28,7 @@ def encode_url_path(url, safe=SAFE_CHARS):
 def make_encoded_file_url_and_params(file_service, share, file_dir, file_name, sas_token, safe=SAFE_CHARS):
     """
     Makes the file url using the service. Converts the file directory and name into byte-strings if needed and returns
-    (url, dir, file) as a tuple. This is needed to account for strng encoding differences between python 2 and 3.
+    (url, dir, file) as a tuple. This is needed to account for string encoding differences between python 2 and 3.
     """
     try:
         file_url = file_service.make_file_url(share, file_dir, file_name, sas_token=sas_token)
@@ -36,4 +36,8 @@ def make_encoded_file_url_and_params(file_service, share, file_dir, file_name, s
         file_dir = file_dir.encode('utf-8')
         file_name = file_name.encode('utf-8')
         file_url = file_service.make_file_url(share, file_dir, file_name, sas_token=sas_token)
-    return (encode_url_path(file_url, safe), file_dir, file_name)
+
+    if not file_dir:
+        sep = file_url.find('://')
+        file_url = file_url[:sep + 3] + file_url[sep + 3:].replace('//', '/')
+    return encode_url_path(file_url, safe), file_dir, file_name

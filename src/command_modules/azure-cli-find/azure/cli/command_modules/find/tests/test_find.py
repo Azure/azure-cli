@@ -4,18 +4,14 @@
 # --------------------------------------------------------------------------------------------
 
 import contextlib
-import json
-import shlex
 import unittest
-
+import mock
 import sys
-
 import six
-from nose import with_setup
 from six import StringIO
 
-from azure.cli.main import main as cli_main
-from azure.cli.command_modules.find.custom import _purge
+from azure.cli.command_modules.find.custom import _purge, find
+from azure.cli.testsdk import TestCli
 
 
 @contextlib.contextmanager
@@ -31,26 +27,26 @@ def capture():
         out[1] = out[1].getvalue()
 
 
-def execute(cmd):
-    cmd_list = shlex.split(cmd)
-    with capture() as out:
-        cli_main(cmd_list)
-
-    return out[0]
-
-
 class SearchIndexTest(unittest.TestCase):
     def setUp(self):
         _purge()
+        self.loader = mock.MagicMock()
+        self.loader.cli_ctx = TestCli()
+
+    def execute(self, args, reindex=False):
+        with capture() as out:
+            find(self.loader, args, reindex)
+
+        return out[0]
 
     def test_search_index(self):
         six.assertRegex(
             self,
-            execute('find -q keyvault list'),
+            self.execute(['keyvault', 'list']),
             'az keyvault list')
 
     def test_search_reindex(self):
         six.assertRegex(
             self,
-            execute('find -q keyvault list --reindex'),
+            self.execute(['keyvault', 'list'], reindex=True),
             'az keyvault list')

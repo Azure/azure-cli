@@ -3,16 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.log import get_logger
+from knack.util import CLIError
+
 from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
     Location
 )
 from azure.mgmt.cosmosdb.models.cosmos_db_enums import DatabaseAccountKind
-from azure.cli.core.util import CLIError
-import azure.cli.core.azlogging as azlogging
 
-logger = azlogging.get_az_logger(__name__)
+
+logger = get_logger(__name__)
+
 
 DEFAULT_INDEXING_POLICY = """{
   "indexingMode": "consistent",
@@ -37,7 +40,7 @@ DEFAULT_INDEXING_POLICY = """{
 }"""
 
 
-def cli_cosmosdb_create(client,
+def cli_cosmosdb_create(cmd, client,
                         resource_group_name,
                         account_name,
                         locations=None,
@@ -56,7 +59,7 @@ def cli_cosmosdb_create(client,
 
     from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    resource_client = get_mgmt_service_client(ResourceManagementClient)
+    resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
     rg = resource_client.resource_groups.get(resource_group_name)
     resource_group_location = rg.location  # pylint: disable=no-member
 

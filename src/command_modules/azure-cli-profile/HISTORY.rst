@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.0.17
+++++++
+* Update for CLI core changes.
+
+2.0.16
+++++++
+* support login with user assigned identities
+
 2.0.15
 ++++++
 * minor fixes

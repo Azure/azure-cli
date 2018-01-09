@@ -38,7 +38,7 @@ def dump_no_help(modules):
         try:
             import_module('azure.cli.command_modules.' + mod).load_params(mod)
         except Exception as ex:
-            print("EXCEPTION: " + str(mod))
+            print("EXCEPTION: {} for module {}".format(ex, str(mod)))
 
     _update_command_definitions(cmd_table)
     add_id_parameters(cmd_table)
@@ -66,8 +66,8 @@ def dump_no_help(modules):
         param_list = set()
         for key in cmd_table[cmd].arguments:
             name = cmd_table[cmd].arguments[key].name
-            if not cmd_table[cmd].arguments[key].type.settings.get('help') and \
-                    name not in white_list_parameters.get(cmd, []):
+            if not cmd_table[cmd].arguments[key].type.settings.get('help') and name not in white_list_parameters.get(
+                    cmd, []):
                 exit_val = 1
                 param_list.add(name)
         if param_list:

@@ -10,14 +10,10 @@ from .scenario_mixin import CdnScenarioMixin
 class CdnEndpointScenarioTest(CdnScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     def test_endpoint_crud(self, resource_group):
-        from azure.cli.core.util import CLIError
+        from knack.util import CLIError
 
         profile_name = 'profile123'
-        error_msg = "Endpoint(s) not found. Please verify the resource(s), group or it's parent " \
-                    "resources exist."
-        with self.assertRaises(CLIError) as missing_profile_error:
-            self.endpoint_list_cmd(resource_group, profile_name)
-        self.assertEqual(missing_profile_error.exception.args[0], error_msg)
+        self.endpoint_list_cmd(resource_group, profile_name, expect_failure=True)
 
         self.profile_create_cmd(resource_group, profile_name)
         list_checks = [JMESPathCheck('length(@)', 0)]

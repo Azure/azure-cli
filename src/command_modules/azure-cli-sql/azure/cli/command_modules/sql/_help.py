@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 
 helps['sql'] = """
@@ -283,6 +283,18 @@ helps['sql server list'] = """
 helps['sql server update'] = """
     type: command
     short-summary: Update a server.
+    """
+helps['sql server conn-policy'] = """
+    type: group
+    short-summary: Manage a server's connection policy.
+    """
+helps['sql server conn-policy show'] = """
+    type: command
+    short-summary: Gets a server's secure connection policy.
+    """
+helps['sql server conn-policy update'] = """
+    type: command
+    short-summary: Updates a server's secure connection policy.
     """
 helps['sql server firewall-rule'] = """
     type: group

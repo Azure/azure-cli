@@ -13,10 +13,7 @@ import re
 import six
 
 from azure.cli.command_modules.find._gather_commands import build_command_table
-import azure.cli.core.azlogging as azlogging
 from azure.cli.core._environment import get_config_dir
-
-logger = azlogging.get_az_logger(__name__)
 
 INDEX_DIR_PREFIX = 'search_index'
 INDEX_VERSION = 'v1'
@@ -34,17 +31,24 @@ def _get_schema():
         examples=TEXT(stored=True, analyzer=stem_ana))
 
 
-def _cli_index_corpus():
-    return build_command_table()
+def _purge():
+    for f in os.listdir(get_config_dir()):
+        if re.search("^{}_*".format(INDEX_DIR_PREFIX), f):
+            shutil.rmtree(os.path.join(get_config_dir(), f))
 
 
-def _index_help():
+def _create_index(cli_ctx):
     from whoosh import index
+    _purge()
+    os.mkdir(INDEX_PATH)
+    index.create_in(INDEX_PATH, _get_schema())
+
+    # index help
     ix = index.open_dir(INDEX_PATH)
     writer = ix.writer()
-    for cmd, document in list(_cli_index_corpus().items()):
+    for command, document in build_command_table(cli_ctx).items():
         writer.add_document(
-            cmd_name=six.u(cmd),
+            cmd_name=six.u(command),
             short_summary=six.u(document.get('short-summary', '')),
             long_summary=six.u(document.get('long-summary', '')),
             examples=six.u(document.get('examples', ''))
@@ -52,28 +56,12 @@ def _index_help():
     writer.commit()
 
 
-def _purge():
-    for f in os.listdir(get_config_dir()):
-        if re.search("^{}_*".format(INDEX_DIR_PREFIX), f):
-            shutil.rmtree(os.path.join(get_config_dir(), f))
-
-
-def _create_index():
+def _get_index(cli_ctx):
     from whoosh import index
-    _purge()
-    os.mkdir(INDEX_PATH)
-    index.create_in(INDEX_PATH, _get_schema())
-    _index_help()
 
-
-def _ensure_index():
+    # create index if it does not exist already
     if not os.path.exists(INDEX_PATH):
-        _create_index()
-
-
-def _get_index():
-    from whoosh import index
-    _ensure_index()
+        _create_index(cli_ctx)
     return index.open_dir(INDEX_PATH)
 
 
@@ -93,25 +81,18 @@ def _print_hit(hit):
     print('')
 
 
-def find(criteria, reindex=False):
-    """
-    Search for Azure CLI commands
-    :param str criteria: Query text to search for.
-    :param bool reindex: Clear the current index and reindex the command modules.
-    :return:
-    :rtype: None
-    """
+def find(cmd, criteria, reindex=False):
     from whoosh.qparser import MultifieldParser
     if reindex:
-        _create_index()
+        _create_index(cmd.cli_ctx)
 
     try:
-        ix = _get_index()
+        ix = _get_index(cmd.cli_ctx)
     except ValueError:
         # got a pickle error because the index was written by a different python version
         # recreate the index and proceed
-        _create_index()
-        ix = _get_index()
+        _create_index(cmd.cli_ctx)
+        ix = _get_index(cmd.cli_ctx)
 
     qp = MultifieldParser(
         ['cmd_name', 'short_summary', 'long_summary', 'examples'],

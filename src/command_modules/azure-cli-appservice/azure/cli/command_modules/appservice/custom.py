@@ -1338,7 +1338,7 @@ def _print_site_logs(api_string, number_of_lines, byte_limit, http, headers):
 
 
 def upload_ssl_cert(resource_group_name, name, certificate_password, certificate_file):
-    client = web_client_factory()
+    client = web_client_factory(cmd.cli_ctx)
     webapp = _generic_site_operation(resource_group_name, name, 'get')
     cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
     cert_file = open(certificate_file, 'rb')

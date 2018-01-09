@@ -5,21 +5,21 @@
 
 import json
 import re
+from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
+
 from azure.cli.core.commands.parameters import get_one_of_subscription_locations
 from azure.cli.core.commands.arm import resource_exists
-
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 from ._client_factory import _compute_client_factory
 
 
-def _resource_not_exists(resource_type):
+def _resource_not_exists(cli_ctx, resource_type):
     def _handle_resource_not_exists(namespace):
         # TODO: hook up namespace._subscription_id once we support it
         ns, t = resource_type.split('/')
-        if resource_exists(namespace.resource_group_name, namespace.name, ns, t):
+        if resource_exists(cli_ctx, namespace.resource_group_name, namespace.name, ns, t):
             raise CLIError('Resource {} of type {} in group {} already exists.'.format(
                 namespace.name,
                 resource_type,
@@ -31,12 +31,12 @@ def _get_thread_count():
     return 5  # don't increase too much till https://github.com/Azure/msrestazure-for-python/issues/6 is fixed
 
 
-def load_images_thru_services(publisher, offer, sku, location):
+def load_images_thru_services(cli_ctx, publisher, offer, sku, location):
     from concurrent.futures import ThreadPoolExecutor, as_completed
     all_images = []
-    client = _compute_client_factory()
+    client = _compute_client_factory(cli_ctx)
     if location is None:
-        location = get_one_of_subscription_locations()
+        location = get_one_of_subscription_locations(cli_ctx)
 
     def _load_images_from_publisher(publisher):
         offers = client.virtual_machine_images.list_offers(location, publisher)
@@ -71,11 +71,10 @@ def load_images_thru_services(publisher, offer, sku, location):
     return all_images
 
 
-def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
-    from azure.cli.core.cloud import get_active_cloud, CloudEndpointNotSetException
-    cloud = get_active_cloud()
+def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None):
+    from azure.cli.core.cloud import CloudEndpointNotSetException
     try:
-        target_url = cloud.endpoints.vm_image_alias_doc
+        target_url = cli_ctx.cloud.endpoints.vm_image_alias_doc
     except CloudEndpointNotSetException:
         raise CLIError("'endpoint_vm_image_alias_doc' isn't configured. Please invoke 'az cloud update' to configure "
                        "it or use '--all' to retrieve images from server")
@@ -102,13 +101,13 @@ def load_images_from_aliases_doc(publisher=None, offer=None, sku=None):
         raise CLIError('Could not retrieve image list from {}'.format(target_url))
 
 
-def load_extension_images_thru_services(publisher, name, version, location, show_latest=False):
+def load_extension_images_thru_services(cli_ctx, publisher, name, version, location, show_latest=False):
     from concurrent.futures import ThreadPoolExecutor, as_completed
     from distutils.version import LooseVersion  # pylint: disable=no-name-in-module,import-error
     all_images = []
-    client = _compute_client_factory()
+    client = _compute_client_factory(cli_ctx)
     if location is None:
-        location = get_one_of_subscription_locations()
+        location = get_one_of_subscription_locations(cli_ctx)
 
     def _load_extension_images_from_publisher(publisher):
         types = client.virtual_machine_extension_images.list_types(location, publisher)
@@ -152,8 +151,8 @@ def load_extension_images_thru_services(publisher, name, version, location, show
     return all_images
 
 
-def get_vm_sizes(location):
-    return list(_compute_client_factory().virtual_machine_sizes.list(location))
+def get_vm_sizes(cli_ctx, location):
+    return list(_compute_client_factory(cli_ctx).virtual_machine_sizes.list(location))
 
 
 def _partial_matched(pattern, string):

@@ -8,7 +8,9 @@ import tempfile
 import unittest
 import uuid
 import mock
-from azure.cli.core.util import CLIError
+
+from azure.cli.testsdk import TestCli
+
 from azure.mgmt.authorization.models import RoleDefinition, RoleDefinitionProperties
 from azure.graphrbac.models import Application, ServicePrincipal, GraphErrorException
 from azure.cli.command_modules.role.custom import (create_role_definition,
@@ -16,6 +18,8 @@ from azure.cli.command_modules.role.custom import (create_role_definition,
                                                    create_service_principal_for_rbac,
                                                    reset_service_principal_credential,
                                                    _try_x509_pem)
+
+from knack.util import CLIError
 
 # pylint: disable=line-too-long
 
@@ -60,7 +64,9 @@ class TestRoleMocked(unittest.TestCase):
         role_definition_file = role_definition_file.replace('\\', '\\\\')
 
         # action
-        create_role_definition(role_definition_file)
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
+        create_role_definition(cmd, role_definition_file)
 
         # assert
         self.assertTrue(self.create_def_invoked)
@@ -88,7 +94,9 @@ class TestRoleMocked(unittest.TestCase):
         role_definition_file = role_definition_file.replace('\\', '\\\\')
 
         # action
-        update_role_definition(role_definition_file)
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
+        update_role_definition(cmd, role_definition_file)
 
         # assert
         self.assertTrue(self.update_def_invoked)
@@ -112,7 +120,9 @@ class TestRoleMocked(unittest.TestCase):
         faked_graph_client.service_principals.create.return_value = sp
 
         # action
-        result = create_service_principal_for_rbac(name, test_pwd, 12, skip_assignment=True)
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
+        result = create_service_principal_for_rbac(cmd, name, test_pwd, 12, skip_assignment=True)
 
         # assert
         self.assertEqual(result['password'], test_pwd)
@@ -151,7 +161,9 @@ class TestRoleMocked(unittest.TestCase):
         faked_graph_client.service_principals.create.return_value = sp
 
         # action
-        result = create_service_principal_for_rbac(name, cert=cert, years=2, skip_assignment=True)
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
+        result = create_service_principal_for_rbac(cmd, name, cert=cert, years=2, skip_assignment=True)
 
         # assert
         self.assertEqual(result['name'], 'http://' + name)
@@ -176,6 +188,8 @@ class TestRoleMocked(unittest.TestCase):
         sp_object = mock.MagicMock()
         sp_object.app_id = 'app_id'
         app_object = mock.MagicMock()
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
         app_object.object_id = test_object_id
 
         graph_client_mock.return_value = faked_graph_client
@@ -186,7 +200,7 @@ class TestRoleMocked(unittest.TestCase):
         faked_graph_client.applications.list_password_credentials.side_effect = [ValueError('should not invoke')]
 
         # action
-        reset_service_principal_credential(name, test_pwd, append=False)
+        reset_service_principal_credential(cmd, name, test_pwd, append=False)
 
         # assert
         self.assertTrue(patch_invoked[0])
@@ -231,6 +245,8 @@ class TestRoleMocked(unittest.TestCase):
         app_object.object_id = test_object_id
         key_cred = mock.MagicMock()
         key_cred.key_id = key_id_of_existing_cert
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
 
         graph_client_mock.return_value = faked_graph_client
         faked_graph_client.service_principals.list.return_value = [sp_object]
@@ -240,7 +256,7 @@ class TestRoleMocked(unittest.TestCase):
         faked_graph_client.applications.list_key_credentials.return_value = [key_cred]
 
         # action
-        reset_service_principal_credential(name, cert=test_cert, append=True)
+        reset_service_principal_credential(cmd, name, cert=test_cert, append=True)
 
         # assert
         self.assertTrue(patch_invoked[0])
@@ -248,13 +264,15 @@ class TestRoleMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
     def test_create_for_rbac_failed_with_polished_error_if_due_to_permission(self, graph_client_mock, auth_client_mock):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
         TestRoleMocked._common_rbac_err_polish_test_mock_setup(graph_client_mock, auth_client_mock,
                                                                'Insufficient privileges to complete the operation',
                                                                self.subscription_id)
 
         # action
         with self.assertRaises(CLIError) as context:
-            create_service_principal_for_rbac('will-fail', skip_assignment=True)
+            create_service_principal_for_rbac(cmd, 'will-fail', skip_assignment=True)
 
         # assert we handled such error
         self.assertTrue('https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal' in str(context.exception))
@@ -262,11 +280,14 @@ class TestRoleMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.role.custom._auth_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.role.custom._graph_client_factory', autospec=True)
     def test_create_for_rbac_failed_with_regular_error(self, graph_client_mock, auth_client_mock):
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
         TestRoleMocked._common_rbac_err_polish_test_mock_setup(graph_client_mock, auth_client_mock,
                                                                'something bad for you',
                                                                self.subscription_id)
         # action
-        self.assertRaises(GraphErrorException, create_service_principal_for_rbac, 'will-fail')
+        with self.assertRaises(GraphErrorException):
+            create_service_principal_for_rbac(cmd, 'will-fail')
 
     @staticmethod
     def _common_rbac_err_polish_test_mock_setup(graph_client_mock, auth_client_mock, error_msg, subscription_id):

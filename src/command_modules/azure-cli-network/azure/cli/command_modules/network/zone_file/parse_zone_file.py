@@ -42,13 +42,14 @@ import argparse
 from collections import OrderedDict
 import re
 
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
+from knack.log import get_logger
+from knack.util import CLIError
 
 from azure.cli.command_modules.network.zone_file.configs import SUPPORTED_RECORDS
 from azure.cli.command_modules.network.zone_file.exceptions import InvalidLineException
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
+
 semicolon_regex = re.compile(r'(?:"[^"]*")*[^\\](;.*)')
 date_regex_dict = {
     'w': {'regex': re.compile(r'(\d*w)'), 'scale': 86400 * 7},
@@ -384,7 +385,7 @@ def _parse_record(parser, record_token):
             break
 
     if not record_type:
-        from azure.cli.core.util import CLIError
+        from knack.util import CLIError
         raise CLIError('Unable to determine record type: {}'.format(' '.join(record_token)))
 
     # move the record type to the front of the token list so it will conform to argparse

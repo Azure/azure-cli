@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.0.20
+++++++
+* Update for CLI core changes.
+
+2.0.19
+++++++
+* `resource show`: expose `--include-response-body` to show the response body in the output
+
 2.0.18
 ++++++
 * --resource parameter, resource-level locks now support resource-ids.

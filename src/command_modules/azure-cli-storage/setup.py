@@ -14,7 +14,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.19"
+VERSION = "2.0.22"
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
@@ -30,9 +30,9 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-multiapi-storage==0.1.6',
-    'azure-mgmt-storage==1.4.0',
-    'azure-cli-core',
+    'azure-multiapi-storage==0.1.7',
+    'azure-mgmt-storage==1.5.0',
+    'azure-cli-core'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -55,6 +55,7 @@ setup(
         'azure.cli',
         'azure.cli.command_modules',
         'azure.cli.command_modules.storage',
+        'azure.cli.command_modules.storage.operations'
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass

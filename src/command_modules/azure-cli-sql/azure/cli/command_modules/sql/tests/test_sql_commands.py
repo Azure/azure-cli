@@ -15,7 +15,9 @@ from azure.cli.testsdk import (
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest,
-    StorageAccountPreparer)
+    StorageAccountPreparer,
+    TestCli,
+    LiveScenarioTest)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
     SingleValueReplacer)
@@ -45,13 +47,13 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = 'az sql server create -l {} -g {} -n {} -u {} -p {}'
-        execute(template.format(self.location, group, name, self.admin_user, self.admin_password))
+        execute(TestCli(), template.format(self.location, group, name, self.admin_user, self.admin_password))
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete:
             group = self._get_resource_group(**kwargs)
-            execute('az sql server delete -g {} -n {} --yes --no-wait'.format(group, name))
+            execute(TestCli(), 'az sql server delete -g {} -n {} --yes --no-wait'.format(group, name))
 
     def _get_resource_group(self, **kwargs):
         try:
@@ -340,6 +342,22 @@ class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
         # Cancel operation
         self.cmd('sql db op cancel -g {} -s {} -d {} -n {}'
                  .format(resource_group, server, database_name, ops[0]['name']))
+
+
+class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
+    def test_sql_server_connection_policy(self, resource_group, resource_group_location, server):
+        # Show
+        self.cmd('sql server conn-policy show -g {} -s {}'
+                 .format(resource_group, server),
+                 checks=[JMESPathCheck('connectionType', 'Default')])
+
+        # Update
+        for type in ('Proxy', 'Default', 'Redirect'):
+            self.cmd('sql server conn-policy update -g {} -s {} -t {}'
+                     .format(resource_group, server, type),
+                     checks=[JMESPathCheck('connectionType', type)])
 
 
 class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
@@ -1174,7 +1192,10 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
 class SqlServerCapabilityScenarioTest(ScenarioTest):
     def test_sql_capabilities(self):
         location = 'westus'
-
+        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = 2048
         # New capabilities are added quite frequently and the state of each capability depends
         # on your subscription. So it's not a good idea to make strict checks against exactly
         # which capabilities are returned. The idea is to just check the overall structure.
@@ -1451,24 +1472,20 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
         self.assertEqual(conn_str, '$conn = new PDO("sqlsrv:server = tcp:myserver.database.windows.net,1433; Database = mydb; LoginTimeout = 30; Encrypt = 1; TrustServerCertificate = 0;", "<username>", "<password>");')
 
         # PHP PDO, ADPassword
-        with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADPassword')
+        self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADPassword', expect_failure=True)
 
         # PHP PDO, ADIntegrated
-        with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADIntegrated')
+        self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADIntegrated', expect_failure=True)
 
         # PHP, user name/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c php').get_output_in_json()
         self.assertEqual(conn_str, '$connectionOptions = array("UID"=>"<username>@myserver", "PWD"=>"<password>", "Database"=>mydb, "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0); $serverName = "tcp:myserver.database.windows.net,1433"; $conn = sqlsrv_connect($serverName, $connectionOptions);')
 
         # PHP, ADPassword
-        with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADPassword')
+        self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADPassword', expect_failure=True)
 
         # PHP, ADIntegrated
-        with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADIntegrated')
+        self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADIntegrated', expect_failure=True)
 
         # ODBC, user name/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc').get_output_in_json()
@@ -1640,8 +1657,8 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
 
 
 class SqlServerVnetMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus2euap')
-    @SqlServerPreparer(location='eastus2euap')
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
         rg = resource_group
         vnet_rule_1 = 'rule1'
@@ -1723,3 +1740,14 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
         # test sql server vnet-rule delete rule 2
         self.cmd('sql server vnet-rule delete --name {} -g {} --server {}'.format(vnet_rule_2, rg, server),
                  checks=NoneCheck())
+
+
+class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
+    def test_sql_subscription_usages(self):
+        self.cmd('sql list-usages -l westus',
+                 checks=[JMESPathCheckGreaterThan('length(@)', 2)])
+
+        self.cmd('sql show-usage -l westus -u SubscriptionFreeDatabaseDaysLeft',
+                 checks=[
+                     JMESPathCheck('name', 'SubscriptionFreeDatabaseDaysLeft'),
+                     JMESPathCheckGreaterThan('limit', 0)])

@@ -166,7 +166,7 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp log tail') as c:
         c.argument('provider', help="By default all live traces configured by 'az webapp log config' will be shown, but you can scope to certain providers/folders, e.g. 'application', 'http', etc. For details, check out https://github.com/projectkudu/kudu/wiki/Diagnostic-Log-Stream")
-		c.argument('number_of_lines', help="Number of lines to be displayed, currently only works for linux")
+        c.argument('number_of_lines', help="Number of lines to be displayed, currently only works for linux")
     with self.argument_context('webapp log download') as c:
         c.argument('log_file', default='webapp_logs.zip', type=file_type, completer=FilesCompleter(), help='the downloaded zipped log file path')
 

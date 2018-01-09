@@ -4,15 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 
-def cf_billing(**_):
+def cf_billing(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.billing import BillingManagementClient
-    return get_mgmt_service_client(BillingManagementClient)
+    return get_mgmt_service_client(cli_ctx, BillingManagementClient)
 
 
-def invoices_mgmt_client_factory(kwargs):
-    return cf_billing(**kwargs).invoices
+def invoices_mgmt_client_factory(cli_ctx, kwargs):
+    return cf_billing(cli_ctx, **kwargs).invoices
 
 
-def billing_periods_mgmt_client_factory(kwargs):
-    return cf_billing(**kwargs).billing_periods
+def billing_periods_mgmt_client_factory(cli_ctx, kwargs):
+    return cf_billing(cli_ctx, **kwargs).billing_periods

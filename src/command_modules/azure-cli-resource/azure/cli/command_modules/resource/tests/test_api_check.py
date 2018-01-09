@@ -10,7 +10,7 @@ try:
 except ImportError:
     from mock import MagicMock
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.command_modules.resource.custom import (_ResourceUtils, _validate_resource_inputs,
                                                        parse_resource_id)
 
@@ -51,15 +51,19 @@ class TestApiCheck(unittest.TestCase):
 
     def test_resolve_api_provider_backup(self):
         # Verifies provider is used as backup if api-version not specified.
+        from azure.cli.testsdk import TestCli
+        cli = TestCli()
         rcf = self._get_mock_client()
-        res_utils = _ResourceUtils(resource_type='Mock/test', resource_name='vnet1',
+        res_utils = _ResourceUtils(cli, resource_type='Mock/test', resource_name='vnet1',
                                    resource_group_name='rg', rcf=rcf)
         self.assertEqual(res_utils.api_version, "2016-01-01")
 
     def test_resolve_api_provider_with_parent_backup(self):
         # Verifies provider (with parent) is used as backup if api-version not specified.
+        from azure.cli.testsdk import TestCli
+        cli = TestCli()
         rcf = self._get_mock_client()
-        res_utils = _ResourceUtils(parent_resource_path='foo/testfoo123', resource_group_name='rg',
+        res_utils = _ResourceUtils(cli, parent_resource_path='foo/testfoo123', resource_group_name='rg',
                                    resource_provider_namespace='Mock', resource_type='test',
                                    resource_name='vnet1',
                                    rcf=rcf)
@@ -67,8 +71,10 @@ class TestApiCheck(unittest.TestCase):
 
     def test_resolve_api_all_previews(self):
         # Verifies most recent preview version returned only if there are no non-preview versions.
+        from azure.cli.testsdk import TestCli
+        cli = TestCli()
         rcf = self._get_mock_client()
-        res_utils = _ResourceUtils(resource_type='Mock/preview', resource_name='vnet1',
+        res_utils = _ResourceUtils(cli, resource_type='Mock/preview', resource_name='vnet1',
                                    resource_group_name='rg', rcf=rcf)
         self.assertEqual(res_utils.api_version, "2005-01-01-preview")
 

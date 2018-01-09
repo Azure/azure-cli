@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.core.commands.parameters import get_resources_in_subscription
 
 from azure.mgmt.containerregistry.v2017_10_01.models import SkuName, Sku
@@ -15,19 +15,19 @@ from ._constants import (
     MANAGED_REGISTRY_SKU,
     CLASSIC_REGISTRY_SKU
 )
-from ._factory import (
+from ._client_factory import (
     get_arm_service_client,
     get_storage_service_client,
     get_acr_service_client
 )
 
 
-def _arm_get_resource_by_name(resource_name, resource_type):
+def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
     """Returns the ARM resource in the current subscription with resource_name.
     :param str resource_name: The name of resource
     :param str resource_type: The type of resource
     """
-    result = get_resources_in_subscription(resource_type)
+    result = get_resources_in_subscription(cli_ctx, resource_type)
     elements = [item for item in result if item.name.lower() == resource_name.lower()]
 
     if not elements:
@@ -52,39 +52,40 @@ def get_resource_group_name_by_resource_id(resource_id):
         resource_group_keyword): resource_id.index('/providers/')]
 
 
-def get_resource_group_name_by_registry_name(registry_name,
+def get_resource_group_name_by_registry_name(cli_ctx, registry_name,
                                              resource_group_name=None):
     """Returns the resource group name for the container registry.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     """
     if not resource_group_name:
-        arm_resource = _arm_get_resource_by_name(registry_name, REGISTRY_RESOURCE_TYPE)
+        arm_resource = _arm_get_resource_by_name(cli_ctx, registry_name, REGISTRY_RESOURCE_TYPE)
         resource_group_name = get_resource_group_name_by_resource_id(arm_resource.id)
     return resource_group_name
 
 
-def get_resource_id_by_storage_account_name(storage_account_name):
+def get_resource_id_by_storage_account_name(cli_ctx, storage_account_name):
     """Returns the resource id for the storage account.
     :param str storage_account_name: The name of storage account
     """
-    arm_resource = _arm_get_resource_by_name(storage_account_name, STORAGE_RESOURCE_TYPE)
+    arm_resource = _arm_get_resource_by_name(cli_ctx, storage_account_name, STORAGE_RESOURCE_TYPE)
     return arm_resource.id
 
 
-def get_registry_by_name(registry_name, resource_group_name=None):
+def get_registry_by_name(cli_ctx, registry_name, resource_group_name=None):
     """Returns a tuple of Registry object and resource group name.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     """
     resource_group_name = get_resource_group_name_by_registry_name(
-        registry_name, resource_group_name)
-    client = get_acr_service_client().registries
+        cli_ctx, registry_name, resource_group_name)
+    client = get_acr_service_client(cli_ctx).registries
 
     return client.get(resource_group_name, registry_name), resource_group_name
 
 
-def arm_deploy_template_managed_storage(resource_group_name,
+def arm_deploy_template_managed_storage(cli_ctx,
+                                        resource_group_name,
                                         registry_name,
                                         location,
                                         sku,
@@ -113,10 +114,11 @@ def arm_deploy_template_managed_storage(resource_group_name,
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
 
     return _arm_deploy_template(
-        get_arm_service_client().deployments, resource_group_name, deployment_name, properties)
+        get_arm_service_client(cli_ctx).deployments, resource_group_name, deployment_name, properties)
 
 
-def arm_deploy_template_new_storage(resource_group_name,
+def arm_deploy_template_new_storage(cli_ctx,
+                                    resource_group_name,
                                     registry_name,
                                     location,
                                     sku,
@@ -148,10 +150,11 @@ def arm_deploy_template_new_storage(resource_group_name,
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
 
     return _arm_deploy_template(
-        get_arm_service_client().deployments, resource_group_name, deployment_name, properties)
+        get_arm_service_client(cli_ctx).deployments, resource_group_name, deployment_name, properties)
 
 
-def arm_deploy_template_existing_storage(resource_group_name,
+def arm_deploy_template_existing_storage(cli_ctx,
+                                         resource_group_name,
                                          registry_name,
                                          location,
                                          sku,
@@ -171,7 +174,7 @@ def arm_deploy_template_existing_storage(resource_group_name,
     from azure.cli.core.util import get_file_json
     import os
 
-    storage_account_id = get_resource_id_by_storage_account_name(storage_account_name)
+    storage_account_id = get_resource_id_by_storage_account_name(cli_ctx, storage_account_name)
 
     parameters = _parameters(
         registry_name=registry_name,
@@ -185,7 +188,7 @@ def arm_deploy_template_existing_storage(resource_group_name,
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
 
     return _arm_deploy_template(
-        get_arm_service_client().deployments, resource_group_name, deployment_name, properties)
+        get_arm_service_client(cli_ctx).deployments, resource_group_name, deployment_name, properties)
 
 
 def _arm_deploy_template(deployments_client,
@@ -237,10 +240,11 @@ def _parameters(registry_name,
     return parameters
 
 
-def random_storage_account_name(registry_name):
+# pylint: disable=inconsistent-return-statements
+def random_storage_account_name(cli_ctx, registry_name):
     from datetime import datetime
 
-    client = get_storage_service_client().storage_accounts
+    client = get_storage_service_client(cli_ctx).storage_accounts
     prefix = registry_name[:18].lower()
 
     while True:
@@ -250,12 +254,12 @@ def random_storage_account_name(registry_name):
             return storage_account_name
 
 
-def validate_managed_registry(registry_name, resource_group_name=None, message=None):
+def validate_managed_registry(cli_ctx, registry_name, resource_group_name=None, message=None):
     """Raise CLIError if the registry in not in Managed SKU.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     """
-    registry, resource_group_name = get_registry_by_name(registry_name, resource_group_name)
+    registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
 
     if not registry.sku or registry.sku.name not in MANAGED_REGISTRY_SKU:
         raise CLIError(message or "This operation is only supported for managed registries.")
@@ -263,12 +267,12 @@ def validate_managed_registry(registry_name, resource_group_name=None, message=N
     return registry, resource_group_name
 
 
-def validate_premium_registry(registry_name, resource_group_name=None, message=None):
+def validate_premium_registry(cli_ctx, registry_name, resource_group_name=None, message=None):
     """Raise CLIError if the registry in not in Premium SKU.
     :param str registry_name: The name of container registry
     :param str resource_group_name: The name of resource group
     """
-    registry, resource_group_name = get_registry_by_name(registry_name, resource_group_name)
+    registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
 
     if not registry.sku or registry.sku.name != SkuName.premium.value:
         raise CLIError(message or "This operation is only supported for managed registries in Premium SKU.")

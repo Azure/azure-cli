@@ -4,7 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=unused-argument
-from azure.cli.core.util import CLIError, to_snake_case
+from knack.util import CLIError, to_snake_case
+
+from msrestazure.azure_cloud import _populate_from_metadata_endpoint, MetadataEndpointError
 
 from azure.cli.core.cloud import (Cloud,
                                   get_clouds,
@@ -14,60 +16,26 @@ from azure.cli.core.cloud import (Cloud,
                                   switch_active_cloud,
                                   update_cloud,
                                   get_active_cloud_name,
+                                  cloud_is_registered,
                                   CloudAlreadyRegisteredException,
                                   CloudNotRegisteredException,
                                   CannotUnregisterCloudException)
 
 
-# The exact API version doesn't matter too much right now. It just has to be YYYY-MM-DD format.
-METADATA_ENDPOINT_SUFFIX = '/metadata/endpoints?api-version=2015-01-01'
+def list_clouds(cmd):
+    return get_clouds(cmd.cli_ctx)
 
 
-def list_clouds():
-    return get_clouds()
-
-
-def show_cloud(cloud_name=None):
+def show_cloud(cmd, cloud_name=None):
     if not cloud_name:
-        cloud_name = get_active_cloud_name()
+        cloud_name = cmd.cli_ctx.cloud.name
     try:
-        return get_cloud(cloud_name)
+        return get_cloud(cmd.cli_ctx, cloud_name)
     except CloudNotRegisteredException as e:
         raise CLIError(e)
 
 
-def _populate_from_metadata_endpoint(cloud, arm_endpoint):
-    endpoints_in_metadata = ['active_directory_graph_resource_id',
-                             'active_directory_resource_id', 'active_directory']
-    if not arm_endpoint or all([cloud.endpoints.has_endpoint_set(n) for n in endpoints_in_metadata]):
-        return
-    try:
-        error_msg_fmt = "Unable to get endpoints from the cloud.\n{}"
-        import requests
-        metadata_endpoint = arm_endpoint + METADATA_ENDPOINT_SUFFIX
-        response = requests.get(metadata_endpoint)
-        if response.status_code == 200:
-            metadata = response.json()
-            if not cloud.endpoints.has_endpoint_set('gallery'):
-                setattr(cloud.endpoints, 'gallery', metadata.get('galleryEndpoint'))
-            if not cloud.endpoints.has_endpoint_set('active_directory_graph_resource_id'):
-                setattr(cloud.endpoints, 'active_directory_graph_resource_id', metadata.get('graphEndpoint'))
-            if not cloud.endpoints.has_endpoint_set('active_directory'):
-                setattr(cloud.endpoints, 'active_directory', metadata['authentication'].get('loginEndpoint'))
-            if not cloud.endpoints.has_endpoint_set('active_directory_resource_id'):
-                setattr(cloud.endpoints, 'active_directory_resource_id', metadata['authentication']['audiences'][0])
-        else:
-            msg = 'Server returned status code {} for {}'.format(response.status_code, metadata_endpoint)
-            raise CLIError(error_msg_fmt.format(msg))
-    except (requests.exceptions.ConnectionError, requests.exceptions.HTTPError) as err:
-        msg = 'Please ensure you have network connection. Error detail: {}'.format(str(err))
-        raise CLIError(error_msg_fmt.format(msg))
-    except ValueError as err:
-        msg = 'Response body does not contain valid json. Error detail: {}'.format(str(err))
-        raise CLIError(error_msg_fmt.format(msg))
-
-
-def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
+def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
     if cloud_config:
         # Using JSON format so convert the keys to snake case
         for key in cloud_config:
@@ -81,14 +49,17 @@ def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
         elif arg.startswith('suffix_') and cloud_args[arg] is not None:
             setattr(c.suffixes, arg.replace('suffix_', ''), cloud_args[arg])
     arm_endpoint = cloud_args.get('endpoint_resource_manager', None)
-    _populate_from_metadata_endpoint(c, arm_endpoint)
+    try:
+        _populate_from_metadata_endpoint(c, arm_endpoint)
+    except MetadataEndpointError as err:
+        raise CLIError(err)
     required_endpoints = {'resource_manager': '--endpoint-resource-manager',
                           'active_directory': '--endpoint-active-directory',
                           'active_directory_resource_id': '--endpoint-active-directory-resource-id',
                           'active_directory_graph_resource_id': '--endpoint-active-directory-graph-resource-id'}
     missing_endpoints = [e_param for e_name, e_param in required_endpoints.items()
                          if not c.endpoints.has_endpoint_set(e_name)]
-    if missing_endpoints:
+    if missing_endpoints and not cloud_is_registered(cli_ctx, cloud_name):
         raise CLIError("The following endpoints are required for the CLI to function and were not specified on the "
                        "command line, in the cloud config or could not be autodetected.\n"
                        "Specify them on the command line or through the cloud config file:\n"
@@ -96,7 +67,8 @@ def _build_cloud(cloud_name, cloud_config=None, cloud_args=None):
     return c
 
 
-def register_cloud(cloud_name,
+def register_cloud(cmd,
+                   cloud_name,
                    cloud_config=None,
                    profile=None,
                    endpoint_management=None,
@@ -113,15 +85,16 @@ def register_cloud(cloud_name,
                    suffix_keyvault_dns=None,
                    suffix_azure_datalake_store_file_system_endpoint=None,
                    suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
-    c = _build_cloud(cloud_name, cloud_config=cloud_config,
+    c = _build_cloud(cmd.cli_ctx, cloud_name, cloud_config=cloud_config,
                      cloud_args=locals())
     try:
-        add_cloud(c)
+        add_cloud(cmd.cli_ctx, c)
     except CloudAlreadyRegisteredException as e:
         raise CLIError(e)
 
 
-def modify_cloud(cloud_name=None,
+def modify_cloud(cmd,
+                 cloud_name=None,
                  cloud_config=None,
                  profile=None,
                  endpoint_management=None,
@@ -139,35 +112,35 @@ def modify_cloud(cloud_name=None,
                  suffix_azure_datalake_store_file_system_endpoint=None,
                  suffix_azure_datalake_analytics_catalog_and_job_endpoint=None):
     if not cloud_name:
-        cloud_name = get_active_cloud_name()
-    c = _build_cloud(cloud_name, cloud_config=cloud_config,
+        cloud_name = cmd.cli_ctx.cloud.name
+    c = _build_cloud(cmd.cli_ctx, cloud_name, cloud_config=cloud_config,
                      cloud_args=locals())
     try:
-        update_cloud(c)
+        update_cloud(cmd.cli_ctx, c)
     except CloudNotRegisteredException as e:
         raise CLIError(e)
 
 
-def unregister_cloud(cloud_name):
+def unregister_cloud(cmd, cloud_name):
     try:
-        return remove_cloud(cloud_name)
+        return remove_cloud(cmd.cli_ctx, cloud_name)
     except CloudNotRegisteredException as e:
         raise CLIError(e)
     except CannotUnregisterCloudException as e:
         raise CLIError(e)
 
 
-def set_cloud(cloud_name, profile=None):
+def set_cloud(cmd, cloud_name, profile=None):
     try:
-        switch_active_cloud(cloud_name)
+        switch_active_cloud(cmd.cli_ctx, cloud_name)
         if profile:
-            modify_cloud(cloud_name=cloud_name, profile=profile)
+            modify_cloud(cmd, cloud_name=cloud_name, profile=profile)
     except CloudNotRegisteredException as e:
         raise CLIError(e)
 
 
-def list_profiles(cloud_name=None, show_all=False):
+def list_profiles(cmd, cloud_name=None, show_all=False):
     from azure.cli.core.profiles import API_PROFILES
     if not cloud_name:
-        cloud_name = get_active_cloud_name()
+        cloud_name = get_active_cloud_name(cmd.cli_ctx.cloud)
     return list(API_PROFILES)

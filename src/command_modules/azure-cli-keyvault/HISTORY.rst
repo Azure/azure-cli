@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.0.16
+++++++
+* Update for CLI core changes.
+
+2.0.15
+++++++
+* Minor fixes.
+
 2.0.14
 ++++++
 * Minor fixes.

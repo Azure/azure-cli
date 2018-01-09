@@ -8,7 +8,7 @@ import tempfile
 import unittest
 import mock
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from azure.cli.command_modules.acs.custom import (
     load_acs_service_principal,
     store_acs_service_principal,
@@ -17,7 +17,7 @@ from azure.cli.command_modules.acs.custom import (
 
 class AcsServicePrincipalTest(unittest.TestCase):
     def test_load_non_existent_service_principal(self):
-        principal = load_acs_service_principal('some-id', config_path='non-existent-file.json')
+        principal = load_acs_service_principal('some-id', file_name='non-existent-file.json')
         self.assertIsNone(principal)
 
     def test_round_trip_one_subscription(self):
@@ -29,8 +29,8 @@ class AcsServicePrincipalTest(unittest.TestCase):
         client_secret = 'foobar'
 
         store_acs_service_principal(
-            sub_id, client_secret, service_principal, config_path=store_file.name)
-        obj = load_acs_service_principal(sub_id, config_path=store_file.name)
+            sub_id, client_secret, service_principal, file_name=store_file.name)
+        obj = load_acs_service_principal(sub_id, file_name=store_file.name)
 
         self.assertIsNotNone(obj)
         self.assertEqual(obj.get('service_principal'), service_principal)
@@ -50,11 +50,11 @@ class AcsServicePrincipalTest(unittest.TestCase):
         # Store them all
         for principal in principals:
             store_acs_service_principal(
-                principal[0], principal[1], principal[2], config_path=store_file.name)
+                principal[0], principal[1], principal[2], file_name=store_file.name)
 
         # Make sure it worked
         for principal in principals:
-            obj = load_acs_service_principal(principal[0], config_path=store_file.name)
+            obj = load_acs_service_principal(principal[0], file_name=store_file.name)
             self.assertIsNotNone(obj, 'expected non-None for {}'.format(principal[0]))
             self.assertEqual(obj.get('service_principal'), principal[2])
             self.assertEqual(obj.get('client_secret'), principal[1])
@@ -63,8 +63,8 @@ class AcsServicePrincipalTest(unittest.TestCase):
         new_principal = 'foo'
         new_secret = 'bar'
         store_acs_service_principal(
-            principals[0][0], new_secret, new_principal, config_path=store_file.name)
-        obj = load_acs_service_principal(principals[0][0], config_path=store_file.name)
+            principals[0][0], new_secret, new_principal, file_name=store_file.name)
+        obj = load_acs_service_principal(principals[0][0], file_name=store_file.name)
         self.assertIsNotNone(obj, 'expected non-None for {}'.format(principals[0][0]))
         self.assertEqual(obj.get('service_principal'), new_principal)
         self.assertEqual(obj.get('client_secret'), new_secret)
@@ -79,11 +79,12 @@ class AcsServicePrincipalTest(unittest.TestCase):
         client.applications = mock.Mock()
         client.applications.create.return_value.app_id = app_id
         client.applications.list.return_value = []
+        cli_ctx = mock.MagicMock()
 
         name = "foo"
         url = "http://contuso.com"
         secret = "notASecret"
-        _build_service_principal(client, name, url, secret)
+        _build_service_principal(client, cli_ctx, name, url, secret)
 
         self.assertTrue(client.applications.create.called)
         self.assertTrue(client.applications.list.called)

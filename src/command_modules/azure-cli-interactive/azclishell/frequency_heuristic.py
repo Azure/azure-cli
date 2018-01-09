@@ -7,15 +7,9 @@ import os
 import datetime
 import json
 
-from azure.cli.core._config import set_global_config_value
-
-from azclishell.configuration import CONFIGURATION, get_config_dir as shell_config
-
-SHELL_CONFIG = CONFIGURATION
 DAYS_AGO = 28
 ACTIVE_STATUS = 5
 DISPLAY_TIME = 20
-FREQUENCY_PATH = os.path.join(shell_config(), SHELL_CONFIG.get_frequency())
 
 
 def day_format(now):
@@ -23,10 +17,11 @@ def day_format(now):
     return now.strftime("%Y-%m-%d")
 
 
-def update_frequency():
+def update_frequency(shell_ctx):
     """ updates the frequency from files """
-    if os.path.exists(FREQUENCY_PATH):
-        with open(FREQUENCY_PATH, 'r') as freq:
+    frequency_path = os.path.join(shell_ctx.config.config_dir, shell_ctx.config.get_frequency())
+    if os.path.exists(frequency_path):
+        with open(frequency_path, 'r') as freq:
             try:
                 frequency = json.load(freq)
             except ValueError:
@@ -34,7 +29,7 @@ def update_frequency():
     else:
         frequency = {}
 
-    with open(FREQUENCY_PATH, 'w') as freq:
+    with open(frequency_path, 'w') as freq:
         now = day_format(datetime.datetime.utcnow())
         val = frequency.get(now)
         frequency[now] = val + 1 if val else 1
@@ -43,9 +38,9 @@ def update_frequency():
     return frequency
 
 
-def frequency_measurement():
+def frequency_measurement(shell_ctx):
     """ measures how many times a user has used this program in the last calendar week """
-    freq = update_frequency()
+    freq = update_frequency(shell_ctx)
     count = 0
     base = datetime.datetime.utcnow()
     date_list = [base - datetime.timedelta(days=x) for x in range(0, DAYS_AGO)]
@@ -55,9 +50,6 @@ def frequency_measurement():
     return count
 
 
-def frequency_heuristic():
+def frequency_heuristic(shell_ctx):
     """ decides whether user meets requirements for frequency """
-    return frequency_measurement() >= ACTIVE_STATUS
-
-
-frequent_user = frequency_heuristic()
+    return frequency_measurement(shell_ctx) >= ACTIVE_STATUS

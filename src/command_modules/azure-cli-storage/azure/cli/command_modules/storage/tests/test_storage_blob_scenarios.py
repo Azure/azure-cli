@@ -9,9 +9,10 @@ import unittest
 from datetime import datetime, timedelta
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, NoneCheck, api_version_constraint)
-from azure.cli.core.util import CLIError
-from azure.cli.command_modules.storage._factory import NO_CREDENTIALS_ERROR_MESSAGE
+from knack.util import CLIError
 from azure.cli.core.profiles import ResourceType
+
+from azure.cli.command_modules.storage._client_factory import NO_CREDENTIALS_ERROR_MESSAGE
 from .storage_test_util import StorageScenarioMixin
 
 
@@ -40,8 +41,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
     def test_storage_blob_no_credentials_scenario(self):
         source_file = self.create_temp_file(1)
-        with self.assertRaisesRegexp(CLIError, re.escape(NO_CREDENTIALS_ERROR_MESSAGE)):
-            self.cmd('storage blob upload -c foo -n bar -f "' + source_file + '"')
+        self.cmd('storage blob upload -c foo -n bar -f "' + source_file + '"', expect_failure=CLIError)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()

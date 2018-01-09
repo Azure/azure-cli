@@ -7,18 +7,30 @@ import os.path
 import unittest
 import mock
 
-import azure.cli.core.application as application
-from azure.cli.core.util import CLIError
 from azure.cli.core.cloud import CloudEndpointNotSetException
+from azure.cli.testsdk import TestCli
+
+from knack.util import CLIError
+
+
+def _get_test_cmd():
+    from azure.cli.testsdk import TestCli
+    from azure.cli.core import AzCommandsLoader
+    from azure.cli.core.commands import AzCliCommand
+    from azure.cli.core.profiles import ResourceType
+    cli_ctx = TestCli()
+    loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_COMPUTE)
+    cmd = AzCliCommand(loader, 'test', None)
+    cmd.command_kwargs = {'resource_type': ResourceType.MGMT_COMPUTE}
+    cmd.cli_ctx = cli_ctx
+    return cmd
 
 
 class TestVMImage(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm.custom.urlopen', autospec=True)
     def test_read_images_from_alias_doc(self, mock_urlopen):
-        config = application.Configuration()
-        application.APPLICATION = application.Application(config)
         from azure.cli.command_modules.vm.custom import list_vm_images
-
+        cmd = _get_test_cmd()
         file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                  'aliases.json')
         with open(file_path, 'r') as test_file:
@@ -29,7 +41,7 @@ class TestVMImage(unittest.TestCase):
         mock_urlopen.return_value = mock_read
 
         # action
-        images = list_vm_images()
+        images = list_vm_images(cmd)
 
         # assert
         win_images = [i for i in images if i['publisher'] == 'MicrosoftWindowsServer']
@@ -47,13 +59,15 @@ class TestVMImage(unittest.TestCase):
     @mock.patch('azure.cli.core.cloud.get_active_cloud', autospec=True)
     def test_when_alias_doc_is_missing(self, mock_get_active_cloud):
         from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
-        p = mock.PropertyMock(side_effect=CloudEndpointNotSetException)
+        p = mock.PropertyMock(side_effect=CloudEndpointNotSetException(''))
         mock_cloud = mock.MagicMock()
         type(mock_cloud.endpoints).vm_image_alias_doc = p
         mock_get_active_cloud.return_value = mock_cloud
         # assert
+        cli_ctx = TestCli()
+        cli_ctx.cloud = mock_cloud
         with self.assertRaises(CLIError):
-            load_images_from_aliases_doc()
+            load_images_from_aliases_doc(cli_ctx)
 
 
 if __name__ == '__main__':

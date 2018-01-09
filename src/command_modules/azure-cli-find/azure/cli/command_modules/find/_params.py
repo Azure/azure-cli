@@ -3,13 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import CliArgumentType, register_cli_argument
 
-
-query = CliArgumentType(
-    options_list=('--search-query', '-q'),
-    help='Query text to find.',
-    nargs='+'
-)
-
-register_cli_argument('find', 'criteria', query)
+def load_arguments(self, _):
+    with self.argument_context('find') as c:
+        c.argument('criteria', options_list=['--search-query', '-q'], help='Query text to find.', nargs='+')
+        c.argument('reindex', help='Clear the current index and reindex the command modules.')

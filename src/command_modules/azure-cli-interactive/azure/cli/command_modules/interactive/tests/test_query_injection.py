@@ -11,11 +11,11 @@ from azclishell.util import parse_quotes
 from azclishell.gather_commands import GatherCommands
 
 
-def pass_gather(_):
+def pass_gather(*_):
     pass
 
 
-GatherCommands.gather_from_files = pass_gather
+GatherCommands._gather_from_files = pass_gather
 
 
 # pylint: disable=too-few-public-methods
@@ -28,10 +28,10 @@ class QueryInjection(unittest.TestCase):
     """ tests using the query gesture for the interactive mode """
     def __init__(self, *args, **kwargs):
         super(QueryInjection, self).__init__(*args, **kwargs)
-        from azclishell.app import Shell
-
+        from azclishell.app import AzInteractiveShell
+        from azure.cli.testsdk import TestCli
         self.stream = six.StringIO()
-        self.shell = Shell(output_custom=self.stream)
+        self.shell = AzInteractiveShell(TestCli(), output_custom=self.stream)
         self.shell.cli_execute = self._mock_execute
         self.shell.last = MockValues()
 

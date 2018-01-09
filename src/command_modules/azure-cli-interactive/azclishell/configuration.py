@@ -6,9 +6,10 @@ from __future__ import print_function
 
 import os
 
-from azure.cli.core._config import az_config, set_global_config_value
 from azure.cli.core._help import PRIVACY_STATEMENT
+
 from prompt_toolkit import prompt
+
 from six.moves import configparser
 
 SELECT_SYMBOL = {
@@ -32,7 +33,6 @@ GESTURE_INFO = {
 }
 
 CONFIG_FILE_NAME = 'shell-config'
-
 GESTURE_LENGTH = max(len(key) for key in GESTURE_INFO) + 1
 
 
@@ -55,11 +55,12 @@ class Configuration(object):
                       'y': True, 'Y': True, 'n': False, 'N': False}
 
     """ Configuration information """
-    def __init__(self):
+    def __init__(self, cli_config):
         self.config = configparser.ConfigParser({
             'firsttime': 'yes',
             'style': 'default'
         })
+        self.cli_config = cli_config
         self.config.add_section('Help Files')
         self.config.add_section('Layout')
         self.config.set('Help Files', 'command', 'help_dump.json')
@@ -69,14 +70,15 @@ class Configuration(object):
         self.config.set('Layout', 'param_description', 'yes')
         self.config.set('Layout', 'examples', 'yes')
 
-        azure_folder = get_config_dir()
-        if not os.path.exists(azure_folder):
-            os.makedirs(azure_folder)
-        if not os.path.exists(os.path.join(get_config_dir(), CONFIG_FILE_NAME)):
-            with open(os.path.join(get_config_dir(), CONFIG_FILE_NAME), 'w') as config_file:
+        self.config_dir = os.getenv('AZURE_CONFIG_DIR') or os.path.expanduser(os.path.join('~', '.azure-shell'))
+
+        if not os.path.exists(self.config_dir):
+            os.makedirs(self.config_dir)
+        if not os.path.exists(os.path.join(self.config_dir, CONFIG_FILE_NAME)):
+            with open(os.path.join(self.config_dir, CONFIG_FILE_NAME), 'w') as config_file:
                 self.config.write(config_file)
         else:
-            with open(os.path.join(get_config_dir(), CONFIG_FILE_NAME), 'r') as config_file:
+            with open(os.path.join(self.config_dir, CONFIG_FILE_NAME), 'r') as config_file:
                 self.config.readfp(config_file)  # pylint: disable=deprecated-method
                 self.update()
 
@@ -99,10 +101,10 @@ class Configuration(object):
     def firsttime(self):
         """ sets it as already done"""
         self.config.set('DEFAULT', 'firsttime', 'no')
-        if az_config.getboolean('core', 'collect_telemetry', fallback=False):
+        if self.config.getboolean('core', 'collect_telemetry', fallback=False):
             print(PRIVACY_STATEMENT)
         else:
-            set_global_config_value('core', 'collect_telemetry', ask_user_for_telemetry())
+            self.cli_config.set_value('core', 'collect_telemetry', ask_user_for_telemetry())
 
         self.update()
 
@@ -112,11 +114,11 @@ class Configuration(object):
 
     def has_feedback(self):
         """ returns whether user has given feedback """
-        return az_config.getboolean('core', 'given feedback', fallback='false')
+        return self.config.getboolean('core', 'given feedback', fallback='false')
 
     def set_feedback(self, value):
         """ sets the feedback in the config """
-        set_global_config_value('core', 'given feedback', value)
+        self.cli_config.set_value('core', 'given feedback', value)
 
     def set_style(self, val):
         """ sets the style they used """
@@ -124,21 +126,14 @@ class Configuration(object):
 
     def set_val(self, direct, section, val):
         """ set the config values """
-        self.config.set(direct, section, val)
-        self.update()
+        if val is not None:
+            self.config.set(direct, section, val)
+            self.update()
 
     def update(self):
         """ updates the configuration settings """
-        with open(os.path.join(get_config_dir(), CONFIG_FILE_NAME), 'w') as config_file:
+        with open(os.path.join(self.config_dir, CONFIG_FILE_NAME), 'w') as config_file:
             self.config.write(config_file)
-
-
-def get_config_dir():
-    """ gets the directory of the configuration """
-    if os.getenv('AZURE_CONFIG_DIR'):
-        return os.getenv('AZURE_CONFIG_DIR')
-    else:
-        return os.path.expanduser(os.path.join('~', '.azure-shell'))
 
 
 def ask_user_for_telemetry():
@@ -151,6 +146,3 @@ def ask_user_for_telemetry():
             answer = 'yes'
 
     return answer
-
-
-CONFIGURATION = Configuration()
