@@ -147,7 +147,7 @@ def _get_credentials(cli_ctx,
     if not password and registry.sku.name in MANAGED_REGISTRY_SKU:
         try:
             username = "00000000-0000-0000-0000-000000000000" if only_refresh_token else None
-            password = _get_aad_token(login_server, only_refresh_token, repository, permission)
+            password = _get_aad_token(cli_ctx, login_server, only_refresh_token, repository, permission)
             return login_server, username, password
         except CLIError as e:
             logger.warning("Unable to get AAD authorization tokens with message: %s", str(e))
