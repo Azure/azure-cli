@@ -101,7 +101,7 @@ class Configuration(object):
     def firsttime(self):
         """ sets it as already done"""
         self.config.set('DEFAULT', 'firsttime', 'no')
-        if self.config.getboolean('core', 'collect_telemetry', fallback=False):
+        if self.cli_config.getboolean('core', 'collect_telemetry', fallback=False):
             print(PRIVACY_STATEMENT)
         else:
             self.cli_config.set_value('core', 'collect_telemetry', ask_user_for_telemetry())
@@ -114,7 +114,7 @@ class Configuration(object):
 
     def has_feedback(self):
         """ returns whether user has given feedback """
-        return self.config.getboolean('core', 'given feedback', fallback='false')
+        return self.cli_config.getboolean('core', 'given feedback', fallback='false')
 
     def set_feedback(self, value):
         """ sets the feedback in the config """
