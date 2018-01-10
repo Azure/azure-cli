@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.24
 ++++++
+* vm/vmss: use right term of "userAssignedIdentity" for EMSI
 * vm: (PREVIEW) support os disk swap
 * vm: support use image from other subscriptions
 

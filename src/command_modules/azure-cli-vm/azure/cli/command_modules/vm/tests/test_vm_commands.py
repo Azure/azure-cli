@@ -1897,7 +1897,8 @@ class MSIScenarioTest(ScenarioTest):
 
         # create a linux vm with identity but w/o a role assignment (--scope "")
         self.cmd('vm create -g {rg} -n {vm1} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!', checks=[
-            self.check('identity.scope', ''),
+            self.check('identity.scope', None),
+            self.check('identity.role', None),
             self.check('identity.port', 50342)
         ])
         # the extension should still get provisioned
@@ -1908,7 +1909,7 @@ class MSIScenarioTest(ScenarioTest):
 
         # create a vmss with identity but w/o a role assignment (--scope "")
         self.cmd('vmss create -g {rg} -n {vmss1} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!', checks=[
-            self.check('vmss.identity.scope', ''),
+            self.check('vmss.identity.scope', None),
             self.check('vmss.identity.port', 50342)
         ])
 
@@ -1922,7 +1923,7 @@ class MSIScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n {vm2} --image debian --admin-username admin123 --admin-password PasswordPassword1!')
         # assign identity but w/o a role assignment
         self.cmd('vm assign-identity -g {rg} -n {vm2}', checks=[
-            self.check('scope', ''),
+            self.check('scope', None),
             self.check('port', 50342)
         ])
         # the extension should still get provisioned
@@ -1935,7 +1936,7 @@ class MSIScenarioTest(ScenarioTest):
         # skip playing back till the test issue gets addressed https://github.com/Azure/azure-cli/issues/4016
         if self.is_live:
             self.cmd('vmss assign-identity -g {rg} -n {vmss2}', checks=[
-                self.check('scope', ''),
+                self.check('scope', None),
                 self.check('port', 50342)
             ])
 
@@ -1960,9 +1961,17 @@ class MSIScenarioTest(ScenarioTest):
                                checks=self.check('name', '{emsi}')).get_output_in_json()
         emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
 
+        # create a vm with only user assigned identity
+        result = self.cmd('vm create -g {rg} -n vm2 --image ubuntults --assign-identity {emsi} --generate-ssh-keys', checks=[
+            self.check('identity.role', None),
+            self.check('identity.scope', None),
+            self.check('length(identity.userAssignedIdentities)', 1)
+        ]).get_output_in_json()
+        self.assertEqual(result['identity']['userAssignedIdentities'][0].lower(), emsi_result['id'].lower())
+
         # create a vm with system + user assigned identities
         result = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys --admin-username ubuntuadmin').get_output_in_json()
-        self.assertEqual(result['identity']['externalIdentities'][0].lower(), emsi_result['id'].lower())
+        self.assertEqual(result['identity']['userAssignedIdentities'][0].lower(), emsi_result['id'].lower())
         result = self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('length(identity.identityIds)', 1),
             self.check('identity.type', 'SystemAssigned, UserAssigned')
@@ -2004,7 +2013,7 @@ class MSIScenarioTest(ScenarioTest):
 
         # create a vmss with system + user assigned identities
         result = self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --instance-count 1 --generate-ssh-keys --admin-username ubuntuadmin').get_output_in_json()
-        self.assertEqual(result['vmss']['identity']['externalIdentities'][0].lower(), emsi_result['id'].lower())
+        self.assertEqual(result['vmss']['identity']['userAssignedIdentities'][0].lower(), emsi_result['id'].lower())
 
         result = self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('length(identity.identityIds)', 1),
