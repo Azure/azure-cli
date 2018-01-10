@@ -3,10 +3,13 @@
 Release History
 ===============
 
+2.0.19
+++++++
+* Minor fixes, enable registry logs.
+
 2.0.18
 ++++++
 * Update for CLI core changes.
-
 
 2.0.17
 ++++++
