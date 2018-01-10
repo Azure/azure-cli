@@ -68,7 +68,7 @@ class AzureContainerServiceKubernetesScenarioTest(LiveScenarioTest):
         cmd = 'acs create -g {} -n {} --orchestrator-type Kubernetes --service-principal {} ' \
               '--client-secret {} --ssh-key-value {}'
         self.cmd(cmd.format(resource_group, acs_name, sp_name, sp_password, ssh_pubkey_file),
-                 checks=[self.check('properties.provisioningState', 'Succeeded')])
+                 checks=[self.check('provisioningState', 'Succeeded')])
 
 
     @classmethod

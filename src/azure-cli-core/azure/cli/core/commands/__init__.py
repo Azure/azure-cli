@@ -845,9 +845,11 @@ class AzArgumentContext(ArgumentsContext):
         resource_type = merged_kwargs.get('resource_type', None)
         min_api = merged_kwargs.get('min_api', None)
         max_api = merged_kwargs.get('max_api', None)
+        operation_group = merged_kwargs.get('operation_group', None)
         if self.command_loader.supported_api_version(resource_type=resource_type,
                                                      min_api=min_api,
-                                                     max_api=max_api):
+                                                     max_api=max_api,
+                                                     operation_group=operation_group):
             super(AzArgumentContext, self).argument(dest, **merged_kwargs)
         else:
             super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
@@ -928,8 +930,10 @@ class AzArgumentContext(ArgumentsContext):
         resource_type = merged_kwargs.get('resource_type', None)
         min_api = merged_kwargs.get('min_api', None)
         max_api = merged_kwargs.get('max_api', None)
+        operation_group = merged_kwargs.get('operation_group', None)
         if self.command_loader.supported_api_version(resource_type=resource_type,
                                                      min_api=min_api,
-                                                     max_api=max_api):
+                                                     max_api=max_api,
+                                                     operation_group=operation_group):
             merged_kwargs.pop('dest', None)
             super(AzArgumentContext, self).extra(argument_dest=dest, **merged_kwargs)

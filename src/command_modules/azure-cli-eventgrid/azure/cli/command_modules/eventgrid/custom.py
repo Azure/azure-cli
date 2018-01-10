@@ -6,6 +6,8 @@
 from six.moves.urllib.parse import quote  # pylint: disable=import-error
 from knack.log import get_logger
 from knack.util import CLIError
+from msrestazure.tools import parse_resource_id
+
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.mgmt.eventgrid.models import (
     EventSubscription,
@@ -13,7 +15,6 @@ from azure.mgmt.eventgrid.models import (
     WebHookEventSubscriptionDestination,
     EventHubEventSubscriptionDestination,
     EventSubscriptionFilter)
-from msrestazure.tools import parse_resource_id
 
 logger = get_logger(__name__)
 
