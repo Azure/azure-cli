@@ -7,7 +7,7 @@ import os
 import tempfile
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer,
-                               RoleBasedServicePrincipalPreparer, LiveScenarioTest)
+                               RoleBasedServicePrincipalPreparer)
 
 # flake8: noqa
 
@@ -53,9 +53,7 @@ class AzureContainerServiceScenarioTest(ScenarioTest):
 
         return pathname
 
-
-# TODO: Convert back to ScenarioTest and re-record when issue #5141 is resolved
-class AzureContainerServiceKubernetesScenarioTest(LiveScenarioTest):
+class AzureContainerServiceKubernetesScenarioTest(ScenarioTest):
 
     # the length is set to avoid following error:
     # Resource name k8s-master-ip-cliacstestgae47e-clitestdqdcoaas25vlhygb2aktyv4-c10894mgmt-D811C917
@@ -68,7 +66,7 @@ class AzureContainerServiceKubernetesScenarioTest(LiveScenarioTest):
         cmd = 'acs create -g {} -n {} --orchestrator-type Kubernetes --service-principal {} ' \
               '--client-secret {} --ssh-key-value {}'
         self.cmd(cmd.format(resource_group, acs_name, sp_name, sp_password, ssh_pubkey_file),
-                 checks=[self.check('provisioningState', 'Succeeded')])
+                 checks=[self.check('properties.provisioningState', 'Succeeded')])
 
 
     @classmethod
