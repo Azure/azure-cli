@@ -1682,7 +1682,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                                                                 build_load_balancer_resource,
                                                                 build_vmss_storage_account_pool_resource,
                                                                 build_application_gateway_resource,
-                                                                build_msi_role_assignment)
+                                                                build_msi_role_assignment, build_nsg_resource)
     subscription_id = get_subscription_id(cmd.cli_ctx)
     network_id_template = resource_id(
         subscription=subscription_id, resource_group=resource_group_name,
@@ -1747,6 +1747,10 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
 
     # Handle load balancer creation
     if load_balancer_type == 'new':
+        # Defaults SKU to 'Standard' for zonal scale set
+        if load_balancer_sku is None:
+            load_balancer_sku = 'Standard' if zones else 'Basic'
+
         vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
 
         lb_dependencies = []
@@ -1849,6 +1853,14 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
 
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
+
+    if nsg is None and zones:
+        # Per https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-overview#nsg
+        nsg_name = '{}NSG'.format(vmss_name)
+        master_template.add_resource(build_nsg_resource(
+            None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
+        nsg = "[resourceId('Microsoft.Network/networkSecurityGroups', '{}')]".format(nsg_name)
+        vmss_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg_name))
 
     vmss_resource = build_vmss_resource(cmd, vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,

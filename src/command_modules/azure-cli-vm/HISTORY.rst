@@ -5,6 +5,7 @@ Release History
 
 2.0.24
 ++++++
+* vmss: (PREVIEW) cross zone support
 * vm/vmss: use right term of "userAssignedIdentity" for EMSI
 * vm: (PREVIEW) support os disk swap
 * vm: support use image from other subscriptions
