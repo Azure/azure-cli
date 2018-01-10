@@ -289,8 +289,7 @@ class AzCommandsLoader(CLICommandsLoader):
         elif operation_group:
             # must be the ApiVersions class. Should be refactored as part of #5195
             return getattr(api_support, operation_group)
-        else:
-            return api_support
+        return api_support
 
     def get_sdk(self, *attr_args, **kwargs):
         from azure.cli.core.profiles import get_sdk
