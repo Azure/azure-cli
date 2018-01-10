@@ -2,6 +2,7 @@
 
 Release History
 ===============
+
 2.0.24
 ++++++
 * vm: (PREVIEW) support os disk swap
