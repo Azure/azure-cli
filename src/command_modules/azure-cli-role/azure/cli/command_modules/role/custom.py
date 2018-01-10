@@ -15,6 +15,9 @@ import dateutil.parser
 from knack.log import get_logger
 from knack.util import CLIError, todict
 
+from msrestazure.azure_exceptions import CloudError
+from azure.graphrbac.models.graph_error import GraphErrorException
+
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
@@ -118,8 +121,12 @@ def _search_role_definitions(definitions_client, name, scope, custom_role_only=F
     return roles
 
 
-def create_role_assignment(cmd, role, assignee, resource_group_name=None, scope=None):
-    return _create_role_assignment(cmd.cli_ctx, role, assignee, resource_group_name, scope)
+def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None, scope=None):
+    if bool(assignee) == bool(assignee_object_id):
+        raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
+    resolve_assignee = not assignee_object_id
+    return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id,
+                                   resource_group_name, scope, resolve_assignee=resolve_assignee)
 
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
@@ -184,13 +191,16 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     # fill in principal names
     principal_ids = set(i['properties']['principalId'] for i in results if i['properties']['principalId'])
     if principal_ids:
-        principals = _get_object_stubs(graph_client, principal_ids)
-        principal_dics = {i.object_id: _get_displayable_name(i) for i in principals}
+        try:
+            principals = _get_object_stubs(graph_client, principal_ids)
+            principal_dics = {i.object_id: _get_displayable_name(i) for i in principals}
 
-        for i in [r for r in results if not r['properties'].get('principalName')]:
-            i['properties']['principalName'] = ''
-            if principal_dics.get(i['properties']['principalId']):
-                i['properties']['principalName'] = principal_dics[i['properties']['principalId']]
+            for i in [r for r in results if not r['properties'].get('principalName')]:
+                i['properties']['principalName'] = ''
+                if principal_dics.get(i['properties']['principalId']):
+                    i['properties']['principalName'] = principal_dics[i['properties']['principalId']]
+        except (CloudError, GraphErrorException):
+            pass   # failure on resolving principal due to graph permission should not block the whole thing
 
     return results
 
@@ -200,14 +210,12 @@ def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
     co_admins = [x for x in co_admins if x.properties.email_address]
     graph_client = _graph_client_factory(cli_ctx)
     if assignee:  # apply assignee filter if applicable
-        try:
-            uuid.UUID(assignee)
+        if _is_guid(assignee):
             result = _get_object_stubs(graph_client, [assignee])
             if not result:
                 return []
             assignee = _get_displayable_name(result[0]).lower()
-        except ValueError:
-            pass
+
         co_admins = [x for x in co_admins if assignee == x.properties.email_address.lower()]
 
     if not co_admins:
@@ -274,7 +282,7 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
                              scope, assignee, role, include_inherited, include_groups):
     assignee_object_id = None
     if assignee:
-        assignee_object_id = _resolve_object_id(cli_ctx, assignee)
+        assignee_object_id = _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=True)
 
     # combining filters is unsupported, so we pick the best, and do limited maunal filtering
     if assignee_object_id:
@@ -321,12 +329,9 @@ def _resolve_role_id(role, scope, definitions_client):
                 role, re.I):
         role_id = role
     else:
-        try:
-            uuid.UUID(role)
+        if _is_guid(role):
             role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
                 definitions_client.config.subscription_id, role)
-        except ValueError:
-            pass
         if not role_id:  # retrieve role id
             role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
             if not role_defs:
@@ -458,11 +463,10 @@ def delete_application(client, identifier):
 def _resolve_application(client, identifier):
     result = list(client.list(filter="identifierUris/any(s:s eq '{}')".format(identifier)))
     if not result:
-        try:
-            uuid.UUID(identifier)
+        if _is_guid(identifier):
             # it is either app id or object id, let us verify
             result = list(client.list(filter="appId eq '{}'".format(identifier)))
-        except ValueError:
+        else:
             raise CLIError("Application '{}' doesn't exist".format(identifier))
 
     return result[0].object_id if result else identifier
@@ -505,10 +509,9 @@ def _create_service_principal(cli_ctx, identifier, resolve_app=True):
     client = _graph_client_factory(cli_ctx)
 
     if resolve_app:
-        try:
-            uuid.UUID(identifier)
+        if _is_guid(identifier):
             result = list(client.applications.list(filter="appId eq '{}'".format(identifier)))
-        except ValueError:
+        else:
             result = list(client.applications.list(
                 filter="identifierUris/any(s:s eq '{}')".format(identifier)))
 
@@ -554,10 +557,9 @@ def _resolve_service_principal(client, identifier):
     result = list(client.list(filter="servicePrincipalNames/any(c:c eq '{}')".format(identifier)))
     if result:
         return result[0].object_id
-    try:
-        uuid.UUID(identifier)
+    if _is_guid(identifier):
         return identifier  # assume an object id
-    except ValueError:
+    else:
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 
@@ -966,22 +968,36 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
     return result
 
 
-def _resolve_object_id(cli_ctx, assignee):
+def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):
     client = _graph_client_factory(cli_ctx)
     result = None
-    if assignee.find('@') >= 0:  # looks like a user principal name
-        result = list(client.users.list(filter="userPrincipalName eq '{}'".format(assignee)))
-    if not result:
-        result = list(client.service_principals.list(
-            filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
-    if not result:  # assume an object id, let us verify it
-        result = _get_object_stubs(client, [assignee])
+    try:
+        if assignee.find('@') >= 0:  # looks like a user principal name
+            result = list(client.users.list(filter="userPrincipalName eq '{}'".format(assignee)))
+        if not result:
+            result = list(client.service_principals.list(
+                filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
+        if not result:  # assume an object id, let us verify it
+            result = _get_object_stubs(client, [assignee])
 
-    # 2+ matches should never happen, so we only check 'no match' here
-    if not result:
-        raise CLIError("No matches in graph database for '{}'".format(assignee))
+        # 2+ matches should never happen, so we only check 'no match' here
+        if not result:
+            raise CLIError("No matches in graph database for '{}'".format(assignee))
 
-    return result[0].object_id
+        return result[0].object_id
+    except (CloudError, GraphErrorException):
+        if fallback_to_object_id and _is_guid(assignee):
+            return assignee
+        raise
+
+
+def _is_guid(guid):
+    try:
+        uuid.UUID(guid)
+        return True
+    except ValueError:
+        pass
+    return False
 
 
 def _get_object_stubs(graph_client, assignees):
