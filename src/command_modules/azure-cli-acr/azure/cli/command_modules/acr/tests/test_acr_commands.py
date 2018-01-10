@@ -17,10 +17,13 @@ class AcrCommandsTests(ScenarioTest):
                  checks=[self.check('[0].name', registry_name),
                          self.check('[0].location', location),
                          self.check('[0].adminUserEnabled', False)])
-        self.cmd('acr show -n {} -g {}'.format(registry_name, resource_group),
-                 checks=[self.check('name', registry_name),
-                         self.check('location', location),
-                         self.check('adminUserEnabled', False)])
+        registry = self.cmd('acr show -n {} -g {}'.format(registry_name, resource_group),
+                            checks=[self.check('name', registry_name),
+                                    self.check('location', location),
+                                    self.check('adminUserEnabled', False)]).get_output_in_json()
+
+        if registry['sku']['name'] == 'Standard':
+            self.cmd('acr show-usage -n {} -g {}'.format(registry_name, resource_group))
 
         # enable admin user
         self.cmd('acr update -n {} -g {} --tags foo=bar cat --admin-enabled true'.format(registry_name, resource_group),

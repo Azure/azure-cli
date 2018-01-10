@@ -13,7 +13,7 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 from ._utils import validate_managed_registry
-from ._docker_utils import get_access_credentials
+from ._docker_utils import get_access_credentials, log_registry_response
 
 
 logger = get_logger(__name__)
@@ -55,9 +55,10 @@ def _delete_data_from_registry(login_server, path, username, password, retry_tim
         errorMessage = None
         try:
             response = requests.delete(
-                'https://{}/{}'.format(login_server, path),
+                'https://{}{}'.format(login_server, path),
                 headers=_get_authorization_header(username, password)
             )
+            log_registry_response(response)
 
             if response.status_code == 200 or response.status_code == 202:
                 return
@@ -82,9 +83,10 @@ def _get_manifest_digest(login_server, path, username, password, retry_times=3, 
             headers = _get_authorization_header(username, password)
             headers.update(_get_manifest_v2_header())
             response = requests.get(
-                'https://{}/{}'.format(login_server, path),
+                'https://{}{}'.format(login_server, path),
                 headers=headers
             )
+            log_registry_response(response)
 
             if response.status_code == 200 and response.headers and 'Docker-Content-Digest' in response.headers:
                 return response.headers['Docker-Content-Digest']
@@ -119,10 +121,11 @@ def _obtain_data_from_registry(login_server,
             errorMessage = None
             try:
                 response = requests.get(
-                    'https://{}/{}'.format(login_server, path),
+                    'https://{}{}'.format(login_server, path),
                     headers=_get_authorization_header(username, password),
                     params=_get_pagination_params(pagination)
                 )
+                log_registry_response(response)
 
                 if response.status_code == 200:
                     result = response.json()[result_index]
