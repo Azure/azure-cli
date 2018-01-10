@@ -100,6 +100,10 @@ def load_arguments(self, _):
             c.argument('virtual_network_subnet_id', options_list=['--subnet'], help='Name or ID of the subnet that allows access to an Azure Postgres Server. If subnet name is provided, --vnet-name must be provided.')
             c.argument('ignore_missing_vnet_service_endpoint', options_list=['--ignore-missing-endpoint', '-i'], help='Create vnet rule before virtual network has vnet service endpoint enabled', arg_type=get_three_state_flag())
             
-        with self.argument_context('postgresql server vnet-rule create') as c:
-            c.extra('vnet_name', options_list=['--vnet-name'], help='The virtual network name', validator=validate_subnet)           
+        with self.argument_context('postgres server vnet-rule create') as c:
+            c.extra('vnet_name', options_list=['--vnet-name'], help='The virtual network name', validator=validate_subnet)
+            
+        with self.argument_context('mysql server vnet-rule create') as c:
+            c.extra('vnet_name', options_list=['--vnet-name'], help='The virtual network name', validator=validate_subnet)
+
             
