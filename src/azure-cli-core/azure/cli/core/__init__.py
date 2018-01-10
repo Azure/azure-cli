@@ -274,7 +274,6 @@ class AzCommandsLoader(CLICommandsLoader):
         resource_type = resource_type or self._get_resource_type()
         return get_api_version(self.cli_ctx, resource_type)
 
-    # pylint: disable=inconsistent-return-statements
     def supported_api_version(self, resource_type=None, min_api=None, max_api=None, operation_group=None):
         from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
         if not min_api and not max_api:
@@ -290,6 +289,8 @@ class AzCommandsLoader(CLICommandsLoader):
         elif operation_group:
             # must be the ApiVersions class. Should be refactored as part of #5195
             return getattr(api_support, operation_group)
+        else:
+            return api_support
 
     def get_sdk(self, *attr_args, **kwargs):
         from azure.cli.core.profiles import get_sdk

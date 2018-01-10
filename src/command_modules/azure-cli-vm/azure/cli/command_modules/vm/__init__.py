@@ -19,6 +19,7 @@ class ComputeCommandsLoader(AzCommandsLoader):
         )
         super(ComputeCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                     resource_type=ResourceType.MGMT_COMPUTE,
+                                                    operation_group='virtual_machines',
                                                     custom_command_type=compute_custom)
 
     def load_command_table(self, args):
