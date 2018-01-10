@@ -52,7 +52,7 @@ The following examples are showing using the `--output table` format, you can ch
 We support tab-completion for groups, commands, and some parameters
 
 ```bash
-# looking up resource group and name
+# look up resource group and name
 $ az vm show -g [tab][tab]
 AccountingGroup   RGOne  WebPropertiesRG
 
