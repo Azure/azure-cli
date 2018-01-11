@@ -5,6 +5,8 @@
 
 from knack.help_files import helps
 
+#  pylint: disable=line-too-long
+
 
 def add_helps(command_group, server_type):
     helps['{}'.format(command_group)] = """
@@ -146,23 +148,23 @@ def add_helps(command_group, server_type):
                 type: group
                 short-summary: Manage {0} databases on a server.
                 """.format(server_type)
-    helps['{} db create'.format(command_group)] = """
-                type: command
-                short-summary: Create a {0} database.
-                examples:
-                    - name: Create database 'testdb' in the server 'testsvr' with the default parameters.
-                      text: az {1} db create -g testgroup -s testsvr -n testdb
-                    - name: Create database 'testdb' in server 'testsvr' with a given character set and collation rules.
-                      text: az {1} db create -g testgroup -s testsvr -n testdb --charset <valid_charset> --collation <valid_collation>
-                """.format(server_type, command_group)
-    helps['{} db delete'.format(command_group)] = """
-                type: command
-                short-summary: Delete a database.
-                """
-    helps['{} db show'.format(command_group)] = """
-                type: command
-                short-summary: Show the details of a database.
-                """
+    # helps['{} db create'.format(command_group)] = """
+    #             type: command
+    #             short-summary: Create a {0} database.
+    #             examples:
+    #                 - name: Create database 'testdb' in the server 'testsvr' with the default parameters.
+    #                   text: az {1} db create -g testgroup -s testsvr -n testdb
+    #                 - name: Create database 'testdb' in server 'testsvr' with a given character set and collation rules.
+    #                   text: az {1} db create -g testgroup -s testsvr -n testdb --charset <valid_charset> --collation <valid_collation>
+    #             """.format(server_type, command_group)
+    # helps['{} db delete'.format(command_group)] = """
+    #             type: command
+    #             short-summary: Delete a database.
+    #             """
+    # helps['{} db show'.format(command_group)] = """
+    #             type: command
+    #             short-summary: Show the details of a database.
+    #             """
     helps['{} db list'.format(command_group)] = """
                 type: command
                 short-summary: List the databases for a server.
