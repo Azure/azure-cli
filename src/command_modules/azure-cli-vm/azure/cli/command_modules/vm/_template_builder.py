@@ -143,8 +143,12 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         'dependsOn': [],
         'properties': public_ip_properties
     }
+
+    # when multiple zones are provided(through a x-zone scale set), we don't propagate to PIP becasue it doesn't
+    # support x-zone; rather we will rely on the Standard LB to work with such scale sets
     if zone and len(zone) == 1:
-        public_ip['zones'] = zone  # PIP itself doesn't support multiple zones. Standard LB will handle it
+        public_ip['zones'] = zone
+
     if sku and cmd.supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         public_ip['sku'] = {'name': sku}
     return public_ip
