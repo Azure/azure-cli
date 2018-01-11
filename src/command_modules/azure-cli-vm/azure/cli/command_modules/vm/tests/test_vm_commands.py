@@ -1748,6 +1748,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
     def test_vmss_lb_sku(self, resource_group):
 
         self.kwargs.update({
+            'vmss0': 'vmss0',
             'vmss': 'vmss1',
             'lb': 'lb1',
             'ip': 'pubip1',
@@ -1755,6 +1756,15 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
             'loc': 'eastus2'
         })
 
+        # default to Basic
+        self.cmd('vmss create -g {rg} -l {loc} -n {vmss0} --image UbuntuLTS --admin-username admin123 --admin-password PasswordPassword1!')
+        self.cmd('network lb list -g {rg}', checks=self.check('[0].sku.name', 'Basic'))
+        self.cmd('network public-ip list -g {rg}', checks=[
+            self.check('[0].sku.name', 'Basic'),
+            self.check('[0].publicIpAllocationMethod', 'Dynamic')
+        ])
+
+        # but you can overrides the defaults
         self.cmd('vmss create -g {rg} -l {loc} -n {vmss} --lb {lb} --lb-sku {sku} --public-ip-address {ip} --image UbuntuLTS --admin-username admin123 --admin-password PasswordPassword1!')
         self.cmd('network lb show -g {rg} -n {lb}',
                  checks=self.check('sku.name', 'Standard'))
@@ -2087,7 +2097,7 @@ class VMZoneScenarioTest(ScenarioTest):
         self.assertTrue(set([resource_group_location, self.kwargs['zones']]).issubset(table_output))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
-    def test_vmss_create_zones(self, resource_group, resource_group_location):
+    def test_vmss_create_single_zone(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'zones': '2',
@@ -2102,6 +2112,36 @@ class VMZoneScenarioTest(ScenarioTest):
         result = self.cmd('vmss list -g {rg} -otable')
         table_output = set(result.output.splitlines()[2].split())
         self.assertTrue(set([resource_group_location, self.kwargs['vmss'], self.kwargs['zones']]).issubset(table_output))
+
+        self.cmd('network lb list -g {rg}', checks=[
+            self.check('[0].sku.name', 'Standard')
+        ])
+        self.cmd('network public-ip list -g {rg}', checks=[
+            self.check('[0].sku.name', 'Standard'),
+            self.check('[0].zones', ['2'])
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
+    def test_vmss_create_x_zones(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'zones': '1 2 3',
+            'vmss': 'vmss123'
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --admin-username clitester --admin-password PasswordPassword1! --image debian --zones {zones}')
+        self.cmd('vmss show -g {rg} -n {vmss}',
+                 checks=self.check('zones', ['1', '2', '3']))
+        result = self.cmd('vmss show -g {rg} -n {vmss} -otable')
+        table_output = set(result.output.splitlines()[2].split())
+        self.assertTrue(set([resource_group_location, self.kwargs['vmss']] + self.kwargs['zones'].split()).issubset(table_output))
+
+        self.cmd('network lb list -g {rg}', checks=[
+            self.check('[0].sku.name', 'Standard')
+        ])
+        self.cmd('network public-ip list -g {rg}', checks=[
+            self.check('[0].sku.name', 'Standard'),
+            self.check('[0].zones', None)
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_zones', location='eastus2')
     def test_disk_create_zones(self, resource_group, resource_group_location):
