@@ -143,8 +143,12 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         'dependsOn': [],
         'properties': public_ip_properties
     }
-    if zone:
+
+    # when multiple zones are provided(through a x-zone scale set), we don't propagate to PIP becasue it doesn't
+    # support x-zone; rather we will rely on the Standard LB to work with such scale sets
+    if zone and len(zone) == 1:
         public_ip['zones'] = zone
+
     if sku and cmd.supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         public_ip['sku'] = {'name': sku}
     return public_ip
@@ -661,6 +665,24 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
     }
     if sku and cmd.supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         lb['sku'] = {'name': sku}
+        # LB rule is the way to enable SNAT so outbound connections are possible
+        if sku.lower() == 'standard':
+            lb_properties['loadBalancingRules'] = [{
+                "name": "LBRule",
+                "properties": {
+                    "frontendIPConfiguration": {
+                        'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(lb_id, frontend_ip_name)
+                    },
+                    "backendAddressPool": {
+                        "id": "[concat({}, '/backendAddressPools/', '{}')]".format(lb_id, backend_pool_name)
+                    },
+                    "protocol": "tcp",
+                    "frontendPort": 80,
+                    "backendPort": 80,
+                    "enableFloatingIP": False,
+                    "idleTimeoutInMinutes": 5,
+                }
+            }]
     return lb
 
 
