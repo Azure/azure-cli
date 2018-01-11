@@ -6,6 +6,10 @@ Release History
 ++++++
 * role assignment: expose --assignee-object-id to bypass graph query
 
+2.0.17
+++++++
+* Helpfile updates
+
 2.0.16
 ++++++
 * Update for CLI core changes.
