@@ -116,13 +116,13 @@ def load_command_table(self, _):
         g.custom_command('download', '_download_log_files')
 
     with self.command_group('mysql db', mysql_db_sdk) as g:
-        g.command('create', 'create_or_update')
-        g.command('delete', 'delete', confirmation=True)
-        g.command('show', 'get')
+        # g.command('create', 'create_or_update')
+        # g.command('delete', 'delete', confirmation=True)
+        # g.command('show', 'get')
         g.command('list', 'list_by_server')
 
     with self.command_group('postgres db', postgres_db_sdk) as g:
-        g.command('create', 'create_or_update')
-        g.command('delete', 'delete', confirmation=True)
-        g.command('show', 'get')
+        # g.command('create', 'create_or_update')
+        # g.command('delete', 'delete', confirmation=True)
+        # g.command('show', 'get')
         g.command('list', 'list_by_server')

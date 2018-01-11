@@ -5,7 +5,7 @@ Release History
 
 0.0.11
 ++++++
-* Updated helpfile
+* Minor fixes.
 
 0.0.10
 ++++++
