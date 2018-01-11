@@ -1212,7 +1212,8 @@ def clear_traffic_routing(cmd, resource_group_name, name):
     set_traffic_routing(cmd, resource_group_name, name, [])
 
 
-def get_streaming_log(cmd, resource_group_name, name, number_of_lines=None, provider=None, slot=None):
+def get_streaming_log(cmd, resource_group_name, name, number_of_lines=None, provider=None,
+                      slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     streaming_url = scm_url + '/logstream'
     import time
@@ -1280,7 +1281,7 @@ def _get_log(url, user_name, password, log_file=None, number_of_lines=None):
                 f.write(data)
     elif number_of_lines:  # print last 'n' number of lines
         api_str = r.read().decode(encoding='utf-8')
-        _print_site_logs(api_str, int(number_of_lines), 512000, http, headers)
+        _print_site_logs(api_str, number_of_lines, 512000, http, headers)
     else:  # streaming
         for chunk in r.stream():
             if chunk:
@@ -1311,7 +1312,7 @@ def _print_site_logs(api_string, number_of_lines, byte_limit, http, headers):
         url = href_str
         byte_limit_exceeded = (int(size) > byte_limit)
         if byte_limit_exceeded:
-            headers.update({'Range': 'bytes=-512000'})  # only get the last 512k
+            headers.update({'Range': 'bytes=-512000'})  # only get the last 512kB
 
         r = http.request(
             'GET',
@@ -1326,18 +1327,18 @@ def _print_site_logs(api_string, number_of_lines, byte_limit, http, headers):
         lines_split = lines.splitlines()
         lines_split_length = len(lines_split)
         if byte_limit_exceeded:
-            if lines_split_length < int(number_of_lines):
+            if lines_split_length < number_of_lines:
                 logger.warning("Hit internal limit of %s bytes."
                                "Please download to see full logs", byte_limit)
-        number_of_lines = min(int(number_of_lines), lines_split_length)
-        last_n_lines = ('\n'.join(lines_split[-int(number_of_lines)::])).lstrip('\n')
+        number_of_lines = min(number_of_lines, lines_split_length)
+        last_n_lines = ('\n'.join(lines_split[-(number_of_lines)::])).lstrip('\n')
         print(last_n_lines)
         api_string = api_string[(index_of_path + len('\",\"path')):]
 
 
-def upload_ssl_cert(resource_group_name, name, certificate_password, certificate_file):
+def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file):
     client = web_client_factory(cmd.cli_ctx)
-    webapp = _generic_site_operation(resource_group_name, name, 'get')
+    webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
     cert_resource_group_name = parse_resource_id(webapp.server_farm_id)['resource_group']
     cert_file = open(certificate_file, 'rb')
     cert_contents = cert_file.read()
