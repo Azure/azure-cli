@@ -93,7 +93,9 @@ def load_command_table(self, _):
 
     compute_vm_run_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations.virtual_machine_run_commands_operations#VirtualMachineRunCommandsOperations.{}',
-        client_factory=cf_run_commands
+        client_factory=cf_run_commands,
+        min_api='2017-03-30',
+        max_api='2017-03-30'
     )
 
     compute_vm_size_sdk = CliCommandType(
@@ -142,13 +144,13 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_user_assigned_identities')
         g.command('list-operations', 'list', operations_tmpl='azure.mgmt.msi.operations.operations#Operations.{}', client_factory=cf_msi_operations_operations)
 
-    with self.command_group('image', compute_image_sdk) as g:
+    with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_image', validator=process_image_create_namespace)
         g.custom_command('list', 'list_images')
         g.command('show', 'get', exception_handler=empty_on_404)
         g.command('delete', 'delete')
 
-    with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots') as g:
+    with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
         g.custom_command('create', 'create_snapshot', validator=process_disk_or_snapshot_create_namespace)
         g.command('delete', 'delete')
         g.custom_command('grant-access', 'grant_snapshot_access')
@@ -182,7 +184,7 @@ def load_command_table(self, _):
         g.custom_command('show', 'show_vm', table_transformer=transform_vm, exception_handler=empty_on_404)
         g.command('start', 'start', no_wait_param='raw')
         g.command('stop', 'power_off', no_wait_param='raw')
-        g.generic_update_command('update', no_wait_param='raw')
+        g.generic_update_command('update', setter_name='update_vm', setter_type=compute_custom, no_wait_param='no_wait')
         g.generic_wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
 
     with self.command_group('vm availability-set', compute_availset_sdk) as g:
@@ -238,7 +240,7 @@ def load_command_table(self, _):
         g.custom_command('show', 'show_vm_nic', exception_handler=empty_on_404)
         g.custom_command('list', 'list_vm_nics')
 
-    with self.command_group('vm run-command', compute_vm_run_sdk) as g:
+    with self.command_group('vm run-command', compute_vm_run_sdk, operation_group='virtual_machine_run_commands') as g:
         g.custom_command('invoke', 'run_command_invoke')
         g.command('list', 'list')
         g.command('show', 'get')
@@ -312,7 +314,7 @@ def load_command_table(self, _):
         g.command('list-vm-nics', 'list_virtual_machine_scale_set_vm_network_interfaces')
         g.command('show', 'get_virtual_machine_scale_set_network_interface', exception_handler=empty_on_404)
 
-    with self.command_group('vmss rolling-upgrade', compute_vmss_rolling_upgrade_sdk) as g:
+    with self.command_group('vmss rolling-upgrade', compute_vmss_rolling_upgrade_sdk, min_api='2017-03-30') as g:
         g.command('cancel', 'cancel')
         g.command('get-latest', 'get_latest')
         g.command('start', 'start_os_upgrade')

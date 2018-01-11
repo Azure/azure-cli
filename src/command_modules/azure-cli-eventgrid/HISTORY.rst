@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.8
++++++
+* Minor fixes.
+
 0.1.7
 +++++
 * BC: Removed the `az eventgrid topic event-subscription` commands. The corresponding `az eventgrid event-subscription` commands can now be used to manage event subscriptions for topics.

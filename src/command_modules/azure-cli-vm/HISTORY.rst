@@ -2,8 +2,10 @@
 
 Release History
 ===============
+
 2.0.24
 ++++++
+* vm: (PREVIEW) support os disk swap
 * vm: support use image from other subscriptions
 
 2.0.23

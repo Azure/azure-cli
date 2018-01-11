@@ -265,7 +265,7 @@ class TestVmCustom(unittest.TestCase):
         with self.assertRaises(CLIError) as context:
             encrypt_vm(cmd, 'rg1', 'vm1', 'client_id', faked_keyvault)
 
-        self.assertTrue("--aad-client-id or --aad-client-cert-thumbprint" in str(context.exception))
+        self.assertTrue("--aad-client-cert-thumbprint or --aad-client-secret" in str(context.exception))
 
     @mock.patch('azure.cli.command_modules.vm.disk_encryption.set_vm', autospec=True)
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)

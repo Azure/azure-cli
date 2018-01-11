@@ -7,7 +7,7 @@ import os
 import tempfile
 
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer,
-                               RoleBasedServicePrincipalPreparer, LiveScenarioTest)
+                               RoleBasedServicePrincipalPreparer)
 
 # flake8: noqa
 
@@ -53,9 +53,7 @@ class AzureContainerServiceScenarioTest(ScenarioTest):
 
         return pathname
 
-
-# TODO: Convert back to ScenarioTest and re-record when issue #5141 is resolved
-class AzureContainerServiceKubernetesScenarioTest(LiveScenarioTest):
+class AzureContainerServiceKubernetesScenarioTest(ScenarioTest):
 
     # the length is set to avoid following error:
     # Resource name k8s-master-ip-cliacstestgae47e-clitestdqdcoaas25vlhygb2aktyv4-c10894mgmt-D811C917

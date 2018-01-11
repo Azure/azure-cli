@@ -47,13 +47,17 @@ def truncate_text(str_to_shorten, width=70, placeholder=' [...]'):
     return str_to_shorten[:s_len] + (str_to_shorten[s_len:] and placeholder)
 
 
+def get_installed_cli_distributions():
+    from pkg_resources import working_set
+    return [d for d in list(working_set) if d.key == CLI_PACKAGE_NAME or d.key.startswith(COMPONENT_PREFIX)]
+
+
 def get_az_version_string():
     import platform
-    from pip import get_installed_distributions
     from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR
 
     output = six.StringIO()
-    installed_dists = get_installed_distributions(local_only=True)
+    installed_dists = get_installed_cli_distributions()
 
     cli_info = None
     for dist in installed_dists:
