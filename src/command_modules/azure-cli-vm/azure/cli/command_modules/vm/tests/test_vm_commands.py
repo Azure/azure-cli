@@ -1748,6 +1748,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
     def test_vmss_lb_sku(self, resource_group):
 
         self.kwargs.update({
+            'vmss0': 'vmss0',
             'vmss': 'vmss1',
             'lb': 'lb1',
             'ip': 'pubip1',
@@ -1755,6 +1756,15 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
             'loc': 'eastus2'
         })
 
+        # default to Basic
+        self.cmd('vmss create -g {rg} -l {loc} -n {vmss0} --image UbuntuLTS --admin-username admin123 --admin-password PasswordPassword1!')
+        self.cmd('network lb list -g {rg}', checks=self.check('[0].sku.name', 'Basic'))
+        self.cmd('network public-ip list -g {rg}', checks=[
+            self.check('[0].sku.name', 'Basic'),
+            self.check('[0].publicIpAllocationMethod', 'Dynamic')
+        ])
+
+        # but you can overrides the defaults
         self.cmd('vmss create -g {rg} -l {loc} -n {vmss} --lb {lb} --lb-sku {sku} --public-ip-address {ip} --image UbuntuLTS --admin-username admin123 --admin-password PasswordPassword1!')
         self.cmd('network lb show -g {rg} -n {lb}',
                  checks=self.check('sku.name', 'Standard'))
