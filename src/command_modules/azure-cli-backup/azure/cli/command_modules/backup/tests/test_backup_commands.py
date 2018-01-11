@@ -57,7 +57,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         restore_cmd_string += ' -g {} -v {}'.format(resource_group, vault_name)
         restore_cmd_string += ' -c {} -i {} -r {}'.format(container, item, recovery_point)
         restore_cmd_string += ' --storage-account {} --query name'.format(storage_account)
-        restore_cmd_string += ' --restore-disks-to-this-storage-account'
+        restore_cmd_string += ' --restore-to-staging-storage-account'
         trigger_restore_job_name = self.cmd(restore_cmd_string).get_output_in_json()
         self.cmd('backup job wait -g {} -v {} -n {}'.format(resource_group, vault_name, trigger_restore_job_name))
 
@@ -330,7 +330,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         osa_restore_cmd_string += ' -g {} -v {}'.format(resource_group, vault_name)
         osa_restore_cmd_string += ' -c {} -i {} -r {}'.format(vm_name, vm_name, rp_name)
         osa_restore_cmd_string += ' --storage-account {}'.format(storage_account)
-        osa_restore_cmd_string += ' --restore-disks-to-this-storage-account false'
+        osa_restore_cmd_string += ' --restore-to-staging-storage-account false'
         self.cmd(osa_restore_cmd_string, expect_failure=True)
 
         # Trigger Restore
@@ -338,7 +338,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         restore_cmd_string += ' -g {} -v {}'.format(resource_group, vault_name)
         restore_cmd_string += ' -c {} -i {} -r {}'.format(vm_name, vm_name, rp_name)
         restore_cmd_string += ' --storage-account {}'.format(storage_account)
-        restore_cmd_string += ' --restore-disks-to-this-storage-account'
+        restore_cmd_string += ' --restore-to-staging-storage-account'
         trigger_restore_job_json = self.cmd(restore_cmd_string, checks=[
             JMESPathCheck("properties.entityFriendlyName", vm_name),
             JMESPathCheck("properties.operation", "Restore"),
@@ -380,7 +380,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         restore_cmd_string += ' -g {} -v {}'.format(resource_group, vault_name)
         restore_cmd_string += ' -c {} -i {} -r {}'.format(vm_name, vm_name, rp_name)
         restore_cmd_string += ' --storage-account {} --query name'.format(storage_account)
-        restore_cmd_string += ' --restore-disks-to-this-storage-account'
+        restore_cmd_string += ' --restore-to-staging-storage-account'
         trigger_restore_job_name = self.cmd(restore_cmd_string).get_output_in_json()
 
         self.cmd('backup job show -g {} -v {} -n {}'

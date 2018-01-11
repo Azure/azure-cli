@@ -285,8 +285,8 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
     return paged_recovery_points
 
 
-def _should_use_original_storage_account(recovery_point, restore_disks_to_this_storage_account):
-    if restore_disks_to_this_storage_account is None:
+def _should_use_original_storage_account(recovery_point, restore_to_staging_storage_account):
+    if restore_to_staging_storage_account is None:
         # No intent given by user. Treat it as False. Try OSA = True
         # pylint: disable=simplifiable-if-statement
         if recovery_point.properties.original_storage_account_option:
@@ -297,7 +297,7 @@ def _should_use_original_storage_account(recovery_point, restore_disks_to_this_s
             use_original_storage_account = False
     else:
         # User gave explicit intent
-        if restore_disks_to_this_storage_account is True:
+        if restore_to_staging_storage_account is True:
             # User explicitly intended to not use OSA. Go ahead with OSA = False
             use_original_storage_account = False
         else:
@@ -316,7 +316,7 @@ def _should_use_original_storage_account(recovery_point, restore_disks_to_this_s
 
 
 def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
-                  restore_disks_to_this_storage_account=None):
+                  restore_to_staging_storage_account=None):
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM")
     _validate_item(item)
@@ -331,7 +331,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
 
     # Original Storage Account Restore Logic
     use_original_storage_account = _should_use_original_storage_account(recovery_point,
-                                                                        restore_disks_to_this_storage_account)
+                                                                        restore_to_staging_storage_account)
     if use_original_storage_account:
         logger.warning(
             """
