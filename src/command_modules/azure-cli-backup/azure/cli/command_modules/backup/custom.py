@@ -42,7 +42,7 @@ def create_vault(client, vault_name, region, resource_group_name):
     vault_sku = Sku(SkuName.standard)
     vault_properties = VaultProperties()
     vault = Vault(region, sku=vault_sku, properties=vault_properties)
-    return client.create_or_update(resource_group_name, vault_name, vault, custom_headers=_get_custom_headers())
+    return client.create_or_update(resource_group_name, vault_name, vault)
 
 
 def _force_delete_vault(cmd, vault_name, resource_group_name):
@@ -80,13 +80,13 @@ def delete_vault(cmd, client, vault_name, resource_group_name, force=False):
 
 def list_vaults(client, resource_group_name=None):
     if resource_group_name:
-        return client.list_by_resource_group(resource_group_name, custom_headers=_get_custom_headers())
-    return client.list_by_subscription_id(custom_headers=_get_custom_headers())
+        return client.list_by_resource_group(resource_group_name)
+    return client.list_by_subscription_id()
 
 
 def set_backup_properties(client, vault_name, resource_group_name, backup_storage_redundancy):
     backup_storage_config = BackupStorageConfig(storage_model_type=backup_storage_redundancy)
-    client.update(resource_group_name, vault_name, backup_storage_config, custom_headers=_get_custom_headers())
+    client.update(resource_group_name, vault_name, backup_storage_config)
 
 
 def get_default_policy_for_vm(client, resource_group_name, vault_name):
@@ -94,30 +94,29 @@ def get_default_policy_for_vm(client, resource_group_name, vault_name):
 
 
 def show_policy(client, resource_group_name, vault_name, name):
-    return client.get(vault_name, resource_group_name, name, custom_headers=_get_custom_headers())
+    return client.get(vault_name, resource_group_name, name)
 
 
 def list_policies(client, resource_group_name, vault_name):
-    policies = client.list(vault_name, resource_group_name, custom_headers=_get_custom_headers())
+    policies = client.list(vault_name, resource_group_name)
     return _get_list_from_paged_response(policies)
 
 
 def list_associated_items_for_policy(client, resource_group_name, vault_name, name):
     filter_string = _get_filter_string({
         'policyName': name})
-    items = client.list(vault_name, resource_group_name, filter_string, custom_headers=_get_custom_headers())
+    items = client.list(vault_name, resource_group_name, filter_string)
     return _get_list_from_paged_response(items)
 
 
 def set_policy(client, resource_group_name, vault_name, policy):
     policy_object = _get_policy_from_json(client, policy)
 
-    return client.create_or_update(vault_name, resource_group_name, policy_object.name, policy_object,
-                                   custom_headers=_get_custom_headers())
+    return client.create_or_update(vault_name, resource_group_name, policy_object.name, policy_object)
 
 
 def delete_policy(client, resource_group_name, vault_name, name):
-    client.delete(vault_name, resource_group_name, name, custom_headers=_get_custom_headers())
+    client.delete(vault_name, resource_group_name, name)
 
 
 def show_container(client, name, resource_group_name, vault_name, container_type="AzureIaasVM", status="Registered"):
@@ -131,10 +130,10 @@ def list_containers(client, resource_group_name, vault_name, container_type="Azu
 def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, policy_name):
     vm_name, vm_rg = _get_resource_name_and_rg(resource_group_name, vm)
     vm = virtual_machines_cf(cmd.cli_ctx).get(vm_rg, vm_name)
-    vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name, custom_headers=_get_custom_headers())
+    vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
 
-    if vm.location != vault.location:
+    if vm.location.lower() != vault.location.lower():
         raise CLIError(
             """
             The VM should be in the same location as that of the Recovery Services vault to enable protection.
@@ -171,7 +170,7 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
 
     # Trigger enable protection and wait for completion
     result = client.create_or_update(vault_name, resource_group_name, fabric_name, container_uri, item_uri, vm_item,
-                                     raw=True, custom_headers=_get_custom_headers())
+                                     raw=True)
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -182,19 +181,21 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
     return _get_none_one_or_many([item for item in items if item.properties.friendly_name == name])
 
 
-def list_items(cmd, client, resource_group_name, vault_name, container_name, container_type="AzureIaasVM",
+def list_items(cmd, client, resource_group_name, vault_name, container_name=None, container_type="AzureIaasVM",
                item_type="VM"):
     filter_string = _get_filter_string({
         'backupManagementType': container_type,
         'itemType': item_type})
 
-    items = client.list(vault_name, resource_group_name, filter_string, custom_headers=_get_custom_headers())
+    items = client.list(vault_name, resource_group_name, filter_string)
     paged_items = _get_list_from_paged_response(items)
-    container = show_container(backup_protection_containers_cf(cmd.cli_ctx), container_name, resource_group_name,
-                               vault_name, container_type)
-    _validate_container(container)
+    if container_name is not None:
+        container = show_container(backup_protection_containers_cf(cmd.cli_ctx), container_name, resource_group_name,
+                                   vault_name, container_type)
+        _validate_container(container)
 
-    return [item for item in paged_items if item.properties.container_name.lower() in container.name.lower()]
+        return [item for item in paged_items if item.properties.container_name.lower() in container.name.lower()]
+    return paged_items
 
 
 def update_policy_for_item(cmd, client, resource_group_name, vault_name, container_name, item_name, policy_name,
@@ -227,7 +228,7 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, contain
 
     # Update policy
     result = client.create_or_update(vault_name, resource_group_name, fabric_name, container_uri, item_uri, vm_item,
-                                     raw=True, custom_headers=_get_custom_headers())
+                                     raw=True)
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -244,7 +245,7 @@ def backup_now(cmd, client, resource_group_name, vault_name, container_name, ite
 
     # Trigger backup
     result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
-                            trigger_backup_request, raw=True, custom_headers=_get_custom_headers())
+                            trigger_backup_request, raw=True)
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -258,8 +259,7 @@ def show_recovery_point(cmd, client, resource_group_name, vault_name, container_
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
 
-    return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name,
-                      custom_headers=_get_custom_headers())
+    return client.get(vault_name, resource_group_name, fabric_name, container_uri, item_uri, name)
 
 
 def list_recovery_points(cmd, client, resource_group_name, vault_name, container_name, item_name,
@@ -279,24 +279,65 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, container
         'endDate': query_end_date})
 
     # Get recovery points
-    recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string,
-                                  custom_headers=_get_custom_headers())
+    recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
     paged_recovery_points = _get_list_from_paged_response(recovery_points)
 
     return paged_recovery_points
 
 
-def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account):
+def _should_use_original_storage_account(recovery_point, restore_to_staging_storage_account):
+    if restore_to_staging_storage_account is None:
+        # No intent given by user. Treat it as False. Try OSA = True
+        # pylint: disable=simplifiable-if-statement
+        if recovery_point.properties.original_storage_account_option:
+            # RP is enabled for OSA.
+            use_original_storage_account = True
+        else:
+            # RP is not enabled for OSA. Go ahead with OSA = False
+            use_original_storage_account = False
+    else:
+        # User gave explicit intent
+        if restore_to_staging_storage_account is True:
+            # User explicitly intended to not use OSA. Go ahead with OSA = False
+            use_original_storage_account = False
+        else:
+            # User explicitly intended to use OSA. Try with OSA = True
+            if recovery_point.properties.original_storage_account_option:
+                # RP supports OSA. Go ahead with OSA = True
+                use_original_storage_account = True
+            else:
+                # RP doesn't support OSA.
+                raise CLIError(
+                    """
+                    This recovery point doesn’t have the capability to restore disks to their original storage
+                    accounts. The disks and the VM config file will be uploaded to the given storage account.
+                    """)
+    return use_original_storage_account
+
+
+def restore_disks(cmd, client, resource_group_name, vault_name, container_name, item_name, rp_name, storage_account,
+                  restore_to_staging_storage_account=None):
     item = show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name, container_name,
                      item_name, "AzureIaasVM", "VM")
     _validate_item(item)
-
-    vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name, custom_headers=_get_custom_headers())
+    recovery_point = show_recovery_point(cmd, recovery_points_cf(cmd.cli_ctx), resource_group_name, vault_name,
+                                         container_name, item_name, rp_name, "AzureIaasVM", "VM")
+    vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     vault_location = vault.location
 
     # Get container and item URIs
     container_uri = _get_protection_container_uri_from_id(item.id)
     item_uri = _get_protected_item_uri_from_id(item.id)
+
+    # Original Storage Account Restore Logic
+    use_original_storage_account = _should_use_original_storage_account(recovery_point,
+                                                                        restore_to_staging_storage_account)
+    if use_original_storage_account:
+        logger.warning(
+            """
+            The disks will be restored to their original storage accounts. The VM config file will be uploaded to given
+            storage account.
+            """)
 
     # Construct trigger restore request object
     sa_name, sa_rg = _get_resource_name_and_rg(resource_group_name, storage_account)
@@ -307,12 +348,13 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                                       recovery_type='RestoreDisks',
                                                       region=vault_location,
                                                       storage_account_id=_storage_account_id,
-                                                      source_resource_id=_source_resource_id)
+                                                      source_resource_id=_source_resource_id,
+                                                      original_storage_account_option=use_original_storage_account)
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
     # Trigger restore
     result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
-                            trigger_restore_request, raw=True, custom_headers=_get_custom_headers())
+                            trigger_restore_request, raw=True)
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -332,14 +374,13 @@ def restore_files_mount_rp(cmd, client, resource_group_name, vault_name, contain
     file_restore_request = ILRRequestResource(properties=file_restore_request_properties)
 
     recovery_point = recovery_points_cf(cmd.cli_ctx).get(vault_name, resource_group_name, fabric_name,
-                                                         container_uri, item_uri, rp_name,
-                                                         custom_headers=_get_custom_headers())
+                                                         container_uri, item_uri, rp_name)
 
     if recovery_point.properties.is_instant_ilr_session_active:
         recovery_point.properties.renew_existing_registration = True
 
     result = client.provision(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
-                              file_restore_request, raw=True, custom_headers=_get_custom_headers())
+                              file_restore_request, raw=True)
 
     client_scripts = _track_backup_ilr(cmd.cli_ctx, result, vault_name, resource_group_name)
 
@@ -359,12 +400,11 @@ def restore_files_unmount_rp(cmd, client, resource_group_name, vault_name, conta
     item_uri = _get_protected_item_uri_from_id(item.id)
 
     recovery_point = recovery_points_cf(cmd.cli_ctx).get(vault_name, resource_group_name, fabric_name,
-                                                         container_uri, item_uri, rp_name,
-                                                         custom_headers=_get_custom_headers())
+                                                         container_uri, item_uri, rp_name)
 
     if recovery_point.properties.is_instant_ilr_session_active:
         result = client.revoke(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
-                               raw=True, custom_headers=_get_custom_headers())
+                               raw=True)
         _track_backup_operation(cmd.cli_ctx, resource_group_name, result, vault_name)
 
 
@@ -380,14 +420,13 @@ def disable_protection(cmd, client, resource_group_name, vault_name, container_n
 
     # Trigger disable protection and wait for completion
     if delete_backup_data:
-        result = client.delete(vault_name, resource_group_name, fabric_name, container_uri, item_uri, raw=True,
-                               custom_headers=_get_custom_headers())
+        result = client.delete(vault_name, resource_group_name, fabric_name, container_uri, item_uri, raw=True)
         return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
     vm_item = _get_disable_protection_request(item)
 
     result = client.create_or_update(vault_name, resource_group_name, fabric_name, container_uri, item_uri, vm_item,
-                                     raw=True, custom_headers=_get_custom_headers())
+                                     raw=True)
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -400,29 +439,28 @@ def list_jobs(client, resource_group_name, vault_name, status=None, operation=No
         'startTime': query_start_date,
         'endTime': query_end_date})
 
-    return _get_list_from_paged_response(client.list(vault_name, resource_group_name, filter_string,
-                                                     custom_headers=_get_custom_headers()))
+    return _get_list_from_paged_response(client.list(vault_name, resource_group_name, filter_string))
 
 
 def show_job(client, resource_group_name, vault_name, name):
-    return client.get(vault_name, resource_group_name, name, custom_headers=_get_custom_headers())
+    return client.get(vault_name, resource_group_name, name)
 
 
 def stop_job(client, resource_group_name, vault_name, name):
-    client.trigger(vault_name, resource_group_name, name, custom_headers=_get_custom_headers())
+    client.trigger(vault_name, resource_group_name, name)
 
 
 def wait_for_job(client, resource_group_name, vault_name, name, timeout=None):
     logger.warning("Waiting for job '%s' ...", name)
     start_timestamp = datetime.utcnow()
-    job_details = client.get(vault_name, resource_group_name, name, custom_headers=_get_custom_headers())
+    job_details = client.get(vault_name, resource_group_name, name)
     while _job_in_progress(job_details.properties.status):
         if timeout:
             elapsed_time = datetime.utcnow() - start_timestamp
             if elapsed_time.seconds > timeout:
                 logger.warning("Command timed out while waiting for job '%s'", name)
                 break
-        job_details = client.get(vault_name, resource_group_name, name, custom_headers=_get_custom_headers())
+        job_details = client.get(vault_name, resource_group_name, name)
         time.sleep(30)
     return job_details
 
@@ -438,7 +476,7 @@ def _get_containers(client, container_type, status, resource_group_name, vault_n
         filter_dict['friendlyName'] = container_name
     filter_string = _get_filter_string(filter_dict)
 
-    containers = client.list(vault_name, resource_group_name, filter_string, custom_headers=_get_custom_headers())
+    containers = client.list(vault_name, resource_group_name, filter_string)
     return _get_list_from_paged_response(containers)
 
 
@@ -448,8 +486,7 @@ def _get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg):
     protectable_item = _try_get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg)
     if protectable_item is None:
         # Protectable item not found. Trigger discovery.
-        refresh_result = protection_containers_client.refresh(vault_name, vault_rg, fabric_name, raw=True,
-                                                              custom_headers=_get_custom_headers())
+        refresh_result = protection_containers_client.refresh(vault_name, vault_rg, fabric_name, raw=True)
         _track_refresh_operation(cli_ctx, refresh_result, vault_name, vault_rg)
     protectable_item = _try_get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg)
     return protectable_item
@@ -461,8 +498,7 @@ def _try_get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_
     filter_string = _get_filter_string({
         'backupManagementType': 'AzureIaasVM'})
 
-    protectable_items_paged = backup_protectable_items_client.list(vault_name, vault_rg, filter_string,
-                                                                   custom_headers=_get_custom_headers())
+    protectable_items_paged = backup_protectable_items_client.list(vault_name, vault_rg, filter_string)
     protectable_items = _get_list_from_paged_response(protectable_items_paged)
 
     for protectable_item in protectable_items:
@@ -534,8 +570,7 @@ def _get_associated_vm_item(cli_ctx, container_uri, item_uri, resource_group, va
     filter_string = _get_filter_string({
         'backupManagementType': BackupManagementType.azure_iaas_vm.value,
         'itemType': WorkloadType.vm.value})
-    items = backup_protected_items_cf(cli_ctx).list(vault_name, resource_group, filter_string,
-                                                    custom_headers=_get_custom_headers())
+    items = backup_protected_items_cf(cli_ctx).list(vault_name, resource_group, filter_string)
     paged_items = _get_list_from_paged_response(items)
 
     filtered_items = [item for item in paged_items
@@ -604,12 +639,6 @@ def _run_client_script_for_linux(client_scripts):
     logger.warning('File downloaded: %s. Use password %s', file_name, password)
 
 
-def _get_custom_headers():
-    import uuid
-
-    return {'x-ms-client-request-id': str(uuid.uuid1()) + '-Cli'}
-
-
 def _get_resource_name_and_rg(resource_group_name, name_or_id):
     if is_valid_resource_id(name_or_id):
         id_parts = parse_resource_id(name_or_id)
@@ -656,7 +685,7 @@ def _track_backup_job(cli_ctx, result, vault_name, resource_group):
 
     if operation_status.properties:
         job_id = operation_status.properties.job_id
-        job_details = job_details_client.get(vault_name, resource_group, job_id, custom_headers=_get_custom_headers())
+        job_details = job_details_client.get(vault_name, resource_group, job_id)
         return job_details
 
 
@@ -664,12 +693,10 @@ def _track_backup_operation(cli_ctx, resource_group, result, vault_name):
     backup_operation_statuses_client = backup_operation_statuses_cf(cli_ctx)
 
     operation_id = _get_operation_id_from_header(result.response.headers['Azure-AsyncOperation'])
-    operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id,
-                                                            custom_headers=_get_custom_headers())
+    operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
     while operation_status.status == OperationStatusValues.in_progress.value:
         time.sleep(1)
-        operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id,
-                                                                custom_headers=_get_custom_headers())
+        operation_status = backup_operation_statuses_client.get(vault_name, resource_group, operation_id)
     return operation_status
 
 
@@ -678,13 +705,11 @@ def _track_refresh_operation(cli_ctx, result, vault_name, resource_group):
 
     operation_id = _get_operation_id_from_header(result.response.headers['Location'])
     result = protection_container_refresh_operation_results_client.get(vault_name, resource_group, fabric_name,
-                                                                       operation_id, raw=True,
-                                                                       custom_headers=_get_custom_headers())
+                                                                       operation_id, raw=True)
     while result.response.status_code == 202:
         time.sleep(1)
         result = protection_container_refresh_operation_results_client.get(vault_name, resource_group, fabric_name,
-                                                                           operation_id, raw=True,
-                                                                           custom_headers=_get_custom_headers())
+                                                                           operation_id, raw=True)
 
 
 def _job_in_progress(job_status):

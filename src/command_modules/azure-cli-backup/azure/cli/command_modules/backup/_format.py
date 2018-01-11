@@ -14,13 +14,22 @@ def transform_container(result):
 
 
 def transform_item(result):
-    return OrderedDict([('Name', result['properties']['friendlyName']),
-                        ('Resource Group', result['resourceGroup']),
-                        ('Type', result['properties']['workloadType']),
-                        ('Last Backup Status', result['properties']['lastBackupStatus']),
-                        ('Last Recovery Point', result['properties']['lastRecoveryPoint']),
-                        ('Protection Status', result['properties']['protectionStatus']),
-                        ('Health Status', result['properties']['healthStatus'])])
+    columns = []
+    columns.append(('Name', result['properties']['friendlyName']))
+    columns.append(('Resource Group', result['resourceGroup']))
+    columns.append(('Type', result['properties']['workloadType']))
+    columns.append(('Last Backup Status', result['properties']['lastBackupStatus']))
+    columns.append(('Last Recovery Point', result['properties']['lastRecoveryPoint']))
+    columns.append(('Protection Status', result['properties']['protectionStatus']))
+    columns.append(('Health Status', result['properties']['healthStatus']))
+
+    if result['properties']['healthDetails'] is not None:
+        recommendations = []
+        for health_detail in result['properties']['healthDetails']:
+            recommendations.append(', '.join(health_detail['recommendations']))
+        columns.append(('Recommendations', ', '.join(recommendations)))
+
+    return OrderedDict(columns)
 
 
 def transform_job(result):
