@@ -37,6 +37,8 @@ logger = get_logger(__name__)
 
 _CUSTOM_RULE = 'CustomRole'
 
+# pylint: disable=too-many-lines
+
 
 def list_role_definitions(cmd, name=None, resource_group_name=None, scope=None,
                           custom_role_only=False):
@@ -412,7 +414,6 @@ def create_application(client, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None):
-    from azure.graphrbac.models import GraphErrorException
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
 
