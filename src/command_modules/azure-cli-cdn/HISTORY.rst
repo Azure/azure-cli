@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.0.12
+++++++
+* Updated helpfile
+  
 0.0.11
 ++++++
 * Update for CLI core changes.
