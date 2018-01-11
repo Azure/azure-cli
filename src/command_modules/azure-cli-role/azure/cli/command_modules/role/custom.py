@@ -126,9 +126,8 @@ def _search_role_definitions(definitions_client, name, scope, custom_role_only=F
 def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None, scope=None):
     if bool(assignee) == bool(assignee_object_id):
         raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
-    resolve_assignee = not assignee_object_id
     return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id,
-                                   resource_group_name, scope, resolve_assignee=resolve_assignee)
+                                   resource_group_name, scope, resolve_assignee=(not assignee_object_id))
 
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
@@ -201,8 +200,9 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
                 i['properties']['principalName'] = ''
                 if principal_dics.get(i['properties']['principalId']):
                     i['properties']['principalName'] = principal_dics[i['properties']['principalId']]
-        except (CloudError, GraphErrorException):
-            pass   # failure on resolving principal due to graph permission should not block the whole thing
+        except (CloudError, GraphErrorException) as ex:
+            # failure on resolving principal due to graph permission should not fail the whole thing
+            logger.info("Failed to resolve graph object information per error '%s'", ex)
 
     return results
 
