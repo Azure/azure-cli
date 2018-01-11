@@ -5,6 +5,8 @@
 
 from knack.help_files import helps
 
+#  pylint: disable=line-too-long
+
 
 def add_helps(command_group, server_type):
     helps['{}'.format(command_group)] = """
