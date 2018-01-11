@@ -2,6 +2,7 @@
 
 Release History
 ===============
+
 2.0.17
 ++++++
 * role assignment: expose --assignee-object-id to bypass graph query
