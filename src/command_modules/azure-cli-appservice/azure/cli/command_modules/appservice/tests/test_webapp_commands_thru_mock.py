@@ -217,6 +217,7 @@ class TestWebappMocked(unittest.TestCase):
     def test_browse_with_trace(self, webbrowser_mock, log_mock, site_op_mock):
         site = Site('antarctica')
         site.default_host_name = 'haha.com'
+        site.enabled_host_names = [site.default_host_name]
         site.host_name_ssl_states = [HostNameSslState('does not matter',
                                                       ssl_state=SslState.ip_based_enabled)]
 
