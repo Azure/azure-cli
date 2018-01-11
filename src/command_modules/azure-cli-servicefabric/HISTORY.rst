@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.0.9
+++++++
+* Added detailed errors to validation response when creating cluster.
+
 0.0.8
 ++++++
 * Update for CLI core changes.
