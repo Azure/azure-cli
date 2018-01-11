@@ -6,26 +6,28 @@
 # AZURE CLI RBAC TEST DEFINITIONS
 import json
 import os
+import uuid
 import tempfile
 import time
 import unittest
+import mock
 
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
+from .role_scenario_test import RoleScenarioTest
 
 
-class RbacSPSecretScenarioTest(LiveScenarioTest):
+class RbacSPSecretScenarioTest(RoleScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_minimal')
-    def test_create_for_rbac_with_secret(self, resource_group):
+    def test_create_for_rbac_with_secret_no_assignment(self, resource_group):
 
         self.kwargs['sp'] = 'http://{}'.format(resource_group)
         try:
-            self.cmd('ad sp create-for-rbac -n {sp}2',
-                     checks=self.check('name', '{sp}'))
+            self.cmd('ad sp create-for-rbac -n {sp} --skip-assignment', checks=self.check('name', '{sp}'))
         finally:
-            self.cmd('ad app delete --id {sp}2')
+            self.cmd('ad app delete --id {sp}')
 
     @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_password')
-    def test_create_for_rbac_with_secret(self, resource_group):
+    def test_create_for_rbac_with_secret_with_assignment(self, resource_group):
 
         subscription_id = self.get_subscription_id()
         self.kwargs.update({
@@ -35,23 +37,27 @@ class RbacSPSecretScenarioTest(LiveScenarioTest):
         })
 
         try:
-            self.cmd('ad sp create-for-rbac -n {sp} --scopes {scope} {scope}/resourceGroups/{rg}',
-                     checks=self.check('name', '{sp}'))
-            self.cmd('role assignment list --assignee {sp} --scope {scope}',
-                     checks=self.check("length([])", 1))
-            self.cmd('role assignment list --assignee {sp} -g {rg}',
-                     checks=self.check("length([])", 1))
-            self.cmd('role assignment delete --assignee {sp} -g {rg}',
-                     checks=self.is_empty())
-            self.cmd('role assignment delete --assignee {sp}',
-                     checks=self.is_empty())
+            guids = ['88DAAF5A-EA86-4A68-9D45-477538D41300', '88DAAF5A-EA86-4A68-9D45-477538D41301', 
+                     '88DAAF5A-EA86-4A68-9D45-477538D41302', '88DAAF5A-EA86-4A68-9D45-477538D41303',
+                     '88DAAF5A-EA86-4A68-9D45-477538D41304', '88DAAF5A-EA86-4A68-9D45-477538D41305']
+            with self.get_guid_gen_patch(guids):
+                self.cmd('ad sp create-for-rbac -n {sp} --scopes {scope} {scope}/resourceGroups/{rg}',
+                         checks=self.check('name', '{sp}'))
+                self.cmd('role assignment list --assignee {sp} --scope {scope}',
+                         checks=self.check("length([])", 1))
+                self.cmd('role assignment list --assignee {sp} -g {rg}',
+                         checks=self.check("length([])", 1))
+                self.cmd('role assignment delete --assignee {sp} -g {rg}',
+                         checks=self.is_empty())
+                self.cmd('role assignment delete --assignee {sp}',
+                         checks=self.is_empty())
         finally:
             self.cmd('ad app delete --id {sp}')
 
 
-class RbacSPCertScenarioTest(LiveScenarioTest):
+class RbacSPCertScenarioTest(RoleScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_create_rbac_sp_with_cert')
-    def test_create_for_rbac_with_cert(self, resource_group):
+    def test_create_for_rbac_with_cert_with_assignment(self, resource_group):
 
         subscription_id = self.get_subscription_id()
         self.kwargs.update({
@@ -61,20 +67,24 @@ class RbacSPCertScenarioTest(LiveScenarioTest):
         })
 
         try:
-            result = self.cmd('ad sp create-for-rbac -n {sp} --scopes {scope} {scope}/resourceGroups/{rg} --create-cert',
-                              checks=self.check('name', '{sp}')).get_output_in_json()
-            self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
-            os.remove(result['fileWithCertAndPrivateKey'])
-            result = self.cmd('ad sp reset-credentials -n {sp} --create-cert',
-                              checks=self.check('name', '{sp}')).get_output_in_json()
-            self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
-            os.remove(result['fileWithCertAndPrivateKey'])
+            guids = ['88DAAF5A-EA86-4A68-9D45-477538D61400', '88DAAF5A-EA86-4A68-9D45-477538D61401', '88DAAF5A-EA86-4A68-9D45-477538D61402',
+                     '88DAAF5A-EA86-4A68-9D45-477538D61403', '88DAAF5A-EA86-4A68-9D45-477538D61404', '88DAAF5A-EA86-4A68-9D45-477538D61405',
+                     '88DAAF5A-EA86-4A68-9D45-477538D61406', '88DAAF5A-EA86-4A68-9D45-477538D61407', '88DAAF5A-EA86-4A68-9D45-477538D61408']
+            with self.get_guid_gen_patch(guids):
+                result = self.cmd('ad sp create-for-rbac -n {sp} --scopes {scope} {scope}/resourceGroups/{rg} --create-cert',
+                                  checks=self.check('name', '{sp}')).get_output_in_json()
+                self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
+                os.remove(result['fileWithCertAndPrivateKey'])
+                result = self.cmd('ad sp reset-credentials -n {sp} --create-cert',
+                                  checks=self.check('name', '{sp}')).get_output_in_json()
+                self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
+                os.remove(result['fileWithCertAndPrivateKey'])
         finally:
             self.cmd('ad app delete --id {sp}',
                      checks=self.is_empty())
 
 
-class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
+class RbacSPKeyVaultScenarioTest(RoleScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
     @KeyVaultPreparer()
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
@@ -86,16 +96,20 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
             'sp': 'http://{}'.format(resource_group),
             'sub': subscription_id,
             'scope': '/subscriptions/{}'.format(subscription_id),
-            'cert': 'cert1'
+            'cert': 'cert1',
+            'kv': key_vault
         })
         time.sleep(5)
 
         try:
-            self.cmd('ad sp create-for-rbac --scopes {scope} {scope}/resourceGroups/{rg} --create-cert --keyvault {kv} --cert {cert} -n {sp}')
-            cer1 = self.cmd('keyvault certificate show --vault-name {kv} -n {cert}').get_output_in_json()['cer']
-            self.cmd('ad sp reset-credentials -n {sp} --create-cert --keyvault {kv} --cert {cert}')
-            cer2 = self.cmd('keyvault certificate show --vault-name {kv} -n {cert}').get_output_in_json()['cer']
-            self.assertTrue(cer1 != cer2)
+            guids = ['88DAAF5A-EA86-4A68-9D45-477538D42500', '88DAAF5A-EA86-4A68-9D45-477538D42501', '88DAAF5A-EA86-4A68-9D45-477538D42502',
+                     '88DAAF5A-EA86-4A68-9D45-477538D42503', '88DAAF5A-EA86-4A68-9D45-477538D42504', '88DAAF5A-EA86-4A68-9D45-477538D42505']
+            with self.get_guid_gen_patch(guids):
+                self.cmd('ad sp create-for-rbac --scopes {scope} {scope}/resourceGroups/{rg} --create-cert --keyvault {kv} --cert {cert} -n {sp}')
+                cer1 = self.cmd('keyvault certificate show --vault-name {kv} -n {cert}').get_output_in_json()['cer']
+                self.cmd('ad sp reset-credentials -n {sp} --create-cert --keyvault {kv} --cert {cert}')
+                cer2 = self.cmd('keyvault certificate show --vault-name {kv} -n {cert}').get_output_in_json()['cer']
+                self.assertTrue(cer1 != cer2)
         finally:
             self.cmd('ad app delete --id {sp}')
 
@@ -110,7 +124,8 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
             'sp': 'http://{}'.format(resource_group),
             'sub': subscription_id,
             'scope': '/subscriptions/{}'.format(subscription_id),
-            'cert': 'cert1'
+            'cert': 'cert1',
+            'kv': key_vault
         })
         time.sleep(5)
 
@@ -118,7 +133,10 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
         try:
             self.kwargs['policy'] = self.cmd('keyvault certificate get-default-policy').get_output_in_json()
             self.cmd('keyvault certificate create --vault-name {kv} -n {cert} -p "{policy}" --validity 24')
-            self.cmd('ad sp create-for-rbac --scopes {scope} {scope}/resourceGroups/{rg} --keyvault {kv} --cert {cert} -n {sp}')
+            guids = ['88DAAF5A-EA86-4A68-9D45-477538D43600', '88DAAF5A-EA86-4A68-9D45-477538D43601', '88DAAF5A-EA86-4A68-9D45-477538D43602',
+                     '88DAAF5A-EA86-4A68-9D45-477538D43603', '88DAAF5A-EA86-4A68-9D45-477538D43604', '88DAAF5A-EA86-4A68-9D45-477538D43605']
+            with self.get_guid_gen_patch(guids):
+                self.cmd('ad sp create-for-rbac --scopes {scope} {scope}/resourceGroups/{rg} --keyvault {kv} --cert {cert} -n {sp}')
             self.cmd('ad sp reset-credentials -n {sp} --keyvault {kv} --cert {cert}')
         finally:
             self.cmd('ad app delete --id {sp}')
@@ -127,20 +145,20 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
         try:
             self.kwargs['sp'] = '{}2'.format(self.kwargs['sp'])
             self.cmd('keyvault certificate create --vault-name {kv} -n {cert} -p "{policy}" --validity 6')
-            self.cmd('ad sp create-for-rbac --scopes {scope} {scope}/resourceGroups/{rg} --keyvault {kv} --cert {cert} -n {sp}')
+            guids = ['88DAAF5A-EA86-4A68-9D45-477538D42700', '88DAAF5A-EA86-4A68-9D45-477538D42701', '88DAAF5A-EA86-4A68-9D45-477538D42702',
+                     '88DAAF5A-EA86-4A68-9D45-477538D42700', '88DAAF5A-EA86-4A68-9D45-477538D42701', '88DAAF5A-EA86-4A68-9D45-477538D42702']
+            with self.get_guid_gen_patch(guids):
+                self.cmd('ad sp create-for-rbac --scopes {scope} {scope}/resourceGroups/{rg} --keyvault {kv} --cert {cert} -n {sp}')
             self.cmd('ad sp reset-credentials -n {sp} --keyvault {kv} --cert {cert}')
         finally:
             self.cmd('ad app delete --id {sp}')
 
 
-# TODO: Allow playback when issue #3187 resolved
-class RoleCreateScenarioTest(LiveScenarioTest):
+class RoleCreateScenarioTest(RoleScenarioTest):
 
     def test_role_create_scenario(self):
-        import time
-
         subscription_id = self.get_subscription_id()
-        role_name = 'cli-test-role3'
+        role_name = self.create_random_name('cli-test-role', 20)
         template = {
             "Name": role_name,
             "Description": "Can monitor compute, network and storage, and restart virtual machines",
@@ -165,80 +183,84 @@ class RoleCreateScenarioTest(LiveScenarioTest):
             'role': role_name,
             'template': temp_file.replace('\\', '\\\\')
         })
+        with self.get_guid_gen_patch(['88DAAF5A-EA86-4A68-9D45-477538D41738']):
+            self.cmd('role definition create --role-definition {template}')
+            time.sleep(60)
+            self.cmd('role definition list -n {role}',
+                     checks=self.check('[0].properties.roleName', '{role}'))
+            self.cmd('role definition delete -n {role}',
+                     checks=self.is_empty())
+            time.sleep(60)
+            self.cmd('role definition list -n {role}',
+                     checks=self.is_empty())
 
-        self.cmd('role definition create --role-definition {template}')
-        self.cmd('role definition list -n {role}',
-                 checks=self.check('[0].properties.roleName', '{role}'))
-        self.cmd('role definition delete -n {role}',
-                 checks=self.is_empty())
-        time.sleep(60)
-        self.cmd('role definition list -n {role}',
-                 checks=self.is_empty())
 
+class RoleAssignmentScenarioTest(RoleScenarioTest):
 
-class RoleAssignmentScenarioTest(LiveScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_role_assign')
+    def test_role_assignment_e2e(self, resource_group):
+        if self.run_under_service_principal():
+            return  # this test delete users which are beyond a SP's capacity, so quit...
 
-    @ResourceGroupPreparer(name_prefix='cli_test_role_assignment')
-    def test_role_assignment_scenario(self, resource_group):
-
+        self.enable_large_payload()
+        user = self.create_random_name('testuser', 15)
         self.kwargs.update({
-            'upn': 'testuser1@azuresdkteam.onmicrosoft.com',
+            'upn': user + '@azuresdkteam.onmicrosoft.com',
             'nsg': 'nsg1'
         })
 
         self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
         time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
-        try:
-            self.cmd('network nsg create -n {nsg} -g {rg}')
-            result = self.cmd('network nsg show -n {nsg} -g {rg}').get_output_in_json()
-            self.kwargs['nsg_id'] = result['id']
+        guids = ['88DAAF5A-EA86-4A68-9D45-477538D41100', '88DAAF5A-EA86-4A68-9D45-477538D41101', '88DAAF5A-EA86-4A68-9D45-477538D41102']
+        with self.get_guid_gen_patch(guids):
+            try:
+                self.cmd('network nsg create -n {nsg} -g {rg}')
+                result = self.cmd('network nsg show -n {nsg} -g {rg}').get_output_in_json()
+                self.kwargs['nsg_id'] = result['id']
 
-            # test role assignments on a resource group
-            self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
-            self.cmd('role assignment list -g {rg}',
-                     checks=self.check("length([])", 1))
-            self.cmd('role assignment list --assignee {upn} --role contributor -g {rg}',
-                     checks=self.check("length([])", 1))
+                # test role assignments on a resource group
+                self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
+                self.cmd('role assignment list -g {rg}',
+                         checks=self.check("length([])", 1))
+                self.cmd('role assignment list --assignee {upn} --role contributor -g {rg}',
+                         checks=self.check("length([])", 1))
 
-            # test couple of more general filters
-            result = self.cmd('role assignment list -g {rg} --include-inherited').get_output_in_json()
-            self.assertTrue(len(result) >= 1)
+                # test couple of more general filters
+                result = self.cmd('role assignment list -g {rg} --include-inherited').get_output_in_json()
+                self.assertTrue(len(result) >= 1)
 
-            result = self.cmd('role assignment list --all').get_output_in_json()
-            self.assertTrue(len(result) >= 1)
+                result = self.cmd('role assignment list --all').get_output_in_json()
+                self.assertTrue(len(result) >= 1)
 
-            self.cmd('role assignment delete --assignee {upn} --role contributor -g {rg}')
-            self.cmd('role assignment list -g {rg}',
-                     checks=self.is_empty())
+                self.cmd('role assignment delete --assignee {upn} --role contributor -g {rg}')
+                self.cmd('role assignment list -g {rg}',
+                         checks=self.is_empty())
 
-            # test role assignments on a resource
-            self.cmd('role assignment create --assignee {upn} --role contributor --scope {nsg_id}')
-            self.cmd('role assignment list --assignee {upn} --role contributor --scope {nsg_id}',
-                     checks=self.check("length([])", 1))
-            self.cmd('role assignment delete --assignee {upn} --role contributor --scope {nsg_id}')
-            self.cmd('role assignment list --scope {nsg_id}',
-                     checks=self.is_empty())
+                # test role assignments on a resource
+                self.cmd('role assignment create --assignee {upn} --role contributor --scope {nsg_id}')
+                self.cmd('role assignment list --assignee {upn} --role contributor --scope {nsg_id}',
+                         checks=self.check("length([])", 1))
+                self.cmd('role assignment delete --assignee {upn} --role contributor --scope {nsg_id}')
+                self.cmd('role assignment list --scope {nsg_id}',
+                         checks=self.is_empty())
 
-            # test role assignment on subscription level
-            self.cmd('role assignment create --assignee {upn} --role reader')
-            self.cmd('role assignment list --assignee {upn} --role reader',
-                     checks=self.check("length([])", 1))
-            self.cmd('role assignment list --assignee {upn}',
-                     checks=self.check("length([])", 1))
-            self.cmd('role assignment delete --assignee {upn} --role reader')
-        finally:
-            self.cmd('ad user delete --upn-or-object-id {upn}')
+                # test role assignment on subscription level
+                self.cmd('role assignment create --assignee {upn} --role reader')
+                self.cmd('role assignment list --assignee {upn} --role reader',
+                         checks=self.check("length([])", 1))
+                self.cmd('role assignment list --assignee {upn}',
+                         checks=self.check("length([])", 1))
+                self.cmd('role assignment delete --assignee {upn} --role reader')
+            finally:
+                self.cmd('ad user delete --upn-or-object-id {upn}')
 
 
-class RoleAssignmentListScenarioTest(ScenarioTest):
+class RoleAssignmentListScenarioTest(RoleScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_assignments_for_coadmins')
     def test_assignments_for_co_admins(self, resource_group):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 1024
+        self.enable_large_payload()
 
         result = self.cmd('role assignment list --include-classic-administrator').get_output_in_json()
         self.assertTrue([x for x in result if x['properties']['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])

@@ -82,7 +82,7 @@ def _create_update_role_definition(cli_ctx, role_definition, for_update):
         role_name = matched[0].properties.role_name
         role_id = matched[0].name
     else:
-        role_id = uuid.uuid4()
+        role_id = _gen_guid()
 
     if not for_update and 'assignableScopes' not in role_definition:
         raise CLIError("please provide 'assignableScopes'")
@@ -141,7 +141,7 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
     properties = RoleAssignmentProperties(role_id, object_id)
-    assignment_name = uuid.uuid4()
+    assignment_name = _gen_guid()
     custom_headers = None
     return assignments_client.create(scope, assignment_name, properties,
                                      custom_headers=custom_headers)
@@ -493,9 +493,9 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     password_creds = None
     key_creds = None
     if password:
-        password_creds = [PasswordCredential(start_date, end_date, str(uuid.uuid4()), password)]
+        password_creds = [PasswordCredential(start_date, end_date, str(_gen_guid()), password)]
     elif key_value:
-        key_creds = [KeyCredential(start_date, end_date, key_value, str(uuid.uuid4()),
+        key_creds = [KeyCredential(start_date, end_date, key_value, str(_gen_guid()),
                                    key_usage, key_type)]
 
     return (password_creds, key_creds)
@@ -568,7 +568,7 @@ def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_dat
 
     if not any((cert, create_cert, password, keyvault)):
         # 1 - Simplest scenario. Use random password
-        return str(uuid.uuid4()), None, None, None, None
+        return str(_gen_guid()), None, None, None, None
 
     if password:
         # 2 - Password supplied -- no certs
@@ -936,7 +936,7 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
         app_creds.append(PasswordCredential(
             start_date=app_start_date,
             end_date=app_end_date,
-            key_id=str(uuid.uuid4()),
+            key_id=str(_gen_guid()),
             value=password
         ))
 
@@ -948,7 +948,7 @@ def reset_service_principal_credential(cmd, name, password=None, create_cert=Fal
             start_date=app_start_date,
             end_date=app_end_date,
             value=public_cert_string,
-            key_id=str(uuid.uuid4()),
+            key_id=str(_gen_guid()),
             usage='Verify',
             type='AsymmetricX509Cert'
         ))
@@ -998,6 +998,11 @@ def _is_guid(guid):
     except ValueError:
         pass
     return False
+
+
+# for injecting test seams to produce predicatable role assignment id for playback
+def _gen_guid():
+    return uuid.uuid4()
 
 
 def _get_object_stubs(graph_client, assignees):
