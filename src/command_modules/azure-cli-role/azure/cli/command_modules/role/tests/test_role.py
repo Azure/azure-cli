@@ -37,7 +37,7 @@ class RbacSPSecretScenarioTest(RoleScenarioTest):
         })
 
         try:
-            guids = ['88DAAF5A-EA86-4A68-9D45-477538D41300', '88DAAF5A-EA86-4A68-9D45-477538D41301', 
+            guids = ['88DAAF5A-EA86-4A68-9D45-477538D41300', '88DAAF5A-EA86-4A68-9D45-477538D41301',
                      '88DAAF5A-EA86-4A68-9D45-477538D41302', '88DAAF5A-EA86-4A68-9D45-477538D41303',
                      '88DAAF5A-EA86-4A68-9D45-477538D41304', '88DAAF5A-EA86-4A68-9D45-477538D41305']
             with self.get_guid_gen_patch(guids):
