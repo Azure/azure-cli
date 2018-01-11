@@ -71,13 +71,12 @@ extension_mappings = {
 
 
 def _construct_identity_info(identity_scope, identity_role, port, external_identities):
-    info = {
-        'scope': identity_scope or '',
-        'role': str(identity_role),  # could be DefaultStr, so convert to string
-        'port': port
-    }
+    info = {'port': port}
+    if identity_scope:
+        info['scope'] = identity_scope
+        info['role'] = str(identity_role)  # could be DefaultStr, so convert to string
     if external_identities:
-        info['externalIdentities'] = external_identities
+        info['userAssignedIdentities'] = external_identities
     return info
 
 
