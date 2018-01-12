@@ -74,12 +74,10 @@ class LoadFreshTable(object):
 
         loader = shell_ctx.cli_ctx.invocation.commands_loader
         cmd_table = loader.load_command_table(None)
-        # TODO: Is this really needed?
-        # invoker.parser.load_command_table(invoker.commands_loader.command_table)
+        loader.load_arguments('')
 
         data = {}
         for cmd in cmd_table:
-            loader.load_arguments(cmd)
             com_descrip = {}  # commands to their descriptions, examples, and parameter info
             param_descrip = {}  # parameters to their aliases, required, and descriptions
 
