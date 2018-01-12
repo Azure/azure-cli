@@ -309,7 +309,7 @@ def _should_use_original_storage_account(recovery_point, restore_to_staging_stor
                 # RP doesn't support OSA.
                 raise CLIError(
                     """
-                    This recovery point doesn’t have the capability to restore disks to their original storage
+                    This recovery point doesn't have the capability to restore disks to their original storage
                     accounts. The disks and the VM config file will be uploaded to the given storage account.
                     """)
     return use_original_storage_account
