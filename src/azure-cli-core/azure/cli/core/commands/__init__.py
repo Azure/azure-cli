@@ -433,6 +433,12 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 
     def __call__(self, poller):
         from msrest.exceptions import ClientException
+        import colorama
+        import platform
+
+        # https://github.com/azure/azure-cli/issues/3555
+        if platform.system() == 'Windows':
+            colorama.init()
 
         correlation_message = ''
         self.cli_ctx.get_progress_controller().begin()
@@ -474,6 +480,10 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             handle_long_running_operation_exception(client_exception)
 
         self.cli_ctx.get_progress_controller().end()
+
+        if platform.system() == 'Windows':
+            colorama.deinit()
+
         return result
 
 
