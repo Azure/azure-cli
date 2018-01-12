@@ -461,7 +461,7 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
             'batch_tests_node',
             'azure.batch.operations.compute_node_operations#ComputeNodeOperations.reboot',
             operations.compute_node_operations.ComputeNodeOperations.reboot,
-            client_factory=get_client)            
+            client_factory=get_client)
         self.command_job = _command_type.AzureBatchDataPlaneCommand(
             'batch_tests_job',
             'azure.batch.operations.job_operations#JobOperations.add',
