@@ -2,25 +2,34 @@ The document provides instructions and guidelines on how to author individual co
 
 **AUTHORING COMMANDS**
 
-1. Write the Command Loader
-2. Write a Command
-3. Register Commands
-4. Write Help Entry
-5. Customize Arguments
+[1. Write the Command Loader](#write-the-command-loader)
+
+[2. Write a Command](#write-a-command)
+
+[3. Register Commands](#register-commands)
+
+[4. Write Help Entry](#write-help-entry)
+
+[5. Customize Arguments](#customize-arguments)
 
 **ADDITIONAL TOPICS**
 
-6. Keyword Argument (kwarg) Reference
-7. Supporting the IDs Parameter
-8. Generic Update Commands
-9. Custom Table Formats
-10. Tab Completion (bash only)
-11. Validators
+[6. Keyword Argument (kwarg) Reference](#keyword-argument-reference)
+
+[7. Supporting the IDs Parameter](#supporting-the-ids-parameter)
+
+[8. Generic Update Commands](#generic-update-commands)
+
+[9. Custom Table Formats](#custom-table-formats)
+
+[10. Tab Completion (bash only)](#tab-completion)
+
+[11. Validators](#validators)
 
 Authoring Commands
 =============================
 
-## 1. Write the Command Loader
+## Write the Command Loader
 
 As of version 2.0.24, Azure CLI is based on the Knack framework (https://github.com/Microsoft/knack), which uses the `CLICommandsLoader` class as the mechanism for loading a module. In Azure CLI 2.0, you will create your own loader which will inherit from the `AzCommandsLoader` class.  The basic structure is:
 
@@ -46,7 +55,7 @@ class MyCommandsLoader(AzCommandsLoader):
 COMMAND_LOADER_CLS = MyCommandsLoader
 ```
 
-## 2. Write a Command
+## Write a Command
 
 Write your command as a simple function, specifying your arguments as the parameter names.
 
@@ -62,7 +71,7 @@ There are two arguments you may include in your custom command that are reserved
 
 `client`: If your command has registered the `client_factory` keyword argument, that factory will be passed into this variable. It can appear anywhere in your command signature.
 
-## 3. Register Commands
+## Register Commands
 
 Before your command can be used in the CLI, it must be registered. Within the `load_command_table` method of your command loader, you will have something like:
 
@@ -137,11 +146,11 @@ Since most wait commands rely on a simple GET call from the SDK, most of these e
    g.generic_wait_command('wait')
 ```
 
-## 4. Write Help Entry
+## Write Help Entry
 
 See the following for guidance on writing a help entry: https://github.com/Azure/azure-cli/blob/master/doc/authoring_help.md
 
-## 5. Customize Arguments
+## Customize Arguments
 
 While the CLI will attempt to figure out certain key properties of your command and its arguments, it is often necessary to override, add to, or customize this metadata. To modify/enhance your command arguments, create an argument context. For the standard modules, these entries are contained within a file called `_params.py`. Within the `load_arguments` method of your command loader, you will have something like:
 
@@ -219,7 +228,7 @@ Often reflected SDK methods have complex parameters that are difficult to expose
 Additional Topics
 =============================
 
-## 6. Keyword Argument Reference
+## Keyword Argument Reference
 
 **Overview of KWARGS in Azure CLI 2.0**
 
@@ -290,7 +299,7 @@ The following kwargs may be inherited from the command loader:
 - `resource_type` - TBD
 - `operation_group` - TBD
 
-## 7. Supporting the IDs Parameter
+## Supporting the IDs Parameter
 
 Most ARM resources can be identified by an ID. In many cases, for example show and delete commands, it may be more useful to copy and paste an ID to identify the target resource instead of having to specify the names of the resource group, the resource, and the parent resource (if any).
 
@@ -369,7 +378,7 @@ A couple things to note:
 - Currently, `--ids` is not exposed for any command that is called 'create', even if it is configured properly.
 
 
-## 8. Generic Update Commands
+## Generic Update Commands
 
 The update commands within the CLI expose a set of generic update arguments: `--add`, `--remove` and `--set`. This allows the user to manipulate objects in a consistent way that may not have long option flags supported by the command. The method which exposes these arguments is `cli_generic_update_command` in the `azure.cli.core.commands.arm` package. The signature of this method is:
 
@@ -414,7 +423,7 @@ instance = _process_generic_updates(...) # apply generic updates, which will ove
 return setter(instance)  # update the instance and return the result
 ```
 
-## 9. Custom Table Formats
+## Custom Table Formats
 
 By default, when the `-o/--output table` option is supplied, the CLI will display the top level fields of the object structure as the columns of the table. The user can always specify a `--query` to control table and TSV formats, but the CLI also allows the command author to specify a different default table format. Two options exist:
 
@@ -440,7 +449,7 @@ table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, P
 ```
 
 
-## 10. Tab Completion
+## Tab Completion
 
 Tab completion is enabled by default (in bash or `az interactive`) for command names, argument names and argument choice lists. To enable tab completion for dynamic properties (for example, resource names) you can supply a callable which returns a list of options:
 
@@ -470,6 +479,6 @@ def get_foo_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: d
 
 The method signature must be as shown and it must return a list of names. You can make additional REST calls within the completer and may examine the partially processed namespace via `parsed_args` to filter the list based on already supplied args (as in the above case with VM).
 
-## 11. Validators
+## Validators
 
 TBD
