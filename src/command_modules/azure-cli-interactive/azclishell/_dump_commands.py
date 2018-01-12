@@ -26,29 +26,6 @@ class LoadFreshTable(object):
         self.command_table = None
         self.shell_ctx = shell_ctx
 
-    def install_modules(self):
-        installed_command_modules = []
-        for cmd in self.command_table:
-            try:
-                self.command_table[cmd].load_arguments()
-            except (ImportError, ValueError):
-                pass
-            mods_ns_pkg = import_module('azure.cli.command_modules')
-        for _, modname, _ in pkgutil.iter_modules(mods_ns_pkg.__path__):
-            if modname not in BLACKLISTED_MODS:
-                installed_command_modules.append(modname)
-
-        for mod in installed_command_modules:
-            try:
-                mod = import_module('azure.cli.command_modules.' + mod)
-                mod.load_params(mod)
-                mod.load_commands()
-
-            except Exception:  # pylint: disable=broad-except
-                # print("Error loading: {}".format(mod))
-                pass
-        self.shell_ctx.cli_ctx.invocation.commands_loader.load_arguments(None)
-
     def load_help_files(self, data):
         """ loads all the extra information from help files """
         for cmd in helps:
@@ -95,19 +72,19 @@ class LoadFreshTable(object):
     def dump_command_table(self, shell_ctx):
         """ dumps the command table """
 
-        self.command_table = shell_ctx.cli_ctx.invocation.commands_loader.command_table
-        command_file = shell_ctx.config.get_help_files()
-
-        self.install_modules()
-        add_id_parameters(self.command_table)
+        loader = shell_ctx.cli_ctx.invocation.commands_loader
+        cmd_table = loader.load_command_table(None)
+        # TODO: Is this really needed?
+        # invoker.parser.load_command_table(invoker.commands_loader.command_table)
 
         data = {}
-        for cmd in self.command_table:
+        for cmd in cmd_table:
+            loader.load_arguments(cmd)
             com_descrip = {}  # commands to their descriptions, examples, and parameter info
             param_descrip = {}  # parameters to their aliases, required, and descriptions
 
             try:
-                command_description = self.command_table[cmd].description
+                command_description = cmd_table[cmd].description
                 if callable(command_description):
                     command_description = command_description()
 
@@ -115,18 +92,18 @@ class LoadFreshTable(object):
                 com_descrip['examples'] = ""
 
                 # checking all the parameters for a single command
-                for key in self.command_table[cmd].arguments:
+                for key in cmd_table[cmd].arguments:
                     required = ""
                     help_desc = ""
 
-                    if self.command_table[cmd].arguments[key].type.settings.get('required'):
+                    if cmd_table[cmd].arguments[key].type.settings.get('required'):
                         required = "[REQUIRED]"
-                    if self.command_table[cmd].arguments[key].type.settings.get('help'):
-                        help_desc = self.command_table[cmd].arguments[key].type.settings.get('help')
+                    if cmd_table[cmd].arguments[key].type.settings.get('help'):
+                        help_desc = cmd_table[cmd].arguments[key].type.settings.get('help')
 
                     # checking aliasing
                     name_options = []
-                    for name in self.command_table[cmd].arguments[key].options_list:
+                    for name in cmd_table[cmd].arguments[key].options_list:
                         name_options.append(name)
 
                     options = {
@@ -135,16 +112,20 @@ class LoadFreshTable(object):
                         'help': help_desc
                     }
                     # the key is the first alias option
-                    param_descrip[self.command_table[cmd].arguments[key].options_list[0]] = options
+                    param_descrip[cmd_table[cmd].arguments[key].options_list[0]] = options
 
                 com_descrip['parameters'] = param_descrip
                 data[cmd] = com_descrip
             except (ImportError, ValueError):
                 pass
 
+        add_id_parameters(cmd_table)
         self.load_help_files(data)
 
+        self.command_table = cmd_table
+
         # dump into the cache file
+        command_file = shell_ctx.config.get_help_files()
         with open(os.path.join(get_cache_dir(shell_ctx), command_file), 'w') as help_file:
             json.dump(data, help_file)
 
