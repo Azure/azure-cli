@@ -1,20 +1,69 @@
-# How to write ScenarioTest based VCR tests
+Automating tests for Azure CLI
+========================================
 
-The `ScenarioTest` class was introduced in pull request
-[#2393](https://github.com/Azure/azure-cli/pull/2393).
-It is the preferred base class for all VCR based test cases from now on.
-The `ScenarioTest` class is designed to be a better and easier test harness
-for authoring scenario based VCR tests.
+## Overview
 
-Pull request [#3621](https://github.com/Azure/azure-cli/pull/3621)
-extracted code useful for other Azure test settings to its own package
-called [azure-devtools](https://github.com/Azure/azure-python-devtools).
-The test harness in [azure-cli-testsdk](src/azure-cli-testsdk)
-provides a compatibility layer between that common code
-and CLI-specific tests,
-adding functionality such as executing CLI commands
-and checking JSON output.
+There are two types of automated tests you can add for Azure CLI: [unit tests](https://en.wikipedia.org/wiki/Unit_testing) and  [integration tests](https://en.wikipedia.org/wiki/Integration_testing).
 
+For unit tests, we support unit tests written in the forms of both standard [unittest](https://docs.python.org/3/library/unittest.html) and [nosetest](http://nose.readthedocs.io/en/latest/writing_tests.html).
+
+For integration tests, we provide the `ScenarioTest` and `LiveScenarioTest` classes to support replayable tests via [VCR.py](https://vcrpy.readthedocs.io/en/latest/).
+
+## About replayable tests
+
+Azure CLI translates user inputs into Azure Python SDK calls which communicate with [Azure REST API](https://docs.microsoft.com/en-us/rest/api/). These HTTP communications are captured and recorded so the integration tests can be replayed in an automation environment without making actual HTTP calls. This ensures that the commands actually work against the service when they are recorded (and then can be re-run live to verify) and provides protection against regressions or breaking changes when they are played back.
+
+## Authoring Tests
+
+### Test Policies
+
+* Do not use hard-coded or otherwise persistent resources. This makes it difficult or impossible to re-record tests or run them live. In general, all resources needed to support the test should be created as part of the test and torn down after the test finishes. The use of `ResourceGroupPreparer` helps to facilitate this.
+* Tests _must_ be included for all new command modules and any new commands to existing test modules. PRs will be rejected outright if they do not include tests.
+* Name test methods in the following format: `test_<module>_<feature>`.
+
+# Recording Tests
+
+### Preparation
+
+1. Set up your [development environment](configuring_your_machine.md)
+2. Select the API profile you want to test. (Optional)
+3. Select the cloud you want to test. (Optional) You may need to register a cloud first (for example, if targeting a staging or test environment).
+4. Log in your Azure account using `az login` command.
+5. Select the subscription you want to use for recording tests. The replaying does not rely on the knowledge of the subscription and the credentials will be removed from the recordings.
+
+### Recording tests for the first time
+
+After the test is executed, a recording file will be generated at `recording/<api_profile_name>/<test_name>.yaml`. The recording file will be created no matter the test pass or not. The behavior makes it easy for you to find issues when a test fails. To re-record the test, you can either delete the existing recording and re-run the test, or simply re-run the test using the `--live` flag (ex: `run_tests --module example --live`.
+
+It is a good practice to add recording file to the local git cache, which makes it easy to diff the different versions of recording to detect issues or changes.
+
+Once the recording file is generated, execute the test again. This time the test will run in playback mode. The execution is offline, and will not act on the Azure subscription.
+
+If the replay passes, you can commit the tests as well as recordings and submit them as part of your PR.
+
+### Running tests live
+
+When a recording file is missing, the test framework will execute the test in live mode. You can also force tests to run live either by setting the environment variable `AZURE_TEST_RUN_LIVE` or by using the `--live` flag with the `run_tests` script. 
+
+Also, you can author tests which are for live test only by deriving the test class from `LiveScenarioTest`. Since these tests will not be run as part of the CI, you lose much of the automatic regression protection by doing this. However, for certain tests that cannot be re-recorded, cannot be replayed, or fail due to service issues, this is a viable approach.
+
+### Test Run Frequency
+
+Recorded tests are run on TravisCI as part of all pull request validations. Therefore it is important to keep the recordings up-to-date, and to ensure that they can be re-recorded.
+
+Live tests run nightly in a separate system and are not tied to pull requests.
+
+## Troubleshooting Test Issues
+
+Here are some issues that may occur when authoring tests that you should be aware of.
+
+- **Non-deterministic results**: If you find that a test will pass on some playbacks but fail on others, there are a couple possible things to check:
+  1. check if your command makes use of concurrency.
+  2. check your parameter aliasing (particularly if it complains that a required parameter is missing that you know is there)
+ If your command makes use of concurrency, consider using unit tests, LiveScenarioTest, or, if practical, forcing the test to operate on a single thread for recording and playback.
+- **Paths**: When including paths in your tests as parameter values, always wrap them in double quotes. While this isn't necessary when running from the command line (depending on your shell environment), it will likely cause issues with the test framework.
+
+# Sample Scenario Tests
 
 ### Sample 1. Basic fixture
 ```Python
@@ -54,35 +103,35 @@ which may not stand in a live test environment.
 
 ### Sample 3. Validate the return JSON value using JMESPath
 ``` Python
-from azure.cli.testsdk import ScenarioTest, JMESPathCheck
+from azure.cli.testsdk import ScenarioTest
 
 class StorageAccountTests(ScenarioTest):
     def test_list_storage_account(self):
-        self.cmd('az account list-locations',
-        checks=[JMESPathCheck("[?name=='westus'].displayName | [0]", 'West US')])
+        self.cmd('az account list-locations', checks=[
+            self.check("[?name=='westus'].displayName | [0]", 'West US')
+        ])
 ```
 Notes: 
 
-1. What is JMESPath?
-[JMESPath is a query language for JSON](http://jmespath.org/).
+1. The first argument in the `check` method is a JMESPath query. [JMESPath is a query language for JSON](http://jmespath.org/).
 2. If a command returns JSON,
 multiple JMESPath based checks can be added to the checks list to validate the result.
-3. In addition to the `JMESPatchCheck`,
-there are other checks like `NoneCheck` which validate the output is `None`.
+3. In addition to the `check` method,
+there are other checks like `is_empty` which validate the output is `None`.
 The check mechanism is extensible.
 Any callable accepting a single `ExecutionResult` argument can act as a check.
 
 
 ### Sample 4. Prepare a resource group for a test
 ``` Python
-from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 class StorageAccountTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_create_storage_account(self, resource_group):
-        self.cmd('az group show -n {}'.format(resource_group), checks=[
-            JMESPathCheck('name', resource_group),
-            JMESPathCheck('properties.provisioningState', 'Succeeded')
+        self.cmd('az group show -n {rg}', checks=[
+            self.check('name', '{rg}'),
+            self.check('properties.provisioningState', 'Succeeded')
         ])
 ```
 Notes:
@@ -93,16 +142,19 @@ Any resources created in this way will be cleaned up after testing.
 By default `ResourceGroupPreparer` passes the value as the `resource_group` parameter.
 The target parameter can be customized (see following samples).
 3. The resource group will be deleted asynchronously for performance reason.
-
+4. The resource group will automatically be registerd into the tests keyword arguments (`self.kwargs`) with the key default key of `rg`. This can then be directly plugged into the command string in `cmd` and into the verification step of the `check` method. The test infrastructure will automatically replace the values.
 
 ### Sample 5. Get more from ResourceGroupPreparer
 ``` Python
 class StorageAccountTests(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
     def test_create_storage_account(self, group_name, group_location):
-        self.cmd('az group show -n {}'.format(group_name), checks=[
-            JMESPathCheck('name', group_name),
-            JMESPathCheck('location', group_location),
+        self.kwargs.update({
+          'loc': group_location
+        })
+        self.cmd('az group show -n {rg}', checks=[
+            JMESPathCheck('name', '{rg}'),
+            JMESPathCheck('location', '{loc}'),
             JMESPathCheck('properties.provisioningState', 'Succeeded')
         ])
 ```
@@ -111,9 +163,7 @@ Notes:
 1. In addition to the name,
 the location of the resource group can be also injected into the test method.
 2. Both parameters' names can be customized.
-3. The test method parameter accepting the location value is optional.
-The test harness will inspect the method signature
-and decide if the value will be added to the keyword arguments.
+3. You can add the location to the test's kwargs using the `self.kwargs.update` method. This allows you to take advantage of the automatic kwarg replacement in your command strings and checks.
 
 
 ### Sample 6. Random name and name mapping
@@ -121,14 +171,18 @@ and decide if the value will be added to the keyword arguments.
 class StorageAccountTests(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_create_storage_account(self, resource_group, location):
-        name = self.create_random_name(prefix='cli', length=24)
-        self.cmd('az storage account create -n {} -g {} --sku {} -l {}'.format(
-            name, resource_group, 'Standard_LRS', location))
-        self.cmd('az storage account show -n {} -g {}'.format(name, resource_group), checks=[
-            JMESPathCheck('name', name),
-            JMESPathCheck('location', location),
-            JMESPathCheck('sku.name', 'Standard_LRS'),
-            JMESPathCheck('kind', 'Storage')
+        self.kwargs.update({
+          'name': self.create_random_name(prefix='cli', length=24),
+          'loc': location,
+          'sku': 'Standard_LRS',
+          'kind': 'Storage'
+        })
+        self.cmd('az storage account create -n {name} -g {rg} --sku {sku} -l {loc}')
+        self.cmd('az storage account show -n {name} -g {rg}', checks=[
+            JMESPathCheck('name', '{name}'),
+            JMESPathCheck('location', '{loc}'),
+            JMESPathCheck('sku.name', '{sku}'),
+            JMESPathCheck('kind', '{kind}')
         ])
 ```
 Note:
@@ -246,3 +300,4 @@ Note: This document's source uses
 [semantic linefeeds](http://rhodesmill.org/brandon/2012/one-sentence-per-line/)
 to make diffs and updates clearer.
 -->
+
