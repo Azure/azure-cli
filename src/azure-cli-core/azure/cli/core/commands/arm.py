@@ -471,21 +471,26 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
             raise CLIError(
                 "incorrect usage: --created | --updated | --deleted | --exists | --custom JMESPATH")
 
+        progress_indicator = context.cli_ctx.get_progress_controller()
+        progress_indicator.begin()
         for _ in range(0, timeout, interval):
             try:
+                progress_indicator.add(message='Waiting')
                 instance = getter(**args)
                 if wait_for_exists:
+                    progress_indicator.end()
                     return None
                 provisioning_state = get_provisioning_state(instance)
                 # until we have any needs to wait for 'Failed', let us bail out on this
                 if provisioning_state == 'Failed':
+                    progress_indicator.stop()
                     raise CLIError('The operation failed')
-                if wait_for_created or wait_for_updated:
-                    if provisioning_state == 'Succeeded':
-                        return None
-                if custom_condition and bool(verify_property(instance, custom_condition)):
+                if ((wait_for_created or wait_for_updated) and provisioning_state == 'Succeeded') or \
+                        custom_condition and bool(verify_property(instance, custom_condition)):
+                    progress_indicator.end()
                     return None
             except ClientException as ex:
+                progress_indicator.stop()
                 if getattr(ex, 'status_code', None) == 404:
                     if wait_for_deleted:
                         return None
@@ -494,10 +499,12 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
                 else:
                     raise
             except Exception as ex:  # pylint: disable=broad-except
+                progress_indicator.stop()
                 raise
 
             time.sleep(interval)
 
+        progress_indicator.end()
         return CLIError('Wait operation timed-out after {} seconds'.format(timeout))
 
     context._cli_command(name, handler=handler, argument_loader=generic_wait_arguments_loader, **kwargs)  # pylint: disable=protected-access
