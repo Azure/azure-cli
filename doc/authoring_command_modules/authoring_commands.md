@@ -1,11 +1,6 @@
-Authoring Commands
-=============================
-
 The document provides instructions and guidelines on how to author individual commands.
 
-## 0. Overview
-
-The basic process of adding commands is presented below, and elaborated upon later in this document.
+**AUTHORING COMMANDS**
 
 1. Write the Command Loader
 2. Write a Command
@@ -13,12 +8,17 @@ The basic process of adding commands is presented below, and elaborated upon lat
 4. Write Help Entry
 5. Customize Arguments
 
-Other topics of interest include:
-6. Supporting the IDs Parameter
-7. Generic Update Commands
-8. Custom Table Formats
-9. Tab Completion (bash only)
-10. Supported Keyword Arguments (kwargs)
+**ADDITIONAL TOPICS**
+
+6. Keyword Argument (kwarg) Reference
+7. Supporting the IDs Parameter
+8. Generic Update Commands
+9. Custom Table Formats
+10. Tab Completion (bash only)
+11. Validators
+
+Authoring Commands
+=============================
 
 ## 1. Write the Command Loader
 
@@ -45,19 +45,6 @@ class MyCommandsLoader(AzCommandsLoader):
         
 COMMAND_LOADER_CLS = MyCommandsLoader
 ```
-
-**Azure CLI 2.0 Keyword Arguments**
-
-When writing commands for Azure CLI 2.0, it is important to understand how keyword arguments (kwargs) are applied. Refer to the following diagram.
-
-![](/doc/assets/annotated-kwarg-structure.gif)
-
-From the diagram you can see that any kwargs supplied when creating the `AzCommandsLoader` object are passed to and used as the baseline for any command groups or argument contexts that are later created. Any kwargs specified in the `command_group` calls serve as the baseline for any `command` or `custom_command` calls, and any kwargs passed to `argument_context` serve as the baseline for any calls to `argument`.
-
-While kwargs are inherited from higher levels on the diagram, they can be overriden at a lower level. For example, if `custom_command_type=foo` is used as a module-level kwarg in the `AzCommandLoader.__init__` method and `custom_command_type=bar` is passed for a call to `command_group`, then `bar` will be used for all calls to `custom_command` within that command group.
-
-Addtionally, you can see that kwargs registered on a command group *do not* carry over to argument contexts, so you must apply the kwargs in both places if necessary.
-
 
 ## 2. Write a Command
 
@@ -102,6 +89,7 @@ At this point, you should be able to access your command using `az [name]` and a
 CliCommandType is a way to group and reuse and keyword arguments supported by commands. Earlier, in the `__init__` method of the `MyCommandsLoader` class, we created a `mymod_custom` variable and assigned it to the `custom_command_type` keyword argument. This will be used any time you use the `custom_command` method within a command group. It is registered with the loader since most modules typically put all of their custom methods in a single file.
 
 **(2) Command Group Helper**
+
 ```Python
 command_group(self, group_name, command_type=None, **kwargs)
 ```
@@ -128,9 +116,10 @@ Any kwargs that are not specified will be pulled from the `command_type` kwarg, 
 The signature for `custom_command` is exactly the same as `command`. The only difference is that, whereas `command` uses `command_type` as the fallback for missings kwargs, `custom_command` relies on `custom_command_type`.
 
 ***generic_update_command***
+
 See the section on "Suppporting Generic Update"
 
-***generic_wait_command****
+***generic_wait_command***
 
 The generic wait command provides a templated solution for polling Azure resources until specific conditions are met.
 
@@ -169,7 +158,7 @@ While the CLI will attempt to figure out certain key properties of your command 
 
 For more information:
 
-**(1) Create an argument context
+**(1) Create an argument context**
 
 ```Python
 argument_context(self, scope, **kwargs):
@@ -194,6 +183,8 @@ with self.argument_context('mypackage command1', ...) as c:  # applies to comman
 - `kwargs` - Any supported kwarg which will be applied to calls within the context block.
 
 **(2) Register different kinds of arguments**
+
+***argument***
 ```Python
 argument(self, dest, arg_type=None, **kwargs)
 ```
@@ -201,8 +192,105 @@ argument(self, dest, arg_type=None, **kwargs)
 - `arg_type` - An instance of the `azure.cli.core.commands.CliArgumentType` class. This essentially serves as a named, reusable packaging of the `kwargs` that modify your command's argument. It is useful when you want to reuse an argument definition, but is generally not required. It is most commonly used for name type parameters, or for enums and flags.
 - `kwargs` - Most likely, you will simply specify keyword arguments that will accomplish what you need.  Any `kwargs` specified will override or extended the definition in `arg_type`, if provided.
 
+***ignore***
+```Python
+ignore(self, *args)
+```
+- `args` - one or more parameter names (dest values) that should be ignored. Useful to suppress arguments that appear due to reflection on an SDK, but are unwanted in the command signature.
 
-## 6. Supporting the IDs Parameter
+***extra***
+```Python
+extra(self, dest, arg_type=None, **kwargs)
+```
+Arguments are the same as `argument`, however this will create a new parameter whereas `argument` will not. This is useful when a reflected SDK method is missing a parameter that you need to expose in your command.
+
+***expand***
+```Python
+expand(self, dest, model_type, group_name=None, patches=None):
+```
+
+Often reflected SDK methods have complex parameters that are difficult to expose directly. The `expand` method offers one way to expose these methods without resorting to a custom command approach.
+
+- `dest` -  The name of the parameter that will be expanded.
+- `model_type` - The model type which will be expanded and collapsed back into the `dest` value.
+- `group_name` - The argument group to which the expand parameters will be assigned. (See arg_group kwarg)
+- `patches` - A list of patches to apply to the expanded parameters.
+
+Additional Topics
+=============================
+
+## 6. Keyword Argument Reference
+
+**Overview of KWARGS in Azure CLI 2.0**
+
+When writing commands for Azure CLI 2.0, it is important to understand how keyword arguments (kwargs) are applied. Refer to the following diagram.
+
+![](/doc/assets/annotated-kwarg-structure.gif)
+
+From the diagram you can see that any kwargs supplied when creating the `AzCommandsLoader` object are passed to and used as the baseline for any command groups or argument contexts that are later created. Any kwargs specified in the `command_group` calls serve as the baseline for any `command` or `custom_command` calls, and any kwargs passed to `argument_context` serve as the baseline for any calls to `argument`.
+
+While kwargs are inherited from higher levels on the diagram, they can be overriden at a lower level. For example, if `custom_command_type=foo` is used as a module-level kwarg in the `AzCommandLoader.__init__` method and `custom_command_type=bar` is passed for a call to `command_group`, then `bar` will be used for all calls to `custom_command` within that command group.
+
+Addtionally, you can see that kwargs registered on a command group *do not* carry over to argument contexts, so you must apply the kwargs in both places if necessary.
+
+****Commands Loader****
+
+_Special Kwargs_
+
+The following special kwargs are only interpretted by the command loader:
+- `min_api_profile` - TBD
+- `max_api_profile` - TBD
+
+****Command Group****
+
+_Special Kwargs_
+
+The following special kwargs are supported by command group and its helper methods:
+- `table_transformer` - TBD
+- `validator` - TBD
+- `confirmation` - TBD
+- `transform` - TBD
+
+_General Kwargs_
+
+The following kwargs may be inherited from the command loader:
+- `min_api` - TBD
+- `max_api` - TBD
+- `resource_type` - TBD
+- `operation_group` - TBD
+- `command_group` - TBD
+- `custom_command_group` - TBD
+
+****Argument Context****
+
+_Special Kwargs_
+
+The follow special kargs are supported by argument context and its helper methods:
+- `options_list` - By default, your argument will be exposed as an option in hyphenated form (ex: `my_param` becomes `--my-param`). If you would like to change the option string without changing the parameter name, and/or add a short option, specify the `options_list` kwarg. This is a list of string values. If there will only be one value, you can just specify the value (Ex: `options_list=['--myparam', '-m']` or `options_list='--myparam'`)
+- `validator` - The name of a callable that takes the function namespace as a parameter. Allows you to perform any custom logic or validation on the entire namespace prior to command execution. Validators are executed after argument parsing, and thus after `type` and `action` have been applied. However, because the order in which validators are executed is random, you should not have multiple validators modifying the same parameter within the namespace.
+- `completer` - The name of a callable that takes the following parameters `(prefix, action, parsed_args, **kwargs)` and return a list of completion values.
+- `id_part` - See below the section on Supporting the IDs Parameter.
+
+Additionally, the following `kwargs`, supported by argparse, are supported as well:
+- `nargs` - See https://docs.python.org/3/library/argparse.html#nargs
+- `action` - See https://docs.python.org/3/library/argparse.html#action
+- `const` - See https://docs.python.org/3/library/argparse.html#const
+- `default` - See https://docs.python.org/3/library/argparse.html#default. Note that the default value is inferred from the parameter's default value in the function signature. If specified, this will override that value.
+- `type` - See https://docs.python.org/3/library/argparse.html#type
+- `choices` - See https://docs.python.org/3/library/argparse.html#choices. If specified this will also serve as a value completer for people using tab completion.
+- `required` - See https://docs.python.org/3/library/argparse.html#required. Note that this value is inferred from the function signature depending on whether or not the parameter has a default value. If specified, this will override that value.
+- `help` - See https://docs.python.org/3/library/argparse.html#help. Generally you should avoid adding help text in this way, instead opting to create a help file as described above.
+- `metavar` - See https://docs.python.org/3/library/argparse.html#metavar
+
+_General Kwargs_
+
+The following kwargs may be inherited from the command loader:
+- `min_api` - TBD
+- `max_api` - TBD
+- `resource_type` - TBD
+- `operation_group` - TBD
+
+## 7. Supporting the IDs Parameter
 
 Most ARM resources can be identified by an ID. In many cases, for example show and delete commands, it may be more useful to copy and paste an ID to identify the target resource instead of having to specify the names of the resource group, the resource, and the parent resource (if any).
 
@@ -281,7 +369,7 @@ A couple things to note:
 - Currently, `--ids` is not exposed for any command that is called 'create', even if it is configured properly.
 
 
-## 7. Generic Update Commands
+## 8. Generic Update Commands
 
 The update commands within the CLI expose a set of generic update arguments: `--add`, `--remove` and `--set`. This allows the user to manipulate objects in a consistent way that may not have long option flags supported by the command. The method which exposes these arguments is `cli_generic_update_command` in the `azure.cli.core.commands.arm` package. The signature of this method is:
 
@@ -326,7 +414,7 @@ instance = _process_generic_updates(...) # apply generic updates, which will ove
 return setter(instance)  # update the instance and return the result
 ```
 
-## 8. Custom Table Formats
+## 9. Custom Table Formats
 
 By default, when the `-o/--output table` option is supplied, the CLI will display the top level fields of the object structure as the columns of the table. The user can always specify a `--query` to control table and TSV formats, but the CLI also allows the command author to specify a different default table format. Two options exist:
 
@@ -352,7 +440,7 @@ table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, P
 ```
 
 
-## 9. Tab Completion
+## 10. Tab Completion
 
 Tab completion is enabled by default (in bash or `az interactive`) for command names, argument names and argument choice lists. To enable tab completion for dynamic properties (for example, resource names) you can supply a callable which returns a list of options:
 
@@ -382,23 +470,6 @@ def get_foo_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: d
 
 The method signature must be as shown and it must return a list of names. You can make additional REST calls within the completer and may examine the partially processed namespace via `parsed_args` to filter the list based on already supplied args (as in the above case with VM).
 
-## 10. Supported Keyword Arguments
+## 11. Validators
 
-****Argument Context****
-
-The follow keyword arguments are supported:
-- `options_list` - By default, your argument will be exposed as an option in hyphenated form (ex: `my_param` becomes `--my-param`). If you would like to change the option string without changing the parameter name, and/or add a short option, specify the `options_list` kwarg. This is a list of string values. If there will only be one value, you can just specify the value (Ex: `options_list=['--myparam', '-m']` or `options_list='--myparam'`)
-- `validator` - The name of a callable that takes the function namespace as a parameter. Allows you to perform any custom logic or validation on the entire namespace prior to command execution. Validators are executed after argument parsing, and thus after `type` and `action` have been applied. However, because the order in which validators are executed is random, you should not have multiple validators modifying the same parameter within the namespace.
-- `completer` - The name of a callable that takes the following parameters `(prefix, action, parsed_args, **kwargs)` and return a list of completion values.
-- `id_part` - See below the section on Supporting the IDs Parameter.
-
-Additionally, the following `kwargs`, supported by argparse, are supported as well:
-- `nargs` - See https://docs.python.org/3/library/argparse.html#nargs
-- `action` - See https://docs.python.org/3/library/argparse.html#action
-- `const` - See https://docs.python.org/3/library/argparse.html#const
-- `default` - See https://docs.python.org/3/library/argparse.html#default. Note that the default value is inferred from the parameter's default value in the function signature. If specified, this will override that value.
-- `type` - See https://docs.python.org/3/library/argparse.html#type
-- `choices` - See https://docs.python.org/3/library/argparse.html#choices. If specified this will also serve as a value completer for people using tab completion.
-- `required` - See https://docs.python.org/3/library/argparse.html#required. Note that this value is inferred from the function signature depending on whether or not the parameter has a default value. If specified, this will override that value.
-- `help` - See https://docs.python.org/3/library/argparse.html#help. Generally you should avoid adding help text in this way, instead opting to create a help file as described above.
-- `metavar` - See https://docs.python.org/3/library/argparse.html#metavar
+TBD
