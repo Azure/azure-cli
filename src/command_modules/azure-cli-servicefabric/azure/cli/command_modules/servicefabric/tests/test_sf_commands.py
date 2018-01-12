@@ -3,11 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import unittest
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer
 
 
-@unittest.skip('Unable to re-record')
-class ServiceFabricTests(ScenarioTest):
+class ServiceFabricTests(LiveScenarioTest):
 
     @ResourceGroupPreparer()
     def test_new_cluster_with_secret(self, resource_group):
