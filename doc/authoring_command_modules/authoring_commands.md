@@ -3,7 +3,7 @@ Authoring Commands
 
 The document provides instructions and guidelines on how to author individual commands.
 
-**Overview**
+**0. Overview**
 
 The basic process of adding commands is presented below, and elaborated upon later in this document.
 
@@ -17,9 +17,9 @@ The basic process of adding commands is presented below, and elaborated upon lat
     - choice lists
     - completers
 
-**Writing the Command Loader**
+**1. Write the Command Loader**
 
-Azure CLI 2.0 is based on the Knack framework (https://github.com/Microsoft/knack), which uses the `CLICommandsLoader` class as the mechanism for loading a module. In Azure CLI 2.0, you will create your own loader which will inherit from the `AzCommandsLoader` class.  The basic structure is:
+As of version 2.0.24, Azure CLI is based on the Knack framework (https://github.com/Microsoft/knack), which uses the `CLICommandsLoader` class as the mechanism for loading a module. In Azure CLI 2.0, you will create your own loader which will inherit from the `AzCommandsLoader` class.  The basic structure is:
 
 ```Python
 class MyCommandsLoader(AzCommandsLoader):
@@ -39,9 +39,24 @@ class MyCommandsLoader(AzCommandsLoader):
     def load_arguments(self, command):
         super(MyCommandsLoader, self).load_arguments(command)
         # TODO: Register argument contexts and arguments here
+        
+COMMAND_LOADER_CLS = MyCommandsLoader
 ```
 
-**Writing a Command**
+***Azure CLI 2.0 Keyword Arguments***
+
+When writing commands for Azure CLI 2.0, it is important to understand how keyword arguments (kwargs) are applied. Refer to the following diagram.
+
+![](/doc/assets/annotated-kwarg-structure.gif)
+
+From the diagram you can see that any kwargs supplied when creating the `AzCommandsLoader` object are passed to and used as the baseline for any command groups or argument contexts that are later created. Any kwargs specified in the `command_group` calls serve as the baseline for any `command` or `custom_command` calls, and any kwargs passed to `argument_context` serve as the baseline for any calls to `argument`.
+
+While kwargs are inherited from higher levels on the diagram, they can be overriden at a lower level. For example, if `custom_command_type=foo` is used as a module-level kwarg in the `AzCommandLoader.__init__` method and `custom_command_type=bar` is passed for a call to `command_group`, then `bar` will be used for all calls to `custom_command` within that command group.
+
+Addtionally, you can see that kwargs registered on a command group *do not* carry over to argument contexts, so you must apply the kwargs in both places if necessary.
+
+
+**2. Write a Command**
 
 Write your command as a simple function, specifying your arguments as the parameter names.
 
@@ -49,7 +64,7 @@ When choosing names, it is recommended that you look at similiar commands and fo
 
 If you specify a default value in your function signature, this will flag the argument as optional and will automatically display the default value in the help text for the command. Any parameters that do not have a default value are required and will automatically appear in help with the [Required] label. The required and default behaviors for arguments can be overridden (see Argument Customization below) but this is not generally needed.
 
-***Special Arguments***
+****Special Arguments****
 
 There are two arguments you may include in your custom command that are reserved by the infrastructure and have special meaning.
 
@@ -57,7 +72,7 @@ There are two arguments you may include in your custom command that are reserved
 
 `client`: If your command has registered the `client_factory` keyword argument, that factory will be passed into this variable. It can appear anywhere in your command signature.
 
-**Registering Commands**
+**3. Register Commands**
 
 Before your command can be used in the CLI, it must be registered. Within the `load_command_table` method of your command loader, you will have something like:
 
@@ -77,46 +92,66 @@ with self.command_group('mymod', mymod_sdk) as g:
     g.generic_wait('wait')
 ```
 
+At this point, you should be able to access your command using `az [name]` and access the built-in help with `az [name] -h/--help`. Your command will automatically be 'wired up' with the global parameters.  See below for amplifying information.
+
 ***(1) CliCommandType***
 
 CliCommandType is a way to group and reuse and keyword arguments supported by commands. Earlier, in the `__init__` method of the `MyCommandsLoader` class, we created a `mymod_custom` variable and assigned it to the `custom_command_type` keyword argument. This will be used any time you use the `custom_command` method within a command group. It is registered with the loader since most modules typically put all of their custom methods in a single file.
 
 ***(2) Command Group Helper***
-
-
+```Python
+command_group(self, group_name, command_type=None, **kwargs)
+```
+- `group_name`: the group name ('network', 'storage account', etc.)
+- `command_type`: a `CliCommandType` object that will be used for all calls to `command` within the group.
+- `kwargs`: any supported kwarg that will be used as the basis for all command calls. Commonly used kwargs include: `custom_command_type` (if custom commands are split amongst many files) and `client_factory` (if custom commands use the `client` argument).
 
 ***(3) Command Registration Helpers***
 
 ****command****
 ```Python
-def command(self, name, method_name=None, command_type=None, **kwargs):
+command(self, name, method_name=None, command_type=None, **kwargs)
 ```
 
 - `name`: The name of the command within the command group
 - `method_name`: The name of the SDK or custom method, relative to the path specified in `operations_tmpl`.
-- `command_type`: An `AzCommandType` object to apply to this command. If not specified, then the group command type is
+- `command_type`: A `CliCommandType` object to apply to this command (optional).
+- `kwargs`: any supported kwarg. Commonly used kwargs include `validator`, `table_transformer`, `confirmation`, `no_wait_param` and  `transform`.
 
-==================================
+Any kwargs that are not specified will be pulled from the `command_type` kwarg, if present.
 
-The signature of this method is 
+****custom_command****
+
+The signature for `custom_command` is exactly the same as `command`. The only difference is that, whereas `command` uses `command_type` as the fallback for missings kwargs, `custom_command` relies on `custom_command_type`.
+
+****generic_update_command****
+See the section on "Suppporting Generic Update"
+
+***generic_wait_command****
+
+The generic wait command provides a templated solution for polling Azure resources until specific conditions are met.
+
 ```Python
-def cli_command(module_name, name, operation, client_factory=None, transform=None, table_transformer=None, confirmation=None):
+generic_wait_command(self, name, getter_name='get', getter_type=None, **kwargs)
 ```
-You will generally only specify `name`, `operation` and possibly `table_transformer`.
-  - `module_name` - The name of the module that is registering the command (e.g. `azure.cli.command_modules.vm.commands`). Typically this will be `__name__`.
-  - `name` - String uniquely naming your command and placing it within the command hierachy. It will be the string that you would type at the command line, omitting `az` (ex: access your command at `az mypackage mycommand` using a name of `mypackage mycommand`).
-  - `operation` - The handler that will be executed. Format is `<module_to_import>#<attribute_list>`
-      - For example if `operation='azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.get'`, the CLI will import `azure.mgmt.compute.operations.virtual_machines_operations`, get the `VirtualMachinesOperations` attribute and then the `get` attribute of `VirtualMachinesOperations`.
-  - `table_transformer` (optional) - Supply a callable that takes, transforms and returns a result for table output.
-  - `confirmation` (optional) - Supply True to enable default confirmation. Alternatively, supply a callable that takes the command arguments as a dict and returning a boolean. Alternatively, supply a string for the prompt.
 
-At this point, you should be able to access your command using `az [name]` and access the built-in help with `az [name] -h/--help`. Your command will automatically be 'wired up' with the global parameters.
+- `name`: The name of the command within the command group. Commonly called 'wait'.
+- `getter_name`: The name of the method for the object getter, relative to the path specified in `operations_tmpl`.
+- `getter_type`: A `CliCommandType` object to apply to this command (optional).
+- `kwargs`: any supported kwarg.
 
-**Write Your Help Entry**
+Since most wait commands rely on a simple GET call from the SDK, most of these entries simply look like:
+```Python
+   g.generic_wait_command('wait')
+```
+
+**4. Write Help Entry**
 
 See the following for guidance on writing a help entry: https://github.com/Azure/azure-cli/blob/master/doc/authoring_help.md
 
-**Customizing Arguments**
+===========================================
+
+**5. Customize Arguments**
 
 There are a number of customizations that you can make to the arguments of a command that alter their behavior within the CLI. To modify/enhance your command arguments, use the `register_cli_argument` method from the `azure.cli.core.commands` package. For the standard modules, these entries are contained within a file called `_params.py`. 
 
