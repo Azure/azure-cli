@@ -6,6 +6,7 @@ Release History
 0.0.9
 ++++++
 * Added detailed errors to validation response when creating cluster.
+* Fix missing client issue with several commands.
 
 0.0.8
 ++++++
