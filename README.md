@@ -122,6 +122,10 @@ $ docker run -v ${HOME}:/root -it microsoft/azure-cli:<version>
 ```
 
 For automated builds triggered by pushes to this repo, see [azuresdk/azure-cli-python](https://hub.docker.com/r/azuresdk/azure-cli-python/tags).
+For example:
+```bash
+docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:dev
+```
 
 ### Edge Builds
 
