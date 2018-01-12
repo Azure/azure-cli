@@ -268,7 +268,7 @@ class AzInteractiveShell(object):
         except CLIError:
             pass
 
-        curr_cloud = "Cloud: {}".format(self.cli_ctx.cloud)
+        curr_cloud = "Cloud: {}".format(self.cli_ctx.cloud.name)
 
         tool_val = 'Subscription: {}'.format(sub_name) if sub_name else curr_cloud
 
@@ -654,7 +654,11 @@ class AzInteractiveShell(object):
                 self.threads.append(thread)
                 result = None
             else:
-                result = self.cli_ctx.invoke(args)
+                invocation = self.cli_ctx.invocation_cls(cli_ctx=self.cli_ctx,
+                                                         parser_cls=self.cli_ctx.parser_cls,
+                                                         commands_loader_cls=self.cli_ctx.commands_loader_cls,
+                                                         help_cls=self.cli_ctx.help_cls)
+                result = invocation.execute(args)
 
             self.last_exit = 0
             if result and result.result is not None:
@@ -663,8 +667,7 @@ class AzInteractiveShell(object):
                     self.output.write(result)
                     self.output.flush()
                 else:
-                    formatter = OutputProducer.get_formatter(
-                        self.app.configuration.output_format)
+                    formatter = OutputProducer.get_formatter(self.cli_ctx.invocation.data['output'])
                     OutputProducer(formatter=formatter).out(result)
                     self.last = result
 
