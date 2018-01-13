@@ -114,22 +114,18 @@ To provide feedback from the command line, try the `az feedback` command.
 
 ### Docker
 
-**This install does not support the component feature.**
-
-We maintain a Docker image preconfigured with the Azure CLI.  Run the latest automated Docker build with the command below.
-
-```bash
-$ docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:latest
-```
-
-All command modules are included in this version as the image is built directly from the Git repository.  
-You can also get a specific version of Azure CLI 2.0 via Docker.
+We maintain a Docker image preconfigured with the Azure CLI.  
+See our [Docker tags](https://hub.docker.com/r/microsoft/azure-cli/tags/) for available versions.
 
 ```bash
-$ docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:<version>
+$ docker run -v ${HOME}:/root -it microsoft/azure-cli:<version>
 ```
 
-See our [Docker tags](https://hub.docker.com/r/azuresdk/azure-cli-python/tags/) for available versions.
+For automated builds triggered by pushes to this repo, see [azuresdk/azure-cli-python](https://hub.docker.com/r/azuresdk/azure-cli-python/tags).  
+For example:
+```bash
+docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:dev
+```
 
 ### Edge Builds
 
