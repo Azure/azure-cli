@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.27
+++++++
+Support raw token retrival in MSI context
 
 2.0.26
 ++++++
