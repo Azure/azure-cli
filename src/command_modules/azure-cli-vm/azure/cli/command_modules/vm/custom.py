@@ -1674,7 +1674,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 single_placement_group=None, custom_data=None, secrets=None,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
-                identity_role_id=None, zones=None):
+                identity_role_id=None, zones=None, priority=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder, StorageProfile, build_vmss_resource,
@@ -1876,7 +1876,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                                         backend_address_pool_id, inbound_nat_pool_id, health_probe=health_probe,
                                         single_placement_group=single_placement_group,
                                         custom_data=custom_data, secrets=secrets,
-                                        license_type=license_type, zones=zones)
+                                        license_type=license_type, zones=zones, priority=priority)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:

@@ -750,7 +750,7 @@ class AzureBatchDataPlaneCommand(object):
                 values_index = docstring.find(' Possible values include')
                 if values_index >= 0:
                     choices = docstring[values_index + 25:].split(', ')
-                    choices = [c for c in choices if c != "'unmapped'"]
+                    choices = [enum_value(c) for c in choices if enum_value(c) != "'unmapped'"]
                     docstring = docstring[0:values_index]
                 args.append(((arg[0], CLICommandArgument(arg[0],
                                                          options_list=[arg_name(arg[0])],
