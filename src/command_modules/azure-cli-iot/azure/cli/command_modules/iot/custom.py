@@ -37,20 +37,6 @@ from ._utils import create_self_signed_certificate, open_certificate
 logger = get_logger(__name__)
 
 
-# IoT Extension run once awareness
-if not extension_exists('azure_cli_iot_ext'):
-    config = CLIConfig(get_config_dir())
-    ran_before = config.getboolean('iot', 'first_run', fallback=False)
-    if not ran_before:
-        extension_text = """
-                         Comprehensive IoT data-plane functionality is available
-                         in the Azure IoT CLI Extension. For more info and install guide
-                         go to https://github.com/Azure/azure-iot-cli-extension
-                         """
-        logger.warning(extension_text)
-        config.set_value('iot', 'first_run', 'yes')
-
-
 # CUSTOM TYPE
 class KeyType(Enum):
     primary = 'primary'
