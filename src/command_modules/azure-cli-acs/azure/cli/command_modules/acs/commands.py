@@ -43,12 +43,14 @@ def load_command_table(self, _):
     # ACS Mesos DC/OS commands
     with self.command_group('acs dcos', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('browse', 'dcos_browse')
+    with self.command_group('acs dcos') as g:
         g.custom_command('install-cli', 'dcos_install_cli')
 
     # ACS Kubernetes commands
     with self.command_group('acs kubernetes', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('browse', 'k8s_browse')
         g.custom_command('get-credentials', 'k8s_get_credentials')
+    with self.command_group('acs kubernetes') as g:
         g.custom_command('install-cli', 'k8s_install_cli')
 
     # AKS commands
