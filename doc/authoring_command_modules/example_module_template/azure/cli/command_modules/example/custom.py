@@ -15,7 +15,7 @@ def create_example(cmd, example_name, resource_group_name, location=None):
     from azure.cli.command_modules.example._client_factory import cf_example
     client = cf_example(cmd.cli_ctx)
 
-    # TODO: custom or non-trivial stuff here
+    # TODO: Your custom logic here
 
     example = Example(location=location)
     return client.create_or_update(example_name, resource_group_name, example)

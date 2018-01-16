@@ -273,7 +273,7 @@ _General Kwargs_
 The following kwargs may be inherited from the command loader:
 - `min_api` - Minimum API version for which the command will appear.
 - `max_api` - Maximimum API version for which the command will appear.
-- `resource_type` - An `azure.cli.core.profiles.ResourceTYpe` enum value that is used for multi-API packages.
+- `resource_type` - An `azure.cli.core.profiles.ResourceType` enum value that is used for multi-API packages.
 - `operation_group` - Only used by the `azure-cli-vm` module to specify which resource API to target.
 - `command_group` - A `CliCommandType` object that contains a bundle of kwargs that will be used by the `command` method if not otherwise provided.
 - `custom_command_group` - A `CliCommandType` object that contains a bundle of kwargs that will be used by the `custom_command` method if not otherwise provided.
@@ -282,7 +282,7 @@ The following kwargs may be inherited from the command loader:
 
 _Special Kwargs_
 
-The follow special kargs are supported by argument context and its helper methods:
+The follow special kwargs are supported by argument context and its helper methods:
 - `options_list` - By default, your argument will be exposed as an option in hyphenated form (ex: `my_param` becomes `--my-param`). If you would like to change the option string without changing the parameter name, and/or add a short option, specify the `options_list` kwarg. This is a list of string values. If there will only be one value, you can just specify the value (Ex: `options_list=['--myparam', '-m']` or `options_list='--myparam'`)
 - `validator` - See section on [Validators](#validators)
 - `completer` - See section on [Tab Completion](#tab-completion)
@@ -304,7 +304,7 @@ _General Kwargs_
 The following kwargs may be inherited from the command loader:
 - `min_api` - Minimum API version for which the argument will appear. Otherwise the argument will be ignored.
 - `max_api` - Maximimum API version for which the argument will appear. Otherwise the argument will be ignored.
-- `resource_type` - An `azure.cli.core.profiles.ResourceTYpe` enum value that is used for multi-API packages.
+- `resource_type` - An `azure.cli.core.profiles.ResourceType` enum value that is used for multi-API packages.
 - `operation_group` - Only used by the `azure-cli-vm` module to specify which resource API to target.
 
 ## Supporting the IDs Parameter

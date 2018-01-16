@@ -142,7 +142,7 @@ Any resources created in this way will be cleaned up after testing.
 By default `ResourceGroupPreparer` passes the value as the `resource_group` parameter.
 The target parameter can be customized (see following samples).
 3. The resource group will be deleted asynchronously for performance reason.
-4. The resource group will automatically be registerd into the tests keyword arguments (`self.kwargs`) with the key default key of `rg`. This can then be directly plugged into the command string in `cmd` and into the verification step of the `check` method. The test infrastructure will automatically replace the values.
+4. The resource group will automatically be registered into the tests keyword arguments (`self.kwargs`) with the key default key of `rg`. This can then be directly plugged into the command string in `cmd` and into the verification step of the `check` method. The test infrastructure will automatically replace the values.
 
 ### Sample 5. Get more from ResourceGroupPreparer
 ``` Python

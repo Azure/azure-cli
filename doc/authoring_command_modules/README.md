@@ -171,6 +171,8 @@ Style Checks
 
 ```
 check_style --module <module> [--pylint] [--pep8]
+OR
+azdev style --module <module> [--pylint] [--pep8]
 ```
 
 Submitting Pull Requests
