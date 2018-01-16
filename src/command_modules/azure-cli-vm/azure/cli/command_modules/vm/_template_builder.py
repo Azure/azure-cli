@@ -714,7 +714,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
-                        single_placement_group=None, custom_data=None, secrets=None, license_type=None, zones=None):
+                        single_placement_group=None, custom_data=None, secrets=None, license_type=None,
+                        zones=None, priority=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -858,6 +859,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     if cmd.supported_api_version(min_api='2016-04-30-preview').virtual_machine_scale_sets:  # pylint: disable=no-member
         vmss_properties['singlePlacementGroup'] = single_placement_group
+
+    if priority and cmd.supported_api_version(min_api='2017-12-01').virtual_machine_scale_sets:  # pylint: disable=no-member
+        vmss_properties['virtualMachineProfile']['priority'] = priority
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
