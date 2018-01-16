@@ -14,8 +14,8 @@ import paramiko.agent
 from sshtunnel import SSHTunnelForwarder
 from scp import SCPClient
 
-from azure.cli.core.util import CLIError
-from azure.cli.core.prompting import prompt_pass
+from knack.prompting import prompt_pass
+from knack.util import CLIError
 
 
 def _load_key(key_filename):
@@ -148,7 +148,7 @@ class ACSClient(object):
             t = threading.Thread(target=ACSClient._run_cmd, args=(self, command))
             t.daemon = True
             t.start()
-            return
+            return None
 
         return self._run_cmd(command)
 

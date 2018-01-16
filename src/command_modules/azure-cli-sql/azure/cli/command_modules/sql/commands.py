@@ -3,11 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import cli_command
-from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
-from azure.cli.core.sdk.util import (
-    create_service_adapter,
-    ServiceGroup)
+from azure.cli.core.commands import CliCommandType
 from ._util import (
     get_sql_server_azure_ad_administrators_operations,
     get_sql_capabilities_operations,
@@ -28,287 +24,208 @@ from ._util import (
     get_sql_servers_operations,
     get_sql_server_usages_operations,
     get_sql_subscription_usages_operations,
-    get_sql_virtual_network_rules_operations
+    get_sql_virtual_network_rules_operations,
 )
+from ._validators import validate_subnet
 
-if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
-    custom_path = 'azure.cli.command_modules.sql.custom#{}'
 
+# pylint: disable=line-too-long,too-many-statements
+def load_command_table(self, _):
     ###############################################
     #                sql capabilities             #
     ###############################################
+    capabilities_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.capabilities_operations#CapabilitiesOperations.{}',
+        client_factory=get_sql_capabilities_operations)
 
-    capabilities_operations = create_service_adapter(
-        'azure.mgmt.sql.operations.capabilities_operations',
-        'CapabilitiesOperations')
+    with self.command_group('sql db', capabilities_operations, client_factory=get_sql_capabilities_operations) as g:
+        g.custom_command('list-editions', 'db_list_capabilities')
 
-    with ServiceGroup(__name__, get_sql_capabilities_operations, capabilities_operations, custom_path) as s:
-        with s.group('sql db') as c:
-            c.custom_command('list-editions', 'db_list_capabilities')
-
-        with s.group('sql elastic-pool') as c:
-            c.custom_command('list-editions', 'elastic_pool_list_capabilities')
+    with self.command_group('sql elastic-pool', capabilities_operations, client_factory=get_sql_capabilities_operations) as g:
+        g.custom_command('list-editions', 'elastic_pool_list_capabilities')
 
     ###############################################
     #                sql list-usages              #
     ###############################################
+    subscription_usages_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.subscription_usages_operations#SubscriptionUsagesOperations.{}',
+        client_factory=get_sql_subscription_usages_operations)
 
-    subscription_usages_operations = create_service_adapter(
-        'azure.mgmt.sql.operations.subscription_usages_operations',
-        'SubscriptionUsagesOperations')
-
-    with ServiceGroup(__name__, get_sql_subscription_usages_operations,
-                      subscription_usages_operations, custom_path) as s:
-        with s.group('sql') as c:
-            c.command('list-usages', 'list_by_location')
-            c.command('show-usage', 'get')
+    with self.command_group('sql', subscription_usages_operations, client_factory=get_sql_subscription_usages_operations) as g:
+        g.command('list-usages', 'list_by_location')
+        g.command('show-usage', 'get')
 
     ###############################################
     #                sql db                       #
     ###############################################
+    with self.command_group('sql db') as g:
+        g.custom_command('show-connection-string', 'db_show_conn_str')
 
-    cli_command(__name__, 'sql db show-connection-string', custom_path.format('db_show_conn_str'), client_factory=None)
+    database_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.databases_operations#DatabasesOperations.{}',
+        client_factory=get_sql_databases_operations)
+    with self.command_group('sql db', database_operations, client_factory=get_sql_databases_operations) as g:
+        g.custom_command('create', 'db_create', no_wait_param='raw')
+        g.custom_command('copy', 'db_copy', no_wait_param='raw')
+        g.custom_command('restore', 'db_restore', no_wait_param='raw')
+        g.command('show', 'get')
+        g.custom_command('list', 'db_list')
+        g.command('delete', 'delete', confirmation=True)
+        g.generic_update_command('update', custom_func_name='db_update', no_wait_param='raw')
+        g.custom_command('import', 'db_import')
+        g.custom_command('export', 'db_export')
 
-    database_operations = create_service_adapter('azure.mgmt.sql.operations.databases_operations',
-                                                 'DatabasesOperations')
+    with self.command_group('sql db replica', database_operations, client_factory=get_sql_databases_operations) as g:
+        g.custom_command('create', 'db_create_replica', no_wait_param='raw')
 
-    with ServiceGroup(__name__, get_sql_databases_operations, database_operations, custom_path) as s:
-        with s.group('sql db') as c:
-            c.custom_command('create', 'db_create', no_wait_param='raw')
-            c.custom_command('copy', 'db_copy', no_wait_param='raw')
-            c.custom_command('restore', 'db_restore', no_wait_param='raw')
-            c.command('show', 'get')
-            c.custom_command('list', 'db_list')
-            c.command('delete', 'delete', confirmation=True)
-            c.generic_update_command('update', 'get', 'create_or_update',
-                                     custom_func_name='db_update', no_wait_param='raw')
-            c.custom_command('import', 'db_import')
-            c.custom_command('export', 'db_export')
+    with self.command_group('sql dw', database_operations, client_factory=get_sql_databases_operations) as g:
+        g.custom_command('create', 'dw_create', no_wait_param='raw')
+        g.command('show', 'get')
+        g.custom_command('list', 'dw_list')
+        g.command('delete', 'delete', confirmation=True)
+        g.command('pause', 'pause')
+        g.command('resume', 'resume')
+        g.generic_update_command('update', custom_func_name='dw_update', no_wait_param='raw')
 
-        with s.group('sql db replica') as c:
-            c.custom_command('create', 'db_create_replica', no_wait_param='raw')
+    database_operations_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.database_operations#DatabaseOperations.{}',
+        client_factory=get_sql_database_operations_operations)
 
-        with s.group('sql dw') as c:
-            c.custom_command('create', 'dw_create', no_wait_param='raw')
-            c.command('show', 'get')
-            c.custom_command('list', 'dw_list')
-            c.command('delete', 'delete', confirmation=True)
-            c.command('pause', 'pause')
-            c.command('resume', 'resume')
-            c.generic_update_command('update', 'get', 'create_or_update',
-                                     custom_func_name='dw_update', no_wait_param='raw')
+    with self.command_group('sql db op', database_operations_operations) as g:
+        g.command('list', 'list_by_database')
+        g.command('cancel', 'cancel')
 
-        # Data Warehouse restore will not be included in the first batch of GA commands
-        # (list_restore_points also applies to db, but it's not very useful. It's
-        # mainly useful for dw.)
-        # with s.group('sql db restore-point') as c:
-        #     c.command('list', 'list_restore_points')
+    transparent_data_encryptions_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.transparent_data_encryptions_operations#TransparentDataEncryptionsOperations.{}',
+        client_factory=get_sql_database_transparent_data_encryptions_operations)
+    with self.command_group('sql db tde', transparent_data_encryptions_operations) as g:
+        g.command('set', 'create_or_update')
+        g.command('show', 'get')
 
-        # Service tier advisor will not be included in the first batch of GA commands
-        # with s.group('sql db service-tier-advisor') as c:
-        #     c.command('list', 'list_service_tier_advisors')
-        #     c.command('show', 'get_service_tier_advisor')
+    transparent_data_encryption_activities_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.transparent_data_encryption_activities_operations#TransparentDataEncryptionActivitiesOperations.{}',
+        client_factory=get_sql_database_transparent_data_encryption_activities_operations)
+    with self.command_group('sql db tde', transparent_data_encryption_activities_operations) as g:
+        g.command('list-activity', 'list_by_configuration')
 
-    database_operations_operations = create_service_adapter('azure.mgmt.sql.operations.database_operations',
-                                                            'DatabaseOperations')
-    with ServiceGroup(__name__, get_sql_database_operations_operations,
-                      database_operations_operations, custom_path) as s:
-        with s.group('sql db op') as c:
-            c.command('list', 'list_by_database')
-            c.command('cancel', 'cancel')
+    replication_links_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.replication_links_operations#ReplicationLinksOperations.{}',
+        client_factory=get_sql_replication_links_operations)
+    with self.command_group('sql db replica', replication_links_operations, client_factory=get_sql_replication_links_operations) as g:
+        g.command('list-links', 'list_by_database')
+        g.custom_command('delete-link', 'db_delete_replica_link', confirmation=True)
+        g.custom_command('set-primary', 'db_failover')
 
-    transparent_data_encryptions_operations = create_service_adapter(
-        'azure.mgmt.sql.operations.transparent_data_encryptions_operations',
-        'TransparentDataEncryptionsOperations')
-    with ServiceGroup(__name__, get_sql_database_transparent_data_encryptions_operations,
-                      transparent_data_encryptions_operations, custom_path) as s:
-        with s.group('sql db tde') as c:
-            c.command('set', 'create_or_update')
-            c.command('show', 'get')
+    restorable_dropped_databases_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.restorable_dropped_databases_operations#RestorableDroppedDatabasesOperations.{}',
+        client_factory=get_sql_restorable_dropped_databases_operations)
+    with self.command_group('sql db', restorable_dropped_databases_operations) as g:
+        g.command('list-deleted', 'list_by_server')
 
-    transparent_data_encryption_activities_operations = create_service_adapter(
-        'azure.mgmt.sql.operations.transparent_data_encryption_activities_operations',
-        'TransparentDataEncryptionActivitiesOperations')
-    with ServiceGroup(__name__, get_sql_database_transparent_data_encryption_activities_operations,
-                      transparent_data_encryption_activities_operations, custom_path) as s:
-        with s.group('sql db tde') as c:
-            c.command('list-activity', 'list_by_configuration')
+    database_blob_auditing_policies_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.database_blob_auditing_policies_operations#DatabaseBlobAuditingPoliciesOperations.{}',
+        client_factory=get_sql_database_blob_auditing_policies_operations)
+    with self.command_group('sql db audit-policy', database_blob_auditing_policies_operations, client_factory=get_sql_database_blob_auditing_policies_operations) as g:
+        g.command('show', 'get')
+        g.generic_update_command('update', custom_func_name='db_audit_policy_update')
 
-    replication_links_operations = create_service_adapter('azure.mgmt.sql.operations.replication_links_operations',
-                                                          'ReplicationLinksOperations')
-    with ServiceGroup(__name__, get_sql_replication_links_operations,
-                      replication_links_operations, custom_path) as s:
-        with s.group('sql db replica') as c:
-            c.command('list-links', 'list_by_database')
-            c.custom_command('delete-link', 'db_delete_replica_link', confirmation=True)
-            c.custom_command('set-primary', 'db_failover')
+    database_threat_detection_policies_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.database_threat_detection_policies_operations#DatabaseThreatDetectionPoliciesOperations.{}',
+        client_factory=get_sql_database_threat_detection_policies_operations)
+    with self.command_group('sql db threat-policy', database_threat_detection_policies_operations, client_factory=get_sql_database_threat_detection_policies_operations) as g:
+        g.command('show', 'get')
+        g.generic_update_command('update', custom_func_name='db_threat_detection_policy_update')
 
-    restorable_dropped_databases_operations = create_service_adapter(
-        'azure.mgmt.sql.operations.restorable_dropped_databases_operations',
-        'RestorableDroppedDatabasesOperations')
-    with ServiceGroup(__name__, get_sql_restorable_dropped_databases_operations,
-                      restorable_dropped_databases_operations, custom_path) as s:
-        with s.group('sql db') as c:
-            c.command('list-deleted', 'list_by_server')
-
-    database_blob_auditing_policies_operations = create_service_adapter(
-        'azure.mgmt.sql.operations.database_blob_auditing_policies_operations',
-        'DatabaseBlobAuditingPoliciesOperations')
-    with ServiceGroup(__name__, get_sql_database_blob_auditing_policies_operations,
-                      database_blob_auditing_policies_operations, custom_path) as s:
-        with s.group('sql db audit-policy') as c:
-            c.command('show', 'get')
-            c.generic_update_command(
-                'update', 'get', 'create_or_update',
-                custom_func_name='db_audit_policy_update')
-
-    database_threat_detection_policies_operations = create_service_adapter(
-        'azure.mgmt.sql.operations.database_threat_detection_policies_operations',
-        'DatabaseThreatDetectionPoliciesOperations')
-    with ServiceGroup(__name__, get_sql_database_threat_detection_policies_operations,
-                      database_threat_detection_policies_operations, custom_path) as s:
-        with s.group('sql db threat-policy') as c:
-            c.command('show', 'get')
-            c.generic_update_command('update', 'get',
-                                     'create_or_update',
-                                     custom_func_name='db_threat_detection_policy_update')
-
-    database_usages_operations = create_service_adapter('azure.mgmt.sql.operations.database_usages_operations',
-                                                        'DatabaseUsagesOperations')
-
-    with ServiceGroup(__name__, get_sql_database_usages_operations, database_usages_operations, custom_path) as s:
-        with s.group('sql db') as c:
-            c.command('list-usages', 'list_by_database')
+    database_usages_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.database_usages_operations#DatabaseUsagesOperations.{}',
+        client_factory=get_sql_database_usages_operations)
+    with self.command_group('sql db', database_usages_operations) as g:
+        g.command('list-usages', 'list_by_database')
 
     ###############################################
     #                sql elastic-pool             #
     ###############################################
+    elastic_pools_ops = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.elastic_pools_operations#ElasticPoolsOperations.{}',
+        client_factory=get_sql_elastic_pools_operations)
+    with self.command_group('sql elastic-pool', elastic_pools_ops, client_factory=get_sql_elastic_pools_operations) as g:
+        g.custom_command('create', 'elastic_pool_create')
+        g.command('delete', 'delete')
+        g.command('show', 'get')
+        g.command('list', 'list_by_server')
+        g.generic_update_command('update', custom_func_name='elastic_pool_update')
 
-    elastic_pools_ops = create_service_adapter('azure.mgmt.sql.operations.elastic_pools_operations',
-                                               'ElasticPoolsOperations')
-
-    with ServiceGroup(__name__, get_sql_elastic_pools_operations, elastic_pools_ops, custom_path) as s:
-        with s.group('sql elastic-pool') as c:
-            c.custom_command('create', 'elastic_pool_create')
-            c.command('delete', 'delete')
-            c.command('show', 'get')
-            c.command('list', 'list_by_server')
-            c.generic_update_command(
-                'update', 'get', 'create_or_update',
-                custom_func_name='elastic_pool_update')
-
-    with ServiceGroup(__name__, get_sql_databases_operations, database_operations, custom_path) as s:
-        with s.group('sql elastic-pool') as c:
-            c.command('list-dbs', 'list_by_elastic_pool')
-
-    recommanded_elastic_pools_ops = \
-        create_service_adapter('azure.mgmt.sql.operations.recommended_elastic_pools_operations',
-                               'RecommendedElasticPoolsOperations')
-
-    # Recommended elastic pools will not be included in the first batch of GA commands
-    # with ServiceGroup(__name__, get_sql_recommended_elastic_pools_operations,
-    #                   recommanded_elastic_pools_ops) as s:
-    #    with s.group('sql elastic-pool recommended') as c:
-    #        c.command('show', 'get')
-    #        c.command('show-metrics', 'list_metrics')
-    #        c.command('list', 'list')
-
-    #    with s.group('sql elastic-pool recommended db') as c:
-    #        c.command('show', 'get_databases')
-    #        c.command('list', 'list_databases')
+    with self.command_group('sql elastic-pool', database_operations) as g:
+        g.command('list-dbs', 'list_by_elastic_pool')
 
     ###############################################
     #                sql server                   #
     ###############################################
+    servers_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.servers_operations#ServersOperations.{}',
+        client_factory=get_sql_servers_operations)
+    with self.command_group('sql server', servers_operations, client_factory=get_sql_servers_operations) as g:
+        g.custom_command('create', 'server_create')
+        g.command('delete', 'delete', confirmation=True)
+        g.command('show', 'get')
+        g.custom_command('list', 'server_list')
+        g.generic_update_command('update', custom_func_name='server_update')
 
-    servers_operations = create_service_adapter('azure.mgmt.sql.operations.servers_operations',
-                                                'ServersOperations')
+    server_usages_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.server_usages_operations#ServerUsagesOperations.{}',
+        client_factory=get_sql_server_usages_operations)
+    with self.command_group('sql server', server_usages_operations) as g:
+        g.command('list-usages', 'list_by_server')
 
-    with ServiceGroup(__name__, get_sql_servers_operations, servers_operations, custom_path) as s:
-        with s.group('sql server') as c:
-            c.custom_command('create', 'server_create')
-            c.command('delete', 'delete', confirmation=True)
-            c.command('show', 'get')
-            c.custom_command('list', 'server_list')
-            c.generic_update_command('update', 'get', 'create_or_update',
-                                     custom_func_name='server_update')
+    firewall_rules_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.firewall_rules_operations#FirewallRulesOperations.{}',
+        client_factory=get_sql_firewall_rules_operations)
+    with self.command_group('sql server firewall-rule', firewall_rules_operations, client_factory=get_sql_firewall_rules_operations) as g:
+        g.command('create', 'create_or_update')
+        g.custom_command('update', 'firewall_rule_update')
+        g.command('delete', 'delete')
+        g.command('show', 'get')
+        g.command('list', 'list_by_server')
 
-    server_usages_operations = create_service_adapter('azure.mgmt.sql.operations.server_usages_operations',
-                                                      'ServerUsagesOperations')
+    aadadmin_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.server_azure_ad_administrators_operations#ServerAzureADAdministratorsOperations.{}',
+        client_factory=get_sql_server_azure_ad_administrators_operations)
+    with self.command_group('sql server ad-admin', aadadmin_operations, client_factory=get_sql_server_azure_ad_administrators_operations) as g:
+        g.custom_command('create', 'server_ad_admin_set')
+        g.command('list', 'list_by_server')
+        g.command('delete', 'delete')
+        g.generic_update_command('update', custom_func_name='server_ad_admin_update',
+                                 setter_arg_name='properties')
 
-    with ServiceGroup(__name__, get_sql_server_usages_operations, server_usages_operations, custom_path) as s:
-        with s.group('sql server') as c:
-            c.command('list-usages', 'list_by_server')
+    server_keys_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.server_keys_operations#ServerKeysOperations.{}',
+        client_factory=get_sql_server_keys_operations)
+    with self.command_group('sql server key', server_keys_operations, client_factory=get_sql_server_keys_operations) as g:
+        g.custom_command('create', 'server_key_create')
+        g.custom_command('delete', 'server_key_delete')
+        g.custom_command('show', 'server_key_get')
+        g.command('list', 'list_by_server')
 
-    firewall_rules_operations = create_service_adapter(
-        'azure.mgmt.sql.operations.firewall_rules_operations',
-        'FirewallRulesOperations')
+    encryption_protectors_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.encryption_protectors_operations#EncryptionProtectorsOperations.{}',
+        client_factory=get_sql_encryption_protectors_operations)
+    with self.command_group('sql server tde-key', encryption_protectors_operations, client_factory=get_sql_encryption_protectors_operations) as g:
+        g.command('show', 'get')
+        g.custom_command('set', 'encryption_protector_update')
 
-    with ServiceGroup(__name__, get_sql_firewall_rules_operations, firewall_rules_operations,
-                      custom_path) as s:
-        with s.group('sql server firewall-rule') as c:
-            c.command('create', 'create_or_update')
-            c.custom_command('update', 'firewall_rule_update')
-            c.command('delete', 'delete')
-            c.command('show', 'get')
-            c.command('list', 'list_by_server')
-            # Keeping this command hidden for now. `firewall-rule create` will explain the special
-            # 0.0.0.0 rule.
-            # c.custom_command('allow-all-azure-ips', 'firewall_rule_allow_all_azure_ips')
+    virtual_network_rules_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.virtual_network_rules_operations#VirtualNetworkRulesOperations.{}',
+        client_factory=get_sql_virtual_network_rules_operations)
+    with self.command_group('sql server vnet-rule', virtual_network_rules_operations, client_factory=get_sql_virtual_network_rules_operations) as g:
+        g.command('create', 'create_or_update', validator=validate_subnet)
+        g.command('show', 'get')
+        g.command('list', 'list_by_server')
+        g.command('delete', 'delete')
+        g.generic_update_command('update')
 
-    aadadmin_operations = create_service_adapter('azure.mgmt.sql.operations.server_azure_ad_administrators_operations',
-                                                 'ServerAzureADAdministratorsOperations')
-
-    with ServiceGroup(__name__, get_sql_server_azure_ad_administrators_operations,
-                      aadadmin_operations, custom_path) as s:
-        with s.group('sql server ad-admin') as c:
-            c.custom_command('create', 'server_ad_admin_set')
-            c.command('list', 'list_by_server')
-            c.command('delete', 'delete')
-            c.generic_update_command('update', 'get', 'create_or_update',
-                                     custom_func_name='server_ad_admin_update',
-                                     setter_arg_name='properties')
-
-    server_keys_operations = create_service_adapter('azure.mgmt.sql.operations.server_keys_operations',
-                                                    'ServerKeysOperations')
-
-    with ServiceGroup(__name__, get_sql_server_keys_operations, server_keys_operations, custom_path) as s:
-        with s.group('sql server key') as c:
-            c.custom_command('create', 'server_key_create')
-            c.custom_command('delete', 'server_key_delete')
-            c.custom_command('show', 'server_key_get')
-            c.command('list', 'list_by_server')
-
-    encryption_protectors_operations = create_service_adapter(
-        'azure.mgmt.sql.operations.encryption_protectors_operations',
-        'EncryptionProtectorsOperations')
-
-    with ServiceGroup(__name__, get_sql_encryption_protectors_operations, encryption_protectors_operations,
-                      custom_path) as s:
-        with s.group('sql server tde-key') as c:
-            c.command('show', 'get')
-            c.custom_command('set', 'encryption_protector_update')
-
-    virtual_network_rules_operations = create_service_adapter(
-        'azure.mgmt.sql.operations.virtual_network_rules_operations',
-        'VirtualNetworkRulesOperations')
-
-    with ServiceGroup(__name__, get_sql_virtual_network_rules_operations, virtual_network_rules_operations,
-                      custom_path) as s:
-        with s.group('sql server vnet-rule') as c:
-            c.command('create', 'create_or_update')
-            c.command('show', 'get')
-            c.command('list', 'list_by_server')
-            c.command('delete', 'delete')
-            c.generic_update_command('update', 'get', 'create_or_update')
-
-    server_connection_policies_operations = create_service_adapter(
-        'azure.mgmt.sql.operations.server_connection_policies_operations',
-        'ServerConnectionPoliciesOperations'
-    )
-
-    with ServiceGroup(__name__, get_sql_server_connection_policies_operations, server_connection_policies_operations,
-                      custom_path) as s:
-        with s.group('sql server conn-policy') as c:
-            c.command('show', 'get')
-            c.generic_update_command('update', 'get', 'create_or_update')
+    server_connection_policies_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.server_connection_policies_operations#ServerConnectionPoliciesOperations.{}',
+        client_factory=get_sql_server_connection_policies_operations)
+    with self.command_group('sql server conn-policy', server_connection_policies_operations, client_factory=get_sql_server_connection_policies_operations) as c:
+        c.command('show', 'get')
+        c.generic_update_command('update')

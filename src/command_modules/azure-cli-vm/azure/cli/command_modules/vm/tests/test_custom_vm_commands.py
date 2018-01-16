@@ -6,7 +6,7 @@
 import unittest
 import mock
 
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 
 from azure.cli.command_modules.vm.custom import enable_boot_diagnostics, disable_boot_diagnostics, \
     _merge_secrets
@@ -17,23 +17,38 @@ from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_i
 from azure.cli.command_modules.vm.custom import \
     (attach_unmanaged_data_disk, detach_data_disk, get_vmss_instance_view)
 
+from azure.cli.core import AzCommandsLoader
+from azure.cli.core.commands import AzCliCommand
+
 
 from azure.cli.command_modules.vm.disk_encryption import (encrypt_vm, decrypt_vm, _check_encrypt_is_supported,
                                                           encrypt_vmss, decrypt_vmss)
 from azure.cli.core.profiles import get_sdk, ResourceType
 
+from azure.cli.testsdk import TestCli
+
+
 NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, InstanceViewStatus, \
     VirtualMachineExtensionInstanceView, VirtualMachineExtension, ImageReference, DiskCreateOptionTypes, \
     VirtualMachineScaleSetVMProfile, VirtualMachineScaleSetOSProfile, LinuxConfiguration, \
-    CachingTypes = get_sdk(ResourceType.MGMT_COMPUTE, 'NetworkProfile', 'StorageProfile', 'DataDisk', 'OSDisk',
+    CachingTypes = get_sdk(TestCli(), ResourceType.MGMT_COMPUTE, 'NetworkProfile', 'StorageProfile', 'DataDisk', 'OSDisk',
                            'OperatingSystemTypes', 'InstanceViewStatus', 'VirtualMachineExtensionInstanceView',
                            'VirtualMachineExtension', 'ImageReference', 'DiskCreateOptionTypes',
                            'VirtualMachineScaleSetVMProfile', 'VirtualMachineScaleSetOSProfile', 'LinuxConfiguration',
                            'CachingTypes',
-                           mod='models', operation_group="virtual_machines")  # FIXME split into loading by RT
+                           mod='models', operation_group='virtual_machines')  # FIXME split into loading by RT
 
 
-class Test_Vm_Custom(unittest.TestCase):
+def _get_test_cmd():
+    cli_ctx = TestCli()
+    loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_COMPUTE)
+    cmd = AzCliCommand(loader, 'test', None)
+    cmd.command_kwargs = {'resource_type': ResourceType.MGMT_COMPUTE, 'operation_group': 'virtual_machines'}
+    cmd.cli_ctx = cli_ctx
+    return cmd
+
+
+class TestVmCustom(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -79,22 +94,24 @@ class Test_Vm_Custom(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
     def test_enable_boot_diagnostics_on_vm_never_enabled(self, mock_vm_set, mock_vm_get):
         vm_fake = mock.MagicMock()
+        cmd = _get_test_cmd()
         mock_vm_get.return_value = vm_fake
-        enable_boot_diagnostics('g1', 'vm1', 'https://storage_uri1')
+        enable_boot_diagnostics(cmd, 'g1', 'vm1', 'https://storage_uri1')
         self.assertTrue(vm_fake.diagnostics_profile.boot_diagnostics.enabled)
         self.assertEqual('https://storage_uri1',
                          vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
         self.assertTrue(mock_vm_get.called)
-        mock_vm_set.assert_called_once_with(vm_fake, mock.ANY)
+        mock_vm_set.assert_called_once_with(cmd, vm_fake, mock.ANY)
 
     @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
     @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
     def test_enable_boot_diagnostics_skip_when_enabled_already(self, mock_vm_set, mock_vm_get):
         vm_fake = mock.MagicMock()
+        cmd = _get_test_cmd()
         mock_vm_get.return_value = vm_fake
         vm_fake.diagnostics_profile.boot_diagnostics.enabled = True
         vm_fake.diagnostics_profile.boot_diagnostics.storage_uri = 'https://storage_uri1'
-        enable_boot_diagnostics('g1', 'vm1', 'https://storage_uri1')
+        enable_boot_diagnostics(cmd, 'g1', 'vm1', 'https://storage_uri1')
         self.assertTrue(mock_vm_get.called)
         self.assertFalse(mock_vm_set.called)
 
@@ -102,14 +119,15 @@ class Test_Vm_Custom(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
     def test_disable_boot_diagnostics_on_vm(self, mock_vm_set, mock_vm_get):
         vm_fake = mock.MagicMock()
+        cmd = _get_test_cmd()
         mock_vm_get.return_value = vm_fake
         vm_fake.diagnostics_profile.boot_diagnostics.enabled = True
         vm_fake.diagnostics_profile.boot_diagnostics.storage_uri = 'storage_uri1'
-        disable_boot_diagnostics('g1', 'vm1')
+        disable_boot_diagnostics(cmd, 'g1', 'vm1')
         self.assertFalse(vm_fake.diagnostics_profile.boot_diagnostics.enabled)
         self.assertIsNone(vm_fake.diagnostics_profile.boot_diagnostics.storage_uri)
         self.assertTrue(mock_vm_get.called)
-        mock_vm_set.assert_called_once_with(vm_fake, mock.ANY)
+        mock_vm_set.assert_called_once_with(cmd, vm_fake, mock.ANY)
 
     @mock.patch('azure.cli.command_modules.vm.custom.get_vm', autospec=True)
     @mock.patch('azure.cli.command_modules.vm.custom.set_vm', autospec=True)
@@ -119,14 +137,15 @@ class Test_Vm_Custom(unittest.TestCase):
 
         # stub to get the vm which has no datadisks
         vm = FakedVM(None, None)
+        cmd = _get_test_cmd()
         mock_vm_get.return_value = vm
 
         # execute
-        attach_unmanaged_data_disk('rg1', 'vm1', True, faked_vhd_uri)
+        attach_unmanaged_data_disk(cmd, 'rg1', 'vm1', True, faked_vhd_uri)
 
         # assert
         self.assertTrue(mock_vm_get.called)
-        mock_vm_set.assert_called_once_with(vm)
+        mock_vm_set.assert_called_once_with(cmd, vm)
         self.assertEqual(len(vm.storage_profile.data_disks), 1)
         data_disk = vm.storage_profile.data_disks[0]
         self.assertIsNone(data_disk.caching)
@@ -146,14 +165,15 @@ class Test_Vm_Custom(unittest.TestCase):
         # stub to get the vm which has no datadisks
         existing_disk = DataDisk(lun=1, vhd=faked_vhd_uri, name='d1', create_option=DiskCreateOptionTypes.empty)
         vm = FakedVM(None, [existing_disk])
+        cmd = _get_test_cmd()
         mock_vm_get.return_value = vm
 
         # execute
-        attach_unmanaged_data_disk('rg1', 'vm1', True, faked_vhd_uri2, None, 'd2', 512, CachingTypes.read_write)
+        attach_unmanaged_data_disk(cmd, 'rg1', 'vm1', True, faked_vhd_uri2, None, 'd2', 512, CachingTypes.read_write)
 
         # assert
         self.assertTrue(mock_vm_get.called)
-        mock_vm_set.assert_called_once_with(vm)
+        mock_vm_set.assert_called_once_with(cmd, vm)
         self.assertEqual(len(vm.storage_profile.data_disks), 2)
         data_disk = vm.storage_profile.data_disks[1]
         self.assertEqual(CachingTypes.read_write, data_disk.caching)
@@ -170,14 +190,15 @@ class Test_Vm_Custom(unittest.TestCase):
 
         # stub to get the vm which has no datadisks
         vm = FakedVM()
+        cmd = _get_test_cmd()
         mock_vm_get.return_value = vm
 
         # execute
-        attach_unmanaged_data_disk('rg1', 'vm1', False, faked_vhd_uri, disk_name='d1', caching=CachingTypes.read_only)
+        attach_unmanaged_data_disk(cmd, 'rg1', 'vm1', False, faked_vhd_uri, disk_name='d1', caching=CachingTypes.read_only)
 
         # assert
         self.assertTrue(mock_vm_get.called)
-        mock_vm_set.assert_called_once_with(vm)
+        mock_vm_set.assert_called_once_with(cmd, vm)
         self.assertEqual(len(vm.storage_profile.data_disks), 1)
         data_disk = vm.storage_profile.data_disks[0]
         self.assertEqual(CachingTypes.read_only, data_disk.caching)
@@ -195,23 +216,25 @@ class Test_Vm_Custom(unittest.TestCase):
         faked_vhd_uri = 'https://your_stoage_account_name.blob.core.windows.net/vhds/d1.vhd'
         existing_disk = DataDisk(lun=1, vhd=faked_vhd_uri, name='d1', create_option=DiskCreateOptionTypes.empty)
         vm = FakedVM(None, [existing_disk])
+        cmd = _get_test_cmd()
         mock_vm_get.return_value = vm
 
         # execute
-        detach_data_disk('rg1', 'vm1', 'd1')
+        detach_data_disk(cmd, 'rg1', 'vm1', 'd1')
 
         # assert
         self.assertTrue(mock_vm_get.called)
-        mock_vm_set.assert_called_once_with(vm)
+        mock_vm_set.assert_called_once_with(cmd, vm)
         self.assertEqual(len(vm.storage_profile.data_disks), 0)
 
     @mock.patch('azure.cli.command_modules.vm.custom._compute_client_factory')
     def test_show_vmss_instance_view(self, factory_mock):
         vm_client = mock.MagicMock()
+        cmd = _get_test_cmd()
         factory_mock.return_value = vm_client
 
         # execute
-        get_vmss_instance_view('rg1', 'vmss1', '*')
+        get_vmss_instance_view(cmd, 'rg1', 'vmss1', '*')
         # assert
         vm_client.virtual_machine_scale_set_vms.list.assert_called_once_with('rg1', 'vmss1', expand='instanceView',
                                                                              select='instanceView')
@@ -224,6 +247,7 @@ class Test_Vm_Custom(unittest.TestCase):
         os_disk = OSDisk(None, OperatingSystemTypes.linux)
         existing_disk = DataDisk(lun=1, vhd='https://someuri', name='d1', create_option=DiskCreateOptionTypes.empty)
         vm = FakedVM(None, [existing_disk], os_disk=os_disk)
+        cmd = _get_test_cmd()
 
         compute_client_mock = mock.MagicMock()
         compute_client_mock.virtual_machines.get.return_value = vm
@@ -233,15 +257,15 @@ class Test_Vm_Custom(unittest.TestCase):
 
         # throw when VM has disks, but no --volume-type is specified
         with self.assertRaises(CLIError) as context:
-            encrypt_vm('rg1', 'vm1', 'client_id', faked_keyvault, 'client_secret')
+            encrypt_vm(cmd, 'rg1', 'vm1', 'client_id', faked_keyvault, 'client_secret')
 
         self.assertTrue("supply --volume-type" in str(context.exception))
 
         # throw when no AAD client secrets
         with self.assertRaises(CLIError) as context:
-            encrypt_vm('rg1', 'vm1', 'client_id', faked_keyvault)
+            encrypt_vm(cmd, 'rg1', 'vm1', 'client_id', faked_keyvault)
 
-        self.assertTrue("--aad-client-id or --aad-client-cert-thumbprint" in str(context.exception))
+        self.assertTrue("--aad-client-cert-thumbprint or --aad-client-secret" in str(context.exception))
 
     @mock.patch('azure.cli.command_modules.vm.disk_encryption.set_vm', autospec=True)
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
@@ -249,6 +273,7 @@ class Test_Vm_Custom(unittest.TestCase):
         os_disk = OSDisk(None, OperatingSystemTypes.linux)
         existing_disk = DataDisk(lun=1, vhd='https://someuri', name='d1', create_option=DiskCreateOptionTypes.empty)
         vm = FakedVM(None, [existing_disk], os_disk=os_disk)
+        cmd = _get_test_cmd()
         vm_extension = VirtualMachineExtension('westus',
                                                settings={'SequenceVersion': 1},
                                                instance_view=VirtualMachineExtensionInstanceView(
@@ -262,19 +287,19 @@ class Test_Vm_Custom(unittest.TestCase):
 
         # throw on disabling encryption on OS disk of a linux VM
         with self.assertRaises(CLIError) as context:
-            decrypt_vm('rg1', 'vm1', 'OS')
+            decrypt_vm(cmd, 'rg1', 'vm1', 'OS')
 
         self.assertTrue("Only Data disks can have encryption disabled in a Linux VM." in str(context.exception))
 
         # throw on disabling encryption on data disk, but os disk is also encrypted
         with self.assertRaises(CLIError) as context:
-            decrypt_vm('rg1', 'vm1', 'DATA')
+            decrypt_vm(cmd, 'rg1', 'vm1', 'DATA')
 
         self.assertTrue("Disabling encryption on data disk can render the VM unbootable" in str(context.exception))
 
         # works fine to disable encryption on daat disk when OS disk is never encrypted
         vm_extension.instance_view.substatuses[0].message = '{}'
-        decrypt_vm('rg1', 'vm1', 'DATA')
+        decrypt_vm(cmd, 'rg1', 'vm1', 'DATA')
 
     def test_encryption_distro_check(self):
         image = ImageReference(None, 'canonical', 'ubuntuserver', '16.04.0-LTS')

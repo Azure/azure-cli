@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-def get_sql_management_client(_):
+def get_sql_management_client(cli_ctx):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.sql import SqlManagementClient
     from msrest.authentication import Authentication
@@ -21,88 +21,88 @@ def get_sql_management_client(_):
             credentials=Authentication())  # No authentication
 
     # Normal production scenario.
-    return get_mgmt_service_client(SqlManagementClient)
+    return get_mgmt_service_client(cli_ctx, SqlManagementClient)
 
 
-def get_sql_capabilities_operations(kwargs):
-    return get_sql_management_client(kwargs).capabilities
+def get_sql_capabilities_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).capabilities
 
 
-def get_sql_databases_operations(kwargs):
-    return get_sql_management_client(kwargs).databases
+def get_sql_databases_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).databases
 
 
-def get_sql_database_operations_operations(kwargs):
-    return get_sql_management_client(kwargs).database_operations
+def get_sql_database_operations_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).database_operations
 
 
-def get_sql_database_blob_auditing_policies_operations(kwargs):
-    return get_sql_management_client(kwargs).database_blob_auditing_policies
+def get_sql_database_blob_auditing_policies_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).database_blob_auditing_policies
 
 
-def get_sql_database_threat_detection_policies_operations(kwargs):
-    return get_sql_management_client(kwargs).database_threat_detection_policies
+def get_sql_database_threat_detection_policies_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).database_threat_detection_policies
 
 
-def get_sql_database_transparent_data_encryption_activities_operations(kwargs):
-    return get_sql_management_client(kwargs).transparent_data_encryption_activities
+def get_sql_database_transparent_data_encryption_activities_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).transparent_data_encryption_activities
 
 
-def get_sql_database_transparent_data_encryptions_operations(kwargs):
-    return get_sql_management_client(kwargs).transparent_data_encryptions
+def get_sql_database_transparent_data_encryptions_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).transparent_data_encryptions
 
 
-def get_sql_database_usages_operations(kwargs):
-    return get_sql_management_client(kwargs).database_usages
+def get_sql_database_usages_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).database_usages
 
 
-def get_sql_elastic_pools_operations(kwargs):
-    return get_sql_management_client(kwargs).elastic_pools
+def get_sql_elastic_pools_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).elastic_pools
 
 
-def get_sql_encryption_protectors_operations(kwargs):
-    return get_sql_management_client(kwargs).encryption_protectors
+def get_sql_encryption_protectors_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).encryption_protectors
 
 
-def get_sql_firewall_rules_operations(kwargs):
-    return get_sql_management_client(kwargs).firewall_rules
+def get_sql_firewall_rules_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).firewall_rules
 
 
-def get_sql_recommended_elastic_pools_operations(kwargs):
-    return get_sql_management_client(kwargs).recommended_elastic_pools
+def get_sql_recommended_elastic_pools_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).recommended_elastic_pools
 
 
-def get_sql_replication_links_operations(kwargs):
-    return get_sql_management_client(kwargs).replication_links
+def get_sql_replication_links_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).replication_links
 
 
-def get_sql_restorable_dropped_databases_operations(kwargs):
-    return get_sql_management_client(kwargs).restorable_dropped_databases
+def get_sql_restorable_dropped_databases_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).restorable_dropped_databases
 
 
-def get_sql_server_azure_ad_administrators_operations(kwargs):
-    return get_sql_management_client(kwargs).server_azure_ad_administrators
+def get_sql_server_azure_ad_administrators_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).server_azure_ad_administrators
 
 
-def get_sql_server_connection_policies_operations(kwargs):
-    return get_sql_management_client(kwargs).server_connection_policies
+def get_sql_server_connection_policies_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).server_connection_policies
 
 
-def get_sql_server_keys_operations(kwargs):
-    return get_sql_management_client(kwargs).server_keys
+def get_sql_server_keys_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).server_keys
 
 
-def get_sql_servers_operations(kwargs):
-    return get_sql_management_client(kwargs).servers
+def get_sql_servers_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).servers
 
 
-def get_sql_server_usages_operations(kwargs):
-    return get_sql_management_client(kwargs).server_usages
+def get_sql_server_usages_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).server_usages
 
 
-def get_sql_subscription_usages_operations(kwargs):
-    return get_sql_management_client(kwargs).subscription_usages
+def get_sql_subscription_usages_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).subscription_usages
 
 
-def get_sql_virtual_network_rules_operations(kwargs):
-    return get_sql_management_client(kwargs).virtual_network_rules
+def get_sql_virtual_network_rules_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).virtual_network_rules

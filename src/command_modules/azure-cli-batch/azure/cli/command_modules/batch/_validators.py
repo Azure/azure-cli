@@ -6,30 +6,7 @@
 import os
 import json
 
-
-def load_node_agent_skus(prefix, **kwargs):  # pylint: disable=unused-argument
-    from msrest.exceptions import ClientRequestError
-    from azure.batch.models import BatchErrorException
-    from azure.cli.command_modules.batch._client_factory import account_client_factory
-    from azure.cli.core._config import az_config
-    all_images = []
-    client_creds = {}
-    client_creds['account_name'] = az_config.get('batch', 'account', None)
-    client_creds['account_key'] = az_config.get('batch', 'access_key', None)
-    client_creds['account_endpoint'] = az_config.get('batch', 'endpoint', None)
-    try:
-        client = account_client_factory(client_creds)
-        skus = client.list_node_agent_skus()
-        for sku in skus:
-            for image in sku['verifiedImageReferences']:
-                all_images.append("{}:{}:{}:{}".format(
-                    image['publisher'],
-                    image['offer'],
-                    image['sku'],
-                    image['version']))
-        return all_images
-    except (ClientRequestError, BatchErrorException):
-        return []
+from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
 
 
 # TYPES VALIDATORS
@@ -121,13 +98,13 @@ def resource_file_format(value):
 
 # COMMAND NAMESPACE VALIDATORS
 
-def validate_required_parameter(ns, parser):
+def validate_required_parameter(namespace, parser):
     """Validates required parameters in Batch complex objects"""
     if not parser.done:
-        parser.parse(ns)
+        parser.parse(namespace)
 
 
-def storage_account_id(namespace):
+def storage_account_id(cmd, namespace):
     """Validate storage account name"""
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -135,7 +112,7 @@ def storage_account_id(namespace):
     if (namespace.storage_account and not
             ('/providers/Microsoft.ClassicStorage/storageAccounts/' in namespace.storage_account or
              '/providers/Microsoft.Storage/storageAccounts/' in namespace.storage_account)):
-        storage_client = get_mgmt_service_client(ResourceType.MGMT_STORAGE)
+        storage_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_STORAGE)
         acc = storage_client.storage_accounts.get_properties(namespace.resource_group_name,
                                                              namespace.storage_account)
         if not acc:
@@ -144,7 +121,7 @@ def storage_account_id(namespace):
         namespace.storage_account = acc.id  # pylint: disable=no-member
 
 
-def keyvault_id(namespace):
+def keyvault_id(cmd, namespace):
     """Validate storage account name"""
     from azure.mgmt.keyvault import KeyVaultManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -158,7 +135,7 @@ def keyvault_id(namespace):
         kv_name = namespace.keyvault
         kv_rg = namespace.resource_group_name
     try:
-        keyvault_client = get_mgmt_service_client(KeyVaultManagementClient)
+        keyvault_client = get_mgmt_service_client(cmd.cli_ctx, KeyVaultManagementClient)
         vault = keyvault_client.vaults.get(kv_rg, kv_name)
         if not vault:
             raise ValueError("KeyVault named '{}' not found in the resource group '{}'.".
@@ -169,12 +146,12 @@ def keyvault_id(namespace):
         raise ValueError('Invalid KeyVault reference: {}\n{}'.format(namespace.keyvault, exp))
 
 
-def application_enabled(namespace):
+def application_enabled(cmd, namespace):
     """Validates account has auto-storage enabled"""
     from azure.mgmt.batch import BatchManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-    client = get_mgmt_service_client(BatchManagementClient)
+    client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
     acc = client.batch_account.get(namespace.resource_group_name, namespace.account_name)
     if not acc:
         raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
@@ -253,43 +230,82 @@ def validate_file_destination(namespace):
 # CUSTOM REQUEST VALIDATORS
 
 
-def validate_pool_settings(ns, parser):
+def validate_pool_settings(namespace, parser):
     """Custom parsing to enfore that either PaaS or IaaS instances are configured
     in the add pool request body.
     """
-    if not ns.json_file:
-        if ns.node_agent_sku_id and not ns.image:
+    if not namespace.json_file:
+        if namespace.node_agent_sku_id and not namespace.image:
             raise ValueError("Missing required argument: --image")
-        if ns.image:
+        if namespace.image:
             try:
-                ns.publisher, ns.offer, ns.sku = ns.image.split(':', 2)
+                namespace.publisher, namespace.offer, namespace.sku = namespace.image.split(':', 2)
                 try:
-                    ns.sku, ns.version = ns.sku.split(':', 1)
+                    namespace.sku, namespace.version = namespace.sku.split(':', 1)
                 except ValueError:
                     pass
             except ValueError:
-                if '/' not in ns.image:
+                if '/' not in namespace.image:
                     message = ("Incorrect format for VM image. Should be in the format: \n"
                                "'publisher:offer:sku[:version]' OR a URL to an ARM image.")
                     raise ValueError(message)
 
-                ns.virtual_machine_image_id = ns.image
-            del ns.image
+                namespace.virtual_machine_image_id = namespace.image
+            del namespace.image
         groups = ['pool.cloud_service_configuration', 'pool.virtual_machine_configuration']
-        parser.parse_mutually_exclusive(ns, True, groups)
+        parser.parse_mutually_exclusive(namespace, True, groups)
 
         paas_sizes = ['small', 'medium', 'large', 'extralarge']
-        if ns.vm_size and ns.vm_size.lower() in paas_sizes and not ns.os_family:
+        if namespace.vm_size and namespace.vm_size.lower() in paas_sizes and not namespace.os_family:
             message = ("The selected VM size is incompatible with Virtual Machine Configuration. "
                        "Please swap for the equivalent: Standard_A1 (small), Standard_A2 "
                        "(medium), Standard_A3 (large), or Standard_A4 (extra large).")
             raise ValueError(message)
-        if ns.auto_scale_formula:
-            ns.enable_auto_scale = True
+        if namespace.auto_scale_formula:
+            namespace.enable_auto_scale = True
 
 
-def validate_cert_settings(ns):
+def validate_cert_settings(namespace):
     """Custom parsing for certificate commands - adds default thumbprint
     algorithm.
     """
-    ns.thumbprint_algorithm = 'sha1'
+    namespace.thumbprint_algorithm = 'sha1'
+
+
+def validate_client_parameters(cmd, namespace):
+    """Retrieves Batch connection parameters from environment variables"""
+    from azure.mgmt.batch import BatchManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+
+    # simply try to retrieve the remaining variables from environment variables
+    if not namespace.account_name:
+        namespace.account_name = cmd.cli_ctx.config.get('batch', 'account', None)
+    if not namespace.account_key:
+        namespace.account_key = cmd.cli_ctx.config.get('batch', 'access_key', None)
+    if not namespace.account_endpoint:
+        namespace.account_endpoint = cmd.cli_ctx.config.get('batch', 'endpoint', None)
+
+    # if account name is specified but no key, attempt to query if we use shared key auth
+    if namespace.account_name and namespace.account_endpoint and not namespace.account_key:
+        if cmd.cli_ctx.config.get('batch', 'auth_mode', 'shared_key') == 'shared_key':
+            endpoint = urlsplit(namespace.account_endpoint)
+            host = endpoint.netloc
+            client = get_mgmt_service_client(cmd.cli_ctx, BatchManagementClient)
+            acc = next((x for x in client.batch_account.list()
+                        if x.name == namespace.account_name and x.account_endpoint == host), None)
+            if acc:
+                from msrestazure.tools import parse_resource_id
+                rg = parse_resource_id(acc.id)['resource_group']
+                namespace.account_key = \
+                    client.batch_account.get_keys(rg,  # pylint: disable=no-member
+                                                  namespace.account_name).primary
+            else:
+                raise ValueError("Batch account '{}' not found.".format(namespace.account_name))
+    else:
+        if not namespace.account_name:
+            raise ValueError("Specify batch account in command line or environment variable.")
+        if not namespace.account_endpoint:
+            raise ValueError("Specify batch endpoint in command line or environment variable.")
+
+    if cmd.cli_ctx.config.get('batch', 'auth_mode', 'shared_key') == 'aad':
+        namespace.account_key = None

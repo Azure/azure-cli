@@ -9,8 +9,10 @@ import unittest
 from collections import OrderedDict
 from six import StringIO
 
-from azure.cli.core._output import OutputProducer, format_json, format_table, format_tsv, CommandResultItem
-import azure.cli.core.util as util
+from azure.cli.core._output import OutputProducer
+
+from knack.output import format_json, format_table, format_tsv
+from knack.util import CommandResultItem, normalize_newlines
 
 
 class TestCoreCLIOutput(unittest.TestCase):
@@ -24,7 +26,7 @@ class TestCoreCLIOutput(unittest.TestCase):
         # The JSON output when the input is a dict should be the dict serialized to JSON
         output_producer = OutputProducer(formatter=format_json, file=self.io)
         output_producer.out(CommandResultItem({'active': True, 'id': '0b1f6472'}))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+        self.assertEqual(normalize_newlines(self.io.getvalue()), normalize_newlines(
             """{
   "active": true,
   "id": "0b1f6472"
@@ -35,7 +37,7 @@ class TestCoreCLIOutput(unittest.TestCase):
         # The JSON output when the input is OrderedDict should be serialized to JSON
         output_producer = OutputProducer(formatter=format_json, file=self.io)
         output_producer.out(CommandResultItem(OrderedDict({'active': True, 'id': '0b1f6472'})))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+        self.assertEqual(normalize_newlines(self.io.getvalue()), normalize_newlines(
             """{
   "active": true,
   "id": "0b1f6472"
@@ -45,7 +47,7 @@ class TestCoreCLIOutput(unittest.TestCase):
     def test_out_json_byte(self):
         output_producer = OutputProducer(formatter=format_json, file=self.io)
         output_producer.out(CommandResultItem({'active': True, 'contents': b'0b1f6472'}))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+        self.assertEqual(normalize_newlines(self.io.getvalue()), normalize_newlines(
             """{
   "active": true,
   "contents": "0b1f6472"
@@ -55,7 +57,7 @@ class TestCoreCLIOutput(unittest.TestCase):
     def test_out_json_byte_empty(self):
         output_producer = OutputProducer(formatter=format_json, file=self.io)
         output_producer.out(CommandResultItem({'active': True, 'contents': b''}))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+        self.assertEqual(normalize_newlines(self.io.getvalue()), normalize_newlines(
             """{
   "active": true,
   "contents": ""
@@ -70,7 +72,7 @@ class TestCoreCLIOutput(unittest.TestCase):
         obj['active'] = True
         obj['val'] = '0b1f6472'
         output_producer.out(CommandResultItem(obj))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+        self.assertEqual(normalize_newlines(self.io.getvalue()), normalize_newlines(
             """Active    Val
 --------  --------
 True      0b1f6472
@@ -80,7 +82,7 @@ True      0b1f6472
         output_producer = OutputProducer(formatter=format_table, file=self.io)
         obj = [['a', 'b'], ['c', 'd']]
         output_producer.out(CommandResultItem(obj))
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+        self.assertEqual(normalize_newlines(self.io.getvalue()), normalize_newlines(
             """Column1    Column2
 ---------  ---------
 a          b
@@ -95,7 +97,7 @@ c          d
         obj['sub'] = {'1'}
         result_item = CommandResultItem(obj)
         output_producer.out(result_item)
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+        self.assertEqual(normalize_newlines(self.io.getvalue()), normalize_newlines(
             """Name    Val
 ------  --------------
 qwerty  0b1f6472qwerty
@@ -107,7 +109,7 @@ qwerty  0b1f6472qwerty
         result_item = CommandResultItem(obj, table_transformer=None, is_query_active=False)
         output_producer.out(result_item)
         # Should be alphabetical order as no table transformer and query is not active.
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+        self.assertEqual(normalize_newlines(self.io.getvalue()), normalize_newlines(
             """Active    Name    Sub       Val
 --------  ------  --------  --------------
 True      qwerty  0b1f6472  0b1f6472qwerty
@@ -124,7 +126,7 @@ True      qwerty  0b1f6472  0b1f6472qwerty
         result_item = CommandResultItem(obj, table_transformer=transformer, is_query_active=False)
         output_producer.out(result_item)
         # Should be table transformer order
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+        self.assertEqual(normalize_newlines(self.io.getvalue()), normalize_newlines(
             """Name    Val             Active    Sub
 ------  --------------  --------  --------
 qwerty  0b1f6472qwerty  True      0b1f6472
@@ -137,7 +139,7 @@ qwerty  0b1f6472qwerty  True      0b1f6472
         result_item = CommandResultItem(obj, table_transformer='{Name:name, Val:val, Active:active}', is_query_active=False)
         output_producer.out(result_item)
         # Should be table transformer order
-        self.assertEqual(util.normalize_newlines(self.io.getvalue()), util.normalize_newlines(
+        self.assertEqual(normalize_newlines(self.io.getvalue()), normalize_newlines(
             """Name    Val             Active
 ------  --------------  --------
 qwerty  0b1f6472qwerty  True

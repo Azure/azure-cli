@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=line-too-long, too-many-lines
+
 import argparse
 import unittest
 try:
@@ -15,13 +17,23 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.vm._validators import (_validate_vm_vmss_create_vnet,
                                                       _validate_vmss_create_subnet,
                                                       _validate_vm_create_storage_account,
-                                                      _validate_vm_vmss_create_auth)
-
-# pylint: disable=line-too-long
-# pylint: disable=too-many-lines
+                                                      _validate_vm_vmss_create_auth,
+                                                      _validate_vm_create_storage_profile)
 
 
-def _mock_resource_client(client_type):
+def _get_test_cmd():
+    from azure.cli.testsdk import TestCli
+    from azure.cli.core import AzCommandsLoader
+    from azure.cli.core.commands import AzCliCommand
+    cli_ctx = TestCli()
+    loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_COMPUTE)
+    cmd = AzCliCommand(loader, 'test', None)
+    cmd.command_kwargs = {'resource_type': ResourceType.MGMT_COMPUTE}
+    cmd.cli_ctx = cli_ctx
+    return cmd
+
+
+def _mock_resource_client(cli_ctx, client_type):
     client = mock.MagicMock()
     if client_type is ResourceType.MGMT_NETWORK:
         def _mock_list(rg):
@@ -76,7 +88,7 @@ def _mock_resource_client(client_type):
     return client
 
 
-def _mock_network_client_with_existing_subnet(_):
+def _mock_network_client_with_existing_subnet(*_):
     client = mock.MagicMock()
 
     def _mock_list(rg):
@@ -117,7 +129,7 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_no_matching_vnet(self):
         self._set_ns('emptyrg', 'eastus')
-        _validate_vm_vmss_create_vnet(self.ns)
+        _validate_vm_vmss_create_vnet(_get_test_cmd(), self.ns)
         self.assertIsNone(self.ns.vnet_name)
         self.assertIsNone(self.ns.subnet)
         self.assertEqual(self.ns.vnet_type, 'new')
@@ -125,7 +137,7 @@ class TestVMCreateDefaultVnet(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_matching_vnet_specified_location(self):
         self._set_ns('rg1', 'eastus')
-        _validate_vm_vmss_create_vnet(self.ns)
+        _validate_vm_vmss_create_vnet(_get_test_cmd(), self.ns)
         self.assertEqual(self.ns.vnet_name, 'vnet1')
         self.assertEqual(self.ns.subnet, 'vnet1subnet')
         self.assertEqual(self.ns.vnet_type, 'existing')
@@ -147,7 +159,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
     def test_matching_vnet_subnet_size_matching(self):
         ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.instance_count = 5
-        _validate_vm_vmss_create_vnet(ns, for_scale_set=True)
+        _validate_vm_vmss_create_vnet(_get_test_cmd(), ns, for_scale_set=True)
         self.assertEqual(ns.vnet_name, 'vnet1')
         self.assertEqual(ns.subnet, 'vnet1subnet')
         self.assertEqual(ns.vnet_type, 'existing')
@@ -156,14 +168,14 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
     def test_matching_vnet_no_subnet_size_matching(self):
         ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.instance_count = 1000
-        _validate_vm_vmss_create_vnet(ns, for_scale_set=True)
+        _validate_vm_vmss_create_vnet(_get_test_cmd(), ns, for_scale_set=True)
         self.assertIsNone(ns.vnet_name)
         self.assertIsNone(ns.subnet)
         self.assertEqual(ns.vnet_type, 'new')
 
         ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.instance_count = 255
-        _validate_vm_vmss_create_vnet(ns, for_scale_set=True)
+        _validate_vm_vmss_create_vnet(_get_test_cmd(), ns, for_scale_set=True)
         self.assertEqual(ns.vnet_type, 'new')
 
     def test_new_subnet_size_for_big_vmss(self):
@@ -206,19 +218,19 @@ class TestVMCreateDefaultStorageAccount(unittest.TestCase):
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_no_matching_storage_account(self):
         self._set_ns('emptyrg', 'eastus')
-        _validate_vm_create_storage_account(self.ns)
+        _validate_vm_create_storage_account(_get_test_cmd(), self.ns)
         self.assertIsNone(self.ns.storage_account)
         self.assertEqual(self.ns.storage_account_type, 'new')
 
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_resource_client)
     def test_matching_storage_account_specified_location(self):
         self._set_ns('rg1', 'eastus')
-        _validate_vm_create_storage_account(self.ns)
+        _validate_vm_create_storage_account(_get_test_cmd(), self.ns)
         self.assertEqual(self.ns.storage_account, 'sa1')
         self.assertEqual(self.ns.storage_account_type, 'existing')
 
         self._set_ns('rg1', 'eastus', 'Premium')
-        _validate_vm_create_storage_account(self.ns)
+        _validate_vm_create_storage_account(_get_test_cmd(), self.ns)
         self.assertEqual(self.ns.storage_account, 'sa2')
         self.assertEqual(self.ns.storage_account_type, 'existing')
 
@@ -270,6 +282,30 @@ class TestVMDefaultAuthType(unittest.TestCase):
         with self.assertRaises(ValueError) as context:
             _validate_vm_vmss_create_auth(ns)
         self.assertTrue("incorrect usage for authentication-type 'password':" in str(context.exception))
+
+
+class TestVMImageDefaults(unittest.TestCase):
+    @mock.patch('azure.cli.command_modules.vm._validators._compute_client_factory', autospec=True)
+    def test_vm_validator_retrieve_image_info_cross_subscription(self, factory_mock):
+        ns = argparse.Namespace()
+        cmd = mock.MagicMock()
+
+        image_info = mock.MagicMock()
+        client_mock = mock.MagicMock()
+        image_info.storage_profile.os_disk.os_type.value = 'someOS'
+        image_info.storage_profile.data_disks = ['does not matter']
+        client_mock.images.get.return_value = image_info
+        factory_mock.return_value = client_mock
+
+        ns.image = '/subscriptions/0b1f6471-1bf0-4dda-aec3-xxxxxxxxxxxx/resourceGroups/foo/providers/Microsoft.Compute/images/bar'
+        ns.admin_username = 'admin123'
+        ns.admin_password = 'verySecret!'
+        ns.storage_sku = 'Premium_LRS'
+        ns.os_type, ns.attach_os_disk, ns.storage_account, ns.storage_container_name, ns.use_unmanaged_disk = None, None, None, None, False
+        _validate_vm_create_storage_profile(cmd, ns, False)
+
+        self.assertEqual(ns.os_type, 'someOS')
+        self.assertEqual(ns.image_data_disks, ['does not matter'])
 
 
 if __name__ == '__main__':

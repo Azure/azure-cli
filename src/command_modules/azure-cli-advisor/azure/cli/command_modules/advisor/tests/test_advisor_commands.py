@@ -44,12 +44,17 @@ class AzureAdvisorUnitTest(unittest.TestCase):
 class AzureAdvisorLiveScenarioTest(LiveScenarioTest):
 
     def test_list_disable_enable_recommendations(self):
+        self.cmd('advisor recommendation generate')
         output = self.cmd('advisor recommendation list').get_output_in_json()
         self.assertGreater(len(output), 1)
         output = self.cmd('advisor recommendation list --category cost').get_output_in_json()
         self.assertGreater(len(output), 0)
-        disableCmd = 'advisor recommendation disable --ids {} --days 1'.format(output[0]['id'])
-        enableCmd = 'advisor recommendation enable --ids {}'.format(output[0]['id'])
+
+        self.kwargs.update({
+            'recommendation_id': output[0]['id']
+        })
+        disableCmd = 'advisor recommendation disable --ids {recommendation_id} --days 1'
+        enableCmd = 'advisor recommendation enable --ids {recommendation_id}'
         output = self.cmd(disableCmd).get_output_in_json()
         self.assertEqual(output[0]['ttl'], '1.00:00:00')
         self.cmd(enableCmd)
@@ -79,14 +84,14 @@ class AzureAdvisorScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_advisor')
     def test_get_set_configurations_resource_group(self, resource_group):
-        output = self.cmd('advisor configuration get --resource-group {}'.format(resource_group)).get_output_in_json()
+        output = self.cmd('advisor configuration get --resource-group {rg}').get_output_in_json()
         self.assertGreater(len(output), 0)
-        self.cmd('advisor configuration set --exclude --resource-group {}'.format(resource_group))
-        output = self.cmd('advisor configuration get --resource-group {}'.format(resource_group)).get_output_in_json()
+        self.cmd('advisor configuration set --exclude --resource-group {rg}')
+        output = self.cmd('advisor configuration get --resource-group {rg}').get_output_in_json()
         self.assertGreater(len(output), 0)
         self.assertTrue(output['value'][0]['properties']['exclude'])
-        self.cmd('advisor configuration set --include --resource-group {}'.format(resource_group))
-        output = self.cmd('advisor configuration get --resource-group {}'.format(resource_group)).get_output_in_json()
+        self.cmd('advisor configuration set --include --resource-group {rg}')
+        output = self.cmd('advisor configuration get --resource-group {rg}').get_output_in_json()
         self.assertGreater(len(output), 0)
         self.assertTrue(not output['value'][0]['properties']['exclude'])
 

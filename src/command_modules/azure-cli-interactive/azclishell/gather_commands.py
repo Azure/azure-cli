@@ -12,8 +12,6 @@ from azclishell.command_tree import CommandBranch, CommandHead
 from azclishell.util import get_window_dim
 
 
-CONFIGURATION = azclishell.configuration.CONFIGURATION
-
 TOLERANCE = 10
 
 GLOBAL_PARAM_DESCRIPTIONS = {
@@ -71,7 +69,7 @@ def add_new_lines(long_phrase, line_min=None, tolerance=TOLERANCE):
 # pylint: disable=too-many-instance-attributes
 class GatherCommands(object):
     """ grabs all the cached commands from files """
-    def __init__(self):
+    def __init__(self, config):
         # everything that is completable
         self.completable = []
         # a completable to the description of what is does
@@ -91,7 +89,7 @@ class GatherCommands(object):
         self.output_options = OUTPUT_OPTIONS
         self.global_param = GLOBAL_PARAM
 
-        self.gather_from_files()
+        self._gather_from_files(config)
 
     def add_exit(self):
         """ adds the exits from the application """
@@ -107,10 +105,10 @@ class GatherCommands(object):
         self.command_param["quit"] = ""
         self.command_param["exit"] = ""
 
-    def gather_from_files(self):
+    def _gather_from_files(self, config):
         """ gathers from the files in a way that is convienent to use """
-        command_file = CONFIGURATION.get_help_files()
-        cache_path = os.path.join(azclishell.configuration.get_config_dir(), 'cache')
+        command_file = config.get_help_files()
+        cache_path = os.path.join(config.config_dir, 'cache')
         cols = _get_window_columns()
 
         with open(os.path.join(cache_path, command_file), 'r') as help_file:

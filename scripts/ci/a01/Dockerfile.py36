@@ -1,0 +1,7 @@
+FROM azureclidev.azurecr.io/azurecli-a01-droid:python3.6-latest
+
+COPY build /tmp/build
+
+RUN find /tmp/build -name '*.whl' | xargs pip install
+
+COPY app /app

@@ -14,7 +14,6 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_storage_service_endpoints')
     @StorageAccountPreparer()
     def test_storage_account_service_endpoints(self, resource_group, storage_account):
-
         kwargs = {
             'rg': resource_group,
             'acc': storage_account,
@@ -123,12 +122,16 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-10-01')
     @ResourceGroupPreparer(parameter_name_for_location='location', location='southcentralus')
     def test_create_storage_account_v2(self, resource_group, location):
-        name = self.create_random_name(prefix='cli', length=24)
 
-        self.cmd('storage account create -n {} -g {} -l {} --kind StorageV2'.format(name, resource_group, location),
+        self.kwargs.update({
+            'name': self.create_random_name(prefix='cli', length=24),
+            'loc': location
+        })
+
+        self.cmd('storage account create -n {name} -g {rg} -l {loc} --kind StorageV2',
                  checks=[JMESPathCheck('kind', 'StorageV2')])
 
-        self.cmd('storage account check-name --name {}'.format(name), checks=[
+        self.cmd('storage account check-name --name {name}', checks=[
             JMESPathCheck('nameAvailable', False),
             JMESPathCheck('reason', 'AlreadyExists')
         ])

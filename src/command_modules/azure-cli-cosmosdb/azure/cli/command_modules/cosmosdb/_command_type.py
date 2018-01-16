@@ -3,41 +3,54 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import create_command, command_table
+from azure.cli.core.commands import AzCommandGroup
 
 
-def cli_cosmosdb_data_plane_command(name,
-                                    operation, client_factory, transform=None,
-                                    table_transformer=None, exception_handler=None):
-    """Registers an Azure CLI Cosmos DB Data Plane command. These commands always include the
-    parameters which can be used to obtain a cosmosdb client."""
+class CosmosDbCommandGroup(AzCommandGroup):
 
-    if not exception_handler:
-        from ._exception_handler import generic_exception_handler
-        exception_handler = generic_exception_handler
+    def _create_cosmosdb_command(self, name, method_name=None, command_type_name=None, **kwargs):
+        """Registers an Azure CLI Cosmos DB Data Plane command. These commands always include the
+        parameters which can be used to obtain a cosmosdb client."""
 
-    command = create_command(__name__, name, operation, transform, table_transformer,
-                             client_factory, exception_handler=exception_handler)
+        merged_kwargs = self._flatten_kwargs(kwargs, command_type_name)
+        if 'exception_handler' not in merged_kwargs:
+            from ._exception_handler import generic_exception_handler
+            merged_kwargs['exception_handler'] = generic_exception_handler
+        if command_type_name == 'command_type':
+            command_name = self.command(name, method_name, **merged_kwargs)
+        else:
+            command_name = self.custom_command(name, method_name, **merged_kwargs)
 
-    # add parameters required to create a cosmosdb client
-    group_name = 'Cosmos DB Account'
+        command = self.command_loader.command_table[command_name]
 
-    command.add_argument('db_resource_group_name', '--resource-group-name', '-g',
-                         arg_group=group_name,
-                         help='name of the resource group. Must be used in conjunction with '
-                              'cosmosdb account name.')
-    command.add_argument('db_account_name', '--name', '-n', arg_group=group_name,
-                         help='Cosmos DB account name. Must be used in conjunction with '
-                              'either name of the resource group or cosmosdb account key.')
+        # add parameters required to create a cosmosdb client
+        group_name = 'Cosmos DB Account'
+        command.add_argument('db_resource_group_name', '--resource-group-name', '-g',
+                             arg_group=group_name,
+                             help='name of the resource group. Must be used in conjunction with '
+                                  'cosmosdb account name.')
+        command.add_argument('db_account_name', '--name', '-n', arg_group=group_name,
+                             help='Cosmos DB account name. Must be used in conjunction with '
+                                  'either name of the resource group or cosmosdb account key.')
 
-    command.add_argument('db_account_key', '--key', required=False, default=None,
-                         arg_group=group_name,
-                         help='Cosmos DB account key. Must be used in conjunction with cosmosdb '
-                              'account name or url-connection.')
+        command.add_argument('db_account_key', '--key', required=False, default=None,
+                             arg_group=group_name,
+                             help='Cosmos DB account key. Must be used in conjunction with cosmosdb '
+                                  'account name or url-connection.')
 
-    command.add_argument('db_url_connection', '--url-connection', required=False, default=None,
-                         arg_group=group_name,
-                         help='Cosmos DB account url connection. Must be used in conjunction with '
-                              'cosmosdb account key.')
+        command.add_argument('db_url_connection', '--url-connection', required=False, default=None,
+                             arg_group=group_name,
+                             help='Cosmos DB account url connection. Must be used in conjunction with '
+                                  'cosmosdb account key.')
 
-    command_table[command.name] = command
+    def cosmosdb_command(self, name, method_name=None, command_type=None, **kwargs):
+        command_type_name = 'command_type'
+        if command_type:
+            kwargs[command_type_name] = command_type
+        self._create_cosmosdb_command(name, method_name, command_type_name, **kwargs)
+
+    def cosmosdb_custom(self, name, method_name=None, command_type=None, **kwargs):
+        command_type_name = 'custom_command_type'
+        if command_type:
+            kwargs[command_type_name] = command_type
+        self._create_cosmosdb_command(name, method_name, command_type_name, **kwargs)

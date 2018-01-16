@@ -6,374 +6,414 @@
 # pylint: disable=line-too-long
 from argcomplete.completers import FilesCompleter
 
-from azure.mgmt.compute.models import (CachingTypes,
-                                       UpgradeMode)
+from knack.arguments import CLIArgumentType
+
+from azure.mgmt.compute.models import CachingTypes, UpgradeMode
 from azure.mgmt.storage.models import SkuName
 
-from azure.cli.core.commands import register_cli_argument, CliArgumentType, VersionConstraint
 from azure.cli.core.profiles import ResourceType
-from azure.cli.core.commands.validators import \
-    (get_default_location_from_resource_group, validate_file_or_dict)
-from azure.cli.core.commands.parameters import \
-    (location_type, get_one_of_subscription_locations,
-     get_resource_name_completion_list, tags_type, file_type, enum_choice_list, ignore_type, zone_type, zones_type)
-from azure.cli.command_modules.vm._actions import \
-    (load_images_from_aliases_doc, get_vm_sizes, _resource_not_exists)
-from azure.cli.command_modules.vm._validators import \
-    (validate_nsg_name, validate_vm_nics, validate_vm_nic, process_vm_create_namespace,
-     process_vmss_create_namespace, process_image_create_namespace,
-     process_disk_or_snapshot_create_namespace, validate_vm_disk, validate_asg_names_or_ids,
-     process_disk_encryption_namespace, process_assign_identity_namespace,
-     process_vm_secret_namespace, process_msi_namespace, process_remove_identity_namespace)
-
-
-def get_urn_aliases_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
-    images = load_images_from_aliases_doc()
-    return [i['urnAlias'] for i in images]
-
-
-def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-    try:
-        location = parsed_args.location
-    except AttributeError:
-        location = get_one_of_subscription_locations()
-    result = get_vm_sizes(location)
-    return [r.name for r in result]
-
-
-def get_vm_run_command_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-    from ._client_factory import _compute_client_factory
-    try:
-        location = parsed_args.location
-    except AttributeError:
-        location = get_one_of_subscription_locations()
-    result = _compute_client_factory().virtual_machine_run_commands.list(location)
-    return [r.id for r in result]
+from azure.cli.core.commands.validators import (
+    get_default_location_from_resource_group, validate_file_or_dict)
+from azure.cli.core.commands.parameters import (
+    get_location_type, get_resource_name_completion_list, tags_type,
+    file_type, get_enum_type, zone_type, zones_type)
+from azure.cli.command_modules.vm._actions import _resource_not_exists
+from azure.cli.command_modules.vm._completers import (
+    get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
+from azure.cli.command_modules.vm._validators import (
+    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_asg_names_or_ids)
 
 
 # REUSABLE ARGUMENT DEFINITIONS
 
-name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-multi_ids_type = CliArgumentType(nargs='+')
-existing_vm_name = CliArgumentType(overrides=name_arg_type,
+name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
+multi_ids_type = CLIArgumentType(nargs='+')
+existing_vm_name = CLIArgumentType(overrides=name_arg_type,
                                    configured_default='vm',
                                    help="The name of the Virtual Machine. You can configure the default using `az configure --defaults vm=<name>`",
                                    completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
-vmss_name_type = CliArgumentType(name_arg_type,
+existing_disk_name = CLIArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
+existing_snapshot_name = CLIArgumentType(overrides=name_arg_type, help='The name of the snapshot', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'), id_part='name')
+existing_image_name = CLIArgumentType(overrides=name_arg_type, help='The name of the custom image', completer=get_resource_name_completion_list('Microsoft.Compute/images'), id_part='name')
+vmss_name_type = CLIArgumentType(name_arg_type,
                                  configured_default='vmss',
                                  completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
                                  help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
                                  id_part='name')
-disk_sku = CliArgumentType(required=False, help='underlying storage sku', **enum_choice_list(['Premium_LRS', 'Standard_LRS']))
-
-# ARGUMENT REGISTRATION
-
-register_cli_argument('vm', 'vm_name', existing_vm_name)
-register_cli_argument('vm', 'size', completer=get_vm_size_completion_list)
-for scope in ['vm', 'disk', 'snapshot', 'image']:
-    register_cli_argument(scope, 'tags', tags_type)
-register_cli_argument('vm', 'name', arg_type=name_arg_type)
-
-with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30', operation_group='virtual_machines') as c:
-    c.register_cli_argument('vm', 'zone', zone_type)
-
-with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30', operation_group='disks') as c:
-    c.register_cli_argument('disk', 'zone', zone_type, options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
-
-with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30', operation_group='virtual_machine_scale_sets') as c:
-    c.register_cli_argument('vmss', 'zones', zones_type)
+disk_sku = CLIArgumentType(help='Underlying storage SKU.', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
 
 
-for item in ['show', 'list']:
-    register_cli_argument('vm {}'.format(item), 'show_details', action='store_true', options_list=('--show-details', '-d'), help='show public ip address, FQDN, and power states. command will run slow')
+# pylint: disable=too-many-statements
+def load_arguments(self, _):
 
-register_cli_argument('vm unmanaged-disk', 'vm_name', arg_type=existing_vm_name)
-register_cli_argument('vm unmanaged-disk attach', 'disk_name', options_list=('--name', '-n'), help='The data disk name(optional when create a new disk)')
-register_cli_argument('vm unmanaged-disk detach', 'disk_name', options_list=('--name', '-n'), help='The data disk name.')
-register_cli_argument('vm unmanaged-disk', 'disk_size', help='Size of disk (GiB)', default=1023, type=int)
-register_cli_argument('vm unmanaged-disk', 'new', action="store_true", help='create a new disk')
-register_cli_argument('vm unmanaged-disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
-register_cli_argument('vm unmanaged-disk', 'vhd_uri', help="virtual hard disk's uri. For example:https://mystorage.blob.core.windows.net/vhds/d1.vhd")
-register_cli_argument('vm', 'caching', help='Disk caching policy', **enum_choice_list(CachingTypes))
+    # special case for `network nic scale-set list` command alias
+    with self.argument_context('network nic scale-set list') as c:
+        c.argument('virtual_machine_scale_set_name', options_list=['--vmss-name'], completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 
-for item in ['attach', 'detach']:
-    register_cli_argument('vm unmanaged-disk {}'.format(item), 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',), id_part=None)
+    # region MixedScopes
+    for scope in ['vm', 'disk', 'snapshot', 'image']:
+        with self.argument_context(scope) as c:
+            c.argument('tags', tags_type)
 
-register_cli_argument('vm disk', 'vm_name', options_list=('--vm-name',), id_part=None,
-                      completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
-register_cli_argument('vm disk', 'disk', validator=validate_vm_disk, help='disk name or id',
-                      completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
-register_cli_argument('vm disk detach', 'disk_name', options_list=('--name', '-n'), help='The data disk name.')
-register_cli_argument('vm disk', 'new', action="store_true", help='create a new disk')
-register_cli_argument('vm disk', 'sku', arg_type=disk_sku)
-register_cli_argument('vm disk', 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
-register_cli_argument('vm disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
+    for scope in ['disk', 'snapshot']:
+        with self.argument_context(scope) as c:
+            c.ignore('source_blob_uri', 'source_disk', 'source_snapshot')
+            c.argument('source_storage_account_id', help='used when source blob is in a different subscription')
+            c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.')
+            c.argument('duration_in_seconds', help='Time duration in seconds until the SAS access expires', type=int)
 
-register_cli_argument('vm availability-set', 'availability_set_name', name_arg_type, id_part='name',
-                      completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
-register_cli_argument('vm availability-set create', 'availability_set_name', name_arg_type, validator=get_default_location_from_resource_group, help='Name of the availability set')
-register_cli_argument('vm availability-set create', 'platform_update_domain_count', type=int,
-                      help='Update Domain count. If unspecified, server picks the most optimal number like 5. For the latest defaults see https://docs.microsoft.com/en-us/rest/api/compute/availabilitysets/availabilitysets-create')
-register_cli_argument('vm availability-set create', 'platform_fault_domain_count', type=int, help='Fault Domain count.')
-register_cli_argument('vm availability-set create', 'validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
+    for scope in ['disk create', 'snapshot create']:
+        with self.argument_context(scope) as c:
+            c.argument('source', help='source to create the disk/snapshot from, including unmanaged blob uri, managed disk id or name, or snapshot id or name')
+    # endregion
 
-with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview', operation_group='availability_sets') as c:
-    c.register_cli_argument('vm availability-set create', 'unmanaged', action='store_true', help='contained VMs should use unmanaged disks')
+    # region Disks
+    with self.argument_context('disk') as c:
+        c.argument('zone', zone_type, min_api='2017-03-30', options_list=['--zone'])  # TODO: --size-gb currently has claimed -z. We can do a breaking change later if we want to.
+        c.argument('disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+        c.argument('name', arg_type=name_arg_type)
+        c.argument('sku', arg_type=disk_sku)
+    # endregion
 
-register_cli_argument('vm user', 'username', options_list=('--username', '-u'), help='The user name')
-register_cli_argument('vm user', 'password', options_list=('--password', '-p'), help='The user password')
+    # region Identity
+    # TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
+    with self.argument_context('identity') as c:
+        c.argument('resource_name', arg_type=name_arg_type, id_part='name')
 
-register_cli_argument('vm capture', 'overwrite', action='store_true')
+    with self.argument_context('identity create') as c:
+        c.argument('location', get_location_type(self.cli_ctx))
+    # endregion
 
-register_cli_argument('vm diagnostics', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',))
-register_cli_argument('vm diagnostics set', 'storage_account', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
+    # region Snapshots
+    with self.argument_context('snapshot') as c:
+        c.argument('snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
+        c.argument('name', arg_type=name_arg_type)
+        c.argument('sku', arg_type=disk_sku)
+    # endregion
 
-register_cli_argument('vm extension', 'vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), id_part='child_name_1')
-register_cli_argument('vm extension', 'vm_name', arg_type=existing_vm_name, options_list=('--vm-name',), id_part='name')
+    # region Images
+    with self.argument_context('image') as c:
+        c.argument('os_type', arg_type=get_enum_type(['Windows', 'Linux']))
+        c.argument('image_name', arg_type=name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/images'))
 
-register_cli_argument('vm extension image', 'image_location', options_list=('--location', '-l'))
-register_cli_argument('vm extension image', 'publisher_name', options_list=('--publisher', '-p'), help='Image publisher name')
-register_cli_argument('vm extension image', 'type', options_list=('--name', '-n'), help='Name of the extension')
-register_cli_argument('vm extension image', 'latest', action='store_true')
-register_cli_argument('vm extension image', 'version', help='Extension version')
+    with self.argument_context('image create') as c:
+        # here we collpase all difference image sources to under 2 common arguments --os-disk-source --data-disk-sources
+        c.argument('name', arg_type=name_arg_type, help='new image name')
+        c.argument('source', help='OS disk source from the same region, including a virtual machine ID or name, OS disk blob URI, managed OS disk ID or name, or OS snapshot ID or name')
+        c.argument('data_disk_sources', nargs='+', help='Space separated list of data disk sources, including unmanaged blob URI, managed disk ID or name, or snapshot ID or name')
+        c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
+    # endregion
 
-for dest in ['vm_scale_set_name', 'virtual_machine_scale_set_name', 'name']:
-    register_cli_argument('vmss', dest, vmss_name_type)
-    register_cli_argument('vmss deallocate', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
-    register_cli_argument('vmss delete-instances', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
-    register_cli_argument('vmss restart', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
-    register_cli_argument('vmss start', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
-    register_cli_argument('vmss stop', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
-    register_cli_argument('vmss show', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
-    register_cli_argument('vmss update-instances', dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
+    # region AvailabilitySets
+    with self.argument_context('vm availability-set') as c:
+        c.argument('availability_set_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
 
-register_cli_argument('vmss', 'instance_id', id_part='child_name_1')
-register_cli_argument('vmss', 'instance_ids', multi_ids_type, help='Space separated list of IDs (ex: 1 2 3 ...) or * for all instances. If not provided, the action will be applied on the scaleset itself')
-register_cli_argument('vmss', 'tags', tags_type)
-register_cli_argument('vmss', 'caching', help='Disk caching policy', **enum_choice_list(CachingTypes))
+    with self.argument_context('vm availability-set create') as c:
+        c.argument('availability_set_name', name_arg_type, validator=get_default_location_from_resource_group, help='Name of the availability set')
+        c.argument('platform_update_domain_count', type=int, help='Update Domain count. If unspecified, server picks the most optimal number like 5. For the latest defaults see https://docs.microsoft.com/en-us/rest/api/compute/availabilitysets/availabilitysets-create')
+        c.argument('platform_fault_domain_count', type=int, help='Fault Domain count.')
+        c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
+        c.argument('unmanaged', action='store_true', min_api='2016-04-30-preview', help='contained VMs should use unmanaged disks')
 
-register_cli_argument('vmss disk', 'lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine instance size.')
-register_cli_argument('vmss disk', 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
-register_cli_argument('vmss disk', 'vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
+    with self.argument_context('vm availability-set update') as c:
+        if self.supported_api_version(max_api='2016-04-30-preview', operation_group='virtual_machines'):
+            c.argument('name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
+            c.argument('availability_set_name', options_list=['--availability-set-name'])
+    # endregion
 
-register_cli_argument('vmss extension', 'extension_name', name_arg_type, help='Name of the extension.')
-register_cli_argument('vmss extension', 'vmss_name', id_part=None)
-register_cli_argument('vmss diagnostics', 'vmss_name', id_part=None, help='Scale set name')
+    # region VirtualMachines
+    with self.argument_context('vm') as c:
+        c.argument('vm_name', existing_vm_name)
+        c.argument('size', completer=get_vm_size_completion_list)
+        c.argument('name', arg_type=name_arg_type)
+        c.argument('zone', zone_type, min_api='2017-03-30')
+        c.argument('caching', help='Disk caching policy', arg_type=get_enum_type(CachingTypes))
+        c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
+        c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
+        c.argument('application_security_groups', min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space separated list of existing application security groups to associate with the VM.', arg_group='Network')
 
-register_cli_argument('vmss extension image', 'publisher_name', options_list=('--publisher', '-p'), help='Image publisher name')
-register_cli_argument('vmss extension image', 'type', options_list=('--name', '-n'), help='Extension name')
-register_cli_argument('vmss extension image', 'latest', action='store_true')
-register_cli_argument('vmss extension image', 'image_name', help='Image name')
-register_cli_argument('vmss extension image', 'orderby', help='The sort to apply on the operation')
-register_cli_argument('vmss extension image', 'top', help='Return top number of records')
-register_cli_argument('vmss extension image', 'version', help='Extension version')
+    with self.argument_context('vm capture') as c:
+        c.argument('overwrite', action='store_true')
 
-for scope in ['update-instances', 'delete-instances']:
-    register_cli_argument('vmss ' + scope, 'instance_ids', multi_ids_type, help='Space separated list of IDs (ex: 1 2 3 ...) or * for all instances.')
+    with self.argument_context('vm update') as c:
+        c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to. Feature registration for 'Microsoft.Compute/AllowManagedDisksReplaceOSDisk' is needed")
 
-for scope in ['vm diagnostics', 'vmss diagnostics']:
-    register_cli_argument(scope, 'version', help='version of the diagnostics extension. Will use the latest if not specfied')
-    register_cli_argument(scope, 'settings', help='json string or a file path, which defines data to be collected.', type=validate_file_or_dict, completer=FilesCompleter())
-    register_cli_argument(scope, 'protected_settings', help='json string or a file path containing private configurations such as storage account keys, etc.', type=validate_file_or_dict, completer=FilesCompleter())
+    with self.argument_context('vm create') as c:
+        c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
+        c.argument('vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', completer=None)
+        c.argument('os_disk_size_gb', type=int, help='the size of the os disk in GB', arg_group='Storage')
+        c.argument('attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
+        c.argument('attach_data_disks', nargs='+', help='Attach existing data disks to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
+        c.argument('availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
+        c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
+        c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
+        c.argument('application_security_groups', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
 
-for scope in ['vm', 'vmss']:
-    register_cli_argument(scope, 'no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
-    register_cli_argument('{} create'.format(scope), 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory', arg_group='Authentication')
-    register_cli_argument('{} extension'.format(scope), 'settings', type=validate_file_or_dict)
-    register_cli_argument('{} extension'.format(scope), 'protected_settings', type=validate_file_or_dict)
+    with self.argument_context('vm open-port') as c:
+        c.argument('vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
+        c.argument('network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=validate_nsg_name)
+        c.argument('apply_to_subnet', help='Allow inbound traffic on the subnet instead of the NIC', action='store_true')
+        c.argument('port', help="The port or port range (ex: 80-100) to open inbound traffic to. Use '*' to allow traffic to all ports.")
+        c.argument('priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
 
+    for scope in ['vm show', 'vm list']:
+        with self.argument_context(scope) as c:
+            c.argument('show_details', action='store_true', options_list=['--show-details', '-d'], help='show public ip address, FQDN, and power states. command will run slow')
 
-register_cli_argument('vm image list', 'image_location', location_type)
-register_cli_argument('vm image', 'publisher_name', options_list=('--publisher', '-p'))
-register_cli_argument('vm image', 'offer', options_list=('--offer', '-f'))
-register_cli_argument('vm image', 'sku', options_list=('--sku', '-s'))
-# overriding skus from the sdk operation to be a single sku
-register_cli_argument('vm image show', 'skus', options_list=('--sku', '-s'))
+    with self.argument_context('vm diagnostics') as c:
+        c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'])
 
-register_cli_argument('vm open-port', 'vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
-register_cli_argument('vm open-port', 'network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=validate_nsg_name)
-register_cli_argument('vm open-port', 'apply_to_subnet', help='Allow inbound traffic on the subnet instead of the NIC', action='store_true')
-register_cli_argument('vm open-port', 'port', help="The port or port range (ex: 80-100) to open inbound traffic to. Use '*' to allow traffic to all ports.")
-register_cli_argument('vm open-port', 'priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
+    with self.argument_context('vm diagnostics set') as c:
+        c.argument('storage_account', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
 
-register_cli_argument('vm nic', 'vm_name', existing_vm_name, options_list=('--vm-name',), id_part=None)
-register_cli_argument('vm nic', 'nics', nargs='+', help='Names or IDs of NICs.', validator=validate_vm_nics)
-register_cli_argument('vm nic show', 'nic', help='NIC name or ID.', validator=validate_vm_nic)
+    with self.argument_context('vm disk') as c:
+        c.argument('vm_name', options_list=['--vm-name'], id_part=None, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'))
+        c.argument('disk', validator=validate_vm_disk, help='disk name or ID', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+        c.argument('new', action='store_true', help='create a new disk')
+        c.argument('sku', arg_type=disk_sku)
+        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.')
+        c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
 
-register_cli_argument('vmss nic', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
-register_cli_argument('vmss nic', 'virtualmachine_index', options_list=('--instance-id',), id_part='child_name_1')
-register_cli_argument('vmss nic', 'network_interface_name', options_list=('--name', '-n'), metavar='NIC_NAME', help='The network interface (NIC).', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'), id_part='child_name_2')
+    with self.argument_context('vm disk detach') as c:
+        c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name.')
 
-register_cli_argument('network nic scale-set list', 'virtual_machine_scale_set_name', options_list=('--vmss-name',), completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
+    with self.argument_context('vm encryption enable') as c:
+        c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
 
-# VM CREATE PARAMETER CONFIGURATION
-register_cli_argument('vm create', 'name', name_arg_type, validator=_resource_not_exists('Microsoft.Compute/virtualMachines'))
+    with self.argument_context('vm extension') as c:
+        c.argument('vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), id_part='child_name_1')
+        c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part='name')
 
-register_cli_argument('vmss create', 'name', name_arg_type)
-register_cli_argument('vmss create', 'nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
-register_cli_argument('vmss create', 'single_placement_group', default=None, help="Enable single placement group. This flag will default to True if instance count <=100, and default to False for instance count >100.", **enum_choice_list(['true', 'false']))
+    for scope in ['vm format-secret', 'vm secret']:
+        with self.argument_context(scope) as c:
+            c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='Space separated list of key vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
+            c.argument('keyvault', help='Name or ID of the key vault.')
+            c.argument('certificate', help='key vault certificate name or its full secret URL')
+            c.argument('certificate_store', help='Windows certificate store names. Default: My')
 
-for scope in ['vm create', 'vmss create']:
-    register_cli_argument(scope, 'location', location_type, help='Location in which to create VM and related resources. If default location is not configured, will default to the resource group\'s location')
-    register_cli_argument(scope, 'tags', tags_type)
-    register_cli_argument(scope, 'no_wait', help='Do not wait for the long-running operation to finish.')
-    register_cli_argument(scope, 'validate', options_list=('--validate',), help='Generate and validate the ARM template without creating any resources.', action='store_true')
-    register_cli_argument(scope, 'size', help='The VM size to be created. See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
-    register_cli_argument(scope, 'image', completer=get_urn_aliases_completion_list)
+    with self.argument_context('vm image') as c:
+        c.argument('publisher_name', options_list=['--publisher', '-p'])
+        c.argument('offer', options_list=['--offer', '-f'])
+        c.argument('sku', options_list=['--sku', '-s'])
 
-    register_cli_argument(scope, 'admin_username', help='Username for the VM.', arg_group='Authentication')
-    register_cli_argument(scope, 'admin_password', help="Password for the VM if authentication type is 'Password'.", arg_group='Authentication')
-    register_cli_argument(scope, 'ssh_key_value', help='SSH public key or public key file path.', completer=FilesCompleter(), type=file_type, arg_group='Authentication')
-    register_cli_argument(scope, 'custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
-    register_cli_argument(scope, 'ssh_dest_key_path', help='Destination file path on the VM for the SSH key.', arg_group='Authentication')
-    register_cli_argument(scope, 'authentication_type', help='Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux.', arg_group='Authentication', **enum_choice_list(['ssh', 'password']))
+    with self.argument_context('vm image list') as c:
+        c.argument('image_location', get_location_type(self.cli_ctx))
 
-    register_cli_argument(scope, 'os_disk_name', help='The name of the new VM OS disk.', arg_group='Storage')
-    register_cli_argument(scope, 'os_type', help='Type of OS installed on a custom VHD. Do not use when specifying an URN or URN alias.', arg_group='Storage', **enum_choice_list(['windows', 'linux']))
-    register_cli_argument(scope, 'storage_account', help="Only applicable when use with '--use-unmanaged-disk'. The name to use when creating a new storage account or referencing an existing one. If omitted, an appropriate storage account in the same resource group and location will be used, or a new one will be created.", arg_group='Storage')
-    register_cli_argument(scope, 'storage_sku', help='The sku of storage account to persist VM. By default, only Standard_LRS and Premium_LRS are allowed. Using with --use-unmanaged-disk, all are available.', arg_group='Storage', **enum_choice_list(SkuName))
-    register_cli_argument(scope, 'storage_container_name', help="Only applicable when use with '--use-unmanaged-disk'. Name of the storage container for the VM OS disk. Default: vhds", arg_group='Storage')
-    register_cli_argument(scope, 'os_publisher', ignore_type)
-    register_cli_argument(scope, 'os_offer', ignore_type)
-    register_cli_argument(scope, 'os_sku', ignore_type)
-    register_cli_argument(scope, 'os_version', ignore_type)
-    register_cli_argument(scope, 'storage_profile', ignore_type)
-    register_cli_argument(scope, 'use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM', arg_group='Storage')
-    register_cli_argument(scope, 'data_disk_sizes_gb', nargs='+', type=int, help='space separated empty managed data disk sizes in GB to create', arg_group='Storage')
-    register_cli_argument(scope, 'image_data_disks', ignore_type)
-    register_cli_argument(scope, 'plan_name', arg_group='Marketplace Image Plan', help='plan name')
-    register_cli_argument(scope, 'plan_product', arg_group='Marketplace Image Plan', help='plan product')
-    register_cli_argument(scope, 'plan_publisher', arg_group='Marketplace Image Plan', help='plan publisher')
-    register_cli_argument(scope, 'plan_promotion_code', arg_group='Marketplace Image Plan', help='plan promotion code')
-    for item in ['storage_account', 'public_ip', 'nsg', 'nic', 'vnet', 'load_balancer', 'app_gateway']:
-        register_cli_argument(scope, '{}_type'.format(item), ignore_type)
+    with self.argument_context('vm image show') as c:
+        c.argument('skus', options_list=['--sku', '-s'])
 
-    register_cli_argument(scope, 'vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.', arg_group='Network')
-    register_cli_argument(scope, 'vnet_address_prefix', help='The IP address prefix to use when creating a new VNet in CIDR format.', arg_group='Network')
-    register_cli_argument(scope, 'subnet', help='The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID. If omitted, an appropriate VNet and subnet will be selected automatically, or a new one will be created.', arg_group='Network')
-    register_cli_argument(scope, 'subnet_address_prefix', help='The subnet IP address prefix to use when creating a new VNet in CIDR format.', arg_group='Network')
-    register_cli_argument(scope, 'nics', nargs='+', help='Names or IDs of existing NICs to attach to the VM. The first NIC will be designated as primary. If omitted, a new NIC will be created. If an existing NIC is specified, do not specify subnet, vnet, public IP or NSG.', arg_group='Network')
-    register_cli_argument(scope, 'private_ip_address', help='Static private IP address (e.g. 10.0.0.5).', arg_group='Network')
-    register_cli_argument(scope, 'public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None.', arg_group='Network')
-    register_cli_argument(scope, 'public_ip_address_allocation', help=None, arg_group='Network', **enum_choice_list(['dynamic', 'static']))
-    register_cli_argument(scope, 'public_ip_address_dns_name', help='Globally unique DNS name for a newly created Public IP.', arg_group='Network')
-    register_cli_argument(scope, 'secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@<file path>` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
-    register_cli_argument(scope, 'os_caching', options_list=['--storage-caching', '--os-disk-caching'], arg_group='Storage', help='Storage caching type for the VM OS disk.', **enum_choice_list([CachingTypes.read_only.value, CachingTypes.read_write.value]))
-    register_cli_argument(scope, 'data_caching', options_list=['--data-disk-caching'], arg_group='Storage', help='Storage caching type for the VM data disk(s).', **enum_choice_list(CachingTypes))
+    with self.argument_context('vm nic') as c:
+        c.argument('vm_name', existing_vm_name, options_list=['--vm-name'], id_part=None)
+        c.argument('nics', nargs='+', help='Names or IDs of NICs.', validator=validate_vm_nics)
+        c.argument('primary_nic', help='Name or ID of the primary NIC. If missing, the first NIC in the list will be the primary.')
 
-    register_cli_argument(scope, 'license_type', help="license type if the Windows image or disk used was licensed on-premises", **enum_choice_list(['Windows_Server', 'Windows_Client']))
+    with self.argument_context('vm nic show') as c:
+        c.argument('nic', help='NIC name or ID.', validator=validate_vm_nic)
 
-    register_cli_argument(scope, 'assign_identity', nargs='*', arg_group='Managed Service Identity',
-                          help="accept system or user assigned identities with space separated. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
+    with self.argument_context('vm run-command') as c:
+        c.argument('command_id', completer=get_vm_run_command_completion_list, help="The run command ID")
 
-for scope in ['vm create', 'vmss create', 'vm assign-identity', 'vmss assign-identity']:
-    arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
-    register_cli_argument(scope, 'identity_scope', options_list=('--scope',), arg_group=arg_group,
-                          help="Scope that the system assigned identity can access")
-    register_cli_argument(scope, 'identity_role', options_list=('--role',), arg_group=arg_group,
-                          help="Role name or id the system assigned identity will have")
-    register_cli_argument(scope, 'identity_role_id', ignore_type)
+    with self.argument_context('vm run-command invoke') as c:
+        c.argument('parameters', nargs='+', help="space separated parameters in the format of '[name=]value'")
+        c.argument('scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
 
-for scope in ['vm remove-identity', 'vmss remove-identity']:
-    register_cli_argument(scope, 'identities', nargs='+', help="space separated user assigned identities to remove")
+    with self.argument_context('vm unmanaged-disk') as c:
+        c.argument('vm_name', arg_type=existing_vm_name)
+        c.argument('disk_size', help='Size of disk (GiB)', default=1023, type=int)
+        c.argument('new', action='store_true', help='Create a new disk.')
+        c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
+        c.argument('vhd_uri', help="Virtual hard disk URI. For example: https://mystorage.blob.core.windows.net/vhds/d1.vhd")
 
-for scope in ['vm assign-identity', 'vmss assign-identity']:
-    register_cli_argument(scope, 'assign_identity', options_list=('--identities',), nargs='*', help="the identities to assign")
-    register_cli_argument(scope, 'port', type=int, help="The port to fetch AAD token. Default: 50342")
+    with self.argument_context('vm unmanaged-disk attach') as c:
+        c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name(optional when create a new disk)')
 
-register_cli_argument('vm assign-identity', 'vm_name', existing_vm_name, validator=process_assign_identity_namespace)
-register_cli_argument('vm remove-identity', 'vm_name', existing_vm_name, validator=process_remove_identity_namespace)
-register_cli_argument('vmss assign-identity', 'vmss_name', vmss_name_type, validator=process_assign_identity_namespace)
-register_cli_argument('vmss remove-identity', 'vmss_name', vmss_name_type, validator=process_remove_identity_namespace)
+    with self.argument_context('vm unmanaged-disk detach') as c:
+        c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name.')
 
-register_cli_argument('vm create', 'vm_name', name_arg_type, id_part=None, help='Name of the virtual machine.', validator=process_vm_create_namespace, completer=None)
-register_cli_argument('vm create', 'os_disk_size_gb', type=int, help='the size of the os disk in GB', arg_group='Storage')
-register_cli_argument('vm create', 'attach_os_disk', help='Attach an existing OS disk to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
-register_cli_argument('vm create', 'attach_data_disks', nargs='+', help='Attach existing data disks to the VM. Can use the name or ID of a managed disk or the URI to an unmanaged disk VHD.')
-register_cli_argument('vm create', 'availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
-register_cli_argument('vm create', 'nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
-register_cli_argument('vm create', 'nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', **enum_choice_list(['RDP', 'SSH']))
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-09-01') as c:
-    c.register_cli_argument('vm create', 'application_security_groups', nargs='+', options_list=['--asgs'], help='Space separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
+    for scope in ['vm unmanaged-disk attach', 'vm unmanaged-disk detach']:
+        with self.argument_context(scope) as c:
+            c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
 
-register_cli_argument('vmss create', 'vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.', validator=process_vmss_create_namespace)
-register_cli_argument('vmss create', 'load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', options_list=['--load-balancer', '--lb'], arg_group='Network Balancer')
-register_cli_argument('vmss create', 'application_gateway', help='Name to use when creating a new application gateway (default) or referencing an existing one. Can also reference an existing application gateway by ID or specify "" for none.', options_list=['--app-gateway'], arg_group='Network Balancer')
-register_cli_argument('vmss create', 'backend_pool_name', help='Name to use for the backend pool when creating a new load balancer or application gateway.', arg_group='Network Balancer')
-register_cli_argument('vmss create', 'nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'], arg_group='Network Balancer')
-register_cli_argument('vmss create', 'backend_port', help='When creating a new load balancer, backend port to open with NAT rules (Defaults to 22 on Linux and 3389 on Windows). When creating an application gateway, the backend port to use for the backend HTTP settings.', type=int, arg_group='Network Balancer')
-register_cli_argument('vmss create', 'app_gateway_subnet_address_prefix', help='The subnet IP address prefix to use when creating a new application gateway in CIDR format.', arg_group='Network Balancer')
-register_cli_argument('vmss create', 'app_gateway_sku', help='SKU when creating a new application gateway.', arg_group='Network Balancer')
-register_cli_argument('vmss create', 'app_gateway_capacity', help='The number of instances to use when creating a new application gateway.', arg_group='Network Balancer')
-register_cli_argument('vmss create', 'instance_count', help='Number of VMs in the scale set.', type=int)
-register_cli_argument('vmss create', 'disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
-register_cli_argument('vmss create', 'upgrade_policy_mode', help=None, **enum_choice_list(UpgradeMode))
-register_cli_argument('vmss create', 'health_probe', help='(Preview) probe name from the existing load balancer, mainly used for rolling upgrade')
-register_cli_argument('vmss create', 'vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
-register_cli_argument('vmss create', 'nsg', help='reference to an existing Network Security Group by ID, or name if in the same resource group', arg_group='Network')
-with VersionConstraint(ResourceType.MGMT_NETWORK, min_api='2017-08-01') as c:
-    c.register_cli_argument('vmss create', 'load_balancer_sku', help='SKU when creating a new Load Balancer.', arg_group='Network Balancer', options_list=['--lb-sku'], default='Basic')  # **model_choice_list(ResourceType.MGMT_NETWORK, 'LoadBalancerSkuName'))
+    with self.argument_context('vm user') as c:
+        c.argument('username', options_list=['--username', '-u'], help='The user name')
+        c.argument('password', options_list=['--password', '-p'], help='The user password')
+    # endregion
 
-with VersionConstraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30', operation_group='virtual_machine_scale_sets') as c:
-    c.register_cli_argument('vmss create', 'public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules", arg_group='Network')
-    c.register_cli_argument('vmss create', 'vm_domain_name', help="domain name of VM instances, once configured, the FQDN is 'vm<vm-index>.<vm-domain-name>.<..rest..>'", arg_group='Network')
-    c.register_cli_argument('vmss create', 'dns_servers', nargs='+', help="space separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6", arg_group='Network')
-    c.register_cli_argument('vmss create', 'accelerated_networking', action='store_true', help="enable accelerated networking", arg_group='Network')
+    # region VMSS
+    scaleset_name_aliases = ['vm_scale_set_name', 'virtual_machine_scale_set_name', 'name']
 
-for scope in ['vm encryption', 'vmss encryption']:
-    register_cli_argument(scope, 'volume_type', help='Type of volume that the encryption operation is performed on', **enum_choice_list(['DATA', 'OS', 'ALL']))
-    register_cli_argument(scope, 'force', action='store_true', help='continue by ignoring client side validation errors')
-    register_cli_argument(scope, 'disk_encryption_keyvault', validator=process_disk_encryption_namespace)
-register_cli_argument('vmss encryption', 'vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
-register_cli_argument('vm encryption enable', 'encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted.')
+    with self.argument_context('vmss') as c:
+        c.argument('zones', zones_type, min_api='2017-03-30')
+        c.argument('instance_id', id_part='child_name_1')
+        c.argument('instance_ids', multi_ids_type, help='Space separated list of IDs (ex: 1 2 3 ...) or * for all instances. If not provided, the action will be applied on the scaleset itself')
+        c.argument('tags', tags_type)
+        c.argument('caching', help='Disk caching policy', arg_type=get_enum_type(CachingTypes))
+        for dest in scaleset_name_aliases:
+            c.argument(dest, vmss_name_type)
 
-existing_disk_name = CliArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
-register_cli_argument('disk', 'disk_name', existing_disk_name, completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
-register_cli_argument('disk', 'name', arg_type=name_arg_type)
-register_cli_argument('disk', 'sku', arg_type=disk_sku)
+    for scope in ['vmss deallocate', 'vmss delete-instances', 'vmss restart', 'vmss start', 'vmss stop', 'vmss show', 'vmss update-instances']:
+        with self.argument_context(scope) as c:
+            for dest in scaleset_name_aliases:
+                c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
-existing_snapshot_name = CliArgumentType(overrides=name_arg_type, help='The name of the snapshot', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'), id_part='name')
-register_cli_argument('snapshot', 'snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
-register_cli_argument('snapshot', 'name', arg_type=name_arg_type)
-register_cli_argument('snapshot', 'sku', arg_type=disk_sku)
+    with self.argument_context('vmss create') as c:
+        c.argument('name', name_arg_type)
+        c.argument('nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
+        c.argument('single_placement_group', default=None, help="Enable single placement group. This flag will default to True if instance count <=100, and default to False for instance count >100.", arg_type=get_enum_type(['true', 'false']))
+        c.argument('vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.')
+        c.argument('instance_count', help='Number of VMs in the scale set.', type=int)
+        c.argument('disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
+        c.argument('upgrade_policy_mode', help=None, arg_type=get_enum_type(UpgradeMode))
+        c.argument('health_probe', help='(Preview) probe name from the existing load balancer, mainly used for rolling upgrade')
+        c.argument('vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
+        c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
 
-existing_image_name = CliArgumentType(overrides=name_arg_type, help='The name of the custom image', completer=get_resource_name_completion_list('Microsoft.Compute/images'), id_part='name')
-register_cli_argument('image', 'os_type', **enum_choice_list(['Windows', 'Linux']))
-register_cli_argument('image', 'image_name', arg_type=name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/images'))
-register_cli_argument('image create', 'name', arg_type=name_arg_type, help='new image name')
+    with self.argument_context('vmss create', arg_group='Network Balancer') as c:
+        LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
+        c.argument('application_gateway', help='Name to use when creating a new application gateway (default) or referencing an existing one. Can also reference an existing application gateway by ID or specify "" for none.', options_list=['--app-gateway'])
+        c.argument('app_gateway_capacity', help='The number of instances to use when creating a new application gateway.')
+        c.argument('app_gateway_sku', help='SKU when creating a new application gateway.')
+        c.argument('app_gateway_subnet_address_prefix', help='The subnet IP address prefix to use when creating a new application gateway in CIDR format.')
+        c.argument('backend_pool_name', help='Name to use for the backend pool when creating a new load balancer or application gateway.')
+        c.argument('backend_port', help='When creating a new load balancer, backend port to open with NAT rules (Defaults to 22 on Linux and 3389 on Windows). When creating an application gateway, the backend port to use for the backend HTTP settings.', type=int)
+        c.argument('load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', options_list=['--load-balancer', '--lb'])
+        c.argument('load_balancer_sku', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-08-01', help="SKU when creating a new Load Balancer. Default to 'Basic' for any non-zonal scaleset and 'Standard' otherwise", options_list=['--lb-sku'], arg_type=get_enum_type(LoadBalancerSkuName))
+        c.argument('nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'])
 
-# here we collpase all difference image sources to under 2 common arguments --os-disk-source --data-disk-sources
-register_cli_argument('image create', 'source', validator=process_image_create_namespace,
-                      help='OS disk source from the same region, including a virtual machine id or name, os disk blob uri, managed os disk id or name, or os snapshot id or name')
-register_cli_argument('image create', 'data_disk_sources', nargs='+',
-                      help='space separated 1 or more data disk sources, including unmanaged blob uri, managed disk id or name, or snapshot id or name')
-register_cli_argument('image create', 'source_virtual_machine', ignore_type)
-register_cli_argument('image create', 'os_blob_uri', ignore_type)
-register_cli_argument('image create', 'os_disk', ignore_type)
-register_cli_argument('image create', 'os_snapshot', ignore_type)
-register_cli_argument('image create', 'data_blob_uris', ignore_type)
-register_cli_argument('image create', 'data_disks', ignore_type)
-register_cli_argument('image create', 'data_snapshots', ignore_type)
+    with self.argument_context('vmss create', min_api='2017-03-30', arg_group='Network') as c:
+        c.argument('public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules")
+        c.argument('vm_domain_name', help="domain name of VM instances, once configured, the FQDN is 'vm<vm-index>.<vm-domain-name>.<..rest..>'")
+        c.argument('dns_servers', nargs='+', help="space separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6")
+        c.argument('accelerated_networking', action='store_true', help="enable accelerated networking")
 
-for scope in ['disk', 'snapshot']:
-    register_cli_argument(scope + ' create', 'source', validator=process_disk_or_snapshot_create_namespace,
-                          help='source to create the disk/snapshot from, including unmanaged blob uri, managed disk id or name, or snapshot id or name')
-    register_cli_argument(scope, 'source_blob_uri', ignore_type)
-    register_cli_argument(scope, 'source_disk', ignore_type)
-    register_cli_argument(scope, 'source_snapshot', ignore_type)
-    register_cli_argument(scope, 'source_storage_account_id', help='used when source blob is in a different subscription')
-    register_cli_argument(scope, 'size_gb', options_list=('--size-gb', '-z'), help='size in GB.')
-    register_cli_argument(scope, 'duration_in_seconds', help='Time duration in seconds until the SAS access expires')
+    for scope in ['vmss update-instances', 'vmss delete-instances']:
+        with self.argument_context(scope) as c:
+            c.argument('instance_ids', multi_ids_type, help='Space separated list of IDs (ex: 1 2 3 ...) or * for all instances.')
 
-register_cli_argument('vm format-secret', 'secrets', multi_ids_type, options_list=('--secrets', '-s'), help='Space separated list of Key Vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
-register_cli_argument('vm secret', 'keyvault', validator=process_vm_secret_namespace, help='Keyvault ID, name if in the same resource group')
-register_cli_argument('vm secret', 'certificate', help='keyvault certificate name or its full secret url')
-register_cli_argument('vm secret', 'certificate_store', help='Windows certificate store names. Default: My')
+    with self.argument_context('vmss diagnostics') as c:
+        c.argument('vmss_name', id_part=None, help='Scale set name')
 
-register_cli_argument('vm run-command invoke', 'parameters', nargs='+', help="space separated parameters in the format of '[name=]value'")
-register_cli_argument('vm run-command invoke', 'scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
-register_cli_argument('vm run-command', 'command_id', completer=get_vm_run_command_completion_list, help="The run command id")
+    with self.argument_context('vmss disk') as c:
+        c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine instance size.')
+        c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.')
+        c.argument('vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
 
-# TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
-register_cli_argument('identity', 'resource_name', arg_type=name_arg_type, id_part='name')
-register_cli_argument('identity create', 'location', location_type, validator=process_msi_namespace)
+    with self.argument_context('vmss encryption') as c:
+        c.argument('vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
+
+    with self.argument_context('vmss extension') as c:
+        c.argument('extension_name', name_arg_type, help='Name of the extension.')
+        c.argument('vmss_name', vmss_name_type, options_list=['--vmss-name'], id_part=None)
+
+    with self.argument_context('vmss nic') as c:
+        c.argument('virtual_machine_scale_set_name', options_list=['--vmss-name'], help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
+        c.argument('virtualmachine_index', options_list=['--instance-id'], id_part='child_name_1')
+        c.argument('network_interface_name', options_list=['--name', '-n'], metavar='NIC_NAME', help='The network interface (NIC).', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'), id_part='child_name_2')
+    # endregion
+
+    # region VM & VMSS Shared
+    for scope in ['vm', 'vmss']:
+        with self.argument_context(scope) as c:
+            c.argument('no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
+
+    for scope in ['vm assign-identity', 'vmss assign-identity']:
+        with self.argument_context(scope) as c:
+            c.argument('assign_identity', options_list=['--identities'], nargs='*', help="the identities to assign")
+            c.argument('port', type=int, help="The port to fetch AAD token. Default: 50342")
+            c.argument('vm_name', existing_vm_name)
+            c.argument('vmss_name', vmss_name_type)
+
+    for scope in ['vm remove-identity', 'vmss remove-identity']:
+        with self.argument_context(scope) as c:
+            c.argument('identities', nargs='+', help="space separated user assigned identities to remove")
+            c.argument('vm_name', existing_vm_name)
+            c.argument('vmss_name', vmss_name_type)
+
+    for scope in ['vm create', 'vmss create']:
+        with self.argument_context(scope) as c:
+            c.argument('location', get_location_type(self.cli_ctx), help='Location in which to create VM and related resources. If default location is not configured, will default to the resource group\'s location')
+            c.argument('tags', tags_type)
+            c.argument('no_wait', help='Do not wait for the long-running operation to finish.')
+            c.argument('validate', options_list=['--validate'], help='Generate and validate the ARM template without creating any resources.', action='store_true')
+            c.argument('size', help='The VM size to be created. See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
+            c.argument('image', completer=get_urn_aliases_completion_list)
+            c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
+            c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@<file path>` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
+            c.argument('license_type', help="license type if the Windows image or disk used was licensed on-premises", arg_type=get_enum_type(['Windows_Server', 'Windows_Client']))
+            c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities with space separated. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
+
+        with self.argument_context(scope, arg_group='Authentication') as c:
+            c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
+            c.argument('admin_username', help='Username for the VM.')
+            c.argument('admin_password', help="Password for the VM if authentication type is 'Password'.")
+            c.argument('ssh_key_value', help='SSH public key or public key file path.', completer=FilesCompleter(), type=file_type)
+            c.argument('ssh_dest_key_path', help='Destination file path on the VM for the SSH key.')
+            c.argument('authentication_type', help='Type of authentication to use with the VM. Defaults to password for Windows and SSH public key for Linux.', arg_type=get_enum_type(['ssh', 'password']))
+
+        with self.argument_context(scope, arg_group='Storage') as c:
+            c.argument('os_disk_name', help='The name of the new VM OS disk.')
+            c.argument('os_type', help='Type of OS installed on a custom VHD. Do not use when specifying an URN or URN alias.', arg_type=get_enum_type(['windows', 'linux']))
+            c.argument('storage_account', help="Only applicable when used with `--use-unmanaged-disk`. The name to use when creating a new storage account or referencing an existing one. If omitted, an appropriate storage account in the same resource group and location will be used, or a new one will be created.")
+            c.argument('storage_sku', help='The SKU of the storage account with which to persist VM. By default, only Standard_LRS and Premium_LRS are allowed. With `--use-unmanaged-disk`, all are available.', arg_type=get_enum_type(SkuName))
+            c.argument('storage_container_name', help="Only applicable when used with `--use-unmanaged-disk`. Name of the storage container for the VM OS disk. Default: vhds")
+            c.ignore('os_publisher', 'os_offer', 'os_sku', 'os_version', 'storage_profile')
+            c.argument('use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM')
+            c.argument('data_disk_sizes_gb', nargs='+', type=int, help='space separated empty managed data disk sizes in GB to create')
+            c.ignore('image_data_disks', 'storage_account_type', 'public_ip_type', 'nsg_type', 'nic_type', 'vnet_type', 'load_balancer_type', 'app_gateway_type')
+            c.argument('os_caching', options_list=['--storage-caching', '--os-disk-caching'], help='Storage caching type for the VM OS disk.', arg_type=get_enum_type([CachingTypes.read_only.value, CachingTypes.read_write.value], default='ReadWrite'))
+            c.argument('data_caching', options_list=['--data-disk-caching'], help='Storage caching type for the VM data disk(s).', arg_type=get_enum_type(CachingTypes))
+
+        with self.argument_context(scope, arg_group='Network') as c:
+            c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
+            c.argument('vnet_address_prefix', help='The IP address prefix to use when creating a new VNet in CIDR format.')
+            c.argument('subnet', help='The name of the subnet when creating a new VNet or referencing an existing one. Can also reference an existing subnet by ID. If omitted, an appropriate VNet and subnet will be selected automatically, or a new one will be created.')
+            c.argument('subnet_address_prefix', help='The subnet IP address prefix to use when creating a new VNet in CIDR format.')
+            c.argument('nics', nargs='+', help='Names or IDs of existing NICs to attach to the VM. The first NIC will be designated as primary. If omitted, a new NIC will be created. If an existing NIC is specified, do not specify subnet, VNet, public IP or NSG.')
+            c.argument('private_ip_address', help='Static private IP address (e.g. 10.0.0.5).')
+            c.argument('public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None.')
+            c.argument('public_ip_address_allocation', help=None, arg_type=get_enum_type(['dynamic', 'static']))
+            c.argument('public_ip_address_dns_name', help='Globally unique DNS name for a newly created public IP.')
+
+        with self.argument_context(scope, arg_group='Marketplace Image Plan') as c:
+            c.argument('plan_name', help='plan name')
+            c.argument('plan_product', help='plan product')
+            c.argument('plan_publisher', help='plan publisher')
+            c.argument('plan_promotion_code', help='plan promotion code')
+
+    for scope in ['vm create', 'vmss create', 'vm assign-identity', 'vmss assign-identity']:
+        with self.argument_context(scope) as c:
+            arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
+            c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group, help="Scope that the system assigned identity can access")
+            c.argument('identity_role', options_list=['--role'], arg_group=arg_group, help="Role name or id the system assigned identity will have")
+            c.ignore('identity_role_id')
+
+    for scope in ['vm diagnostics', 'vmss diagnostics']:
+        with self.argument_context(scope) as c:
+            c.argument('version', help='version of the diagnostics extension. Will use the latest if not specfied')
+            c.argument('settings', help='json string or a file path, which defines data to be collected.', type=validate_file_or_dict, completer=FilesCompleter())
+            c.argument('protected_settings', help='json string or a file path containing private configurations such as storage account keys, etc.', type=validate_file_or_dict, completer=FilesCompleter())
+
+    for scope in ['vm encryption', 'vmss encryption']:
+        with self.argument_context(scope) as c:
+            c.argument('volume_type', help='Type of volume that the encryption operation is performed on', arg_type=get_enum_type(['DATA', 'OS', 'ALL']))
+            c.argument('force', action='store_true', help='continue by ignoring client side validation errors')
+            c.argument('disk_encryption_keyvault', help='The key vault where the generated encryption key will be placed.')
+            c.argument('key_encryption_key', help='Key vault key name or URL used to encrypt the disk encryption key.')
+            c.argument('key_encryption_keyvault', help='The key vault containing the key encryption key used to encrypt the disk encryption key. If missing, CLI will use `--disk-encryption-keyvault`.')
+
+    for scope in ['vm extension', 'vmss extension']:
+        with self.argument_context(scope) as c:
+            c.argument('publisher', help='The name of the extension publisher.')
+            c.argument('settings', type=validate_file_or_dict, help='Extension settings in JSON format. A JSON file path is also accepted.')
+            c.argument('protected_settings', type=validate_file_or_dict, help='Protected settings in JSON format for sensitive information like credentials. A JSON file path is also accepted.')
+            c.argument('version', help='The version of the extension')
+
+    for scope in ['vm extension image', 'vmss extension image']:
+        with self.argument_context(scope) as c:
+            c.argument('image_location', options_list=['--location', '-l'], help='Image location.')
+            c.argument('name', help='Image name', id_part=None)
+            c.argument('publisher_name', options_list=['--publisher', '-p'], help='Image publisher name')
+            c.argument('type', options_list=['--name', '-n'], help='Name of the extension')
+            c.argument('latest', action='store_true', help='Show the latest version only.')
+            c.argument('version', help='Extension version')
+    # endregion

@@ -4,184 +4,164 @@
 # --------------------------------------------------------------------------------------------
 import json
 
-from azure.cli.testsdk import JMESPathCheck as JMESPathCheck2
-from azure.cli.testsdk import NoneCheck as NoneCheck2
-from azure.cli.testsdk import ScenarioTest
-from azure.cli.testsdk.vcr_test_base import VCRTestBase, JMESPathCheck, NoneCheck
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest
 
 
-class ServicePrincipalExpressCreateScenarioTest(VCRTestBase):
-    def __init__(self, test_method):
-        super(ServicePrincipalExpressCreateScenarioTest, self).__init__(__file__, test_method)
+class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
 
     def test_sp_create_scenario(self):
-        if self.playback:
-            return  # live-only test, will enable playback once resolve #635
-        else:
-            self.execute()
-
-    def body(self):
-        app_id_uri = 'http://azureclitest-graph'
+        app_id_uri = 'http://' + self.create_random_name('clisp-test-', 20)
+        self.kwargs['app_id_uri'] = app_id_uri
         # create app through express option
-        self.cmd('ad sp create-for-rbac -n {}'.format(app_id_uri), checks=[
-            JMESPathCheck('name', app_id_uri)
-        ])
+        self.cmd('ad sp create-for-rbac -n {app_id_uri} --skip-assignment',
+                 checks=self.check('name', '{app_id_uri}'))
 
         # show/list app
-        self.cmd('ad app show --id {}'.format(app_id_uri), checks=[
-            JMESPathCheck('identifierUris[0]', app_id_uri)
-        ])
-        self.cmd('ad app list --identifier-uri {}'.format(app_id_uri), checks=[
-            JMESPathCheck('[0].identifierUris[0]', app_id_uri),
-            JMESPathCheck('length([*])', 1)
+        self.cmd('ad app show --id {app_id_uri}',
+                 checks=self.check('identifierUris[0]', '{app_id_uri}'))
+        self.cmd('ad app list --identifier-uri {app_id_uri}', checks=[
+            self.check('[0].identifierUris[0]', '{app_id_uri}'),
+            self.check('length([*])', 1)
         ])
 
         # show/list sp
-        self.cmd('ad sp show --id {}'.format(app_id_uri), checks=[
-            JMESPathCheck('servicePrincipalNames[0]', app_id_uri)
+        self.cmd('ad sp show --id {app_id_uri}',
+                 checks=self.check('servicePrincipalNames[0]', '{app_id_uri}'))
+        self.cmd('ad sp list --spn {app_id_uri}', checks=[
+            self.check('[0].servicePrincipalNames[0]', '{app_id_uri}'),
+            self.check('length([*])', 1),
         ])
-        self.cmd('ad sp list --spn {}'.format(app_id_uri), checks=[
-            JMESPathCheck('[0].servicePrincipalNames[0]', app_id_uri),
-            JMESPathCheck('length([*])', 1),
-        ])
-        self.cmd('ad sp reset-credentials -n {}'.format(app_id_uri), checks=[
-            JMESPathCheck('name', app_id_uri)
-        ])
+        self.cmd('ad sp reset-credentials -n {app_id_uri}',
+                 checks=self.check('name', '{app_id_uri}'))
         # cleanup
-        self.cmd('ad sp delete --id {}'.format(app_id_uri), None)
-        self.cmd('ad sp list --spn {}'.format(app_id_uri), checks=NoneCheck())
-        self.cmd('ad app delete --id {}'.format(app_id_uri), None)
-        self.cmd('ad app list --identifier-uri {}'.format(app_id_uri), checks=NoneCheck())
+        self.cmd('ad sp delete --id {app_id_uri}')  # this whould auto-delete the app as well
+        self.cmd('ad sp list --spn {app_id_uri}',
+                 checks=self.is_empty())
+        self.cmd('ad app list --identifier-uri {app_id_uri}',
+                 checks=self.is_empty())
 
 
-class ApplicationSetScenarioTest(VCRTestBase):
-    def __init__(self, test_method):
-        super(ApplicationSetScenarioTest, self).__init__(__file__, test_method)
+class ApplicationSetScenarioTest(ScenarioTest):
 
     def test_application_set_scenario(self):
-        self.execute()
-
-    def body(self):
-        app_id_uri = 'http://azureclitest-graph'
-        display_name = 'azureclitest'
+        self.kwargs.update({
+            'app': 'http://azureclitest-graph',
+            'name': 'azureclitest'
+        })
 
         # crerate app through general option
-        self.cmd('ad app create --display-name {} --homepage {} --identifier-uris {}'
-                 .format(display_name, app_id_uri, app_id_uri),
-                 checks=[JMESPathCheck('identifierUris[0]', app_id_uri)])
+        self.cmd('ad app create --display-name {name} --homepage {app} --identifier-uris {app}',
+                 checks=self.check('identifierUris[0]', '{app}'))
 
         # show/list app
-        self.cmd('ad app show --id {}'.format(app_id_uri), checks=[
-            JMESPathCheck('identifierUris[0]', app_id_uri)
-        ])
-        self.cmd('ad app list --display-name {}'.format(display_name), checks=[
-            JMESPathCheck('[0].identifierUris[0]', app_id_uri),
-            JMESPathCheck('length([*])', 1)
+        self.cmd('ad app show --id {app}',
+                 checks=self.check('identifierUris[0]', '{app}'))
+        self.cmd('ad app list --display-name {name}', checks=[
+            self.check('[0].identifierUris[0]', '{app}'),
+            self.check('length([*])', 1)
         ])
 
         # update app
-        reply_uri = "http://azureclitest-replyuri"
-        self.cmd('ad app update --id {} --reply-urls {}'.format(app_id_uri, reply_uri))
-        self.cmd('ad app show --id {}'.format(app_id_uri), checks=[
-            JMESPathCheck('replyUrls[0]', reply_uri)
-        ])
+        self.kwargs['reply_uri'] = "http://azureclitest-replyuri"
+        self.cmd('ad app update --id {app} --reply-urls {reply_uri}')
+        self.cmd('ad app show --id {app}',
+                 checks=self.check('replyUrls[0]', '{reply_uri}'))
 
         # delete app
-        self.cmd('ad app delete --id {}'.format(app_id_uri))
-        self.cmd('ad app list --identifier-uri {}'.format(app_id_uri), checks=NoneCheck())
+        self.cmd('ad app delete --id {app}')
+        self.cmd('ad app list --identifier-uri {app}',
+                 checks=self.is_empty())
 
 
-class CreateForRbacScenarioTest(ScenarioTest):
+class CreateForRbacScenarioTest(LiveScenarioTest):
 
     def test_revoke_sp_for_rbac(self):
-        if not self.in_recording:
-            return
-        name = 'http://azurecli-test-revoke'
-        self.cmd('ad sp create-for-rbac -n ' + name)
+        self.kwargs['name'] = 'http://azurecli-test-revoke'
+        self.cmd('ad sp create-for-rbac -n {name}')
 
-        self.cmd('ad sp list --spn ' + name)
+        self.cmd('ad sp list --spn {name}')
 
-        self.cmd('ad app list --identifier-uri ' + name)
+        self.cmd('ad app list --identifier-uri {name}')
 
-        result = self.cmd('role assignment list --assignee ' + name).get_output_in_json()
+        result = self.cmd('role assignment list --assignee {name}').get_output_in_json()
         object_id = result[0]['properties']['principalId']
 
-        self.cmd('ad sp delete --id ' + name)
+        self.cmd('ad sp delete --id {name}')
 
         result2 = self.cmd('role assignment list --all').get_output_in_json()
         self.assertFalse([a for a in result2 if a['id'] == object_id])
 
-        self.cmd('ad sp list --spn ' + name, checks=[
-            JMESPathCheck2('length([])', 0)
-        ])
-        self.cmd('ad app list --identifier-uri ' + name, checks=[
-            JMESPathCheck2('length([])', 0)
-        ])
+        self.cmd('ad sp list --spn {name}',
+                 checks=self.check('length([])', 0))
+        self.cmd('ad app list --identifier-uri {name}',
+                 checks=self.check('length([])', 0))
 
 
 class GraphGroupScenarioTest(ScenarioTest):
 
     def test_graph_group_scenario(self):
-        self.user1 = 'deleteme1'
-        self.user1 = 'deleteme2'
-        upn = self.cmd('account show --query "user.name" -o tsv').output
-        _, domain = upn.split('@', 1)
-        user1 = 'deleteme1'
-        user2 = 'deleteme2'
-        group = 'deleteme_g'
-        password = 'Test1234!!'
+
+        account_info = self.cmd('account show').get_output_in_json()
+        if account_info['user']['type'] == 'servicePrincipal':
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+        upn = account_info['user']['name']
+
+        self.kwargs = {
+            'user1': 'deleteme1',
+            'user2': 'deleteme2',
+            'domain': upn.split('@', 1)[1],
+            'group': 'deleteme_g',
+            'pass': 'Test1234!!'
+        }
         try:
             # create user1
-            user1_result = json.loads(self.cmd('ad user create --display-name {0} --password {1} --user-principal-name {0}@{2}'.format(user1, password, domain)).output)
+            user1_result = self.cmd('ad user create --display-name {user1} --password {pass} --user-principal-name {user1}@{domain}').get_output_in_json()
+            self.kwargs['user1_id'] = user1_result['objectId']
             # create user2
-            user2_result = json.loads(self.cmd('ad user create --display-name {0} --password {1} --user-principal-name {0}@{2}'.format(user2, password, domain)).output)
+            user2_result = self.cmd('ad user create --display-name {user2} --password {pass} --user-principal-name {user2}@{domain}').get_output_in_json()
+            self.kwargs['user2_id'] = user2_result['objectId']
             # create group
-            group_result = json.loads(self.cmd('ad group create --display-name {0} --mail-nickname {0}'.format(group)).output)
+            group_result = self.cmd('ad group create --display-name {group} --mail-nickname {group}').get_output_in_json()
+            self.kwargs['group_id'] = group_result['objectId']
             # add user1 into group
-            self.cmd('ad group member add -g {} --member-id {}'.format(group, user1_result['objectId']), checks=NoneCheck2())
+            self.cmd('ad group member add -g {group} --member-id {user1_id}',
+                     checks=self.is_empty())
             # add user2 into group
-            self.cmd('ad group member add -g {} --member-id {}'.format(group, user2_result['objectId']), checks=NoneCheck2())
+            self.cmd('ad group member add -g {group} --member-id {user2_id}',
+                     checks=self.is_empty())
             # show group
-            self.cmd('ad group show -g ' + group, checks=[
-                JMESPathCheck2('objectId', group_result['objectId']),
-                JMESPathCheck2('displayName', group)
+            self.cmd('ad group show -g {group}', checks=[
+                self.check('objectId', '{group_id}'),
+                self.check('displayName', '{group}')
             ])
-            self.cmd('ad group show -g ' + group_result['objectId'], checks=[
-                JMESPathCheck2('displayName', group)
-            ])
+            self.cmd('ad group show -g {group}',
+                     checks=self.check('displayName', '{group}'))
             # list group
-            self.cmd('ad group list --display-name ' + group, checks=[
-                JMESPathCheck2('[0].displayName', group)
-            ])
+            self.cmd('ad group list --display-name {group}',
+                     checks=self.check('[0].displayName', '{group}'))
             # show member groups
-            self.cmd('ad group get-member-groups -g ' + group, checks=[
-                JMESPathCheck2('length([])', 0)
-            ])
+            self.cmd('ad group get-member-groups -g {group}',
+                     checks=self.check('length([])', 0))
             # check user1 memebership
-            self.cmd('ad group member check -g {} --member-id {}'.format(group, user1_result['objectId']), checks=[
-                JMESPathCheck2('value', True)
-            ])
+            self.cmd('ad group member check -g {group} --member-id {user1_id}',
+                     checks=self.check('value', True))
             # check user2 memebership
-            self.cmd('ad group member check -g {} --member-id {}'.format(group, user2_result['objectId']), checks=[
-                JMESPathCheck2('value', True)
-            ])
-            # list memebers
-            self.cmd('ad group member list -g ' + group, checks=[
-                JMESPathCheck2("length([?displayName=='{}'])".format(user1), 1),
-                JMESPathCheck2("length([?displayName=='{}'])".format(user2), 1),
-                JMESPathCheck2("length([])", 2),
+            self.cmd('ad group member check -g {group} --member-id {user2_id}',
+                     checks=self.check('value', True))            # list memebers
+            self.cmd('ad group member list -g {group}', checks=[
+                self.check("length([?displayName=='{user1}'])", 1),
+                self.check("length([?displayName=='{user2}'])", 1),
+                self.check("length([])", 2),
             ])
             # remove user1
-            self.cmd('ad group member remove -g {} --member-id {}'.format(group, user1_result['objectId']))
+            self.cmd('ad group member remove -g {group} --member-id {user1_id}')
             # check user1 memebership
-            self.cmd('ad group member check -g {} --member-id {}'.format(group, user1_result['objectId']), checks=[
-                JMESPathCheck2('value', False)
-            ])
+            self.cmd('ad group member check -g {group} --member-id {user1_id}',
+                     checks=self.check('value', False))
             # delete the group
-            self.cmd('ad group delete -g ' + group)
-            self.cmd('ad group list', checks=[
-                JMESPathCheck2("length([?displayName=='{}'])".format(group), 0)
-            ])
+            self.cmd('ad group delete -g {group}')
+            self.cmd('ad group list',
+                     checks=self.check("length([?displayName=='{group}'])", 0))
         finally:
-            self.cmd('ad user delete --upn-or-object-id ' + user1_result['objectId'])
-            self.cmd('ad user delete --upn-or-object-id ' + user2_result['objectId'])
+            self.cmd('ad user delete --upn-or-object-id {user1_id}')
+            self.cmd('ad user delete --upn-or-object-id {user2_id}')

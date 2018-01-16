@@ -6,8 +6,9 @@
 import argparse
 import re
 
-from azure.cli.core.util import CLIError
-from ..util import get_aggregation_map, get_operator_map
+from knack.util import CLIError
+
+from azure.cli.command_modules.monitor.util import get_aggregation_map, get_operator_map
 
 
 def period_type(value):

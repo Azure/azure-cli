@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long, too-many-lines
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 vm_ids_example = """        - name: {0}
           text: >
@@ -60,7 +60,7 @@ helps['vm create'] = """
             az vm create -g MyResourceGroup -n MyVm --attach-os-disk MyOsDisk --os-type linux
         - name: 'Create an Ubuntu Linux VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init.'
           text: >
-            az vm create -g MyResourceGroup -n MyVm --image debian --custom_data MyCloudInitScript.yml
+            az vm create -g MyResourceGroup -n MyVm --image debian --custom-data MyCloudInitScript.yml
         - name: Create a Debian VM with SSH key authentication and a public DNS entry, located on an existing virtual network and availability set.
           text: |
             az vm create -n MyVm -g MyResourceGroup --image debian --vnet-name MyVnet --subnet subnet1 \\
@@ -93,6 +93,7 @@ helps['vm create'] = """
           text: >
              az vm create -n MyVm -g rg1 --image debian --assign-identity  [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
         - name: Create a VM in an availability zone in the current resource group's region
+          min_profile: latest
           text: >
              az vm create -n MyVm -g MyResourceGroup --image Centos --zone 1
 """
@@ -123,7 +124,7 @@ helps['vmss create'] = """
                 --public-ip-per-vm --vm-domain-name myvmss --dns-servers 10.0.0.6 10.0.0.5
         - name: 'Create a Linux VM scale set using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init'
           text: >
-            az vmss create -g MyResourceGroup -n MyVmss --image debian --custom_data MyCloudInitScript.yml
+            az vmss create -g MyResourceGroup -n MyVmss --image debian --custom-data MyCloudInitScript.yml
         - name: Create a Debian VM scaleset using Key Vault secrets.
           text: >
             az keyvault certificate create --vault-name vaultname -n cert1 \\
@@ -146,6 +147,7 @@ helps['vmss create'] = """
           text: >
              az vmss create -n MyVmss -g rg1 --image debian --assign-identity  [system] /subscriptions/99999999-1bf0-4dda-aec3-cb9272f09590/resourcegroups/myRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myID
         - name: Create a single zone VM scaleset in the current resource group's region
+          min_profile: latest
           text: >
              az vmss create -n MyVmss -g MyResourceGroup --image Centos --zones 1
 """
@@ -185,6 +187,7 @@ helps['vm availability-set convert'] = """
 helps['vm extension set'] = """
     type: command
     short-summary: Set extensions for a VM.
+    long-summary: Get extension details from `az vm extension image list`.
     examples:
         - name: Add a user account to a Linux VM.
           text: |
@@ -242,12 +245,30 @@ helps['vm update'] = """
           text: az vm update -n name -g group --remove networkProfile.networkInterfaces 3
 """
 
+helps['vmss deallocate'] = """
+    type: command
+    short-summary: Deallocate VMs within a VMSS.
+"""
+
+helps['vmss delete-instances'] = """
+    type: command
+    short-summary: Delete VMs within a VMSS.
+"""
+
 helps['vmss get-instance-view'] = """
     type: command
     short-summary: View an instance of a VMSS.
     parameters:
         - name: --ids
           short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
+        - name: --instance-id
+          short-summary: A VM instance ID or "*" to list instance view for all VMs in a scale set.
+
+"""
+
+helps['vmss list'] = """
+    type: command
+    short-summary: List VMSS.
 """
 
 helps['vmss reimage'] = """
@@ -256,6 +277,56 @@ helps['vmss reimage'] = """
     parameters:
         - name: --ids
           short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
+        - name: --instance-id
+          short-summary: VM instance ID. If missing, reimage all instances.
+"""
+
+helps['vmss restart'] = """
+    type: command
+    short-summary: Restart VMs within a VMSS.
+"""
+
+helps['vmss scale'] = """
+    type: command
+    short-summary: Change the number of VMs within a VMSS.
+    parameters:
+        - name: --new-capacity
+          short-summary: Number of VMs in the VMSS.
+"""
+
+helps['vmss show'] = """
+    type: command
+    short-summary: Get details on VMs within a VMSS.
+    parameters:
+        - name: --ids
+          short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
+        - name: --instance-id
+          short-summary: VM instance ID. If missing, show the VMSS.
+"""
+
+helps['vmss start'] = """
+    type: command
+    short-summary: Start VMs within a VMSS.
+"""
+
+helps['vmss stop'] = """
+    type: command
+    short-summary: Power off (stop) VMs within a VMSS.
+"""
+
+helps['vmss update'] = """
+    type: command
+    short-summary: Update a VMSS.
+"""
+
+helps['vmss update-instances'] = """
+    type: command
+    short-summary: Upgrade VMs within a VMSS.
+"""
+
+helps['vmss wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of a scale set is met.
 """
 
 helps['vmss disk'] = """
@@ -268,25 +339,7 @@ helps['vmss nic'] = """
     short-summary: Manage network interfaces of a VMSS.
 """
 
-helps['vmss show'] = """
-    type: command
-    short-summary: Get details on VMs within a VMSS.
-    parameters:
-        - name: --ids
-          short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
-"""
-
-helps['vmss update'] = """
-    type: command
-    short-summary: Update a virtual machine scale set.
-"""
-
-helps['vmss wait'] = """
-    type: command
-    short-summary: Place the CLI in a waiting state until a condition of a scale set is met.
-"""
-
-helps['vmss rolling-ugrade'] = """
+helps['vmss rolling-upgrade'] = """
     type: group
     short-summary: (PREVIEW) Manage rolling upgrades.
 """
@@ -331,7 +384,10 @@ helps['vm user reset-ssh'] = """
 
 helps['vm user update'] = """
     type: command
-    long-summary: Update a user account.
+    short-summary: Update a user account.
+    parameters:
+        - name: --ssh-key-value
+          short-summary: SSH public key file value or public key file path
     examples:
         - name: Update a Windows user account.
           text: az vm user update -u username -p password -n MyVm -g MyResourceGroup
@@ -369,6 +425,9 @@ vm_boot_diagnostics_enable_cmd = "{0} --storage https://mystor.blob.core.windows
 helps[vm_boot_diagnostics_enable] = """
     type: command
     short-summary: Enable the boot diagnostics on a VM.
+    parameters:
+        - name: --storage
+          short-summary: Name or URI of a storage account (e.g. https://your_storage_account_name.blob.core.windows.net/)
     examples:
 {0}
 """.format(vm_ids_example.format('Enable boot diagnostics on all VMs in a resource group.', vm_boot_diagnostics_enable_cmd))
@@ -455,11 +514,11 @@ helps['vm diagnostics set'] = """
                 --account-name $my_diagnostic_storage_account --expiry 9999-12-31T23:59Z \\
                 --permissions wlacu --resource-types co --services bt -o tsv)
 
-            protected_settings="{'storageAccountName': '${my_diagnostic_storage_account}', \\
-                'storageAccountSasToken': '${storage_sastoken}'}"
+            protected_settings="{'storageAccountName': '{my_diagnostic_storage_account}', \\
+                'storageAccountSasToken': '{storage_sastoken}'}"
 
-            az vm diagnostics set --settings "${default_config}" \\
-                --protected-settings "${protected_settings}" \\
+            az vm diagnostics set --settings "{default_config}" \\
+                --protected-settings "{protected_settings}" \\
                 --resource-group $my_resource_group --vm-name $my_linux_vm
 """
 
@@ -552,6 +611,28 @@ helps['vm disk attach'] = """
 helps['vm encryption'] = """
     type: group
     short-summary: Manage encryption of VM disks.
+"""
+
+helps['vm encryption enable'] = """
+    type: command
+    short-summary: Enable disk encryption on the OS disk and/or data disks.
+    parameters:
+        - name: --aad-client-id
+          short-summary: Client ID of an AAD app with permissions to write secrets to the key vault.
+        - name: --aad-client-secret
+          short-summary: Client secret of the AAD app with permissions to write secrets to the key vault.
+        - name: --aad-client-cert-thumbprint
+          short-summary: Thumbprint of the AAD app certificate with permissions to write secrets to the key vault.
+"""
+
+helps['vm encryption disable'] = """
+    type: command
+    short-summary: Disable disk encryption on the OS disk and/or data disks.
+"""
+
+helps['vm encryption show'] = """
+    type: command
+    short-summary: Show encryption status.
 """
 
 helps['vm extension'] = """
@@ -654,11 +735,11 @@ helps['vm extension image show'] = """
             location=westus\n
 
             latest=$(az vm extension image list-versions \\
-              --publisher ${publisher} -l ${location} -n ${extension} \\
+              --publisher {publisher} -l {location} -n {extension} \\
               --query "[].name" -o tsv | sort | tail -n 1)
 
-            az vm extension image show -l ${location} \\
-              --publisher ${publisher} -n ${extension} --version ${latest}
+            az vm extension image show -l {location} \\
+              --publisher {publisher} -n {extension} --version {latest}
 """
 
 helps['vm image'] = """
@@ -669,6 +750,15 @@ helps['vm image'] = """
 helps['vm image list'] = """
     type: command
     short-summary: List the VM/VMSS images available in the Azure Marketplace.
+    parameters:
+        - name: --all
+          short-summary: Retrieve image list from live Azure service rather using an offline image list
+        - name: --offer -f
+          short-summary: Image offer name, partial name is accepted
+        - name: --publisher -p
+          short-summary: Image publisher name, partial name is accepted
+        - name: --sku -s
+          short-summary: Image sku name, partial name is accepted
     examples:
         - name: List all available images.
           text: az vm image list --all
@@ -714,7 +804,7 @@ helps['vm image show'] = """
           text: >
             latest=$(az vm image list -p OpenLogic -s 7.3 --all --query \\
                 "[?offer=='CentOS'].version" -o tsv | sort -u | tail -n 1)
-            az vm image show -l westus -f CentOS -p OpenLogic --s 7.3 --version ${latest}
+            az vm image show -l westus -f CentOS -p OpenLogic --s 7.3 --version {latest}
 """
 
 helps['vm nic'] = """
@@ -775,6 +865,17 @@ helps['vmss diagnostics'] = """
     short-summary: Configure the Azure Virtual Machine Scale Set diagnostics extension.
 """
 
+helps['vmss diagnostics get-default-config'] = """
+    type: command
+    short-summary: Show the default config file which defines data to be collected.
+"""
+
+helps['vmss diagnostics set'] = """
+    type: command
+    short-summary: Enable diagnostics on a VMSS.
+"""
+
+
 helps['vmss list-instance-connection-info'] = """
     type: command
     short-summary: Get the IP address and port number used to connect to individual VM instances within a set.
@@ -790,10 +891,47 @@ helps['vmss extension'] = """
     short-summary: Manage extensions on a VM scale set.
 """
 
+helps['vmss extension delete'] = """
+    type: command
+    short-summary: Delete an extension from a VMSS.
+"""
+
+helps['vmss extension list'] = """
+    type: command
+    short-summary: List extensions associated with a VMSS.
+"""
+
+helps['vmss extension set'] = """
+    type: command
+    short-summary: Add an extension to a VMSS or update an existing extension.
+    long-summary: Get extension details from `az vmss extension image list`.
+"""
+
+helps['vmss extension show'] = """
+    type: command
+    short-summary: Show details on a VMSS extension.
+"""
+
 helps['vmss extension image'] = """
     type: group
     short-summary: Find the available VM extensions for a subscription and region.
 """
+
+helps['vmss extension image list'] = """
+    type: command
+    short-summary: List the information on available extensions.
+    examples:
+        - name: List the unique publishers for extensions.
+          text: az vmss extension image list --query "[].publisher" -o tsv | sort -u
+        - name: Find extensions with "Docker" in the name.
+          text: az vmss extension image list --query "[].name" -o tsv | sort -u | grep Docker
+        - name: List extension names where the publisher name starts with "Microsoft.Azure.App".
+          text: |
+            az vmss extension image list --query \\
+                "[?starts_with(publisher, 'Microsoft.Azure.App')].publisher" \\
+                -o tsv | sort -u | xargs -I{} az vmss extension image list-names --publisher {} -l westus
+"""
+
 
 deallocate_generalize_capture = """        - name: Deallocate, generalize, and capture a stopped virtual machine.
           text: |
@@ -803,43 +941,51 @@ deallocate_generalize_capture = """        - name: Deallocate, generalize, and c
         - name: Deallocate, generalize, and capture multiple stopped virtual machines.
           text: |
             vms_ids=$(az vm list -g MyResourceGroup --query "[].id" -o tsv)
-            az vm deallocate --ids ${vms_ids}
-            az vm generalize --ids ${vms_ids}
-            az vm capture --ids ${vms_ids} --vhd-name-prefix MyPrefix
+            az vm deallocate --ids {vms_ids}
+            az vm generalize --ids {vms_ids}
+            az vm capture --ids {vms_ids} --vhd-name-prefix MyPrefix
 """
 
 helps['vmss encryption'] = """
     type: group
-    short-summary: (PREVIEW) Manage encryption of VM scale sets.
+    short-summary: (PREVIEW) Manage encryption of VMSS.
 """
 
 helps['vmss encryption enable'] = """
     type: command
-    short-summary: Encrypt a VM scale set with managed disks.
+    short-summary: Encrypt a VMSS with managed disks.
     examples:
-        - name: encrypte a VM scale set using a key vault in the same resource group
+        - name: encrypt a VM scale set using a key vault in the same resource group
           text: >
             az vmss encryption enable -g MyResourceGroup -n MyVm --disk-encryption-keyvault myvault
 """
 
 helps['vmss encryption disable'] = """
     type: command
-    short-summary: disable the encryption on a VM scale set with managed disks.
+    short-summary: Disable the encryption on a VMSS with managed disks.
     examples:
-        - name: disable encryption a VM scale set
+        - name: disable encryption a VMSS
           text: >
             az vmss encryption disable -g MyResourceGroup -n MyVm
 """
 
 helps['vmss encryption show'] = """
     type: command
-    short-summary: show the encryption status
+    short-summary: Show encryption status.
 """
 
 helps['vm capture'] = """
     type: command
     short-summary: Capture information for a stopped VM.
     long-summary: 'For an end-to-end tutorial, see https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-capture-image'
+    parameters:
+        - name: --vhd-name-prefix
+          type: string
+          short-summary: The VHD name prefix specify for the VM disks.
+        - name: --storage-container
+          short-summary: The storage account container name in which to save the disks.
+        - name: --overwrite
+          short-summary: Overwrite the existing disk file.
     examples:
 {0}
 """.format(deallocate_generalize_capture)
@@ -937,10 +1083,16 @@ helps['vm list-skus'] = """
 
 helps['vm open-port'] = """
     type: command
-    short-summary: Manage open ports on a VM.
+    short-summary: Opens a VM to inbound traffic on specified ports.
+    long-summary: >
+        Adds a security rule to the network security group (NSG) that is attached to the VM's
+        network interface (NIC) or subnet. The existing NSG will be used or a new one will be
+        created. The rule name is 'open-port-{{port}}' and will overwrite an existing rule with
+        this name. For multi-NIC VMs, or for more fine-grained control, use the appropriate
+        network commands directly (nsg rule create, etc).
     examples:
         - name: Open all ports on a VM to inbound traffic.
-          text: az vm open-port -g MyResourceGroup -n MyVm --port *
+          text: az vm open-port -g MyResourceGroup -n MyVm --port '*'
         - name: Open a range of ports on a VM to inbound traffic with the highest priority.
           text: az vm open-port -g MyResourceGroup -n MyVm --port 80-100 --priority 100
 {0}
@@ -958,6 +1110,12 @@ helps['vm redeploy'] = """
 helps['vm resize'] = """
     type: command
     short-summary: Update a VM's size.
+    parameters:
+        - name: --size
+          type: string
+          short-summary: The VM size.
+          populator-commands:
+          - az vm list-vm-resize-options
     examples:
         - name: Resize a VM.
           text: az vm resize -g MyResourceGroup -n MyVm --size Standard_DS3_v2
@@ -1017,6 +1175,7 @@ helps['vm assign-identity'] = """
         - name: Enable identity on a VM with the 'Reader' role.
           text: az vm assign-identity -g MyResourceGroup -n MyVm --role Reader
 """
+
 helps['vm remove-identity'] = """
     type: command
     short-summary: (PREVIEW) Remove user assigned identities from a VM.
@@ -1024,6 +1183,7 @@ helps['vm remove-identity'] = """
         - name: Remove 2 identities which are in the same resource group with the VM
           text: az vm remove-identity -g MyResourceGroup -n MyVm --identities readerId writerId
 """
+
 helps['vm run-command'] = """
     type: group
     short-summary: (PREVIEW) Manage run commands on a Virtual Machine
@@ -1047,6 +1207,7 @@ helps['vmss assign-identity'] = """
         - name: Enable identity on a VMSS with the 'Owner' role.
           text: az vmss assign-identity -g MyResourceGroup -n MyVmss --role Owner
 """
+
 helps['vmss remove-identity'] = """
     type: command
     short-summary: (PREVIEW) Remove user assigned identities from a VM scaleset.
@@ -1054,6 +1215,7 @@ helps['vmss remove-identity'] = """
         - name: Remove 2 identities which are in the same resource group with the VM scaleset
           text: az vmss remove-identity -g MyResourceGroup -n MyVm --identities readerId writerId
 """
+
 helps['disk'] = """
     type: group
     short-summary: Manage Azure Managed Disks.

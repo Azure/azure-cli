@@ -8,23 +8,23 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_create000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_create000001","name":"cli_test_resource_create000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:57 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1189']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -34,9 +34,9 @@ interactions:
       CommandName: [resource create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.web?api-version=2017-05-10
@@ -340,14 +340,14 @@ interactions:
       cache-control: [no-cache]
       content-length: ['40579']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:58 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "westus", "sku": {"tier": "BASIC", "name": "B1"}}'
+    body: '{"location": "westus", "sku": {"name": "B1", "tier": "BASIC"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -355,21 +355,21 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['62']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.web/serverFarms/cli_res_create_plan?api-version=2017-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_create000001/providers/Microsoft.web/serverFarms/cli_res_create_plan?api-version=2017-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli_res_create_plan","name":"cli_res_create_plan","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":0,"name":"cli_res_create_plan","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-089_2848","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_create000001/providers/Microsoft.Web/serverfarms/cli_res_create_plan","name":"cli_res_create_plan","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
+        US","properties":{"serverFarmId":0,"name":"cli_res_create_plan","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"cli_test_resource_create000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"cli_test_resource_create000001","reserved":false,"mdmId":"waws-prod-bay-019_20247","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1363']
+      content-length: ['1364']
       content-type: [application/json]
-      date: ['Wed, 13 Dec 2017 21:12:07 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:17 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -377,7 +377,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1187']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -388,9 +388,9 @@ interactions:
       CommandName: [resource create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.web?api-version=2017-05-10
@@ -694,7 +694,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['40579']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:12:07 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:19 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -708,26 +708,26 @@ interactions:
       CommandName: [resource create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_create000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_create000001","name":"cli_test_resource_create000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:12:06 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:19 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "westus", "properties": {"serverFarmId": "cli_res_create_plan"}}'
+    body: '{"properties": {"serverFarmId": "cli_res_create_plan"}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -735,20 +735,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['77']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.web/sites/clirescreateweb?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_create000001/providers/Microsoft.web/sites/clirescreateweb?api-version=2016-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/clirescreateweb","name":"clirescreateweb","type":"Microsoft.Web/sites","kind":"app","location":"westus","properties":{"name":"clirescreateweb","state":"Running","hostNames":["clirescreateweb.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/clirescreateweb","repositorySiteName":"clirescreateweb","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["clirescreateweb.azurewebsites.net","clirescreateweb.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"clirescreateweb.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"clirescreateweb.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/cli_res_create_plan","reserved":false,"lastModifiedTimeUtc":"2017-12-13T21:12:09.1066667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"clirescreateweb","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"clirescreateweb.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_create000001/providers/Microsoft.Web/sites/clirescreateweb","name":"clirescreateweb","type":"Microsoft.Web/sites","kind":"app","location":"westus","properties":{"name":"clirescreateweb","state":"Running","hostNames":["clirescreateweb.azurewebsites.net"],"webSpace":"cli_test_resource_create000001-WestUSwebspace","selfLink":"https://waws-prod-bay-019.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/cli_test_resource_create000001-WestUSwebspace/sites/clirescreateweb","repositorySiteName":"clirescreateweb","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["clirescreateweb.azurewebsites.net","clirescreateweb.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"clirescreateweb.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"clirescreateweb.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_create000001/providers/Microsoft.Web/serverfarms/cli_res_create_plan","reserved":false,"lastModifiedTimeUtc":"2017-12-19T04:36:22.147","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"clirescreateweb","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.40.57.101,104.40.82.23,104.40.81.188,104.40.85.254","possibleOutboundIpAddresses":"104.40.57.101,104.40.82.23,104.40.81.188,104.40.85.254","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-019","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"cli_test_resource_create000001","defaultHostName":"clirescreateweb.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3019']
+      content-length: ['2963']
       content-type: [application/json]
-      date: ['Wed, 13 Dec 2017 21:12:35 GMT']
-      etag: ['"1D3745709594B20"']
+      date: ['Tue, 19 Dec 2017 04:36:28 GMT']
+      etag: ['"1D37882EBF28EE0"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -767,9 +767,9 @@ interactions:
       CommandName: [resource create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web?api-version=2017-05-10
@@ -1073,7 +1073,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['40579']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:12:36 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:30 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -1087,26 +1087,26 @@ interactions:
       CommandName: [resource create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_create000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_create000001","name":"cli_test_resource_create000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:12:36 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "westus", "properties": {"key2": "value12"}}'
+    body: '{"properties": {"key2": "value12"}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -1114,21 +1114,21 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['57']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/clirescreateweb/config/appsettings?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_create000001/providers/Microsoft.Web/sites/clirescreateweb/config/appsettings?api-version=2016-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/clirescreateweb/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_create000001/providers/Microsoft.Web/sites/clirescreateweb/config/appsettings","name":"appsettings","type":"Microsoft.Web/sites/config","location":"West
         US","properties":{"key2":"value12"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['326']
       content-type: [application/json]
-      date: ['Wed, 13 Dec 2017 21:12:37 GMT']
-      etag: ['"1D374571A21A8EB"']
+      date: ['Tue, 19 Dec 2017 04:36:31 GMT']
+      etag: ['"1D37882F16CD740"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -1136,7 +1136,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1189']
+      x-ms-ratelimit-remaining-subscription-writes: ['1183']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -1147,9 +1147,9 @@ interactions:
       CommandName: [resource show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web?api-version=2017-05-10
@@ -1453,7 +1453,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['40579']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:12:38 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:33 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -1467,20 +1467,20 @@ interactions:
       CommandName: [resource show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Web/sites/clirescreateweb/config/web?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_create000001/providers/Microsoft.Web/sites/clirescreateweb/config/web?api-version=2016-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/clirescreateweb/config/web","name":"clirescreateweb","type":"Microsoft.Web/sites/config","location":"West
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_create000001/providers/Microsoft.Web/sites/clirescreateweb/config/web","name":"clirescreateweb","type":"Microsoft.Web/sites/config","location":"West
         US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$clirescreateweb","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"ipSecurityRestrictions":null}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['2378']
       content-type: [application/json]
-      date: ['Wed, 13 Dec 2017 21:12:38 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:34 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -1498,9 +1498,9 @@ interactions:
       CommandName: [resource show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Web?api-version=2017-05-10
@@ -1804,7 +1804,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['40579']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:12:39 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:35 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -1818,20 +1818,20 @@ interactions:
       CommandName: [resource show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001/providers/Microsoft.Web/sites/clirescreateweb/config/web?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_create000001/providers/Microsoft.Web/sites/clirescreateweb/config/web?api-version=2016-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/clirescreateweb/config/web","name":"clirescreateweb","type":"Microsoft.Web/sites/config","location":"West
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_create000001/providers/Microsoft.Web/sites/clirescreateweb/config/web","name":"clirescreateweb","type":"Microsoft.Web/sites/config","location":"West
         US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$clirescreateweb","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"None","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"ipSecurityRestrictions":null}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['2378']
       content-type: [application/json]
-      date: ['Wed, 13 Dec 2017 21:12:39 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:35 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -1850,22 +1850,22 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_create000001?api-version=2017-05-10
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 13 Dec 2017 21:12:40 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:37 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc0M1dCRTNNQ0RYWDNQTkRXV1pDWks3S1dISFRERkkyRzZEQnw5MEE4RjVDMTc0OEQ5NzZELVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUkVTT1VSQ0U6NUZDUkVBVEVPUUxHTUlQUUIzREtUQVhGWnxGRUYzMDhCNjkwRUYyQTU4LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+      x-ms-ratelimit-remaining-subscription-writes: ['1173']
     status: {code: 202, message: Accepted}
 version: 1

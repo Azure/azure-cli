@@ -3,21 +3,25 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.core.azlogging as azlogging
+from six.moves.urllib.parse import quote  # pylint: disable=import-error
+from knack.log import get_logger
+from knack.util import CLIError
+from msrestazure.tools import parse_resource_id
+
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.mgmt.eventgrid.models import (
     EventSubscription,
+    EventSubscriptionUpdateParameters,
     WebHookEventSubscriptionDestination,
     EventHubEventSubscriptionDestination,
     EventSubscriptionFilter)
 
-from six.moves.urllib.parse import quote  # pylint: disable=import-error
+logger = get_logger(__name__)
 
-logger = azlogging.get_az_logger(__name__)
 EVENTGRID_NAMESPACE = "Microsoft.EventGrid"
 RESOURCES_NAMESPACE = "Microsoft.Resources"
-RESOURCE_TYPE_SUBSCRIPTIONS = "subscriptions"
-RESOURCE_TYPE_RESOURCE_GROUPS = "resourcegroups"
+SUBSCRIPTIONS = "subscriptions"
+RESOURCE_GROUPS = "resourcegroups"
 EVENTGRID_TOPICS = "topics"
 WEBHOOK_DESTINATION = "webhook"
 EVENTHUB_DESTINATION = "eventhub"
@@ -32,259 +36,123 @@ def cli_topic_list(
     return client.list_by_subscription()
 
 
-def cli_eventgrid_event_subscription_topic_create(
-        client,
-        resource_group_name,
-        topic_name,
-        event_subscription_name,
-        endpoint,
-        endpoint_type="WebHook",
-        included_event_types=None,
-        subject_begins_with=None,
-        subject_ends_with=None,
-        is_subject_case_sensitive=False,
-        labels=None):
-    return _event_subscription_create(
-        client,
-        resource_group_name,
-        EVENTGRID_NAMESPACE,
-        EVENTGRID_TOPICS,
-        topic_name,
-        event_subscription_name,
-        endpoint,
-        endpoint_type,
-        included_event_types,
-        subject_begins_with,
-        subject_ends_with,
-        is_subject_case_sensitive,
-        labels)
-
-
-def cli_eventgrid_event_subscription_topic_get(
-        client,
-        resource_group_name,
-        topic_name,
-        event_subscription_name):
-    return _event_subscription_get(
-        client,
-        resource_group_name,
-        EVENTGRID_NAMESPACE,
-        EVENTGRID_TOPICS,
-        topic_name,
-        event_subscription_name)
-
-
-def cli_eventgrid_event_subscription_topic_get_full_url(
-        client,
-        resource_group_name,
-        topic_name,
-        event_subscription_name):
-    return _event_subscription_get_full_url(
-        client,
-        resource_group_name,
-        EVENTGRID_NAMESPACE,
-        EVENTGRID_TOPICS,
-        topic_name,
-        event_subscription_name)
-
-
-def cli_eventgrid_event_subscription_topic_delete(
-        client,
-        resource_group_name,
-        topic_name,
-        event_subscription_name):
-    _event_subscription_delete(
-        client,
-        resource_group_name,
-        EVENTGRID_NAMESPACE,
-        EVENTGRID_TOPICS,
-        topic_name,
-        event_subscription_name)
-
-
-def cli_eventgrid_event_subscription_resource_create(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name,
-        event_subscription_name,
-        endpoint,
-        endpoint_type="WebHook",
-        included_event_types=None,
-        subject_begins_with=None,
-        subject_ends_with=None,
-        is_subject_case_sensitive=False,
-        labels=None):
-    return _event_subscription_create(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name,
-        event_subscription_name,
-        endpoint,
-        endpoint_type,
-        included_event_types,
-        subject_begins_with,
-        subject_ends_with,
-        is_subject_case_sensitive,
-        labels)
-
-
-def cli_eventgrid_event_subscription_resource_get(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name,
-        event_subscription_name):
-    return _event_subscription_get(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name,
-        event_subscription_name)
-
-
-def cli_eventgrid_event_subscription_resource_get_full_url(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name,
-        event_subscription_name):
-    return _event_subscription_get_full_url(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name,
-        event_subscription_name)
-
-
-def cli_eventgrid_event_subscription_resource_delete(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name,
-        event_subscription_name):
-    _event_subscription_delete(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name,
-        event_subscription_name)
-
-
-def cli_eventgrid_event_subscription_arm_create(
+def cli_eventgrid_event_subscription_create(
+        cmd,
         client,
         event_subscription_name,
         endpoint,
+        resource_id=None,
         resource_group_name=None,
-        endpoint_type="WebHook",
+        topic_name=None,
+        endpoint_type=WEBHOOK_DESTINATION,
         included_event_types=None,
         subject_begins_with=None,
         subject_ends_with=None,
         is_subject_case_sensitive=False,
         labels=None):
-    resource_type, resource_name = _get_arm_resource_info(resource_group_name)
+    scope = _get_scope_for_event_subscription(cmd.cli_ctx, resource_id, topic_name, resource_group_name)
 
-    return _event_subscription_create(
-        client,
-        resource_group_name,
-        RESOURCES_NAMESPACE,
-        resource_type,
-        resource_name,
-        event_subscription_name,
-        endpoint,
-        endpoint_type,
-        included_event_types,
+    if endpoint_type.lower() == WEBHOOK_DESTINATION.lower():
+        destination = WebHookEventSubscriptionDestination(endpoint)
+    elif endpoint_type.lower() == EVENTHUB_DESTINATION.lower():
+        destination = EventHubEventSubscriptionDestination(endpoint)
+
+    event_subscription_filter = EventSubscriptionFilter(
         subject_begins_with,
         subject_ends_with,
-        is_subject_case_sensitive,
-        labels)
+        included_event_types,
+        is_subject_case_sensitive)
+    event_subscription_info = EventSubscription(destination, event_subscription_filter, labels)
+
+    async_event_subscription_create = client.create(
+        scope,
+        event_subscription_name,
+        event_subscription_info)
+    created_event_subscription = async_event_subscription_create.result()
+    return created_event_subscription
 
 
-def cli_eventgrid_event_subscription_arm_get(
+def event_subscription_setter(
+        cmd,
+        client,
+        parameters,
+        event_subscription_name,
+        resource_id=None,
+        resource_group_name=None,
+        topic_name=None):
+    scope = _get_scope_for_event_subscription(cmd.cli_ctx, resource_id, topic_name, resource_group_name)
+
+    async_event_subscription_update = client.update(
+        scope,
+        event_subscription_name,
+        parameters)
+    updated_event_subscription = async_event_subscription_update.result()
+    return updated_event_subscription
+
+
+def cli_eventgrid_event_subscription_get(
+        cmd,
         client,
         event_subscription_name,
-        resource_group_name=None):
-    resource_type, resource_name = _get_arm_resource_info(resource_group_name)
+        resource_id=None,
+        resource_group_name=None,
+        topic_name=None,
+        include_full_endpoint_url=False):
+    scope = _get_scope_for_event_subscription(cmd.cli_ctx, resource_id, topic_name, resource_group_name)
+    retrieved_event_subscription = client.get(scope, event_subscription_name)
+    destination = retrieved_event_subscription.destination
+    if include_full_endpoint_url and isinstance(destination, WebHookEventSubscriptionDestination):
+        full_endpoint_url = client.get_full_url(scope, event_subscription_name)
+        destination.endpoint_url = full_endpoint_url.endpoint_url
 
-    return _event_subscription_get(
-        client,
-        resource_group_name,
-        RESOURCES_NAMESPACE,
-        resource_type,
-        resource_name,
-        event_subscription_name)
-
-
-def cli_eventgrid_event_subscription_arm_get_full_url(
-        client,
-        event_subscription_name,
-        resource_group_name=None):
-    resource_type, resource_name = _get_arm_resource_info(resource_group_name)
-
-    return _event_subscription_get_full_url(
-        client,
-        resource_group_name,
-        RESOURCES_NAMESPACE,
-        resource_type,
-        resource_name,
-        event_subscription_name)
+    return retrieved_event_subscription
 
 
-def cli_eventgrid_event_subscription_arm_delete(
+def cli_eventgrid_event_subscription_delete(
+        cmd,
         client,
         event_subscription_name,
-        resource_group_name=None):
-    resource_type, resource_name = _get_arm_resource_info(resource_group_name)
-
-    _event_subscription_delete(
-        client,
-        resource_group_name,
-        RESOURCES_NAMESPACE,
-        resource_type,
-        resource_name,
-        event_subscription_name)
-
-
-def cli_topic_event_subscription_list(
-        client,
-        resource_group_name,
-        topic_name):
-    return resource_event_subscription_list_internal(
-        client,
-        resource_group_name,
-        EVENTGRID_NAMESPACE,
-        EVENTGRID_TOPICS,
-        topic_name)
-
-
-def cli_resource_event_subscription_list(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name):
-    return resource_event_subscription_list_internal(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name)
+        resource_id=None,
+        resource_group_name=None,
+        topic_name=None):
+    scope = _get_scope_for_event_subscription(cmd.cli_ctx, resource_id, topic_name, resource_group_name)
+    client.delete(scope, event_subscription_name)
 
 
 def cli_event_subscription_list(   # pylint: disable=too-many-return-statements
         client,
+        resource_id=None,
         resource_group_name=None,
+        topic_name=None,
         location=None,
         topic_type_name=None):
+    if resource_id:
+        # Resource ID is specified, we need to list only for the particular resource.
+        if resource_group_name is not None or topic_name is not None:
+            raise CLIError('Since ResourceId is specified, topic-name and resource-group-name should not be specified.')
+
+        id_parts = parse_resource_id(resource_id)
+        rg_name = id_parts['resource_group']
+        resource_name = id_parts['name']
+        provider_namespace = id_parts['namespace']
+        resource_type = id_parts['resource_type']
+
+        return client.list_by_resource(
+            rg_name,
+            provider_namespace,
+            resource_type,
+            resource_name)
+
+    if topic_name:
+        if resource_group_name is None:
+            raise CLIError('Since topic-name is specified, resource-group-name must also be specified.')
+
+        return client.list_by_resource(
+            resource_group_name,
+            EVENTGRID_NAMESPACE,
+            EVENTGRID_TOPICS,
+            topic_name)
+
     if topic_type_name:
         if location:
             if resource_group_name:
@@ -318,95 +186,13 @@ def cli_event_subscription_list(   # pylint: disable=too-many-return-statements
     return client.list_global_by_subscription()
 
 
-def resource_event_subscription_list_internal(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name):
-    return client.list_by_resource(
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name)
-
-
-def _event_subscription_create(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name,
-        event_subscription_name,
-        endpoint,
-        endpoint_type,
-        included_event_types,
-        subject_begins_with,
-        subject_ends_with,
-        is_subject_case_sensitive,
-        labels):
-    scope = _get_scope(resource_group_name, provider_namespace, resource_type, resource_name)
-    if endpoint_type.lower() == WEBHOOK_DESTINATION.lower():
-        destination = WebHookEventSubscriptionDestination(endpoint)
-    elif endpoint_type.lower() == EVENTHUB_DESTINATION.lower():
-        destination = EventHubEventSubscriptionDestination(endpoint)
-
-    event_subscription_filter = EventSubscriptionFilter(
-        subject_begins_with,
-        subject_ends_with,
-        included_event_types,
-        is_subject_case_sensitive)
-    event_subscription_info = EventSubscription(destination, event_subscription_filter, labels)
-
-    async_event_subscription_create = client.create(
-        scope,
-        event_subscription_name,
-        event_subscription_info)
-    created_event_subscription = async_event_subscription_create.result()
-    return created_event_subscription
-
-
-def _event_subscription_get(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name,
-        event_subscription_name):
-    scope = _get_scope(resource_group_name, provider_namespace, resource_type, resource_name)
-    retrieved_event_subscription = client.get(scope, event_subscription_name)
-    return retrieved_event_subscription
-
-
-def _event_subscription_get_full_url(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name,
-        event_subscription_name):
-    scope = _get_scope(resource_group_name, provider_namespace, resource_type, resource_name)
-    full_endpoint_url = client.get_full_url(scope, event_subscription_name)
-    return full_endpoint_url
-
-
-def _event_subscription_delete(
-        client,
-        resource_group_name,
-        provider_namespace,
-        resource_type,
-        resource_name,
-        event_subscription_name):
-    scope = _get_scope(resource_group_name, provider_namespace, resource_type, resource_name)
-    client.delete(scope, event_subscription_name)
-
-
 def _get_scope(
+        cli_ctx,
         resource_group_name,
         provider_namespace,
         resource_type,
         resource_name):
-    subscription_id = get_subscription_id()
+    subscription_id = get_subscription_id(cli_ctx)
 
     if provider_namespace == RESOURCES_NAMESPACE:
         if resource_group_name:
@@ -430,12 +216,75 @@ def _get_scope(
     return scope
 
 
-def _get_arm_resource_info(resource_group_name):
-    if resource_group_name:
-        resource_type = RESOURCE_TYPE_RESOURCE_GROUPS
-        resource_name = resource_group_name
-    else:
-        resource_type = RESOURCE_TYPE_SUBSCRIPTIONS
-        resource_name = get_subscription_id()
+def _get_scope_for_event_subscription(
+        cli_ctx,
+        resource_id,
+        topic_name,
+        resource_group_name):
+    if resource_id:
+        # Resource ID is provided, use that as the scope for the event subscription.
+        scope = resource_id
+    elif topic_name:
+        # Topic name is provided, use the topic and resource group to build a scope for the user topic
+        if resource_group_name is None:
+            raise CLIError("When topic name is specified, the resource group name must also be specified.")
 
-    return resource_type, resource_name
+        scope = _get_scope(cli_ctx, resource_group_name, EVENTGRID_NAMESPACE, EVENTGRID_TOPICS, topic_name)
+    elif resource_group_name:
+        # Event subscription to a resource group.
+        scope = _get_scope(cli_ctx, resource_group_name, RESOURCES_NAMESPACE, RESOURCE_GROUPS, resource_group_name)
+    else:
+        scope = _get_scope(cli_ctx, None, RESOURCES_NAMESPACE, SUBSCRIPTIONS, get_subscription_id(cli_ctx))
+
+    return scope
+
+
+def event_subscription_getter(
+        cmd,
+        client,
+        event_subscription_name,
+        resource_id=None,
+        resource_group_name=None,
+        topic_name=None):
+    scope = _get_scope_for_event_subscription(cmd.cli_ctx, resource_id, topic_name, resource_group_name)
+    retrieved_event_subscription = client.get(scope, event_subscription_name)
+    return retrieved_event_subscription
+
+
+def update_event_subscription(
+        instance,
+        endpoint=None,
+        endpoint_type=WEBHOOK_DESTINATION,
+        subject_begins_with=None,
+        subject_ends_with=None,
+        included_event_types=None,
+        labels=None):
+    event_subscription_destination = None
+    event_subscription_labels = instance.labels
+    event_subscription_filter = instance.filter
+
+    if endpoint is not None:
+        if endpoint_type.lower() == WEBHOOK_DESTINATION.lower():
+            event_subscription_destination = WebHookEventSubscriptionDestination(endpoint)
+        elif endpoint_type.lower() == EVENTHUB_DESTINATION.lower():
+            event_subscription_destination = EventHubEventSubscriptionDestination(endpoint)
+
+    if subject_begins_with is not None:
+        event_subscription_filter.subject_begins_with = subject_begins_with
+
+    if subject_ends_with is not None:
+        event_subscription_filter.subject_ends_with = subject_ends_with
+
+    if included_event_types is not None:
+        event_subscription_filter.included_event_types = included_event_types
+
+    if labels is not None:
+        event_subscription_labels = labels
+
+    params = EventSubscriptionUpdateParameters(
+        destination=event_subscription_destination,
+        filter=event_subscription_filter,
+        labels=event_subscription_labels
+    )
+
+    return params

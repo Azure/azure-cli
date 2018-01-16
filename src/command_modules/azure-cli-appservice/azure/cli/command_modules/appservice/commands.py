@@ -4,22 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from azure.cli.core.application import APPLICATION
-from azure.cli.core.commands import cli_command
-from azure.cli.core.commands.arm import cli_generic_update_command
+from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-
-
-def deprecate(argv):
-    if len(argv) > 1 and argv[0] == 'appservice' and argv[1] == 'web':
-        from azure.cli.core.util import CLIError
-        raise CLIError("All 'appservice web' commands have been renamed to 'webapp'")
-
-
-APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSING, deprecate)
+from ._validators import validate_existing_function_app, validate_existing_web_app
 
 
 def output_slots_in_table(slots):
@@ -45,7 +34,7 @@ def transform_web_list_output(webs):
 def ex_handler_factory(creating_plan=False):
     def _polish_bad_errors(ex):
         import json
-        from azure.cli.core.util import CLIError
+        from knack.util import CLIError
         try:
             detail = json.loads(ex.response.text)['Message']
             if creating_plan:
@@ -64,127 +53,166 @@ def ex_handler_factory(creating_plan=False):
     return _polish_bad_errors
 
 
-custom_path = 'azure.cli.command_modules.appservice.custom#'
+# pylint: disable=too-many-statements
+def load_command_table(self, _):
+    webclient_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.web.web_site_management_client#WebSiteManagementClient.{}',
+        client_factory=cf_web_client
+    )
+    appservice_plan_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.{}',
+        client_factory=cf_plans
+    )
+    webapp_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.web.operations.web_apps_operations#WebAppsOperations.{}',
+        client_factory=cf_webapps
+    )
+    with self.command_group('webapp', webapp_sdk) as g:
+        g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
+        g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
+        g.custom_command('show', 'show_webapp', validator=validate_existing_web_app,
+                         exception_handler=empty_on_404, table_transformer=transform_web_output)
+        g.custom_command('delete', 'delete_webapp')
+        g.custom_command('stop', 'stop_webapp')
+        g.custom_command('start', 'start_webapp')
+        g.custom_command('restart', 'restart_webapp')
+        g.custom_command('browse', 'view_in_browser')
+        g.custom_command('list-runtimes', 'list_runtimes')
+        g.custom_command('assign-identity', 'assign_identity')
+        g.generic_update_command('update', custom_func_name='update_webapp', setter_arg_name='site_envelope')
 
-cli_command(__name__, 'webapp create', custom_path + 'create_webapp', exception_handler=ex_handler_factory())
-cli_command(__name__, 'webapp list', custom_path + 'list_webapp', table_transformer=transform_web_list_output)
-cli_command(__name__, 'webapp show', custom_path + 'show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output)
-cli_command(__name__, 'webapp delete', custom_path + 'delete_webapp')
-cli_command(__name__, 'webapp stop', custom_path + 'stop_webapp')
-cli_command(__name__, 'webapp start', custom_path + 'start_webapp')
-cli_command(__name__, 'webapp restart', custom_path + 'restart_webapp')
-cli_generic_update_command(__name__, 'webapp update', 'azure.mgmt.web.operations.web_apps_operations#WebAppsOperations.get',
-                           'azure.mgmt.web.operations.web_apps_operations#WebAppsOperations.create_or_update',
-                           custom_function_op=custom_path + 'update_webapp',
-                           setter_arg_name='site_envelope', factory=cf_webapps)
+    with self.command_group('webapp traffic-routing') as g:
+        g.custom_command('set', 'set_traffic_routing')
+        g.custom_command('show', 'show_traffic_routing')
+        g.custom_command('clear', 'clear_traffic_routing')
 
-cli_command(__name__, 'webapp traffic-routing set', custom_path + 'set_traffic_routing')
-cli_command(__name__, 'webapp traffic-routing show', custom_path + 'show_traffic_routing')
-cli_command(__name__, 'webapp traffic-routing clear', custom_path + 'clear_traffic_routing')
+    with self.command_group('webapp config') as g:
+        g.custom_command('set', 'update_site_configs')
+        g.custom_command('show', 'get_site_configs', exception_handler=empty_on_404)
 
-cli_command(__name__, 'webapp config set', custom_path + 'update_site_configs')
-cli_command(__name__, 'webapp config show', custom_path + 'get_site_configs', exception_handler=empty_on_404)
-cli_command(__name__, 'webapp config appsettings list', custom_path + 'get_app_settings', exception_handler=empty_on_404)
-cli_command(__name__, 'webapp config appsettings set', custom_path + 'update_app_settings')
-cli_command(__name__, 'webapp config appsettings delete', custom_path + 'delete_app_settings')
-cli_command(__name__, 'webapp config connection-string list', custom_path + 'get_connection_strings', exception_handler=empty_on_404)
-cli_command(__name__, 'webapp config connection-string set', custom_path + 'update_connection_strings')
-cli_command(__name__, 'webapp config connection-string delete', custom_path + 'delete_connection_strings')
+    with self.command_group('webapp config appsettings') as g:
+        g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)
+        g.custom_command('set', 'update_app_settings')
+        g.custom_command('delete', 'delete_app_settings')
 
-cli_command(__name__, 'webapp config hostname add', custom_path + 'add_hostname', exception_handler=ex_handler_factory())
-cli_command(__name__, 'webapp config hostname list', custom_path + 'list_hostnames')
-cli_command(__name__, 'webapp config hostname delete', custom_path + 'delete_hostname')
-cli_command(__name__, 'webapp config hostname get-external-ip', custom_path + 'get_external_ip')
-cli_command(__name__, 'webapp config container set', custom_path + 'update_container_settings')
-cli_command(__name__, 'webapp config container delete', custom_path + 'delete_container_settings')
-cli_command(__name__, 'webapp config container show', custom_path + 'show_container_settings', exception_handler=empty_on_404)
+    with self.command_group('webapp config connection-string') as g:
+        g.custom_command('list', 'get_connection_strings', exception_handler=empty_on_404)
+        g.custom_command('set', 'update_connection_strings')
+        g.custom_command('delete', 'delete_connection_strings')
 
-cli_command(__name__, 'webapp config ssl upload', custom_path + 'upload_ssl_cert', exception_handler=ex_handler_factory())
-cli_command(__name__, 'webapp config ssl list', custom_path + 'list_ssl_certs')
-cli_command(__name__, 'webapp config ssl bind', custom_path + 'bind_ssl_cert', exception_handler=ex_handler_factory())
-cli_command(__name__, 'webapp config ssl unbind', custom_path + 'unbind_ssl_cert')
-cli_command(__name__, 'webapp config ssl delete', custom_path + 'delete_ssl_cert')
+    with self.command_group('webapp config hostname') as g:
+        g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())
+        g.custom_command('list', 'list_hostnames')
+        g.custom_command('delete', 'delete_hostname')
+        g.custom_command('get-external-ip', 'get_external_ip')
 
-cli_command(__name__, 'webapp config backup list', custom_path + 'list_backups')
-cli_command(__name__, 'webapp config backup show', custom_path + 'show_backup_configuration', exception_handler=empty_on_404)
-cli_command(__name__, 'webapp config backup create', custom_path + 'create_backup', exception_handler=ex_handler_factory())
-cli_command(__name__, 'webapp config backup update', custom_path + 'update_backup_schedule', exception_handler=ex_handler_factory())
-cli_command(__name__, 'webapp config backup restore', custom_path + 'restore_backup', exception_handler=ex_handler_factory())
+    with self.command_group('webapp config container') as g:
+        g.custom_command('set', 'update_container_settings')
+        g.custom_command('delete', 'delete_container_settings')
+        g.custom_command('show', 'show_container_settings', exception_handler=empty_on_404)
 
-cli_command(__name__, 'webapp deployment source config-local-git', custom_path + 'enable_local_git')
-cli_command(__name__, 'webapp deployment source config-zip', custom_path + 'enable_zip_deploy')
-cli_command(__name__, 'webapp deployment source config', custom_path + 'config_source_control', exception_handler=ex_handler_factory())
-cli_command(__name__, 'webapp deployment source sync', custom_path + 'sync_site_repo', exception_handler=ex_handler_factory())
-cli_command(__name__, 'webapp deployment source show', custom_path + 'show_source_control', exception_handler=empty_on_404)
-cli_command(__name__, 'webapp deployment source delete', custom_path + 'delete_source_control')
-cli_command(__name__, 'webapp deployment source update-token', custom_path + 'update_git_token', exception_handler=ex_handler_factory())
+    with self.command_group('webapp config ssl') as g:
+        g.custom_command('upload', 'upload_ssl_cert', exception_handler=ex_handler_factory())
+        g.custom_command('list', 'list_ssl_certs')
+        g.custom_command('bind', 'bind_ssl_cert', exception_handler=ex_handler_factory())
+        g.custom_command('unbind', 'unbind_ssl_cert')
+        g.custom_command('delete', 'delete_ssl_cert')
 
-cli_command(__name__, 'webapp log tail', custom_path + 'get_streaming_log')
-cli_command(__name__, 'webapp log download', custom_path + 'download_historical_logs')
-cli_command(__name__, 'webapp log config', custom_path + 'config_diagnostics')
-cli_command(__name__, 'webapp log show', custom_path + 'show_diagnostic_settings')
-cli_command(__name__, 'webapp browse', custom_path + 'view_in_browser')
+    with self.command_group('webapp config backup') as g:
+        g.custom_command('list', 'list_backups')
+        g.custom_command('show', 'show_backup_configuration', exception_handler=empty_on_404)
+        g.custom_command('create', 'create_backup', exception_handler=ex_handler_factory())
+        g.custom_command('update', 'update_backup_schedule', exception_handler=ex_handler_factory())
+        g.custom_command('restore', 'restore_backup', exception_handler=ex_handler_factory())
 
-cli_command(__name__, 'webapp deployment slot list', custom_path + 'list_slots', table_transformer=output_slots_in_table)
-cli_command(__name__, 'webapp deployment slot delete', custom_path + 'delete_slot')
-cli_command(__name__, 'webapp deployment slot auto-swap', custom_path + 'config_slot_auto_swap')
-cli_command(__name__, 'webapp deployment slot swap', custom_path + 'swap_slot', exception_handler=ex_handler_factory())
-cli_command(__name__, 'webapp deployment slot create', custom_path + 'create_webapp_slot', exception_handler=ex_handler_factory())
+    with self.command_group('webapp deployment source') as g:
+        g.custom_command('config-local-git', 'enable_local_git')
+        g.custom_command('config-zip', 'enable_zip_deploy')
+        g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory())
+        g.custom_command('sync', 'sync_site_repo', exception_handler=ex_handler_factory())
+        g.custom_command('show', 'show_source_control', exception_handler=empty_on_404)
+        g.custom_command('delete', 'delete_source_control')
+        g.custom_command('update-token', 'update_git_token', exception_handler=ex_handler_factory())
 
-cli_command(__name__, 'webapp deployment user set', custom_path + 'set_deployment_user', exception_handler=ex_handler_factory())
-cli_command(__name__, 'webapp deployment list-publishing-profiles',
-            custom_path + 'list_publish_profiles')
-cli_command(__name__, 'webapp deployment container config',
-            custom_path + 'enable_cd')
-cli_command(__name__, 'webapp deployment container show-cd-url',
-            custom_path + 'show_container_cd_url')
-cli_command(__name__, 'webapp deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', cf_web_client, exception_handler=empty_on_404)
-cli_command(__name__, 'webapp list-runtimes', custom_path + 'list_runtimes')
+    with self.command_group('webapp log') as g:
+        g.custom_command('tail', 'get_streaming_log')
+        g.custom_command('download', 'download_historical_logs')
+        g.custom_command('config', 'config_diagnostics')
+        g.custom_command('show', 'show_diagnostic_settings')
 
-cli_command(__name__, 'webapp auth show', custom_path + 'get_auth_settings')
-cli_command(__name__, 'webapp auth update', custom_path + 'update_auth_settings')
+    with self.command_group('webapp deployment slot') as g:
+        g.custom_command('list', 'list_slots', table_transformer=output_slots_in_table)
+        g.custom_command('delete', 'delete_slot')
+        g.custom_command('auto-swap', 'config_slot_auto_swap')
+        g.custom_command('swap', 'swap_slot', exception_handler=ex_handler_factory())
+        g.custom_command('create', 'create_webapp_slot', exception_handler=ex_handler_factory())
 
-cli_command(__name__, 'webapp assign-identity', custom_path + 'assign_identity')
+    with self.command_group('webapp deployment') as g:
+        g.custom_command('list-publishing-profiles', 'list_publish_profiles')
 
-if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
-    cli_command(__name__, 'appservice plan create', custom_path + 'create_app_service_plan', exception_handler=ex_handler_factory(creating_plan=True))
-    cli_command(__name__, 'appservice plan delete', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.delete', cf_plans, confirmation=True)
-    cli_command(__name__, 'appservice plan list', custom_path + 'list_app_service_plans')
-    cli_command(__name__, 'appservice plan show', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.get', cf_plans, exception_handler=empty_on_404)
-    cli_generic_update_command(__name__, 'appservice plan update', 'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.get',
-                               'azure.mgmt.web.operations.app_service_plans_operations#AppServicePlansOperations.create_or_update',
-                               custom_function_op=custom_path + 'update_app_service_plan',
-                               setter_arg_name='app_service_plan', factory=cf_plans)
-    cli_command(__name__, 'appservice list-locations', custom_path + 'list_locations', transform=transform_list_location_output)
-    cli_command(__name__, 'functionapp create', custom_path + 'create_function')
-    cli_command(__name__, 'functionapp list', custom_path + 'list_function_app', table_transformer=transform_web_list_output)
-    cli_command(__name__, 'functionapp show', custom_path + 'show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output)
-    cli_command(__name__, 'functionapp delete', custom_path + 'delete_function_app')
-    cli_command(__name__, 'functionapp stop', custom_path + 'stop_webapp')
-    cli_command(__name__, 'functionapp start', custom_path + 'start_webapp')
-    cli_command(__name__, 'functionapp restart', custom_path + 'restart_webapp')
-    cli_command(__name__, 'functionapp list-consumption-locations', custom_path + 'list_consumption_locations')
-    cli_command(__name__, 'functionapp config appsettings list', custom_path + 'get_app_settings', exception_handler=empty_on_404)
-    cli_command(__name__, 'functionapp config appsettings set', custom_path + 'update_app_settings')
-    cli_command(__name__, 'functionapp config appsettings delete', custom_path + 'delete_app_settings')
-    cli_command(__name__, 'functionapp config hostname add', custom_path + 'add_hostname', exception_handler=ex_handler_factory())
-    cli_command(__name__, 'functionapp config hostname list', custom_path + 'list_hostnames')
-    cli_command(__name__, 'functionapp config hostname delete', custom_path + 'delete_hostname')
-    cli_command(__name__, 'functionapp config hostname get-external-ip', custom_path + 'get_external_ip')
-    cli_command(__name__, 'functionapp config ssl upload', custom_path + 'upload_ssl_cert', exception_handler=ex_handler_factory())
-    cli_command(__name__, 'functionapp config ssl list', custom_path + 'list_ssl_certs')
-    cli_command(__name__, 'functionapp config ssl bind', custom_path + 'bind_ssl_cert', exception_handler=ex_handler_factory())
-    cli_command(__name__, 'functionapp config ssl unbind', custom_path + 'unbind_ssl_cert')
-    cli_command(__name__, 'functionapp config ssl delete', custom_path + 'delete_ssl_cert')
-    cli_command(__name__, 'functionapp deployment source config-local-git', custom_path + 'enable_local_git')
-    cli_command(__name__, 'functionapp deployment source config-zip', custom_path + 'enable_zip_deploy')
-    cli_command(__name__, 'functionapp deployment source config', custom_path + 'config_source_control', exception_handler=ex_handler_factory())
-    cli_command(__name__, 'functionapp deployment source sync', custom_path + 'sync_site_repo')
-    cli_command(__name__, 'functionapp deployment source show', custom_path + 'show_source_control', exception_handler=empty_on_404)
-    cli_command(__name__, 'functionapp deployment source delete', custom_path + 'delete_source_control')
-    cli_command(__name__, 'functionapp deployment source update-token', custom_path + 'update_git_token', exception_handler=ex_handler_factory())
-    cli_command(__name__, 'functionapp deployment user set', custom_path + 'set_deployment_user', exception_handler=ex_handler_factory())
-    cli_command(__name__, 'functionapp deployment list-publishing-profiles',
-                custom_path + 'list_publish_profiles')
-    cli_command(__name__, 'functionapp deployment user show', 'azure.mgmt.web.web_site_management_client#WebSiteManagementClient.get_publishing_user', cf_web_client, exception_handler=empty_on_404)
-    cli_command(__name__, 'functionapp assign-identity', custom_path + 'assign_identity')
+    with self.command_group('webapp deployment user', webclient_sdk) as g:
+        g.command('show', 'get_publishing_user', exception_handler=empty_on_404)
+        g.custom_command('set', 'set_deployment_user', exception_handler=ex_handler_factory())
+
+    with self.command_group('webapp deployment container') as g:
+        g.custom_command('config', 'enable_cd')
+        g.custom_command('show-cd-url', 'show_container_cd_url')
+
+    with self.command_group('webapp auth') as g:
+        g.custom_command('show', 'get_auth_settings')
+        g.custom_command('update', 'update_auth_settings')
+
+    with self.command_group('appservice plan', appservice_plan_sdk) as g:
+        g.custom_command('create', 'create_app_service_plan', exception_handler=ex_handler_factory(creating_plan=True))
+        g.command('delete', 'delete', confirmation=True)
+        g.custom_command('list', 'list_app_service_plans')
+        g.command('show', 'get', exception_handler=empty_on_404)
+        g.generic_update_command('update', custom_func_name='update_app_service_plan', setter_arg_name='app_service_plan')
+    with self.command_group('appservice') as g:
+        g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
+
+    with self.command_group('functionapp') as g:
+        g.custom_command('create', 'create_function')
+        g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
+        g.custom_command('show', 'show_webapp', validator=validate_existing_function_app,
+                         exception_handler=empty_on_404, table_transformer=transform_web_output)
+        g.custom_command('delete', 'delete_function_app')
+        g.custom_command('stop', 'stop_webapp')
+        g.custom_command('start', 'start_webapp')
+        g.custom_command('restart', 'restart_webapp')
+        g.custom_command('list-consumption-locations', 'list_consumption_locations')
+        g.custom_command('assign-identity', 'assign_identity')
+
+    with self.command_group('functionapp config appsettings') as g:
+        g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)
+        g.custom_command('set', 'update_app_settings')
+        g.custom_command('delete', 'delete_app_settings')
+
+    with self.command_group('functionapp config hostname') as g:
+        g.custom_command('add', 'add_hostname', exception_handler=ex_handler_factory())
+        g.custom_command('list', 'list_hostnames')
+        g.custom_command('delete', 'delete_hostname')
+        g.custom_command('get-external-ip', 'get_external_ip')
+
+    with self.command_group('functionapp config ssl') as g:
+        g.custom_command('upload', 'upload_ssl_cert', exception_handler=ex_handler_factory())
+        g.custom_command('list', 'list_ssl_certs')
+        g.custom_command('bind', 'bind_ssl_cert', exception_handler=ex_handler_factory())
+        g.custom_command('unbind', 'unbind_ssl_cert')
+        g.custom_command('delete', 'delete_ssl_cert')
+
+    with self.command_group('functionapp deployment source') as g:
+        g.custom_command('config-local-git', 'enable_local_git')
+        g.custom_command('config-zip', 'enable_zip_deploy')
+        g.custom_command('config', 'config_source_control', exception_handler=ex_handler_factory())
+        g.custom_command('sync', 'sync_site_repo')
+        g.custom_command('show', 'show_source_control', exception_handler=empty_on_404)
+        g.custom_command('delete', 'delete_source_control')
+        g.custom_command('update-token', 'update_git_token', exception_handler=ex_handler_factory())
+
+    with self.command_group('functionapp deployment user', webclient_sdk) as g:
+        g.custom_command('set', 'set_deployment_user', exception_handler=ex_handler_factory())
+        g.command('show', 'get_publishing_user', exception_handler=empty_on_404)
+
+    with self.command_group('functionapp deployment') as g:
+        g.custom_command('list-publishing-profiles', 'list_publish_profiles')

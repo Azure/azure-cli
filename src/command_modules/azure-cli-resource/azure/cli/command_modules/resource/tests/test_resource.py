@@ -8,345 +8,296 @@ import os
 import time
 import unittest
 
-from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
-                               JMESPathCheck as JCheck, create_random_name)
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name
 from azure.cli.core.util import get_file_json
-# AZURE CLI RESOURCE TEST DEFINITIONS
-from azure.cli.testsdk.vcr_test_base import (VCRTestBase, JMESPathCheck, NoneCheck,
-                                             BooleanCheck,
-                                             ResourceGroupVCRTestBase,
-                                             MOCKED_SUBSCRIPTION_ID)
 
 
 class ResourceGroupScenarioTest(ScenarioTest):
+
     @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
     def test_resource_group(self, resource_group):
-        s = self
-        rg = resource_group
-        s.cmd('group delete -n {} --yes'.format(rg))
-        s.cmd('group exists -n {}'.format(rg), checks=NoneCheck())
 
-        s.cmd('group create -n {} -l westus --tag a=b c'.format(rg), checks=[
-            JCheck('name', rg),
-            JCheck('tags', {'a': 'b', 'c': ''})
+        self.cmd('group delete -n {rg} --yes')
+        self.cmd('group exists -n {rg}',
+                 checks=self.check('@', False))
+
+        self.cmd('group create -n {rg} -l westus --tag a=b c', checks=[
+            self.check('name', '{rg}'),
+            self.check('tags', {'a': 'b', 'c': ''})
         ])
-        s.cmd('group exists -n {}'.format(rg), checks=BooleanCheck(True))
-        s.cmd('group show -n {}'.format(rg), checks=[
-            JCheck('name', rg),
-            JCheck('tags', {'a': 'b', 'c': ''})
+        self.cmd('group exists -n {rg}',
+                 checks=self.check('@', True))
+        self.cmd('group show -n {rg}', checks=[
+            self.check('name', '{rg}'),
+            self.check('tags', {'a': 'b', 'c': ''})
         ])
-        s.cmd('group list --tag a=b', checks=[
-            JCheck('[0].name', rg),
-            JCheck('[0].tags', {'a': 'b', 'c': ''})
+        self.cmd('group list --tag a=b', checks=[
+            self.check('[0].name', '{rg}'),
+            self.check('[0].tags', {'a': 'b', 'c': ''})
         ])
 
 
-class ResourceGroupNoWaitScenarioTest(VCRTestBase):
-    def test_resource_group_no_wait(self):
-        self.execute()
+class ResourceGroupNoWaitScenarioTest(ScenarioTest):
 
-    def __init__(self, test_method):
-        self.resource_group = 'cli_rg_nowait_test'
-        super(ResourceGroupNoWaitScenarioTest, self).__init__(__file__, test_method)
+    @ResourceGroupPreparer(name_prefix='cli_rg_nowait_test')
+    def test_resource_group_no_wait(self, resource_group):
 
-    def set_up(self):
-        if self.cmd('group exists -n {}'.format(self.resource_group)):
-            self.cmd('group delete -n {} --yes'.format(self.resource_group))
-
-    def body(self):
-        s = self
-        rg = self.resource_group
-        s.cmd('group create -n {} -l westus'.format(rg), checks=[
-            JMESPathCheck('name', rg),
-        ])
-        s.cmd('group exists -n {}'.format(rg), checks=BooleanCheck(True))
-        s.cmd('group wait --exists -n {}'.format(rg), checks=NoneCheck())
-        s.cmd('group delete -n {} --no-wait --yes'.format(rg), checks=NoneCheck())
-        s.cmd('group wait --deleted -n {}'.format(rg), checks=NoneCheck())
-        s.cmd('group exists -n {}'.format(rg), checks=NoneCheck())
+        self.cmd('group delete -n {rg} --no-wait --yes',
+                 checks=self.is_empty())
+        self.cmd('group wait --deleted -n {rg}',
+                 checks=self.is_empty())
+        self.cmd('group exists -n {rg}',
+                 checks=self.check('@', False))
+        self.cmd('group create -n {rg} -l westus',
+                 checks=self.check('name', '{rg}'))
+        self.cmd('group exists -n {rg}',
+                 checks=self.check('@', True))
+        self.cmd('group wait --exists -n {rg}',
+                 checks=self.is_empty())
 
 
 class ResourceScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(name_prefix='cli_test_rsrc_scenario', location='southcentralus')
-    def test_resource_scenario(self, resource_group):
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_scenario', location='southcentralus')
+    def test_resource_scenario(self, resource_group, resource_group_location):
         from azure_devtools.scenario_tests import LargeResponseBodyProcessor
         large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
         if large_resp_body:
             large_resp_body._max_response_body = 4096
 
-        vnet_name = self.create_random_name('cli-test-vnet', 30)
-        subnet_name = self.create_random_name('cli-test-subnet', 30)
-        vnet_type = 'Microsoft.Network/virtualNetworks'
+        self.kwargs.update({
+            'loc': resource_group_location,
+            'vnet': self.create_random_name('vnet-', 30),
+            'subnet': self.create_random_name('subnet-', 30),
+            'rt': 'Microsoft.Network/virtualNetworks'
+        })
+        vnet_count = self.cmd("resource list --query \"length([?name=='{vnet}'])\"").get_output_in_json() or 0
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet} --tags cli-test=test')
+        vnet_count += 1
 
-        self.cmd('network vnet create -g {} -n {} --subnet-name {} --tags cli-test=test'.format(
-            resource_group, vnet_name, subnet_name))
-
-        self.cmd('resource list', checks=JCheck("length([?name=='{}'])".format(vnet_name), 1))
-        self.cmd('resource list -l southcentralus',
-                 checks=JCheck("length([?location == 'southcentralus']) == length(@)", True))
-        self.cmd('resource list --resource-type {}'.format(vnet_type),
-                 checks=JCheck("length([?name=='{}'])".format(vnet_name), 1))
-        self.cmd('resource list --name {}'.format(vnet_name),
-                 checks=JCheck("length([?name=='{}'])".format(vnet_name), 1))
-        self.cmd('resource list --tag cli-test', checks=JCheck("length([?name=='{}'])".format(vnet_name), 1))
-        self.cmd('resource list --tag cli-test=test', checks=JCheck("length([?name=='{}'])".format(vnet_name), 1))
+        self.cmd('resource list',
+                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
+        self.cmd('resource list -l {loc}',
+                 checks=self.check("length([?location == '{loc}']) == length(@)", True))
+        self.cmd('resource list --resource-type {rt}',
+                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
+        self.cmd('resource list --name {vnet}',
+                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
+        self.cmd('resource list --tag cli-test',
+                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
+        self.cmd('resource list --tag cli-test=test',
+                 checks=self.check("length([?name=='{vnet}'])", vnet_count))
 
         # check for simple resource with tag
-        self.cmd('resource show -n {} -g {} --resource-type {}'.format(vnet_name, resource_group, vnet_type), checks=[
-            JCheck('name', vnet_name),
-            JCheck('location', 'southcentralus'),
-            JCheck('resourceGroup', resource_group),
-            JCheck('tags', {'cli-test': 'test'})])
-
+        self.cmd('resource show -n {vnet} -g {rg} --resource-type Microsoft.Network/virtualNetworks', checks=[
+            self.check('name', '{vnet}'),
+            self.check('location', '{loc}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('tags', {'cli-test': 'test'})
+        ])
         # check for child resource
-        self.cmd(
-            'resource show -n {} -g {} --namespace Microsoft.Network --parent virtualNetworks/{}'
-            ' --resource-type subnets'.format(subnet_name, resource_group, vnet_name), checks=[
-                JCheck('name', subnet_name),
-                JCheck('resourceGroup', resource_group)])
+        self.cmd('resource show -n {subnet} -g {rg} --namespace Microsoft.Network --parent virtualNetworks/{vnet} --resource-type subnets', checks=[
+            self.check('name', '{subnet}'),
+            self.check('resourceGroup', '{rg}')
+        ])
 
         # clear tag and verify
-        self.cmd('resource tag -n {} -g {} --resource-type {} --tags'.format(vnet_name, resource_group, vnet_type))
-        self.cmd('resource show -n {} -g {} --resource-type {}'
-                 .format(vnet_name, resource_group, vnet_type), checks=JCheck('tags', {}))
+        self.cmd('resource tag -n {vnet} -g {rg} --resource-type Microsoft.Network/virtualNetworks --tags')
+        self.cmd('resource show -n {vnet} -g {rg} --resource-type Microsoft.Network/virtualNetworks',
+                 checks=self.check('tags', {}))
 
-        # delete resource and verify
-        self.cmd('resource delete -n {} -g {} --resource-type {}'.format(vnet_name, resource_group, vnet_type))
+        # delete and verify
+        self.cmd('resource delete -n {vnet} -g {rg} --resource-type {rt}')
         time.sleep(10)
-        self.cmd('resource list', checks=JCheck("length([?name=='{}'])".format(vnet_name), 0))
+        self.cmd('resource list', checks=self.check("length([?name=='{vnet}'])", 0))
 
 
-class ResourceIDScenarioTest(ResourceGroupVCRTestBase):
-    def test_resource_id_scenario(self):
-        self.execute()
+class ResourceIDScenarioTest(ScenarioTest):
 
-    def __init__(self, test_method):
-        super(ResourceIDScenarioTest, self).__init__(__file__, test_method,
-                                                     resource_group='cli_test_resource_id')
-        self.vnet_name = 'cli_test_resource_id_vnet'
-        self.subnet_name = 'cli_test_resource_id_subnet'
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_id')
+    def test_resource_id_scenario(self, resource_group):
 
-    def set_up(self):
-        super(ResourceIDScenarioTest, self).set_up()
-        self.cmd('network vnet create -g {} -n {} --subnet-name {}'.format(self.resource_group,
-                                                                           self.vnet_name,
-                                                                           self.subnet_name))
+        self.kwargs.update({
+            'vnet': 'cli_test_resource_id_vnet',
+            'subnet': 'cli_test_resource_id_subnet'
+        })
 
-    def body(self):
-        if self.playback:
-            subscription_id = MOCKED_SUBSCRIPTION_ID
-        else:
-            subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv')
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
 
-        s = self
-        vnet_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/' \
-                           'virtualNetworks/{}'.format(subscription_id,
-                                                       self.resource_group,
-                                                       self.vnet_name)
-        s.cmd('resource tag --id {} --tags {}'.format(vnet_resource_id, 'tag-vnet'))
-        s.cmd('resource show --id {}'.format(vnet_resource_id), checks=[
-            JMESPathCheck('name', self.vnet_name),
-            JMESPathCheck('resourceGroup', self.resource_group),
-            JMESPathCheck('tags', {'tag-vnet': ''})
+        self.kwargs['sub'] = self.get_subscription_id()
+
+        self.kwargs['vnet_id'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet}'.format(
+            **self.kwargs)
+        self.cmd('resource tag --id {vnet_id} --tags tag-vnet')
+        self.cmd('resource show --id {vnet_id}', checks=[
+            self.check('name', '{vnet}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('tags', {'tag-vnet': ''})
         ])
 
-        subnet_resource_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/' \
-                             'virtualNetworks/{}/subnets/{}'.format(subscription_id,
-                                                                    self.resource_group,
-                                                                    self.vnet_name,
-                                                                    self.subnet_name)
-        s.cmd('resource show --id {}'.format(subnet_resource_id), checks=[
-            JMESPathCheck('name', self.subnet_name),
-            JMESPathCheck('resourceGroup', self.resource_group),
-            JMESPathCheck('properties.addressPrefix', '10.0.0.0/24')
+        self.kwargs['subnet_id'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vnet}/subnets/{subnet}'.format(
+            **self.kwargs)
+        self.cmd('resource show --id {subnet_id}', checks=[
+            self.check('name', '{subnet}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('properties.addressPrefix', '10.0.0.0/24')
         ])
 
-        s.cmd('resource update --id {} --set properties.addressPrefix=10.0.0.0/22'.format(
-            subnet_resource_id), checks=[
-            JMESPathCheck('properties.addressPrefix', '10.0.0.0/22')
-        ])
+        self.cmd('resource update --id {subnet_id} --set properties.addressPrefix=10.0.0.0/22',
+                 checks=self.check('properties.addressPrefix', '10.0.0.0/22'))
 
-        s.cmd('resource delete --id {}'.format(subnet_resource_id), checks=NoneCheck())
-        s.cmd('resource delete --id {}'.format(vnet_resource_id), checks=NoneCheck())
+        self.cmd('resource delete --id {subnet_id}', checks=self.is_empty())
+        self.cmd('resource delete --id {vnet_id}', checks=self.is_empty())
 
 
 class ResourceCreateAndShowScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_create')
     def test_resource_create_and_show(self, resource_group, resource_group_location):
-        appservice_plan = 'cli_res_create_plan'
-        webapp = 'clirescreateweb'
 
-        self.cmd('resource create -g {} -n {} --resource-type Microsoft.web/serverFarms '
-                 '--is-full-object --properties "{{\\"location\\":\\"{}\\",\\"sku\\":{{\\"name\\":'
-                 '\\"B1\\",\\"tier\\":\\"BASIC\\"}}}}"'.format(resource_group,
-                                                               appservice_plan,
-                                                               resource_group_location),
-                 checks=[JCheck('name', appservice_plan)])
+        self.kwargs.update({
+            'plan': 'cli_res_create_plan',
+            'app': 'clirescreateweb',
+            'loc': resource_group_location
+        })
 
-        result = self.cmd(
-            'resource create -g {} -n {} --resource-type Microsoft.web/sites --properties '
-            '"{{\\"serverFarmId\\":\\"{}\\"}}"'.format(resource_group,
-                                                       webapp,
-                                                       appservice_plan),
-            checks=[JCheck('name', webapp)]).get_output_in_json()
+        self.cmd('resource create -g {rg} -n {plan} --resource-type Microsoft.web/serverFarms --is-full-object --properties "{{\\"location\\":\\"{loc}\\",\\"sku\\":{{\\"name\\":\\"B1\\",\\"tier\\":\\"BASIC\\"}}}}"',
+                 checks=self.check('name', '{plan}'))
 
-        app_settings_id = result['id'] + '/config/appsettings'
-        self.cmd('resource create --id {} --properties "{{\\"key2\\":\\"value12\\"}}"'.format(
-            app_settings_id), checks=[JCheck('properties.key2', 'value12')])
+        result = self.cmd('resource create -g {rg} -n {app} --resource-type Microsoft.web/sites --properties "{{\\"serverFarmId\\":\\"{plan}\\"}}"',
+                          checks=self.check('name', '{app}')).get_output_in_json()
 
-        self.cmd('resource show --id {}'.format(result['id'] + '/config/web'), checks=[
-            JCheck('properties.publishingUsername', '$' + webapp)  # spot check
-        ])
-        self.cmd('resource show --id {} --include-response-body'.format(result['id'] + '/config/web'), checks=[
-            JCheck('responseBody.properties.publishingUsername', '$' + webapp)  # spot check
-        ])
+        self.kwargs['app_settings_id'] = result['id'] + '/config/appsettings'
+        self.kwargs['app_config_id'] = result['id'] + '/config/web'
+        self.cmd('resource create --id {app_settings_id} --properties "{{\\"key2\\":\\"value12\\"}}"',
+                 checks=[self.check('properties.key2', 'value12')])
+
+        self.cmd('resource show --id {app_config_id}',
+                 checks=self.check('properties.publishingUsername', '${app}'))
+        self.cmd('resource show --id {app_config_id} --include-response-body',
+                 checks=self.check('responseBody.properties.publishingUsername', '${app}'))
 
 
-class TagScenarioTest(VCRTestBase):
+class TagScenarioTest(ScenarioTest):
+
     def test_tag_scenario(self):
-        self.execute()
 
-    def __init__(self, test_method):
-        self.tag_name = 'travistesttag'
-        super(TagScenarioTest, self).__init__(__file__, test_method)
+        self.kwargs.update({
+            'tag': 'cli_test_tag'
+        })
 
-    def set_up(self):
-        tn = self.tag_name
-        tags = self.cmd('tag list --query "[?tagName == \'{}\'].values[].tagValue"'.format(tn))
+        tags = self.cmd('tag list --query "[?tagName == \'{tag}\'].values[].tagValue"').get_output_in_json()
         for tag in tags:
-            self.cmd('tag remove-value -n {} --value {}'.format(tn, tag))
-        self.cmd('tag delete -n {}'.format(tn))
+            self.cmd('tag remove-value -n {} --value {{tag}}'.format(tag))
+        self.cmd('tag delete -n {tag}')
 
-    def body(self):
-        s = self
-        tn = s.tag_name
-
-        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(tn), checks=NoneCheck())
-        s.cmd('tag create -n {}'.format(tn), checks=[
-            JMESPathCheck('tagName', tn),
-            JMESPathCheck('values', []),
-            JMESPathCheck('count.value', 0)
+        self.cmd('tag list --query "[?tagName == \'{tag}\']"', checks=self.is_empty())
+        self.cmd('tag create -n {tag}', checks=[
+            self.check('tagName', '{tag}'),
+            self.check('values', []),
+            self.check('count.value', 0)
         ])
-        s.cmd('tag add-value -n {} --value test'.format(tn))
-        s.cmd('tag add-value -n {} --value test2'.format(tn))
-        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(tn), checks=[
-            JMESPathCheck('[].values[].tagValue', [u'test', u'test2'])
-        ])
-        s.cmd('tag remove-value -n {} --value test'.format(tn))
-        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(tn), checks=[
-            JMESPathCheck('[].values[].tagValue', [u'test2'])
-        ])
-        s.cmd('tag remove-value -n {} --value test2'.format(tn))
-        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(tn), checks=[
-            JMESPathCheck('[].values[].tagValue', [])
-        ])
-        s.cmd('tag delete -n {}'.format(tn))
-        s.cmd('tag list --query "[?tagName == \'{}\']"'.format(self.tag_name), checks=NoneCheck())
+        self.cmd('tag add-value -n {tag} --value test')
+        self.cmd('tag add-value -n {tag} --value test2')
+        self.cmd('tag list --query "[?tagName == \'{tag}\']"',
+                 checks=self.check('[].values[].tagValue', [u'test', u'test2']))
+        self.cmd('tag remove-value -n {tag} --value test')
+        self.cmd('tag list --query "[?tagName == \'{tag}\']"',
+                 checks=self.check('[].values[].tagValue', [u'test2']))
+        self.cmd('tag remove-value -n {tag} --value test2')
+        self.cmd('tag list --query "[?tagName == \'{tag}\']"',
+                 checks=self.check('[].values[].tagValue', []))
+        self.cmd('tag delete -n {tag}')
+        self.cmd('tag list --query "[?tagName == \'{tag}\']"',
+                 checks=self.is_empty())
 
 
-class ProviderRegistrationTest(VCRTestBase):
-    def __init__(self, test_method):
-        super(ProviderRegistrationTest, self).__init__(__file__, test_method)
+class ProviderRegistrationTest(ScenarioTest):
 
     def test_provider_registration(self):
-        self.execute()
 
-    def body(self):
-        provider = 'TrendMicro.DeepSecurity'
-        result = self.cmd('provider show -n {}'.format(provider), checks=None)
+        self.kwargs.update({'prov': 'TrendMicro.DeepSecurity'})
+
+        result = self.cmd('provider show -n {prov}').get_output_in_json()
         if result['registrationState'] == 'Unregistered':
-            self.cmd('provider register -n {}'.format(provider), checks=None)
-            result = self.cmd('provider show -n {}'.format(provider))
+            self.cmd('provider register -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
-            self.cmd('provider unregister -n {}'.format(provider), checks=None)
-            result = self.cmd('provider show -n {}'.format(provider))
+            self.cmd('provider unregister -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
         else:
-            self.cmd('provider unregister -n {}'.format(provider), checks=None)
-            result = self.cmd('provider show -n {}'.format(provider))
+            self.cmd('provider unregister -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Unregistering', 'Unregistered'])
-            self.cmd('provider register -n {}'.format(provider), checks=None)
-            result = self.cmd('provider show -n {}'.format(provider))
+            self.cmd('provider register -n {prov}')
+            result = self.cmd('provider show -n {prov}').get_output_in_json()
             self.assertTrue(result['registrationState'] in ['Registering', 'Registered'])
 
 
-class ProviderOperationTest(VCRTestBase):
-    def __init__(self, test_method):
-        super(ProviderOperationTest, self).__init__(__file__, test_method)
+class ProviderOperationTest(ScenarioTest):
 
     def test_provider_operation(self):
-        self.execute()
-
-    def body(self):
         self.cmd('provider operation show --namespace microsoft.compute', checks=[
-            JMESPathCheck('id',
-                          '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
-            JMESPathCheck('type', 'Microsoft.Authorization/providerOperations')
+            self.check('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
+            self.check('type', 'Microsoft.Authorization/providerOperations')
         ])
-        self.cmd('provider operation show --namespace microsoft.compute --api-version 2015-07-01',
-                 checks=[
-                     JMESPathCheck(
-                         'id',
-                         '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
-                     JMESPathCheck('type', 'Microsoft.Authorization/providerOperations')
-                 ])
+        self.cmd('provider operation show --namespace microsoft.compute --api-version 2015-07-01', checks=[
+            self.check('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
+            self.check('type', 'Microsoft.Authorization/providerOperations')
+        ])
 
 
 class DeploymentTest(ScenarioTest):
+
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_lite')
     def test_group_deployment_lite(self, resource_group):
         # ensures that a template that is missing "parameters" or "resources" still deploys
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_file = os.path.join(curr_dir, 'test-template-lite.json').replace('\\', '\\\\')
-        deployment_name = self.create_random_name('azure-cli-deployment', 30)
 
-        self.cmd('group deployment create -g {} -n {} --template-file {}'.format(
-            resource_group, deployment_name, template_file), checks=[
-            JCheck('properties.provisioningState', 'Succeeded'),
-            JCheck('resourceGroup', resource_group),
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'test-template-lite.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-deployment', 30)
+        })
+
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment')
     def test_group_deployment(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_file = os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\')
-        parameters_file = os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\')
-        object_file = os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\')
-        deployment_name = 'azure-cli-deployment'
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\'),
+            'of': os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\'),
+            'dn': 'azure-cli-deployment'
+        })
+        self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
-        subnet_id = self.cmd(
-            'network vnet create -g {} -n vnet1 --subnet-name subnet1'.format(resource_group)).get_output_in_json()[
-            'newVNet']['subnets'][0]['id']
-
-        self.cmd(
-            'group deployment validate -g {} --template-file {} --parameters @"{}" --parameters subnetId="{}" --parameters backendAddressPools=@"{}"'.format(
-                resource_group, template_file, parameters_file, subnet_id, object_file), checks=[
-                JCheck('properties.provisioningState', 'Succeeded')
-            ])
-
-        self.cmd(
-            'group deployment create -g {} -n {} --template-file {} --parameters @"{}" --parameters subnetId="{}" --parameters backendAddressPools=@"{}"'.format(
-                resource_group, deployment_name, template_file, parameters_file, subnet_id, object_file), checks=[
-                JCheck('properties.provisioningState', 'Succeeded'),
-                JCheck('resourceGroup', resource_group),
-            ])
-        self.cmd('network lb show -g {} -n test-lb'.format(resource_group), checks=[
-            JCheck('tags', {'key': 'super=value'})
+        self.cmd('group deployment validate -g {rg} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
         ])
 
-        self.cmd('group deployment list -g {}'.format(resource_group), checks=[
-            JCheck('[0].name', deployment_name),
-            JCheck('[0].resourceGroup', resource_group)
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}')
         ])
-        self.cmd('group deployment show -g {} -n {}'.format(resource_group, deployment_name), checks=[
-            JCheck('name', deployment_name),
-            JCheck('resourceGroup', resource_group)
+        self.cmd('network lb show -g {rg} -n test-lb',
+                 checks=self.check('tags', {'key': 'super=value'}))
+
+        self.cmd('group deployment list -g {rg}', checks=[
+            self.check('[0].name', '{dn}'),
+            self.check('[0].resourceGroup', '{rg}')
         ])
-        self.cmd('group deployment operation list -g {} -n {}'.format(resource_group, deployment_name), checks=[
-            JCheck('length([])', 2),
-            JCheck('[0].resourceGroup', resource_group)
+        self.cmd('group deployment show -g {rg} -n {dn}', checks=[
+            self.check('name', '{dn}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+        self.cmd('group deployment operation list -g {rg} -n {dn}', checks=[
+            self.check('length([])', 2),
+            self.check('[0].resourceGroup', '{rg}')
         ])
 
 
@@ -355,492 +306,465 @@ class DeploymentLiveTest(LiveScenarioTest):
     def test_group_deployment_progress(self, resource_group):
         from azure.cli.testsdk.utilities import force_progress_logging
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_file = os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\')
-        parameters_file = os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\')
-        object_file = os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\')
-        deployment_name = 'azure-cli-deployment2'
 
-        subnet_id = self.cmd(
-            'network vnet create -g {} -n vnet1 --subnet-name subnet1'.format(resource_group)).get_output_in_json()[
-            'newVNet']['subnets'][0]['id']
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'test-template.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'test-params.json').replace('\\', '\\\\'),
+            'of': os.path.join(curr_dir, 'test-object.json').replace('\\', '\\\\'),
+            'dn': 'azure-cli-deployment2'
+        })
+
+        self.kwargs['subnet_id'] = self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name subnet1').get_output_in_json()['newVNet']['subnets'][0]['id']
 
         with force_progress_logging() as test_io:
-            self.cmd(
-                'group deployment create --verbose -g {} -n {} --template-file {} --parameters @"{}" --parameters subnetId="{}" --parameters backendAddressPools=@"{}"'.format(
-                    resource_group, deployment_name, template_file, parameters_file, subnet_id, object_file))
+            self.cmd('group deployment create --verbose -g {rg} -n {dn} --template-file {tf} --parameters @"{params}" --parameters subnetId="{subnet_id}" --parameters backendAddressPools=@"{of}"')
 
         # very the progress
         lines = test_io.getvalue().splitlines()
         for l in lines:
             self.assertTrue(l.split(':')[0] in ['Accepted', 'Succeeded'])
-        self.assertTrue('Succeeded: {} (Microsoft.Resources/deployments)'.format(deployment_name), lines)
+        self.assertTrue('Succeeded: {} (Microsoft.Resources/deployments)'.format(self.kwargs['dn']), lines)
 
 
-class DeploymentnoWaitTest(ResourceGroupVCRTestBase):
-    def __init__(self, test_method):
-        super(DeploymentnoWaitTest, self).__init__(__file__, test_method,
-                                                   resource_group='azure-cli-deployment-test')
+class DeploymentNoWaitTest(ScenarioTest):
 
-    def test_group_deployment_no_wait(self):
-        self.execute()
-
-    def body(self):
+    @ResourceGroupPreparer(name_prefix='cli_test_group_deployment_no_wait')
+    def test_group_deployment_no_wait(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_file = os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\')
-        parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\',
-                                                                                          '\\\\')
-        deployment_name = 'azure-cli-deployment'
 
-        self.cmd('group deployment create -g {} -n {} --template-file {} --parameters @{} '
-                 '--no-wait'.format(self.resource_group,
-                                    deployment_name,
-                                    template_file,
-                                    parameters_file),
-                 checks=NoneCheck())
+        self.kwargs.update({
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\'),
+            'dn': 'azure-cli-deployment'
+        })
 
-        self.cmd('group deployment wait -g {} -n {} --created'.format(self.resource_group,
-                                                                      deployment_name),
-                 checks=NoneCheck())
+        self.cmd('group deployment create -g {rg} -n {dn} --template-file {tf} --parameters @{params} --no-wait',
+                 checks=self.is_empty())
 
-        self.cmd('group deployment show -g {} -n {}'.format(self.resource_group, deployment_name),
-                 checks=[JMESPathCheck('properties.provisioningState', 'Succeeded')])
+        self.cmd('group deployment wait -g {rg} -n {dn} --created',
+                 checks=self.is_empty())
+
+        self.cmd('group deployment show -g {rg} -n {dn}',
+                 checks=self.check('properties.provisioningState', 'Succeeded'))
 
 
 class DeploymentThruUriTest(ScenarioTest):
+
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_uri')
     def test_group_deployment_thru_uri(self, resource_group):
         self.resource_group = resource_group
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         # same copy of the sample template file under current folder, but it is uri based now
-        template_uri = 'https://raw.githubusercontent.com/Azure/azure-cli/master/src/' \
-                       'command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/simple_deploy.json'
-        parameters_file = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\',
-                                                                                          '\\\\')
-        result = self.cmd('group deployment create -g {} --template-uri {} --parameters @{}'.format(
-            self.resource_group, template_uri, parameters_file), checks=[
-            JCheck('properties.provisioningState', 'Succeeded'),
-            JCheck('resourceGroup', self.resource_group),
-        ]).get_output_in_json()
+        self.kwargs.update({
+            'tf': 'https://raw.githubusercontent.com/Azure/azure-cli/master/src/command_modules/azure-cli-resource/azure/cli/command_modules/resource/tests/simple_deploy.json',
+            'params': os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
+        })
+        self.kwargs['dn'] = self.cmd('group deployment create -g {rg} --template-uri {tf} --parameters @{params}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg}'),
+        ]).get_output_in_json()['name']
 
-        deployment_name = result['name']
-        result = self.cmd(
-            'group deployment show -g {} -n {}'.format(self.resource_group, deployment_name),
-            checks=JCheck('name', deployment_name))
+        self.cmd('group deployment show -g {rg} -n {dn}',
+                 checks=self.check('name', '{dn}'))
 
-        self.cmd('group deployment delete -g {} -n {}'.format(self.resource_group, deployment_name))
-        self.cmd('group deployment list -g {}'.format(self.resource_group), checks=NoneCheck())
+        self.cmd('group deployment delete -g {rg} -n {dn}')
+        self.cmd('group deployment list -g {rg}',
+                 checks=self.is_empty())
 
 
 class ResourceMoveScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_resource_move_dest', parameter_name='resource_group_dest')
-    @ResourceGroupPreparer(name_prefix='cli_test_resource_move_source')
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_move_dest', parameter_name='resource_group_dest', key='rg2')
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_move_source', key='rg1')
     def test_resource_move(self, resource_group, resource_group_dest):
-        nsg1_name = self.create_random_name('nsg-move', 20)
-        nsg2_name = self.create_random_name('nsg-move', 20)
+        self.kwargs.update({
+            'nsg1': self.create_random_name('nsg-move', 20),
+            'nsg2': self.create_random_name('nsg-move', 20)
+        })
 
-        nsg1 = self.cmd('network nsg create -n {} -g {}'.format(nsg1_name, resource_group)).get_output_in_json()
-        nsg2 = self.cmd('network nsg create -n {} -g {}'.format(nsg2_name, resource_group)).get_output_in_json()
+        self.kwargs['nsg1_id'] = self.cmd('network nsg create -n {nsg1} -g {rg1}').get_output_in_json()['NewNSG']['id']
+        self.kwargs['nsg2_id'] = self.cmd('network nsg create -n {nsg2} -g {rg1}').get_output_in_json()['NewNSG']['id']
 
-        nsg1_id = nsg1['NewNSG']['id']
-        nsg2_id = nsg2['NewNSG']['id']
+        self.cmd('resource move --ids {nsg1_id} {nsg2_id} --destination-group {rg2}')
 
-        self.cmd('resource move --ids {} {} --destination-group {}'.format(nsg1_id, nsg2_id, resource_group_dest))
-
-        self.cmd('network nsg show -g {} -n {}'.format(resource_group_dest, nsg1_name), checks=[
-            JCheck('name', nsg1_name)])
-        self.cmd('network nsg show -g {} -n {}'.format(resource_group_dest, nsg2_name), checks=[
-            JCheck('name', nsg2_name)])
+        self.cmd('network nsg show -g {rg2} -n {nsg1}', checks=[
+            self.check('name', '{nsg1}')])
+        self.cmd('network nsg show -g {rg2} -n {nsg2}', checks=[
+                 self.check('name', '{nsg2}')])
 
 
-class FeatureScenarioTest(VCRTestBase):
-    def __init__(self, test_method):
-        super(FeatureScenarioTest, self).__init__(__file__, test_method)
+class FeatureScenarioTest(ScenarioTest):
 
     def test_feature_list(self):
-        self.execute()
+        self.cmd('feature list', checks=self.check("length([?name=='Microsoft.Xrm/uxdevelopment'])", 1))
 
-    def body(self):
-        self.cmd('feature list', checks=[
-            JMESPathCheck("length([?name=='Microsoft.Xrm/uxdevelopment'])", 1)
-        ])
-
-        self.cmd('feature list --namespace {}'.format('Microsoft.Network'), checks=[
-            JMESPathCheck("length([?name=='Microsoft.Network/SkipPseudoVipGeneration'])", 1)
-        ])
+        self.cmd('feature list --namespace Microsoft.Network',
+                 checks=self.check("length([?name=='Microsoft.Network/SkipPseudoVipGeneration'])", 1))
 
 
 class PolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
     def test_resource_policy(self, resource_group):
-        policy_name = self.create_random_name('azure-cli-test-policy', 30)
-        policy_display_name = self.create_random_name('test_policy', 20)
-        policy_description = 'desc_for_test_policy_123'
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        rules_file = os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\')
-        params_def_file = os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
-        params_file = os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\')
-        mode = 'Indexed'
+
+        self.kwargs.update({
+            'pn': self.create_random_name('azure-cli-test-policy', 30),
+            'pdn': self.create_random_name('test_policy', 20),
+            'desc': 'desc_for_test_policy_123',
+            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
+            'params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\'),
+            'mode': 'Indexed'
+        })
 
         # create a policy
-        self.cmd(
-            'policy definition create -n {} --rules {} --params {} --display-name {} --description {} --mode {}'.format(
-                policy_name, rules_file, params_def_file, policy_display_name, policy_description, mode),
-            checks=[
-                JCheck('name', policy_name),
-                JCheck('displayName', policy_display_name),
-                JCheck('description', policy_description),
-                JCheck('mode', mode)
-            ]
-        )
+        self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode}', checks=[
+            self.check('name', '{pn}'),
+            self.check('displayName', '{pdn}'),
+            self.check('description', '{desc}'),
+            self.check('mode', '{mode}')
+        ])
 
         # update it
-        new_policy_description = policy_description + '_new'
-        self.cmd('policy definition update -n {} --description {}'.format(policy_name, new_policy_description),
-                 checks=JCheck('description', new_policy_description))
+        self.kwargs['desc'] = self.kwargs['desc'] + '_new'
+        self.cmd('policy definition update -n {pn} --description {desc}',
+                 checks=self.check('description', '{desc}'))
 
         # list and show it
-        self.cmd('policy definition list', checks=JMESPathCheck("length([?name=='{}'])".format(policy_name), 1))
-        self.cmd('policy definition show -n {}'.format(policy_name), checks=[
-            JCheck('name', policy_name),
-            JCheck('displayName', policy_display_name)
+        self.cmd('policy definition list',
+                 checks=self.check("length([?name=='{pn}'])", 1))
+        self.cmd('policy definition show -n {pn}', checks=[
+            self.check('name', '{pn}'),
+            self.check('displayName', '{pdn}')
         ])
 
         # create a policy assignment on a resource group
-        policy_assignment_name = self.create_random_name('azurecli-test-policy-assignment', 40)
-        policy_assignment_display_name = self.create_random_name('test_assignment', 20)
-        self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {} --params {}'.format(
-            policy_name, policy_assignment_name, policy_assignment_display_name, resource_group, params_file),
-            checks=[JCheck('name', policy_assignment_name),
-                    JCheck('displayName', policy_assignment_display_name),
-                    JCheck('sku.name', 'A0'),
-                    JCheck('sku.tier', 'Free')])
+        self.kwargs.update({
+            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
+            'padn': self.create_random_name('test_assignment', 20)
+        })
+        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --params {params}', checks=[
+            self.check('name', '{pan}'),
+            self.check('displayName', '{padn}'),
+            self.check('sku.name', 'A0'),
+            self.check('sku.tier', 'Free')
+        ])
 
         # create a policy assignment with not scopes and standard sku
-        get_cmd = 'group show -n {}'
-        rg = self.cmd(get_cmd.format(resource_group)).get_output_in_json()
-        vnet_name = self.create_random_name('azurecli-test-policy-vnet', 40)
-        subnet_name = self.create_random_name('azurecli-test-policy-subnet', 40)
-        vnetcreatecmd = 'network vnet create -g {} -n {} --subnet-name {}'
-        self.cmd(vnetcreatecmd.format(resource_group, vnet_name, subnet_name))
-        notscope = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks'.format(
-            rg['id'].split("/")[2], resource_group)
-        self.cmd(
-            'policy assignment create --policy {} -n {} --display-name {} -g {} --not-scopes {} --params {} --sku {}'.format(
-                policy_name, policy_assignment_name, policy_assignment_display_name, resource_group, notscope,
-                params_file, 'standard'),
-            checks=[JCheck('name', policy_assignment_name),
-                    JCheck('displayName', policy_assignment_display_name),
-                    JCheck('sku.name', 'A1'),
-                    JCheck('sku.tier', 'Standard'),
-                    JCheck('notScopes[0]', notscope)])
+        self.kwargs.update({
+            'vnet': self.create_random_name('azurecli-test-policy-vnet', 40),
+            'subnet': self.create_random_name('azurecli-test-policy-subnet', 40),
+            'sub': self.get_subscription_id()
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}')
+        self.kwargs['notscope'] = '/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks'.format(**self.kwargs)
+        self.cmd('policy assignment create --policy {pn} -n {pan} --display-name {padn} -g {rg} --not-scopes {notscope} --params {params} --sku standard', checks=[
+            self.check('name', '{pan}'),
+            self.check('displayName', '{padn}'),
+            self.check('sku.name', 'A1'),
+            self.check('sku.tier', 'Standard'),
+            self.check('notScopes[0]', '{notscope}')
+        ])
 
         # create a policy assignment using a built in policy definition name
-        policy_assignment_name2 = self.create_random_name('azurecli-test-policy-assignment2', 40)
-        built_in_policy = self.cmd(
-            'policy definition list --query "[?policyType==\'BuiltIn\']|[0]"').get_output_in_json()
-        self.cmd('policy assignment create --policy {} -n {} --display-name {} -g {}'.format(
-            built_in_policy['name'], policy_assignment_name2, policy_assignment_display_name, resource_group),
-            checks=[JCheck('name', policy_assignment_name2),
-                    JCheck('displayName', policy_assignment_display_name)])
-        self.cmd('policy assignment delete -n {} -g {}'.format(policy_assignment_name2, resource_group))
+        self.kwargs['pan2'] = self.create_random_name('azurecli-test-policy-assignment2', 40)
+        self.kwargs['bip'] = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']|[0]"').get_output_in_json()['name']
+        self.cmd('policy assignment create --policy {bip} -n {pan2} --display-name {padn} -g {rg}', checks=[
+            self.check('name', '{pan2}'),
+            self.check('displayName', '{padn}')
+        ])
+        self.cmd('policy assignment delete -n {pan2} -g {rg}')
 
         # listing at subscription level won't find the assignment made at a resource group
         import jmespath
         try:
-            self.cmd('policy assignment list', checks=JCheck("length([?name=='{}'])".format(policy_assignment_name), 0))
+            self.cmd('policy assignment list',
+                     checks=self.check("length([?name=='{pan}'])", 0))
         except jmespath.exceptions.JMESPathTypeError:  # ok if query fails on None result
             pass
 
         # but enable --show-all works
         self.cmd('policy assignment list --disable-scope-strict-match',
-                 checks=JCheck("length([?name=='{}'])".format(policy_assignment_name), 1))
+                 checks=self.check("length([?name=='{pan}'])", 1))
 
         # delete the assignment
-        self.cmd('policy assignment delete -n {} -g {}'.format(policy_assignment_name, resource_group))
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
         self.cmd('policy assignment list --disable-scope-strict-match')
 
         # delete the policy
-        self.cmd('policy definition delete -n {}'.format(policy_name))
+        self.cmd('policy definition delete -n {pn}')
         time.sleep(10)  # ensure the policy is gone when run live.
-        self.cmd('policy definition list', checks=JCheck("length([?name=='{}'])".format(policy_name), 0))
+        self.cmd('policy definition list',
+                 checks=self.check("length([?name=='{pn}'])", 0))
 
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
     def test_resource_policyset(self, resource_group):
-        policy_name = self.create_random_name('azure-cli-test-policy', 30)
-        policy_display_name = self.create_random_name('test_policy', 20)
-        policy_description = 'desc_for_test_policy_123'
-        policyset_name = self.create_random_name('azure-cli-test-policyset', 30)
-        policyset_display_name = self.create_random_name('test_policyset', 20)
-        policyset_description = 'desc_for_test_policyset_123'
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        rules_file = os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\')
-        policyset_file = os.path.join(curr_dir, 'sample_policy_set.json').replace('\\', '\\\\')
-        params_def_file = os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
+
+        self.kwargs.update({
+            'pn': self.create_random_name('azure-cli-test-policy', 30),
+            'pdn': self.create_random_name('test_policy', 20),
+            'desc': 'desc_for_test_policy_123',
+            'psn': self.create_random_name('azure-cli-test-policyset', 30),
+            'psdn': self.create_random_name('test_policyset', 20),
+            'ps_desc': 'desc_for_test_policyset_123',
+            'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
+            'psf': os.path.join(curr_dir, 'sample_policy_set.json').replace('\\', '\\\\'),
+            'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\')
+        })
 
         # create a policy
-        policycreatecmd = 'policy definition create -n {} --rules {} --params {} --display-name {} --description {}'
-        policy = self.cmd(policycreatecmd.format(policy_name, rules_file, params_def_file, policy_display_name,
-                                                 policy_description)).get_output_in_json()
+        policy = self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc}').get_output_in_json()
 
         # create a policy set
-        policyset = get_file_json(policyset_file)
+        policyset = get_file_json(self.kwargs['psf'])
         policyset[0]['policyDefinitionId'] = policy['id']
         with open(os.path.join(curr_dir, 'sample_policy_set.json'), 'w') as outfile:
             json.dump(policyset, outfile)
-        self.cmd('policy set-definition create -n {} --definitions @"{}" --display-name {} --description {}'.format(
-            policyset_name, policyset_file, policyset_display_name, policyset_description),
-            checks=[JCheck('name', policyset_name),
-                    JCheck('displayName', policyset_display_name),
-                    JCheck('description', policyset_description)])
+        self.cmd('policy set-definition create -n {psn} --definitions @"{psf}" --display-name {psdn} --description {ps_desc}', checks=[
+            self.check('name', '{psn}'),
+            self.check('displayName', '{psdn}'),
+            self.check('description', '{ps_desc}')
+        ])
 
         # update it
-        new_policyset_description = policy_description + '_new'
-        self.cmd(
-            'policy set-definition update -n {} --description {}'.format(policyset_name, new_policyset_description),
-            checks=JCheck('description', new_policyset_description))
+        self.kwargs['ps_desc'] = self.kwargs['ps_desc'] + '_new'
+        self.cmd('policy set-definition update -n {psn} --description {ps_desc}',
+                 checks=self.check('description', '{ps_desc}'))
 
         # list and show it
-        self.cmd('policy set-definition list', checks=JMESPathCheck("length([?name=='{}'])".format(policyset_name), 1))
-        self.cmd('policy set-definition show -n {}'.format(policyset_name),
-                 checks=[JCheck('name', policyset_name),
-                         JCheck('displayName', policyset_display_name)])
+        self.cmd('policy set-definition list',
+                 checks=self.check("length([?name=='{psn}'])", 1))
+        self.cmd('policy set-definition show -n {psn}', checks=[
+            self.check('name', '{psn}'),
+            self.check('displayName', '{psdn}')
+        ])
 
         # create a policy assignment on a resource group
-        policy_assignment_name = self.create_random_name('azurecli-test-policy-assignment', 40)
-        policy_assignment_display_name = self.create_random_name('test_assignment', 20)
-        self.cmd('policy assignment create -d {} -n {} --display-name {} -g {}'.format(
-            policyset_name, policy_assignment_name, policy_assignment_display_name, resource_group),
-            checks=[JCheck('name', policy_assignment_name),
-                    JCheck('displayName', policy_assignment_display_name),
-                    JCheck('sku.name', 'A0'),
-                    JCheck('sku.tier', 'Free')])
+        self.kwargs.update({
+            'pan': self.create_random_name('azurecli-test-policy-assignment', 40),
+            'padn': self.create_random_name('test_assignment', 20)
+        })
+        self.cmd('policy assignment create -d {psn} -n {pan} --display-name {padn} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('displayName', '{padn}'),
+            self.check('sku.name', 'A0'),
+            self.check('sku.tier', 'Free'),
+        ])
 
         # delete the assignment
-        self.cmd('policy assignment delete -n {} -g {}'.format(policy_assignment_name, resource_group))
+        self.cmd('policy assignment delete -n {pan} -g {rg}')
         self.cmd('policy assignment list --disable-scope-strict-match')
 
         # delete the policy set
-        self.cmd('policy set-definition delete -n {}'.format(policyset_name))
+        self.cmd('policy set-definition delete -n {psn}')
         time.sleep(10)  # ensure the policy is gone when run live.
-        self.cmd('policy set-definition list', checks=JCheck("length([?name=='{}'])".format(policyset_name), 0))
+        self.cmd('policy set-definition list',
+                 checks=self.check("length([?name=='{psn}'])", 0))
 
     def test_show_built_in_policy(self):
+        # This test actually does not work...
         result = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']|[0]"').get_output_in_json()
-        policy_name = result['name']
-        self.cmd('policy definition show -n ' + policy_name, checks=[
-            JCheck('name', policy_name)
-        ])
+        self.kwargs['pn'] = result['name']
+        self.cmd('policy definition show -n {pn}',
+                 checks=self.check('name', '{pn}'))
 
 
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_managedappdef(self, resource_group):
-        location = 'eastus2euap'
-        appdef_name = self.create_random_name('testappdefname', 20)
-        appdef_display_name = self.create_random_name('test_appdef', 20)
-        appdef_description = 'test_appdef_123'
-        packageUri = 'https:\/\/testclinew.blob.core.windows.net\/files\/vivekMAD.zip'
-        auth = '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
-        lock = 'None'
+
+        self.kwargs.update({
+            'loc': 'eastus2euap',
+            'adn': self.create_random_name('testappdefname', 20),
+            'addn': self.create_random_name('test_appdef', 20),
+            'ad_desc': 'test_appdef_123',
+            'uri': 'https:\/\/testclinew.blob.core.windows.net\/files\/vivekMAD.zip',
+            'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
+            'lock': 'None'
+        })
 
         # create a managedapp definition
-        create_cmd = 'managedapp definition create -n {} --package-file-uri {} --display-name {} --description {} -l {} -a {} --lock-level {} -g {}'
-        appdef = self.cmd(
-            create_cmd.format(appdef_name, packageUri, appdef_display_name, appdef_description, location, auth, lock,
-                              resource_group), checks=[
-                JCheck('name', appdef_name),
-                JCheck('displayName', appdef_display_name),
-                JCheck('description', appdef_description),
-                JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-                JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
-                JCheck('artifacts[0].name', 'ApplicationResourceTemplate'),
-                JCheck('artifacts[0].type', 'Template'),
-                JCheck('artifacts[1].name', 'CreateUiDefinition'),
-                JCheck('artifacts[1].type', 'Custom')
-            ]).get_output_in_json()
+        self.kwargs['ad_id'] = self.cmd('managedapp definition create -n {adn} --package-file-uri {uri} --display-name {addn} --description {ad_desc} -l {loc} -a {auth} --lock-level {lock} -g {rg}', checks=[
+            self.check('name', '{adn}'),
+            self.check('displayName', '{addn}'),
+            self.check('description', '{ad_desc}'),
+            self.check('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
+            self.check('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
+            self.check('artifacts[0].type', 'Template'),
+            self.check('artifacts[1].name', 'CreateUiDefinition'),
+            self.check('artifacts[1].type', 'Custom')
+        ]).get_output_in_json()['id']
 
-        # list and show it
-        list_cmd = 'managedapp definition list -g {}'
-        self.cmd(list_cmd.format(resource_group), checks=[
-            JCheck('[0].name', appdef_name)
+        self.cmd('managedapp definition list -g {rg}',
+                 checks=self.check('[0].name', '{adn}'))
+
+        self.cmd('managedapp definition show --ids {ad_id}', checks=[
+            self.check('name', '{adn}'),
+            self.check('displayName', '{addn}'),
+            self.check('description', '{ad_desc}'),
+            self.check('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
+            self.check('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
+            self.check('artifacts[0].type', 'Template'),
+            self.check('artifacts[1].name', 'CreateUiDefinition'),
+            self.check('artifacts[1].type', 'Custom')
         ])
 
-        show_cmd = 'managedapp definition show --ids {}'
-        self.cmd(show_cmd.format(appdef['id']), checks=[
-            JCheck('name', appdef_name),
-            JCheck('displayName', appdef_display_name),
-            JCheck('description', appdef_description),
-            JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-            JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
-            JCheck('artifacts[0].name', 'ApplicationResourceTemplate'),
-            JCheck('artifacts[0].type', 'Template'),
-            JCheck('artifacts[1].name', 'CreateUiDefinition'),
-            JCheck('artifacts[1].type', 'Custom')
-        ])
-
-        # delete
-        self.cmd('managedapp definition delete -g {} -n {}'.format(resource_group, appdef_name))
-        self.cmd('managedapp definition list -g {}'.format(resource_group), checks=NoneCheck())
+        self.cmd('managedapp definition delete -g {rg} -n {adn}')
+        self.cmd('managedapp definition list -g {rg}', checks=self.is_empty())
 
     @ResourceGroupPreparer()
     def test_managedappdef_inline(self, resource_group):
-        location = 'eastus2euap'
-        appdef_name = self.create_random_name('testappdefname', 20)
-        appdef_display_name = self.create_random_name('test_appdef', 20)
-        appdef_description = 'test_appdef_123'
-        auth = '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
-        lock = 'None'
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        createUiDef_file = os.path.join(curr_dir, 'sample_create_ui_definition.json').replace('\\', '\\\\')
-        mainTemplate_file = os.path.join(curr_dir, 'sample_main_template.json').replace('\\', '\\\\')
+
+        self.kwargs.update({
+            'loc': 'eastus2euap',
+            'adn': self.create_random_name('testappdefname', 20),
+            'addn': self.create_random_name('test_appdef', 20),
+            'ad_desc': 'test_appdef_123',
+            'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
+            'lock': 'None',
+            'ui_file': os.path.join(curr_dir, 'sample_create_ui_definition.json').replace('\\', '\\\\'),
+            'main_file': os.path.join(curr_dir, 'sample_main_template.json').replace('\\', '\\\\')
+        })
 
         # create a managedapp definition with inline params for create-ui-definition and main-template
-        create_cmd = 'managedapp definition create -n {} --create-ui-definition @"{}" --main-template @"{}" --display-name {} --description {} -l {} -a {} --lock-level {} -g {}'
-        appdef = self.cmd(
-            create_cmd.format(appdef_name, createUiDef_file, mainTemplate_file, appdef_display_name, appdef_description,
-                              location, auth, lock, resource_group), checks=[
-                JCheck('name', appdef_name),
-                JCheck('displayName', appdef_display_name),
-                JCheck('description', appdef_description),
-                JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-                JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
-                JCheck('artifacts[0].name', 'ApplicationResourceTemplate'),
-                JCheck('artifacts[0].type', 'Template'),
-                JCheck('artifacts[1].name', 'CreateUiDefinition'),
-                JCheck('artifacts[1].type', 'Custom')
-            ]).get_output_in_json()
+        self.kwargs['ad_id'] = self.cmd('managedapp definition create -n {adn} --create-ui-definition @"{ui_file}" --main-template @"{main_file}" --display-name {addn} --description {ad_desc} -l {loc} -a {auth} --lock-level {lock} -g {rg}', checks=[
+            self.check('name', '{adn}'),
+            self.check('displayName', '{addn}'),
+            self.check('description', '{ad_desc}'),
+            self.check('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
+            self.check('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
+            self.check('artifacts[0].type', 'Template'),
+            self.check('artifacts[1].name', 'CreateUiDefinition'),
+            self.check('artifacts[1].type', 'Custom')
+        ]).get_output_in_json()['id']
 
-        # list and show it
-        list_cmd = 'managedapp definition list -g {}'
-        self.cmd(list_cmd.format(resource_group), checks=[
-            JCheck('[0].name', appdef_name)
+        self.cmd('managedapp definition list -g {rg}',
+                 checks=self.check('[0].name', '{adn}'))
+
+        self.cmd('managedapp definition show --ids {ad_id}', checks=[
+            self.check('name', '{adn}'),
+            self.check('displayName', '{addn}'),
+            self.check('description', '{ad_desc}'),
+            self.check('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
+            self.check('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
+            self.check('artifacts[0].name', 'ApplicationResourceTemplate'),
+            self.check('artifacts[0].type', 'Template'),
+            self.check('artifacts[1].name', 'CreateUiDefinition'),
+            self.check('artifacts[1].type', 'Custom')
         ])
 
-        show_cmd = 'managedapp definition show --ids {}'
-        self.cmd(show_cmd.format(appdef['id']), checks=[
-            JCheck('name', appdef_name),
-            JCheck('displayName', appdef_display_name),
-            JCheck('description', appdef_description),
-            JCheck('authorizations[0].principalId', '5e91139a-c94b-462e-a6ff-1ee95e8aac07'),
-            JCheck('authorizations[0].roleDefinitionId', '8e3af657-a8ff-443c-a75c-2fe8c4bcb635'),
-            JCheck('artifacts[0].name', 'ApplicationResourceTemplate'),
-            JCheck('artifacts[0].type', 'Template'),
-            JCheck('artifacts[1].name', 'CreateUiDefinition'),
-            JCheck('artifacts[1].type', 'Custom')
-        ])
-
-        # delete
-        self.cmd('managedapp definition delete -g {} -n {}'.format(resource_group, appdef_name))
-        self.cmd('managedapp definition list -g {}'.format(resource_group), checks=NoneCheck())
+        self.cmd('managedapp definition delete -g {rg} -n {adn}')
+        self.cmd('managedapp definition list -g {rg}', checks=self.is_empty())
 
 
 # TODO: Change back to ScenarioTest and re-record when issue #5110 is fixed.
 class ManagedAppScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer()
     def test_managedapp(self, resource_group):
-        location = 'westcentralus'
-        appdef_name = 'testappdefname'
-        appdef_display_name = 'test_appdef_123'
-        appdef_description = 'test_appdef_123'
-        packageUri = 'https:\/\/wud.blob.core.windows.net\/appliance\/SingleStorageAccount.zip'
-        auth = '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635'
-        lock = 'None'
 
-        # create a managedapp definition
-        create_cmd = 'managedapp definition create -n {} --package-file-uri {} --display-name {} --description {} -l {} -a {} --lock-level {} -g {}'
-        managedappdef = self.cmd(create_cmd.format(appdef_name, packageUri, appdef_display_name,
-                                                   appdef_description, location, auth, lock,
-                                                   resource_group)).get_output_in_json()
+        self.kwargs.update({
+            'loc': 'westcentralus',
+            'adn': 'testappdefname',
+            'addn': 'test_appdef_123',
+            'ad_desc': 'test_appdef_123',
+            'uri': 'https:\/\/wud.blob.core.windows.net\/appliance\/SingleStorageAccount.zip',
+            'auth': '5e91139a-c94b-462e-a6ff-1ee95e8aac07:8e3af657-a8ff-443c-a75c-2fe8c4bcb635',
+            'lock': 'None',
+            'sub': self.get_subscription_id()
+        })
+
+        self.kwargs['ad_id'] = self.cmd('managedapp definition create -n {adn} --package-file-uri {uri} --display-name {addn} --description {ad_desc} -l {loc} -a {auth} --lock-level {lock} -g {rg}').get_output_in_json()['id']
 
         # create a managedapp
-        managedapp_name = 'mymanagedapp'
-        managedapp_loc = 'westcentralus'
-        managedapp_kind = 'servicecatalog'
-        newrg = self.create_random_name('climanagedapp', 25)
-        managedrg = '/subscriptions/{}/resourceGroups/{}'.format(managedappdef['id'].split("/")[2], newrg)
-        create_cmd = 'managedapp create -n {} -g {} -l {} --kind {} -m {} -d {}'
-        app = self.cmd(create_cmd.format(managedapp_name, resource_group, managedapp_loc, managedapp_kind, managedrg,
-                                         managedappdef['id']), checks=[
-            JCheck('name', managedapp_name),
-            JCheck('type', 'Microsoft.Solutions/applications'),
-            JCheck('kind', 'servicecatalog'),
-            JCheck('managedResourceGroupId', managedrg)
-        ]).get_output_in_json()
+        self.kwargs.update({
+            'man': 'mymanagedapp',
+            'ma_loc': 'westcentralus',
+            'ma_kind': 'servicecatalog',
+            'ma_rg': self.create_random_name('climanagedapp', 25)
+        })
+        self.kwargs['ma_rg_id'] = '/subscriptions/{sub}/resourceGroups/{ma_rg}'.format(**self.kwargs)
 
-        # list and show
-        list_byrg_cmd = 'managedapp list -g {}'
-        self.cmd(list_byrg_cmd.format(resource_group), checks=[
-            JCheck('[0].name', managedapp_name)
+        self.kwargs['ma_id'] = self.cmd('managedapp create -n {man} -g {rg} -l {ma_loc} --kind {ma_kind} -m {ma_rg_id} -d {ad_id}', checks=[
+            self.check('name', '{man}'),
+            self.check('type', 'Microsoft.Solutions/applications'),
+            self.check('kind', 'servicecatalog'),
+            self.check('managedResourceGroupId', '{ma_rg_id}')
+        ]).get_output_in_json()['id']
+
+        self.cmd('managedapp list -g {rg}', checks=self.check('[0].name', '{man}'))
+
+        self.cmd('managedapp show --ids {ma_id}', checks=[
+            self.check('name', '{man}'),
+            self.check('type', 'Microsoft.Solutions/applications'),
+            self.check('kind', 'servicecatalog'),
+            self.check('managedResourceGroupId', '{ma_rg_id}')
         ])
 
-        show_cmd = 'managedapp show --ids {}'
-        self.cmd(show_cmd.format(app['id']), checks=[
-            JCheck('name', managedapp_name),
-            JCheck('type', 'Microsoft.Solutions/applications'),
-            JCheck('kind', 'servicecatalog'),
-            JCheck('managedResourceGroupId', managedrg)
-        ])
-
-        # delete
-        self.cmd('managedapp delete -g {} -n {}'.format(resource_group, managedapp_name))
-        self.cmd('managedapp list -g {}'.format(resource_group), checks=NoneCheck())
+        self.cmd('managedapp delete -g {rg} -n {man}')
+        self.cmd('managedapp list -g {rg}', checks=self.is_empty())
 
 
 class CrossRGDeploymentScenarioTest(ScenarioTest):
+
     @ResourceGroupPreparer(name_prefix='cli_test_cross_rg_alt', parameter_name='resource_group_cross')
     @ResourceGroupPreparer(name_prefix='cli_test_cross_rg_deploy')
     def test_group_deployment_crossrg(self, resource_group, resource_group_cross):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_file = os.path.join(curr_dir, 'crossrg_deploy.json').replace('\\', '\\\\')
-        deployment_name = self.create_random_name('azure-cli-crossrgdeployment', 40)
-        storage_account_1 = create_random_name(prefix='crossrg')
-        storage_account_2 = create_random_name(prefix='crossrg')
 
-        self.cmd(
-            'group deployment validate -g {} --template-file {} --parameters CrossRg={} StorageAccountName1={} StorageAccountName2={}'.format(
-                resource_group, template_file, resource_group_cross, storage_account_1, storage_account_2), checks=[
-                JCheck('properties.provisioningState', 'Succeeded')
-            ])
-        self.cmd('group deployment create -g {} -n {} --template-file {} --parameters CrossRg={}'.format(
-            resource_group, deployment_name, template_file, resource_group_cross), checks=[
-            JCheck('properties.provisioningState', 'Succeeded'),
-            JCheck('resourceGroup', resource_group),
+        self.kwargs.update({
+            'rg1': resource_group,
+            'rg2': resource_group_cross,
+            'tf': os.path.join(curr_dir, 'crossrg_deploy.json').replace('\\', '\\\\'),
+            'dn': self.create_random_name('azure-cli-crossrgdeployment', 40),
+            'sa1': create_random_name(prefix='crossrg'),
+            'sa2': create_random_name(prefix='crossrg')
+        })
+
+        self.cmd('group deployment validate -g {rg1} --template-file "{tf}" --parameters CrossRg={rg2} StorageAccountName1={sa1} StorageAccountName2={sa2}', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
         ])
-        self.cmd('group deployment list -g {}'.format(resource_group), checks=[
-            JCheck('[0].name', deployment_name),
-            JCheck('[0].resourceGroup', resource_group)
+        self.cmd('group deployment create -g {rg1} -n {dn} --template-file "{tf}" --parameters CrossRg={rg2}', checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('resourceGroup', '{rg1}'),
         ])
-        self.cmd('group deployment show -g {} -n {}'.format(resource_group, deployment_name), checks=[
-            JCheck('name', deployment_name),
-            JCheck('resourceGroup', resource_group)
+        self.cmd('group deployment list -g {rg1}', checks=[
+            self.check('[0].name', '{dn}'),
+            self.check('[0].resourceGroup', '{rg1}')
         ])
-        self.cmd('group deployment operation list -g {} -n {}'.format(resource_group, deployment_name), checks=[
-            JCheck('length([])', 3),
-            JCheck('[0].resourceGroup', resource_group)
+        self.cmd('group deployment show -g {rg1} -n {dn}', checks=[
+            self.check('name', '{dn}'),
+            self.check('resourceGroup', '{rg1}')
+        ])
+        self.cmd('group deployment operation list -g {rg1} -n {dn}', checks=[
+            self.check('length([])', 3),
+            self.check('[0].resourceGroup', '{rg1}')
         ])
 
 
 class InvokeActionTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_invoke_action')
     def test_invoke_action(self, resource_group):
-        vm_name = self.create_random_name('cli-test-vm', 30)
-        username = 'ubuntu'
-        password = self.create_random_name('Longpassword#1', 30)
 
-        vm_json = self.cmd('vm create -g {} -n {} --use-unmanaged-disk --image UbuntuLTS --admin-username {} '
-                           '--admin-password {} --authentication-type {}'
-                           .format(resource_group, vm_name, username, password, 'password')).get_output_in_json()
+        self.kwargs.update({
+            'vm': self.create_random_name('cli-test-vm', 30),
+            'user': 'ubuntu',
+            'pass': self.create_random_name('Longpassword#1', 30)
+        })
 
-        vm_id = vm_json.get('id', None)
+        self.kwargs['vm_id'] = self.cmd('vm create -g {rg} -n {vm} --use-unmanaged-disk --image UbuntuLTS --admin-username {user} --admin-password {pass} --authentication-type password').get_output_in_json()['id']
 
-        self.cmd('resource invoke-action --action powerOff --ids {}'.format(vm_id))
-        self.cmd('resource invoke-action --action generalize --ids {}'.format(vm_id))
-        self.cmd('resource invoke-action --action deallocate --ids {}'.format(vm_id))
+        self.cmd('resource invoke-action --action powerOff --ids {vm_id}')
+        self.cmd('resource invoke-action --action generalize --ids {vm_id}')
+        self.cmd('resource invoke-action --action deallocate --ids {vm_id}')
 
-        request_body = '{\\"vhdPrefix\\":\\"myPrefix\\",\\"destinationContainerName\\":\\"container\\",' \
-                       '\\"overwriteVhds\\":\\"true\\"}'
+        request_body = '{\\"vhdPrefix\\":\\"myPrefix\\",\\"destinationContainerName\\":\\"container\\",\\"overwriteVhds\\":\\"true\\"}'
 
-        self.cmd('resource invoke-action --action capture --ids {} --request-body {}'.format(vm_id, request_body))
+        self.cmd('resource invoke-action --action capture --ids {} --request-body {}'.format(self.kwargs['vm_id'], request_body))
 
 
 if __name__ == '__main__':

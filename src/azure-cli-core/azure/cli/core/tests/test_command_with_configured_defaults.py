@@ -2,17 +2,20 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+from __future__ import print_function
 import os
 import logging
 import unittest
 import mock
+from six import StringIO
+import sys
 
-from azure.cli.core.commands import _update_command_definitions
+from azure.cli.core import AzCommandsLoader
+from azure.cli.core.commands import AzCliCommand, CliCommandType
 
-from azure.cli.core.commands import (command_table, CliArgumentType, cli_command,
-                                     register_cli_argument)
-from azure.cli.core.application import Application, Configuration
-from azure.cli.core._config import AzConfig
+from azure.cli.testsdk import TestCli
+
+from knack.config import CLIConfig
 
 
 # a dummy callback for arg-parse
@@ -22,63 +25,52 @@ def load_params(_):
 
 class TestCommandWithConfiguredDefaults(unittest.TestCase):
 
-    def __init__(self, *args, **kwargs):
-        self.argv = None
-        self.application = None
-        super(TestCommandWithConfiguredDefaults, self).__init__(*args, **kwargs)
-
     @classmethod
     def setUpClass(cls):
         # Ensure initialization has occurred correctly
-        import azure.cli.main
         logging.basicConfig(level=logging.DEBUG)
 
     @classmethod
     def tearDownClass(cls):
         logging.shutdown()
 
-    @staticmethod
-    def sample_vm_list(resource_group_name):
-        return resource_group_name
-
     def set_up_command_table(self, required_arg=False):
-        command_table.clear()
 
-        module_name = __name__ + '.' + self._testMethodName
-        cli_command(module_name, 'test sample-vm-list',
-                    '{}#TestCommandWithConfiguredDefaults.sample_vm_list'.format(__name__))
+        class TestCommandsLoader(AzCommandsLoader):
 
-        register_cli_argument('test sample-vm-list', 'resource_group_name',
-                              CliArgumentType(options_list=('--resource-group-name', '-g'),
-                                              configured_default='group', required=required_arg))
+            def sample_vm_list(resource_group_name):
+                return str(resource_group_name)
+            setattr(sys.modules[__name__], sample_vm_list.__name__, sample_vm_list)
 
-        command_table['test sample-vm-list'].load_arguments()
-        _update_command_definitions(command_table)
+            def load_command_table(self, args):
+                test_type = CliCommandType(operations_tmpl='{}#{{}}'.format(__name__))
+                with self.command_group('test', test_type) as g:
+                    g.command('sample-vm-list', 'sample_vm_list')
+                return self.command_table
 
-        self.argv = 'az test sample-vm-list'.split()
-        config = Configuration()
-        config.get_command_table = lambda argv: command_table
-        self.application = Application(config)
+            def load_arguments(self, command):
+                self.command_table[command].load_arguments()  # this loads the arguments via reflection
+                with self.argument_context('test') as c:
+                    c.argument('resource_group_name', options_list=['--resource-group-name', '-g'],
+                               configured_default='group', required=required_arg)
+                self._update_command_definitions()  # pylint: disable=protected-access
+        return TestCli(commands_loader_cls=TestCommandsLoader)
 
-    @mock.patch.dict(os.environ, {AzConfig.env_var_name('defaults', 'group'): 'myRG'})
+    @mock.patch.dict(os.environ, {'AZURE_DEFAULTS_GROUP': 'myRG'})
     def test_apply_configured_defaults_on_required_arg(self):
-        self.set_up_command_table(required_arg=True)
+        io = StringIO()
+        cli = self.set_up_command_table(required_arg=True)
+        cli.invoke('test sample-vm-list'.split(), out_file=io)
+        result = io.getvalue()
+        self.assertTrue('myRG' in result)
 
-        # action
-        res = self.application.execute(self.argv[1:])
-
-        # assert
-        self.assertEqual(res.result, 'myRG')
-
-    @mock.patch.dict(os.environ, {AzConfig.env_var_name('defaults', 'group'): 'myRG'})
+    @mock.patch.dict(os.environ, {'AZURE_DEFAULTS_GROUP': 'myRG'})
     def test_apply_configured_defaults_on_optional_arg(self):
-        self.set_up_command_table(required_arg=False)
-
-        # action
-        res = self.application.execute(self.argv[1:])
-
-        # assert
-        self.assertEqual(res.result, 'myRG')
+        io = StringIO()
+        cli = self.set_up_command_table(required_arg=False)
+        cli.invoke('test sample-vm-list'.split(), out_file=io)
+        result = io.getvalue()
+        self.assertTrue('myRG' in result)
 
 
 if __name__ == '__main__':

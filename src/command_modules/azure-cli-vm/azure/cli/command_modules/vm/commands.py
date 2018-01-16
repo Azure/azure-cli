@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from collections import OrderedDict
-
 from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, cf_ni,
                                                           cf_vm_ext,
                                                           cf_vm_ext_image, cf_vm_image, cf_usage,
@@ -14,358 +12,309 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm, cf_avail_set, c
                                                           cf_rolling_upgrade_commands,
                                                           cf_msi_user_identities_operations,
                                                           cf_msi_operations_operations)
-from azure.cli.core.commands import DeploymentOutputLongRunningOperation, cli_command
-from azure.cli.core.commands.arm import \
-    (cli_generic_update_command, cli_generic_wait_command, deployment_validate_table_format)
+from azure.cli.command_modules.vm._format import (
+    transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
+    transform_sku_for_table_output, transform_disk_show_table_output, transform_extension_show_table_output,
+    get_vmss_table_output_transformer)
+from azure.cli.command_modules.vm._validators import (
+    process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
+    process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
+    process_vm_secret_namespace, process_msi_namespace, process_remove_identity_namespace)
+
+from azure.cli.core.commands import DeploymentOutputLongRunningOperation
+from azure.cli.core.commands.arm import deployment_validate_table_format
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.profiles import supported_api_version, ResourceType
-
-# pylint: disable=line-too-long
-
-custom_path = 'azure.cli.command_modules.vm.custom#{}'
-mgmt_path = 'azure.mgmt.compute.operations.{}#{}.{}'
+from azure.cli.core.commands import CliCommandType
 
 
-# VM
-def transform_ip_addresses(result):
-    transformed = []
-    for r in result:
-        network = r['virtualMachine']['network']
-        public = network.get('publicIpAddresses')
-        public_ip_addresses = ','.join([p['ipAddress'] for p in public if p['ipAddress']]) if public else None
-        private = network.get('privateIpAddresses')
-        private_ip_addresses = ','.join(private) if private else None
-        entry = OrderedDict([('virtualMachine', r['virtualMachine']['name']),
-                             ('publicIPAddresses', public_ip_addresses),
-                             ('privateIPAddresses', private_ip_addresses)])
-        transformed.append(entry)
+# pylint: disable=line-too-long, too-many-statements
+def load_command_table(self, _):
 
-    return transformed
+    custom_tmpl = 'azure.cli.command_modules.vm.custom#{}'
 
+    compute_custom = CliCommandType(operations_tmpl=custom_tmpl)
 
-def transform_vm(vm):
-    result = OrderedDict([('name', vm['name']),
-                          ('resourceGroup', vm['resourceGroup']),
-                          ('powerState', vm.get('powerState')),
-                          ('publicIps', vm.get('publicIps')),
-                          ('fqdns', vm.get('fqdns')),
-                          ('location', vm['location'])])
-    if 'zones' in vm:
-        result['zones'] = ','.join(vm['zones']) if vm['zones'] else ''
-    return result
+    compute_disk_encryption_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.vm.disk_encryption#{}',
+        operation_group='virtual_machines'
+    )
 
+    compute_availset_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.availability_sets_operations#AvailabilitySetsOperations.{}',
+        client_factory=cf_avail_set,
+        operation_group='availability_sets'
+    )
 
-def transform_vm_create_output(result):
-    from msrestazure.tools import parse_resource_id
-    try:
-        output = OrderedDict([('id', result.id),
-                              ('resourceGroup', getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']),
-                              ('powerState', result.power_state),
-                              ('publicIpAddress', result.public_ips),
-                              ('fqdns', result.fqdns),
-                              ('privateIpAddress', result.private_ips),
-                              ('macAddress', result.mac_addresses),
-                              ('location', result.location)])
-        if getattr(result, 'identity', None):
-            output['identity'] = result.identity
-        if hasattr(result, 'zones'):  # output 'zones' column even the property value is None
-            output['zones'] = result.zones[0] if result.zones else ''
-        return output
-    except AttributeError:
-        from msrest.pipeline import ClientRawResponse
-        return None if isinstance(result, ClientRawResponse) else result
+    compute_disk_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.disks_operations#DisksOperations.{}',
+        client_factory=cf_disks,
+        operation_group='disks'
+    )
 
+    compute_identity_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.msi.operations.user_assigned_identities_operations#UserAssignedIdentitiesOperations.{}',
+        client_factory=cf_msi_user_identities_operations
+    )
 
-def transform_vm_usage_list(result):
-    result = list(result)
-    for item in result:
-        item.current_value = str(item.current_value)
-        item.limit = str(item.limit)
-        item.local_name = item.name.localized_value
-    return result
+    compute_image_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.images_operations#ImagesOperations.{}',
+        client_factory=cf_images
+    )
 
+    compute_snapshot_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.snapshots_operations#SnapshotsOperations.{}',
+        client_factory=cf_snapshots
+    )
 
-def transform_vm_list(vm_list):
-    return [transform_vm(v) for v in vm_list]
+    compute_vm_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.virtual_machines_operations#VirtualMachinesOperations.{}',
+        client_factory=cf_vm
+    )
 
+    compute_vm_extension_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_extensions_operations#VirtualMachineExtensionsOperations.{}',
+        client_factory=cf_vm_ext
+    )
 
-# flattern out important fields (single member arrays) to be displayed in the table output
-def transform_sku_for_table_output(skus):
-    result = []
-    for k in skus:
-        order_dict = OrderedDict()
-        order_dict['resourceType'] = k['resourceType']
-        order_dict['locations'] = str(k['locations']) if len(k['locations']) > 1 else k['locations'][0]
-        order_dict['name'] = k['name']
-        if k.get('locationInfo'):
-            order_dict['zones'] = ','.join(sorted(k['locationInfo'][0].get('zones', [])))
-        order_dict['size'] = k['size']
-        order_dict['tier'] = k['tier']
-        if k['capabilities']:
-            temp = ['{}={}'.format(pair['name'], pair['value']) for pair in k['capabilities']]
-            order_dict['capabilities'] = str(temp) if len(temp) > 1 else temp[0]
-        else:
-            order_dict['capabilities'] = None
-        if k['restrictions']:
-            reasons = [x['reasonCode'] for x in k['restrictions']]
-            order_dict['restrictions'] = str(reasons) if len(reasons) > 1 else reasons[0]
-        else:
-            order_dict['restrictions'] = None
-        result.append(order_dict)
-    return result
+    compute_vm_extension_image_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_extension_images_operations#VirtualMachineExtensionImagesOperations.{}',
+        client_factory=cf_vm_ext_image
+    )
 
+    compute_vm_image_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_images_operations#VirtualMachineImagesOperations.{}',
+        client_factory=cf_vm_image
+    )
 
-op_var = 'virtual_machines_operations'
-op_class = 'VirtualMachinesOperations'
-cli_command(__name__, 'vm create', custom_path.format('create_vm'), transform=transform_vm_create_output, no_wait_param='no_wait', table_transformer=deployment_validate_table_format)
-cli_command(__name__, 'vm delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm, confirmation=True, no_wait_param='raw')
-cli_command(__name__, 'vm deallocate', mgmt_path.format(op_var, op_class, 'deallocate'), cf_vm, no_wait_param='raw')
-cli_command(__name__, 'vm generalize', mgmt_path.format(op_var, op_class, 'generalize'), cf_vm, no_wait_param='raw')
-cli_command(__name__, 'vm show', custom_path.format('show_vm'), table_transformer=transform_vm, exception_handler=empty_on_404)
-cli_command(__name__, 'vm list-vm-resize-options', mgmt_path.format(op_var, op_class, 'list_available_sizes'), cf_vm)
-cli_command(__name__, 'vm stop', mgmt_path.format(op_var, op_class, 'power_off'), cf_vm, no_wait_param='raw')
-cli_command(__name__, 'vm restart', mgmt_path.format(op_var, op_class, 'restart'), cf_vm, no_wait_param='raw')
-cli_command(__name__, 'vm start', mgmt_path.format(op_var, op_class, 'start'), cf_vm, no_wait_param='raw')
-cli_command(__name__, 'vm redeploy', mgmt_path.format(op_var, op_class, 'redeploy'), cf_vm, no_wait_param='raw')
-cli_command(__name__, 'vm list-ip-addresses', custom_path.format('list_ip_addresses'), table_transformer=transform_ip_addresses)
-cli_command(__name__, 'vm get-instance-view', custom_path.format('get_instance_view'),
-            table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}')
-cli_command(__name__, 'vm list', custom_path.format('list_vm'), table_transformer=transform_vm_list)
-cli_command(__name__, 'vm resize', custom_path.format('resize_vm'), no_wait_param='no_wait')
-cli_command(__name__, 'vm capture', custom_path.format('capture_vm'))
-cli_command(__name__, 'vm open-port', custom_path.format('vm_open_port'))
-cli_command(__name__, 'vm format-secret', custom_path.format('get_vm_format_secret'), deprecate_info='az vm secret format')
-cli_command(__name__, 'vm secret format', custom_path.format('get_vm_format_secret'))
-cli_command(__name__, 'vm secret add', custom_path.format('add_vm_secret'))
-cli_command(__name__, 'vm secret list', custom_path.format('list_vm_secrets'))
-cli_command(__name__, 'vm secret remove', custom_path.format('remove_vm_secret'))
-cli_generic_update_command(__name__, 'vm update',
-                           mgmt_path.format(op_var, op_class, 'get'),
-                           mgmt_path.format(op_var, op_class, 'create_or_update'),
-                           cf_vm,
-                           no_wait_param='raw')
-cli_generic_wait_command(__name__, 'vm wait', 'azure.cli.command_modules.vm.custom#get_instance_view')
-if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
-    cli_command(__name__, 'vm perform-maintenance', mgmt_path.format(op_var, op_class, 'perform_maintenance'), cf_vm)
+    compute_vm_usage_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.usage_operations#UsageOperations.{}',
+        client_factory=cf_usage
+    )
 
+    compute_vm_run_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_run_commands_operations#VirtualMachineRunCommandsOperations.{}',
+        client_factory=cf_run_commands,
+        min_api='2017-03-30',
+        max_api='2017-03-30'
+    )
 
-if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
-    cli_command(__name__, 'vm convert', mgmt_path.format(op_var, op_class, 'convert_to_managed_disks'), cf_vm)
+    compute_vm_size_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_sizes_operations#VirtualMachineSizesOperations.{}',
+        client_factory=cf_vm_sizes
+    )
 
-# VM encryption
-cli_command(__name__, 'vm encryption enable', 'azure.cli.command_modules.vm.disk_encryption#encrypt_vm')
-cli_command(__name__, 'vm encryption disable', 'azure.cli.command_modules.vm.disk_encryption#decrypt_vm')
-cli_command(__name__, 'vm encryption show', 'azure.cli.command_modules.vm.disk_encryption#show_vm_encryption_status', exception_handler=empty_on_404)
+    compute_vmss_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_scale_sets_operations#VirtualMachineScaleSetsOperations.{}',
+        client_factory=cf_vmss,
+        operation_group='virtual_machine_scale_sets'
+    )
 
-# VMSS encryption
-if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
-    cli_command(__name__, 'vmss encryption enable', 'azure.cli.command_modules.vm.disk_encryption#encrypt_vmss')
-    cli_command(__name__, 'vmss encryption disable', 'azure.cli.command_modules.vm.disk_encryption#decrypt_vmss')
-    cli_command(__name__, 'vmss encryption show', 'azure.cli.command_modules.vm.disk_encryption#show_vmss_encryption_status', exception_handler=empty_on_404)
+    compute_vmss_rolling_upgrade_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_scale_set_rolling_upgrades_operations#VirtualMachineScaleSetRollingUpgradesOperations.{}',
+        client_factory=cf_rolling_upgrade_commands,
+        operation_group='virtual_machine_scale_sets'
+    )
 
-# VM NIC
-cli_command(__name__, 'vm nic add', custom_path.format('vm_add_nics'))
-cli_command(__name__, 'vm nic remove', custom_path.format('vm_remove_nics'))
-cli_command(__name__, 'vm nic set', custom_path.format('vm_set_nics'))
-cli_command(__name__, 'vm nic show', custom_path.format('vm_show_nic'), exception_handler=empty_on_404)
-cli_command(__name__, 'vm nic list', custom_path.format('vm_list_nics'))
+    compute_vmss_vm_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations.virtual_machine_scale_set_vms_operations#VirtualMachineScaleSetVMsOperations.{}',
+        client_factory=cf_vmss_vm,
+        operation_group='virtual_machine_scale_sets'
+    )
 
-# VMSS NIC
-cli_command(__name__, 'vmss nic list', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.list_virtual_machine_scale_set_network_interfaces', cf_ni)
-cli_command(__name__, 'vmss nic list-vm-nics', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.list_virtual_machine_scale_set_vm_network_interfaces', cf_ni)
-cli_command(__name__, 'vmss nic show', 'azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.get_virtual_machine_scale_set_network_interface', cf_ni, exception_handler=empty_on_404)
+    network_nic_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations.network_interfaces_operations#NetworkInterfacesOperations.{}',
+        client_factory=cf_ni
+    )
 
-# VM Access
-cli_command(__name__, 'vm user update', custom_path.format('set_user'), no_wait_param='no_wait')
-cli_command(__name__, 'vm user delete', custom_path.format('delete_user'), no_wait_param='no_wait')
-cli_command(__name__, 'vm user reset-ssh', custom_path.format('reset_linux_ssh'), no_wait_param='no_wait')
+    with self.command_group('disk', compute_disk_sdk, operation_group='disks', min_api='2017-03-30') as g:
+        g.custom_command('create', 'create_managed_disk', no_wait_param='no_wait', table_transformer=transform_disk_show_table_output, validator=process_disk_or_snapshot_create_namespace)
+        g.command('delete', 'delete', no_wait_param='raw', confirmation=True)
+        g.custom_command('grant-access', 'grant_disk_access')
+        g.custom_command('list', 'list_managed_disks', table_transformer='[].' + transform_disk_show_table_output)
+        g.command('revoke-access', 'revoke_access')
+        g.command('show', 'get', exception_handler=empty_on_404, table_transformer=transform_disk_show_table_output)
+        g.generic_update_command('update', custom_func_name='update_managed_disk', setter_arg_name='disk', no_wait_param='raw')
+        g.generic_wait_command('wait')
 
-# # VM Availability Set
-cli_command(__name__, 'vm availability-set create', custom_path.format('create_av_set'), table_transformer=deployment_validate_table_format, no_wait_param='no_wait')
+    # TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
+    with self.command_group('identity', compute_identity_sdk, min_api='2017-12-01') as g:
+        g.command('create', 'create_or_update', validator=process_msi_namespace)
+        g.command('show', 'get')
+        g.command('delete', 'delete')
+        g.custom_command('list', 'list_user_assigned_identities')
+        g.command('list-operations', 'list', operations_tmpl='azure.mgmt.msi.operations.operations#Operations.{}', client_factory=cf_msi_operations_operations)
 
-op_var = 'availability_sets_operations'
-op_class = 'AvailabilitySetsOperations'
-cli_command(__name__, 'vm availability-set delete', mgmt_path.format(op_var, op_class, 'delete'), cf_avail_set)
-cli_command(__name__, 'vm availability-set show', mgmt_path.format(op_var, op_class, 'get'), cf_avail_set, exception_handler=empty_on_404)
-cli_command(__name__, 'vm availability-set list', mgmt_path.format(op_var, op_class, 'list'), cf_avail_set)
-cli_command(__name__, 'vm availability-set list-sizes', mgmt_path.format(op_var, op_class, 'list_available_sizes'), cf_avail_set)
-if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
-    cli_command(__name__, 'vm availability-set convert', custom_path.format('convert_av_set_to_managed_disk'))
+    with self.command_group('image', compute_image_sdk, min_api='2016-04-30-preview') as g:
+        g.custom_command('create', 'create_image', validator=process_image_create_namespace)
+        g.custom_command('list', 'list_images')
+        g.command('show', 'get', exception_handler=empty_on_404)
+        g.command('delete', 'delete')
 
-cli_generic_update_command(__name__, 'vm availability-set update',
-                           custom_path.format('availset_get'),
-                           custom_path.format('availset_set'))
+    with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots', min_api='2016-04-30-preview') as g:
+        g.custom_command('create', 'create_snapshot', validator=process_disk_or_snapshot_create_namespace)
+        g.command('delete', 'delete')
+        g.custom_command('grant-access', 'grant_snapshot_access')
+        g.custom_command('list', 'list_snapshots')
+        g.command('revoke-access', 'revoke_access')
+        g.command('show', 'get', exception_handler=empty_on_404)
+        g.generic_update_command('update', custom_func_name='update_snapshot', setter_arg_name='snapshot')
 
-cli_generic_update_command(__name__, 'vmss update',
-                           custom_path.format('vmss_get'),
-                           custom_path.format('vmss_set'),
-                           no_wait_param='no_wait')
-cli_generic_wait_command(__name__, 'vmss wait', custom_path.format('vmss_get'))
+    with self.command_group('vm', compute_vm_sdk) as g:
+        g.custom_command('assign-identity', 'assign_vm_identity', validator=process_assign_identity_namespace)
+        g.custom_command('remove-identity', 'remove_vm_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
+        g.custom_command('capture', 'capture_vm')
+        g.custom_command('create', 'create_vm', transform=transform_vm_create_output, no_wait_param='no_wait', table_transformer=deployment_validate_table_format, validator=process_vm_create_namespace)
+        g.command('convert', 'convert_to_managed_disks', min_api='2016-04-30-preview')
+        g.command('deallocate', 'deallocate', no_wait_param='raw')
+        g.command('delete', 'delete', confirmation=True, no_wait_param='raw')
+        g.custom_command('format-secret', 'get_vm_format_secret', deprecate_info='az vm secret format')
+        g.command('generalize', 'generalize', no_wait_param='raw')
+        g.custom_command('get-instance-view', 'get_instance_view', table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}')
+        g.custom_command('list', 'list_vm', table_transformer=transform_vm_list)
+        g.custom_command('list-ip-addresses', 'list_vm_ip_addresses', table_transformer=transform_ip_addresses)
+        g.command('list-sizes', 'list', command_type=compute_vm_size_sdk)
+        g.custom_command('list-skus', 'list_skus', table_transformer=transform_sku_for_table_output, min_api='2017-03-30')
+        g.command('list-usage', 'list', command_type=compute_vm_usage_sdk, transform=transform_vm_usage_list, table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
+        g.command('list-vm-resize-options', 'list_available_sizes')
+        g.custom_command('open-port', 'open_vm_port')
+        g.command('perform-maintenance', 'perform_maintenance', min_api='2017-03-30')
+        g.command('redeploy', 'redeploy', no_wait_param='raw')
+        g.custom_command('resize', 'resize_vm', no_wait_param='no_wait')
+        g.command('restart', 'restart', no_wait_param='raw')
+        g.custom_command('show', 'show_vm', table_transformer=transform_vm, exception_handler=empty_on_404)
+        g.command('start', 'start', no_wait_param='raw')
+        g.command('stop', 'power_off', no_wait_param='raw')
+        g.generic_update_command('update', setter_name='update_vm', setter_type=compute_custom, no_wait_param='no_wait')
+        g.generic_wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
 
-# VM Boot Diagnostics
-cli_command(__name__, 'vm boot-diagnostics disable', custom_path.format('disable_boot_diagnostics'))
-cli_command(__name__, 'vm boot-diagnostics enable', custom_path.format('enable_boot_diagnostics'))
-cli_command(__name__, 'vm boot-diagnostics get-boot-log', custom_path.format('get_boot_log'))
+    with self.command_group('vm availability-set', compute_availset_sdk) as g:
+        g.custom_command('convert', 'convert_av_set_to_managed_disk', min_api='2016-04-30-preview')
+        g.custom_command('create', 'create_av_set', table_transformer=deployment_validate_table_format, no_wait_param='no_wait')
+        g.command('delete', 'delete')
+        g.command('list', 'list')
+        g.command('list-sizes', 'list_available_sizes')
+        g.command('show', 'get', exception_handler=empty_on_404)
+        g.generic_update_command('update')
 
-# VM Diagnostics
-cli_command(__name__, 'vm diagnostics set', custom_path.format('set_diagnostics_extension'))
-cli_command(__name__, 'vm diagnostics get-default-config', custom_path.format('show_default_diagnostics_configuration'))
+    with self.command_group('vm boot-diagnostics', compute_vm_sdk) as g:
+        g.custom_command('disable', 'disable_boot_diagnostics')
+        g.custom_command('enable', 'enable_boot_diagnostics')
+        g.custom_command('get-boot-log', 'get_boot_log')
 
-# VMSS Diagnostics
-cli_command(__name__, 'vmss diagnostics set', custom_path.format('set_vmss_diagnostics_extension'))
-cli_command(__name__, 'vmss diagnostics get-default-config', custom_path.format('show_default_diagnostics_configuration'))
+    with self.command_group('vm diagnostics', compute_vm_sdk) as g:
+        g.custom_command('set', 'set_diagnostics_extension')
+        g.custom_command('get-default-config', 'show_default_diagnostics_configuration')
 
-if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
-    cli_command(__name__, 'vm disk attach', custom_path.format('attach_managed_data_disk'))
-    cli_command(__name__, 'vm disk detach', custom_path.format('detach_data_disk'))
+    with self.command_group('vm disk', compute_vm_sdk, min_api='2017-03-30') as g:
+        g.custom_command('attach', 'attach_managed_data_disk')
+        g.custom_command('detach', 'detach_data_disk')
 
-if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
-    cli_command(__name__, 'vmss disk attach', custom_path.format('attach_managed_data_disk_to_vmss'))
-    cli_command(__name__, 'vmss disk detach', custom_path.format('detach_disk_from_vmss'))
+    with self.command_group('vm encryption', custom_command_type=compute_disk_encryption_custom) as g:
+        g.custom_command('enable', 'encrypt_vm', validator=process_disk_encryption_namespace)
+        g.custom_command('disable', 'decrypt_vm')
+        g.custom_command('show', 'show_vm_encryption_status', exception_handler=empty_on_404)
 
-cli_command(__name__, 'vm unmanaged-disk attach', custom_path.format('attach_unmanaged_data_disk'))
-cli_command(__name__, 'vm unmanaged-disk detach', custom_path.format('detach_data_disk'))
-cli_command(__name__, 'vm unmanaged-disk list', custom_path.format('list_unmanaged_disks'))
+    with self.command_group('vm extension', compute_vm_extension_sdk) as g:
+        g.command('delete', 'delete')
+        g.command('show', 'get', exception_handler=empty_on_404, table_transformer=transform_extension_show_table_output)
+        g.custom_command('set', 'set_extension')
+        g.custom_command('list', 'list_extensions', table_transformer='[].' + transform_extension_show_table_output)
 
-# VM Extension
-op_var = 'virtual_machine_extensions_operations'
-op_class = 'VirtualMachineExtensionsOperations'
-cli_command(__name__, 'vm extension delete', mgmt_path.format(op_var, op_class, 'delete'), cf_vm_ext)
-_extension_show_transform = '{Name:name, ProvisioningState:provisioningState, Publisher:publisher, Version:typeHandlerVersion, AutoUpgradeMinorVersion:autoUpgradeMinorVersion}'
-cli_command(__name__, 'vm extension show', mgmt_path.format(op_var, op_class, 'get'), cf_vm_ext, exception_handler=empty_on_404,
-            table_transformer=_extension_show_transform)
-cli_command(__name__, 'vm extension set', custom_path.format('set_extension'))
-cli_command(__name__, 'vm extension list', custom_path.format('list_extensions'),
-            table_transformer='[].' + _extension_show_transform)
+    with self.command_group('vm extension image', compute_vm_extension_image_sdk) as g:
+        g.command('show', 'get', exception_handler=empty_on_404)
+        g.command('list-names', 'list_types')
+        g.command('list-versions', 'list_versions')
+        g.custom_command('list', 'list_vm_extension_images')
 
-# VMSS Extension
-cli_command(__name__, 'vmss extension delete', custom_path.format('delete_vmss_extension'))
-cli_command(__name__, 'vmss extension show', custom_path.format('get_vmss_extension'), exception_handler=empty_on_404)
-cli_command(__name__, 'vmss extension set', custom_path.format('set_vmss_extension'))
-cli_command(__name__, 'vmss extension list', custom_path.format('list_vmss_extensions'))
+    with self.command_group('vm image', compute_vm_image_sdk) as g:
+        g.command('show', 'get', exception_handler=empty_on_404)
+        g.command('list-offers', 'list_offers')
+        g.command('list-publishers', 'list_publishers')
+        g.command('list-skus', 'list_skus')
+        g.custom_command('list', 'list_vm_images')
 
-# VM Extension Image
-op_var = 'virtual_machine_extension_images_operations'
-op_class = 'VirtualMachineExtensionImagesOperations'
-cli_command(__name__, 'vm extension image show', mgmt_path.format(op_var, op_class, 'get'), cf_vm_ext_image, exception_handler=empty_on_404)
-cli_command(__name__, 'vm extension image list-names', mgmt_path.format(op_var, op_class, 'list_types'), cf_vm_ext_image)
-cli_command(__name__, 'vm extension image list-versions', mgmt_path.format(op_var, op_class, 'list_versions'), cf_vm_ext_image)
-cli_command(__name__, 'vm extension image list', custom_path.format('list_vm_extension_images'))
+    with self.command_group('vm nic', compute_vm_sdk) as g:
+        g.custom_command('add', 'add_vm_nic')
+        g.custom_command('remove', 'remove_vm_nic')
+        g.custom_command('set', 'set_vm_nic')
+        g.custom_command('show', 'show_vm_nic', exception_handler=empty_on_404)
+        g.custom_command('list', 'list_vm_nics')
 
-# VMSS Extension Image (convenience copy of VM Extension Image)
-cli_command(__name__, 'vmss extension image show', mgmt_path.format(op_var, op_class, 'get'), cf_vm_ext_image, exception_handler=empty_on_404)
-cli_command(__name__, 'vmss extension image list-names', mgmt_path.format(op_var, op_class, 'list_types'), cf_vm_ext_image)
-cli_command(__name__, 'vmss extension image list-versions', mgmt_path.format(op_var, op_class, 'list_versions'), cf_vm_ext_image)
-cli_command(__name__, 'vmss extension image list', custom_path.format('list_vm_extension_images'))
+    with self.command_group('vm run-command', compute_vm_run_sdk, operation_group='virtual_machine_run_commands') as g:
+        g.custom_command('invoke', 'run_command_invoke')
+        g.command('list', 'list')
+        g.command('show', 'get')
 
-# VM Image
-op_var = 'virtual_machine_images_operations'
-op_class = 'VirtualMachineImagesOperations'
-cli_command(__name__, 'vm image show', mgmt_path.format(op_var, op_class, 'get'), cf_vm_image, exception_handler=empty_on_404)
-cli_command(__name__, 'vm image list-offers', mgmt_path.format(op_var, op_class, 'list_offers'), cf_vm_image)
-cli_command(__name__, 'vm image list-publishers', mgmt_path.format(op_var, op_class, 'list_publishers'), cf_vm_image)
-cli_command(__name__, 'vm image list-skus', mgmt_path.format(op_var, op_class, 'list_skus'), cf_vm_image)
-cli_command(__name__, 'vm image list', custom_path.format('list_vm_images'))
+    with self.command_group('vm secret', compute_vm_sdk) as g:
+        g.custom_command('format', 'get_vm_format_secret')
+        g.custom_command('add', 'add_vm_secret', validator=process_vm_secret_namespace)
+        g.custom_command('list', 'list_vm_secrets')
+        g.custom_command('remove', 'remove_vm_secret', validator=process_vm_secret_namespace)
 
-# VM Usage
-cli_command(__name__, 'vm list-usage', mgmt_path.format('usage_operations', 'UsageOperations', 'list'), cf_usage, transform=transform_vm_usage_list,
-            table_transformer='[].{Name:localName, CurrentValue:currentValue, Limit:limit}')
+    with self.command_group('vm unmanaged-disk', compute_vm_sdk) as g:
+        g.custom_command('attach', 'attach_unmanaged_data_disk')
+        g.custom_command('detach', 'detach_data_disk')
+        g.custom_command('list', 'list_unmanaged_disks')
 
-# VMSS
-vmss_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Capacity:sku.capacity, Overprovision:overprovision, UpgradePolicy:upgradePolicy.mode}'
-vmss_show_table_transform = vmss_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') else ' ')
-cli_command(__name__, 'vmss delete', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'delete'), cf_vmss, no_wait_param='raw')
-cli_command(__name__, 'vmss list-skus', mgmt_path.format('virtual_machine_scale_sets_operations', 'VirtualMachineScaleSetsOperations', 'list_skus'), cf_vmss)
+    with self.command_group('vm user', compute_vm_sdk, no_wait_param='no_wait') as g:
+        g.custom_command('update', 'set_user')
+        g.custom_command('delete', 'delete_user')
+        g.custom_command('reset-ssh', 'reset_linux_ssh')
 
-cli_command(__name__, 'vmss list-instances', mgmt_path.format('virtual_machine_scale_set_vms_operations', 'VirtualMachineScaleSetVMsOperations', 'list'), cf_vmss_vm)
+    with self.command_group('vmss', compute_vmss_sdk) as g:
+        g.custom_command('assign-identity', 'assign_vmss_identity', validator=process_assign_identity_namespace)
+        g.custom_command('remove-identity', 'remove_vmss_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
+        g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), no_wait_param='no_wait', table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace)
+        g.custom_command('deallocate', 'deallocate_vmss', no_wait_param='no_wait')
+        g.command('delete', 'delete', no_wait_param='raw')
+        g.custom_command('delete-instances', 'delete_vmss_instances', no_wait_param='no_wait')
+        g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
+        g.custom_command('list', 'list_vmss', table_transformer=get_vmss_table_output_transformer(self))
+        g.command('list-instances', 'list', command_type=compute_vmss_vm_sdk)
+        g.custom_command('list-instance-connection-info', 'list_vmss_instance_connection_info')
+        g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
+        g.command('list-skus', 'list_skus')
+        g.custom_command('reimage', 'reimage_vmss', no_wait_param='no_wait', min_api='2017-03-30')
+        g.custom_command('restart', 'restart_vmss', no_wait_param='no_wait')
+        g.custom_command('scale', 'scale_vmss', no_wait_param='no_wait')
+        g.custom_command('show', 'show_vmss', exception_handler=empty_on_404, table_transformer=get_vmss_table_output_transformer(self, False))
+        g.custom_command('start', 'start_vmss', no_wait_param='no_wait')
+        g.custom_command('stop', 'stop_vmss', no_wait_param='no_wait')
+        g.generic_update_command('update', getter_name='get_vmss', setter_name='set_vmss', no_wait_param='no_wait', command_type=compute_custom)
+        g.custom_command('update-instances', 'update_vmss_instances', no_wait_param='no_wait')
+        g.generic_wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
 
-cli_command(__name__, 'vmss create', custom_path.format('create_vmss'), transform=DeploymentOutputLongRunningOperation('Starting vmss create'), no_wait_param='no_wait', table_transformer=deployment_validate_table_format)
-cli_command(__name__, 'vmss deallocate', custom_path.format('deallocate_vmss'), no_wait_param='no_wait')
-cli_command(__name__, 'vmss delete-instances', custom_path.format('delete_vmss_instances'), no_wait_param='no_wait')
-cli_command(__name__, 'vmss get-instance-view', custom_path.format('get_vmss_instance_view'),
-            table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
-cli_command(__name__, 'vmss show', custom_path.format('show_vmss'), exception_handler=empty_on_404,
-            table_transformer=vmss_show_table_transform)
-cli_command(__name__, 'vmss list', custom_path.format('list_vmss'), table_transformer='[].' + vmss_show_table_transform)
-cli_command(__name__, 'vmss stop', custom_path.format('stop_vmss'), no_wait_param='no_wait')
-cli_command(__name__, 'vmss restart', custom_path.format('restart_vmss'), no_wait_param='no_wait')
-cli_command(__name__, 'vmss start', custom_path.format('start_vmss'), no_wait_param='no_wait')
-cli_command(__name__, 'vmss update-instances', custom_path.format('update_vmss_instances'), no_wait_param='no_wait')
-if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
-    cli_command(__name__, 'vmss reimage', custom_path.format('reimage_vmss'), no_wait_param='no_wait')
-cli_command(__name__, 'vmss scale', custom_path.format('scale_vmss'), no_wait_param='no_wait')
-cli_command(__name__, 'vmss list-instance-connection-info', custom_path.format('list_vmss_instance_connection_info'))
-cli_command(__name__, 'vmss list-instance-public-ips', custom_path.format('list_vmss_instance_public_ips'))
+    with self.command_group('vmss diagnostics', compute_vmss_sdk) as g:
+        g.custom_command('set', 'set_vmss_diagnostics_extension')
+        g.custom_command('get-default-config', 'show_default_diagnostics_configuration')
 
-# VM Size
-cli_command(__name__, 'vm list-sizes', mgmt_path.format('virtual_machine_sizes_operations', 'VirtualMachineSizesOperations', 'list'), cf_vm_sizes)
+    with self.command_group('vmss disk', compute_vmss_sdk, min_api='2017-03-30') as g:
+        g.custom_command('attach', 'attach_managed_data_disk_to_vmss')
+        g.custom_command('detach', 'detach_disk_from_vmss')
 
-if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
-    # VM Disk
-    disk_show_table_transform = '{Name:name, ResourceGroup:resourceGroup, Location:location, $zone$Sku:sku.name, OsType:osType, SizeGb:diskSizeGb, ProvisioningState:provisioningState}'
-    disk_show_table_transform = disk_show_table_transform.replace('$zone$', 'Zones: (!zones && \' \') || join(` `, zones), ' if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30') else ' ')
-    op_var = 'disks_operations'
-    op_class = 'DisksOperations'
-    cli_command(__name__, 'disk create', custom_path.format('create_managed_disk'), no_wait_param='no_wait', table_transformer=disk_show_table_transform)
-    cli_command(__name__, 'disk list', custom_path.format('list_managed_disks'), table_transformer='[].' + disk_show_table_transform)
-    cli_command(__name__, 'disk show', mgmt_path.format(op_var, op_class, 'get'), cf_disks, exception_handler=empty_on_404, table_transformer=disk_show_table_transform)
-    cli_command(__name__, 'disk delete', mgmt_path.format(op_var, op_class, 'delete'), cf_disks, no_wait_param='raw', confirmation=True)
-    cli_command(__name__, 'disk grant-access', custom_path.format('grant_disk_access'))
-    cli_command(__name__, 'disk revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_disks)
-    cli_generic_update_command(__name__, 'disk update', 'azure.mgmt.compute.operations.{}#{}.get'.format(op_var, op_class),
-                               'azure.mgmt.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
-                               custom_function_op=custom_path.format('update_managed_disk'),
-                               setter_arg_name='disk', factory=cf_disks, no_wait_param='raw')
-    cli_generic_wait_command(__name__, 'disk wait', 'azure.mgmt.compute.operations.{}#{}.get'.format(op_var, op_class), cf_disks)
+    with self.command_group('vmss encryption', custom_command_type=compute_disk_encryption_custom, min_api='2017-03-30') as g:
+        g.custom_command('enable', 'encrypt_vmss', validator=process_disk_encryption_namespace)
+        g.custom_command('disable', 'decrypt_vmss')
+        g.custom_command('show', 'show_vmss_encryption_status', exception_handler=empty_on_404)
 
-    op_var = 'snapshots_operations'
-    op_class = 'SnapshotsOperations'
-    cli_command(__name__, 'snapshot create', custom_path.format('create_snapshot'))
-    cli_command(__name__, 'snapshot list', custom_path.format('list_snapshots'))
-    cli_command(__name__, 'snapshot show', mgmt_path.format(op_var, op_class, 'get'), cf_snapshots, exception_handler=empty_on_404)
-    cli_command(__name__, 'snapshot delete', mgmt_path.format(op_var, op_class, 'delete'), cf_snapshots)
-    cli_command(__name__, 'snapshot grant-access', custom_path.format('grant_snapshot_access'))
-    cli_command(__name__, 'snapshot revoke-access', mgmt_path.format(op_var, op_class, 'revoke_access'), cf_snapshots)
-    cli_generic_update_command(__name__, 'snapshot update', 'azure.mgmt.compute.operations.{}#{}.get'.format(op_var, op_class),
-                               'azure.mgmt.compute.operations.{}#{}.create_or_update'.format(op_var, op_class),
-                               custom_function_op=custom_path.format('update_snapshot'),
-                               setter_arg_name='snapshot', factory=cf_snapshots)
+    with self.command_group('vmss extension', compute_vmss_sdk) as g:
+        g.custom_command('delete', 'delete_vmss_extension')
+        g.custom_command('show', 'get_vmss_extension', exception_handler=empty_on_404)
+        g.custom_command('set', 'set_vmss_extension')
+        g.custom_command('list', 'list_vmss_extensions')
 
-op_var = 'images_operations'
-op_class = 'ImagesOperations'
-cli_command(__name__, 'image create', custom_path.format('create_image'))
-cli_command(__name__, 'image list', custom_path.format('list_images'))
-cli_command(__name__, 'image show', mgmt_path.format(op_var, op_class, 'get'), cf_images, exception_handler=empty_on_404)
-cli_command(__name__, 'image delete', mgmt_path.format(op_var, op_class, 'delete'), cf_images)
+    with self.command_group('vmss extension image', compute_vm_extension_image_sdk) as g:
+        g.command('show', 'get', exception_handler=empty_on_404)
+        g.command('list-names', 'list_types')
+        g.command('list-versions', 'list_versions')
+        g.custom_command('list', 'list_vm_extension_images')
 
-if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
-    cli_command(__name__, 'vm list-skus', custom_path.format('list_skus'), table_transformer=transform_sku_for_table_output)
-    op_var = 'virtual_machine_run_commands_operations'
-    op_class = 'VirtualMachineRunCommandsOperations'
-    cli_command(__name__, 'vm run-command show', mgmt_path.format(op_var, op_class, 'get'), cf_run_commands)
-    cli_command(__name__, 'vm run-command list', mgmt_path.format(op_var, op_class, 'list'), cf_run_commands)
-    cli_command(__name__, 'vm run-command invoke', custom_path.format('run_command_invoke'))
+    with self.command_group('vmss nic', network_nic_sdk) as g:
+        g.command('list', 'list_virtual_machine_scale_set_network_interfaces')
+        g.command('list-vm-nics', 'list_virtual_machine_scale_set_vm_network_interfaces')
+        g.command('show', 'get_virtual_machine_scale_set_network_interface', exception_handler=empty_on_404)
 
-    op_var = 'virtual_machine_scale_set_rolling_upgrades_operations'
-    op_class = 'VirtualMachineScaleSetRollingUpgradesOperations'
-    cli_command(__name__, 'vmss rolling-upgrade cancel', mgmt_path.format(op_var, op_class, 'cancel'), cf_rolling_upgrade_commands)
-    cli_command(__name__, 'vmss rolling-upgrade get-latest', mgmt_path.format(op_var, op_class, 'get_latest'), cf_rolling_upgrade_commands)
-    cli_command(__name__, 'vmss rolling-upgrade start', mgmt_path.format(op_var, op_class, 'start_os_upgrade'), cf_rolling_upgrade_commands)
-
-# MSI
-cli_command(__name__, 'vm assign-identity', custom_path.format('assign_vm_identity'))
-cli_command(__name__, 'vmss assign-identity', custom_path.format('assign_vmss_identity'))
-if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-12-01'):
-    cli_command(__name__, 'vm remove-identity', custom_path.format('remove_vm_identity'))
-    cli_command(__name__, 'vmss remove-identity', custom_path.format('remove_vmss_identity'))
-
-
-# TODO move to its own command module https://github.com/Azure/azure-cli/issues/5105
-msi_mgmt_path = 'azure.mgmt.msi.operations.{}#{}.{}'
-msi_op_var = 'user_assigned_identities_operations'
-msi_op_class = 'UserAssignedIdentitiesOperations'
-cli_command(__name__, 'identity create', msi_mgmt_path.format(msi_op_var, msi_op_class, 'create_or_update'), cf_msi_user_identities_operations)
-cli_command(__name__, 'identity show', msi_mgmt_path.format(msi_op_var, msi_op_class, 'get'), cf_msi_user_identities_operations)
-cli_command(__name__, 'identity delete', msi_mgmt_path.format(msi_op_var, msi_op_class, 'delete'), cf_msi_user_identities_operations)
-cli_command(__name__, 'identity list', custom_path.format("list_user_assigned_identities"))
-cli_command(__name__, 'identity list-operations', 'azure.mgmt.msi.operations.operations#Operations.list', cf_msi_operations_operations)
+    with self.command_group('vmss rolling-upgrade', compute_vmss_rolling_upgrade_sdk, min_api='2017-03-30') as g:
+        g.command('cancel', 'cancel')
+        g.command('get-latest', 'get_latest')
+        g.command('start', 'start_os_upgrade')

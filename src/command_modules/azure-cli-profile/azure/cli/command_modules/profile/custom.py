@@ -5,30 +5,32 @@
 
 from __future__ import print_function
 
-from azure.cli.core.prompting import prompt_pass, NoTTYException
-from azure.cli.core import get_az_logger
+from knack.log import get_logger
+from knack.prompting import prompt_pass, NoTTYException
+from knack.util import CLIError
+
 from azure.cli.core._profile import Profile
-from azure.cli.core.util import CLIError, in_cloud_console
-from azure.cli.core.cloud import get_active_cloud
+from azure.cli.core.util import in_cloud_console
+
 from azure.cli.core.commands.validators import DefaultStr
 
-logger = get_az_logger(__name__)
+logger = get_logger(__name__)
 
 _CLOUD_CONSOLE_WARNING_TEMPLATE = ("Azure Cloud Shell automatically authenticates the user account it was initially"
                                    " launched under, as a result 'az %s' is disabled.")
 
 
-def load_subscriptions(all_clouds=False, refresh=False):
-    profile = Profile()
+def _load_subscriptions(cli_ctx, all_clouds=False, refresh=False):
+    profile = Profile(cli_ctx=cli_ctx)
     if refresh:
         subscriptions = profile.refresh_accounts()
     subscriptions = profile.load_cached_subscriptions(all_clouds)
     return subscriptions
 
 
-def list_subscriptions(all=False, refresh=False):  # pylint: disable=redefined-builtin
+def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefined-builtin
     """List the imported subscriptions."""
-    subscriptions = load_subscriptions(all_clouds=all, refresh=refresh)
+    subscriptions = _load_subscriptions(cmd.cli_ctx, all_clouds=all, refresh=refresh)
     if not subscriptions:
         logger.warning('Please run "az login" to access your accounts.')
     for sub in subscriptions:
@@ -42,9 +44,10 @@ def list_subscriptions(all=False, refresh=False):  # pylint: disable=redefined-b
     return subscriptions
 
 
-def show_subscription(subscription=None, show_auth_for_sdk=None):
+# pylint: disable=inconsistent-return-statements
+def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
     import json
-    profile = Profile()
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     if not show_auth_for_sdk:
         return profile.get_subscription(subscription)
 
@@ -52,15 +55,15 @@ def show_subscription(subscription=None, show_auth_for_sdk=None):
     print(json.dumps(profile.get_sp_auth_info(subscription), indent=2))
 
 
-def get_access_token(subscription=None, resource=None):
+def get_access_token(cmd, subscription=None, resource=None):
     '''
     get AAD token to access to a specified resource
     :param resource: Azure resource endpoints. Default to Azure Resource Manager
     Use 'az cloud show' command for other Azure resources
     '''
-    resource = (resource or get_active_cloud().endpoints.active_directory_resource_id)
-    profile = Profile()
-    creds, subscription, tenant = profile.get_raw_token(resource, subscription=subscription)
+    resource = (resource or cmd.cli_ctx.cloud.endpoints.active_directory_resource_id)
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    creds, subscription, tenant = profile.get_raw_token(subscription=subscription, resource=resource)
     return {
         'tokenType': creds[0],
         'accessToken': creds[1],
@@ -70,21 +73,22 @@ def get_access_token(subscription=None, resource=None):
     }
 
 
-def set_active_subscription(subscription):
+def set_active_subscription(cmd, subscription):
     """Set the current subscription"""
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     if not id:
         raise CLIError('Please provide subscription id or unique name.')
-    profile = Profile()
     profile.set_active_subscription(subscription)
 
 
-def account_clear():
+def account_clear(cmd):
     """Clear all stored subscriptions. To clear individual, use 'logout'"""
-    profile = Profile()
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     profile.logout_all()
 
 
-def login(username=None, password=None, service_principal=None, tenant=None,
+# pylint: disable=inconsistent-return-statements
+def login(cmd, username=None, password=None, service_principal=None, tenant=None,
           allow_no_subscriptions=False, msi=False, msi_port=DefaultStr(50342)):
     """Log in to access Azure subscriptions"""
     import os
@@ -99,7 +103,7 @@ def login(username=None, password=None, service_principal=None, tenant=None,
 
     interactive = False
 
-    profile = Profile()
+    profile = Profile(cli_ctx=cmd.cli_ctx)
 
     if in_cloud_console():
         console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
@@ -121,6 +125,7 @@ def login(username=None, password=None, service_principal=None, tenant=None,
         interactive = True
 
     try:
+        profile = Profile(cli_ctx=cmd.cli_ctx)
         subscriptions = profile.find_subscriptions_on_login(
             interactive,
             username,
@@ -146,18 +151,18 @@ def login(username=None, password=None, service_principal=None, tenant=None,
     return all_subscriptions
 
 
-def logout(username=None):
+def logout(cmd, username=None):
     """Log out to remove access to Azure subscriptions"""
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_WARNING_TEMPLATE, 'logout')
         return
 
-    profile = Profile()
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     if not username:
         username = profile.get_current_account_user()
     profile.logout(username)
 
 
-def list_locations():
+def list_locations(cmd):
     from azure.cli.core.commands.parameters import get_subscription_locations
-    return get_subscription_locations()
+    return get_subscription_locations(cmd.cli_ctx)

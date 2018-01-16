@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"location": "eastus", "tags": {"use": "az-test"}}'
+    body: !!python/unicode '{"location": "eastus", "tags": {"use": "az-test"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -8,27 +8,27 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 resourcemanagementclient/1.2.0rc2
-          Azure-SDK-For-Python AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"eastus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"eastus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:13:56 GMT']
+      date: ['Thu, 21 Dec 2017 17:53:38 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
-    body: '{"properties": {"supportsHttpsTrafficOnly": false}, "location": "eastus",
-      "kind": "Storage", "sku": {"name": "Standard_LRS"}}'
+    body: !!python/unicode '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location":
+      "eastus", "properties": {"supportsHttpsTrafficOnly": false}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -36,24 +36,24 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['125']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 storagemanagementclient/1.2.0
-          Azure-SDK-For-Python AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2017-10-01
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Sat, 30 Sep 2017 22:13:58 GMT']
+      date: ['Thu, 21 Dec 2017 17:53:50 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus/asyncoperations/42e9fcfa-0e94-49fc-a548-9a6bc3462384?monitor=true&api-version=2017-10-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus/asyncoperations/909446af-83b1-4f97-8928-798927d4c6ee?monitor=true&api-version=2017-10-01']
       pragma: [no-cache]
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -63,21 +63,21 @@ interactions:
       CommandName: [storage account create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 storagemanagementclient/1.2.0
-          Azure-SDK-For-Python AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus/asyncoperations/42e9fcfa-0e94-49fc-a548-9a6bc3462384?monitor=true&api-version=2017-10-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/eastus/asyncoperations/909446af-83b1-4f97-8928-798927d4c6ee?monitor=true&api-version=2017-10-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","kind":"Storage","location":"eastus","name":"clitest000002","properties":{"creationTime":"2017-09-30T22:13:58.1177253Z","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","file":"https://clitest000002.file.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/"},"primaryLocation":"eastus","provisioningState":"Succeeded","statusOfPrimary":"available","supportsHttpsTrafficOnly":false},"sku":{"name":"Standard_LRS","tier":"Standard"},"tags":{},"type":"Microsoft.Storage/storageAccounts"}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","kind":"Storage","location":"eastus","name":"clitest000002","properties":{"creationTime":"2017-12-21T17:53:52.8461024Z","encryption":{"keySource":"Microsoft.Storage","services":{"blob":{"enabled":true,"lastEnabledTime":"2017-12-21T17:53:52.8480991Z"},"file":{"enabled":true,"lastEnabledTime":"2017-12-21T17:53:52.8480991Z"}}},"networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","file":"https://clitest000002.file.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/"},"primaryLocation":"eastus","provisioningState":"Succeeded","statusOfPrimary":"available","supportsHttpsTrafficOnly":false},"sku":{"name":"Standard_LRS","tier":"Standard"},"tags":{},"type":"Microsoft.Storage/storageAccounts"}
 
         '}
     headers:
       cache-control: [no-cache]
-      content-length: ['964']
+      content-length: ['1170']
       content-type: [application/json]
-      date: ['Sat, 30 Sep 2017 22:14:15 GMT']
+      date: ['Thu, 21 Dec 2017 17:54:11 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
@@ -94,21 +94,21 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 storagemanagementclient/1.2.0
-          Azure-SDK-For-Python AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-10-01
   response:
-    body: {string: '{"keys":[{"keyName":"key1","permissions":"Full","value":"vkw8+Mmn4A1wwIx0/VL/nchfiqaWr4ksAryIa605DjfF8cNNmC4Ab8Kf1QpDDFGuEDZqkT8jkkWOdb+OQEmR4g=="},{"keyName":"key2","permissions":"Full","value":"KU6Bv+jCwub808zynSxJchUafjW9W5FiU6u9VVWNf56hjsJDEz35EOYk7RKQ6G/qQXaZ6AdqKXsKo7+ubjw4vg=="}]}
+    body: {string: !!python/unicode '{"keys":[{"keyName":"key1","permissions":"Full","value":"PgpFtR/ZdxcBZ+6y8XLwYYeqAliqDbULJE9AKkWxzGSVfIASgHOHFE9EseTabZSCsLFud/YgvbeQJi4KalyKtg=="},{"keyName":"key2","permissions":"Full","value":"BnhZmS0rZltEur/czSkfjpZzKnpR3NgSxNtszl13WM8NHDIKTgug9kY12vYmDlNik4Xc3TYet4P09bUOQ0Reag=="}]}
 
         '}
     headers:
       cache-control: [no-cache]
       content-length: ['289']
       content-type: [application/json]
-      date: ['Sat, 30 Sep 2017 22:14:16 GMT']
+      date: ['Thu, 21 Dec 2017 17:54:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
@@ -126,21 +126,21 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 storagemanagementclient/1.2.0
-          Azure-SDK-For-Python AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-10-01
   response:
-    body: {string: '{"keys":[{"keyName":"key1","permissions":"Full","value":"vkw8+Mmn4A1wwIx0/VL/nchfiqaWr4ksAryIa605DjfF8cNNmC4Ab8Kf1QpDDFGuEDZqkT8jkkWOdb+OQEmR4g=="},{"keyName":"key2","permissions":"Full","value":"KU6Bv+jCwub808zynSxJchUafjW9W5FiU6u9VVWNf56hjsJDEz35EOYk7RKQ6G/qQXaZ6AdqKXsKo7+ubjw4vg=="}]}
+    body: {string: !!python/unicode '{"keys":[{"keyName":"key1","permissions":"Full","value":"PgpFtR/ZdxcBZ+6y8XLwYYeqAliqDbULJE9AKkWxzGSVfIASgHOHFE9EseTabZSCsLFud/YgvbeQJi4KalyKtg=="},{"keyName":"key2","permissions":"Full","value":"BnhZmS0rZltEur/czSkfjpZzKnpR3NgSxNtszl13WM8NHDIKTgug9kY12vYmDlNik4Xc3TYet4P09bUOQ0Reag=="}]}
 
         '}
     headers:
       cache-control: [no-cache]
       content-length: ['289']
       content-type: [application/json]
-      date: ['Sat, 30 Sep 2017 22:14:17 GMT']
+      date: ['Thu, 21 Dec 2017 17:54:39 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-Azure-Storage-Resource-Provider/1.0, Microsoft-HTTPAPI/2.0]
@@ -154,58 +154,60 @@ interactions:
     headers:
       Connection: [keep-alive]
       Content-Length: ['0']
-      User-Agent: [Azure-Storage/0.36.0 (Python CPython 3.5.3; Linux 4.10.0-35-generic)
-          AZURECLI/2.0.16+dev]
-      x-ms-date: ['Sat, 30 Sep 2017 22:14:17 GMT']
+      User-Agent: [Azure-Storage/0.37.1-0.36.0 (Python CPython 2.7.12; Darwin 17.2.0)
+          AZURECLI/2.0.24]
+      x-ms-date: ['Thu, 21 Dec 2017 17:54:39 GMT']
       x-ms-version: ['2017-04-17']
     method: PUT
     uri: https://clitest000002.file.core.windows.net/share?restype=share
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      date: ['Sat, 30 Sep 2017 22:14:17 GMT']
-      etag: ['"0x8D5085097CCF0A9"']
-      last-modified: ['Sat, 30 Sep 2017 22:14:17 GMT']
+      date: ['Thu, 21 Dec 2017 17:54:43 GMT']
+      etag: ['"0x8D5489BEAFA7B98"']
+      last-modified: ['Thu, 21 Dec 2017 17:54:44 GMT']
       server: [Windows-Azure-File/1.0 Microsoft-HTTPAPI/2.0]
       transfer-encoding: [chunked]
       x-ms-version: ['2017-04-17']
     status: {code: 201, message: Created}
 - request:
-    body: 'b''{"properties": {"userAccountSettings": {"adminUserName": "DemoUser",
-      "adminUserPassword": "DemoPa$$w0rd"}, "nodeSetup": {"mountVolumes": {"azureFileShares":
-      [{"accountName": "clitest000002", "fileMode": "0777", "directoryMode": "0777",
-      "azureFileUrl": "https://clitest000002.file.core.windows.net/share", "credentialsInfo":
-      {"accountKey": "vkw8+Mmn4A1wwIx0/VL/nchfiqaWr4ksAryIa605DjfF8cNNmC4Ab8Kf1QpDDFGuEDZqkT8jkkWOdb+OQEmR4g=="},
-      "relativeMountPath": "azfiles"}]}}, "scaleSettings": {"manual": {"targetNodeCount":
-      1}}, "vmSize": "STANDARD_D1"}, "location": "eastus"}'''
+    body: !!python/unicode '{"properties": {"scaleSettings": {"manual": {"targetNodeCount":
+      1}}, "userAccountSettings": {"adminUserName": "DemoUser", "adminUserPassword":
+      "DemoPa$$w0rd"}, "nodeSetup": {"mountVolumes": {"azureFileShares": [{"azureFileUrl":
+      "https://clitest000002.file.core.windows.net/share", "relativeMountPath": "azfiles",
+      "credentials": {"accountKey": "PgpFtR/ZdxcBZ+6y8XLwYYeqAliqDbULJE9AKkWxzGSVfIASgHOHFE9EseTabZSCsLFud/YgvbeQJi4KalyKtg=="},
+      "directoryMode": "0777", "fileMode": "0777", "accountName": "clitest000002"}]}},
+      "vmSize": "STANDARD_D1", "virtualMachineConfiguration": {"imageReference": {"sku":
+      "16.04-LTS", "publisher": "Canonical", "offer": "UbuntuServer"}}}, "location":
+      "eastus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [batchai cluster create]
       Connection: [keep-alive]
-      Content-Length: ['590']
+      Content-Length: ['710']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster?api-version=2017-09-01-preview
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/866ba2f4-b8e0-4695-8d7b-46d79023198b?api-version=2017-09-01-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/c248c9ff-bd03-441f-aac8-6e10f2012e05?api-version=2017-09-01-preview']
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Sat, 30 Sep 2017 22:14:29 GMT']
+      date: ['Thu, 21 Dec 2017 17:54:53 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/866ba2f4-b8e0-4695-8d7b-46d79023198b?api-version=2017-09-01-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationstatuses/c248c9ff-bd03-441f-aac8-6e10f2012e05?api-version=2017-09-01-preview']
       pragma: [no-cache]
-      request-id: [88e89353-7e3b-47b9-bb93-95928331781a]
+      request-id: [33f74ebf-2367-4663-8986-9c4db9f1731f]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -215,22 +217,22 @@ interactions:
       CommandName: [batchai cluster create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/866ba2f4-b8e0-4695-8d7b-46d79023198b?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/c248c9ff-bd03-441f-aac8-6e10f2012e05?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/866ba2f4-b8e0-4695-8d7b-46d79023198b","name":"866ba2f4-b8e0-4695-8d7b-46d79023198b","status":"Succeeded","startTime":"2017-09-30T22:14:29.418Z","endTime":"2017-09-30T22:14:31.717Z","properties":{"resourceId":"8001b49e-e169-4ee6-a5ff-9c3ea5385053$clitest.rg000001$cluster"}}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/c248c9ff-bd03-441f-aac8-6e10f2012e05","name":"c248c9ff-bd03-441f-aac8-6e10f2012e05","status":"Succeeded","startTime":"2017-12-21T17:54:50.938Z","endTime":"2017-12-21T17:54:51.641Z","properties":{"resourceId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590$clitest.rg000001$cluster"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['481']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:14:46 GMT']
+      date: ['Thu, 21 Dec 2017 17:55:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [e1bc5fb8-8d6d-4135-9745-00c91610115f]
+      request-id: [6b4d7b51-b94d-4e2b-95e1-b0ddde4caad0]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -245,24 +247,24 @@ interactions:
       CommandName: [batchai cluster create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster","name":"cluster","type":"Microsoft.BatchAI/Clusters","location":"eastus","properties":{"provisioningState":"Succeeded","allocationState":"Resizing","creationTime":"2017-09-30T22:14:29.215Z","lastModified":"2017-09-30T22:14:29.215Z","allocationStateTransitionTime":"2017-09-30T22:14:31.715Z","provisioningStateTransitionTime":"2017-09-30T22:14:31.701Z","vmSize":"STANDARD_D1","currentNodeCount":0,"nodeStateCounts":{"runningNodeCount":0,"idleNodeCount":0,"unusableNodeCount":0,"preparingNodeCount":0},"vmPriority":"Dedicated","scaleSettings":{"manual":{"targetNodeCount":1,"nodeDeallocationOption":"Requeue"}},"virtualMachineConfiguration":{"imageReference":{"publisher":"Canonical","offer":"UbuntuServer","sku":"16.04-LTS","version":"latest"}},"userAccountSettings":{"adminUserName":"DemoUser"},"nodeSetup":{"mountVolumes":{"azureFileShares":[{"accountName":"clitest000002","azureFileUrl":"https://clitest000002.file.core.windows.net/share","credentialsInfo":{},"relativeMountPath":"azfiles","fileMode":"0777","directoryMode":"0777"}]}},"subnet":{}}}'}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster","name":"cluster","type":"Microsoft.BatchAI/Clusters","location":"eastus","properties":{"provisioningState":"succeeded","allocationState":"resizing","creationTime":"2017-12-21T17:54:50.922Z","allocationStateTransitionTime":"2017-12-21T17:54:50.922Z","provisioningStateTransitionTime":"2017-12-21T17:54:51.61Z","vmSize":"STANDARD_D1","currentNodeCount":0,"nodeStateCounts":{"runningNodeCount":0,"idleNodeCount":0,"unusableNodeCount":0,"preparingNodeCount":0,"leavingNodeCount":0},"vmPriority":"dedicated","scaleSettings":{"manual":{"targetNodeCount":1,"nodeDeallocationOption":"requeue"}},"virtualMachineConfiguration":{"imageReference":{"publisher":"Canonical","offer":"UbuntuServer","sku":"16.04-LTS","version":"latest"}},"userAccountSettings":{"adminUserName":"DemoUser"},"nodeSetup":{"mountVolumes":{"azureFileShares":[{"accountName":"clitest000002","azureFileUrl":"https://clitest000002.file.core.windows.net/share","credentials":{},"relativeMountPath":"azfiles","fileMode":"0777","directoryMode":"0777"}]}}}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1268']
+      content-length: ['1230']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:14:48 GMT']
-      etag: ['"0x8D508509E7C69A0"']
+      date: ['Thu, 21 Dec 2017 17:55:18 GMT']
+      etag: ['"0x8D5489BEEF921D8"']
       expires: ['-1']
-      last-modified: ['Sat, 30 Sep 2017 22:14:29 GMT']
+      last-modified: ['Thu, 21 Dec 2017 17:54:50 GMT']
       pragma: [no-cache]
-      request-id: [6d725491-0844-43df-a9ad-bc06f52b3e32]
+      request-id: [c7128985-5af2-4b92-89a8-23b0a026421c]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -277,24 +279,24 @@ interactions:
       CommandName: [batchai job create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster","name":"cluster","type":"Microsoft.BatchAI/Clusters","location":"eastus","properties":{"provisioningState":"Succeeded","allocationState":"Resizing","creationTime":"2017-09-30T22:14:29.215Z","lastModified":"2017-09-30T22:14:29.215Z","allocationStateTransitionTime":"2017-09-30T22:14:31.715Z","provisioningStateTransitionTime":"2017-09-30T22:14:31.701Z","vmSize":"STANDARD_D1","currentNodeCount":0,"nodeStateCounts":{"runningNodeCount":0,"idleNodeCount":0,"unusableNodeCount":0,"preparingNodeCount":0},"vmPriority":"Dedicated","scaleSettings":{"manual":{"targetNodeCount":1,"nodeDeallocationOption":"Requeue"}},"virtualMachineConfiguration":{"imageReference":{"publisher":"Canonical","offer":"UbuntuServer","sku":"16.04-LTS","version":"latest"}},"userAccountSettings":{"adminUserName":"DemoUser"},"nodeSetup":{"mountVolumes":{"azureFileShares":[{"accountName":"clitest000002","azureFileUrl":"https://clitest000002.file.core.windows.net/share","credentialsInfo":{},"relativeMountPath":"azfiles","fileMode":"0777","directoryMode":"0777"}]}},"subnet":{}}}'}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster","name":"cluster","type":"Microsoft.BatchAI/Clusters","location":"eastus","properties":{"provisioningState":"succeeded","allocationState":"resizing","creationTime":"2017-12-21T17:54:50.922Z","allocationStateTransitionTime":"2017-12-21T17:54:50.922Z","provisioningStateTransitionTime":"2017-12-21T17:54:51.61Z","vmSize":"STANDARD_D1","currentNodeCount":0,"nodeStateCounts":{"runningNodeCount":0,"idleNodeCount":0,"unusableNodeCount":0,"preparingNodeCount":0,"leavingNodeCount":0},"vmPriority":"dedicated","scaleSettings":{"manual":{"targetNodeCount":1,"nodeDeallocationOption":"requeue"}},"virtualMachineConfiguration":{"imageReference":{"publisher":"Canonical","offer":"UbuntuServer","sku":"16.04-LTS","version":"latest"}},"userAccountSettings":{"adminUserName":"DemoUser"},"nodeSetup":{"mountVolumes":{"azureFileShares":[{"accountName":"clitest000002","azureFileUrl":"https://clitest000002.file.core.windows.net/share","credentials":{},"relativeMountPath":"azfiles","fileMode":"0777","directoryMode":"0777"}]}}}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1268']
+      content-length: ['1230']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:14:51 GMT']
-      etag: ['"0x8D508509E7C69A0"']
+      date: ['Thu, 21 Dec 2017 17:55:25 GMT']
+      etag: ['"0x8D5489BEEF921D8"']
       expires: ['-1']
-      last-modified: ['Sat, 30 Sep 2017 22:14:29 GMT']
+      last-modified: ['Thu, 21 Dec 2017 17:54:50 GMT']
       pragma: [no-cache]
-      request-id: [98e01787-0987-4479-b768-3509732490e0]
+      request-id: [12e6aa3a-2706-46c5-8143-5b4fef82d176]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -302,40 +304,40 @@ interactions:
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"cluster": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster"},
-      "containerSettings": {"imageSourceRegistry": {"image": "ubuntu"}}, "customToolkitSettings":
-      {"commandLine": "echo hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt"}, "outputDirectories":
-      [{"id": "OUTPUT", "type": "custom", "pathPrefix": "$AZ_BATCHAI_MOUNT_ROOT/azfiles",
-      "pathSuffix": "output"}], "stdOutErrPathPrefix": "$AZ_BATCHAI_MOUNT_ROOT/azfiles",
-      "nodeCount": 1}, "location": "eastus"}'''
+    body: !!python/unicode '{"properties": {"cluster": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster"},
+      "stdOutErrPathPrefix": "$AZ_BATCHAI_MOUNT_ROOT/azfiles", "customToolkitSettings":
+      {"commandLine": "echo hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt"}, "containerSettings":
+      {"imageSourceRegistry": {"image": "ubuntu"}}, "outputDirectories": [{"type":
+      "custom", "pathPrefix": "$AZ_BATCHAI_MOUNT_ROOT/azfiles", "pathSuffix": "output",
+      "id": "OUTPUT"}], "nodeCount": 1}, "location": "eastus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [batchai job create]
       Connection: [keep-alive]
-      Content-Length: ['618']
+      Content-Length: ['615']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job?api-version=2017-09-01-preview
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/d6efb27e-6233-4e0e-9f9c-5ffd55e5a7f8?api-version=2017-09-01-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/bda8e284-ef58-4dc4-ba98-7364ec8da7a9?api-version=2017-09-01-preview']
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Sat, 30 Sep 2017 22:15:04 GMT']
+      date: ['Thu, 21 Dec 2017 17:55:28 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/d6efb27e-6233-4e0e-9f9c-5ffd55e5a7f8?api-version=2017-09-01-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationstatuses/bda8e284-ef58-4dc4-ba98-7364ec8da7a9?api-version=2017-09-01-preview']
       pragma: [no-cache]
-      request-id: [38ebfaba-ef7e-4156-9d55-d8c4837ff91e]
+      request-id: [eca75f76-ac98-4f89-81a1-fac14a0bbc2f]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -345,22 +347,22 @@ interactions:
       CommandName: [batchai job create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/d6efb27e-6233-4e0e-9f9c-5ffd55e5a7f8?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/bda8e284-ef58-4dc4-ba98-7364ec8da7a9?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/d6efb27e-6233-4e0e-9f9c-5ffd55e5a7f8","name":"d6efb27e-6233-4e0e-9f9c-5ffd55e5a7f8","status":"Succeeded","startTime":"2017-09-30T22:15:03.638Z","endTime":"2017-09-30T22:15:08.104Z","properties":{"resourceId":"8001b49e-e169-4ee6-a5ff-9c3ea5385053$clitest.rg000001$job"}}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/bda8e284-ef58-4dc4-ba98-7364ec8da7a9","name":"bda8e284-ef58-4dc4-ba98-7364ec8da7a9","status":"Succeeded","startTime":"2017-12-21T17:55:30.163Z","endTime":"2017-12-21T17:55:30.827Z","properties":{"resourceId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590$clitest.rg000001$job"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['477']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:15:21 GMT']
+      date: ['Thu, 21 Dec 2017 17:55:51 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [acd16c5d-1070-4eb3-abe3-76eb4e498a59]
+      request-id: [2bc1f957-8a01-4c4f-b5bc-16606542dc71]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -375,25 +377,25 @@ interactions:
       CommandName: [batchai job create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job","name":"job","type":"Microsoft.BatchAI/Jobs","properties":{"priority":0,"cluster":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster"},"nodeCount":1,"containerSettings":{"imageSourceRegistry":{"image":"ubuntu"}},"toolType":"Custom","customToolkitSettings":{"commandLine":"echo
-        hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt"},"stdOutErrPathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","outputDirectories":[{"id":"OUTPUT","pathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","pathSuffix":"output","type":"Custom","createNew":true}],"constraints":{"maxWallClockTime":"P7D","maxRetryCount":0},"creationTime":"2017-09-30T22:15:03.365Z","provisioningState":"Succeeded","provisioningStateTransitionTime":"2017-09-30T22:15:08.089Z","executionState":"Queued","executionStateTransitionTime":"2017-09-30T22:15:07.494Z"}}'}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job","name":"job","type":"Microsoft.BatchAI/Jobs","properties":{"priority":0,"cluster":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster"},"nodeCount":1,"containerSettings":{"imageSourceRegistry":{"image":"ubuntu"}},"toolType":"custom","customToolkitSettings":{"commandLine":"echo
+        hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt"},"stdOutErrPathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","outputDirectories":[{"id":"OUTPUT","pathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","pathSuffix":"output","type":"custom","createNew":true}],"constraints":{"maxWallClockTime":"P7D"},"creationTime":"2017-12-21T17:55:30.147Z","provisioningState":"succeeded","provisioningStateTransitionTime":"2017-12-21T17:55:30.795Z","executionState":"queued","executionStateTransitionTime":"2017-12-21T17:55:30.147Z"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1133']
+      content-length: ['1112']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:15:22 GMT']
-      etag: ['"0x8D50850B2D75D3B"']
+      date: ['Thu, 21 Dec 2017 17:55:55 GMT']
+      etag: ['"0x8D5489C065A4878"']
       expires: ['-1']
-      last-modified: ['Sat, 30 Sep 2017 22:15:03 GMT']
+      last-modified: ['Thu, 21 Dec 2017 17:55:30 GMT']
       pragma: [no-cache]
-      request-id: [456f0ae9-a676-40d8-8457-987dc400ec26]
+      request-id: [f4ad2187-e27c-4ff5-8398-82059a582724]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -408,25 +410,25 @@ interactions:
       CommandName: [batchai job show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job","name":"job","type":"Microsoft.BatchAI/Jobs","properties":{"priority":0,"cluster":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster"},"nodeCount":1,"containerSettings":{"imageSourceRegistry":{"image":"ubuntu"}},"toolType":"Custom","customToolkitSettings":{"commandLine":"echo
-        hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt"},"stdOutErrPathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","outputDirectories":[{"id":"OUTPUT","pathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","pathSuffix":"output","type":"Custom","createNew":true}],"constraints":{"maxWallClockTime":"P7D","maxRetryCount":0},"creationTime":"2017-09-30T22:15:03.365Z","provisioningState":"Succeeded","provisioningStateTransitionTime":"2017-09-30T22:15:08.089Z","executionState":"Succeeded","executionStateTransitionTime":"2017-09-30T22:19:04.407Z","executionInfo":{"startTime":"2017-09-30T22:15:07.512Z","endTime":"2017-09-30T22:19:57.155Z","exitCode":0}}}'}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job","name":"job","type":"Microsoft.BatchAI/Jobs","properties":{"priority":0,"cluster":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster"},"nodeCount":1,"containerSettings":{"imageSourceRegistry":{"image":"ubuntu"}},"toolType":"custom","customToolkitSettings":{"commandLine":"echo
+        hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt"},"stdOutErrPathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","outputDirectories":[{"id":"OUTPUT","pathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","pathSuffix":"output","type":"custom","createNew":true}],"constraints":{"maxWallClockTime":"P7D"},"creationTime":"2017-12-21T17:55:30.147Z","provisioningState":"succeeded","provisioningStateTransitionTime":"2017-12-21T17:55:30.795Z","executionState":"succeeded","executionStateTransitionTime":"2017-12-21T17:59:12.867Z","executionInfo":{"startTime":"2017-12-21T17:58:45.984Z","endTime":"2017-12-21T17:59:12.867Z","exitCode":0}}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1243']
+      content-length: ['1222']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:25:24 GMT']
-      etag: ['"0x8D50850B2D75D3B"']
+      date: ['Thu, 21 Dec 2017 18:06:00 GMT']
+      etag: ['"0x8D5489C065A4878"']
       expires: ['-1']
-      last-modified: ['Sat, 30 Sep 2017 22:15:03 GMT']
+      last-modified: ['Thu, 21 Dec 2017 17:55:30 GMT']
       pragma: [no-cache]
-      request-id: [190e4bee-c6a5-47ab-9fe0-3d4d1281f848]
+      request-id: [7cb3bb4b-9bf6-4e59-9ca4-5bbc797f45b2]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -438,26 +440,26 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [batchai job list-output-files]
+      CommandName: [batchai job list-files]
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job/listOutputFiles?maxresults=1000&outputdirectoryid=stdouterr&api-version=2017-09-01-preview&linkexpiryinminutes=60
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job/listOutputFiles?api-version=2017-09-01-preview&linkexpiryinminutes=60&maxresults=1000&outputdirectoryid=stdouterr
   response:
-    body: {string: '{"value":[{"name":"stderr.txt","downloadUrl":"https://clitest000002.file.core.windows.net/share/8001b49e-e169-4ee6-a5ff-9c3ea5385053/clitest.rg000001/jobs/job/stderr.txt?sv=2016-05-31&sr=f&sig=zPh5b3J6qDbDg%2Bges6ZGkiPY3BJ8tiOYGKOI4JskKaQ%3D&se=2017-09-30T23%3A25%3A26Z&sp=rl","properties":{"lastModified":"2017-09-30T22:19:03Z","contentLength":0}},{"name":"stdout.txt","downloadUrl":"https://clitest000002.file.core.windows.net/share/8001b49e-e169-4ee6-a5ff-9c3ea5385053/clitest.rg000001/jobs/job/stdout.txt?sv=2016-05-31&sr=f&sig=7FQF%2B8lgP2ZAOdG46tXqR8vuBwhQGyohhQGgV9K8dL4%3D&se=2017-09-30T23%3A25%3A26Z&sp=rl","properties":{"lastModified":"2017-09-30T22:19:03Z","contentLength":3}}]}'}
+    body: {string: !!python/unicode '{"value":[{"name":"stderr.txt","downloadUrl":"https://clitest000002.file.core.windows.net/share/0b1f6471-1bf0-4dda-aec3-cb9272f09590/clitest.rg000001/jobs/job/ef5796bc-5cc9-49ba-ab56-3e31a36cf719/stderr.txt?sv=2016-05-31&sr=f&sig=wi5jTG%2BBo9BQdoTo%2FVOJQkph99rcvBoOmfLHrdtDiSk%3D&se=2017-12-21T19%3A06%3A09Z&sp=rl","properties":{"lastModified":"2017-12-21T17:59:12Z","contentLength":0}},{"name":"stdout.txt","downloadUrl":"https://clitest000002.file.core.windows.net/share/0b1f6471-1bf0-4dda-aec3-cb9272f09590/clitest.rg000001/jobs/job/ef5796bc-5cc9-49ba-ab56-3e31a36cf719/stdout.txt?sv=2016-05-31&sr=f&sig=GSM%2F15dvmRZDhaPQPpb4nxtGDthmMZEHqI3SVhVM1MY%3D&se=2017-12-21T19%3A06%3A09Z&sp=rl","properties":{"lastModified":"2017-12-21T17:59:12Z","contentLength":3}}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['829']
+      content-length: ['905']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:25:27 GMT']
+      date: ['Thu, 21 Dec 2017 18:06:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [7f9c5630-6bce-43ff-9153-de19ddf71209]
+      request-id: [53bad3d7-d171-4f88-a1ec-5b1869ebb8f3]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -469,26 +471,26 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [batchai job list-output-files]
+      CommandName: [batchai job list-files]
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job/listOutputFiles?maxresults=1000&outputdirectoryid=OUTPUT&api-version=2017-09-01-preview&linkexpiryinminutes=60
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job/listOutputFiles?api-version=2017-09-01-preview&linkexpiryinminutes=60&maxresults=1000&outputdirectoryid=OUTPUT
   response:
-    body: {string: '{"value":[{"name":"result.txt","downloadUrl":"https://clitest000002.file.core.windows.net/share/8001b49e-e169-4ee6-a5ff-9c3ea5385053/clitest.rg000001/jobs/job/outputs/output/result.txt?sv=2016-05-31&sr=f&sig=JvUmMGEw3f3hJ4SF7%2FHW86%2FMRx8qcMdTZ8EzJaV7iGY%3D&se=2017-09-30T23%3A25%3A28Z&sp=rl","properties":{"lastModified":"2017-09-30T22:19:03Z","contentLength":3}}]}'}
+    body: {string: !!python/unicode '{"value":[{"name":"result.txt","downloadUrl":"https://clitest000002.file.core.windows.net/share/0b1f6471-1bf0-4dda-aec3-cb9272f09590/clitest.rg000001/jobs/job/ef5796bc-5cc9-49ba-ab56-3e31a36cf719/outputs/output/result.txt?sv=2016-05-31&sr=f&sig=KzP1Ejg%2F69cR%2BYA8jvBg6burhB1KRfn5m81YzIa0Lro%3D&se=2017-12-21T19%3A06%3A14Z&sp=rl","properties":{"lastModified":"2017-12-21T17:59:12Z","contentLength":3}}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['437']
+      content-length: ['474']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:25:27 GMT']
+      date: ['Thu, 21 Dec 2017 18:06:16 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [b508d4bb-c545-4a16-9933-a97498c20048]
+      request-id: [dbfc5b4b-4301-4417-96a4-74bc6f2e366d]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -496,7 +498,7 @@ interactions:
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"scaleSettings": {"manual": {"nodeDeallocationOption":
+    body: !!python/unicode '{"properties": {"scaleSettings": {"manual": {"nodeDeallocationOption":
       "requeue", "targetNodeCount": 0}}}}'
     headers:
       Accept: [application/json]
@@ -505,24 +507,24 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['106']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PATCH
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster","name":"cluster","type":"Microsoft.BatchAI/Clusters","location":"eastus","properties":{"provisioningState":"Succeeded","allocationState":"Steady","creationTime":"2017-09-30T22:14:29.215Z","lastModified":"2017-09-30T22:14:29.215Z","allocationStateTransitionTime":"2017-09-30T22:16:23.067Z","provisioningStateTransitionTime":"2017-09-30T22:14:31.701Z","vmSize":"STANDARD_D1","currentNodeCount":1,"nodeStateCounts":{"runningNodeCount":0,"idleNodeCount":1,"unusableNodeCount":0,"preparingNodeCount":0},"vmPriority":"Dedicated","scaleSettings":{"manual":{"targetNodeCount":0,"nodeDeallocationOption":"Requeue"}},"virtualMachineConfiguration":{"imageReference":{"publisher":"Canonical","offer":"UbuntuServer","sku":"16.04-LTS","version":"latest"}},"userAccountSettings":{"adminUserName":"DemoUser"},"nodeSetup":{"mountVolumes":{"azureFileShares":[{"accountName":"clitest000002","azureFileUrl":"https://clitest000002.file.core.windows.net/share","credentialsInfo":{},"relativeMountPath":"azfiles","fileMode":"0777","directoryMode":"0777"}]}},"subnet":{}}}'}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster","name":"cluster","type":"Microsoft.BatchAI/Clusters","location":"eastus","properties":{"provisioningState":"succeeded","allocationState":"steady","creationTime":"2017-12-21T17:54:50.922Z","allocationStateTransitionTime":"2017-12-21T17:56:05.858Z","provisioningStateTransitionTime":"2017-12-21T17:54:51.61Z","vmSize":"STANDARD_D1","currentNodeCount":1,"nodeStateCounts":{"runningNodeCount":0,"idleNodeCount":1,"unusableNodeCount":0,"preparingNodeCount":0,"leavingNodeCount":0},"vmPriority":"dedicated","scaleSettings":{"manual":{"targetNodeCount":0,"nodeDeallocationOption":"requeue"}},"virtualMachineConfiguration":{"imageReference":{"publisher":"Canonical","offer":"UbuntuServer","sku":"16.04-LTS","version":"latest"}},"userAccountSettings":{"adminUserName":"DemoUser"},"nodeSetup":{"mountVolumes":{"azureFileShares":[{"accountName":"clitest000002","azureFileUrl":"https://clitest000002.file.core.windows.net/share","credentials":{},"relativeMountPath":"azfiles","fileMode":"0777","directoryMode":"0777"}]}}}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1266']
+      content-length: ['1228']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:25:32 GMT']
-      etag: ['"0x8D508509E7C69A0"']
+      date: ['Thu, 21 Dec 2017 18:06:17 GMT']
+      etag: ['"0x8D5489BEEF921D8"']
       expires: ['-1']
-      last-modified: ['Sat, 30 Sep 2017 22:14:29 GMT']
+      last-modified: ['Thu, 21 Dec 2017 17:54:50 GMT']
       pragma: [no-cache]
-      request-id: [5d742ac2-377d-4470-9d44-de387657fcad]
+      request-id: [5154157c-aef3-438d-9157-d11755f984f1]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -538,24 +540,24 @@ interactions:
       CommandName: [batchai cluster show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster","name":"cluster","type":"Microsoft.BatchAI/Clusters","location":"eastus","properties":{"provisioningState":"Succeeded","allocationState":"Steady","creationTime":"2017-09-30T22:14:29.215Z","lastModified":"2017-09-30T22:14:29.215Z","allocationStateTransitionTime":"2017-09-30T22:29:52.667Z","provisioningStateTransitionTime":"2017-09-30T22:14:31.701Z","vmSize":"STANDARD_D1","currentNodeCount":0,"nodeStateCounts":{"runningNodeCount":0,"idleNodeCount":0,"unusableNodeCount":0,"preparingNodeCount":0},"vmPriority":"Dedicated","scaleSettings":{"manual":{"targetNodeCount":0,"nodeDeallocationOption":"Requeue"}},"virtualMachineConfiguration":{"imageReference":{"publisher":"Canonical","offer":"UbuntuServer","sku":"16.04-LTS","version":"latest"}},"userAccountSettings":{"adminUserName":"DemoUser"},"nodeSetup":{"mountVolumes":{"azureFileShares":[{"accountName":"clitest000002","azureFileUrl":"https://clitest000002.file.core.windows.net/share","credentialsInfo":{},"relativeMountPath":"azfiles","fileMode":"0777","directoryMode":"0777"}]}},"subnet":{}}}'}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster","name":"cluster","type":"Microsoft.BatchAI/Clusters","location":"eastus","properties":{"provisioningState":"succeeded","allocationState":"steady","creationTime":"2017-12-21T17:54:50.922Z","allocationStateTransitionTime":"2017-12-21T17:56:05.858Z","provisioningStateTransitionTime":"2017-12-21T17:54:51.61Z","vmSize":"STANDARD_D1","currentNodeCount":0,"nodeStateCounts":{"runningNodeCount":0,"idleNodeCount":0,"unusableNodeCount":0,"preparingNodeCount":0,"leavingNodeCount":0},"vmPriority":"dedicated","scaleSettings":{"manual":{"targetNodeCount":0,"nodeDeallocationOption":"requeue"}},"virtualMachineConfiguration":{"imageReference":{"publisher":"Canonical","offer":"UbuntuServer","sku":"16.04-LTS","version":"latest"}},"userAccountSettings":{"adminUserName":"DemoUser"},"nodeSetup":{"mountVolumes":{"azureFileShares":[{"accountName":"clitest000002","azureFileUrl":"https://clitest000002.file.core.windows.net/share","credentials":{},"relativeMountPath":"azfiles","fileMode":"0777","directoryMode":"0777"}]}}}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1266']
+      content-length: ['1228']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:35:35 GMT']
-      etag: ['"0x8D508509E7C69A0"']
+      date: ['Thu, 21 Dec 2017 18:16:27 GMT']
+      etag: ['"0x8D5489BEEF921D8"']
       expires: ['-1']
-      last-modified: ['Sat, 30 Sep 2017 22:14:29 GMT']
+      last-modified: ['Thu, 21 Dec 2017 17:54:50 GMT']
       pragma: [no-cache]
-      request-id: [b41d1896-ebda-42bc-b6ce-cbabf1d825db]
+      request-id: [224f3904-0ab4-40e7-b417-0c2f457daa2e]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -563,7 +565,7 @@ interactions:
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"scaleSettings": {"manual": {"nodeDeallocationOption":
+    body: !!python/unicode '{"properties": {"scaleSettings": {"manual": {"nodeDeallocationOption":
       "requeue", "targetNodeCount": 1}}}}'
     headers:
       Accept: [application/json]
@@ -572,30 +574,30 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['106']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PATCH
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster","name":"cluster","type":"Microsoft.BatchAI/Clusters","location":"eastus","properties":{"provisioningState":"Succeeded","allocationState":"Steady","creationTime":"2017-09-30T22:14:29.215Z","lastModified":"2017-09-30T22:14:29.215Z","allocationStateTransitionTime":"2017-09-30T22:29:52.667Z","provisioningStateTransitionTime":"2017-09-30T22:14:31.701Z","vmSize":"STANDARD_D1","currentNodeCount":0,"nodeStateCounts":{"runningNodeCount":0,"idleNodeCount":0,"unusableNodeCount":0,"preparingNodeCount":0},"vmPriority":"Dedicated","scaleSettings":{"manual":{"targetNodeCount":1,"nodeDeallocationOption":"Requeue"}},"virtualMachineConfiguration":{"imageReference":{"publisher":"Canonical","offer":"UbuntuServer","sku":"16.04-LTS","version":"latest"}},"userAccountSettings":{"adminUserName":"DemoUser"},"nodeSetup":{"mountVolumes":{"azureFileShares":[{"accountName":"clitest000002","azureFileUrl":"https://clitest000002.file.core.windows.net/share","credentialsInfo":{},"relativeMountPath":"azfiles","fileMode":"0777","directoryMode":"0777"}]}},"subnet":{}}}'}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster","name":"cluster","type":"Microsoft.BatchAI/Clusters","location":"eastus","properties":{"provisioningState":"succeeded","allocationState":"steady","creationTime":"2017-12-21T17:54:50.922Z","allocationStateTransitionTime":"2017-12-21T17:56:05.858Z","provisioningStateTransitionTime":"2017-12-21T17:54:51.61Z","vmSize":"STANDARD_D1","currentNodeCount":0,"nodeStateCounts":{"runningNodeCount":0,"idleNodeCount":0,"unusableNodeCount":0,"preparingNodeCount":0,"leavingNodeCount":0},"vmPriority":"dedicated","scaleSettings":{"manual":{"targetNodeCount":1,"nodeDeallocationOption":"requeue"}},"virtualMachineConfiguration":{"imageReference":{"publisher":"Canonical","offer":"UbuntuServer","sku":"16.04-LTS","version":"latest"}},"userAccountSettings":{"adminUserName":"DemoUser"},"nodeSetup":{"mountVolumes":{"azureFileShares":[{"accountName":"clitest000002","azureFileUrl":"https://clitest000002.file.core.windows.net/share","credentials":{},"relativeMountPath":"azfiles","fileMode":"0777","directoryMode":"0777"}]}}}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1266']
+      content-length: ['1228']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:35:36 GMT']
-      etag: ['"0x8D508509E7C69A0"']
+      date: ['Thu, 21 Dec 2017 18:16:36 GMT']
+      etag: ['"0x8D5489BEEF921D8"']
       expires: ['-1']
-      last-modified: ['Sat, 30 Sep 2017 22:14:29 GMT']
+      last-modified: ['Thu, 21 Dec 2017 17:54:50 GMT']
       pragma: [no-cache]
-      request-id: [00d74e70-0870-444a-92c5-931d58d562e9]
+      request-id: [5e3a2fc4-e9a5-4156-a7ae-71bbe617da98]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -605,24 +607,24 @@ interactions:
       CommandName: [batchai job create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster","name":"cluster","type":"Microsoft.BatchAI/Clusters","location":"eastus","properties":{"provisioningState":"Succeeded","allocationState":"Steady","creationTime":"2017-09-30T22:14:29.215Z","lastModified":"2017-09-30T22:14:29.215Z","allocationStateTransitionTime":"2017-09-30T22:29:52.667Z","provisioningStateTransitionTime":"2017-09-30T22:14:31.701Z","vmSize":"STANDARD_D1","currentNodeCount":0,"nodeStateCounts":{"runningNodeCount":0,"idleNodeCount":0,"unusableNodeCount":0,"preparingNodeCount":0},"vmPriority":"Dedicated","scaleSettings":{"manual":{"targetNodeCount":1,"nodeDeallocationOption":"Requeue"}},"virtualMachineConfiguration":{"imageReference":{"publisher":"Canonical","offer":"UbuntuServer","sku":"16.04-LTS","version":"latest"}},"userAccountSettings":{"adminUserName":"DemoUser"},"nodeSetup":{"mountVolumes":{"azureFileShares":[{"accountName":"clitest000002","azureFileUrl":"https://clitest000002.file.core.windows.net/share","credentialsInfo":{},"relativeMountPath":"azfiles","fileMode":"0777","directoryMode":"0777"}]}},"subnet":{}}}'}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster","name":"cluster","type":"Microsoft.BatchAI/Clusters","location":"eastus","properties":{"provisioningState":"succeeded","allocationState":"steady","creationTime":"2017-12-21T17:54:50.922Z","allocationStateTransitionTime":"2017-12-21T17:56:05.858Z","provisioningStateTransitionTime":"2017-12-21T17:54:51.61Z","vmSize":"STANDARD_D1","currentNodeCount":0,"nodeStateCounts":{"runningNodeCount":0,"idleNodeCount":0,"unusableNodeCount":0,"preparingNodeCount":0,"leavingNodeCount":0},"vmPriority":"dedicated","scaleSettings":{"manual":{"targetNodeCount":1,"nodeDeallocationOption":"requeue"}},"virtualMachineConfiguration":{"imageReference":{"publisher":"Canonical","offer":"UbuntuServer","sku":"16.04-LTS","version":"latest"}},"userAccountSettings":{"adminUserName":"DemoUser"},"nodeSetup":{"mountVolumes":{"azureFileShares":[{"accountName":"clitest000002","azureFileUrl":"https://clitest000002.file.core.windows.net/share","credentials":{},"relativeMountPath":"azfiles","fileMode":"0777","directoryMode":"0777"}]}}}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1266']
+      content-length: ['1228']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:35:37 GMT']
-      etag: ['"0x8D508509E7C69A0"']
+      date: ['Thu, 21 Dec 2017 18:16:43 GMT']
+      etag: ['"0x8D5489BEEF921D8"']
       expires: ['-1']
-      last-modified: ['Sat, 30 Sep 2017 22:14:29 GMT']
+      last-modified: ['Thu, 21 Dec 2017 17:54:50 GMT']
       pragma: [no-cache]
-      request-id: [78f40d93-cede-4067-a7cf-a86c17bfd160]
+      request-id: [a8fe3675-3bb9-45e9-994b-63b3c1d1a3b1]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -630,40 +632,40 @@ interactions:
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"cluster": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster"},
-      "containerSettings": {"imageSourceRegistry": {"image": "ubuntu"}}, "customToolkitSettings":
-      {"commandLine": "echo hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt"}, "outputDirectories":
-      [{"id": "OUTPUT", "type": "custom", "pathPrefix": "$AZ_BATCHAI_MOUNT_ROOT/azfiles",
-      "pathSuffix": "output"}], "stdOutErrPathPrefix": "$AZ_BATCHAI_MOUNT_ROOT/azfiles",
-      "nodeCount": 1}, "location": "eastus"}'''
+    body: !!python/unicode '{"properties": {"cluster": {"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster"},
+      "stdOutErrPathPrefix": "$AZ_BATCHAI_MOUNT_ROOT/azfiles", "customToolkitSettings":
+      {"commandLine": "echo hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt"}, "containerSettings":
+      {"imageSourceRegistry": {"image": "ubuntu"}}, "outputDirectories": [{"type":
+      "custom", "pathPrefix": "$AZ_BATCHAI_MOUNT_ROOT/azfiles", "pathSuffix": "output",
+      "id": "OUTPUT"}], "nodeCount": 1}, "location": "eastus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [batchai job create]
       Connection: [keep-alive]
-      Content-Length: ['618']
+      Content-Length: ['615']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job2?api-version=2017-09-01-preview
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/b762ab75-ad12-4694-94a5-54ff892041e9?api-version=2017-09-01-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/2544c737-7385-457f-9b47-1b3245929cb8?api-version=2017-09-01-preview']
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Sat, 30 Sep 2017 22:35:43 GMT']
+      date: ['Thu, 21 Dec 2017 18:16:50 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/b762ab75-ad12-4694-94a5-54ff892041e9?api-version=2017-09-01-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationstatuses/2544c737-7385-457f-9b47-1b3245929cb8?api-version=2017-09-01-preview']
       pragma: [no-cache]
-      request-id: [ba09afaa-1e3c-4b35-a463-f9d66ae9d367]
+      request-id: [4f6220b0-64a8-4af3-a1ae-9c349b910104]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -673,22 +675,22 @@ interactions:
       CommandName: [batchai job create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/b762ab75-ad12-4694-94a5-54ff892041e9?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/2544c737-7385-457f-9b47-1b3245929cb8?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/b762ab75-ad12-4694-94a5-54ff892041e9","name":"b762ab75-ad12-4694-94a5-54ff892041e9","status":"Succeeded","startTime":"2017-09-30T22:35:43.61Z","endTime":"2017-09-30T22:35:45.423Z","properties":{"resourceId":"8001b49e-e169-4ee6-a5ff-9c3ea5385053$clitest.rg000001$job2"}}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/2544c737-7385-457f-9b47-1b3245929cb8","name":"2544c737-7385-457f-9b47-1b3245929cb8","status":"Succeeded","startTime":"2017-12-21T18:16:51.229Z","endTime":"2017-12-21T18:16:52.026Z","properties":{"resourceId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590$clitest.rg000001$job2"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['477']
+      content-length: ['478']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:35:59 GMT']
+      date: ['Thu, 21 Dec 2017 18:17:12 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [7c6f07c9-534d-422d-b8c8-dde0758ca579]
+      request-id: [b8890676-2960-443d-a561-9cd9b5a59e24]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -703,25 +705,25 @@ interactions:
       CommandName: [batchai job create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job2?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job2","name":"job2","type":"Microsoft.BatchAI/Jobs","properties":{"priority":0,"cluster":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster"},"nodeCount":1,"containerSettings":{"imageSourceRegistry":{"image":"ubuntu"}},"toolType":"Custom","customToolkitSettings":{"commandLine":"echo
-        hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt"},"stdOutErrPathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","outputDirectories":[{"id":"OUTPUT","pathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","pathSuffix":"output","type":"Custom","createNew":true}],"constraints":{"maxWallClockTime":"P7D","maxRetryCount":0},"creationTime":"2017-09-30T22:35:43.61Z","provisioningState":"Succeeded","provisioningStateTransitionTime":"2017-09-30T22:35:45.408Z","executionState":"Queued","executionStateTransitionTime":"2017-09-30T22:35:44.798Z"}}'}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job2","name":"job2","type":"Microsoft.BatchAI/Jobs","properties":{"priority":0,"cluster":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster"},"nodeCount":1,"containerSettings":{"imageSourceRegistry":{"image":"ubuntu"}},"toolType":"custom","customToolkitSettings":{"commandLine":"echo
+        hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt"},"stdOutErrPathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","outputDirectories":[{"id":"OUTPUT","pathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","pathSuffix":"output","type":"custom","createNew":true}],"constraints":{"maxWallClockTime":"P7D"},"creationTime":"2017-12-21T18:16:51.214Z","provisioningState":"succeeded","provisioningStateTransitionTime":"2017-12-21T18:16:52.011Z","executionState":"queued","executionStateTransitionTime":"2017-12-21T18:16:51.214Z"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1134']
+      content-length: ['1114']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:36:01 GMT']
-      etag: ['"0x8D508539615B1A2"']
+      date: ['Thu, 21 Dec 2017 18:17:19 GMT']
+      etag: ['"0x8D5489F01ED9CD9"']
       expires: ['-1']
-      last-modified: ['Sat, 30 Sep 2017 22:35:43 GMT']
+      last-modified: ['Thu, 21 Dec 2017 18:16:51 GMT']
       pragma: [no-cache]
-      request-id: [de0bcf1a-c54d-449f-8f9d-ba9a42f6b276]
+      request-id: [de165461-00d3-4801-85a7-13f27e725cc5]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -736,25 +738,25 @@ interactions:
       CommandName: [batchai job show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job2?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job2","name":"job2","type":"Microsoft.BatchAI/Jobs","properties":{"priority":0,"cluster":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster"},"nodeCount":1,"containerSettings":{"imageSourceRegistry":{"image":"ubuntu"}},"toolType":"Custom","customToolkitSettings":{"commandLine":"echo
-        hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt"},"stdOutErrPathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","outputDirectories":[{"id":"OUTPUT","pathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","pathSuffix":"output","type":"Custom","createNew":true}],"constraints":{"maxWallClockTime":"P7D","maxRetryCount":0},"creationTime":"2017-09-30T22:35:43.61Z","provisioningState":"Succeeded","provisioningStateTransitionTime":"2017-09-30T22:35:45.408Z","executionState":"Succeeded","executionStateTransitionTime":"2017-09-30T22:40:19.58Z","executionInfo":{"startTime":"2017-09-30T22:35:45.07Z","endTime":"2017-09-30T22:41:29.011Z","exitCode":0}}}'}
+    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job2","name":"job2","type":"Microsoft.BatchAI/Jobs","properties":{"priority":0,"cluster":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster"},"nodeCount":1,"containerSettings":{"imageSourceRegistry":{"image":"ubuntu"}},"toolType":"custom","customToolkitSettings":{"commandLine":"echo
+        hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt"},"stdOutErrPathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","outputDirectories":[{"id":"OUTPUT","pathPrefix":"$AZ_BATCHAI_MOUNT_ROOT/azfiles","pathSuffix":"output","type":"custom","createNew":true}],"constraints":{"maxWallClockTime":"P7D"},"creationTime":"2017-12-21T18:16:51.214Z","provisioningState":"succeeded","provisioningStateTransitionTime":"2017-12-21T18:16:52.011Z","executionState":"succeeded","executionStateTransitionTime":"2017-12-21T18:20:25.149Z","executionInfo":{"startTime":"2017-12-21T18:19:58.942Z","endTime":"2017-12-21T18:20:25.149Z","exitCode":0}}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1242']
+      content-length: ['1224']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:51:03 GMT']
-      etag: ['"0x8D508539615B1A2"']
+      date: ['Thu, 21 Dec 2017 18:27:17 GMT']
+      etag: ['"0x8D5489F01ED9CD9"']
       expires: ['-1']
-      last-modified: ['Sat, 30 Sep 2017 22:35:43 GMT']
+      last-modified: ['Thu, 21 Dec 2017 18:16:51 GMT']
       pragma: [no-cache]
-      request-id: [360b8d9e-57ef-4b33-8c8b-99941aa118a4]
+      request-id: [022414cc-f38d-47fc-85c4-11e4efc8a6e0]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -770,23 +772,23 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters/cluster?api-version=2017-09-01-preview
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071?api-version=2017-09-01-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec?api-version=2017-09-01-preview']
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Sat, 30 Sep 2017 22:51:05 GMT']
+      date: ['Thu, 21 Dec 2017 18:27:25 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071?api-version=2017-09-01-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationstatuses/a619dec1-3669-4835-bb8a-33ebe0f103ec?api-version=2017-09-01-preview']
       pragma: [no-cache]
-      request-id: [2efda68c-92ff-4a43-85c1-ab6c1e4fd228]
+      request-id: [e0196b38-6d36-4bc4-9965-8626c3d1f3d6]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
@@ -800,22 +802,22 @@ interactions:
       CommandName: [batchai cluster delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071","name":"f9f643e3-8b4a-4e8c-b4d4-8350a6529071","status":"InProgress","startTime":"2017-09-30T22:51:05.545Z"}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec","name":"a619dec1-3669-4835-bb8a-33ebe0f103ec","status":"InProgress","startTime":"2017-12-21T18:27:25.598Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['294']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:51:21 GMT']
+      date: ['Thu, 21 Dec 2017 18:27:44 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [0b2cefbb-3267-4bc7-895b-30272a1c7f22]
+      request-id: [c949639d-702c-42c8-9bfb-7d4ec8c805a8]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -830,22 +832,22 @@ interactions:
       CommandName: [batchai cluster delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071","name":"f9f643e3-8b4a-4e8c-b4d4-8350a6529071","status":"InProgress","startTime":"2017-09-30T22:51:05.545Z"}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec","name":"a619dec1-3669-4835-bb8a-33ebe0f103ec","status":"InProgress","startTime":"2017-12-21T18:27:25.598Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['294']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:51:52 GMT']
+      date: ['Thu, 21 Dec 2017 18:28:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [ddb87dd9-f6c1-4f02-bb9c-69140e3fbd48]
+      request-id: [63d85353-d152-451a-98b5-129545252564]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -860,22 +862,22 @@ interactions:
       CommandName: [batchai cluster delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071","name":"f9f643e3-8b4a-4e8c-b4d4-8350a6529071","status":"InProgress","startTime":"2017-09-30T22:51:05.545Z"}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec","name":"a619dec1-3669-4835-bb8a-33ebe0f103ec","status":"InProgress","startTime":"2017-12-21T18:27:25.598Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['294']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:52:23 GMT']
+      date: ['Thu, 21 Dec 2017 18:28:49 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [f4959c55-66b0-46a4-a171-3e9e03ed5058]
+      request-id: [72a98581-5573-4558-be01-263f5e0a1b45]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -890,22 +892,22 @@ interactions:
       CommandName: [batchai cluster delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071","name":"f9f643e3-8b4a-4e8c-b4d4-8350a6529071","status":"InProgress","startTime":"2017-09-30T22:51:05.545Z"}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec","name":"a619dec1-3669-4835-bb8a-33ebe0f103ec","status":"InProgress","startTime":"2017-12-21T18:27:25.598Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['294']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:52:53 GMT']
+      date: ['Thu, 21 Dec 2017 18:29:26 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [7f754dd1-1511-4b27-9f1f-9eccb2b58fc8]
+      request-id: [b3446422-bbae-4adf-9dd2-ba0e7c70ea18]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -920,22 +922,22 @@ interactions:
       CommandName: [batchai cluster delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071","name":"f9f643e3-8b4a-4e8c-b4d4-8350a6529071","status":"InProgress","startTime":"2017-09-30T22:51:05.545Z"}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec","name":"a619dec1-3669-4835-bb8a-33ebe0f103ec","status":"InProgress","startTime":"2017-12-21T18:27:25.598Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['294']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:53:25 GMT']
+      date: ['Thu, 21 Dec 2017 18:30:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [5efb30e8-bd54-4f3a-b364-7bfa76b4f1ec]
+      request-id: [3e05db33-c87e-4dea-936b-70d6992aab16]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -950,22 +952,22 @@ interactions:
       CommandName: [batchai cluster delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071","name":"f9f643e3-8b4a-4e8c-b4d4-8350a6529071","status":"InProgress","startTime":"2017-09-30T22:51:05.545Z"}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec","name":"a619dec1-3669-4835-bb8a-33ebe0f103ec","status":"InProgress","startTime":"2017-12-21T18:27:25.598Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['294']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:53:55 GMT']
+      date: ['Thu, 21 Dec 2017 18:30:39 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [be7dadca-91a2-468c-8aa0-fe90ff058779]
+      request-id: [bd4bc68e-4f7a-4555-b112-1b84146bb15e]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -980,22 +982,22 @@ interactions:
       CommandName: [batchai cluster delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071","name":"f9f643e3-8b4a-4e8c-b4d4-8350a6529071","status":"InProgress","startTime":"2017-09-30T22:51:05.545Z"}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec","name":"a619dec1-3669-4835-bb8a-33ebe0f103ec","status":"InProgress","startTime":"2017-12-21T18:27:25.598Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['294']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:54:27 GMT']
+      date: ['Thu, 21 Dec 2017 18:31:13 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [21a96db4-a562-4f41-874c-9a5515b836a4]
+      request-id: [fc3d2246-cc15-422b-95a2-7b7810d1b0b3]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -1010,22 +1012,22 @@ interactions:
       CommandName: [batchai cluster delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071","name":"f9f643e3-8b4a-4e8c-b4d4-8350a6529071","status":"InProgress","startTime":"2017-09-30T22:51:05.545Z"}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec","name":"a619dec1-3669-4835-bb8a-33ebe0f103ec","status":"InProgress","startTime":"2017-12-21T18:27:25.598Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['294']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:54:58 GMT']
+      date: ['Thu, 21 Dec 2017 18:31:50 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [680cba95-66fd-4907-a988-5bc1c1ad8f9e]
+      request-id: [962ec258-ba2c-4b84-ba57-7a6f2e127fb9]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -1040,52 +1042,22 @@ interactions:
       CommandName: [batchai cluster delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071","name":"f9f643e3-8b4a-4e8c-b4d4-8350a6529071","status":"InProgress","startTime":"2017-09-30T22:51:05.545Z"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['294']
-      content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:55:28 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      request-id: [379c1a9f-a317-4d32-8adc-bb96d250a89a]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [batchai cluster delete]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071?api-version=2017-09-01-preview
-  response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/f9f643e3-8b4a-4e8c-b4d4-8350a6529071","name":"f9f643e3-8b4a-4e8c-b4d4-8350a6529071","status":"Succeeded","startTime":"2017-09-30T22:51:05.545Z","endTime":"2017-09-30T22:55:39.005Z","properties":{"resourceId":"8001b49e-e169-4ee6-a5ff-9c3ea5385053$clitest.rg000001$cluster"}}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/a619dec1-3669-4835-bb8a-33ebe0f103ec","name":"a619dec1-3669-4835-bb8a-33ebe0f103ec","status":"Succeeded","startTime":"2017-12-21T18:27:25.598Z","endTime":"2017-12-21T18:32:28.552Z","properties":{"resourceId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590$clitest.rg000001$cluster"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['481']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:56:00 GMT']
+      date: ['Thu, 21 Dec 2017 18:32:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [cfc2abef-633f-4a6a-9132-5af1968e030b]
+      request-id: [0d62172a-5791-480b-a030-19ec35724b73]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -1100,27 +1072,23 @@ interactions:
       CommandName: [batchai cluster list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/clusters?api-version=2017-09-01-preview
   response:
-    body: {string: '{"value":[]}'}
+    body: {string: !!python/unicode '{"value":[]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['12']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:56:02 GMT']
+      date: ['Thu, 21 Dec 2017 18:32:40 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [beff9702-46bb-499e-a33e-19c19913ef2f]
-      server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1131,23 +1099,23 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job?api-version=2017-09-01-preview
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/1dadd093-9dfb-4c4b-a84a-41afde25efb0?api-version=2017-09-01-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/2cb4a485-2f80-495e-ad44-b9ffeb86aa28?api-version=2017-09-01-preview']
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Sat, 30 Sep 2017 22:56:03 GMT']
+      date: ['Thu, 21 Dec 2017 18:33:16 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/1dadd093-9dfb-4c4b-a84a-41afde25efb0?api-version=2017-09-01-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationstatuses/2cb4a485-2f80-495e-ad44-b9ffeb86aa28?api-version=2017-09-01-preview']
       pragma: [no-cache]
-      request-id: [3a776487-23c4-472a-9250-f70a1b1678ca]
+      request-id: [b07d581f-765d-42a1-8a0f-89bc7aa9e74a]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
@@ -1161,22 +1129,22 @@ interactions:
       CommandName: [batchai job delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/1dadd093-9dfb-4c4b-a84a-41afde25efb0?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/2cb4a485-2f80-495e-ad44-b9ffeb86aa28?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/1dadd093-9dfb-4c4b-a84a-41afde25efb0","name":"1dadd093-9dfb-4c4b-a84a-41afde25efb0","status":"InProgress","startTime":"2017-09-30T22:56:03.88Z"}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/2cb4a485-2f80-495e-ad44-b9ffeb86aa28","name":"2cb4a485-2f80-495e-ad44-b9ffeb86aa28","status":"InProgress","startTime":"2017-12-21T18:33:14.69Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['293']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:56:19 GMT']
+      date: ['Thu, 21 Dec 2017 18:33:41 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [2ef69cfe-3976-45e3-bd31-d98877f104a6]
+      request-id: [670c0f62-1d76-4b80-9e3c-7b71d895928c]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -1191,22 +1159,22 @@ interactions:
       CommandName: [batchai job delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/1dadd093-9dfb-4c4b-a84a-41afde25efb0?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/2cb4a485-2f80-495e-ad44-b9ffeb86aa28?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/1dadd093-9dfb-4c4b-a84a-41afde25efb0","name":"1dadd093-9dfb-4c4b-a84a-41afde25efb0","status":"Succeeded","startTime":"2017-09-30T22:56:03.88Z","endTime":"2017-09-30T22:56:35.249Z","properties":{"resourceId":"8001b49e-e169-4ee6-a5ff-9c3ea5385053$clitest.rg000001$job"}}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/2cb4a485-2f80-495e-ad44-b9ffeb86aa28","name":"2cb4a485-2f80-495e-ad44-b9ffeb86aa28","status":"Succeeded","startTime":"2017-12-21T18:33:14.69Z","endTime":"2017-12-21T18:33:45.964Z","properties":{"resourceId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590$clitest.rg000001$job"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['476']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:56:51 GMT']
+      date: ['Thu, 21 Dec 2017 18:34:13 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [21d3a912-b6bf-4fac-a7c6-5840a132f5a9]
+      request-id: [84f149b6-c8c9-4b7e-803d-60f8ce7b375d]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -1222,27 +1190,27 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs/job2?api-version=2017-09-01-preview
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/b160fb44-5211-49c5-8a5b-c409b90bb78d?api-version=2017-09-01-preview']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/90ca7de2-de47-44a1-b6b2-4b9210dec879?api-version=2017-09-01-preview']
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Sat, 30 Sep 2017 22:56:52 GMT']
+      date: ['Thu, 21 Dec 2017 18:34:25 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/b160fb44-5211-49c5-8a5b-c409b90bb78d?api-version=2017-09-01-preview']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationstatuses/90ca7de2-de47-44a1-b6b2-4b9210dec879?api-version=2017-09-01-preview']
       pragma: [no-cache]
-      request-id: [6729b6f2-7258-4d34-87eb-3e2dcb9608e0]
+      request-id: [9c817272-413f-4b7b-ac91-01b67d7ef4e6]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -1252,22 +1220,22 @@ interactions:
       CommandName: [batchai job delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/b160fb44-5211-49c5-8a5b-c409b90bb78d?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/90ca7de2-de47-44a1-b6b2-4b9210dec879?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/b160fb44-5211-49c5-8a5b-c409b90bb78d","name":"b160fb44-5211-49c5-8a5b-c409b90bb78d","status":"InProgress","startTime":"2017-09-30T22:56:52.308Z"}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/90ca7de2-de47-44a1-b6b2-4b9210dec879","name":"90ca7de2-de47-44a1-b6b2-4b9210dec879","status":"InProgress","startTime":"2017-12-21T18:34:22.84Z"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['294']
+      content-length: ['293']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:57:08 GMT']
+      date: ['Thu, 21 Dec 2017 18:34:40 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [91d3f889-6937-4815-8e46-8f55ede99ec8]
+      request-id: [89f0556a-aecc-43cd-9628-a61e4ddd3e50]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -1282,22 +1250,22 @@ interactions:
       CommandName: [batchai job delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/b160fb44-5211-49c5-8a5b-c409b90bb78d?api-version=2017-09-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/90ca7de2-de47-44a1-b6b2-4b9210dec879?api-version=2017-09-01-preview
   response:
-    body: {string: '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/b160fb44-5211-49c5-8a5b-c409b90bb78d","name":"b160fb44-5211-49c5-8a5b-c409b90bb78d","status":"Succeeded","startTime":"2017-09-30T22:56:52.308Z","endTime":"2017-09-30T22:57:23.524Z","properties":{"resourceId":"8001b49e-e169-4ee6-a5ff-9c3ea5385053$clitest.rg000001$job2"}}'}
+    body: {string: !!python/unicode '{"id":"https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.BatchAI/locations/eastus/operationresults/90ca7de2-de47-44a1-b6b2-4b9210dec879","name":"90ca7de2-de47-44a1-b6b2-4b9210dec879","status":"Succeeded","startTime":"2017-12-21T18:34:22.84Z","endTime":"2017-12-21T18:34:53.433Z","properties":{"resourceId":"0b1f6471-1bf0-4dda-aec3-cb9272f09590$clitest.rg000001$job2"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['478']
+      content-length: ['477']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:57:39 GMT']
+      date: ['Thu, 21 Dec 2017 18:35:14 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [23957414-1743-445c-9da5-4332ca497636]
+      request-id: [f62a539e-937d-4590-8722-487834b5543a]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -1312,27 +1280,23 @@ interactions:
       CommandName: [batchai job list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 batchaiclient/0.2.0 Azure-SDK-For-Python
-          AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 batchaimanagementclient/0.2.0 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.BatchAI/jobs?api-version=2017-09-01-preview
   response:
-    body: {string: '{"value":[]}'}
+    body: {string: !!python/unicode '{"value":[]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['12']
       content-type: [application/json; charset=utf-8]
-      date: ['Sat, 30 Sep 2017 22:57:41 GMT']
+      date: ['Thu, 21 Dec 2017 18:35:26 GMT']
       expires: ['-1']
       pragma: [no-cache]
-      request-id: [4ebc1a66-334c-4078-8c68-6af24414e8c1]
-      server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1343,22 +1307,22 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Linux-4.10.0-35-generic-x86_64-with-Ubuntu-17.04-zesty)
-          requests/2.9.1 msrest/0.4.14 msrest_azure/0.4.14 resourcemanagementclient/1.2.0rc2
-          Azure-SDK-For-Python AZURECLI/2.0.16+dev]
+      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: ''}
+    body: {string: !!python/unicode ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Sat, 30 Sep 2017 22:57:42 GMT']
+      date: ['Thu, 21 Dec 2017 18:35:35 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc3WlRKSFdBTFlNSlhDU0FKTEg0RE1aUlZMVENVR01OMkNZN3w1NDdFMTRBNUM0NEZEQTg4LUVBU1RVUyIsImpvYkxvY2F0aW9uIjoiZWFzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdUUDJYTkNDN0s3Q1QzUk1WV1FOUURON0JJTElIQVU0MkFGUHwyOTMzODczOEJBMzQzRTVELUVBU1RVUyIsImpvYkxvY2F0aW9uIjoiZWFzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 202, message: Accepted}
 version: 1

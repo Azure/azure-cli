@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=no-self-use,too-many-arguments,line-too-long
-# pylint:disable=too-many-lines
+# pylint: disable=line-too-long,too-many-lines
 
 import os
 import time
-from azure.cli.core.util import CLIError, get_file_json, b64_to_hex
-import azure.cli.core.azlogging as azlogging
+
+from knack.log import get_logger
+from OpenSSL import crypto
 
 try:
     from urllib.parse import urlparse
@@ -18,14 +18,11 @@ except ImportError:
 
 from msrestazure.azure_exceptions import CloudError
 
-from azure.cli.core.commands import (LongRunningOperation)  # pylint:disable=ungrouped-imports
-
+from azure.cli.core.util import CLIError, get_file_json, b64_to_hex
+from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac import GraphRbacManagementClient
-from azure.keyvault import KeyVaultClient
-
-from OpenSSL import crypto
-
-from azure.mgmt.keyvault.models import (VaultProperties,  # pylint:disable=ungrouped-imports
+from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
+from azure.mgmt.keyvault.models import (VaultProperties,
                                         Sku as KeyVaultSku,
                                         AccessPolicyEntry,
                                         Permissions,
@@ -33,7 +30,6 @@ from azure.mgmt.keyvault.models import (VaultProperties,  # pylint:disable=ungro
                                         KeyPermissions,
                                         SecretPermissions,
                                         SkuName as KeyVaultSkuName)
-
 from azure.keyvault.models import (CertificateAttributes,
                                    CertificatePolicy,
                                    ActionType,
@@ -45,7 +41,6 @@ from azure.keyvault.models import (CertificateAttributes,
                                    X509CertificateProperties,
                                    Trigger,
                                    Action)
-
 from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              ClientCertificateThumbprint,
                                              ClientCertificateCommonName,
@@ -53,7 +48,6 @@ from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              SettingsParameterDescription,
                                              NodeTypeDescription,
                                              EndpointRangeDescription)
-
 from azure.mgmt.network.models import (PublicIPAddress,
                                        Subnet,
                                        SubResource as NetworkSubResource,
@@ -64,7 +58,6 @@ from azure.mgmt.network.models import (PublicIPAddress,
                                        FrontendIPConfiguration,
                                        BackendAddressPool,
                                        LoadBalancingRule)
-
 from azure.mgmt.compute.models import (VaultCertificate,
                                        Sku as ComputeSku,
                                        UpgradePolicy,
@@ -82,8 +75,7 @@ from azure.mgmt.compute.models import (VaultCertificate,
                                        VirtualMachineScaleSetNetworkProfile,
                                        SubResource,
                                        UpgradeMode)
-
-from azure.mgmt.storage.models import (StorageAccountCreateParameters)
+from azure.mgmt.storage.models import StorageAccountCreateParameters
 
 from ._client_factory import (resource_client_factory,
                               keyvault_client_factory,
@@ -91,7 +83,7 @@ from ._client_factory import (resource_client_factory,
                               storage_client_factory,
                               network_client_factory)
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 DEFAULT_ADMIN_USER_NAME = "adminuser"
 DEFAULT_SKU = "Standard_D2_V2"
@@ -133,7 +125,8 @@ def list_cluster(client, resource_group_name=None):
 
 
 # pylint:disable=too-many-locals, too-many-statements, too-many-boolean-expressions, too-many-branches
-def new_cluster(client,
+def new_cluster(cmd,
+                client,
                 resource_group_name,
                 location,
                 certificate_subject_name=None,
@@ -151,6 +144,7 @@ def new_cluster(client,
                 cluster_size=None,
                 vm_sku=None,
                 vm_os=None):
+    cli_ctx = cmd.cli_ctx
     if certificate_subject_name is None and certificate_file is None and secret_identifier is None:
         raise CLIError(
             '\'--certificate-subject-name\', \'--certificate-file\', \'--secret-identifier\', one of them must be specified')
@@ -182,9 +176,9 @@ def new_cluster(client,
     if vm_user_name is None:
         vm_user_name = DEFAULT_ADMIN_USER_NAME
 
-    rg = _get_resource_group_name(resource_group_name)
+    rg = _get_resource_group_name(cli_ctx, resource_group_name)
     if rg is None:
-        _create_resource_group_name(resource_group_name, location)
+        _create_resource_group_name(cli_ctx, resource_group_name, location)
 
     if vault_name is None:
         vault_name = resource_group_name
@@ -201,7 +195,7 @@ def new_cluster(client,
         cluster_name = resource_group_name
 
     if certificate_file:
-        filename, file_extension = os.path.splitext(certificate_file)   # pylint: disable=unused-variable
+        _, file_extension = os.path.splitext(certificate_file)
         if file_extension is None or file_extension.lower() != '.pfx'.lower():
             raise CLIError('\'--certificate_file\' should be a valid pfx file')
 
@@ -216,7 +210,8 @@ def new_cluster(client,
     if parameter_file is None:
         vm_os = os_dic[vm_os]
         reliability_level = _get_reliability_level(cluster_size)
-        result = _create_certificate(resource_group_name,
+        result = _create_certificate(cli_ctx,
+                                     resource_group_name,
                                      certificate_file,
                                      certificate_password,
                                      vault_name,
@@ -247,7 +242,8 @@ def new_cluster(client,
                                                           os_type=vm_os,
                                                           linux=linux)
     else:
-        parameters, output_file = _set_parameters_for_customize_template(resource_group_name,
+        parameters, output_file = _set_parameters_for_customize_template(cli_ctx,
+                                                                         resource_group_name,
                                                                          certificate_file,
                                                                          certificate_password,
                                                                          vault_name,
@@ -264,12 +260,13 @@ def new_cluster(client,
 
     logger.info("Validating the deployment")
     validate_result = _deploy_arm_template_core(
-        resource_group_name, template, parameters, deployment_name, 'incremental', True)
+        cli_ctx, resource_group_name, template, parameters, deployment_name, 'incremental', True)
     if validate_result.error is not None:
-        raise CLIError("Template validates error \n'{}'".format(
-            validate_result.error))
+        errors_detailed = _build_detailed_error(validate_result.error, [])
+        errors_detailed.insert(0, "Error validating template. See below for more information.")
+        raise CLIError('\n'.join(errors_detailed))
     logger.info("Deployment is valid, and begin to deploy")
-    _deploy_arm_template_core(resource_group_name, template,
+    _deploy_arm_template_core(cli_ctx, resource_group_name, template,
                               parameters, deployment_name, 'incremental', False)
 
     output_dict = {}
@@ -283,7 +280,21 @@ def new_cluster(client,
     return output_dict
 
 
-def add_app_cert(client,
+def _build_detailed_error(top_error, output_list):
+    if output_list:
+        output_list.append(' Inner Error - Code: "{}" Message: "{}"'.format(top_error.code, top_error.message))
+    else:
+        output_list.append('Error - Code: "{}" Message: "{}"'.format(top_error.code, top_error.message))
+
+    if top_error.details:
+        for error in top_error.details:
+            _build_detailed_error(error, output_list)
+
+    return output_list
+
+
+def add_app_cert(cmd,
+                 client,
                  resource_group_name,
                  cluster_name,
                  certificate_file=None,
@@ -293,7 +304,9 @@ def add_app_cert(client,
                  certificate_output_folder=None,
                  certificate_subject_name=None,
                  secret_identifier=None):
-    result = _create_certificate(resource_group_name,
+    cli_ctx = cmd.cli_ctx
+    result = _create_certificate(cli_ctx,
+                                 resource_group_name,
                                  certificate_file,
                                  certificate_password,
                                  vault_name,
@@ -302,7 +315,7 @@ def add_app_cert(client,
                                  certificate_subject_name,
                                  secret_identifier)
 
-    _add_cert_to_all_vmss(resource_group_name, result[0], result[1])
+    _add_cert_to_all_vmss(cli_ctx, resource_group_name, result[0], result[1])
     return client.get(resource_group_name, cluster_name)
 
 
@@ -448,7 +461,8 @@ def remove_client_cert(client,
     return client.update(resource_group_name, cluster_name, patch_request)
 
 
-def add_cluster_cert(client,
+def add_cluster_cert(cmd,
+                     client,
                      resource_group_name,
                      cluster_name,
                      certificate_file=None,
@@ -458,11 +472,13 @@ def add_cluster_cert(client,
                      certificate_output_folder=None,
                      certificate_subject_name=None,
                      secret_identifier=None):
+    cli_ctx = cmd.cli_ctx
     cluster = client.get(resource_group_name, cluster_name)
     if cluster.certificate is None:
         raise CLIError("Unsecure cluster is not allowed to add certificate")
 
-    result = _create_certificate(resource_group_name,
+    result = _create_certificate(cli_ctx,
+                                 resource_group_name,
                                  certificate_file,
                                  certificate_password,
                                  vault_name,
@@ -475,7 +491,7 @@ def add_cluster_cert(client,
     secret_url = result[1]
     thumbprint = result[2]
 
-    compute_client = compute_client_factory()
+    compute_client = compute_client_factory(cli_ctx)
     primary_node_type = [
         n for n in cluster.node_types if n.is_primary is True][0]
     vmss_name = primary_node_type.name
@@ -490,7 +506,7 @@ def add_cluster_cert(client,
     seconday_setting = json.loads(
         '{{"thumbprint":"{0}","x509StoreName":"{1}"}}'.format(thumbprint, 'my'))
     fabric_ext[0].settings["certificateSecondary"] = seconday_setting
-    _add_cert_to_vmss(vmss, resource_group_name, vault_id, secret_url)
+    _add_cert_to_vmss(cli_ctx, vmss, resource_group_name, vault_id, secret_url)
 
     patch_request = ClusterUpdateParameters(certificate=cluster.certificate)
     patch_request.certificate.thumbprint_secondary = thumbprint
@@ -516,11 +532,12 @@ def remove_cluster_cert(client, resource_group_name, cluster_name, thumbprint):
     return client.update(resource_group_name, cluster_name, patch_request)
 
 
-def add_cluster_node(client, resource_group_name, cluster_name, node_type, number_of_nodes_to_add):
+def add_cluster_node(cmd, client, resource_group_name, cluster_name, node_type, number_of_nodes_to_add):
+    cli_ctx = cmd.cli_ctx
     number_of_nodes_to_add = int(number_of_nodes_to_add)
     if number_of_nodes_to_add <= 0:
         raise CLIError("--number-of-nodes-to-add must be greater than 0")
-    compute_client = compute_client_factory()
+    compute_client = compute_client_factory(cli_ctx)
     cluster = client.get(resource_group_name, cluster_name)
     node_types = [n for n in cluster.node_types if n.name.lower() == node_type.lower()]
     if node_types is None:
@@ -532,18 +549,19 @@ def add_cluster_node(client, resource_group_name, cluster_name, node_type, numbe
     vmss.sku.capacity = vmss.sku.capacity + number_of_nodes_to_add
     vmss_poll = compute_client.virtual_machine_scale_sets.create_or_update(
         resource_group_name, vmss.name, vmss)
-    LongRunningOperation()(vmss_poll)
+    LongRunningOperation(cli_ctx)(vmss_poll)
     node_type.vm_instance_count = vmss.sku.capacity
 
     patch_request = ClusterUpdateParameters(node_types=cluster.node_types)
     return client.update(resource_group_name, cluster_name, patch_request)
 
 
-def remove_cluster_node(client, resource_group_name, cluster_name, node_type, number_of_nodes_to_remove):
+def remove_cluster_node(cmd, client, resource_group_name, cluster_name, node_type, number_of_nodes_to_remove):
+    cli_ctx = cmd.cli_ctx
     number_of_nodes_to_remove = int(number_of_nodes_to_remove)
     if number_of_nodes_to_remove <= 0:
         raise CLIError("--number-of-nodes-to-remove must be greater than 0")
-    compute_client = compute_client_factory()
+    compute_client = compute_client_factory(cli_ctx)
     cluster = client.get(resource_group_name, cluster_name)
     node_types = [n for n in cluster.node_types if n.name.lower() == node_type.lower()]
     if node_types is None:
@@ -562,20 +580,21 @@ def remove_cluster_node(client, resource_group_name, cluster_name, node_type, nu
                 reliability_level))
     vmss_poll = compute_client.virtual_machine_scale_sets.create_or_update(
         resource_group_name, vmss.name, vmss)
-    LongRunningOperation()(vmss_poll)
+    LongRunningOperation(cli_ctx)(vmss_poll)
     node_type.vm_instance_count = vmss.sku.capacity
 
     patch_request = ClusterUpdateParameters(node_types=cluster.node_types)
     return client.update(resource_group_name, cluster_name, patch_request)
 
 
-def update_cluster_durability(client, resource_group_name, cluster_name, node_type, durability_level):
+def update_cluster_durability(cmd, client, resource_group_name, cluster_name, node_type, durability_level):
+    cli_ctx = cmd.cli_ctx
     cluster = client.get(resource_group_name, cluster_name)
     node_types = [n for n in cluster.node_types if n.name.lower() == node_type.lower()]
     if node_types is None:
         raise CLIError("Failed to find the node type in the cluster")
 
-    compute_client = compute_client_factory()
+    compute_client = compute_client_factory(cli_ctx)
     vmss = compute_client.virtual_machine_scale_sets.get(
         resource_group_name, node_type)
     fabric_exts = [ext for ext in vmss.virtual_machine_profile.extension_profile.extensions
@@ -596,11 +615,11 @@ def update_cluster_durability(client, resource_group_name, cluster_name, node_ty
     update_cluster_poll = client.update(
         resource_group_name, cluster_name, patch_request)
 
-    def wait(poller):
-        return LongRunningOperation()(poller)
+    def wait(ctx, poller):
+        return LongRunningOperation(ctx)(poller)
     import threading
-    t1 = threading.Thread(target=wait, args=[vmss_poll])
-    t2 = threading.Thread(target=wait, args=[update_cluster_poll])
+    t1 = threading.Thread(target=wait, args=[cli_ctx, vmss_poll])
+    t2 = threading.Thread(target=wait, args=[cli_ctx, update_cluster_poll])
     t1.start()
     t2.start()
     t1.join()
@@ -699,10 +718,12 @@ def remove_cluster_setting(client,
     return client.update(resource_group_name, cluster_name, patch_request)
 
 
-def update_cluster_reliability_level(client,
+def update_cluster_reliability_level(cmd,
+                                     client,
                                      resource_group_name,
                                      cluster_name, reliability_level,
                                      auto_add_node=False):
+    cli_ctx = cmd.cli_ctx
     reliability_level = reliability_level.lower()
     cluster = client.get(resource_group_name, cluster_name)
     instance_now = _get_target_instance(cluster.reliability_level)
@@ -711,7 +732,7 @@ def update_cluster_reliability_level(client,
     if node_types is None:
         raise CLIError("Failed to find the node type in the cluster")
     node_type = node_types[0]
-    compute_client = compute_client_factory()
+    compute_client = compute_client_factory(cli_ctx)
     vmss = compute_client.virtual_machine_scale_sets.get(
         resource_group_name, node_type.name)
     if instance_target == instance_now:
@@ -724,7 +745,7 @@ def update_cluster_reliability_level(client,
             vmss.sku.capacity = instance_target
             vmss_poll = compute_client.virtual_machine_scale_sets.create_or_update(
                 resource_group_name, vmss.name, vmss)
-            LongRunningOperation()(vmss_poll)
+            LongRunningOperation(cli_ctx)(vmss_poll)
 
     node_type.vm_instance_count = vmss.sku.capacity
     patch_request = ClusterUpdateParameters(
@@ -732,7 +753,8 @@ def update_cluster_reliability_level(client,
     return client.update(resource_group_name, cluster_name, patch_request)
 
 
-def add_cluster_node_type(client,
+def add_cluster_node_type(cmd,
+                          client,
                           resource_group_name,
                           cluster_name,
                           node_type,
@@ -742,10 +764,11 @@ def add_cluster_node_type(client,
                           vm_sku=DEFAULT_SKU,
                           vm_tier=DEFAULT_TIER,
                           durability_level=DEFAULT_DURABILITY_LEVEL):
+    cli_ctx = cmd.cli_ctx
     if durability_level.lower() == 'gold':
         if vm_sku.lower() != 'Standard_D15_v2' or vm_sku.lower() != 'Standard_G5':
             raise CLIError(
-                'Only Standard_D15_v2 and Standard_G5 supports Gold durability,please specify -VmSku to right value')
+                'Only Standard_D15_v2 and Standard_G5 supports Gold durability, please specify --vm-sku to right value')
     cluster = client.get(resource_group_name, cluster_name)
     if any(n for n in cluster.node_types if n.name.lower() == node_type):
         raise CLIError("{} already exists in the cluster")
@@ -762,11 +785,11 @@ def add_cluster_node_type(client,
 
     patch_request = ClusterUpdateParameters(node_types=cluster.node_types)
     poller = client.update(resource_group_name, cluster_name, patch_request)
-    LongRunningOperation()(poller)
+    LongRunningOperation(cli_ctx)(poller)
 
     subnet_name = "subnet_{}".format(1)
-    network_client = network_client_factory()
-    location = _get_resource_group_name(resource_group_name).location
+    network_client = network_client_factory(cli_ctx)
+    location = _get_resource_group_name(cli_ctx, resource_group_name).location
     virtual_network = list(
         network_client.virtual_networks.list(resource_group_name))[0]
     subnets = list(network_client.subnets.list(
@@ -792,7 +815,7 @@ def add_cluster_node_type(client,
                                                      subnet_name,
                                                      Subnet(address_prefix=address_prefix))
 
-    subnet = LongRunningOperation()(poller)
+    subnet = LongRunningOperation(cli_ctx)(poller)
 
     public_address_name = 'LBIP-{}-{}{}'.format(
         cluster_name.lower(), node_type.lower(), index)
@@ -806,9 +829,9 @@ def add_cluster_node_type(client,
                                                                                  location=location,
                                                                                  dns_settings=PublicIPAddressDnsSettings(dns_lable)))
 
-    publicIp = LongRunningOperation()(poller)
+    publicIp = LongRunningOperation(cli_ctx)(poller)
     from azure.cli.core.commands.client_factory import get_subscription_id
-    subscription_id = get_subscription_id()
+    subscription_id = get_subscription_id(cli_ctx)
     new_load_balancer_id = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/loadBalancers/{}'.format(
         subscription_id, resource_group_name, lb_name)
     backend_address_poll_name = "LoadBalancerBEAddressPool"
@@ -883,7 +906,7 @@ def add_cluster_node_type(client,
 
     poller = network_client.load_balancers.create_or_update(
         resource_group_name, lb_name, new_load_balancer)
-    LongRunningOperation()(poller)
+    LongRunningOperation(cli_ctx)(poller)
 
     new_load_balancer = network_client.load_balancers.get(
         resource_group_name, lb_name)
@@ -900,7 +923,7 @@ def add_cluster_node_type(client,
                                                                                                                                                                                                     load_balancer_backend_address_pools=backend_address_pools,
                                                                                                                                                                                                     load_balancer_inbound_nat_pools=inbound_nat_pools,
                                                                                                                                                                                                     subnet=ApiEntityReference(id=subnet.id))])])
-    compute_client = compute_client_factory()
+    compute_client = compute_client_factory(cli_ctx)
     vmsses = list(compute_client.virtual_machine_scale_sets.list(
         resource_group_name))
     vmss = [vm for vm in vmsses
@@ -908,7 +931,7 @@ def add_cluster_node_type(client,
 
     vmss = vmss[0]
 
-    def create_vhd(resource_group_name, cluster_name, node_type, location):
+    def create_vhd(cli_ctx, resource_group_name, cluster_name, node_type, location):
         storage_name = '{}{}'.format(cluster_name.lower(), node_type.lower())
         name = ""
         vhds = []
@@ -919,18 +942,18 @@ def add_cluster_node_type(client,
                 break
         for i in range(1, 6):
             acc = create_storage_account(
-                resource_group_name.lower(), '{}{}'.format(storage_name, i), location)
+                cli_ctx, resource_group_name.lower(), '{}{}'.format(storage_name, i), location)
             vhds.append('{}{}'.format(acc[0].primary_endpoints.blob, 'vhd'))
         return vhds
 
-    def create_storage_account(resource_group_name, storage_name, location):
+    def create_storage_account(cli_ctx, resource_group_name, storage_name, location):
         from azure.mgmt.storage.models import Sku, SkuName
-        storage_client = storage_client_factory()
-        LongRunningOperation()(storage_client.storage_accounts.create(resource_group_name,
-                                                                      storage_name,
-                                                                      StorageAccountCreateParameters(Sku(SkuName.standard_lrs),
-                                                                                                     'storage',
-                                                                                                     location)))
+        storage_client = storage_client_factory(cli_ctx)
+        LongRunningOperation(cli_ctx)(storage_client.storage_accounts.create(resource_group_name,
+                                                                             storage_name,
+                                                                             StorageAccountCreateParameters(Sku(SkuName.standard_lrs),
+                                                                                                            'storage',
+                                                                                                            location)))
 
         acc_prop = storage_client.storage_accounts.get_properties(
             resource_group_name, storage_name)
@@ -954,7 +977,7 @@ def add_cluster_node_type(client,
                                                            os_disk=VirtualMachineScaleSetOSDisk(caching='ReadOnly',
                                                                                                 create_option='FromImage',
                                                                                                 name='vmssosdisk',
-                                                                                                vhd_containers=create_vhd(resource_group_name, cluster_name, node_type, location)))
+                                                                                                vhd_containers=create_vhd(cli_ctx, resource_group_name, cluster_name, node_type, location)))
 
     os_profile = VirtualMachineScaleSetOSProfile(computer_name_prefix=node_type,
                                                  admin_password=vm_password,
@@ -970,7 +993,7 @@ def add_cluster_node_type(client,
     if any(diagnostics_exts):
         diagnostics_ext = diagnostics_exts[0]
         diagnostics_account = diagnostics_ext.settings['StorageAccount']
-        storage_client = storage_client_factory()
+        storage_client = storage_client_factory(cli_ctx)
         list_results = storage_client.storage_accounts.list_keys(
             resource_group_name, diagnostics_account)
         import json
@@ -993,7 +1016,7 @@ def add_cluster_node_type(client,
     fabric_ext.settings['durabilityLevel'] = durability_level
     if fabric_ext.settings['nicPrefixOverride']:
         fabric_ext.settings['nicPrefixOverride'] = address_prefix
-    storage_client = storage_client_factory()
+    storage_client = storage_client_factory(cli_ctx)
     list_results = storage_client.storage_accounts.list_keys(
         resource_group_name, diagnostics_storage_name)
     import json
@@ -1023,7 +1046,7 @@ def add_cluster_node_type(client,
                                                                                                upgrade_policy=UpgradePolicy(
                                                                                                    mode=UpgradeMode.automatic),
                                                                                                virtual_machine_profile=virtual_machine_scale_set_profile))
-    LongRunningOperation()(poller)
+    LongRunningOperation(cli_ctx)(poller)
     return client.get(resource_group_name, cluster_name)
 
 
@@ -1067,7 +1090,8 @@ def _verify_cert_function_parameter(certificate_file=None,
                 raise CLIError("Invalid input")
 
 
-def _create_certificate(resource_group_name,
+def _create_certificate(cli_ctx,
+                        resource_group_name,
                         certificate_file=None,
                         certificate_password=None,
                         vault_name=None,
@@ -1082,7 +1106,7 @@ def _create_certificate(resource_group_name,
                                     secret_identifier)
 
     output_file = None
-    rg = _get_resource_group_name(resource_group_name)
+    rg = _get_resource_group_name(cli_ctx, resource_group_name)
     location = rg.location
 
     vault_id = None
@@ -1090,10 +1114,10 @@ def _create_certificate(resource_group_name,
     certificate_thumbprint = None
 
     if secret_identifier is not None:
-        vault = _get_vault_from_secret_identifier(secret_identifier)
+        vault = _get_vault_from_secret_identifier(cli_ctx, secret_identifier)
         vault_id = vault.id
         certificate_thumbprint = _get_thumbprint_from_secret_identifier(
-            vault, secret_identifier)
+            cli_ctx, vault, secret_identifier)
         secret_url = secret_identifier
 
     else:
@@ -1101,12 +1125,12 @@ def _create_certificate(resource_group_name,
             vault_name = _get_vault_name(resource_group_name, vault_name)
             logger.info("Creating key vault")
             vault = _create_keyvault(
-                vault_resource_group_name, vault_name, location, enabled_for_deployment=True)
+                cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True)
             vault_uri = vault.properties.vault_uri
             certificate_name = _get_certificate_name(resource_group_name)
             logger.info("Import certificate")
             result = import_certificate(
-                vault_uri, certificate_name, certificate_file, password=certificate_password)
+                cli_ctx, vault_uri, certificate_name, certificate_file, password=certificate_password)
             vault_id = vault.id
             secret_url = result.sid
             import base64
@@ -1121,7 +1145,7 @@ def _create_certificate(resource_group_name,
 
             logger.info("Creating key vault")
             vault = _create_keyvault(
-                vault_resource_group_name, vault_name, location, enabled_for_deployment=True)
+                cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True)
             logger.info("Wait for key vault ready")
             time.sleep(20)
             vault_uri = vault.properties.vault_uri
@@ -1130,7 +1154,7 @@ def _create_certificate(resource_group_name,
             policy = _get_default_policy(certificate_subject_name)
             logger.info("Creating self-signed certificate")
             result = _create_self_signed_key_vault_certificate(
-                vault_uri, certificate_name, policy, certificate_output_folder=certificate_output_folder)
+                cli_ctx, vault_uri, certificate_name, policy, certificate_output_folder=certificate_output_folder)
             kv_result = result[0]
             output_file = result[1]
             vault_id = vault.id
@@ -1142,8 +1166,9 @@ def _create_certificate(resource_group_name,
     return vault_id, secret_url, certificate_thumbprint, output_file
 
 
-def _add_cert_to_vmss(vmss, resource_group_name, vault_id, secret_url):
-    compute_client = compute_client_factory()
+# pylint: disable=inconsistent-return-statements
+def _add_cert_to_vmss(cli_ctx, vmss, resource_group_name, vault_id, secret_url):
+    compute_client = compute_client_factory(cli_ctx)
     secrets = [
         s for s in vmss.virtual_machine_profile.os_profile.secrets if s.source_vault.id == vault_id]
     if secrets is not None:
@@ -1168,18 +1193,18 @@ def _add_cert_to_vmss(vmss, resource_group_name, vault_id, secret_url):
 
     poller = compute_client.virtual_machine_scale_sets.create_or_update(
         resource_group_name, vmss.name, vmss)
-    return LongRunningOperation()(poller)
+    return LongRunningOperation(cli_ctx)(poller)
 
 
-def _add_cert_to_all_vmss(resource_group_name, vault_id, secret_url):
+def _add_cert_to_all_vmss(cli_ctx, resource_group_name, vault_id, secret_url):
     threads = []
     import threading
-    compute_client = compute_client_factory()
+    compute_client = compute_client_factory(cli_ctx)
     vmsses = list(compute_client.virtual_machine_scale_sets.list(
         resource_group_name))
     if vmsses is not None:
         for vmss in vmsses:
-            t = threading.Thread(target=_add_cert_to_vmss, args=[vmss, resource_group_name, vault_id, secret_url])
+            t = threading.Thread(target=_add_cert_to_vmss, args=[cli_ctx, vmss, resource_group_name, vault_id, secret_url])
             t.start()
             threads.append(t)
 
@@ -1187,9 +1212,9 @@ def _add_cert_to_all_vmss(resource_group_name, vault_id, secret_url):
         t.join()
 
 
-def _get_resource_group_name(resource_group_name):
+def _get_resource_group_name(cli_ctx, resource_group_name):
     try:
-        resouce_client = resource_client_factory().resource_groups
+        resouce_client = resource_client_factory(cli_ctx).resource_groups
         return resouce_client.get(resource_group_name)
     except Exception as ex:  # pylint: disable=broad-except
         error = getattr(ex, 'Azure Error', ex)
@@ -1199,13 +1224,14 @@ def _get_resource_group_name(resource_group_name):
             raise
 
 
-def _create_resource_group_name(rg_name, location, tags=None):
+def _create_resource_group_name(cli_ctx, rg_name, location, tags=None):
     from azure.mgmt.resource.resources.models import ResourceGroup
-    client = resource_client_factory().resource_groups
+    client = resource_client_factory(cli_ctx).resource_groups
     parameters = ResourceGroup(location=location, tags=tags)
     client.create_or_update(rg_name, parameters)
 
 
+# pylint: disable=inconsistent-return-statements
 def _get_target_instance(reliability_level):
     level = reliability_level.lower()
     if level == 'none':
@@ -1220,6 +1246,7 @@ def _get_target_instance(reliability_level):
         return 9
 
 
+# pylint: disable=inconsistent-return-statements
 def _get_reliability_level(cluster_size):
     size = int(cluster_size)
     if size > 0 and size < 3:
@@ -1262,7 +1289,8 @@ def _dict_to_fabric_settings(setting_dict):
     return settings
 
 
-def _deploy_arm_template_core(resource_group_name,
+def _deploy_arm_template_core(cli_ctx,
+                              resource_group_name,
                               template,
                               parameters,
                               deployment_name=None,
@@ -1272,12 +1300,12 @@ def _deploy_arm_template_core(resource_group_name,
     from azure.mgmt.resource.resources.models import DeploymentProperties
     properties = DeploymentProperties(
         template=template, template_link=None, parameters=parameters, mode=mode)
-    client = resource_client_factory()
+    client = resource_client_factory(cli_ctx)
     if validate_only:
         return client.deployments.validate(resource_group_name, deployment_name, properties, raw=no_wait)
 
     deploy_poll = client.deployments.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
-    result = LongRunningOperation()(deploy_poll)
+    result = LongRunningOperation(cli_ctx)(deploy_poll)
     return result
 
 
@@ -1287,7 +1315,6 @@ def _get_vault_name(resource_group_name, vault_name):
     return vault_name
 
 
-# pylint: disable=unused-argument
 def _get_certificate_name(resource_group_name):
     certificate_name = resource_group_name
     name = ""
@@ -1300,8 +1327,9 @@ def _get_certificate_name(resource_group_name):
     return "{}{}".format(certificate_name, suffix)
 
 
-def _get_vault_from_secret_identifier(secret_identifier):
-    key_vault_client = keyvault_client_factory().vaults
+# pylint: disable=inconsistent-return-statements
+def _get_vault_from_secret_identifier(cli_ctx, secret_identifier):
+    key_vault_client = keyvault_client_factory(cli_ctx).vaults
     vault_name = urlparse(secret_identifier).hostname.split('.')[0]
     vaults = key_vault_client.list()
     if vaults is not None:
@@ -1309,8 +1337,8 @@ def _get_vault_from_secret_identifier(secret_identifier):
         return vault[0]
 
 
-def _get_vault_uri_and_resource_group_name(vault):
-    client = keyvault_client_factory().vaults
+def _get_vault_uri_and_resource_group_name(cli_ctx, vault):
+    client = keyvault_client_factory(cli_ctx).vaults
     vault_resource_group_name = vault.id.split('/')[4]
     v = client.get(vault_resource_group_name, vault.name)
     vault_uri = v.properties.vault_uri
@@ -1324,15 +1352,15 @@ def _asn1_to_iso8601(asn1_date):
     return dateutil.parser.parse(asn1_date)
 
 
-def _get_thumbprint_from_secret_identifier(vault, secret_identifier):
+def _get_thumbprint_from_secret_identifier(cli_ctx, vault, secret_identifier):
     secret_uri = urlparse(secret_identifier)
     path = secret_uri.path
     segment = path.split('/')
     secret_name = segment[2]
     secret_version = segment[3]
-    vault_uri_group = _get_vault_uri_and_resource_group_name(vault)
+    vault_uri_group = _get_vault_uri_and_resource_group_name(cli_ctx, vault)
     vault_uri = vault_uri_group[0]
-    client_not_arm = _get_keyVault_not_arm_client()
+    client_not_arm = _get_keyVault_not_arm_client(cli_ctx)
     secret = client_not_arm.get_secret(vault_uri, secret_name, secret_version)
     cert_bytes = secret.value
     x509 = None
@@ -1359,7 +1387,7 @@ def _get_certificate(client, vault_base_url, certificate_name):
     return cert
 
 
-def import_certificate(vault_base_url, certificate_name, certificate_data,
+def import_certificate(cli_ctx, vault_base_url, certificate_name, certificate_data,
                        disabled=False, password=None, certificate_policy=None, tags=None):
     import binascii
     certificate_data = open(certificate_data, 'rb').read()
@@ -1392,7 +1420,8 @@ def import_certificate(vault_base_url, certificate_name, certificate_data,
                 certificate_data).decode('utf-8')
         except crypto.Error:
             raise CLIError(
-                'We could not parse the provided certificate as .pem or .pfx. Please verify the certificate with OpenSSL.')  # pylint: disable=line-too-long
+                'We could not parse the provided certificate as .pem or .pfx. '
+                'Please verify the certificate with OpenSSL.')
 
     not_before, not_after = None, None
 
@@ -1418,8 +1447,9 @@ def import_certificate(vault_base_url, certificate_name, certificate_data,
             secret_properties=SecretProperties(content_type=content_type))
 
     logger.info("Starting 'keyvault certificate import'")
-    client_not_arm = _get_keyVault_not_arm_client()
-    result = client_not_arm.import_certificate(vault_base_url=vault_base_url,
+    client_not_arm = _get_keyVault_not_arm_client(cli_ctx)
+    result = client_not_arm.import_certificate(cli_ctx=cli_ctx,
+                                               vault_base_url=vault_base_url,
                                                certificate_name=certificate_name,
                                                base64_encoded_certificate=certificate_data,
                                                certificate_attributes=cert_attrs,
@@ -1431,8 +1461,8 @@ def import_certificate(vault_base_url, certificate_name, certificate_data,
     return result
 
 
-def _download_secret(vault_base_url, secret_name, pem_path, pfx_path, encoding=None, secret_version=''):  # pylint: disable=unused-argument
-    client = _get_keyVault_not_arm_client()
+def _download_secret(cli_ctx, vault_base_url, secret_name, pem_path, pfx_path, secret_version=''):
+    client = _get_keyVault_not_arm_client(cli_ctx)
     secret = client.get_secret(vault_base_url, secret_name, secret_version)
     secret_value = secret.value
     if pem_path:
@@ -1469,7 +1499,7 @@ def _download_secret(vault_base_url, secret_name, pem_path, pfx_path, encoding=N
             raise ex
 
 
-def _get_default_policy(subject):  # pylint: disable=unused-argument
+def _get_default_policy(subject):
     if subject.lower().startswith('cn') is not True:
         subject = "CN={0}".format(subject)
     return _default_certificate_profile(subject)
@@ -1499,12 +1529,12 @@ def _default_certificate_profile(subject):
     return template
 
 
-def _create_self_signed_key_vault_certificate(vault_base_url, certificate_name, certificate_policy, certificate_output_folder=None, disabled=False, tags=None, validity=None):
+def _create_self_signed_key_vault_certificate(cli_ctx, vault_base_url, certificate_name, certificate_policy, certificate_output_folder=None, disabled=False, tags=None, validity=None):
     cert_attrs = CertificateAttributes(not disabled)
     logger.info("Starting long-running operation 'keyvault certificate create'")
     if validity is not None:
         certificate_policy['x509_certificate_properties']['validity_in_months'] = validity
-    client = _get_keyVault_not_arm_client()
+    client = _get_keyVault_not_arm_client(cli_ctx)
     client.create_certificate(
         vault_base_url, certificate_name, certificate_policy, cert_attrs, tags)
 
@@ -1514,7 +1544,7 @@ def _create_self_signed_key_vault_certificate(vault_base_url, certificate_name, 
             vault_base_url, certificate_name)
         if check.status != 'inProgress':
             logger.info("Long-running operation 'keyvault certificate create' finished with result %s.",
-                        check)  # pylint: disable=line-too-long
+                        check)
             break
         try:
             time.sleep(10)
@@ -1538,7 +1568,7 @@ def _create_self_signed_key_vault_certificate(vault_base_url, certificate_name, 
             certificate_output_folder, certificate_name + '.pem')
         pfx_output_folder = os.path.join(
             certificate_output_folder, certificate_name + '.pfx')
-        _download_secret(vault_base_url, certificate_name,
+        _download_secret(cli_ctx, vault_base_url, certificate_name,
                          pem_output_folder, pfx_output_folder)
     return client.get_certificate(vault_base_url, certificate_name, ''), pem_output_folder
 
@@ -1546,18 +1576,18 @@ def _create_self_signed_key_vault_certificate(vault_base_url, certificate_name, 
 _create_self_signed_key_vault_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
 
 
-def _get_keyVault_not_arm_client():
+def _get_keyVault_not_arm_client(cli_ctx):
     from azure.cli.core._profile import Profile
-    from azure.keyvault import KeyVaultAuthentication  # pylint: unused-variable, reimported
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile().get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
 
     client = KeyVaultClient(KeyVaultAuthentication(get_token))
     return client
 
 
-def _create_keyvault(resource_group_name,
+def _create_keyvault(cli_ctx,
+                     resource_group_name,
                      vault_name,
                      location=None,
                      sku=KeyVaultSkuName.standard.value,
@@ -1566,14 +1596,14 @@ def _create_keyvault(resource_group_name,
                      enabled_for_template_deployment=None,
                      no_self_perms=None, tags=None):
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
-    from azure.cli.core._profile import Profile, CLOUD
+    from azure.cli.core._profile import Profile
     from azure.graphrbac.models import GraphErrorException
-    profile = Profile()
+    profile = Profile(cli_ctx=cli_ctx)
     cred, _, tenant_id = profile.get_login_credentials(
-        resource=CLOUD.endpoints.active_directory_graph_resource_id)
+        resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     graph_client = GraphRbacManagementClient(cred,
                                              tenant_id,
-                                             base_url=CLOUD.endpoints.active_directory_graph_resource_id)  # pylint: disable=line-too-long
+                                             base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     subscription = profile.get_subscription()
     if no_self_perms:
         access_policies = []
@@ -1629,7 +1659,7 @@ def _create_keyvault(resource_group_name,
     parameters = VaultCreateOrUpdateParameters(location=location,
                                                tags=tags,
                                                properties=properties)
-    client = keyvault_client_factory().vaults
+    client = keyvault_client_factory(cli_ctx).vaults
     return client.create_or_update(resource_group_name=resource_group_name,
                                    vault_name=vault_name,
                                    parameters=parameters)
@@ -1638,6 +1668,7 @@ def _create_keyvault(resource_group_name,
 _create_keyvault.__doc__ = VaultProperties.__doc__
 
 
+# pylint: disable=inconsistent-return-statements
 def _get_current_user_object_id(graph_client):
     try:
         current_user = graph_client.objects.get_current_user()
@@ -1652,11 +1683,11 @@ def _get_object_id_by_spn(graph_client, spn):
         filter="servicePrincipalNames/any(c:c eq '{}')".format(spn)))
     if not accounts:
         logger.warning("Unable to find user with spn '%s'", spn)
-        return
+        return None
     if len(accounts) > 1:
         logger.warning("Multiple service principals found with spn '%s'. "
                        "You can avoid this by specifying object id.", spn)
-        return
+        return None
     return accounts[0].object_id
 
 
@@ -1665,11 +1696,11 @@ def _get_object_id_by_upn(graph_client, upn):
         filter="userPrincipalName eq '{}'".format(upn)))
     if not accounts:
         logger.warning("Unable to find user with upn '%s'", upn)
-        return
+        return None
     if len(accounts) > 1:
         logger.warning("Multiple users principals found with upn '%s'. "
                        "You can avoid this by specifying object id.", upn)
-        return
+        return None
     return accounts[0].object_id
 
 
@@ -1722,8 +1753,7 @@ def _set_parameters_for_default_template(cluster_location,
                                          vm_sku,
                                          os_type,
                                          linux):
-    parameter_file, template_file = _get_template_file_and_parameters_file(  # pylint: disable=redefined-outer-name, unused-variable
-        linux)
+    parameter_file, _ = _get_template_file_and_parameters_file(linux)
     parameters = get_file_json(parameter_file)['parameters']
     if parameters is None:
         raise CLIError('Invalid parameters file')
@@ -1742,7 +1772,8 @@ def _set_parameters_for_default_template(cluster_location,
     return parameters
 
 
-def _set_parameters_for_customize_template(resource_group_name,
+def _set_parameters_for_customize_template(cli_ctx,
+                                           resource_group_name,
                                            certificate_file,
                                            certificate_password,
                                            vault_name,
@@ -1751,12 +1782,14 @@ def _set_parameters_for_customize_template(resource_group_name,
                                            certificate_subject_name,
                                            secret_identifier,
                                            parameter_file):
+    cli_ctx = cli_ctx
     parameters = get_file_json(parameter_file)['parameters']
     if parameters is None:
         raise CLIError('Invalid parameters file')
     if SOURCE_VAULT_VALUE in parameters and CERTIFICATE_THUMBPRINT in parameters and CERTIFICATE_URL_VALUE in parameters:
         logger.info('Found primary certificate parameters in parameters file')
-        result = _create_certificate(resource_group_name,
+        result = _create_certificate(cli_ctx,
+                                     resource_group_name,
                                      certificate_file,
                                      certificate_password,
                                      vault_name,
@@ -1778,7 +1811,8 @@ def _set_parameters_for_customize_template(resource_group_name,
 
     if SEC_SOURCE_VAULT_VALUE in parameters and SEC_CERTIFICATE_THUMBPRINT in parameters and SEC_CERTIFICATE_URL_VALUE in parameters:
         logger.info('Found secondary certificate parameters in parameters file')
-        result = _create_certificate(resource_group_name,
+        result = _create_certificate(cli_ctx,
+                                     resource_group_name,
                                      certificate_file,
                                      certificate_password,
                                      vault_name,
@@ -1800,7 +1834,6 @@ def _set_parameters_for_customize_template(resource_group_name,
 
 
 def _modify_template(linux):
-    parameter_file, template_file = _get_template_file_and_parameters_file(  # pylint: disable=unused-variable
-        linux)
+    _, template_file = _get_template_file_and_parameters_file(linux)
     template = get_file_json(template_file)
     return template

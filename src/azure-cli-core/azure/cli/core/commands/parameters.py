@@ -7,25 +7,27 @@
 import argparse
 import platform
 
-from azure.cli.core.commands import \
-    (CliArgumentType, register_cli_argument)
+from knack.arguments import CLIArgumentType, CaseInsensitiveList
+from knack.log import get_logger
+from knack.util import CLIError
+
 from azure.cli.core.commands.validators import validate_tag, validate_tags
-from azure.cli.core.util import CLIError
 from azure.cli.core.commands.validators import generate_deployment_name
-from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
-import azure.cli.core.azlogging as azlogging
+from azure.cli.core.decorators import Completer
+from azure.cli.core.profiles import ResourceType
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 
-def get_subscription_locations():
+def get_subscription_locations(cli_ctx):
     from azure.cli.core.commands.client_factory import get_subscription_service_client
-    subscription_client, subscription_id = get_subscription_service_client()
+    subscription_client, subscription_id = get_subscription_service_client(cli_ctx)
     return list(subscription_client.subscriptions.list_locations(subscription_id))
 
 
-def get_location_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
-    result = get_subscription_locations()
+@Completer
+def get_location_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+    result = get_subscription_locations(cmd.cli_ctx)
     return [l.name for l in result]
 
 
@@ -34,104 +36,75 @@ def file_type(path):
     return os.path.expanduser(path)
 
 
-def location_name_type(name):
-    if ' ' in name:
-        # if display name is provided, attempt to convert to short form name
-        name = next((l.name for l in get_subscription_locations()
-                     if l.display_name.lower() == name.lower()), name)
-    return name
+def get_location_name_type(cli_ctx):
+    def location_name_type(name):
+        if ' ' in name:
+            # if display name is provided, attempt to convert to short form name
+            name = next((l.name for l in get_subscription_locations(cli_ctx)
+                         if l.display_name.lower() == name.lower()), name)
+        return name
+    return location_name_type
 
 
-def get_one_of_subscription_locations():
-    result = get_subscription_locations()
+def get_one_of_subscription_locations(cli_ctx):
+    result = get_subscription_locations(cli_ctx)
     if result:
         return next((r.name for r in result if r.name.lower() == 'westus'), result[0].name)
     else:
         raise CLIError('Current subscription does not have valid location list')
 
 
-def get_resource_groups():
+def get_resource_groups(cli_ctx):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
+    rcf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     return list(rcf.resource_groups.list())
 
 
-def get_resource_group_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
-    result = get_resource_groups()
+@Completer
+def get_resource_group_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+    result = get_resource_groups(cmd.cli_ctx)
     return [l.name for l in result]
 
 
-def get_resources_in_resource_group(resource_group_name, resource_type=None):
+def get_resources_in_resource_group(cli_ctx, resource_group_name, resource_type=None):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
+    from azure.cli.core.profiles import supported_api_version
+
+    rcf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     filter_str = "resourceType eq '{}'".format(resource_type) if resource_type else None
-    if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, max_api='2016-09-01'):
+    if supported_api_version(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, max_api='2016-09-01'):
         return list(rcf.resource_groups.list_resources(resource_group_name, filter=filter_str))
     return list(rcf.resources.list_by_resource_group(resource_group_name, filter=filter_str))
 
 
-def get_resources_in_subscription(resource_type=None):
+def get_resources_in_subscription(cli_ctx, resource_type=None):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    rcf = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
+    rcf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     filter_str = "resourceType eq '{}'".format(resource_type) if resource_type else None
     return list(rcf.resources.list(filter=filter_str))
 
 
 def get_resource_name_completion_list(resource_type=None):
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        if getattr(parsed_args, 'resource_group_name', None):
-            rg = parsed_args.resource_group_name
-            return [r.name for r in get_resources_in_resource_group(rg, resource_type=resource_type)]
-        return [r.name for r in get_resources_in_subscription(resource_type=resource_type)]
+
+    @Completer
+    def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
+        rg = getattr(namespace, 'resource_group_name', None)
+        if rg:
+            return [r.name for r in get_resources_in_resource_group(cmd.cli_ctx, rg, resource_type=resource_type)]
+        return [r.name for r in get_resources_in_subscription(cmd.cli_ctx, resource_type)]
+
     return completer
 
 
 def get_generic_completion_list(generic_list):
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
+
+    @Completer
+    def completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
         return generic_list
     return completer
 
 
-class CaseInsensitiveList(list):  # pylint: disable=too-few-public-methods
-
-    def __contains__(self, other):
-        return next((True for x in self if other.lower() == x.lower()), False)
-
-
-def model_choice_list(resource_type, model_name):
-    model = get_sdk(resource_type, model_name, mod='models')
-    return enum_choice_list(model) if model else {}
-
-
-def enum_choice_list(data):
-    """ Creates the argparse choices and type kwargs for a supplied enum type or list of strings. """
-    # transform enum types, otherwise assume list of string choices
-    if not data:
-        return {}
-    try:
-        choices = [x.value for x in data]
-    except AttributeError:
-        choices = data
-
-    def _type(value):
-        return next((x for x in choices if x.lower() == value.lower()), value) if value else value
-    params = {
-        'choices': CaseInsensitiveList(choices),
-        'type': _type
-    }
-    return params
-
-
-def enum_default(resource_type, enum_name, enum_val_name):
-    mod = get_sdk(resource_type, enum_name, mod='models')
-    try:
-        return getattr(mod, enum_val_name).value
-    except AttributeError:
-        logger.debug('Skipping param default %s.%s for %s.', enum_name, enum_val_name, resource_type)
-        return None
-
-
-def three_state_flag(positive_label='true', negative_label='false', invert=False, return_label=False):
+def get_three_state_flag(positive_label='true', negative_label='false', invert=False, return_label=False):
     """ Creates a flag-like argument that can also accept positive/negative values. This allows
     consistency between create commands that typically use flags and update commands that require
     positive/negative values without introducing breaking changes. Flag-like behavior always
@@ -162,42 +135,73 @@ def three_state_flag(positive_label='true', negative_label='false', invert=False
         'nargs': '?',
         'action': ThreeStateAction
     }
-    return params
+    return CLIArgumentType(**params)
 
 
-class IgnoreAction(argparse.Action):  # pylint: disable=too-few-public-methods
+def get_enum_type(data, default=None):
+    """ Creates the argparse choices and type kwargs for a supplied enum type or list of strings. """
+    if not data:
+        return None
 
-    def __call__(self, parser, namespace, values, option_string=None):
-        raise argparse.ArgumentError(None, 'unrecognized argument: {} {}'.format(
-            option_string, values or ''))
+    # transform enum types, otherwise assume list of string choices
+    try:
+        choices = [x.value for x in data]
+    except AttributeError:
+        choices = data
+
+    # pylint: disable=too-few-public-methods
+    class DefaultAction(argparse.Action):
+
+        def __call__(self, parser, args, values, option_string=None):
+
+            def _get_value(val):
+                return next((x for x in self.choices if x.lower() == val.lower()), val)
+
+            if isinstance(values, list):
+                values = [_get_value(v) for v in values]
+            else:
+                values = _get_value(values)
+            setattr(args, self.dest, values)
+
+    def _type(value):
+        return next((x for x in choices if x.lower() == value.lower()), value) if value else value
+
+    default_value = None
+    if default:
+        default_value = next((x for x in choices if x.lower() == default.lower()), None)
+        if not default_value:
+            raise CLIError("Command authoring exception: urecognized default '{}' from choices '{}'"
+                           .format(default, choices))
+        arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), action=DefaultAction, default=default_value)
+    else:
+        arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), action=DefaultAction)
+    return arg_type
 
 
 # GLOBAL ARGUMENT DEFINITIONS
 
-ignore_type = CliArgumentType(
-    help=argparse.SUPPRESS,
-    nargs='?',
-    action=IgnoreAction,
-    required=False)
-
-resource_group_name_type = CliArgumentType(
+resource_group_name_type = CLIArgumentType(
     options_list=('--resource-group', '-g'),
     completer=get_resource_group_completion_list,
     id_part='resource_group',
     help="Name of resource group. You can configure the default group using `az configure --defaults group=<name>`",
     configured_default='group')
 
-name_type = CliArgumentType(options_list=('--name', '-n'), help='the primary resource name')
+name_type = CLIArgumentType(options_list=('--name', '-n'), help='the primary resource name')
 
-location_type = CliArgumentType(
-    options_list=('--location', '-l'),
-    completer=get_location_completion_list,
-    type=location_name_type,
-    help="Location. You can configure the default location using `az configure --defaults location=<location>`",
-    metavar='LOCATION',
-    configured_default='location')
 
-deployment_name_type = CliArgumentType(
+def get_location_type(cli_ctx):
+    location_type = CLIArgumentType(
+        options_list=('--location', '-l'),
+        completer=get_location_completion_list,
+        type=get_location_name_type(cli_ctx),
+        help="Location. You can configure the default location using `az configure --defaults location=<location>`",
+        metavar='LOCATION',
+        configured_default='location')
+    return location_type
+
+
+deployment_name_type = CLIArgumentType(
     help=argparse.SUPPRESS,
     required=False,
     validator=generate_deployment_name
@@ -206,39 +210,35 @@ deployment_name_type = CliArgumentType(
 quotes = '""' if platform.system() == 'Windows' else "''"
 quote_text = 'Use {} to clear existing tags.'.format(quotes)
 
-tags_type = CliArgumentType(
+tags_type = CLIArgumentType(
     validator=validate_tags,
     help="space separated tags in 'key[=value]' format. {}".format(quote_text),
     nargs='*'
 )
 
-tag_type = CliArgumentType(
+tag_type = CLIArgumentType(
     type=validate_tag,
     help="a single tag in 'key[=value]' format. {}".format(quote_text),
     nargs='?',
     const=''
 )
 
-no_wait_type = CliArgumentType(
+no_wait_type = CLIArgumentType(
     options_list=('--no-wait', ),
     help='do not wait for the long-running operation to finish',
     action='store_true'
 )
 
-zones_type = CliArgumentType(
+zones_type = CLIArgumentType(
     options_list=['--zones', '-z'],
     nargs='+',
     help='Space separated list of availability zones into which to provision the resource.',
     choices=['1', '2', '3']
 )
 
-zone_type = CliArgumentType(
+zone_type = CLIArgumentType(
     options_list=['--zone', '-z'],
     help='Availability zone into which to provision the resource.',
     choices=['1', '2', '3'],
     nargs=1
 )
-
-register_cli_argument('', 'resource_group_name', resource_group_name_type)
-register_cli_argument('', 'location', location_type)
-register_cli_argument('', 'deployment_name', deployment_name_type)

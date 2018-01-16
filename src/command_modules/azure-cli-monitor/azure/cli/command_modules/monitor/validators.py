@@ -3,12 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
+
+from msrestazure.tools import is_valid_resource_id, resource_id
 
 
 def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False):
-    def _validator(namespace):
+    def _validator(cmd, namespace):
         name_or_id = getattr(namespace, dest)
         rg = namespace.resource_group_name
         res_ns = namespace.namespace
@@ -33,7 +34,7 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
 
                 setattr(namespace, dest,
                         '/subscriptions/{}/resourceGroups/{}/providers/{}/{}{}/{}'.format(
-                            get_subscription_id(), rg, res_ns, parent + '/' if parent else '',
+                            get_subscription_id(cmd.cli_ctx), rg, res_ns, parent + '/' if parent else '',
                             res_type, name_or_id))
 
         del namespace.namespace
@@ -41,58 +42,43 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
         del namespace.resource_type
         if not preserve_resource_group_parameter:
             del namespace.resource_group_name
+
     return _validator
 
 
-def validate_diagnostic_settings(namespace):
+def validate_diagnostic_settings(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    resource_group_error = "--resource-group is required when name is provided for "\
-                           "storage account or workspace or service bus namespace and rule. "
+    resource_group_error = "--resource-group is required when name is provided for storage account or workspace or " \
+                           "service bus namespace and rule. "
 
-    if namespace.namespace or namespace.rule_name:
-        if namespace.namespace is None:
-            raise CLIError(resource_group_error)
-        if namespace.rule_name is None:
-            raise CLIError(resource_group_error)
-        if namespace.resource_group is None:
-            raise CLIError(resource_group_error)
-
-        if not is_valid_resource_id(namespace.namespace):
-            namespace.service_bus_rule_id = resource_id(subscription=get_subscription_id(),
-                                                        resource_group=namespace.resource_group,
-                                                        namespace='microsoft.ServiceBus',
-                                                        type='namespaces',
-                                                        name=namespace.namespace,
-                                                        child_type_1='AuthorizationRules',
-                                                        child_name_1=namespace.rule_name)
-        else:
-            resource_dict = parse_resource_id(namespace.namespace)
-            namespace.service_bus_rule_id = resource_id(subscription=resource_dict['subscription'],
-                                                        resource_group=resource_dict['resource_group'],
-                                                        namespace=resource_dict['namespace'],
-                                                        type=resource_dict['type'],
-                                                        name=resource_dict['name'],
-                                                        child_type_1='AuthorizationRules',
-                                                        child_name_1=namespace.rule_name)
+    get_target_resource_validator('resource_uri', required=True, preserve_resource_group_parameter=True)(cmd, namespace)
 
     if namespace.storage_account and not is_valid_resource_id(namespace.storage_account):
-        if namespace.resource_group is None:
+        if namespace.resource_group_name is None:
             raise CLIError(resource_group_error)
-        namespace.storage_account = resource_id(subscription=get_subscription_id(),
-                                                resource_group=namespace.resource_group,
+        namespace.storage_account = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                                resource_group=namespace.resource_group_name,
                                                 namespace='microsoft.Storage',
                                                 type='storageAccounts',
                                                 name=namespace.storage_account)
 
     if namespace.workspace and not is_valid_resource_id(namespace.workspace):
-        if namespace.resource_group is None:
+        if namespace.resource_group_name is None:
             raise CLIError(resource_group_error)
-        namespace.workspace = resource_id(subscription=get_subscription_id(),
-                                          resource_group=namespace.resource_group,
+        namespace.workspace = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                          resource_group=namespace.resource_group_name,
                                           namespace='microsoft.OperationalInsights',
-                                          type='workspaces', name=namespace.workspace)
+                                          type='workspaces',
+                                          name=namespace.workspace)
 
-    _validate_tags(namespace)
+    if not namespace.storage_account and not namespace.workspace and not namespace.event_hub_name:
+        raise CLIError(
+            'One of the following parameters is expected: --storage-account, --event-hub-name, or --workspace.')
+
+    try:
+        del namespace.resource_group_name
+    except AttributeError:
+        pass
 
 
 def _validate_tags(namespace):
@@ -170,3 +156,19 @@ def process_metric_dimension(namespace):
         raise CLIError('usage: --dimension and --filter parameters are mutually exclusive.')
 
     ns['filter'] = ' and '.join("{} eq '*'".format(d) for d in dimensions)
+
+
+def process_webhook_prop(namespace):
+    if not isinstance(namespace.webhook_properties, list):
+        return
+
+    result = {}
+    for each in namespace.webhook_properties:
+        if each:
+            if '=' in each:
+                key, value = each.split('=', 1)
+            else:
+                key, value = each, ''
+            result[key] = value
+
+    namespace.webhook_properties = result

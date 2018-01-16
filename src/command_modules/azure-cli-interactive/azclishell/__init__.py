@@ -3,4 +3,4 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-__version__ = '0.3.5'
+__version__ = '0.3.13'

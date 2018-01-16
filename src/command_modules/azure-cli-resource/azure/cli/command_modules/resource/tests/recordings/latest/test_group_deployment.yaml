@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -8,9 +8,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment000001?api-version=2017-05-10
@@ -20,11 +20,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:10:36 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:03 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1178']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -34,9 +34,9 @@ interactions:
       CommandName: [network vnet create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment000001?api-version=2017-05-10
@@ -46,16 +46,16 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:10:36 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:04 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "westus", "tags": {}, "properties": {"addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "subnets": [{"name": "subnet1", "properties": {"addressPrefix":
-      "10.0.0.0/24"}}], "dhcpOptions": {}}}'
+    body: '{"tags": {}, "properties": {"dhcpOptions": {}, "subnets": [{"properties":
+      {"addressPrefix": "10.0.0.0/24"}, "name": "subnet1"}], "addressSpace": {"addressPrefixes":
+      ["10.0.0.0/16"]}}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -63,37 +63,37 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['205']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1\"\
-        ,\r\n  \"etag\": \"W/\\\"47dbd33c-cbf0-4b9f-b90f-e0bb8ec1e746\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"0b724643-d465-4625-bb36-db4e3b1b234b\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\"\
         ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Updating\",\r\n    \"resourceGuid\": \"47a48462-580e-4c8c-bf03-12c1b6445281\"\
+        \ \"Updating\",\r\n    \"resourceGuid\": \"6e256c4d-966f-4809-8791-2300705f3535\"\
         ,\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"\
         10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\"\
         : []\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        ,\r\n        \"etag\": \"W/\\\"47dbd33c-cbf0-4b9f-b90f-e0bb8ec1e746\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"0b724643-d465-4625-bb36-db4e3b1b234b\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"addressPrefix\": \"10.0.0.0/24\"\r\n        }\r\n      }\r\
         \n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\"\
         : false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/73ff596d-b16b-4795-807a-1d944f458d84?api-version=2017-11-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6148aecd-360d-47bd-9ed1-c347a8a1b4d0?api-version=2017-11-01']
       cache-control: [no-cache]
       content-length: ['1230']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:10:38 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:05 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1189']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -103,18 +103,18 @@ interactions:
       CommandName: [network vnet create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/73ff596d-b16b-4795-807a-1d944f458d84?api-version=2017-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6148aecd-360d-47bd-9ed1-c347a8a1b4d0?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['29']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:10:41 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -130,22 +130,22 @@ interactions:
       CommandName: [network vnet create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"name\": \"vnet1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1\"\
-        ,\r\n  \"etag\": \"W/\\\"28d3c57d-3792-4d15-b597-fdc62a4c3db6\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"de787544-f5e5-418f-b93d-eeb164b7a497\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\"\
         ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Succeeded\",\r\n    \"resourceGuid\": \"47a48462-580e-4c8c-bf03-12c1b6445281\"\
+        \ \"Succeeded\",\r\n    \"resourceGuid\": \"6e256c4d-966f-4809-8791-2300705f3535\"\
         ,\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"\
         10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\"\
         : []\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"subnet1\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
-        ,\r\n        \"etag\": \"W/\\\"28d3c57d-3792-4d15-b597-fdc62a4c3db6\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"de787544-f5e5-418f-b93d-eeb164b7a497\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
         ,\r\n          \"addressPrefix\": \"10.0.0.0/24\"\r\n        }\r\n      }\r\
         \n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\"\
@@ -154,8 +154,8 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1232']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:10:41 GMT']
-      etag: [W/"28d3c57d-3792-4d15-b597-fdc62a4c3db6"]
+      date: ['Tue, 19 Dec 2017 04:36:09 GMT']
+      etag: [W/"de787544-f5e5-418f-b93d-eeb164b7a497"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -164,21 +164,21 @@ interactions:
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"mode": "Incremental", "parameters": {"location": {"value":
-      "westus"}, "tags": {"value": {"key": "super=value"}}, "subnetId": {"value":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},
-      "backendAddressPools": {"value": [{"name": "bepool1"}, {"name": "bepool2"}]},
-      "name": {"value": "test-lb"}, "privateIPAllocationMethod": {"value": "Dynamic"}},
-      "template": {"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-      "resources": [{"location": "[parameters(\''location\'')]", "name": "[parameters(\''name\'')]",
-      "properties": {"frontendIPConfigurations": [{"name": "LoadBalancerFrontEnd",
-      "properties": {"subnet": {"id": "[parameters(\''subnetId\'')]"}, "privateIPAllocationMethod":
-      "[parameters(\''privateIPAllocationMethod\'')]"}}], "backendAddressPools": "[parameters(\''backendAddressPools\'')]"},
-      "type": "Microsoft.Network/loadBalancers", "apiVersion": "2016-03-30", "tags":
-      "[parameters(\''tags\'')]", "dependsOn": []}], "contentVersion": "1.0.0.0",
-      "parameters": {"location": {"type": "string"}, "subnetId": {"type": "string"},
-      "privateIPAllocationMethod": {"type": "string"}, "backendAddressPools": {"type":
-      "array"}, "tags": {"type": "object"}, "name": {"type": "string"}}}}}'''
+    body: 'b''{"properties": {"template": {"resources": [{"apiVersion": "2016-03-30",
+      "properties": {"backendAddressPools": "[parameters(\''backendAddressPools\'')]",
+      "frontendIPConfigurations": [{"name": "LoadBalancerFrontEnd", "properties":
+      {"privateIPAllocationMethod": "[parameters(\''privateIPAllocationMethod\'')]",
+      "subnet": {"id": "[parameters(\''subnetId\'')]"}}}]}, "location": "[parameters(\''location\'')]",
+      "tags": "[parameters(\''tags\'')]", "name": "[parameters(\''name\'')]", "dependsOn":
+      [], "type": "Microsoft.Network/loadBalancers"}], "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "parameters": {"backendAddressPools": {"type": "array"}, "subnetId": {"type":
+      "string"}, "privateIPAllocationMethod": {"type": "string"}, "tags": {"type":
+      "object"}, "name": {"type": "string"}, "location": {"type": "string"}}, "contentVersion":
+      "1.0.0.0"}, "parameters": {"backendAddressPools": {"value": [{"name": "bepool1"},
+      {"name": "bepool2"}]}, "subnetId": {"value": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},
+      "privateIPAllocationMethod": {"value": "Dynamic"}, "tags": {"value": {"key":
+      "super=value"}}, "name": {"value": "test-lb"}, "location": {"value": "westus"}},
+      "mode": "Incremental"}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -186,42 +186,42 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['1375']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/deployment_dry_run","name":"deployment_dry_run","properties":{"templateHash":"7638451064576703829","parameters":{"location":{"type":"String","value":"westus"},"subnetId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},"privateIPAllocationMethod":{"type":"String","value":"Dynamic"},"backendAddressPools":{"type":"Array","value":[{"name":"bepool1"},{"name":"bepool2"}]},"tags":{"type":"Object","value":{"key":"super=value"}},"name":{"type":"String","value":"test-lb"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-12-13T21:10:43.1731864Z","duration":"PT0S","correlationId":"a001658c-8a80-4a8c-9c86-6e0e1f65d09c","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"loadBalancers","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"apiVersion":"2016-03-30","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb","name":"test-lb","type":"Microsoft.Network/loadBalancers","location":"westus","tags":{"key":"super=value"},"properties":{"frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","properties":{"subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},"privateIPAllocationMethod":"Dynamic"}}],"backendAddressPools":[{"name":"bepool1"},{"name":"bepool2"}]}}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/deployment_dry_run","name":"deployment_dry_run","properties":{"templateHash":"3117808844699724179","parameters":{"backendAddressPools":{"type":"Array","value":[{"name":"bepool1"},{"name":"bepool2"}]},"subnetId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},"privateIPAllocationMethod":{"type":"String","value":"Dynamic"},"tags":{"type":"Object","value":{"key":"super=value"}},"name":{"type":"String","value":"test-lb"},"location":{"type":"String","value":"westus"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-12-19T04:36:11.5236424Z","duration":"PT0S","correlationId":"7574610d-117f-467d-822e-f80315ab9065","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"loadBalancers","locations":["westus"]}]}],"dependencies":[],"validatedResources":[{"apiVersion":"2016-03-30","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb","name":"test-lb","type":"Microsoft.Network/loadBalancers","location":"westus","tags":{"key":"super=value"},"properties":{"backendAddressPools":[{"name":"bepool1"},{"name":"bepool2"}],"frontendIPConfigurations":[{"name":"LoadBalancerFrontEnd","properties":{"privateIPAllocationMethod":"Dynamic","subnet":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"}}}]}}]}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['1935']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:10:42 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:11 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1184']
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"mode": "Incremental", "parameters": {"location": {"value":
-      "westus"}, "tags": {"value": {"key": "super=value"}}, "subnetId": {"value":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},
-      "backendAddressPools": {"value": [{"name": "bepool1"}, {"name": "bepool2"}]},
-      "name": {"value": "test-lb"}, "privateIPAllocationMethod": {"value": "Dynamic"}},
-      "template": {"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-      "resources": [{"location": "[parameters(\''location\'')]", "name": "[parameters(\''name\'')]",
-      "properties": {"frontendIPConfigurations": [{"name": "LoadBalancerFrontEnd",
-      "properties": {"subnet": {"id": "[parameters(\''subnetId\'')]"}, "privateIPAllocationMethod":
-      "[parameters(\''privateIPAllocationMethod\'')]"}}], "backendAddressPools": "[parameters(\''backendAddressPools\'')]"},
-      "type": "Microsoft.Network/loadBalancers", "apiVersion": "2016-03-30", "tags":
-      "[parameters(\''tags\'')]", "dependsOn": []}], "contentVersion": "1.0.0.0",
-      "parameters": {"location": {"type": "string"}, "subnetId": {"type": "string"},
-      "privateIPAllocationMethod": {"type": "string"}, "backendAddressPools": {"type":
-      "array"}, "tags": {"type": "object"}, "name": {"type": "string"}}}}}'''
+    body: 'b''{"properties": {"template": {"resources": [{"apiVersion": "2016-03-30",
+      "properties": {"backendAddressPools": "[parameters(\''backendAddressPools\'')]",
+      "frontendIPConfigurations": [{"name": "LoadBalancerFrontEnd", "properties":
+      {"privateIPAllocationMethod": "[parameters(\''privateIPAllocationMethod\'')]",
+      "subnet": {"id": "[parameters(\''subnetId\'')]"}}}]}, "location": "[parameters(\''location\'')]",
+      "tags": "[parameters(\''tags\'')]", "name": "[parameters(\''name\'')]", "dependsOn":
+      [], "type": "Microsoft.Network/loadBalancers"}], "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+      "parameters": {"backendAddressPools": {"type": "array"}, "subnetId": {"type":
+      "string"}, "privateIPAllocationMethod": {"type": "string"}, "tags": {"type":
+      "object"}, "name": {"type": "string"}, "location": {"type": "string"}}, "contentVersion":
+      "1.0.0.0"}, "parameters": {"backendAddressPools": {"value": [{"name": "bepool1"},
+      {"name": "bepool2"}]}, "subnetId": {"value": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},
+      "privateIPAllocationMethod": {"value": "Dynamic"}, "tags": {"value": {"key":
+      "super=value"}}, "name": {"value": "test-lb"}, "location": {"value": "westus"}},
+      "mode": "Incremental"}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -229,24 +229,24 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['1375']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-deployment","name":"azure-cli-deployment","properties":{"templateHash":"7638451064576703829","parameters":{"location":{"type":"String","value":"westus"},"subnetId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},"privateIPAllocationMethod":{"type":"String","value":"Dynamic"},"backendAddressPools":{"type":"Array","value":[{"name":"bepool1"},{"name":"bepool2"}]},"tags":{"type":"Object","value":{"key":"super=value"}},"name":{"type":"String","value":"test-lb"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-12-13T21:10:44.9541751Z","duration":"PT0.5649587S","correlationId":"612206ee-e9a6-4920-a8ff-7c8742c57db0","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"loadBalancers","locations":["westus"]}]}],"dependencies":[]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-deployment","name":"azure-cli-deployment","properties":{"templateHash":"3117808844699724179","parameters":{"backendAddressPools":{"type":"Array","value":[{"name":"bepool1"},{"name":"bepool2"}]},"subnetId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},"privateIPAllocationMethod":{"type":"String","value":"Dynamic"},"tags":{"type":"Object","value":{"key":"super=value"}},"name":{"type":"String","value":"test-lb"},"location":{"type":"String","value":"westus"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2017-12-19T04:36:13.6438252Z","duration":"PT0.5642502S","correlationId":"3999a86e-0718-4990-a106-a595030aa4b9","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"loadBalancers","locations":["westus"]}]}],"dependencies":[]}}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-deployment/operationStatuses/08586884074410884041?api-version=2017-05-10']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-deployment/operationStatuses/08586879487123980443?api-version=2017-05-10']
       cache-control: [no-cache]
       content-length: ['1170']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:10:44 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:13 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1189']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -256,19 +256,19 @@ interactions:
       CommandName: [group deployment create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586884074410884041?api-version=2017-05-10
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08586879487123980443?api-version=2017-05-10
   response:
     body: {string: '{"status":"Succeeded"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['22']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:15 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:43 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -282,19 +282,19 @@ interactions:
       CommandName: [group deployment create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-deployment","name":"azure-cli-deployment","properties":{"templateHash":"7638451064576703829","parameters":{"location":{"type":"String","value":"westus"},"subnetId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},"privateIPAllocationMethod":{"type":"String","value":"Dynamic"},"backendAddressPools":{"type":"Array","value":[{"name":"bepool1"},{"name":"bepool2"}]},"tags":{"type":"Object","value":{"key":"super=value"}},"name":{"type":"String","value":"test-lb"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-12-13T21:10:46.3585697Z","duration":"PT1.9693533S","correlationId":"612206ee-e9a6-4920-a8ff-7c8742c57db0","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"loadBalancers","locations":["westus"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-deployment","name":"azure-cli-deployment","properties":{"templateHash":"3117808844699724179","parameters":{"backendAddressPools":{"type":"Array","value":[{"name":"bepool1"},{"name":"bepool2"}]},"subnetId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},"privateIPAllocationMethod":{"type":"String","value":"Dynamic"},"tags":{"type":"Object","value":{"key":"super=value"}},"name":{"type":"String","value":"test-lb"},"location":{"type":"String","value":"westus"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-12-19T04:36:20.4318079Z","duration":"PT7.3522329S","correlationId":"3999a86e-0718-4990-a106-a595030aa4b9","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"loadBalancers","locations":["westus"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb"}]}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['1393']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:16 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:43 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -308,31 +308,31 @@ interactions:
       CommandName: [network lb show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"name\": \"test-lb\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb\"\
-        ,\r\n  \"etag\": \"W/\\\"1fcfa63b-27b2-42b1-a7ec-7155d39972f6\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"125663e4-3371-44a2-a6ed-1f7f7604a4fd\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/loadBalancers\",\r\n  \"location\": \"westus\"\
         ,\r\n  \"tags\": {\r\n    \"key\": \"super=value\"\r\n  },\r\n  \"properties\"\
         : {\r\n    \"provisioningState\": \"Succeeded\",\r\n    \"resourceGuid\":\
-        \ \"bf4d948d-1b48-4d04-9ae4-a4a9a0912b7e\",\r\n    \"frontendIPConfigurations\"\
+        \ \"69b78050-442c-480a-80ce-f5494b8a5745\",\r\n    \"frontendIPConfigurations\"\
         : [\r\n      {\r\n        \"name\": \"LoadBalancerFrontEnd\",\r\n        \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb/frontendIPConfigurations/LoadBalancerFrontEnd\"\
-        ,\r\n        \"etag\": \"W/\\\"1fcfa63b-27b2-42b1-a7ec-7155d39972f6\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"125663e4-3371-44a2-a6ed-1f7f7604a4fd\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
         ,\r\n          \"privateIPAddress\": \"10.0.0.4\",\r\n          \"privateIPAllocationMethod\"\
         : \"Dynamic\",\r\n          \"subnet\": {\r\n            \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1\"\
         \r\n          }\r\n        }\r\n      }\r\n    ],\r\n    \"backendAddressPools\"\
         : [\r\n      {\r\n        \"name\": \"bepool1\",\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb/backendAddressPools/bepool1\"\
-        ,\r\n        \"etag\": \"W/\\\"1fcfa63b-27b2-42b1-a7ec-7155d39972f6\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"125663e4-3371-44a2-a6ed-1f7f7604a4fd\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
         \r\n        }\r\n      },\r\n      {\r\n        \"name\": \"bepool2\",\r\n\
         \        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb/backendAddressPools/bepool2\"\
-        ,\r\n        \"etag\": \"W/\\\"1fcfa63b-27b2-42b1-a7ec-7155d39972f6\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"125663e4-3371-44a2-a6ed-1f7f7604a4fd\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
         \r\n        }\r\n      }\r\n    ],\r\n    \"loadBalancingRules\": [],\r\n\
         \    \"probes\": [],\r\n    \"inboundNatRules\": [],\r\n    \"outboundNatRules\"\
@@ -342,8 +342,8 @@ interactions:
       cache-control: [no-cache]
       content-length: ['2459']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:15 GMT']
-      etag: [W/"1fcfa63b-27b2-42b1-a7ec-7155d39972f6"]
+      date: ['Tue, 19 Dec 2017 04:36:45 GMT']
+      etag: [W/"125663e4-3371-44a2-a6ed-1f7f7604a4fd"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -359,19 +359,19 @@ interactions:
       CommandName: [group deployment list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/?api-version=2017-05-10
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-deployment","name":"azure-cli-deployment","properties":{"templateHash":"7638451064576703829","parameters":{"location":{"type":"String","value":"westus"},"subnetId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},"privateIPAllocationMethod":{"type":"String","value":"Dynamic"},"backendAddressPools":{"type":"Array","value":[{"name":"bepool1"},{"name":"bepool2"}]},"tags":{"type":"Object","value":{"key":"super=value"}},"name":{"type":"String","value":"test-lb"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-12-13T21:10:46.3585697Z","duration":"PT1.9693533S","correlationId":"612206ee-e9a6-4920-a8ff-7c8742c57db0","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"loadBalancers","locations":["westus"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb"}]}}]}'}
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-deployment","name":"azure-cli-deployment","properties":{"templateHash":"3117808844699724179","parameters":{"backendAddressPools":{"type":"Array","value":[{"name":"bepool1"},{"name":"bepool2"}]},"subnetId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},"privateIPAllocationMethod":{"type":"String","value":"Dynamic"},"tags":{"type":"Object","value":{"key":"super=value"}},"name":{"type":"String","value":"test-lb"},"location":{"type":"String","value":"westus"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-12-19T04:36:20.4318079Z","duration":"PT7.3522329S","correlationId":"3999a86e-0718-4990-a106-a595030aa4b9","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"loadBalancers","locations":["westus"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb"}]}}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['1405']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:17 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:45 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -385,19 +385,19 @@ interactions:
       CommandName: [group deployment show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-deployment","name":"azure-cli-deployment","properties":{"templateHash":"7638451064576703829","parameters":{"location":{"type":"String","value":"westus"},"subnetId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},"privateIPAllocationMethod":{"type":"String","value":"Dynamic"},"backendAddressPools":{"type":"Array","value":[{"name":"bepool1"},{"name":"bepool2"}]},"tags":{"type":"Object","value":{"key":"super=value"}},"name":{"type":"String","value":"test-lb"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-12-13T21:10:46.3585697Z","duration":"PT1.9693533S","correlationId":"612206ee-e9a6-4920-a8ff-7c8742c57db0","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"loadBalancers","locations":["westus"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb"}]}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-deployment","name":"azure-cli-deployment","properties":{"templateHash":"3117808844699724179","parameters":{"backendAddressPools":{"type":"Array","value":[{"name":"bepool1"},{"name":"bepool2"}]},"subnetId":{"type":"String","value":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnet1"},"privateIPAllocationMethod":{"type":"String","value":"Dynamic"},"tags":{"type":"Object","value":{"key":"super=value"}},"name":{"type":"String","value":"test-lb"},"location":{"type":"String","value":"westus"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2017-12-19T04:36:20.4318079Z","duration":"PT7.3522329S","correlationId":"3999a86e-0718-4990-a106-a595030aa4b9","providers":[{"namespace":"Microsoft.Network","resourceTypes":[{"resourceType":"loadBalancers","locations":["westus"]}]}],"dependencies":[],"outputResources":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb"}]}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['1393']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:17 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:46 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -411,19 +411,19 @@ interactions:
       CommandName: [group deployment operation list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment000001/deployments/mock-deployment/operations?api-version=2017-05-10
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-deployment/operations/B3AED07C158A7D4C","operationId":"B3AED07C158A7D4C","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2017-12-13T21:10:46.1253661Z","duration":"PT0.7899536S","trackingId":"53e984b0-0212-427e-9343-ba89815c5042","serviceRequestId":"1175bb2e-8494-48fc-b29f-631adbbf65af","statusCode":"Created","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb","resourceType":"Microsoft.Network/loadBalancers","resourceName":"test-lb"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-deployment/operations/08586884074410884041","operationId":"08586884074410884041","properties":{"provisioningOperation":"EvaluateDeploymentOutput","provisioningState":"Succeeded","timestamp":"2017-12-13T21:10:46.2828603Z","duration":"PT0.1102932S","trackingId":"d25bd4a0-3fbe-436b-92cd-0ea558a5c76f","statusCode":"OK","statusMessage":null}}]}'}
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-deployment/operations/2E1173B56F2AA3F6","operationId":"2E1173B56F2AA3F6","properties":{"provisioningOperation":"Create","provisioningState":"Succeeded","timestamp":"2017-12-19T04:36:20.1894382Z","duration":"PT4.9385323S","trackingId":"20e8f2a6-11f8-45b8-832c-341a96c97a2c","serviceRequestId":"b37518c5-55be-46ae-ab8a-ec34eb0a286b","statusCode":"Created","targetResource":{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Network/loadBalancers/test-lb","resourceType":"Microsoft.Network/loadBalancers","resourceName":"test-lb"}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_deployment000001/providers/Microsoft.Resources/deployments/azure-cli-deployment/operations/08586879487123980443","operationId":"08586879487123980443","properties":{"provisioningOperation":"EvaluateDeploymentOutput","provisioningState":"Succeeded","timestamp":"2017-12-19T04:36:20.3859568Z","duration":"PT0.117331S","trackingId":"94bfdcf9-a60f-499d-a80d-db78abf3265b","statusCode":"OK","statusMessage":null}}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1404']
+      content-length: ['1403']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:17 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:47 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -438,9 +438,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_deployment000001?api-version=2017-05-10
@@ -449,11 +449,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 13 Dec 2017 21:11:18 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:48 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGREVQTE9ZTUVOVE5XRFRIS0dTR0RLR1JNT1lQTVNUVVdNU3wzOUQxRDkyQjYyRDA4N0FDLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGREVQTE9ZTUVOVFk2SVBIMkxaN0dNWTdBUjU2UVA2RVJDRnxERDRCQzc0RTk0RkI3Q0NFLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1182']
     status: {code: 202, message: Accepted}
 version: 1

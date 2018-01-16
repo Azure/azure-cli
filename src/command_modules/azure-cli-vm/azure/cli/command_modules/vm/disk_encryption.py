@@ -4,16 +4,21 @@
 # --------------------------------------------------------------------------------------------
 import uuid
 import os
+
 from msrestazure.tools import parse_resource_id
+
+from knack.log import get_logger
+from knack.util import CLIError
+
 from azure.cli.core.commands import LongRunningOperation
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
-from .custom import set_vm, _compute_client_factory, get_vmss_instance_view
-from ._vm_utils import create_keyvault_data_plane_client, get_key_vault_base_url
-logger = azlogging.get_az_logger(__name__)
+
+from azure.cli.command_modules.vm.custom import set_vm, _compute_client_factory, get_vmss_instance_view
+from azure.cli.command_modules.vm._vm_utils import get_key_vault_base_url, create_keyvault_data_plane_client
 
 _DATA_VOLUME_TYPE = 'DATA'
 _STATUS_ENCRYPTED = 'Encrypted'
+
+logger = get_logger(__name__)
 
 vm_extension_info = {
     'Linux': {
@@ -42,7 +47,7 @@ vmss_extension_info = {
 }
 
 
-def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals, too-many-statements
+def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-locals, too-many-statements
                aad_client_id,
                disk_encryption_keyvault,
                aad_client_secret=None, aad_client_cert_thumbprint=None,
@@ -51,20 +56,8 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
                key_encryption_algorithm='RSA-OAEP',
                volume_type=None,
                encrypt_format_all=False):
-    '''
-    Enable disk encryption on OS disk, Data disks, or both
-    :param str aad_client_id: Client ID of AAD app with permissions to write secrets to KeyVault
-    :param str aad_client_secret: Client Secret of AAD app with permissions to
-    write secrets to KeyVault
-    :param str aad_client_cert_thumbprint: Thumbprint of AAD app certificate with permissions
-    to write secrets to KeyVault
-    :param str disk_encryption_keyvault:the KeyVault where generated encryption key will be placed
-    :param str key_encryption_key: KeyVault key name or URL used to encrypt the disk encryption key
-    :param str key_encryption_keyvault: the KeyVault containing the key encryption key
-    used to encrypt the disk encryption key. If missing, CLI will use --disk-encryption-keyvault
-    '''
     # pylint: disable=no-member
-    compute_client = _compute_client_factory()
+    compute_client = _compute_client_factory(cmd.cli_ctx)
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     os_type = vm.storage_profile.os_disk.os_type.value
     is_linux = _is_linux_vm(os_type)
@@ -75,7 +68,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
     # 1. First validate arguments
 
     if not aad_client_cert_thumbprint and not aad_client_secret:
-        raise CLIError('Please provide either --aad-client-id or --aad-client-cert-thumbprint')
+        raise CLIError('Please provide either --aad-client-cert-thumbprint or --aad-client-secret')
 
     if volume_type is None:
         if vm.storage_profile.data_disks:
@@ -97,14 +90,14 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
 
     # retrieve keyvault details
     disk_encryption_keyvault_url = get_key_vault_base_url(
-        (parse_resource_id(disk_encryption_keyvault))['name'])
+        cmd.cli_ctx, (parse_resource_id(disk_encryption_keyvault))['name'])
 
     # disk encryption key itself can be further protected, so let us verify
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
         if '://' not in key_encryption_key:  # appears a key name
             key_encryption_key = _get_keyvault_key_url(
-                (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
+                cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
 
     # 2. we are ready to provision/update the disk encryption extensions
     # The following logic was mostly ported from xplat-cli
@@ -122,9 +115,9 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
         'AADClientSecret': aad_client_secret if is_linux else (aad_client_secret or '')
     }
 
-    from azure.mgmt.compute.models import (VirtualMachineExtension, DiskEncryptionSettings,
-                                           KeyVaultSecretReference, KeyVaultKeyReference,
-                                           SubResource)
+    VirtualMachineExtension, DiskEncryptionSettings, KeyVaultSecretReference, KeyVaultKeyReference, SubResource = \
+        cmd.get_models('VirtualMachineExtension', 'DiskEncryptionSettings', 'KeyVaultSecretReference',
+                       'KeyVaultKeyReference', 'SubResource')
 
     ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
                                   publisher=extension['publisher'],
@@ -169,7 +162,7 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
         vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
 
     vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
-    set_vm(vm)
+    set_vm(cmd, vm)
 
     if vm_encrypted:
         # and start after the update
@@ -183,11 +176,8 @@ def encrypt_vm(resource_group_name, vm_name,  # pylint: disable=too-many-locals,
                        "the encryption will finish shortly")
 
 
-def decrypt_vm(resource_group_name, vm_name, volume_type=None, force=False):
-    '''
-    Disable disk encryption on OS disk, Data disks, or both
-    '''
-    compute_client = _compute_client_factory()
+def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False):
+    compute_client = _compute_client_factory(cmd.cli_ctx)
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     # pylint: disable=no-member
     os_type = vm.storage_profile.os_disk.os_type.value
@@ -198,7 +188,7 @@ def decrypt_vm(resource_group_name, vm_name, volume_type=None, force=False):
         if volume_type:
             if not force:
                 if volume_type == _DATA_VOLUME_TYPE:
-                    status = show_vm_encryption_status(resource_group_name, vm_name)
+                    status = show_vm_encryption_status(cmd, resource_group_name, vm_name)
                     if status['osDisk'] == _STATUS_ENCRYPTED:
                         raise CLIError("Linux VM's OS disk is encrypted. Disabling encryption on data "
                                        "disk can render the VM unbootable. Use '--force' "
@@ -224,7 +214,8 @@ def decrypt_vm(resource_group_name, vm_name, volume_type=None, force=False):
         'SequenceVersion': sequence_version,
     }
 
-    from azure.mgmt.compute.models import VirtualMachineExtension, DiskEncryptionSettings
+    VirtualMachineExtension, DiskEncryptionSettings = cmd.get_models(
+        'VirtualMachineExtension', 'DiskEncryptionSettings')
 
     ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
                                   publisher=extension['publisher'],
@@ -248,18 +239,18 @@ def decrypt_vm(resource_group_name, vm_name, volume_type=None, force=False):
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     disk_encryption_settings = DiskEncryptionSettings(enabled=False)
     vm.storage_profile.os_disk.encryption_settings = disk_encryption_settings
-    set_vm(vm)
+    set_vm(cmd, vm)
 
 
-def show_vm_encryption_status(resource_group_name, vm_name):
-    '''show the encryption status'''
+def show_vm_encryption_status(cmd, resource_group_name, vm_name):
+
     encryption_status = {
         'osDisk': 'NotEncrypted',
         'osDiskEncryptionSettings': None,
         'dataDisk': 'NotEncrypted',
         'osType': None
     }
-    compute_client = _compute_client_factory()
+    compute_client = _compute_client_factory(cmd.cli_ctx)
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     # pylint: disable=no-member
     # The following logic was mostly ported from xplat-cli
@@ -316,9 +307,9 @@ def _is_linux_vm(os_type):
     return os_type.lower() == 'linux'
 
 
-def _get_keyvault_key_url(keyvault_name, key_name):
-    client = create_keyvault_data_plane_client()
-    result = client.get_key(get_key_vault_base_url(keyvault_name), key_name, '')
+def _get_keyvault_key_url(cli_ctx, keyvault_name, key_name):
+    client = create_keyvault_data_plane_client(cli_ctx)
+    result = client.get_key(get_key_vault_base_url(cli_ctx, keyvault_name), key_name, '')
     return result.key.kid  # pylint: disable=no-member
 
 
@@ -391,27 +382,18 @@ def _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, forc
     return volume_type
 
 
-def encrypt_vmss(resource_group_name, vmss_name,  # pylint: disable=too-many-locals, too-many-statements
+def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-many-locals, too-many-statements
                  disk_encryption_keyvault,
                  key_encryption_keyvault=None,
                  key_encryption_key=None,
                  key_encryption_algorithm='RSA-OAEP',
                  volume_type=None,
                  force=False):
-    '''
-    :param str disk_encryption_keyvault:the KeyVault where generated encryption key will be placed
-    :param str key_encryption_key: KeyVault key name or URL used to encrypt the disk encryption key
-    :param str key_encryption_keyvault: the KeyVault containing the key encryption key
-    used to encrypt the disk encryption key. If missing, CLI will use --disk-encryption-keyvault
-    :param bool force: continue by ignoring client side validation errors
-    '''
-    from azure.cli.core.profiles import get_sdk, ResourceType
     # pylint: disable=no-member
-    UpgradeMode, VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = get_sdk(
-        ResourceType.MGMT_COMPUTE, 'UpgradeMode', 'VirtualMachineScaleSetExtension',
-        'VirtualMachineScaleSetExtensionProfile', mod='models', operation_group='virtual_machine_scale_sets')
+    UpgradeMode, VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
+        'UpgradeMode', 'VirtualMachineScaleSetExtension', 'VirtualMachineScaleSetExtensionProfile')
 
-    compute_client = _compute_client_factory()
+    compute_client = _compute_client_factory(cmd.cli_ctx)
     vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     os_type = 'Linux' if vmss.virtual_machine_profile.os_profile.linux_configuration else 'Windows'
     is_linux = _is_linux_vm(os_type)
@@ -430,17 +412,18 @@ def encrypt_vmss(resource_group_name, vmss_name,  # pylint: disable=too-many-loc
                 logger.warning(message)
 
     # retrieve keyvault details
-    disk_encryption_keyvault_url = get_key_vault_base_url((parse_resource_id(disk_encryption_keyvault))['name'])
+    disk_encryption_keyvault_url = get_key_vault_base_url(cmd.cli_ctx,
+                                                          (parse_resource_id(disk_encryption_keyvault))['name'])
 
     # disk encryption key itself can be further protected, so let us verify
     if key_encryption_key:
         key_encryption_keyvault = key_encryption_keyvault or disk_encryption_keyvault
         if '://' not in key_encryption_key:  # appears a key name
             key_encryption_key = _get_keyvault_key_url(
-                (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
+                cmd.cli_ctx, (parse_resource_id(key_encryption_keyvault))['name'], key_encryption_key)
 
     #  to avoid bad server errors, ensure the vault has the right configurations
-    _verify_keyvault_good_for_encryption(disk_encryption_keyvault, key_encryption_keyvault, vmss, force)
+    _verify_keyvault_good_for_encryption(cmd.cli_ctx, disk_encryption_keyvault, key_encryption_keyvault, vmss, force)
 
     # 2. we are ready to provision/update the disk encryption extensions
     public_config = {
@@ -464,16 +447,13 @@ def encrypt_vmss(resource_group_name, vmss_name,  # pylint: disable=too-many-loc
         vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile([])
     vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
     poller = compute_client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
-    LongRunningOperation()(poller)
+    LongRunningOperation(cmd.cli_ctx)(poller)
     _show_post_action_message(resource_group_name, vmss.name, vmss.upgrade_policy.mode == UpgradeMode.manual, True)
 
 
-def decrypt_vmss(resource_group_name, vmss_name, volume_type=None, force=False):
-    from azure.cli.core.profiles import get_sdk, ResourceType
-    UpgradeMode, VirtualMachineScaleSetExtension = get_sdk(
-        ResourceType.MGMT_COMPUTE, 'UpgradeMode', 'VirtualMachineScaleSetExtension', mod='models',
-        operation_group='virtual_machine_scale_sets')
-    compute_client = _compute_client_factory()
+def decrypt_vmss(cmd, resource_group_name, vmss_name, volume_type=None, force=False):
+    UpgradeMode, VirtualMachineScaleSetExtension = cmd.get_models('UpgradeMode', 'VirtualMachineScaleSetExtension')
+    compute_client = _compute_client_factory(cmd.cli_ctx)
     vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     os_type = 'Linux' if vmss.virtual_machine_profile.os_profile.linux_configuration else 'Windows'
     is_linux = _is_linux_vm(os_type)
@@ -509,7 +489,7 @@ def decrypt_vmss(resource_group_name, vmss_name, volume_type=None, force=False):
     index = vmss.virtual_machine_profile.extension_profile.extensions.index(ade_extension[0])
     vmss.virtual_machine_profile.extension_profile.extensions[index] = ext
     poller = compute_client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
-    LongRunningOperation()(poller)
+    LongRunningOperation(cmd.cli_ctx)(poller)
     _show_post_action_message(resource_group_name, vmss.name, vmss.upgrade_policy.mode == UpgradeMode.manual, False)
 
 
@@ -524,13 +504,13 @@ def _show_post_action_message(resource_group_name, vmss_name, maunal_mode, enabl
     logger.warning(msg)
 
 
-def show_vmss_encryption_status(resource_group_name, vmss_name):
+def show_vmss_encryption_status(cmd, resource_group_name, vmss_name):
     encryption_ext_names = [v['name'] for v in vmss_extension_info.values()]
-    views = get_vmss_instance_view(resource_group_name, vmss_name)
+    views = get_vmss_instance_view(cmd, resource_group_name, vmss_name)
     if not views.extensions or not [e for e in views.extensions if e.name in encryption_ext_names]:
         raise CLIError("'{}' is not encrypted yet".format(vmss_name))
 
-    views = get_vmss_instance_view(resource_group_name, vmss_name, instance_id='*')
+    views = get_vmss_instance_view(cmd, resource_group_name, vmss_name, instance_id='*')
     result = [{'disks': v.disks, 'extensions': v.extensions} for v in views]
     # get rid of unrelaed disk status
     for r in result:
@@ -541,7 +521,7 @@ def show_vmss_encryption_status(resource_group_name, vmss_name):
     return result
 
 
-def _verify_keyvault_good_for_encryption(disk_vault_id, kek_vault_id, vmss, force):
+def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, vmss, force):
     def _report_client_side_validation_error(msg):
         if force:
             logger.warning(msg)
@@ -550,7 +530,7 @@ def _verify_keyvault_good_for_encryption(disk_vault_id, kek_vault_id, vmss, forc
 
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.keyvault import KeyVaultManagementClient
-    client = get_mgmt_service_client(KeyVaultManagementClient).vaults
+    client = get_mgmt_service_client(cli_ctx, KeyVaultManagementClient).vaults
     disk_vault_resource_info = parse_resource_id(disk_vault_id)
     key_vault = client.get(disk_vault_resource_info['resource_group'], disk_vault_resource_info['name'])
 

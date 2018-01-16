@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 # pylint: disable=line-too-long, too-many-lines
 
@@ -44,14 +44,14 @@ helps['monitor alert create'] = """
     examples:
         - name: Create a high CPU usage alert on a VM with no actions.
           text: >
-            az monitor alert create -n rule1 -g {RG} --target {VM ID} --condition "Percentage CPU > 90 avg 5m"
+            az monitor alert create -n rule1 -g {ResourceGroup} --target {VirtualMachineID} --condition "Percentage CPU > 90 avg 5m"
         - name: Create a high CPU usage alert on a VM with email and webhook actions.
           text: |
-            az monitor alert create -n rule1 -g {RG} --target {VM ID} \\
+            az monitor alert create -n rule1 -g {ResourceGroup} --target {VirtualMachineID} \\
                 --condition "Percentage CPU > 90 avg 5m" \\
                 --action email bob@contoso.com ann@contoso.com --email-service-owners \\
                 --action webhook https://www.contoso.com/alerts?type=HighCPU \\
-                --action webhook https://alerts.contoso.com apiKey={KEY} type=HighCPU
+                --action webhook https://alerts.contoso.com apiKey={APIKey} type=HighCPU
 """
 
 helps['monitor alert update'] = """
@@ -141,15 +141,18 @@ helps['monitor metrics list'] = """
           short-summary: The interval of the metric query. In ISO 8601 duration format, eg "PT1M"
         - name: --start-time
           type: string
-          short-summary: The start time of the query. In ISO format with explicit indication of timezone,
-                         1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to 1 Hour prior to the current time.
+          short-summary: >
+            The start time of the query. In ISO format with explicit indication of timezone, 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500.
+            Defaults to 1 Hour prior to the current time.
         - name: --end-time
           type: string
-          short-summary: The end time of the query. In ISO format with explicit indication of timezone,
-                         1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to current time.
+          short-summary: >
+             The end time of the query. In ISO format with explicit indication of timezone, 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500.
+             Defaults to the current time.
         - name: --filter
           type: string
           short-summary: A string used to reduce the set of metric data returned. eg. "BlobType eq '*'"
+          long-summary: 'For a full list of filters, see the filter string reference at https://docs.microsoft.com/en-us/rest/api/monitor/metrics/list'
         - name: --metadata
           short-summary: Returns the metadata values instead of metric data
         - name: --dimension
@@ -158,32 +161,31 @@ helps['monitor metrics list'] = """
     examples:
         - name: List a VM's CPU usage for the past hour
           text: >
-              az monitor metrics list --resource <resource id> --metric "Percentage CPU"
+              az monitor metrics list --resource {ResourceName} --metric "Percentage CPU"
         - name: List success E2E latency of a storage account and split the data series based on API name
           text: >
-              az monitor metrics list --resource <resource id> --metric SuccessE2ELatency \\
+              az monitor metrics list --resource {ResourceName} --metric SuccessE2ELatency \\
                                       --dimension ApiName
         - name: List success E2E latency of a storage account and split the data series based on both API name and geo type
           text: >
-              az monitor metrics list --resource <resource id> --metric SuccessE2ELatency \\
+              az monitor metrics list --resource {ResourceName} --metric SuccessE2ELatency \\
                                       --dimension ApiName GeoType
         - name: List success E2E latency of a storage account and split the data series based on both API name and geo type using "--filter" parameter
           text: >
-              az monitor metrics list --resource <resource id> --metric SuccessE2ELatency \\
+              az monitor metrics list --resource {ResourceName} --metric SuccessE2ELatency \\
                                       --filter "ApiName eq '*' and GeoType eq '*'"
         - name: List success E2E latency of a storage account and split the data series based on both API name and geo type. Limits the api name to 'DeleteContainer'
           text: >
-              az monitor metrics list --resource <resource id> --metric SuccessE2ELatency \\
+              az monitor metrics list --resource {ResourceName} --metric SuccessE2ELatency \\
                                       --filter "ApiName eq 'DeleteContainer' and GeoType eq '*'"
-              Filter string reference: https://docs.microsoft.com/en-us/rest/api/monitor/metrics/list
         - name: List transactions of a storage account per day since 2017-01-01
           text: >
-              az monitor metrics list --resource <resource id> --metric Transactions \\
+              az monitor metrics list --resource {ResourceName} --metric Transactions \\
                                       --start-time 2017-01-01T00:00:00Z \\
                                       --interval PT24H
         - name: List the metadata values for a storage account under transaction metric's api name dimension since 2017
           text: >
-              az monitor metrics list --resource <resource id> --metric Transactions \\
+              az monitor metrics list --resource {ResourceName} --metric Transactions \\
                                       --filter "ApiName eq '*'" \\
                                       --start-time 2017-01-01T00:00:00Z
 """
@@ -215,36 +217,38 @@ helps['monitor diagnostic-settings create'] = """
             type: command
             short-summary: Create diagnostic settings for the specified resource.
             parameters:
+                - name: --name -n
+                  short-summary: The name of the diagnostic settings.
                 - name: --resource-id
                   type: string
                   short-summary: The identifier of the resource.
                 - name: --resource-group -g
                   type: string
-                  short-summary: Name of the resource group.
+                  short-summary: Name of the resource group for the Log Analytics and Storage Account when the name of
+                                 the service instead of a full resource ID is given.
                 - name: --logs
                   type: string
-                  short-summary: JSON encoded list of logs settings. Use @{file} to load from a file.
+                  short-summary: JSON encoded list of logs settings. Use '@{file}' to load from a file.
                 - name: --event-hub-name
                   type: string
-                  short-summary: The name of the event hub. If none is specified, the default event hub will be
-                                 selected.
+                  short-summary: The name of the event hub. If none is specified, the default event hub will be selected.
                 - name: --metrics
                   type: string
-                  short-summary: JSON encoded list of metric settings. Use @{file} to load from a file.
+                  short-summary: JSON encoded list of metric settings. Use '@{file}' to load from a file.
                 - name: --storage-account
                   type: string
                   short-summary: Name or ID of the storage account to send diagnostic logs to.
-                - name: --namespace
-                  type: string
-                  short-summary: Name or ID of the Service Bus namespace.
-                - name: --rule-name
-                  type: string
-                  short-summary: Name of the Service Bus authorization rule.
                 - name: --workspace
                   type: string
                   short-summary: Name or ID of the Log Analytics workspace to send diagnostic logs to.
+                - name: --event-hub
+                  type: string
+                  short-summary: The name of the event hub. If none is specified, the default event hub will be
+                                 selected.
+                - name: --event-hub-rule
+                  short-summary: The resource Id for the event hub authorization rule
                 - name: --tags
-                  short-summary: Space separated tags in 'key[=value]' format. Use '' to clear existing tags
+                  short-summary: Space separated tags in 'key[=value]' format. Use the "" value to clear existing tags.
             """
 helps['monitor diagnostic-settings update'] = """
             type: command
@@ -275,8 +279,9 @@ helps['monitor action-group list'] = """
     parameters:
         - name: --resource-group -g
           type: string
-          short-summary: Name of the resource group under which the action groups are being listed. If it is omitted,
-                         all the action groups under the current subscription are listed.
+          short-summary: >
+            Name of the resource group under which the action groups are being listed. If it is omitted, all the action groups under
+            the current subscription are listed.
 """
 
 helps['monitor action-group show'] = """
@@ -342,46 +347,46 @@ helps['monitor activity-log alert create'] = """
         - name: --name -n
           short-summary: Name of the activity log alerts
         - name: --scope -s
-          short-summary: A list of string that will be used as prefixes. The alert will only apply to activityLogs
-                         with resourceIds that fall under one of these prefixes. If not provided, the path to this
-                         resource group will be used.
+          short-summary: A list of strings that will be used as prefixes.
+          long-summary: >
+            The alert will only apply to activity logs with resourceIDs that fall under one of these prefixes.
+            If not provided, the path to the resource group will be used.
         - name: --disable
           short-summary: Disable the activity log alert after it is created.
         - name: --description
           short-summary: A description of this activity log alert
         - name: --condition -c
-          short-summary: A condition expression represents the condition that will cause the alert to activate. The
-                         format is FIELD=VALUE[ and FILED=VALUE...]. The possible values for the field are 'resourceId',
-                         'category', 'caller', 'level', 'operationName', 'resourceGroup', 'resourceProvider', 'status',
-                         'subStatus', 'resourceType', or anything beginning with 'properties.'.
+          short-summary: The condition that will cause the alert to activate. The format is FIELD=VALUE[ and FIELD=VALUE...].
+          long-summary:  >
+            The possible values for the field are 'resourceId', 'category', 'caller', 'level', 'operationName', 'resourceGroup',
+            'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties.'.
         - name: --action-group -a
-          short-summary: Add action group. Accept space separated action groups identifiers. The identify can be the
-                         action group's name or its resource id.
+          short-summary: >
+            Add an action group. Accepts space separated action group identifiers. The identifier can be the action group's name
+            or its resource ID.
         - name: --webhook-properties -w
-          short-summary: Space separated web hook properties in 'key[=value]' format. These properties will be
-                         associated with the action groups added in this command. For any webhook receiver in these
-                         action group, these data are appended to the webhook payload. To attach different webhook
-                         properties to different action groups, add the action groups in separate update-action
-                         commands.
+          short-summary: >
+            Space separated webhook properties in 'key[=value]' format. These properties are associated with the action groups
+            added in this command.
+          long-summary: >
+            For any webhook receiver in these action group, this data is appended to the webhook payload. To attach different webhook
+            properties to different action groups, add the action groups in separate update-action commands.
     examples:
         - name: Create an alert with default settings.
           text: >
-              az monitor activity-log alert create -n {ALERT_NAME} -g {RG}
-
+              az monitor activity-log alert create -n {AlertName} -g {ResourceGroup}
         - name: Create an alert with condition about error level service health log.
           text: >
-              az monitor activity-log alert create -n {ALERT_NAME} -g {RG} \\
+              az monitor activity-log alert create -n {AlertName} -g {ResourceGroup} \\
                 --condition category=ServiceHealth and level=Error
-
         - name: Create an alert with an action group and specify webhook properties.
           text: >
-              az monitor activity-log alert create -n {ALERT_NAME} -g {RG} \\
-                -a /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/microsoft.insights/actionGroups/example_action_group
+              az monitor activity-log alert create -n {AlertName} -g {ResourceGroup} \\
+                -a /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/actionGroups/{ActionGroup} \\
                 -w usage=test owner=jane
-
-        - name: Create an alert is disabled initially.
+        - name: Create an alert which is initially disabled.
           text: >
-              az monitor activity-log alert create -n {ALERT_NAME} -g {RG} --disable
+              az monitor activity-log alert create -n {AlertName} -g {ResourceGroup} --disable
 """
 
 helps['monitor activity-log alert update'] = """
@@ -391,21 +396,20 @@ helps['monitor activity-log alert update'] = """
         - name: --description
           short-summary: A description of this activity log alert.
         - name: --condition -c
-          short-summary: A condition expression represents the condition that will cause the alert to activate. The
-                         format is FIELD=VALUE[ and FILED=VALUE...]. The possible values for the field are 'resourceId',
-                         'category', 'caller', 'level', 'operationName', 'resourceGroup', 'resourceProvider', 'status',
-                         'subStatus', 'resourceType', or anything beginning with 'properties.'.
+          short-summary: The conditional expression that will cause the alert to activate. The format is FIELD=VALUE[ and FIELD=VALUE...].
+          long-summary: >
+            The possible values for the field are 'resourceId', 'category', 'caller', 'level', 'operationName', 'resourceGroup',
+            'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties.'.
         - name: --enable
-          short-summary: Enable or disable this activity log alert.
+          short-summary: Enable or disable this activity log alert. Takes a boolean value of 'true' or 'false'.
     examples:
         - name: Update the condition
           text: >
-              az monitor activity-log alert update -n {ALERT_NAME} -g {RG} \\
+              az monitor activity-log alert update -n {AlertName} -g {ResourceGroup} \\
                 --condition category=ServiceHealth and level=Error
-
         - name: Disable an alert
           text: >
-              az monitor activity-log alert update -n {ALERT_NAME} -g {RG} --enable false
+              az monitor activity-log alert update -n {AlertName} -g {ResourceGroup} --enable false
 """
 
 helps['monitor activity-log alert action-group'] = """
@@ -425,35 +429,33 @@ helps['monitor activity-log alert action-group add'] = """
         - name: --reset
           short-summary: Remove all the existing action groups before add new conditions.
         - name: --webhook-properties -w
-          short-summary: Space separated web hook properties in 'key[=value]' format. These properties will be
-                         associated with the action groups added in this command. For any webhook receiver in these
-                         action group, these data are appended to the webhook payload. To attach different webhook
-                         properties to different action groups, add the action groups in separate update-action
-                         commands.
+          short-summary: >
+            Space separated webhook properties in 'key[=value]' format. These properties will be associated with
+            the action groups added in this command.
+          long-summary: >
+            For any webhook receiver in these action group, these data are appended to the webhook payload.
+            To attach different webhook properties to different action groups, add the action groups in separate update-action commands.
         - name: --strict
           short-summary: Fails the command if an action group to be added will change existing webhook properties.
     examples:
         - name: Add an action group and specify webhook properties.
-          text: >
-              az monitor activity-log alert action-group add -n {ALERT_NAME} -g {RG} \\
-                --action /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/microsoft.insights/actionGroups/example_action_group
+          text: |
+              az monitor activity-log alert action-group add -n {AlertName} -g {ResourceGroup} \\
+                --action /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/actionGroups/{ActionGroup} \\
                 --webhook-properties usage=test owner=jane
-
         - name: Overwite an existing action group's webhook properties.
-          text: >
-              az monitor activity-log alert action-group add -n {ALERT_NAME} -g {RG} \\
-                -a /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/microsoft.insights/actionGroups/example_action_group
+          text: |
+              az monitor activity-log alert action-group add -n {AlertName} -g {ResourceGroup} \\
+                -a /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/actionGroups/{ActionGroup} \\
                 --webhook-properties usage=test owner=john
-
         - name: Remove webhook properties from an existing action group.
-          text: >
-              az monitor activity-log alert action-group add -n {ALERT_NAME} -g {RG} \\
-                -a /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/microsoft.insights/actionGroups/example_action_group
-
+          text: |
+              az monitor activity-log alert action-group add -n {AlertName} -g {ResourceGroup} \\
+                -a /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/actionGroups/{ActionGroup}
         - name: Add new action groups but prevent the command from accidently overwrite existing webhook properties
-          text: >
-              az monitor activity-log alert action-group add -n {ALERT_NAME} -g {RG} --strict \\
-                --action-group {A_LIST_OF_RESOURCE_IDS}
+          text: |
+              az monitor activity-log alert action-group add -n {AlertName} -g {ResourceGroup} --strict \\
+                --action-group {ResourceIDList}
 """
 
 helps['monitor activity-log alert action-group remove'] = """

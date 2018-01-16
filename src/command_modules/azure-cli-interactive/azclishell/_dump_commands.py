@@ -11,12 +11,10 @@ import os
 import pkgutil
 import yaml
 
-from azure.cli.core.application import APPLICATION, Configuration
-from azure.cli.core.commands import _update_command_definitions, BLACKLISTED_MODS
-from azure.cli.core.help_files import helps
+from azure.cli.core.commands import BLACKLISTED_MODS
 from azure.cli.core.commands.arm import add_id_parameters
 
-import azclishell.configuration as config
+from knack.help_files import helps
 
 
 class LoadFreshTable(object):
@@ -24,30 +22,9 @@ class LoadFreshTable(object):
     this class generates and dumps the fresh command table into a file
     as well as installs all the modules
     """
-    def __init__(self):
+    def __init__(self, shell_ctx):
         self.command_table = None
-
-    def install_modules(self):
-        installed_command_modules = []
-        for cmd in self.command_table:
-            try:
-                self.command_table[cmd].load_arguments()
-            except (ImportError, ValueError):
-                pass
-            mods_ns_pkg = import_module('azure.cli.command_modules')
-        for _, modname, _ in pkgutil.iter_modules(mods_ns_pkg.__path__):
-            if modname not in BLACKLISTED_MODS:
-                installed_command_modules.append(modname)
-
-        for mod in installed_command_modules:
-            try:
-                mod = import_module('azure.cli.command_modules.' + mod)
-                mod.load_params(mod)
-                mod.load_commands()
-
-            except Exception:  # pylint: disable=broad-except
-                print("Error loading: {}".format(mod))
-        _update_command_definitions(self.command_table)
+        self.shell_ctx = shell_ctx
 
     def load_help_files(self, data):
         """ loads all the extra information from help files """
@@ -92,22 +69,20 @@ class LoadFreshTable(object):
                     examples.append([example['name'], example['text']])
                 data[cmd]['examples'] = examples
 
-    def dump_command_table(self):
+    def dump_command_table(self, shell_ctx):
         """ dumps the command table """
 
-        self.command_table = APPLICATION.configuration.get_command_table()
-        command_file = config.CONFIGURATION.get_help_files()
-
-        self.install_modules()
-        add_id_parameters(self.command_table)
+        loader = shell_ctx.cli_ctx.invocation.commands_loader
+        cmd_table = loader.load_command_table(None)
+        loader.load_arguments('')
 
         data = {}
-        for cmd in self.command_table:
+        for cmd in cmd_table:
             com_descrip = {}  # commands to their descriptions, examples, and parameter info
             param_descrip = {}  # parameters to their aliases, required, and descriptions
 
             try:
-                command_description = self.command_table[cmd].description
+                command_description = cmd_table[cmd].description
                 if callable(command_description):
                     command_description = command_description()
 
@@ -115,18 +90,18 @@ class LoadFreshTable(object):
                 com_descrip['examples'] = ""
 
                 # checking all the parameters for a single command
-                for key in self.command_table[cmd].arguments:
+                for key in cmd_table[cmd].arguments:
                     required = ""
                     help_desc = ""
 
-                    if self.command_table[cmd].arguments[key].type.settings.get('required'):
+                    if cmd_table[cmd].arguments[key].type.settings.get('required'):
                         required = "[REQUIRED]"
-                    if self.command_table[cmd].arguments[key].type.settings.get('help'):
-                        help_desc = self.command_table[cmd].arguments[key].type.settings.get('help')
+                    if cmd_table[cmd].arguments[key].type.settings.get('help'):
+                        help_desc = cmd_table[cmd].arguments[key].type.settings.get('help')
 
                     # checking aliasing
                     name_options = []
-                    for name in self.command_table[cmd].arguments[key].options_list:
+                    for name in cmd_table[cmd].arguments[key].options_list:
                         name_options.append(name)
 
                     options = {
@@ -135,29 +110,30 @@ class LoadFreshTable(object):
                         'help': help_desc
                     }
                     # the key is the first alias option
-                    param_descrip[self.command_table[cmd].arguments[key].options_list[0]] = options
+                    param_descrip[cmd_table[cmd].arguments[key].options_list[0]] = options
 
                 com_descrip['parameters'] = param_descrip
                 data[cmd] = com_descrip
             except (ImportError, ValueError):
                 pass
 
+        add_id_parameters(cmd_table)
         self.load_help_files(data)
 
+        self.command_table = cmd_table
+
         # dump into the cache file
-        with open(os.path.join(get_cache_dir(), command_file), 'w') as help_file:
+        command_file = shell_ctx.config.get_help_files()
+        with open(os.path.join(get_cache_dir(shell_ctx), command_file), 'w') as help_file:
             json.dump(data, help_file)
 
 
-def get_cache_dir():
+def get_cache_dir(shell_ctx):
     """ gets the location of the cache """
-    azure_folder = config.get_config_dir()
+    azure_folder = shell_ctx.config.config_dir
     cache_path = os.path.join(azure_folder, 'cache')
     if not os.path.exists(azure_folder):
         os.makedirs(azure_folder)
     if not os.path.exists(cache_path):
         os.makedirs(cache_path)
     return cache_path
-
-
-FRESH_TABLE = LoadFreshTable()

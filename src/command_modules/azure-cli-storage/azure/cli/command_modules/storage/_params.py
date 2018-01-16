@@ -3,757 +3,653 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-import argparse
 from argcomplete.completers import FilesCompleter
 from six import u as unicode_string
 
-from azure.cli.core._config import az_config
-from azure.cli.core.commands.parameters import (ignore_type, tags_type, file_type, get_resource_name_completion_list,
-                                                enum_choice_list, model_choice_list, enum_default, location_type,
-                                                three_state_flag)
+from knack.arguments import ignore_type, CLIArgumentType
+
+from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-import azure.cli.core.commands.arm  # pylint: disable=unused-import
-from azure.cli.core.commands import (register_cli_argument, register_extra_cli_argument, CliArgumentType,
-                                     VersionConstraint)
-
-from azure.common import AzureMissingResourceHttpError
-
-from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
-
-from .sdkutil import get_table_data_type
-from ._factory import get_storage_data_service_client
-from ._validators import \
-    (get_datetime_type, get_file_path_validator, validate_metadata,
-     get_permission_validator, table_permission_validator, get_permission_help_string,
-     resource_type_type, services_type, ipv4_range_type, validate_entity,
-     validate_select, validate_source_uri, validate_blob_type, validate_included_datasets,
-     validate_custom_domain, validate_public_access,
-     process_blob_upload_batch_parameters, process_blob_download_batch_parameters,
-     process_file_upload_batch_parameters, process_file_download_batch_parameters,
-     process_blob_batch_source_parameters, process_file_batch_source_parameters,
-     get_content_setting_validator, validate_encryption_services, validate_accept,
-     validate_key, storage_account_key_options, validate_encryption_source,
-     process_file_download_namespace,
-     process_metric_update_namespace, process_blob_copy_batch_namespace,
-     get_source_file_or_blob_service_client, process_blob_source_uri,
-     get_char_options_validator, validate_bypass, validate_subnet, page_blob_tier_validator, blob_tier_validator)
-
-DeleteSnapshot, BlockBlobService, PageBlobService, AppendBlobService = get_sdk(ResourceType.DATA_STORAGE,
-                                                                               'DeleteSnapshot',
-                                                                               'BlockBlobService',
-                                                                               'PageBlobService',
-                                                                               'AppendBlobService',
-                                                                               mod='blob')
-
-BlobContentSettings, ContainerPermissions, BlobPermissions, PublicAccess = get_sdk(ResourceType.DATA_STORAGE,
-                                                                                   'ContentSettings',
-                                                                                   'ContainerPermissions',
-                                                                                   'BlobPermissions',
-                                                                                   'PublicAccess',
-                                                                                   mod='blob.models')
-
-FileContentSettings, SharePermissions, FilePermissions = get_sdk(ResourceType.DATA_STORAGE,
-                                                                 'ContentSettings',
-                                                                 'SharePermissions',
-                                                                 'FilePermissions',
-                                                                 mod='file.models')
-
-TableService, TablePayloadFormat = get_table_data_type('table', 'TableService', 'TablePayloadFormat')
-
-AccountPermissions = get_sdk(ResourceType.DATA_STORAGE, 'common.models#AccountPermissions')
-
-BaseBlobService, FileService, QueueService, QueuePermissions = get_sdk(ResourceType.DATA_STORAGE,
-                                                                       'blob.baseblobservice#BaseBlobService',
-                                                                       'file#FileService',
-                                                                       'queue#QueueService',
-                                                                       'queue.models#QueuePermissions')
-
-# UTILITY
-
-public_access_types = {'off': None, 'blob': PublicAccess.Blob, 'container': PublicAccess.Container}
-
-
-class CommandContext(object):
-    def __init__(self, scope):
-        self._scope = scope
-
-    def reg_arg(self, *args, **kwargs):
-        if not self._in_api_range(kwargs):
-            return register_cli_argument(self._scope, args[0], ignore_type)
-
-        return register_cli_argument(self._scope, *args, **kwargs)
-
-    def reg_extra_arg(self, *args, **kwargs):
-        return register_extra_cli_argument(self._scope, *args, **kwargs)
-
-    def ignore(self, argument):
-        return register_cli_argument(self._scope, argument, ignore_type)
-
-    def arg_group(self, name):
-        return ArgumentGroupContext(self._scope, name)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
-
-    @staticmethod
-    def _in_api_range(kwargs):
-        resource_type = kwargs.pop('resource_type', None)
-        max_api = kwargs.pop('max_api', None)
-        min_api = kwargs.pop('min_api', None)
-        if resource_type and (max_api or min_api):
-            return supported_api_version(resource_type, min_api=min_api, max_api=max_api)
-        return True
-
-
-class ArgumentGroupContext(CommandContext):
-    def __init__(self, scope, name):
-        CommandContext.__init__(self, scope)
-        self._name = name
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        pass
-
-    def reg_arg(self, *args, **kwargs):
-        kwargs['arg_group'] = self._name
-        return CommandContext.reg_arg(self, *args, **kwargs)
-
-    def reg_extra_arg(self, *args, **kwargs):
-        kwargs['arg_group'] = self._name
-        return CommandContext.reg_extra_arg(self, *args, **kwargs)
-
-# COMPLETERS
-
-
-def _get_client(service, parsed_args):
-    account_name = getattr(parsed_args, 'account_name', None) or az_config.get('storage', 'account', None)
-    account_key = getattr(parsed_args, 'account_key', None) or az_config.get('storage', 'key', None)
-    connection_string = getattr(parsed_args, 'connection_string', None) or az_config.get('storage', 'connection_string', None)
-    sas_token = getattr(parsed_args, 'sas_token', None) or az_config.get('storage', 'sas_token', None)
-    return get_storage_data_service_client(
-        service, account_name, account_key, connection_string, sas_token)
-
-
-def get_storage_name_completion_list(service, func, parent=None):
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = _get_client(service, parsed_args)
-        if parent:
-            parent_name = getattr(parsed_args, parent)
-            method = getattr(client, func)
-            items = [x.name for x in method(**{parent: parent_name})]
-        else:
-            items = [x.name for x in getattr(client, func)()]
-        return items
-    return completer
-
-
-def get_storage_acl_name_completion_list(service, container_param, func):
-    def completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-        client = _get_client(service, parsed_args)
-        container_name = getattr(parsed_args, container_param)
-        return list(getattr(client, func)(container_name))
-    return completer
-
-
-def dir_path_completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-    client = _get_client(FileService, parsed_args)
-    share_name = parsed_args.share_name
-    directory_name = prefix or ''
-    try:
-        items = list(client.list_directories_and_files(share_name, directory_name))
-    except AzureMissingResourceHttpError:
-        directory_name = directory_name.rsplit('/', 1)[0] if '/' in directory_name else ''
-        items = list(client.list_directories_and_files(share_name, directory_name))
-
-    dir_list = [x for x in items if not hasattr(x.properties, 'content_length')]
-    path_format = '{}{}/' if directory_name.endswith('/') or not directory_name else '{}/{}/'
-    names = []
-    for d in dir_list:
-        name = path_format.format(directory_name, d.name)
-        names.append(name)
-    return sorted(names)
-
-
-def file_path_completer(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-    client = _get_client(FileService, parsed_args)
-    share_name = parsed_args.share_name
-    directory_name = prefix or ''
-    try:
-        items = list(client.list_directories_and_files(share_name, directory_name))
-    except AzureMissingResourceHttpError:
-        directory_name = directory_name.rsplit('/', 1)[0] if '/' in directory_name else ''
-        items = list(client.list_directories_and_files(share_name, directory_name))
-
-    path_format = '{}{}' if directory_name.endswith('/') or not directory_name else '{}/{}'
-    names = []
-    for i in items:
-        name = path_format.format(directory_name, i.name)
-        if not hasattr(i.properties, 'content_length'):
-            name = '{}/'.format(name)
-        names.append(name)
-    return sorted(names)
-
-# PATH REGISTRATION
-
-
-def register_path_argument(scope, default_file_param=None, options_list=None):
-    path_help = 'The path to the file within the file share.'
-    if default_file_param:
-        path_help = '{} If the file name is omitted, the source file name will be used.'.format(path_help)
-    register_extra_cli_argument(scope, 'path', options_list=options_list or ('--path', '-p'), required=default_file_param is None, help=path_help, validator=get_file_path_validator(default_file_param=default_file_param), completer=file_path_completer)
-    register_cli_argument(scope, 'file_name', ignore_type)
-    register_cli_argument(scope, 'directory_name', ignore_type)
-
-# EXTRA PARAMETER SET REGISTRATION
-
-
-def register_content_settings_argument(scope, settings_class, update, arg_group=None, guess_from_file=None):
-    register_cli_argument(scope, 'content_settings', ignore_type, validator=get_content_setting_validator(settings_class, update, guess_from_file=guess_from_file), arg_group=arg_group)
-    register_extra_cli_argument(scope, 'content_type', default=None, help='The content MIME type.', arg_group=arg_group)
-    register_extra_cli_argument(scope, 'content_encoding', default=None, help='The content encoding type.', arg_group=arg_group)
-    register_extra_cli_argument(scope, 'content_language', default=None, help='The content language.', arg_group=arg_group)
-    register_extra_cli_argument(scope, 'content_disposition', default=None, help='Conveys additional information about how to process the response payload, and can also be used to attach additional metadata.', arg_group=arg_group)
-    register_extra_cli_argument(scope, 'content_cache_control', default=None, help='The cache control string.', arg_group=arg_group)
-    register_extra_cli_argument(scope, 'content_md5', default=None, help='The content\'s MD5 hash.', arg_group=arg_group)
-
-
-def register_source_uri_arguments(scope):
-    register_cli_argument(scope, 'copy_source', options_list=('--source-uri', '-u'), validator=validate_source_uri, required=False, arg_group='Copy Source')
-    register_extra_cli_argument(scope, 'source_sas', default=None, help='The shared access signature for the source storage account.', arg_group='Copy Source')
-    register_extra_cli_argument(scope, 'source_share', default=None, help='The share name for the source storage account.', arg_group='Copy Source')
-    register_extra_cli_argument(scope, 'source_path', default=None, help='The file path for the source storage account.', arg_group='Copy Source')
-    register_extra_cli_argument(scope, 'source_container', default=None, help='The container name for the source storage account.', arg_group='Copy Source')
-    register_extra_cli_argument(scope, 'source_blob', default=None, help='The blob name for the source storage account.', arg_group='Copy Source')
-    register_extra_cli_argument(scope, 'source_snapshot', default=None, help='The blob snapshot for the source storage account.', arg_group='Copy Source')
-    register_extra_cli_argument(scope, 'source_account_name', default=None, help='The storage account name of the source blob.', arg_group='Copy Source')
-    register_extra_cli_argument(scope, 'source_account_key', default=None, help='The storage account key of the source blob.', arg_group='Copy Source')
-
-
-def register_blob_source_uri_arguments(scope):
-    register_cli_argument(scope, 'copy_source', options_list=('--source-uri', '-u'), validator=process_blob_source_uri, required=False, arg_group='Copy Source')
-    register_extra_cli_argument(scope, 'source_sas', default=None, help='The shared access signature for the source storage account.', arg_group='Copy Source')
-    register_extra_cli_argument(scope, 'source_container', default=None, help='The container name for the source storage account.', arg_group='Copy Source')
-    register_extra_cli_argument(scope, 'source_blob', default=None, help='The blob name for the source storage account.', arg_group='Copy Source')
-    register_extra_cli_argument(scope, 'source_snapshot', default=None, help='The blob snapshot for the source storage account.', arg_group='Copy Source')
-    register_extra_cli_argument(scope, 'source_account_name', default=None, help='The storage account name of the source blob.', arg_group='Copy Source')
-    register_extra_cli_argument(scope, 'source_account_key', default=None, help='The storage account key of the source blob.', arg_group='Copy Source')
-
-
-# CUSTOM CHOICE LISTS
-
-blob_types = {'block': BlockBlobService, 'page': PageBlobService, 'append': AppendBlobService}
-delete_snapshot_types = {'include': DeleteSnapshot.Include, 'only': DeleteSnapshot.Only}
-table_payload_formats = {'none': TablePayloadFormat.JSON_NO_METADATA, 'minimal': TablePayloadFormat.JSON_MINIMAL_METADATA, 'full': TablePayloadFormat.JSON_FULL_METADATA}
-
-# ARGUMENT TYPES
-
-account_name_type = CliArgumentType(options_list=('--account-name', '-n'), help='The storage account name.', completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'), id_part='name')
-blob_name_type = CliArgumentType(options_list=('--blob-name', '-b'), help='The blob name.', completer=get_storage_name_completion_list(BaseBlobService, 'list_blobs', parent='container_name'))
-container_name_type = CliArgumentType(options_list=('--container-name', '-c'), help='The container name.', completer=get_storage_name_completion_list(BaseBlobService, 'list_containers'))
-directory_type = CliArgumentType(options_list=('--directory-name', '-d'), help='The directory name.', completer=get_storage_name_completion_list(FileService, 'list_directories_and_files', parent='share_name'))
-file_name_type = CliArgumentType(options_list=('--file-name', '-f'), completer=get_storage_name_completion_list(FileService, 'list_directories_and_files', parent='share_name'))
-share_name_type = CliArgumentType(options_list=('--share-name', '-s'), help='The file share name.', completer=get_storage_name_completion_list(FileService, 'list_shares'))
-table_name_type = CliArgumentType(options_list=('--table-name', '-t'), completer=get_storage_name_completion_list(TableService, 'list_tables'))
-queue_name_type = CliArgumentType(options_list=('--queue-name', '-q'), help='The queue name.', completer=get_storage_name_completion_list(QueueService, 'list_queues'))
-
-# PARAMETER REGISTRATIONS
-
-register_cli_argument('storage', 'directory_name', directory_type)
-register_cli_argument('storage', 'share_name', share_name_type)
-register_cli_argument('storage', 'table_name', table_name_type)
-register_cli_argument('storage', 'retry_wait', options_list=('--retry-interval',))
-register_cli_argument('storage', 'progress_callback', ignore_type)
-register_cli_argument('storage', 'metadata', nargs='+', help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.', validator=validate_metadata)
-register_cli_argument('storage', 'timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
-
-register_cli_argument('storage', 'if_modified_since', help='Alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')', type=get_datetime_type(False), arg_group='Pre-condition')
-register_cli_argument('storage', 'if_unmodified_since', help='Alter only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')', type=get_datetime_type(False), arg_group='Pre-condition')
-register_cli_argument('storage', 'if_match', arg_group='Pre-condition')
-register_cli_argument('storage', 'if_none_match', arg_group='Pre-condition')
-
-register_cli_argument('storage', 'container_name', container_name_type)
-for item in ['check-name', 'delete', 'list', 'show', 'show-usage', 'update', 'keys']:
-    register_cli_argument('storage account {}'.format(item), 'account_name', account_name_type, options_list=('--name', '-n'))
-
-register_cli_argument('storage account show-connection-string', 'account_name', account_name_type, options_list=('--name', '-n'))
-register_cli_argument('storage account show-connection-string', 'protocol', help='The default endpoint protocol.', **enum_choice_list(['http', 'https']))
-register_cli_argument('storage account show-connection-string', 'key_name', options_list=('--key',), help='The key to use.', **enum_choice_list(list(storage_account_key_options.keys())))
-for item in ['blob', 'file', 'queue', 'table']:
-    register_cli_argument('storage account show-connection-string', '{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
-
-
-def register_common_storage_account_options(context):
-    context.reg_arg('https_only', help='Allows https traffic only to storage service.', **three_state_flag())
-    context.reg_arg('sku', help='The storage account SKU.', **model_choice_list(ResourceType.MGMT_STORAGE, 'SkuName'))
-    context.reg_arg('access_tier', help='The access tier used for billing StandardBlob accounts. Cannot be set for '
-                                        'StandardLRS, StandardGRS, StandardRAGRS, or PremiumLRS account types. It is '
-                                        'required for StandardBlob accounts during creation',
-                    **model_choice_list(ResourceType.MGMT_STORAGE, 'AccessTier'))
-
-    # after API 2016-12-01
-    if supported_api_version(resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01'):
-        encryption_services_model = get_sdk(ResourceType.MGMT_STORAGE, 'models#EncryptionServices')
-        if encryption_services_model:
-
-            encryption_choices = []
-            for attribute in encryption_services_model._attribute_map.keys():  # pylint: disable=protected-access
-                if not encryption_services_model._validation.get(attribute, {}).get('readonly'):  # pylint: disable=protected-access
-                    # skip readonly attributes, which are not for input
-                    encryption_choices.append(attribute)
-
-            context.reg_arg('encryption_services', nargs='+', help='Specifies which service(s) to encrypt.',
-                            validator=validate_encryption_services, **enum_choice_list(encryption_choices))
-
-    # after API 2017-06-01
-    if supported_api_version(resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01'):
-        context.reg_arg('assign_identity', action='store_true',
-                        help='Generate and assign a new Storage Account Identity for this storage account for use with '
-                             'key management services like Azure KeyVault.')
-
-        # the options of encryption key sources are hardcoded since there isn't a enum represents them in the SDK.
-        context.reg_arg('encryption_key_source', help='The encryption keySource (provider). Default: Microsoft.Storage',
-                        validator=validate_encryption_source,
-                        **enum_choice_list(['Microsoft.Storage', 'Microsoft.Keyvault']))
-
-
-with CommandContext('storage account create') as c:
-    register_common_storage_account_options(c)
-    c.reg_arg('location', location_type, validator=get_default_location_from_resource_group)
-    c.reg_arg('account_type', help='The storage account type',
-              **model_choice_list(ResourceType.MGMT_STORAGE, 'AccountType'))
-    c.reg_arg('account_name', account_name_type, options_list=('--name', '-n'), completer=None)
-    c.reg_arg('kind', help='Indicates the type of storage account.',
-              default=enum_default(ResourceType.MGMT_STORAGE, 'Kind', 'storage'),
-              **model_choice_list(ResourceType.MGMT_STORAGE, 'Kind'))
-    c.reg_arg('tags', tags_type)
-    c.reg_arg('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
-    c.reg_arg('sku', help='The storage account SKU.', default=enum_default(ResourceType.MGMT_STORAGE, 'SkuName', 'standard_ragrs'),
-              **model_choice_list(ResourceType.MGMT_STORAGE, 'SkuName'))
-
-with CommandContext('storage account update') as c:
-    register_common_storage_account_options(c)
-    c.reg_arg('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source. Use "" to '
-                                    'clear existing value.',
-              validator=validate_custom_domain)
-    c.reg_arg('use_subdomain', help='Specify whether to use indirect CNAME validation.',
-              **enum_choice_list(['true', 'false']))
-    c.reg_arg('tags', tags_type, default=None)
-
-    # after API 2017-06-01
-    if supported_api_version(resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01'):
-        c.reg_arg('encryption_key_vault_properties', ignore_type)
-
-        with c.arg_group('Customer managed key') as g:
-            g.reg_extra_arg('encryption_key_name', help='The name of the KeyVault key.')
-            g.reg_extra_arg('encryption_key_vault', help='The Uri of the KeyVault')
-            g.reg_extra_arg('encryption_key_version', help='The version of the KeyVault key')
-
-with VersionConstraint(ResourceType.MGMT_STORAGE, min_api='2017-06-01') as c:
-    for item in ['create', 'update']:
-        register_cli_argument('storage account {}'.format(item), 'bypass', nargs='+', validator=validate_bypass, arg_group='Network Rule', help='Bypass traffic for space-separated uses.', **model_choice_list(ResourceType.MGMT_STORAGE, 'Bypass'))
-        register_cli_argument('storage account {}'.format(item), 'default_action', arg_group='Network Rule', help='Default action to apply when no rule matches.', **model_choice_list(ResourceType.MGMT_STORAGE, 'DefaultAction'))
-
-    register_cli_argument('storage account network-rule', 'storage_account_name', account_name_type)
-    register_cli_argument('storage account network-rule', 'ip_address', help='IPv4 address or CIDR range.')
-    register_cli_argument('storage account network-rule', 'subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
-    register_cli_argument('storage account network-rule', 'vnet_name', help='Name of a virtual network.', validator=validate_subnet)
-
-register_cli_argument('storage account keys renew', 'key_name', options_list=('--key',), help='The key to regenerate.', validator=validate_key, **enum_choice_list(list(storage_account_key_options.keys())))
-register_cli_argument('storage account keys renew', 'account_name', account_name_type, id_part=None)
-register_cli_argument('storage account keys list', 'account_name', account_name_type, id_part=None)
-
-register_cli_argument('storage blob', 'blob_name', blob_name_type, options_list=('--name', '-n'))
-
-for item in ['container', 'blob']:
-    register_cli_argument('storage {} lease'.format(item), 'lease_duration', type=int)
-    register_cli_argument('storage {} lease'.format(item), 'lease_break_period', type=int)
-
-register_cli_argument('storage blob lease', 'blob_name', blob_name_type)
-
-for source in ['destination', 'source']:
-    register_cli_argument('storage blob copy', '{}_if_modified_since'.format(source), arg_group='Pre-condition')
-    register_cli_argument('storage blob copy', '{}_if_unmodified_since'.format(source), arg_group='Pre-condition')
-    register_cli_argument('storage blob copy', '{}_if_match'.format(source), arg_group='Pre-condition')
-    register_cli_argument('storage blob copy', '{}_if_none_match'.format(source), arg_group='Pre-condition')
-register_cli_argument('storage blob copy', 'container_name', container_name_type, options_list=('--destination-container', '-c'))
-register_cli_argument('storage blob copy', 'blob_name', blob_name_type, options_list=('--destination-blob', '-b'), help='Name of the destination blob. If the exists, it will be overwritten.')
-register_cli_argument('storage blob copy', 'source_lease_id', arg_group='Copy Source')
-
-# BLOB INCREMENTAL COPY PARAMETERS
-register_blob_source_uri_arguments('storage blob incremental-copy start')
-register_cli_argument('storage blob incremental-copy start', 'destination_if_modified_since', arg_group='Pre-condition')
-register_cli_argument('storage blob incremental-copy start', 'destination_if_unmodified_since', arg_group='Pre-condition')
-register_cli_argument('storage blob incremental-copy start', 'destination_if_match', arg_group='Pre-condition')
-register_cli_argument('storage blob incremental-copy start', 'destination_if_none_match', arg_group='Pre-condition')
-register_cli_argument('storage blob incremental-copy start', 'container_name', container_name_type, options_list=('--destination-container', '-c'))
-register_cli_argument('storage blob incremental-copy start', 'blob_name', blob_name_type, options_list=('--destination-blob', '-b'), help='Name of the destination blob. If the exists, it will be overwritten.')
-register_cli_argument('storage blob incremental-copy start', 'source_lease_id', arg_group='Copy Source')
-
-register_cli_argument('storage blob delete', 'delete_snapshots', **enum_choice_list(list(delete_snapshot_types.keys())))
-
-register_cli_argument('storage blob exists', 'blob_name', required=True)
-
-with CommandContext('storage blob list') as c:
-    c.reg_arg('include',
-              help='Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots. Can be combined.',
-              validator=validate_included_datasets)
-    c.reg_arg('num_results', type=int)
-    c.reg_arg('marker', ignore_type)  # https://github.com/Azure/azure-cli/issues/3745
-
-for item in ['download', 'upload']:
-    register_cli_argument('storage blob {}'.format(item), 'file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
-    register_cli_argument('storage blob {}'.format(item), 'max_connections', type=int)
-    with VersionConstraint(ResourceType.DATA_STORAGE, min_api='2016-05-31') as c:
-        c.register_cli_argument('storage blob {}'.format(item), 'validate_content', action='store_true')
-
-for item in ['update', 'upload', 'upload-batch']:
-    register_content_settings_argument('storage blob {}'.format(item), BlobContentSettings, item == 'update')
-
-with CommandContext('storage blob upload') as c:
-    c.reg_arg('blob_type', help="Defaults to 'page' for *.vhd files, or 'block' otherwise.",
-              options_list=('--type', '-t'), validator=validate_blob_type, **enum_choice_list(blob_types.keys()))
-    c.reg_arg('maxsize_condition', help='The max length in bytes permitted for an append blob.')
-    c.reg_arg('validate_content',
-              help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by the '
-                   'service when the chunk has arrived.',
-              resource_type=ResourceType.DATA_STORAGE,
-              min_api='2016-05-31')
-
-    from azure.cli.command_modules.storage.util import get_blob_tier_names
-    c.reg_arg('tier',
-              help='A page blob tier value to set the blob to. The tier correlates to the size of the blob and number '
-                   'of allowed IOPS. This is only applicable to page blobs on premium storage accounts.',
-              resource_type=ResourceType.DATA_STORAGE,
-              min_api='2017-04-17',
-              validator=page_blob_tier_validator,
-              **enum_choice_list(get_blob_tier_names('PremiumPageBlobTier')))
-
-with CommandContext('storage blob set-tier') as c:
-    c.reg_arg('blob_type', help="The blob's type", options_list=('--type', '-t'), **enum_choice_list(['block', 'page']))
-    c.reg_arg('tier', help='The tier value to set the blob to.', validator=blob_tier_validator)
-    c.reg_arg('timeout', help='The timeout parameter is expressed in seconds. This method may make multiple calls to '
-                              'the Azure service and the timeout will apply to each call individually.',
-              type=int)
-
-
-# TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
-register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',), help=argparse.SUPPRESS)
-
-# BLOB DOWNLOAD-BATCH PARAMETERS
-register_cli_argument('storage blob download-batch', 'destination', options_list=('--destination', '-d'))
-register_cli_argument('storage blob download-batch', 'source', options_list=('--source', '-s'),
-                      validator=process_blob_download_batch_parameters)
-
-register_cli_argument('storage blob download-batch', 'source_container_name', ignore_type)
-
-
-# BLOB DELETE-BATCH PARAMETERS
-register_cli_argument('storage blob delete-batch', 'source', options_list=('--source', '-s'),
-                      validator=process_blob_batch_source_parameters)
-
-register_cli_argument('storage blob delete-batch', 'source_container_name', ignore_type)
-register_cli_argument('storage blob delete-batch', 'delete_snapshots', **enum_choice_list(list(delete_snapshot_types.keys())))
-
-
-# BLOB UPLOAD-BATCH PARAMETERS
-register_cli_argument('storage blob upload-batch', 'destination', options_list=('--destination', '-d'))
-register_cli_argument('storage blob upload-batch', 'source', options_list=('--source', '-s'),
-                      validator=process_blob_upload_batch_parameters)
-
-register_cli_argument('storage blob upload-batch', 'source_files', ignore_type)
-register_cli_argument('storage blob upload-batch', 'destination_container_name', ignore_type)
-
-register_cli_argument('storage blob upload-batch', 'blob_type',
-                      help="Defaults to 'page' for *.vhd files, or 'block' otherwise. The setting will override blob types for every file.",
-                      options_list=('--type', '-t'),
-                      **enum_choice_list(blob_types.keys()))
-register_cli_argument('storage blob upload-batch', 'maxsize_condition',
-                      help='The max length in bytes permitted for an append blob.',
-                      arg_group='Content Control')
-with VersionConstraint(ResourceType.DATA_STORAGE, min_api='2016-05-31') as c:
-    c.register_cli_argument('storage blob upload-batch', 'validate_content',
-                            help='Specifies that an MD5 hash shall be calculated for each chunk of the blob and verified by' +
-                            ' the service when the chunk has arrived.',
-                            arg_group='Content Control')
-register_cli_argument('storage blob upload-batch', 'lease_id', help='Required if the blob has an active lease')
-register_cli_argument('storage blob upload-batch', 'content_encoding', arg_group='Content Control')
-register_cli_argument('storage blob upload-batch', 'content_disposition', arg_group='Content Control')
-register_cli_argument('storage blob upload-batch', 'content_md5', arg_group='Content Control')
-register_cli_argument('storage blob upload-batch', 'content_type', arg_group='Content Control')
-register_cli_argument('storage blob upload-batch', 'content_cache_control', arg_group='Content Control')
-register_cli_argument('storage blob upload-batch', 'content_language', arg_group='Content Control')
-register_cli_argument('storage blob upload-batch', 'max_connections', type=int)
-
-# BLOB COPY-BATCH PARAMETERS
-
-with CommandContext('storage blob copy start-batch') as c:
-    c.reg_arg('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
-
-    with c.arg_group('Copy Source') as group:
-        group.reg_extra_arg('source_account_name')
-        group.reg_extra_arg('source_account_key')
-        group.reg_extra_arg('source_uri')
-        group.reg_arg('source_sas')
-        group.reg_arg('source_container')
-        group.reg_arg('source_share')
-        group.reg_arg('prefix', validator=process_blob_copy_batch_namespace)
-
-# FILE UPLOAD-BATCH PARAMETERS
-with CommandContext('storage file upload-batch') as c:
-    c.reg_arg('source', options_list=('--source', '-s'), validator=process_file_upload_batch_parameters)
-    c.reg_arg('destination', options_list=('--destination', '-d'))
-
-    with c.arg_group('Download Control') as group:
-        group.reg_arg('max_connections')
-
-        with VersionConstraint(ResourceType.DATA_STORAGE, min_api='2016-05-31') as vc:
-            vc.register_cli_argument('storage file upload-batch', 'validate_content')
-
-register_content_settings_argument('storage file upload-batch', FileContentSettings,
-                                   update=False, arg_group='Content Settings')
-
-# FILE DOWNLOAD-BATCH PARAMETERS
-with CommandContext('storage file download-batch') as c:
-    c.reg_arg('source', options_list=('--source', '-s'), validator=process_file_download_batch_parameters)
-    c.reg_arg('destination', options_list=('--destination', '-d'))
-
-    with c.arg_group('Download Control') as group:
-        group.reg_arg('max_connections')
-
-        with VersionConstraint(ResourceType.DATA_STORAGE, min_api='2016-05-31') as vc:
-            vc.register_cli_argument('storage file download-batch', 'validate_content')
-
-# FILE DELETE-BATCH PARAMETERS
-with CommandContext('storage file delete-batch') as c:
-    c.reg_arg('source', options_list=('--source', '-s'), validator=process_file_batch_source_parameters)
-
-# FILE COPY-BATCH PARAMETERS
-with CommandContext('storage file copy start-batch') as c:
-    c.reg_arg('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
-
-    with c.arg_group('Copy Source') as group:
-        group.reg_extra_arg('source_account_name')
-        group.reg_extra_arg('source_account_key')
-        group.reg_extra_arg('source_uri')
-        group.reg_arg('source_sas')
-        group.reg_arg('source_container')
-        group.reg_arg('source_share')
-
-for item in ['file', 'blob']:
-    register_cli_argument('storage {} url'.format(item), 'protocol', help='Protocol to use.', default='https', **enum_choice_list(['http', 'https']))
-    register_source_uri_arguments('storage {} copy start'.format(item))
-
-register_cli_argument('storage container', 'container_name', container_name_type, options_list=('--name', '-n'))
-register_cli_argument('storage container', 'public_access', validator=validate_public_access, help='Specifies whether data in the container may be accessed publically. By default, container data is private ("off") to the account owner. Use "blob" to allow public read access for blobs. Use "container" to allow public read and list access to the entire container.', **enum_choice_list(public_access_types.keys()))
-
-register_cli_argument('storage container create', 'container_name', container_name_type, options_list=('--name', '-n'), completer=None)
-register_cli_argument('storage container create', 'fail_on_exist', help='Throw an exception if the container already exists.')
-
-register_cli_argument('storage container delete', 'fail_not_exist', help='Throw an exception if the container does not exist.')
-
-register_cli_argument('storage container exists', 'blob_name', ignore_type)
-register_cli_argument('storage container exists', 'snapshot', ignore_type)
-
-register_cli_argument('storage container set-permission', 'signed_identifiers', ignore_type)
-
-register_cli_argument('storage container lease', 'container_name', container_name_type)
-
-register_cli_argument('storage container policy', 'container_name', container_name_type)
-register_cli_argument('storage container policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(BaseBlobService, 'container_name', 'get_container_acl'))
-for item in ['create', 'delete', 'list', 'show', 'update']:
-    register_extra_cli_argument('storage container policy {}'.format(item), 'lease_id', options_list=('--lease-id',), help='The container lease ID.')
-
-register_cli_argument('storage container list', 'marker', ignore_type)  # https://github.com/Azure/azure-cli/issues/3745
-
-register_cli_argument('storage share', 'share_name', share_name_type, options_list=('--name', '-n'))
-
-register_cli_argument('storage share exists', 'directory_name', ignore_type)
-register_cli_argument('storage share exists', 'file_name', ignore_type)
-
-register_cli_argument('storage share policy', 'container_name', share_name_type)
-register_cli_argument('storage share policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(FileService, 'container_name', 'get_share_acl'))
-
-register_cli_argument('storage share list', 'marker', ignore_type)  # https://github.com/Azure/azure-cli/issues/3745
-register_cli_argument('storage share delete', 'delete_snapshots',
-                      help='Specify the deletion strategy when the share has snapshots.',
-                      **enum_choice_list(list(delete_snapshot_types.keys())))
-
-register_cli_argument('storage directory', 'directory_name', directory_type, options_list=('--name', '-n'))
-
-register_cli_argument('storage directory exists', 'directory_name', required=True)
-register_cli_argument('storage directory exists', 'file_name', ignore_type)
-
-register_cli_argument('storage file', 'file_name', file_name_type, options_list=('--name', '-n'))
-register_cli_argument('storage file', 'directory_name', directory_type, required=False)
-
-register_cli_argument('storage file copy', 'share_name', share_name_type, options_list=('--destination-share', '-s'), help='Name of the destination share. The share must exist.')
-register_path_argument('storage file copy start', options_list=('--destination-path', '-p'))
-register_path_argument('storage file copy cancel', options_list=('--destination-path', '-p'))
-
-register_path_argument('storage file delete')
-
-register_cli_argument('storage file download', 'file_path', options_list=('--dest',), type=file_type, help='Path of the file to write to. The source filename will be used if not specified.', required=False, validator=process_file_download_namespace, completer=FilesCompleter())
-register_cli_argument('storage file download', 'path', validator=None)  # validator called manually from process_file_download_namespace so remove the automatic one
-register_cli_argument('storage file download', 'progress_callback', ignore_type)
-register_path_argument('storage file download')
-
-register_cli_argument('storage file exists', 'file_name', required=True)
-register_path_argument('storage file exists')
-
-register_path_argument('storage file generate-sas')
-
-register_cli_argument('storage file list', 'directory_name', options_list=('--path', '-p'), help='The directory path within the file share.', completer=dir_path_completer)
-
-register_path_argument('storage file metadata show')
-register_path_argument('storage file metadata update')
-
-register_cli_argument('storage file resize', 'content_length', options_list=('--size',))
-register_path_argument('storage file resize')
-
-register_path_argument('storage file show')
-
-register_content_settings_argument('storage file update', FileContentSettings, update=True)
-register_content_settings_argument('storage file upload', FileContentSettings, update=False, guess_from_file='local_file_path')
-
-register_path_argument('storage file update')
-
-register_cli_argument('storage file upload', 'progress_callback', ignore_type)
-register_cli_argument('storage file upload', 'local_file_path', options_list=('--source',), type=file_type, completer=FilesCompleter())
-register_path_argument('storage file upload', default_file_param='local_file_path')
-
-register_path_argument('storage file url')
-
-for item in ['container', 'share', 'table', 'queue']:
-    register_cli_argument('storage {} policy'.format(item), 'start', type=get_datetime_type(True), help='start UTC datetime (Y-m-d\'T\'H:M:S\'Z\'). Defaults to time of request.')
-    register_cli_argument('storage {} policy'.format(item), 'expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
-
-register_cli_argument('storage table', 'table_name', table_name_type, options_list=('--name', '-n'))
-
-register_cli_argument('storage table batch', 'table_name', table_name_type)
-
-register_cli_argument('storage table create', 'table_name', table_name_type, options_list=('--name', '-n'), completer=None)
-register_cli_argument('storage table create', 'fail_on_exist', help='Throw an exception if the table already exists.')
-
-register_cli_argument('storage table policy', 'container_name', table_name_type)
-register_cli_argument('storage table policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(TableService, 'container_name', 'get_table_acl'))
-
-register_cli_argument('storage entity', 'entity', options_list=('--entity', '-e'), validator=validate_entity, nargs='+')
-register_cli_argument('storage entity', 'property_resolver', ignore_type)
-register_cli_argument('storage entity', 'select', nargs='+', help='Space separated list of properties to return for each entity.', validator=validate_select)
-
-register_cli_argument('storage entity insert', 'if_exists', **enum_choice_list(['fail', 'merge', 'replace']))
-
-register_cli_argument('storage entity query', 'accept', help='Specifies how much metadata to include in the response payload.', default='minimal', validator=validate_accept, **enum_choice_list(table_payload_formats.keys()))
-
-register_cli_argument('storage queue', 'queue_name', queue_name_type, options_list=('--name', '-n'))
-
-register_cli_argument('storage queue create', 'queue_name', queue_name_type, options_list=('--name', '-n'), completer=None)
-
-register_cli_argument('storage queue policy', 'container_name', queue_name_type)
-register_cli_argument('storage queue policy', 'policy_name', options_list=('--name', '-n'), help='The stored access policy name.', completer=get_storage_acl_name_completion_list(QueueService, 'container_name', 'get_queue_acl'))
-
-register_cli_argument('storage message', 'queue_name', queue_name_type)
-register_cli_argument('storage message', 'message_id', options_list=('--id',))
-register_cli_argument('storage message', 'content', type=unicode_string, help='Message content, up to 64KB in size.')
-
-for item in ['account', 'blob', 'container', 'file', 'share', 'table', 'queue']:
-    register_cli_argument('storage {} generate-sas'.format(item), 'ip', help='Specifies the IP address or range of IP addresses from which to accept requests. Supports only IPv4 style addresses.', type=ipv4_range_type)
-    register_cli_argument('storage {} generate-sas'.format(item), 'expiry', help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes invalid. Do not use if a stored access policy is referenced with --id that specifies this value.', type=get_datetime_type(True))
-    register_cli_argument('storage {} generate-sas'.format(item), 'start', help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes valid. Do not use if a stored access policy is referenced with --id that specifies this value. Defaults to the time of the request.', type=get_datetime_type(True))
-    register_cli_argument('storage {} generate-sas'.format(item), 'protocol', options_list=('--https-only',), help='Only permit requests made with the HTTPS protocol. If omitted, requests from both the HTTP and HTTPS protocol are permitted.', action='store_const', const='https')
-
-help_format = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is referenced with --id that specifies this value. Can be combined.'
-policies = [
-    {'name': 'account', 'container': '', 'class': '', 'sas_perm_help': 'The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(get_permission_help_string(AccountPermissions)), 'policy_perm_help': '', 'perm_validator': get_permission_validator(AccountPermissions)},
-    {'name': 'container', 'container': 'container', 'class': BaseBlobService, 'sas_perm_help': help_format.format(get_permission_help_string(ContainerPermissions)), 'policy_perm_help': 'Allowed values: {}. Can be combined.'.format(get_permission_help_string(ContainerPermissions)), 'perm_validator': get_permission_validator(ContainerPermissions)},
-    {'name': 'blob', 'container': 'container', 'class': BaseBlobService, 'sas_perm_help': help_format.format(get_permission_help_string(BlobPermissions)), 'policy_perm_help': '', 'perm_validator': get_permission_validator(BlobPermissions)},
-    {'name': 'share', 'container': 'share', 'class': FileService, 'sas_perm_help': help_format.format(get_permission_help_string(SharePermissions)), 'policy_perm_help': 'Allowed values: {}. Can be combined.'.format(get_permission_help_string(SharePermissions)), 'perm_validator': get_permission_validator(SharePermissions)},
-    {'name': 'file', 'container': 'share', 'class': FileService, 'sas_perm_help': help_format.format(get_permission_help_string(FilePermissions)), 'policy_perm_help': '', 'perm_validator': get_permission_validator(FilePermissions)},
-    {'name': 'table', 'container': 'table', 'class': TableService, 'sas_perm_help': help_format.format('(r)ead/query (a)dd (u)pdate (d)elete'), 'policy_perm_help': 'Allowed values: {}. Can be combined.'.format('(r)ead/query (a)dd (u)pdate (d)elete'), 'perm_validator': table_permission_validator},
-    {'name': 'queue', 'container': 'queue', 'class': QueueService, 'sas_perm_help': help_format.format(get_permission_help_string(QueuePermissions)), 'policy_perm_help': 'Allowed values: {}. Can be combined.'.format(get_permission_help_string(QueuePermissions)), 'perm_validator': get_permission_validator(QueuePermissions)}
-]
-for item in policies:
-    register_cli_argument('storage {} generate-sas'.format(item['name']), 'id', options_list=('--policy-name',), help='The name of a stored access policy within the {}\'s ACL.'.format(item['container']), completer=get_storage_acl_name_completion_list(item['class'], '{}_name'.format(item['container']), 'get_{}_acl'.format(item['container'])))
-    register_cli_argument('storage {} generate-sas'.format(item['name']), 'permission', options_list=('--permissions',), help=item['sas_perm_help'], validator=item['perm_validator'])
-    register_cli_argument('storage {} policy'.format(item['name']), 'permission', options_list=('--permissions',), help=item['policy_perm_help'], validator=item['perm_validator'])
-
-register_cli_argument('storage account generate-sas', 'services', help='The storage services the SAS is applicable for. Allowed values: (b)lob (f)ile (q)ueue (t)able. Can be combined.', type=services_type)
-register_cli_argument('storage account generate-sas', 'resource_types', help='The resource types the SAS is applicable for. Allowed values: (s)ervice (c)ontainer (o)bject. Can be combined.', type=resource_type_type)
-register_cli_argument('storage account generate-sas', 'expiry', help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes invalid.', type=get_datetime_type(True))
-register_cli_argument('storage account generate-sas', 'start', help='Specifies the UTC datetime (Y-m-d\'T\'H:M\'Z\') at which the SAS becomes valid. Defaults to the time of the request.', type=get_datetime_type(True))
-register_cli_argument('storage account generate-sas', 'account_name', account_name_type, options_list=('--account-name',), help='Storage account name. Must be used in conjunction with either storage account key or a SAS token. Environment Variable: AZURE_STORAGE_ACCOUNT')
-register_cli_argument('storage account generate-sas', 'sas_token', ignore_type)
-
-
-#######################################
-# storage cors commands parameters
-#######################################
-
-with CommandContext('storage cors') as c:
-    c.reg_arg('services', validator=get_char_options_validator('bfqt', 'services'))
-
-
-with CommandContext('storage cors list') as c:
-    c.reg_arg('services', validator=get_char_options_validator('bfqt', 'services'), default='bqft', required=False)
-
-
-with CommandContext('storage cors add') as c:
-    c.reg_arg('max_age')
-    c.reg_arg('origins', nargs='+')
-    c.reg_arg('methods', nargs='+', **enum_choice_list(['DELETE', 'GET', 'HEAD', 'MERGE', 'POST', 'OPTIONS', 'PUT']))
-    c.reg_arg('allowed_headers', nargs='+')
-    c.reg_arg('exposed_headers', nargs='+')
-
-
-#######################################
-# storage logging commands parameters
-#######################################
-
-with CommandContext('storage logging show') as c:
-    c.reg_arg('services', validator=get_char_options_validator('bqt', 'services'), required=False, default='bqt',
-              help='The storage services from which to retrieve logging info: (b)lob (q)ueue (t)able. Can be combined.')
-
-
-with CommandContext('storage logging update') as c:
-    c.reg_arg('services', validator=get_char_options_validator('bqt', 'services'),
-              help='The storage service(s) for which to update logging info: (b)lob (q)ueue (t)able. Can be combined.')
-    c.reg_arg('log', validator=get_char_options_validator('rwd', 'log'),
-              help='The operations for which to enable logging: (r)ead (w)rite (d)elete. Can be combined.')
-    c.reg_arg('retention', type=int, help='Number of days for which to retain logs. 0 to disable.')
-
-
-#######################################
-# storage metrics commands parameters
-#######################################
-
-with CommandContext('storage metrics show') as c:
-    c.reg_arg('services', validator=get_char_options_validator('bfqt', 'services'), required=False, default='bfqt',
-              help='The storage services from which to retrieve metrics info: (b)lob (f)ile (q)ueue (t)able. '
-                   'Can be combined.')
-    c.reg_arg('interval',
-              help='Filter the set of metrics to retrieve by time interval.',
-              **enum_choice_list(['hour', 'minute', 'both']))
-
-
-with CommandContext('storage metrics update') as c:
-    c.reg_arg('services', validator=get_char_options_validator('bfqt', 'services'),
-              help='The storage service(s) for which to update metrics info: (b)lob (f)ile (q)ueue (t)able. '
-                   'Can be combined.')
-    c.reg_arg('hour',
-              help='Update the hourly metrics.',
-              validator=process_metric_update_namespace, **enum_choice_list(['true', 'false']))
-    c.reg_arg('minute',
-              help='Update the by-minute metrics.', **enum_choice_list(['true', 'false']))
-    c.reg_arg('api',
-              help='Specify whether to include API in metrics. Applies to both hour and minute metrics if both are '
-                   'specified. Must be specified if hour or minute metrics are enabled and being updated.',
-              **enum_choice_list(['true', 'false']))
-    c.reg_arg('retention',
-              type=int, help='Number of days for which to retain metrics. 0 to disable. Applies to both hour and minute'
-                             ' metrics if both are specified.')
+from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type, get_enum_type)
+
+from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
+                          resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
+                          validate_included_datasets, validate_custom_domain, validate_container_public_access,
+                          validate_table_payload_format, validate_key,
+                          storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
+                          get_char_options_validator, validate_bypass)
+
+
+def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
+    from azure.cli.core.commands.parameters import get_resource_name_completion_list
+    from .sdkutil import get_table_data_type
+    from .completers import get_storage_name_completion_list
+
+    t_base_blob_service = self.get_sdk('blob.baseblobservice#BaseBlobService')
+    t_file_service = self.get_sdk('file#FileService')
+    t_queue_service = self.get_sdk('queue#QueueService')
+    t_table_service = get_table_data_type(self.cli_ctx, 'table', 'TableService')
+
+    acct_name_type = CLIArgumentType(options_list=['--account-name', '-n'], help='The storage account name.',
+                                     id_part='name',
+                                     completer=get_resource_name_completion_list('Microsoft.Storage/storageAccounts'))
+    blob_name_type = CLIArgumentType(options_list=['--blob-name', '-b'], help='The blob name.',
+                                     completer=get_storage_name_completion_list(t_base_blob_service, 'list_blobs',
+                                                                                parent='container_name'))
+
+    container_name_type = CLIArgumentType(options_list=['--container-name', '-c'], help='The container name.',
+                                          completer=get_storage_name_completion_list(t_base_blob_service,
+                                                                                     'list_containers'))
+    directory_type = CLIArgumentType(options_list=['--directory-name', '-d'], help='The directory name.',
+                                     completer=get_storage_name_completion_list(t_file_service,
+                                                                                'list_directories_and_files',
+                                                                                parent='share_name'))
+    file_name_type = CLIArgumentType(options_list=['--file-name', '-f'],
+                                     completer=get_storage_name_completion_list(t_file_service,
+                                                                                'list_directories_and_files',
+                                                                                parent='share_name'))
+    share_name_type = CLIArgumentType(options_list=['--share-name', '-s'], help='The file share name.',
+                                      completer=get_storage_name_completion_list(t_file_service, 'list_shares'))
+    table_name_type = CLIArgumentType(options_list=['--table-name', '-t'],
+                                      completer=get_storage_name_completion_list(t_table_service, 'list_tables'))
+    queue_name_type = CLIArgumentType(options_list=['--queue-name', '-q'], help='The queue name.',
+                                      completer=get_storage_name_completion_list(t_queue_service, 'list_queues'))
+
+    sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
+               'referenced with --id that specifies this value. Can be combined.'
+
+    with self.argument_context('storage') as c:
+        c.argument('container_name', container_name_type)
+        c.argument('directory_name', directory_type)
+        c.argument('share_name', share_name_type)
+        c.argument('table_name', table_name_type)
+        c.argument('retry_wait', options_list=('--retry-interval',))
+        c.ignore('progress_callback')
+        c.argument('metadata', nargs='+',
+                   help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
+                   validator=validate_metadata)
+        c.argument('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+
+    with self.argument_context('storage', arg_group='Precondition') as c:
+        c.argument('if_modified_since', help='Alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
+                   type=get_datetime_type(False))
+        c.argument('if_unmodified_since',
+                   help='Alter only if unmodified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
+                   type=get_datetime_type(False))
+        c.argument('if_match')
+        c.argument('if_none_match')
+
+    for item in ['check-name', 'delete', 'list', 'show', 'show-usage', 'update', 'keys']:
+        with self.argument_context('storage account {}'.format(item)) as c:
+            c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
+
+    with self.argument_context('storage account create') as c:
+        t_account_type, t_sku_name, t_kind = self.get_models('AccountType', 'SkuName', 'Kind',
+                                                             resource_type=ResourceType.MGMT_STORAGE)
+
+        c.register_common_storage_account_options()
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+        c.argument('account_type', help='The storage account type', arg_type=get_enum_type(t_account_type))
+        c.argument('account_name', acct_name_type, options_list=['--name', '-n'], completer=None)
+        c.argument('kind', help='Indicates the type of storage account.',
+                   arg_type=get_enum_type(t_kind, default='storage'))
+        c.argument('tags', tags_type)
+        c.argument('custom_domain', help='User domain assigned to the storage account. Name is the CNAME source.')
+        c.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name, default='standard_ragrs'))
+
+    with self.argument_context('storage account update') as c:
+        c.register_common_storage_account_options()
+        c.argument('custom_domain',
+                   help='User domain assigned to the storage account. Name is the CNAME source. Use "" to clear '
+                        'existing value.',
+                   validator=validate_custom_domain)
+        c.argument('use_subdomain', help='Specify whether to use indirect CNAME validation.',
+                   arg_type=get_enum_type(['true', 'false']))
+        c.argument('tags', tags_type, default=None)
+
+    for scope in ['storage account create', 'storage account update']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01',
+                                   arg_group='Network Rule') as c:
+            t_bypass, t_default_action = self.get_models('Bypass', 'DefaultAction',
+                                                         resource_type=ResourceType.MGMT_STORAGE)
+
+            c.argument('bypass', nargs='+', validator=validate_bypass, arg_type=get_enum_type(t_bypass),
+                       help='Bypass traffic for space-separated uses.')
+            c.argument('default_action', arg_type=get_enum_type(t_default_action),
+                       help='Default action to apply when no rule matches.')
+
+    with self.argument_context('storage account show-connection-string') as c:
+        c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
+        c.argument('protocol', help='The default endpoint protocol.', arg_type=get_enum_type(['http', 'https']))
+        c.argument('key_name', options_list=['--key'], help='The key to use.',
+                   arg_type=get_enum_type(list(storage_account_key_options.keys())))
+        for item in ['blob', 'file', 'queue', 'table']:
+            c.argument('{}_endpoint'.format(item), help='Custom endpoint for {}s.'.format(item))
+
+    with self.argument_context('storage account keys renew') as c:
+        c.argument('key_name', options_list=['--key'], help='The key to regenerate.', validator=validate_key,
+                   arg_type=get_enum_type(list(storage_account_key_options.keys())))
+        c.argument('account_name', acct_name_type, id_part=None)
+
+    with self.argument_context('storage account keys list') as c:
+        c.argument('account_name', acct_name_type, id_part=None)
+
+    with self.argument_context('storage account network-rule') as c:
+        from ._validators import validate_subnet
+        c.argument('storage_account_name', acct_name_type, id_part=None)
+        c.argument('ip_address', help='IPv4 address or CIDR range.')
+        c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+        c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
+
+    with self.argument_context('storage account generate-sas') as c:
+        t_account_permissions = self.get_sdk('common.models#AccountPermissions')
+        c.register_sas_arguments()
+        c.argument('services', type=services_type(self))
+        c.argument('resource_types', type=resource_type_type(self))
+        c.argument('expiry', type=get_datetime_type(True))
+        c.argument('start', type=get_datetime_type(True))
+        c.argument('account_name', acct_name_type, options_list=('--account-name',))
+        c.argument('permission', options_list=('--permissions',),
+                   help='The permissions the SAS grants. Allowed values: {}. Can be combined.'.format(
+                       get_permission_help_string(t_account_permissions)),
+                   validator=get_permission_validator(t_account_permissions))
+        c.ignore('sas_token')
+
+    with self.argument_context('storage logging show') as c:
+        c.extra('services', validator=get_char_options_validator('bqt', 'services'), default='bqt')
+
+    with self.argument_context('storage logging update') as c:
+        c.extra('services', validator=get_char_options_validator('bqt', 'services'), options_list='--services',
+                required=True)
+        c.argument('log', validator=get_char_options_validator('rwd', 'log'))
+        c.argument('retention', type=int)
+
+    with self.argument_context('storage metrics show') as c:
+        c.extra('services', validator=get_char_options_validator('bfqt', 'services'), default='bfqt')
+        c.argument('interval', arg_type=get_enum_type(['hour', 'minute', 'both']))
+
+    with self.argument_context('storage metrics update') as c:
+        c.extra('services', validator=get_char_options_validator('bfqt', 'services'), options_list='--services',
+                required=True)
+        c.argument('hour', validator=process_metric_update_namespace, arg_type=get_enum_type(['true', 'false']))
+        c.argument('minute', arg_type=get_enum_type(['true', 'false']))
+        c.argument('api', arg_type=get_enum_type(['true', 'false']))
+        c.argument('retention', type=int)
+
+    with self.argument_context('storage blob') as c:
+        c.argument('blob_name', options_list=('--name', '-n'), arg_type=blob_name_type)
+
+    with self.argument_context('storage blob list') as c:
+        c.argument('include', validator=validate_included_datasets)
+        c.argument('num_results', type=int)
+        c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745
+
+    with self.argument_context('storage blob generate-sas') as c:
+        from .completers import get_storage_acl_name_completion_list
+
+        t_blob_permissions = self.get_sdk('blob.models#BlobPermissions')
+        c.register_sas_arguments()
+        c.argument('id', options_list='--policy-name',
+                   help='The name of a stored access policy within the container\'s ACL.',
+                   completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
+                                                                  'get_container_acl'))
+        c.argument('permission', options_list='--permissions',
+                   help=sas_help.format(get_permission_help_string(t_blob_permissions)),
+                   validator=get_permission_validator(t_blob_permissions))
+
+    with self.argument_context('storage blob update') as c:
+        t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
+        c.register_content_settings_argument(t_blob_content_settings, update=True)
+
+    with self.argument_context('storage blob exists') as c:
+        c.argument('blob_name', required=True)
+
+    with self.argument_context('storage blob url') as c:
+        c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
+
+    with self.argument_context('storage blob set-tier') as c:
+        from azure.cli.command_modules.storage._validators import blob_tier_validator
+
+        c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(('block', 'page')))
+        c.argument('tier', validator=blob_tier_validator)
+        c.argument('timeout', type=int)
+
+    with self.argument_context('storage blob upload') as c:
+        from ._validators import page_blob_tier_validator
+        from .sdkutil import get_blob_types, get_blob_tier_names
+
+        t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
+        c.register_content_settings_argument(t_blob_content_settings, update=False)
+
+        c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
+        c.argument('max_connections', type=int)
+        c.argument('blob_type', options_list=('--type', '-t'), validator=validate_blob_type,
+                   arg_type=get_enum_type(get_blob_types()))
+        c.argument('validate_content', action='store_true', min_api='2016-05-31')
+        # TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
+        # register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',),
+        #                              help=argparse.SUPPRESS)
+        c.argument('tier', validator=page_blob_tier_validator,
+                   arg_type=get_enum_type(get_blob_tier_names(self.cli_ctx, 'PremiumPageBlobTier')),
+                   min_api='2017-04-17')
+
+    with self.argument_context('storage blob upload-batch') as c:
+        from .sdkutil import get_blob_types
+        from ._validators import process_blob_upload_batch_parameters
+
+        t_blob_content_settings = self.get_sdk('blob.models#ContentSettings')
+        c.register_content_settings_argument(t_blob_content_settings, update=False, arg_group='Content Control')
+        c.ignore('source_files', 'destination_container_name')
+
+        c.argument('source', options_list=('--source', '-s'), validator=process_blob_upload_batch_parameters)
+        c.argument('destination', options_list=('--destination', '-d'))
+        c.argument('max_connections', type=int)
+        c.argument('maxsize_condition', arg_group='Content Control')
+        c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group='Content Control')
+        c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()))
+
+    with self.argument_context('storage blob download') as c:
+        c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
+        c.argument('max_connections', type=int)
+        c.argument('validate_content', action='store_true', min_api='2016-05-31')
+
+    with self.argument_context('storage blob download-batch') as c:
+        from azure.cli.command_modules.storage._validators import process_blob_download_batch_parameters
+
+        c.ignore('source_container_name')
+        c.argument('destination', options_list=('--destination', '-d'))
+        c.argument('source', options_list=('--source', '-s'), validator=process_blob_download_batch_parameters)
+
+    with self.argument_context('storage blob delete') as c:
+        from .sdkutil import get_delete_blob_snapshot_type_names
+        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()))
+
+    with self.argument_context('storage blob delete-batch') as c:
+        from azure.cli.command_modules.storage._validators import process_blob_batch_source_parameters
+
+        c.ignore('source_container_name')
+        c.argument('source', options_list=('--source', '-s'), validator=process_blob_batch_source_parameters)
+        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_blob_snapshot_type_names()))
+
+    with self.argument_context('storage blob lease') as c:
+        c.argument('lease_duration', type=int)
+        c.argument('lease_break_period', type=int)
+        c.argument('blob_name', arg_type=blob_name_type)
+
+    with self.argument_context('storage blob copy') as c:
+        for item in ['destination', 'source']:
+            c.argument('{}_if_modified_since'.format(item), arg_group='Pre-condition')
+            c.argument('{}_if_unmodified_since'.format(item), arg_group='Pre-condition')
+            c.argument('{}_if_match'.format(item), arg_group='Pre-condition')
+            c.argument('{}_if_none_match'.format(item), arg_group='Pre-condition')
+        c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'))
+        c.argument('blob_name', blob_name_type, options_list=('--destination-blob', '-b'),
+                   help='Name of the destination blob. If the exists, it will be overwritten.')
+        c.argument('source_lease_id', arg_group='Copy Source')
+
+    with self.argument_context('storage blob copy start') as c:
+        from azure.cli.command_modules.storage._validators import validate_source_uri
+
+        c.register_source_uri_arguments(validator=validate_source_uri)
+
+    with self.argument_context('storage blob copy start-batch', arg_group='Copy Source') as c:
+        from azure.cli.command_modules.storage._validators import (get_source_file_or_blob_service_client,
+                                                                   process_blob_copy_batch_namespace)
+
+        c.argument('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
+
+        c.extra('source_account_name')
+        c.extra('source_account_key')
+        c.extra('source_uri')
+        c.argument('source_sas')
+        c.argument('source_container')
+        c.argument('source_share')
+        c.argument('prefix', validator=process_blob_copy_batch_namespace)
+
+    with self.argument_context('storage blob incremental-copy start') as c:
+        from azure.cli.command_modules.storage._validators import process_blob_source_uri
+
+        c.register_source_uri_arguments(validator=process_blob_source_uri, blob_only=True)
+        c.argument('destination_if_modified_since', arg_group='Pre-condition')
+        c.argument('destination_if_unmodified_since', arg_group='Pre-condition')
+        c.argument('destination_if_match', arg_group='Pre-condition')
+        c.argument('destination_if_none_match', arg_group='Pre-condition')
+        c.argument('container_name', container_name_type, options_list=('--destination-container', '-c'))
+        c.argument('blob_name', blob_name_type, options_list=('--destination-blob', '-b'),
+                   help='Name of the destination blob. If the exists, it will be overwritten.')
+        c.argument('source_lease_id', arg_group='Copy Source')
+
+    with self.argument_context('storage container') as c:
+        from .sdkutil import get_container_access_type_names
+        c.argument('container_name', container_name_type, options_list=('--name', '-n'))
+        c.argument('public_access', validator=validate_container_public_access,
+                   arg_type=get_enum_type(get_container_access_type_names()),
+                   help='Specifies whether data in the container may be accessed publically. By default, container '
+                        'data is private ("off") to the account owner. Use "blob" to allow public read access for '
+                        'blobs. Use "container" to allow public read and list access to the entire container.')
+
+    with self.argument_context('storage container create') as c:
+        c.argument('container_name', container_name_type, options_list=('--name', '-n'), completer=None)
+        c.argument('fail_on_exist', help='Throw an exception if the container already exists.')
+
+    with self.argument_context('storage container delete') as c:
+        c.argument('fail_not_exist', help='Throw an exception if the container does not exist.')
+
+    with self.argument_context('storage container exists') as c:
+        c.ignore('blob_name', 'snapshot')
+
+    with self.argument_context('storage container set-permission') as c:
+        c.ignore('signed_identifiers')
+
+    with self.argument_context('storage container lease') as c:
+        c.argument('container_name', container_name_type)
+
+    with self.argument_context('storage container list') as c:
+        c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745
+
+    with self.argument_context('storage container policy') as c:
+        from .completers import get_storage_acl_name_completion_list
+        t_container_permissions = self.get_sdk('blob.models#ContainerPermissions')
+
+        c.argument('container_name', container_name_type)
+        c.argument('policy_name', options_list=('--name', '-n'), help='The stored access policy name.',
+                   completer=get_storage_acl_name_completion_list(t_base_blob_service, 'container_name',
+                                                                  'get_container_acl'))
+        help_str = 'Allowed values: {}. Can be combined'.format(get_permission_help_string(t_container_permissions))
+        c.argument('permission', options_list='--permissions', help=help_str,
+                   validator=get_permission_validator(t_container_permissions))
+
+        c.argument('start', type=get_datetime_type(True),
+                   help='start UTC datetime (Y-m-d\'T\'H:M:S\'Z\'). Defaults to time of request.')
+        c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
+
+    for item in ['create', 'delete', 'list', 'show', 'update']:
+        with self.argument_context('storage container policy {}'.format(item)) as c:
+            c.extra('lease_id', options_list='--lease-id', help='The container lease ID.')
+
+    with self.argument_context('storage container generate-sas') as c:
+        from .completers import get_storage_acl_name_completion_list
+        t_container_permissions = self.get_sdk('blob.models#ContainerPermissions')
+        c.register_sas_arguments()
+        c.argument('id', options_list='--policy-name',
+                   help='The name of a stored access policy within the container\'s ACL.',
+                   completer=get_storage_acl_name_completion_list(t_container_permissions, 'container_name',
+                                                                  'get_container_acl'))
+        c.argument('permission', options_list='--permissions',
+                   help=sas_help.format(get_permission_help_string(t_container_permissions)),
+                   validator=get_permission_validator(t_container_permissions))
+
+    with self.argument_context('storage container lease') as c:
+        c.argument('lease_duration', type=int)
+        c.argument('lease_break_period', type=int)
+
+    with self.argument_context('storage share') as c:
+        c.argument('share_name', share_name_type, options_list=('--name', '-n'))
+
+    with self.argument_context('storage share list') as c:
+        c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745
+
+    with self.argument_context('storage share exists') as c:
+        c.ignore('directory_name', 'file_name')
+
+    with self.argument_context('storage share policy') as c:
+        from .completers import get_storage_acl_name_completion_list
+
+        t_file_svc = self.get_sdk('file#FileService')
+        t_share_permissions = self.get_sdk('file.models#SharePermissions')
+
+        c.argument('container_name', share_name_type)
+        c.argument('policy_name', options_list=('--name', '-n'), help='The stored access policy name.',
+                   completer=get_storage_acl_name_completion_list(t_file_svc, 'container_name', 'get_share_acl'))
+
+        help_str = 'Allowed values: {}. Can be combined'.format(get_permission_help_string(t_share_permissions))
+        c.argument('permission', options_list='--permissions', help=help_str,
+                   validator=get_permission_validator(t_share_permissions))
+
+        c.argument('start', type=get_datetime_type(True),
+                   help='start UTC datetime (Y-m-d\'T\'H:M:S\'Z\'). Defaults to time of request.')
+        c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
+
+    with self.argument_context('storage share delete') as c:
+        from .sdkutil import get_delete_file_snapshot_type_names
+        c.argument('delete_snapshots', arg_type=get_enum_type(get_delete_file_snapshot_type_names()),
+                   help='Specify the deletion strategy when the share has snapshots.')
+
+    with self.argument_context('storage share generate-sas') as c:
+        from .completers import get_storage_acl_name_completion_list
+
+        t_share_permissions = self.get_sdk('file.models#SharePermissions')
+        c.register_sas_arguments()
+        c.argument('id', options_list='--policy-name',
+                   help='The name of a stored access policy within the share\'s ACL.',
+                   completer=get_storage_acl_name_completion_list(t_share_permissions, 'share_name', 'get_share_acl'))
+        c.argument('permission', options_list='--permissions',
+                   help=sas_help.format(get_permission_help_string(t_share_permissions)),
+                   validator=get_permission_validator(t_share_permissions))
+
+    with self.argument_context('storage directory') as c:
+        c.argument('directory_name', directory_type, options_list=('--name', '-n'))
+
+    with self.argument_context('storage directory exists') as c:
+        c.ignore('file_name')
+        c.argument('directory_name', required=True)
+
+    with self.argument_context('storage file') as c:
+        c.argument('file_name', file_name_type, options_list=('--name', '-n'))
+        c.argument('directory_name', directory_type, required=False)
+
+    with self.argument_context('storage file copy') as c:
+        c.argument('share_name', share_name_type, options_list=('--destination-share', '-s'),
+                   help='Name of the destination share. The share must exist.')
+
+    with self.argument_context('storage file copy start') as c:
+        c.register_path_argument(options_list=('--destination-path', '-p'))
+
+    with self.argument_context('storage file copy cancel') as c:
+        c.register_path_argument(options_list=('--destination-path', '-p'))
+
+    with self.argument_context('storage file delete') as c:
+        c.register_path_argument()
+
+    with self.argument_context('storage file download') as c:
+        c.register_path_argument()
+        c.argument('file_path', options_list=('--dest',), type=file_type, required=False,
+                   help='Path of the file to write to. The source filename will be used if not specified.',
+                   validator=process_file_download_namespace, completer=FilesCompleter())
+        c.argument('path', validator=None)  # validator called manually from process_file_download_namespace
+        c.ignore('progress_callback')
+
+    with self.argument_context('storage file exists') as c:
+        c.register_path_argument()
+
+    with self.argument_context('storage file generate-sas') as c:
+        from .completers import get_storage_acl_name_completion_list
+
+        c.register_path_argument()
+        c.register_sas_arguments()
+
+        t_file_svc = self.get_sdk('file.fileservice#FileService')
+        t_file_permissions = self.get_sdk('file.models#FilePermissions')
+        c.argument('id', options_list='--policy-name',
+                   help='The name of a stored access policy within the container\'s ACL.',
+                   completer=get_storage_acl_name_completion_list(t_file_svc, 'container_name', 'get_container_acl'))
+        c.argument('permission', options_list='--permissions',
+                   help=sas_help.format(get_permission_help_string(t_file_permissions)),
+                   validator=get_permission_validator(t_file_permissions))
+
+    with self.argument_context('storage file list') as c:
+        from .completers import dir_path_completer
+        c.argument('directory_name', options_list=('--path', '-p'), help='The directory path within the file share.',
+                   completer=dir_path_completer)
+
+    with self.argument_context('storage file metadata show') as c:
+        c.register_path_argument()
+
+    with self.argument_context('storage file metadata update') as c:
+        c.register_path_argument()
+
+    with self.argument_context('storage file resize') as c:
+        c.register_path_argument()
+        c.argument('content_length', options_list='--size')
+
+    with self.argument_context('storage file show') as c:
+        c.register_path_argument()
+
+    with self.argument_context('storage file update') as c:
+        t_file_content_settings = self.get_sdk('file.models#ContentSettings')
+
+        c.register_path_argument()
+        c.register_content_settings_argument(t_file_content_settings, update=True)
+
+    with self.argument_context('storage file upload') as c:
+        t_file_content_settings = self.get_sdk('file.models#ContentSettings')
+
+        c.register_path_argument(default_file_param='local_file_path')
+        c.register_content_settings_argument(t_file_content_settings, update=False, guess_from_file='local_file_path')
+        c.argument('local_file_path', options_list='--source', type=file_type, completer=FilesCompleter())
+        c.ignore('progress_callback')
+
+    with self.argument_context('storage file url') as c:
+        c.register_path_argument()
+        c.argument('protocol', arg_type=get_enum_type(['http', 'https'], 'https'), help='Protocol to use.')
+
+    with self.argument_context('storage file upload-batch') as c:
+        from ._validators import process_file_upload_batch_parameters
+        c.argument('source', options_list=('--source', '-s'), validator=process_file_upload_batch_parameters)
+        c.argument('destination', options_list=('--destination', '-d'))
+        c.argument('max_connections', arg_group='Download Control')
+        c.argument('validate_content', action='store_true', min_api='2016-05-31')
+        c.register_content_settings_argument(t_file_content_settings, update=False, arg_group='Content Settings')
+
+    with self.argument_context('storage file download-batch') as c:
+        from ._validators import process_file_download_batch_parameters
+        c.argument('source', options_list=('--source', '-s'), validator=process_file_download_batch_parameters)
+        c.argument('destination', options_list=('--destination', '-d'))
+        c.argument('max_connections', arg_group='Download Control')
+        c.argument('validate_content', action='store_true', min_api='2016-05-31')
+
+    with self.argument_context('storage file delete-batch') as c:
+        from ._validators import process_file_batch_source_parameters
+        c.argument('source', options_list=('--source', '-s'), validator=process_file_batch_source_parameters)
+
+    with self.argument_context('storage file copy start') as c:
+        from azure.cli.command_modules.storage._validators import validate_source_uri
+
+        c.register_source_uri_arguments(validator=validate_source_uri)
+
+    with self.argument_context('storage file copy start-batch', arg_group='Copy Source') as c:
+        from ._validators import get_source_file_or_blob_service_client
+        c.argument('source_client', ignore_type, validator=get_source_file_or_blob_service_client)
+        c.extra('source_account_name')
+        c.extra('source_account_key')
+        c.extra('source_uri')
+        c.argument('source_sas')
+        c.argument('source_container')
+        c.argument('source_share')
+
+    with self.argument_context('storage cors list') as c:
+        c.extra('services', validator=get_char_options_validator('bfqt', 'services'), default='bqft',
+                options_list='--services', required=False)
+
+    with self.argument_context('storage cors add') as c:
+        c.extra('services', validator=get_char_options_validator('bfqt', 'services'), required=True,
+                options_list='--services')
+        c.argument('max_age')
+        c.argument('origins', nargs='+')
+        c.argument('methods', nargs='+',
+                   arg_type=get_enum_type(['DELETE', 'GET', 'HEAD', 'MERGE', 'POST', 'OPTIONS', 'PUT']))
+        c.argument('allowed_headers', nargs='+')
+        c.argument('exposed_headers', nargs='+')
+
+    with self.argument_context('storage cors clear') as c:
+        c.extra('services', validator=get_char_options_validator('bfqt', 'services'), required=True,
+                options_list='--services')
+
+    with self.argument_context('storage queue generate-sas') as c:
+        from .completers import get_storage_acl_name_completion_list
+
+        t_queue_permissions = self.get_sdk('queue.models#QueuePermissions')
+
+        c.register_sas_arguments()
+
+        c.argument('id', options_list='--policy-name',
+                   help='The name of a stored access policy within the share\'s ACL.',
+                   completer=get_storage_acl_name_completion_list(t_queue_permissions, 'queue_name', 'get_queue_acl'))
+        c.argument('permission', options_list='--permissions',
+                   help=sas_help.format(get_permission_help_string(t_queue_permissions)),
+                   validator=get_permission_validator(t_queue_permissions))
+
+    with self.argument_context('storage queue') as c:
+        c.argument('queue_name', queue_name_type, options_list=('--name', '-n'))
+
+    with self.argument_context('storage queue create') as c:
+        c.argument('queue_name', queue_name_type, options_list=('--name', '-n'), completer=None)
+
+    with self.argument_context('storage queue policy') as c:
+        from .completers import get_storage_acl_name_completion_list
+
+        t_queue_permissions = self.get_sdk('queue.models#QueuePermissions')
+
+        c.argument('container_name', queue_name_type)
+        c.argument('policy_name', options_list=('--name', '-n'), help='The stored access policy name.',
+                   completer=get_storage_acl_name_completion_list(t_queue_service, 'container_name', 'get_queue_acl'))
+
+        help_str = 'Allowed values: {}. Can be combined'.format(get_permission_help_string(t_queue_permissions))
+        c.argument('permission', options_list='--permissions', help=help_str,
+                   validator=get_permission_validator(t_queue_permissions))
+
+        c.argument('start', type=get_datetime_type(True),
+                   help='start UTC datetime (Y-m-d\'T\'H:M:S\'Z\'). Defaults to time of request.')
+        c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
+
+    with self.argument_context('storage message') as c:
+        c.argument('queue_name', queue_name_type)
+        c.argument('message_id', options_list='--id')
+        c.argument('content', type=unicode_string, help='Message content, up to 64KB in size.')
+
+    with self.argument_context('storage table') as c:
+        c.argument('table_name', table_name_type, options_list=('--name', '-n'))
+
+    with self.argument_context('storage table create') as c:
+        c.argument('table_name', table_name_type, options_list=('--name', '-n'), completer=None)
+        c.argument('fail_on_exist', help='Throw an exception if the table already exists.')
+
+    with self.argument_context('storage table policy') as c:
+        from ._validators import table_permission_validator
+        from .completers import get_storage_acl_name_completion_list
+
+        c.argument('container_name', table_name_type)
+        c.argument('policy_name', options_list=('--name', '-n'), help='The stored access policy name.',
+                   completer=get_storage_acl_name_completion_list(t_table_service, 'table_name', 'get_table_acl'))
+
+        help_str = 'Allowed values: (r)ead/query (a)dd (u)pdate (d)elete. Can be combined.'
+        c.argument('permission', options_list='--permissions', help=help_str, validator=table_permission_validator)
+
+        c.argument('start', type=get_datetime_type(True),
+                   help='start UTC datetime (Y-m-d\'T\'H:M:S\'Z\'). Defaults to time of request.')
+        c.argument('expiry', type=get_datetime_type(True), help='expiration UTC datetime in (Y-m-d\'T\'H:M:S\'Z\')')
+
+    with self.argument_context('storage table generate-sas') as c:
+        from .completers import get_storage_acl_name_completion_list
+
+        c.register_sas_arguments()
+        c.argument('id', options_list='--policy-name',
+                   help='The name of a stored access policy within the table\'s ACL.',
+                   completer=get_storage_acl_name_completion_list(t_table_service, 'table_name', 'get_table_acl'))
+        c.argument('permission', options_list='--permissions',
+                   help=sas_help.format('(r)ead/query (a)dd (u)pdate (d)elete'),
+                   validator=table_permission_validator)
+
+    with self.argument_context('storage entity') as c:
+        c.ignore('property_resolver')
+        c.argument('entity', options_list=('--entity', '-e'), validator=validate_entity, nargs='+')
+        c.argument('select', nargs='+', validator=validate_select,
+                   help='Space separated list of properties to return for each entity.')
+
+    with self.argument_context('storage entity insert') as c:
+        c.argument('if_exists', arg_type=get_enum_type(['fail', 'merge', 'replace']))
+
+    with self.argument_context('storage entity query') as c:
+        c.argument('accept', default='minimal', validator=validate_table_payload_format,
+                   arg_type=get_enum_type(['none', 'minimal', 'full']),
+                   help='Specifies how much metadata to include in the response payload.')

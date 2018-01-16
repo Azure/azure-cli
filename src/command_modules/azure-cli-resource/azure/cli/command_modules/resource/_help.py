@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 # pylint: disable=line-too-long, too-many-lines
 helps['managedapp'] = """
@@ -21,12 +21,12 @@ helps['managedapp create'] = """
         - name: Create a managed application of kind 'ServiceCatalog'. This requires a valid managed application definition ID.
           text: |
             az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind ServiceCatalog \\
-                -m "/subscriptions/{SubID}/resourceGroups/{ManagedRG}" \\
-                -d "/subscriptions/{SubID}/resourceGroups/{MyRG}/providers/Microsoft.Solutions/applianceDefinitions/{ManagedAppDef}"
+                -m "/subscriptions/{SubID}/resourceGroups/{ManagedResourceGroup}" \\
+                -d "/subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Solutions/applianceDefinitions/{ApplianceDefinition}"
         - name: Create a managed application of kind 'MarketPlace'. This requires a valid plan, containing details about existing marketplace package like plan name, version, publisher and product.
           text: |
             az managedapp create -g MyResourceGroup -n MyManagedApp -l westcentralus --kind MarketPlace \\
-                -m "/subscriptions/{SubID}/resourceGroups/myManagedRG" \\
+                -m "/subscriptions/{SubID}/resourceGroups/{ManagedResourceGroup}" \\
                 --plan-name ContosoAppliance --plan-version "1.0" --plan-product "contoso-appliance" --plan-publisher Contoso
 """
 helps['managedapp definition create'] = """
@@ -170,31 +170,29 @@ helps['policy definition create'] = """
             examples:
                 - name: Create a read-only policy.
                   text: |
-                    az policy definition create -n readOnlyStorage --rules \\
-                        { \\
-                            "if": \\
-                            { \\
-                                "source": "action", \\
-                                "equals": "Microsoft.Storage/storageAccounts/write" \\
-                            }, \\
-                            "then": \\
-                            { \\
-                                "effect": "deny" \\
-                            } \\
-                        }
+                    az policy definition create -n readOnlyStorage --rules '{
+                            "if":
+                            {
+                                "source": "action",
+                                "equals": "Microsoft.Storage/storageAccounts/write"
+                            },
+                            "then":
+                            {
+                                "effect": "deny"
+                            }
+                        }'
                 - name: Create a policy parameter definition with the following example
                   text: |
-                        {
-                            "allowedLocations": {
-                                "type": "array",
-                                "metadata": {
-                                    "description": "The list of locations that can be specified
-                                                    when deploying resources",
-                                    "strongType": "location",
-                                    "displayName": "Allowed locations"
-                                }
+                    az policy definition create -n allowedLocations --rules '{
+                        "allowedLocations": {
+                            "type": "array",
+                            "metadata": {
+                                "description": "The list of locations that can be specified when deploying resources",
+                                "strongType": "location",
+                                "displayName": "Allowed locations"
                             }
                         }
+                    }'
 """
 helps['policy definition delete'] = """
     type: command
@@ -226,12 +224,11 @@ helps['policy set-definition create'] = """
             examples:
                 - name: Create a policy set definition.
                   text: |
-                    az policy setdefinition create -n readOnlyStorage --definitions \\
-                        [ \\
-                            { \\
-                                "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy" \\
-                            } \\
-                        ]
+                    az policy setdefinition create -n readOnlyStorage --definitions '[
+                            {
+                                "policyDefinitionId": "/subscriptions/mySubId/providers/Microsoft.Authorization/policyDefinitions/storagePolicy"
+                            }
+                        ]'
 """
 helps['policy set-definition delete'] = """
     type: command
@@ -259,7 +256,7 @@ helps['policy assignment create'] = """
     examples:
         - name: Provide rule parameter values with the following example
           text: |
-                {
+                az policy assignment create --policy {PolicyNamed} -p '{
                     "allowedLocations": {
                         "value": [
                             "australiaeast",
@@ -267,7 +264,7 @@ helps['policy assignment create'] = """
                             "japaneast"
                         ]
                     }
-                }
+                }'
 """
 helps['policy assignment delete'] = """
     type: command
@@ -300,7 +297,7 @@ helps['resource list'] = """
              az resource list --tag test
         - name: List all resources with a tag that starts with 'test'.
           text: >
-            az resource list --tag test*
+            az resource list --tag 'test*'
         - name: List all resources with the tag 'test' that have the value 'example'.
           text: >
             az resource list --tag test=example
@@ -351,7 +348,7 @@ helps['resource tag'] = """
             az resource tag --tags vmlist=vm1 -g MyResourceGroup -n MyVm --resource-type "Microsoft.Compute/virtualMachines"
         - name: Tag a web app with the key 'vmlist' and value 'vm1', using a resource identifier.
           text: >
-            az resource tag --tags vmlist=vm1 --id /subscriptions/{SubID}/resourceGroups/{MyRG}/providers/Microsoft.Web/sites/{MyWebApp}
+            az resource tag --tags vmlist=vm1 --id /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Web/sites/{WebApp}
 """
 
 helps['resource create'] = """
@@ -360,23 +357,21 @@ helps['resource create'] = """
     examples:
        - name: Create an API app by providing a full JSON configuration.
          text: |
-            az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties \\
-                    '{\\
-                        "kind": "api",\\
-                        "location": "West US",\\
-                        "properties": {\\
-                            "serverFarmId": "/subscriptions/{SubID}/resourcegroups/{MyRG}/providers/Microsoft.Web/serverfarms/{MyServicePlan}"\\
-                        }\\
+            az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties '{
+                        "kind": "api",
+                        "location": "West US",
+                        "properties": {
+                            "serverFarmId": "/subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/Microsoft.Web/serverfarms/{ServicePlan}"
+                        }
                     }'
        - name: Create a resource by loading JSON configuration from a file.
          text: >
             az resource create -g myRG -n myApiApp --resource-type Microsoft.web/sites --is-full-object --properties @jsonConfigFile
        - name: Create a web app with the minimum required configuration information.
          text: |
-            az resource create -g myRG -n myWeb --resource-type Microsoft.web/sites --properties \\
-                { \\
-                    "serverFarmId":"/subscriptions/{SubID}/resourcegroups/{MyRG}/providers/Microsoft.Web/serverfarms/{MyServicePlan}" \\
-                }
+            az resource create -g myRG -n myWeb --resource-type Microsoft.web/sites --properties '{
+                    "serverFarmId":"/subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/Microsoft.Web/serverfarms/{ServicePlan}"
+                }'
 """
 
 helps['resource update'] = """
@@ -389,16 +384,22 @@ helps['resource invoke-action'] = """
     short-summary: Invoke an action on the resource.
     long-summary: >
         A list of possible actions corresponding to a resource can be found at https://docs.microsoft.com/en-us/rest/api/. All POST requests are actions that can be invoked and are specified at the end of the URI path. For instance, to stop a VM, the
-        request URI is https://management.azure.com/subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/Microsoft.Compute/virtualMachines/{vm}/powerOff?api-version={apiVersion} and the corresponding action is `powerOff`. This can
+        request URI is https://management.azure.com/subscriptions/{SubscriptionId}/resourceGroups/{ResourceGroup}/providers/Microsoft.Compute/virtualMachines/{VM}/powerOff?api-version={APIVersion} and the corresponding action is `powerOff`. This can
         be found at https://docs.microsoft.com/en-us/rest/api/compute/virtualmachines/virtualmachines-stop.
     examples:
        - name: Power-off a vm, specified by Id.
          text: >
-            az resource invoke-action --action powerOff --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM
+            az resource invoke-action --action powerOff \\
+              --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Compute/virtualMachines/{VMName}
        - name: Capture information for a stopped vm.
          text: >
-            az resource invoke-action --action capture --ids /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM --request-body
-            {\\"vhdPrefix\\":\\"myPrefix\\",\\"destinationContainerName\\":\\"myContainer\\",\\"overwriteVhds\\":\\"true\\"}
+            az resource invoke-action --action capture \\
+              --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Compute/virtualMachines/{VMName} \\
+              --request-body '{
+                "vhdPrefix": "myPrefix",
+                "destinationContainerName": "myContainer",
+                "overwriteVhds": true
+            }'
 """
 
 helps['feature'] = """
@@ -474,15 +475,15 @@ helps['group deployment create'] = """
             az group deployment create -g MyResourceGroup --template-uri https://myresource/azuredeploy.json --parameters @myparameters.json
         - name: Create a deployment from a local template file, using parameters from a JSON string.
           text: |
-            az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters \\
-                    '{ \\
-                        "location": {\\
-                            "value": "westus" \\
-                        } \\
-                    }'
+            az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters '{
+                    "location": {
+                        "value": "westus"
+                    }
+                }'
         - name: Create a deployment from a local template, using a parameter file and selectively overriding key/value pairs.
           text: >
-            az group deployment create -g MyResourceGroup --template-file azuredeploy.json --parameters @params.json --parameters MyValue=This MyArray=@array.json
+            az group deployment create -g MyResourceGroup --template-file azuredeploy.json \\
+                --parameters @params.json --parameters MyValue=This MyArray=@array.json
 """
 helps['group deployment export'] = """
     type: command
@@ -598,29 +599,29 @@ helps['resource link'] = """
 helps['resource link create'] = """
     type: command
     short-summary: Create a new link between resources.
-    long-summary: A link-id is of the form /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/{provider-namespace}/{resource-type}/{resource-name}/Microsoft.Resources/links/{link-name}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
     examples:
-        - name: Create a link from <link-id> to <resource-id> with notes "some notes to explain this link"
+        - name: Create a link from {SourceID} to {ResourceID} with notes
           text: >
-            az resource link create --link-id <link-id> --target-id <resource-id> --notes "some notes to explain this link"
+            az resource link create --link-id {SourceID} --target-id {ResourceID} --notes "SourceID depends on ResourceID"
 """
 helps['resource link update'] = """
     type: command
     short-summary: Update link between resources.
-    long-summary: A link-id is of the form /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/{provider-namespace}/{resource-type}/{resource-name}/Microsoft.Resources/links/{link-name}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
     examples:
-        - name: Update the notes for <link-id> notes "some notes to explain this link"
+        - name: Update the notes for {LinkID} notes "some notes to explain this link"
           text: >
-            az resource link update --link-id <link-id> --notes "some notes to explain this link"
+            az resource link update --link-id {LinkID} --notes "some notes to explain this link"
 """
 helps['resource link delete'] = """
     type: command
     short-summary: Delete a link between resources.
-    long-summary: A link-id is of the form /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/{provider-namespace}/{resource-type}/{resource-name}/Microsoft.Resources/links/{link-name}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
     examples:
-        - name: Delete link <link-id>
+        - name: Delete link {LinkID}
           text: >
-            az resource link delete --link-id <link-id>
+            az resource link delete --link-id {LinkID}
 """
 helps['resource link list'] = """
     type: command
@@ -629,18 +630,14 @@ helps['resource link list'] = """
         - name: List links, filtering with <filter-string>
           text: >
             az resource link list --filter <filter-string>
-        - name: List all links at /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myGroup
+        - name: List all links for resource group {ResourceGroup} in subscription {SubID}
           text: >
-            az resource link list --scope /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myGroup
+            az resource link list --scope /subscriptions/{SubID}/resourceGroups/{ResourceGroup}
 """
 helps['resource link show'] = """
     type: command
     short-summary: Get details for a resource link.
-    long-summary: A link-id is of the form /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/{provider-namespace}/{resource-type}/{resource-name}/Microsoft.Resources/links/{link-name}
-    examples:
-        - name: Show the <link-id> resource link.
-          text: >
-            az resource link show --link-id <link-id>
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
 """
 helps['resource lock'] = """
     type: group
@@ -655,7 +652,7 @@ helps['resource lock create'] = """
             az resource lock create --lock-type ReadOnly -n lockName -g MyResourceGroup --resource myvnet --resource-type Microsoft.Network/virtualNetworks
         - name: Create a read-only resource level lock on a vnet using a vnet id.
           text: >
-            az resource lock create --lock-type ReadOnly -n lockName --resource /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/myvnet
+            az resource lock create --lock-type ReadOnly -n lockName --resource /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}
     """
 helps['resource lock delete'] = """
     type: command
@@ -666,7 +663,7 @@ helps['resource lock delete'] = """
             az resource lock delete --name lockName -g MyResourceGroup --resource myvnet --resource-type Microsoft.Network/virtualNetworks
         - name: Delete a resource level lock on a vnet using a vnet id.
           text: >
-            az resource lock delete -n lockName --resource /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.Network/virtualNetworks/myvnet
+            az resource lock delete -n lockName --resource /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VMName}
     """
 helps['resource lock list'] = """
     type: command

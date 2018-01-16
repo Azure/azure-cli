@@ -8,9 +8,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy000001?api-version=2017-05-10
@@ -20,19 +20,19 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:16 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1192']
     status: {code: 201, message: Created}
 - request:
-    body: 'b''{"properties": {"policyRule": {"if": {"not": {"in": "[parameters(\''allowedLocations\'')]",
-      "field": "location"}}, "then": {"effect": "deny"}}, "displayName": "test_policy000003",
-      "description": "desc_for_test_policy_123", "mode": "Indexed", "parameters":
-      {"allowedLocations": {"type": "array", "metadata": {"strongType": "location",
-      "displayName": "Allowed locations", "description": "The list of locations that
-      can be specified when deploying resources"}}}}}'''
+    body: 'b''{"properties": {"parameters": {"allowedLocations": {"type": "array",
+      "metadata": {"description": "The list of locations that can be specified when
+      deploying resources", "displayName": "Allowed locations", "strongType": "location"}}},
+      "description": "desc_for_test_policy_123", "policyRule": {"if": {"not": {"field":
+      "location", "in": "[parameters(\''allowedLocations\'')]"}}, "then": {"effect":
+      "deny"}}, "mode": "Indexed", "displayName": "test_policy000003"}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -40,24 +40,24 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['459']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
   response:
-    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
-        locations","description":"The list of locations that can be specified when
-        deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['687']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:17 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1188']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -67,20 +67,20 @@ interactions:
       CommandName: [policy definition update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
   response:
-    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
-        locations","description":"The list of locations that can be specified when
-        deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['687']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:18 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -88,12 +88,12 @@ interactions:
       vary: ['Accept-Encoding,Accept-Encoding']
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"policyRule": {"if": {"not": {"in": "[parameters(\''allowedLocations\'')]",
-      "field": "location"}}, "then": {"effect": "deny"}}, "displayName": "test_policy000003",
-      "description": "desc_for_test_policy_123_new", "parameters": {"allowedLocations":
-      {"type": "Array", "metadata": {"displayName": "Allowed locations", "strongType":
-      "location", "description": "The list of locations that can be specified when
-      deploying resources"}}}}}'''
+    body: 'b''{"properties": {"parameters": {"allowedLocations": {"type": "Array",
+      "metadata": {"description": "The list of locations that can be specified when
+      deploying resources", "displayName": "Allowed locations", "strongType": "location"}}},
+      "description": "desc_for_test_policy_123_new", "displayName": "test_policy000003",
+      "policyRule": {"if": {"not": {"field": "location", "in": "[parameters(\''allowedLocations\'')]"}},
+      "then": {"effect": "deny"}}}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -101,24 +101,24 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['444']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
   response:
-    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
-        locations","strongType":"location","description":"The list of locations that
-        can be specified when deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['674']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:17 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+      x-ms-ratelimit-remaining-subscription-writes: ['1191']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -128,8 +128,8 @@ interactions:
       CommandName: [policy definition list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions?api-version=2016-12-01
@@ -279,7 +279,9 @@ interactions:
         locations","description":"The list of locations that can be specified when
         deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyc5rc55x4p","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyc5rc55x4p"},{"properties":{"displayName":"test_policyk2pzv6c47","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
         locations","description":"The list of locations that can be specified when
-        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydbeyd5nrs","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydbeyd5nrs"},{"properties":{"displayName":"test_policy5wdd7p44s","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydbeyd5nrs","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydbeyd5nrs"},{"properties":{"displayName":"test_policyt2xy7226j","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydjrlusdxd","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydjrlusdxd"},{"properties":{"displayName":"test_policy5wdd7p44s","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
         locations","description":"The list of locations that can be specified when
         deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydwllppxro","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydwllppxro"},{"properties":{"displayName":"test_policykqgncz42o","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
         locations","description":"The list of locations that can be specified when
@@ -289,9 +291,7 @@ interactions:
         locations","description":"The list of locations that can be specified when
         deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyguhpc2m5m","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyguhpc2m5m"},{"properties":{"displayName":"test_policyefslsptce","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policygz5kk3f55","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policygz5kk3f55"},{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
-        locations","strongType":"location","description":"The list of locations that
-        can be specified when deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"},{"properties":{"displayName":"test_policyx4niz5vcs","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policygz5kk3f55","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policygz5kk3f55"},{"properties":{"displayName":"test_policyx4niz5vcs","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
         locations","description":"The list of locations that can be specified when
         deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policykg3zihtqy","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policykg3zihtqy"},{"properties":{"displayName":"test_policylhbmrfp7w","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
         locations","description":"The list of locations that can be specified when
@@ -329,15 +329,17 @@ interactions:
         list of locations that can be specified when deploying resources","displayName":"Allowed
         locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyxlkjobh5l","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyxlkjobh5l"},{"properties":{"displayName":"test_policyyxqr7mttl","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
         locations","strongType":"location","description":"The list of locations that
-        can be specified when deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyy4snzm2ry","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyy4snzm2ry"},{"properties":{"displayName":"My
+        can be specified when deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyy4snzm2ry","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyy4snzm2ry"},{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"},{"properties":{"displayName":"My
         Policy","policyType":"Custom","description":"This is my policy","policyRule":{"if":{"not":{"field":"location","in":["northeurope","westeurope"]}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy1","type":"Microsoft.Authorization/policyDefinitions","name":"policy1"},{"properties":{"displayName":"useless
         policy just for tetsing","policyType":"Custom","description":"some testing
         policy","policyRule":{"if":{"source":"action","equals":"Microsoft.Storage/storageAccounts/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/yugangw-policy","type":"Microsoft.Authorization/policyDefinitions","name":"yugangw-policy"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['56691']
+      content-length: ['57362']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:18 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:11 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -352,20 +354,20 @@ interactions:
       CommandName: [policy definition show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
   response:
-    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
-        locations","strongType":"location","description":"The list of locations that
-        can be specified when deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['674']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:19 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:14 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -380,20 +382,20 @@ interactions:
       CommandName: [policy assignment create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
   response:
-    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
-        locations","strongType":"location","description":"The list of locations that
-        can be specified when deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['674']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:18 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:15 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -401,11 +403,10 @@ interactions:
       vary: ['Accept-Encoding,Accept-Encoding']
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''b\\\''{"sku": {"tier": "Free", "name": "A0"}, "properties": {"scope":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001",
-      "displayName": "test_assignment000005", "parameters": {"allowedLocations": {"value":
-      ["australiaeast", "eastus", "japaneast", "westus"]}}, "policyDefinitionId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002"}}\\\''\'''''
+    body: 'b''b\''b\\\''{"sku": {"tier": "Free", "name": "A0"}, "properties": {"policyDefinitionId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002",
+      "parameters": {"allowedLocations": {"value": ["australiaeast", "eastus", "japaneast",
+      "westus"]}}, "displayName": "test_assignment000005", "scope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001"}}\\\''\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -413,8 +414,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['508']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000004?api-version=2017-06-01-preview
@@ -424,38 +425,12 @@ interactions:
       cache-control: [no-cache]
       content-length: ['834']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:20 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:15 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-subscription-writes: ['1176']
     status: {code: 201, message: Created}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [group show]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy000001?api-version=2017-05-10
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001","name":"cli_test_policy000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['328']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:20 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      vary: [Accept-Encoding]
-    status: {code: 200, message: OK}
 - request:
     body: null
     headers:
@@ -464,9 +439,9 @@ interactions:
       CommandName: [network vnet create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy000001?api-version=2017-05-10
@@ -476,16 +451,17 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:20 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:17 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"properties": {"subnets": [{"properties": {"addressPrefix": "10.0.0.0/24"},
-      "name": "azurecli-test-policy-subnet000007"}], "addressSpace": {"addressPrefixes":
-      ["10.0.0.0/16"]}, "dhcpOptions": {}}, "location": "westus", "tags": {}}'''
+    body: 'b''{"location": "westus", "properties": {"dhcpOptions": {}, "subnets":
+      [{"name": "azurecli-test-policy-subnet000007", "properties": {"addressPrefix":
+      "10.0.0.0/24"}}], "addressSpace": {"addressPrefixes": ["10.0.0.0/16"]}}, "tags":
+      {}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -493,38 +469,38 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['238']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks/azurecli-test-policy-vnet000006?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"name\": \"azurecli-test-policy-vnet000006\",\r\n  \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks/azurecli-test-policy-vnet000006\"\
-        ,\r\n  \"etag\": \"W/\\\"665850e5-49b1-4ea7-a794-e87e961a6f19\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"932a5771-e62b-4716-873d-20be44a91933\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\"\
         ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Updating\",\r\n    \"resourceGuid\": \"84cdd8a0-3010-45b4-ae02-e1da81095af9\"\
+        \ \"Updating\",\r\n    \"resourceGuid\": \"30f2726c-50e9-4a68-aeba-c30eec8529cc\"\
         ,\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"\
         10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\"\
         : []\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"azurecli-test-policy-subnet000007\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks/azurecli-test-policy-vnet000006/subnets/azurecli-test-policy-subnet000007\"\
-        ,\r\n        \"etag\": \"W/\\\"665850e5-49b1-4ea7-a794-e87e961a6f19\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"932a5771-e62b-4716-873d-20be44a91933\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Updating\"\
         ,\r\n          \"addressPrefix\": \"10.0.0.0/24\"\r\n        }\r\n      }\r\
         \n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\"\
         : false,\r\n    \"enableVmProtection\": false\r\n  }\r\n}"}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/846e3253-4552-4bd1-952c-2fe864fc56ef?api-version=2017-11-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f8164b1c-5d72-4c3c-8d53-971cc2c45cc5?api-version=2017-11-01']
       cache-control: [no-cache]
       content-length: ['1401']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:22 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:18 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1177']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -534,18 +510,18 @@ interactions:
       CommandName: [network vnet create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/846e3253-4552-4bd1-952c-2fe864fc56ef?api-version=2017-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f8164b1c-5d72-4c3c-8d53-971cc2c45cc5?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['29']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:25 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:21 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -561,23 +537,23 @@ interactions:
       CommandName: [network vnet create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 networkmanagementclient/1.6.0 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 networkmanagementclient/1.7.0 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks/azurecli-test-policy-vnet000006?api-version=2017-11-01
   response:
     body: {string: "{\r\n  \"name\": \"azurecli-test-policy-vnet000006\",\r\n  \"\
         id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks/azurecli-test-policy-vnet000006\"\
-        ,\r\n  \"etag\": \"W/\\\"3b72bea3-abbe-47fa-94ac-2b0b9ee4ceaf\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"c66e9184-78bc-4637-94c9-978c1798ca84\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/virtualNetworks\",\r\n  \"location\": \"westus\"\
         ,\r\n  \"tags\": {},\r\n  \"properties\": {\r\n    \"provisioningState\":\
-        \ \"Succeeded\",\r\n    \"resourceGuid\": \"84cdd8a0-3010-45b4-ae02-e1da81095af9\"\
+        \ \"Succeeded\",\r\n    \"resourceGuid\": \"30f2726c-50e9-4a68-aeba-c30eec8529cc\"\
         ,\r\n    \"addressSpace\": {\r\n      \"addressPrefixes\": [\r\n        \"\
         10.0.0.0/16\"\r\n      ]\r\n    },\r\n    \"dhcpOptions\": {\r\n      \"dnsServers\"\
         : []\r\n    },\r\n    \"subnets\": [\r\n      {\r\n        \"name\": \"azurecli-test-policy-subnet000007\"\
         ,\r\n        \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks/azurecli-test-policy-vnet000006/subnets/azurecli-test-policy-subnet000007\"\
-        ,\r\n        \"etag\": \"W/\\\"3b72bea3-abbe-47fa-94ac-2b0b9ee4ceaf\\\"\"\
+        ,\r\n        \"etag\": \"W/\\\"c66e9184-78bc-4637-94c9-978c1798ca84\\\"\"\
         ,\r\n        \"properties\": {\r\n          \"provisioningState\": \"Succeeded\"\
         ,\r\n          \"addressPrefix\": \"10.0.0.0/24\"\r\n        }\r\n      }\r\
         \n    ],\r\n    \"virtualNetworkPeerings\": [],\r\n    \"enableDdosProtection\"\
@@ -586,8 +562,8 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1403']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:25 GMT']
-      etag: [W/"3b72bea3-abbe-47fa-94ac-2b0b9ee4ceaf"]
+      date: ['Tue, 19 Dec 2017 04:36:22 GMT']
+      etag: [W/"c66e9184-78bc-4637-94c9-978c1798ca84"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -603,20 +579,20 @@ interactions:
       CommandName: [policy assignment create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
   response:
-    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
-        locations","strongType":"location","description":"The list of locations that
-        can be specified when deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['674']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:25 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:22 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -626,9 +602,9 @@ interactions:
 - request:
     body: 'b''b\''b\\\''{"sku": {"tier": "Standard", "name": "A1"}, "properties":
       {"policyDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002",
-      "scope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001",
-      "displayName": "test_assignment000005", "parameters": {"allowedLocations": {"value":
-      ["australiaeast", "eastus", "japaneast", "westus"]}}, "notScopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks"]}}\\\''\'''''
+      "parameters": {"allowedLocations": {"value": ["australiaeast", "eastus", "japaneast",
+      "westus"]}}, "scope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001",
+      "displayName": "test_assignment000005", "notScopes": ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Network/virtualNetworks"]}}\\\''\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -636,8 +612,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['717']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000004?api-version=2017-06-01-preview
@@ -647,11 +623,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1041']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:26 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:23 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1191']
+      x-ms-ratelimit-remaining-subscription-writes: ['1185']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -661,8 +637,8 @@ interactions:
       CommandName: [policy definition list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions?api-version=2016-12-01
@@ -812,7 +788,9 @@ interactions:
         locations","description":"The list of locations that can be specified when
         deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyc5rc55x4p","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyc5rc55x4p"},{"properties":{"displayName":"test_policyk2pzv6c47","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
         locations","description":"The list of locations that can be specified when
-        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydbeyd5nrs","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydbeyd5nrs"},{"properties":{"displayName":"test_policy5wdd7p44s","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydbeyd5nrs","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydbeyd5nrs"},{"properties":{"displayName":"test_policyt2xy7226j","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydjrlusdxd","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydjrlusdxd"},{"properties":{"displayName":"test_policy5wdd7p44s","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
         locations","description":"The list of locations that can be specified when
         deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydwllppxro","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydwllppxro"},{"properties":{"displayName":"test_policykqgncz42o","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
         locations","description":"The list of locations that can be specified when
@@ -822,9 +800,7 @@ interactions:
         locations","description":"The list of locations that can be specified when
         deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyguhpc2m5m","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyguhpc2m5m"},{"properties":{"displayName":"test_policyefslsptce","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
         list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
-        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policygz5kk3f55","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policygz5kk3f55"},{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
-        locations","strongType":"location","description":"The list of locations that
-        can be specified when deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"},{"properties":{"displayName":"test_policyx4niz5vcs","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policygz5kk3f55","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policygz5kk3f55"},{"properties":{"displayName":"test_policyx4niz5vcs","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
         locations","description":"The list of locations that can be specified when
         deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policykg3zihtqy","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policykg3zihtqy"},{"properties":{"displayName":"test_policylhbmrfp7w","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
         locations","description":"The list of locations that can be specified when
@@ -862,15 +838,17 @@ interactions:
         list of locations that can be specified when deploying resources","displayName":"Allowed
         locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyxlkjobh5l","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyxlkjobh5l"},{"properties":{"displayName":"test_policyyxqr7mttl","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
         locations","strongType":"location","description":"The list of locations that
-        can be specified when deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyy4snzm2ry","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyy4snzm2ry"},{"properties":{"displayName":"My
+        can be specified when deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyy4snzm2ry","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyy4snzm2ry"},{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"},{"properties":{"displayName":"My
         Policy","policyType":"Custom","description":"This is my policy","policyRule":{"if":{"not":{"field":"location","in":["northeurope","westeurope"]}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/policy1","type":"Microsoft.Authorization/policyDefinitions","name":"policy1"},{"properties":{"displayName":"useless
         policy just for tetsing","policyType":"Custom","description":"some testing
         policy","policyRule":{"if":{"source":"action","equals":"Microsoft.Storage/storageAccounts/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/yugangw-policy","type":"Microsoft.Authorization/policyDefinitions","name":"yugangw-policy"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['56691']
+      content-length: ['57362']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:27 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:24 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -885,8 +863,8 @@ interactions:
       CommandName: [policy assignment create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d?api-version=2016-12-01
@@ -897,7 +875,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['138']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:28 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:24 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -910,8 +888,8 @@ interactions:
       CommandName: [policy assignment create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d?api-version=2016-12-01
@@ -923,7 +901,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['877']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:27 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:24 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -931,9 +909,9 @@ interactions:
       vary: ['Accept-Encoding,Accept-Encoding']
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''{"sku": {"tier": "Free", "name": "A0"}, "properties": {"scope":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001",
-      "displayName": "test_assignment000005", "policyDefinitionId": "/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d"}}\'''''
+    body: 'b''b\''{"sku": {"tier": "Free", "name": "A0"}, "properties": {"policyDefinitionId":
+      "/providers/Microsoft.Authorization/policyDefinitions/06a78e20-9358-41c9-923c-fb736d382a4d",
+      "displayName": "test_assignment000005", "scope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001"}}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -941,8 +919,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['364']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment2000008?api-version=2017-06-01-preview
@@ -952,11 +930,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['697']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:28 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:24 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1185']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -967,8 +945,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment2000008?api-version=2017-06-01-preview
@@ -978,13 +956,13 @@ interactions:
       cache-control: [no-cache]
       content-length: ['697']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:29 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:26 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1189']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -994,8 +972,8 @@ interactions:
       CommandName: [policy assignment list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2017-06-01-preview
@@ -1005,7 +983,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1053']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:29 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:25 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -1020,8 +998,8 @@ interactions:
       CommandName: [policy assignment list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2017-06-01-preview
@@ -1031,7 +1009,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1053']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:29 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:26 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -1047,8 +1025,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000004?api-version=2017-06-01-preview
@@ -1058,13 +1036,13 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1041']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:29 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:28 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-subscription-writes: ['1188']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1074,8 +1052,8 @@ interactions:
       CommandName: [policy assignment list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2017-06-01-preview
@@ -1085,7 +1063,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['12']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:30 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:27 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -1101,26 +1079,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
   response:
-    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
-        locations","strongType":"location","description":"The list of locations that
-        can be specified when deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+    body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123_new","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
+        list of locations that can be specified when deploying resources","displayName":"Allowed
+        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['674']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:31 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1130,8 +1108,8 @@ interactions:
       CommandName: [policy definition list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions?api-version=2016-12-01
@@ -1281,7 +1259,9 @@ interactions:
         locations","description":"The list of locations that can be specified when
         deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyc5rc55x4p","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policyc5rc55x4p"},{"properties":{"displayName":"test_policyk2pzv6c47","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
         locations","description":"The list of locations that can be specified when
-        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydbeyd5nrs","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydbeyd5nrs"},{"properties":{"displayName":"test_policy5wdd7p44s","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        deploying resources","strongType":"location"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydbeyd5nrs","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydbeyd5nrs"},{"properties":{"displayName":"test_policyt2xy7226j","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
+        locations","description":"The list of locations that can be specified when
+        deploying resources"}}},"policyRule":{"if":{"not":{"in":"[parameters(''allowedLocations'')]","field":"location"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydjrlusdxd","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydjrlusdxd"},{"properties":{"displayName":"test_policy5wdd7p44s","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"strongType":"location","displayName":"Allowed
         locations","description":"The list of locations that can be specified when
         deploying resources"}}},"policyRule":{"then":{"effect":"deny"},"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydwllppxro","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policydwllppxro"},{"properties":{"displayName":"test_policykqgncz42o","policyType":"Custom","mode":"Indexed","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"displayName":"Allowed
         locations","description":"The list of locations that can be specified when
@@ -1335,9 +1315,9 @@ interactions:
         policy","policyRule":{"if":{"source":"action","equals":"Microsoft.Storage/storageAccounts/write"},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/yugangw-policy","type":"Microsoft.Authorization/policyDefinitions","name":"yugangw-policy"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['56016']
+      content-length: ['56687']
       content-type: [application/json; charset=utf-8]
-      date: ['Wed, 13 Dec 2017 21:11:41 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:39 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -1353,9 +1333,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.19
-          msrest_azure/0.4.18 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.23]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
+          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.24]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy000001?api-version=2017-05-10
@@ -1364,11 +1344,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Wed, 13 Dec 2017 21:11:42 GMT']
+      date: ['Tue, 19 Dec 2017 04:36:40 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUE9MSUNZSFI2WUVTR0NVWVYySUFBNTRYV01FTE9UREpIT3xBNEFBNjM1MEJEQTU3NEQ5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUE9MSUNZT1JVWVo2RlBYUFc2SVhTNUtMVVFLWEpaSUtMTHxBNjE0QzJEMjNGNkJDNDkyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1192']
+      x-ms-ratelimit-remaining-subscription-writes: ['1184']
     status: {code: 202, message: Accepted}
 version: 1

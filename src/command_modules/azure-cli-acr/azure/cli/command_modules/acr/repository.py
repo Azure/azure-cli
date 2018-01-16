@@ -8,17 +8,19 @@ from base64 import b64encode
 import requests
 from requests.utils import to_native_string
 
-from azure.cli.core.prompting import NoTTYException, prompt_y_n
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
+from knack.prompting import prompt_y_n, NoTTYException
+from knack.util import CLIError
+from knack.log import get_logger
 
 from ._utils import validate_managed_registry
-from ._docker_utils import get_access_credentials
+from ._docker_utils import get_access_credentials, log_registry_response
 
 
-logger = azlogging.get_az_logger(__name__)
-DELETE_NOT_SUPPORTED = 'Delete is only supported for managed registries.'
-LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is only supported for managed registries.'
+logger = get_logger(__name__)
+
+
+DELETE_NOT_SUPPORTED = 'Delete is not supported for registries in Basic SKU.'
+LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is not supported for registries in Basic SKU.'
 
 
 def _get_basic_auth_str(username, password):
@@ -53,9 +55,10 @@ def _delete_data_from_registry(login_server, path, username, password, retry_tim
         errorMessage = None
         try:
             response = requests.delete(
-                'https://{}/{}'.format(login_server, path),
+                'https://{}{}'.format(login_server, path),
                 headers=_get_authorization_header(username, password)
             )
+            log_registry_response(response)
 
             if response.status_code == 200 or response.status_code == 202:
                 return
@@ -80,9 +83,10 @@ def _get_manifest_digest(login_server, path, username, password, retry_times=3, 
             headers = _get_authorization_header(username, password)
             headers.update(_get_manifest_v2_header())
             response = requests.get(
-                'https://{}/{}'.format(login_server, path),
+                'https://{}{}'.format(login_server, path),
                 headers=headers
             )
+            log_registry_response(response)
 
             if response.status_code == 200 and response.headers and 'Docker-Content-Digest' in response.headers:
                 return response.headers['Docker-Content-Digest']
@@ -117,10 +121,11 @@ def _obtain_data_from_registry(login_server,
             errorMessage = None
             try:
                 response = requests.get(
-                    'https://{}/{}'.format(login_server, path),
+                    'https://{}{}'.format(login_server, path),
                     headers=_get_authorization_header(username, password),
                     params=_get_pagination_params(pagination)
                 )
+                log_registry_response(response)
 
                 if response.status_code == 200:
                     result = response.json()[result_index]
@@ -151,17 +156,13 @@ def _obtain_data_from_registry(login_server,
     return resultList
 
 
-def acr_repository_list(registry_name,
+def acr_repository_list(cmd,
+                        registry_name,
                         resource_group_name=None,
                         username=None,
                         password=None):
-    """Lists repositories in the specified container registry.
-    :param str registry_name: The name of container registry
-    :param str resource_group_name: The name of resource group
-    :param str username: The username used to log into the container registry
-    :param str password: The password used to log into the container registry
-    """
     login_server, username, password = get_access_credentials(
+        cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         username=username,
@@ -175,19 +176,14 @@ def acr_repository_list(registry_name,
         result_index='repositories')
 
 
-def acr_repository_show_tags(registry_name,
+def acr_repository_show_tags(cmd,
+                             registry_name,
                              repository,
                              resource_group_name=None,
                              username=None,
                              password=None):
-    """Shows tags of a given repository in the specified container registry.
-    :param str registry_name: The name of container registry
-    :param str repository: The repository to obtain tags from
-    :param str resource_group_name: The name of resource group
-    :param str username: The username used to log into the container registry
-    :param str password: The password used to log into the container registry
-    """
     login_server, username, password = get_access_credentials(
+        cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         username=username,
@@ -203,19 +199,14 @@ def acr_repository_show_tags(registry_name,
         result_index='tags')
 
 
-def acr_repository_show_manifests(registry_name,
+def acr_repository_show_manifests(cmd,
+                                  registry_name,
                                   repository,
                                   resource_group_name=None,
                                   username=None,
                                   password=None):
-    """Shows manifests of a given repository in the specified container registry.
-    :param str registry_name: The name of container registry
-    :param str repository: The repository to obtain manifests from
-    :param str resource_group_name: The name of resource group
-    :param str username: The username used to log into the container registry
-    :param str password: The password used to log into the container registry
-    """
     login_server, username, password = get_access_credentials(
+        cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         username=username,
@@ -231,7 +222,8 @@ def acr_repository_show_manifests(registry_name,
         result_index='manifests')
 
 
-def acr_repository_delete(registry_name,
+def acr_repository_delete(cmd,
+                          registry_name,
                           repository,
                           tag=None,
                           manifest=None,
@@ -239,19 +231,11 @@ def acr_repository_delete(registry_name,
                           username=None,
                           password=None,
                           yes=False):
-    """Deletes a repository or a manifest/tag from the given repository in the specified container registry.
-    :param str registry_name: The name of container registry
-    :param str repository: The name of repository to delete
-    :param str tag: The name of tag to delete
-    :param str manifest: The sha256 based digest of manifest to delete
-    :param str resource_group_name: The name of resource group
-    :param str username: The username used to log into the container registry
-    :param str password: The password used to log into the container registry
-    """
     _, resource_group_name = validate_managed_registry(
-        registry_name, resource_group_name, DELETE_NOT_SUPPORTED)
+        cmd.cli_ctx, registry_name, resource_group_name, DELETE_NOT_SUPPORTED)
 
     login_server, username, password = get_access_credentials(
+        cli_ctx=cmd.cli_ctx,
         registry_name=registry_name,
         resource_group_name=resource_group_name,
         username=username,

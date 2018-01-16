@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 # pylint: disable=line-too-long, too-many-lines
 
@@ -557,7 +557,7 @@ helps['network application-gateway waf-config list-rule-sets'] = """
             az network application-gateway waf-config list-rule-sets --type OWASP
         - name: List available rules in the OWASP 3.0 rule set.
           text: >
-            az network application-gateway waf-config list-rule-sets --group * --type OWASP --version 3.0
+            az network application-gateway waf-config list-rule-sets --group '*' --type OWASP --version 3.0
         - name: List available rules in the 'crs_35_bad_robots' rule group.
           text: >
             az network application-gateway waf-config list-rule-sets --group crs_35_bad_robots
@@ -1379,7 +1379,7 @@ helps['network nsg rule create'] = """
           text: >
             az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --priority 4096
                     --source-address-prefixes 208.130.28/24 --source-port-ranges 80
-                    --destination-address-prefixes * --destination-port-ranges 80 8080 --access Deny
+                    --destination-address-prefixes '*' --destination-port-ranges 80 8080 --access Deny
                     --protocol Tcp --description "Deny from specific IP address ranges on 80 and 8080."
 """
 
@@ -1404,7 +1404,7 @@ helps['network nsg rule update'] = """
     examples:
         - name: Update an NSG rule with a new wildcard destination address prefix.
           text: >
-            az network nsg rule update -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --destination-address-prefix *
+            az network nsg rule update -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --destination-address-prefix '*'
 """
 
 # endregion
@@ -1457,7 +1457,7 @@ helps['network public-ip show'] = """
             az network public-ip show -g MyResourceGroup -n MyIp
         - name: Get the FQDN and IP address for a public IP resource.
           text: >
-            az network public-ip show -g MyResourceGroup -n MyIp --query "{ fqdn:dnsSettings.fqdn, address: ipAddress }"
+            az network public-ip show -g MyResourceGroup -n MyIp --query "{fqdn: dnsSettings.fqdn, address: ipAddress}"
 """
 
 helps['network public-ip update'] = """

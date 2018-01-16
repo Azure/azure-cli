@@ -3,48 +3,182 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-import os
+# pylint: disable=line-too-long,too-many-statements
+
+import os.path
 import platform
 
 from argcomplete.completers import FilesCompleter
-
-from azure.cli.core.commands import (
-    CliArgumentType,
-    register_cli_argument,
-    register_extra_cli_argument)
-from azure.cli.core.commands.parameters import tags_type
-from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.cli.core.commands.parameters import (
-    enum_choice_list,
-    file_type,
-    resource_group_name_type,
-    get_one_of_subscription_locations,
-    get_resource_name_completion_list)
-from azure.cli.command_modules.acs._validators import validate_create_parameters, validate_ssh_key, validate_list_of_integers
-from azure.cli.command_modules.acs._validators import validate_k8s_client_version
-from azure.cli.command_modules.acs._validators import validate_k8s_version
-from azure.cli.command_modules.acs._validators import validate_linux_host_name
-from azure.cli.command_modules.acs._validators import validate_connector_name
+    file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type)
+from azure.cli.core.commands.validators import validate_file_or_dict
+
+from ._completers import get_vm_size_completion_list
+from ._validators import (
+    validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
+    validate_list_of_integers, validate_ssh_key, validate_connector_name)
 
 
-def _compute_client_factory(**_):
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(ResourceType.MGMT_COMPUTE)
+aci_connector_os_type = ['Windows', 'Linux', 'Both']
+
+aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-0.1.0.tgz'
+
+orchestrator_types = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
+
+regions_in_preview = [
+    "canadacentral",
+    "canadaeast",
+    "centralindia",
+    "koreasouth",
+    "koreacentral",
+    "southindia",
+    "uksouth",
+    "ukwest",
+    "westcentralus",
+    "westindia",
+    "westus2",
+]
+
+regions_in_prod = [
+    "australiaeast",
+    "australiasoutheast",
+    "brazilsouth",
+    "centralus",
+    "eastasia",
+    "eastus",
+    "eastus2",
+    "japaneast",
+    "japanwest",
+    "northcentralus",
+    "northeurope",
+    "southcentralus",
+    "southeastasia",
+    "westeurope",
+    "westus",
+]
+
+storage_profile_types = ["StorageAccount", "ManagedDisks"]
 
 
-def get_vm_sizes(location):
-    return list(_compute_client_factory().virtual_machine_sizes.list(location))
+def load_arguments(self, _):
 
+    # ACS command argument configuration
+    with self.argument_context('acs') as c:
+        c.argument('resource_name', name_type,
+                   completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'),
+                   help='Name of the container service. You can configure the default using `az configure --defaults acs=<name>`')
+        c.argument('name', name_type,
+                   completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'),
+                   help='Name of the container service. You can configure the default using `az configure --defaults acs=<name>`')
+        c.argument('container_service_name', name_type, help='Name of the container service. You can configure the default using `az configure --defaults acs=<name>`',
+                   completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
+        c.argument('admin_username', options_list=['--admin-username', '-u'], default='azureuser')
+        c.argument('api_version',
+                   help=_get_feature_in_preview_message() + 'Use API version of ACS to perform az acs operations. Available options: 2017-01-31, 2017-07-01. Default: the latest version for the location')
+        c.argument('dns_name_prefix', options_list=['--dns-prefix', '-d'])
+        c.argument('orchestrator_type', get_enum_type(orchestrator_types), options_list=['--orchestrator-type', '-t'])
+        c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
+                   completer=FilesCompleter(), validator=validate_ssh_key)
+        c.argument('tags', tags_type)
+        c.argument('disable_browser', help='Do not open browser after opening a proxy to the cluster web user interface')
 
-def get_vm_size_completion_list(prefix, action, parsed_args, **kwargs):  # pylint: disable=unused-argument
-    try:
-        location = parsed_args.location
-    except AttributeError:
-        location = get_one_of_subscription_locations()
-    result = get_vm_sizes(location)
-    return [r.name for r in result]
+    with self.argument_context('acs create') as c:
+        c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
+                   completer=FilesCompleter(), validator=validate_ssh_key)
+        c.argument('master_profile', options_list=['--master-profile', '-m'], type=validate_file_or_dict,
+                   help=_get_feature_in_preview_message() + 'The file or dictionary representation of the master profile. Note it will override any master settings once set')
+        c.argument('master_vm_size', completer=get_vm_size_completion_list, help=_get_feature_in_preview_message())
+        c.argument('agent_count', type=int)
+        c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters,
+                   help='Generate SSH public and private key files if missing')
+        c.argument('master_osdisk_size', type=int,
+                   help=_get_feature_in_preview_message() + 'The disk size for master pool vms. Unit in GB. Default: corresponding vmsize disk size')
+        c.argument('master_vnet_subnet_id', type=str,
+                   help=_get_feature_in_preview_message() + 'The custom vnet subnet id. Note agent need to used the same vnet if master set. Default: ""')
+        c.argument('master_first_consecutive_static_ip', type=str,
+                   help=_get_feature_in_preview_message() + 'The first consecutive ip used to specify static ip block.')
+        c.argument('master_storage_profile', get_enum_type(storage_profile_types),
+                   help=_get_feature_in_preview_message() + 'Default: varies based on Orchestrator')
+        c.argument('agent_profiles', options_list=['--agent-profiles', '-a'], type=validate_file_or_dict,
+                   help=_get_feature_in_preview_message() + 'The file or dictionary representation of the agent profiles. Note it will override any agent settings once set')
+        c.argument('agent_vm_size', completer=get_vm_size_completion_list,
+                   help='Set the default size for agent pools vms.')
+        c.argument('agent_osdisk_size', type=int,
+                   help=_get_feature_in_preview_message() + 'Set the default disk size for agent pools vms. Unit in GB. Default: corresponding vmsize disk size')
+        c.argument('agent_vnet_subnet_id', type=str,
+                   help=_get_feature_in_preview_message() + 'Set the default custom vnet subnet id for agent pools. Note agent need to used the same vnet if master set. Default: ""')
+        c.argument('agent_ports', type=validate_list_of_integers,
+                   help=_get_feature_in_preview_message() + 'Set the default ports exposed on the agent pools. Only usable for non-Kubernetes. Default: 8080,4000,80')
+        c.argument('agent_storage_profile', get_enum_type(storage_profile_types),
+                   help=_get_feature_in_preview_message() + 'Set default storage profile for agent pools. Default: varies based on Orchestrator')
+        c.argument('windows', action='store_true',
+                   help='If true, set the default osType of agent pools to be Windows.')
+        c.argument('validate', action='store_true',
+                   help='Generate and validate the ARM template without creating any resources')
+        c.argument('orchestrator_version',
+                   help=_get_feature_in_preview_message() + 'Use Orchestrator Version to specify the semantic version for your choice of orchestrator.')
+
+    with self.argument_context('acs scale') as c:
+        c.argument('new_agent_count', type=int)
+
+    with self.argument_context('acs dcos browse') as c:
+        c.argument('ssh_key_file', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa'),
+                   completer=FilesCompleter(), help='Path to an SSH key file to use.')
+
+    with self.argument_context('acs dcos install-cli') as c:
+        c.argument('install_location', default=_get_default_install_location('dcos'))
+
+    with self.argument_context('acs kubernetes get-credentials') as c:
+        c.argument('path', options_list=['--file', '-f'], )
+
+    with self.argument_context('acs kubernetes install-cli') as c:
+        c.argument('install_location', type=file_type, completer=FilesCompleter(),
+                   default=os.path.join(os.path.expanduser('~'), '.kube', 'config'))
+        c.argument('ssh_key_file', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa'),
+                   completer=FilesCompleter(), help='Path to an SSH key file to use.')
+
+    # AKS command argument configuration
+    with self.argument_context('aks') as c:
+        c.argument('resource_name', name_type, help='Name of the managed cluster.',
+                   completer=get_resource_name_completion_list('Microsoft.ContainerService/ManagedClusters'))
+        c.argument('name', name_type, help='Name of the managed cluster.',
+                   completer=get_resource_name_completion_list('Microsoft.ContainerService/ManagedClusters'))
+        c.argument('kubernetes_version', options_list=['--kubernetes-version', '-k'], validator=validate_k8s_version)
+        c.argument('node_count', options_list=['--node-count', '-c'], type=int)
+        c.argument('tags', tags_type)
+
+    with self.argument_context('aks create') as c:
+        c.argument('name', validator=validate_linux_host_name)
+        c.argument('admin_username', options_list=['--admin-username', '-u'], default='azureuser')
+        c.argument('dns_name_prefix', options_list=['--dns-name-prefix', '-p'])
+        c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters)
+        c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
+        c.argument('ssh_key_value', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'),
+                   completer=FilesCompleter(), validator=validate_ssh_key)
+
+    with self.argument_context('aks get-credentials') as c:
+        c.argument('admin', options_list=['--admin', '-a'], default=False)
+        c.argument('path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                   default=os.path.join(os.path.expanduser('~'), '.kube', 'config'))
+
+    with self.argument_context('aks install-cli') as c:
+        c.argument('client_version', validator=validate_k8s_client_version)
+        c.argument('install_location', default=_get_default_install_location('kubectl'))
+
+    with self.argument_context('aks install-connector') as c:
+        c.argument('chart_url', default=aci_connector_chart_url, help='URL to the chart')
+        c.argument('client_secret',
+                   help='Client secret to use with the service principal for making calls to Azure APIs')
+        c.argument('connector_name', help='The name for the ACI Connector', validator=validate_connector_name)
+        c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
+        c.argument('service_principal',
+                   help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
+
+    with self.argument_context('aks remove-connector') as c:
+        c.argument('connector_name', help='The name for the ACI Connector', validator=validate_connector_name)
+        c.argument('graceful', action='store_true',
+                   help='Mention if you want to drain/uncordon your aci-connector to move your applications')
+        c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
 
 
 def _get_default_install_location(exe_name):
@@ -62,137 +196,4 @@ def _get_default_install_location(exe_name):
 
 
 def _get_feature_in_preview_message():
-    return "Feature in preview, only in " + ", ".join(regionsInPreview) + ". "
-
-
-regionsInPreview = ["ukwest", "uksouth", "westcentralus", "westus2", "canadaeast", "canadacentral", "westindia", "southindia", "centralindia", "koreasouth", "koreacentral"]
-
-regionsInProd = ["australiasoutheast", "northeurope", "brazilsouth", "australiaeast", "japaneast", "northcentralus", "westus", "eastasia", "eastus2", "southcentralus", "southeastasia", "eastus", "westeurope", "centralus", "japanwest"]
-
-name_arg_type = CliArgumentType(options_list=('--name', '-n'), metavar='NAME')
-
-orchestratorTypes = ["Custom", "DCOS", "Kubernetes", "Swarm", "DockerCE"]
-
-aci_connector_os_type = ['Windows', 'Linux', 'Both']
-
-aci_connector_chart_url = 'https://github.com/virtual-kubelet/virtual-kubelet/raw/master/charts/virtual-kubelet-0.1.0.tgz'
-
-k8s_version_arg_type = CliArgumentType(options_list=('--kubernetes-version', '-k'), metavar='KUBERNETES_VERSION')
-
-storageProfileTypes = ["StorageAccount", "ManagedDisks"]
-
-register_cli_argument('acs', 'tags', tags_type)
-
-register_cli_argument('acs', 'name', arg_type=name_arg_type, configured_default='acs',
-                      help="ACS cluster name. You can configure the default using `az configure --defaults acs=<name>`",
-                      completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
-
-register_cli_argument('acs', 'resource_group', arg_type=resource_group_name_type)
-
-register_cli_argument('acs', 'orchestrator_type', options_list=('--orchestrator-type', '-t'), help='DockerCE - ' + _get_feature_in_preview_message(), **enum_choice_list(orchestratorTypes))
-# some admin names are prohibited in acs, such as root, admin, etc. Because we have no control on the orchestrators, so default to a safe name.
-register_cli_argument('acs', 'admin_username', options_list=('--admin-username',), default='azureuser', required=False)
-register_cli_argument('acs', 'api_version', options_list=('--api-version',), required=False, help=_get_feature_in_preview_message() + 'Use API version of ACS to perform az acs operations. Available options: 2017-01-31, 2017-07-01. Default: the latest version for the location')
-register_cli_argument('acs', 'dns_name_prefix', options_list=('--dns-prefix', '-d'), help='default use the format of <clustername>-<resourcegroupname>-<subid>, will trim the length and replace sensitive characters if needed')
-register_cli_argument('acs', 'container_service_name', options_list=('--name', '-n'), help='The name of the container service', completer=get_resource_name_completion_list('Microsoft.ContainerService/ContainerServices'))
-
-register_cli_argument('acs', 'ssh_key_value', required=False, help='SSH key file value or key file path.', type=file_type, default=os.path.join('~', '.ssh', 'id_rsa.pub'), completer=FilesCompleter())
-register_cli_argument('acs create', 'name', arg_type=name_arg_type, validator=validate_ssh_key)
-
-register_extra_cli_argument('acs create', 'generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing', validator=validate_create_parameters)
-register_cli_argument('acs create', 'master_profile', options_list=('--master-profile', '-m'), type=validate_file_or_dict, help=_get_feature_in_preview_message() + 'The file or dictionary representation of the master profile. Note it will override any master settings once set')
-register_cli_argument('acs create', 'master_vm_size', completer=get_vm_size_completion_list, help=_get_feature_in_preview_message())
-register_cli_argument('acs create', 'master_osdisk_size', type=int, help=_get_feature_in_preview_message() + 'The disk size for master pool vms. Unit in GB. Default: corresponding vmsize disk size')
-register_cli_argument('acs create', 'master_vnet_subnet_id', type=str, help=_get_feature_in_preview_message() + 'The custom vnet subnet id. Note agent need to used the same vnet if master set. Default: ""')
-register_cli_argument('acs create', 'master_first_consecutive_static_ip', type=str, help=_get_feature_in_preview_message() + 'The first consecutive ip used to specify static ip block.')
-register_cli_argument('acs create', 'master_storage_profile', help=_get_feature_in_preview_message() + 'Default: varies based on Orchestrator', **enum_choice_list(storageProfileTypes))
-register_cli_argument('acs create', 'agent_count', type=int, help='Set default number of agents for the agent pools.  Note, for DC/OS clusters you will also get 1 or 2 public agents in addition to these selected masters.')
-register_cli_argument('acs create', 'agent_profiles', options_list=('--agent-profiles', '-a'), type=validate_file_or_dict, help=_get_feature_in_preview_message() + 'The file or dictionary representation of the agent profiles. Note it will override any agent settings once set')
-register_cli_argument('acs create', 'agent_vm_size', completer=get_vm_size_completion_list, help='Set the default size for agent pools vms.')
-register_cli_argument('acs create', 'agent_osdisk_size', type=int, help=_get_feature_in_preview_message() + 'Set the default disk size for agent pools vms. Unit in GB. Default: corresponding vmsize disk size')
-register_cli_argument('acs create', 'agent_vnet_subnet_id', type=str, help=_get_feature_in_preview_message() + 'Set the default custom vnet subnet id for agent pools. Note agent need to used the same vnet if master set. Default: ""')
-register_cli_argument('acs create', 'agent_ports', type=validate_list_of_integers, help=_get_feature_in_preview_message() + 'Set the default ports exposed on the agent pools. Only usable for non-Kubernetes. Default: 8080,4000,80')
-register_cli_argument('acs create', 'agent_storage_profile', help=_get_feature_in_preview_message() + 'Set default storage profile for agent pools. Default: varies based on Orchestrator', **enum_choice_list(storageProfileTypes))
-
-register_cli_argument('acs create', 'windows', action='store_true', help='If true, set the default osType of agent pools to be Windows.')
-register_cli_argument('acs create', 'validate', action='store_true', help='Generate and validate the ARM template without creating any resources')
-
-register_cli_argument('acs create', 'orchestrator_version', options_list=('--orchestrator-version',), help=_get_feature_in_preview_message() + 'Use Orchestrator Version to specify the semantic version for your choice of orchestrator.')
-
-register_cli_argument('acs', 'disable_browser', help='Do not open browser after opening a proxy to the cluster web user interface')
-register_cli_argument('acs dcos browse', 'name', name_arg_type)
-register_cli_argument('acs dcos browse', 'ssh_key_file',
-                      required=False,
-                      help='Path to an SSH key file to use.',
-                      type=file_type,
-                      default=os.path.join('~', '.ssh', 'id_rsa'),
-                      completer=FilesCompleter())
-register_cli_argument('acs dcos install-cli', 'install_location',
-                      options_list=('--install-location',),
-                      default=_get_default_install_location('dcos'))
-register_cli_argument('acs kubernetes install-cli', 'install_location',
-                      options_list=('--install-location',),
-                      default=_get_default_install_location('kubectl'))
-
-# TODO: Make this derive from the cluster object, instead of just preset values
-register_cli_argument('acs kubernetes get-credentials', 'dns_prefix')
-register_cli_argument('acs kubernetes get-credentials', 'location')
-register_cli_argument('acs kubernetes get-credentials', 'path',
-                      options_list=('--file', '-f',),
-                      default=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
-                      type=file_type,
-                      completer=FilesCompleter())
-register_cli_argument('acs kubernetes get-credentials', 'ssh_key_file',
-                      required=False,
-                      help='Path to an SSH key file to use.',
-                      type=file_type,
-                      default=os.path.join('~', '.ssh', 'id_rsa'),
-                      completer=FilesCompleter())
-register_cli_argument('acs scale', 'new_agent_count', type=int, help='The number of agents for the cluster')
-register_cli_argument('acs create', 'service_principal', help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
-register_cli_argument('acs create', 'client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
-
-# Managed Clusters flags configuration
-register_cli_argument('aks', 'name', help='Resource name for the managed cluster', arg_type=name_arg_type)
-register_cli_argument('aks', 'resource_group', arg_type=resource_group_name_type)
-register_cli_argument('aks', 'tags', tags_type)
-
-register_cli_argument('aks create', 'ssh_key_value', required=False,
-                      help='SSH key file value or key file path.', type=file_type,
-                      default=os.path.join('~', '.ssh', 'id_rsa.pub'), completer=FilesCompleter(),
-                      validator=validate_ssh_key)
-register_cli_argument('aks create', 'name', arg_type=name_arg_type, validator=validate_linux_host_name)
-register_extra_cli_argument('aks create', 'generate_ssh_keys', action='store_true',
-                            help='Generate SSH public and private key files if missing',
-                            validator=validate_create_parameters)
-register_cli_argument('aks create', 'kubernetes_version', arg_type=k8s_version_arg_type,
-                      validator=validate_k8s_version)
-register_cli_argument('aks create', 'admin_username', options_list=('--admin-username', '-u'))
-register_cli_argument('aks create', 'node_vm_size', options_list=('--node-vm-size', '-s'),
-                      completer=get_vm_size_completion_list)
-register_cli_argument('aks create', 'node_count', type=int, options_list=('--node-count', '-c'))
-register_cli_argument('aks create', 'dns_name_prefix', options_list=('--dns-name-prefix', '-p'))
-register_cli_argument('aks delete', 'resource_name', help='Resource name for the managed cluster', arg_type=name_arg_type)
-register_cli_argument('aks get-credentials', 'path', options_list=('--file', '-f',),
-                      default=os.path.join(os.path.expanduser('~'), '.kube', 'config'),
-                      type=file_type, completer=FilesCompleter())
-register_cli_argument('aks get-credentials', 'admin', options_list=('--admin', '-a'), default=False)
-register_cli_argument('aks get-versions', 'resource_name', help='Resource name for the managed cluster', arg_type=name_arg_type)
-register_cli_argument('aks scale', 'node_count', type=int, options_list=('--node-count', '-c'))
-register_cli_argument('aks upgrade', 'kubernetes_version', arg_type=k8s_version_arg_type,
-                      validator=validate_k8s_version)
-register_cli_argument('aks upgrade', 'name', arg_type=name_arg_type, validator=validate_linux_host_name)
-register_cli_argument('aks wait', 'resource_name', options_list=('--name', '-n'))
-register_cli_argument('aks install-cli', 'install_location', options_list=('--install-location',),
-                      default=_get_default_install_location('kubectl'))
-register_cli_argument('aks install-cli', 'client_version', options_list=('--client-version',),
-                      validator=validate_k8s_client_version)
-register_cli_argument('aks install-connector', 'os_type', help='The OS type of the connector', **enum_choice_list(aci_connector_os_type))
-register_cli_argument('aks install-connector', 'chart_url', help='URL to the chart', default=aci_connector_chart_url)
-register_cli_argument('aks install-connector', 'connector_name', help='The name for the ACI Connector', validator=validate_connector_name)
-register_cli_argument('aks install-connector', 'service_principal', help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
-register_cli_argument('aks install-connector', 'client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
-register_cli_argument('aks remove-connector', 'os_type', help='The OS type of the connector', **enum_choice_list(aci_connector_os_type))
-register_cli_argument('aks remove-connector', 'graceful', help='Mention if you want to drain/uncordon your aci-connector to move your applications', action='store_true')
-register_cli_argument('aks remove-connector', 'connector_name', help='The name for the ACI Connector', validator=validate_connector_name)
-register_cli_argument('aks remove-connector', 'resource_group', arg_type=resource_group_name_type, help='The name of the resource group where the AKS cluster is deployed')
+    return "Feature in preview, only in " + ", ".join(regions_in_preview) + ". "

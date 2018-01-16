@@ -5,8 +5,11 @@
 
 import json
 import os
-from azure.cli.core.util import CLIError
-from msrestazure.tools import parse_resource_id
+
+from knack.log import get_logger
+from knack.util import CLIError
+
+logger = get_logger(__name__)
 
 
 MSI_LOCAL_ID = '[system]'
@@ -20,10 +23,10 @@ def read_content_if_is_file(string_or_file):
     return content
 
 
-def _resolve_api_version(provider_namespace, resource_type, parent_path):
+def _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
-    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     provider = client.providers.get(provider_namespace)
 
     # If available, we will use parent resource's api-version
@@ -43,21 +46,19 @@ def _resolve_api_version(provider_namespace, resource_type, parent_path):
 
 
 def log_pprint_template(template):
-    import azure.cli.core.azlogging as azlogging
-
-    logger = azlogging.get_az_logger(__name__)
     logger.info('==== BEGIN TEMPLATE ====')
     logger.info(json.dumps(template, indent=2))
     logger.info('==== END TEMPLATE ====')
 
 
-def check_existence(value, resource_group, provider_namespace, resource_type,
+def check_existence(cli_ctx, value, resource_group, provider_namespace, resource_type,
                     parent_name=None, parent_type=None):
     # check for name or ID and set the type flags
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from msrestazure.azure_exceptions import CloudError
+    from msrestazure.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
-    resource_client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resources
+    resource_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources
 
     id_parts = parse_resource_id(value)
 
@@ -72,7 +73,7 @@ def check_existence(value, resource_group, provider_namespace, resource_type,
         parent_path = ''
         resource_name = id_parts['name']
         resource_type = id_parts.get('type', resource_type)
-    api_version = _resolve_api_version(provider_namespace, resource_type, parent_path)
+    api_version = _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path)
 
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)
@@ -81,17 +82,16 @@ def check_existence(value, resource_group, provider_namespace, resource_type,
         return False
 
 
-def create_keyvault_data_plane_client():
+def create_keyvault_data_plane_client(cli_ctx):
     from azure.cli.core._profile import Profile
 
     def get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile().get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
 
     from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
     return KeyVaultClient(KeyVaultAuthentication(get_token))
 
 
-def get_key_vault_base_url(vault_name):
-    from azure.cli.core._profile import CLOUD
-    suffix = CLOUD.suffixes.keyvault_dns
+def get_key_vault_base_url(cli_ctx, vault_name):
+    suffix = cli_ctx.cloud.suffixes.keyvault_dns
     return 'https://{}{}'.format(vault_name, suffix)

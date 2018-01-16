@@ -3,6 +3,15 @@
 Release History
 ===============
 
+0.1.0
++++++
+* BC: Add multi-diagnostic settings support. `--name` is required in `monitor diagnostic-settings create`.
+* Add command to get diagnostic settings category.
+
+0.0.14
+++++++
+* Update for CLI core changes.
+
 0.0.13
 ++++++
 * Update managed SDK reference to 0.4.0

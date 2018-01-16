@@ -59,7 +59,7 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.copy.status', 'success'))
 
         # test that a file can be successfully copied by name components
-        self.storage_cmd('storage file copy start -s {} -p "{}" --source-share {} --source-path {}',
+        self.storage_cmd('storage file copy start -s {} -p "{}" --source-share {} --source-path "{}"',
                          account_info, s2, dst_file, s1, src_file) \
             .assert_with_checks(JMESPathCheck('status', 'success'))
 

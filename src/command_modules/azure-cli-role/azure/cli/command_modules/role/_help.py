@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps  # pylint: disable=unused-import
+from knack.help_files import helps  # pylint: disable=unused-import
 
 
 helps['ad sp create-for-rbac'] = """
@@ -47,8 +47,8 @@ helps['ad sp create-for-rbac'] = """
         - name: Create with customized contributor assignments.
           text: |
             az ad sp create-for-rbac -n "MyApp" --role contributor \\
-                --scopes /subscriptions/{SubID}/resourceGroups/{MyRG1} \\
-                /subscriptions/{SubID}/resourceGroups/{MyRG2}
+                --scopes /subscriptions/{SubID}/resourceGroups/{ResourceGroup1} \\
+                /subscriptions/{SubID}/resourceGroups/{ResourceGroup2}
         - name: Create using a self-signed certificte.
           text: az ad sp create-for-rbac --create-cert
         - name: Create using a self-signed certificate, and store it within KeyVault.
@@ -160,23 +160,23 @@ helps['role definition create'] = """
     examples:
         - name: Create a role with read-only access to storage and network resources, and the ability to start or restart VMs.
           text: |
-                az role definition create --role-definition { \\
-                    "Name": "Contoso On-call", \\
-                    "Description": "Perform VM actions and read storage and network information." \\
-                    "Actions": [ \\
-                        "Microsoft.Compute/*/read", \\
-                        "Microsoft.Compute/virtualMachines/start/action", \\
-                        "Microsoft.Compute/virtualMachines/restart/action", \\
-                        "Microsoft.Network/*/read", \\
-                        "Microsoft.Storage/*/read", \\
-                        "Microsoft.Authorization/*/read", \\
-                        "Microsoft.Resources/subscriptions/resourceGroups/read", \\
-                        "Microsoft.Resources/subscriptions/resourceGroups/resources/read", \\
-                        "Microsoft.Insights/alertRules/*", \\
-                        "Microsoft.Support/*" \\
-                    ], \\
-                    "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"] \\
-                }
+                az role definition create --role-definition '{
+                    "Name": "Contoso On-call",
+                    "Description": "Perform VM actions and read storage and network information."
+                    "Actions": [
+                        "Microsoft.Compute/*/read",
+                        "Microsoft.Compute/virtualMachines/start/action",
+                        "Microsoft.Compute/virtualMachines/restart/action",
+                        "Microsoft.Network/*/read",
+                        "Microsoft.Storage/*/read",
+                        "Microsoft.Authorization/*/read",
+                        "Microsoft.Resources/subscriptions/resourceGroups/read",
+                        "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
+                        "Microsoft.Insights/alertRules/*",
+                        "Microsoft.Support/*"
+                    ],
+                    "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
+                }'
         - name: Create a role from a file containing a JSON description.
           text: >
             az role definition create --role-definition @ad-role.json
@@ -200,23 +200,23 @@ helps['role definition update'] = """
     examples:
         - name: Create a role with read-only access to storage and network resources, and the ability to start or restart VMs.
           text: |
-                az role definition create --role-definition { \\
-                    "Name": "Contoso On-call", \\
-                    "Description": "Perform VM actions and read storage and network information." \\
-                    "Actions": [ \\
-                        "Microsoft.Compute/*/read", \\
-                        "Microsoft.Compute/virtualMachines/start/action", \\
-                        "Microsoft.Compute/virtualMachines/restart/action", \\
-                        "Microsoft.Network/*/read", \\
-                        "Microsoft.Storage/*/read", \\
-                        "Microsoft.Authorization/*/read", \\
-                        "Microsoft.Resources/subscriptions/resourceGroups/read", \\
-                        "Microsoft.Resources/subscriptions/resourceGroups/resources/read", \\
-                        "Microsoft.Insights/alertRules/*", \\
-                        "Microsoft.Support/*" \\
-                    ], \\
-                    "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"] \\
-                }
+                az role definition create --role-definition '{
+                    "Name": "Contoso On-call",
+                    "Description": "Perform VM actions and read storage and network information."
+                    "Actions": [
+                        "Microsoft.Compute/*/read",
+                        "Microsoft.Compute/virtualMachines/start/action",
+                        "Microsoft.Compute/virtualMachines/restart/action",
+                        "Microsoft.Network/*/read",
+                        "Microsoft.Storage/*/read",
+                        "Microsoft.Authorization/*/read",
+                        "Microsoft.Resources/subscriptions/resourceGroups/read",
+                        "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
+                        "Microsoft.Insights/alertRules/*",
+                        "Microsoft.Support/*"
+                    ],
+                    "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
+                }'
         - name: Create a role from a file containing a JSON description.
           text: >
             az role definition create --role-definition ad-role.json

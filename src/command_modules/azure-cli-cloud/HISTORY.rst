@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.11
+++++++
+* Bug fix: Do not require endpoints to be specified when setting --profile for a cloud.
+
 2.0.10
 ++++++
 * `az cloud register` & `az cloud update`: Prevent users from registering clouds that have missing required endpoints

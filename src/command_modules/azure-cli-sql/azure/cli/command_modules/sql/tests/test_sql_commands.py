@@ -16,6 +16,7 @@ from azure.cli.testsdk import (
     ResourceGroupPreparer,
     ScenarioTest,
     StorageAccountPreparer,
+    TestCli,
     LiveScenarioTest)
 from azure.cli.testsdk.preparers import (
     AbstractPreparer,
@@ -46,13 +47,13 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
         template = 'az sql server create -l {} -g {} -n {} -u {} -p {}'
-        execute(template.format(self.location, group, name, self.admin_user, self.admin_password))
+        execute(TestCli(), template.format(self.location, group, name, self.admin_user, self.admin_password))
         return {self.parameter_name: name}
 
     def remove_resource(self, name, **kwargs):
         if not self.skip_delete:
             group = self._get_resource_group(**kwargs)
-            execute('az sql server delete -g {} -n {} --yes --no-wait'.format(group, name))
+            execute(TestCli(), 'az sql server delete -g {} -n {} --yes --no-wait'.format(group, name))
 
     def _get_resource_group(self, **kwargs):
         try:
@@ -1191,7 +1192,10 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
 class SqlServerCapabilityScenarioTest(ScenarioTest):
     def test_sql_capabilities(self):
         location = 'westus'
-
+        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = 2048
         # New capabilities are added quite frequently and the state of each capability depends
         # on your subscription. So it's not a good idea to make strict checks against exactly
         # which capabilities are returned. The idea is to just check the overall structure.
@@ -1468,24 +1472,20 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
         self.assertEqual(conn_str, '$conn = new PDO("sqlsrv:server = tcp:myserver.database.windows.net,1433; Database = mydb; LoginTimeout = 30; Encrypt = 1; TrustServerCertificate = 0;", "<username>", "<password>");')
 
         # PHP PDO, ADPassword
-        with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADPassword')
+        self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADPassword', expect_failure=True)
 
         # PHP PDO, ADIntegrated
-        with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADIntegrated')
+        self.cmd('sql db show-connection-string -s myserver -n mydb -c php_pdo -a ADIntegrated', expect_failure=True)
 
         # PHP, user name/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c php').get_output_in_json()
         self.assertEqual(conn_str, '$connectionOptions = array("UID"=>"<username>@myserver", "PWD"=>"<password>", "Database"=>mydb, "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0); $serverName = "tcp:myserver.database.windows.net,1433"; $conn = sqlsrv_connect($serverName, $connectionOptions);')
 
         # PHP, ADPassword
-        with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADPassword')
+        self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADPassword', expect_failure=True)
 
         # PHP, ADIntegrated
-        with self.assertRaises(CLIError):
-            self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADIntegrated')
+        self.cmd('sql db show-connection-string -s myserver -n mydb -c php -a ADIntegrated', expect_failure=True)
 
         # ODBC, user name/password
         conn_str = self.cmd('sql db show-connection-string -s myserver -n mydb -c odbc').get_output_in_json()
@@ -1656,10 +1656,9 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('length(@)', 1)])
 
 
-# TODO: Restore to ScenarioTest and re-record when issue #5112 is fixed.
-class SqlServerVnetMgmtScenarioTest(LiveScenarioTest):
-    @ResourceGroupPreparer(location='eastus2euap')
-    @SqlServerPreparer(location='eastus2euap')
+class SqlServerVnetMgmtScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer()
+    @SqlServerPreparer()
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
         rg = resource_group
         vnet_rule_1 = 'rule1'
