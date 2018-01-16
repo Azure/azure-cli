@@ -7,12 +7,30 @@ from azure.cli.core import AzCommandsLoader
 
 import azure.cli.command_modules.iot._help  # pylint: disable=unused-import
 
+def handler(ctx, **kwargs):
+    cmd = kwargs.get('command', None)
+    if cmd and cmd.startswith('iot'):
+        from azure.cli.core.extension import extension_exists
+        if not extension_exists('azure_cli_iot_ext'):
+            ran_before = ctx.config.getboolean('iot', 'first_run', fallback=False)
+            if ran_before:
+                from knack.log import get_logger
+                extension_text = """
+Comprehensive IoT data-plane functionality is available
+in the Azure IoT CLI Extension. For more info and install guide
+go to https://github.com/Azure/azure-iot-cli-extension
+"""
+                logger = get_logger(__name__)
+                logger.warning(extension_text)
+                ctx.config.set_value('iot', 'first_run', 'yes')
 
 class IoTCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
+        from knack.events import EVENT_INVOKER_POST_PARSE_ARGS
         from azure.cli.core.commands import CliCommandType
         iot_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.iot.custom#{}')
+        cli_ctx.register_event(EVENT_INVOKER_POST_PARSE_ARGS, handler)
         super(IoTCommandsLoader, self).__init__(cli_ctx=cli_ctx,
                                                 custom_command_type=iot_custom,
                                                 min_profile='2017-03-10-profile')
