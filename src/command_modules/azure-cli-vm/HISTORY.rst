@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.25
+++++++
+* vmss:(PREVIEW) support low priority
 
 2.0.24
 ++++++
