@@ -674,6 +674,52 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(tenant, self.tenant_id)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('requests.post', autospec=True)
+    def test_get_raw_token_msi_system_assigned(self, mock_post, mock_read_cred_file):
+        cli = TestCli()
+        mock_read_cred_file.return_value = []
+
+        # setup an existing msi subscription
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False)
+        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
+        test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
+        test_port = '12345'
+        test_user = 'systemAssignedIdentity'
+        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id,
+                                            'MSI@' + str(test_port), self.state1, test_tenant_id)
+        consolidated = profile._normalize_properties(test_user,
+                                                     [msi_subscription],
+                                                     True)
+        profile._set_subscriptions(consolidated)
+
+        # setup a response for the token request
+        test_token_entry = {
+            'token_type': 'Bearer',
+            'access_token': 'good token for you'
+        }
+        encoded_test_token = json.dumps(test_token_entry).encode()
+        response = mock.MagicMock()
+        response.status_code = 200
+        response.content = encoded_test_token
+        mock_post.return_value = response
+        test_resource = 'https://foo'
+        # action
+        cred, subscription_id, _ = profile.get_raw_token(resource=test_resource)
+
+        # assert
+        self.assertEqual(subscription_id, test_subscription_id)
+
+        # verify the cred._tokenRetriever is a working lambda
+        token_type, token, whole_entry = cred
+        self.assertEqual(test_token_entry['access_token'], token)
+        self.assertEqual(test_token_entry['token_type'], token_type)
+        self.assertEqual(test_token_entry, whole_entry)
+        mock_post.assert_called_with('http://localhost:12345/oauth2/token',
+                                     data={'resource': test_resource},
+                                     headers={'Metadata': 'true'})
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
     def test_get_login_credentials_for_graph_client(self, mock_get_token, mock_read_cred_file):
         cli = TestCli()
