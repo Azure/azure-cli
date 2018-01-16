@@ -90,7 +90,7 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='update', custom_func_name='update_profile',
                                  doc_string_source='azure.mgmt.cdn.models#ProfileUpdateParameters')
 
-    with self.command_group('cdn custom-domain', cdn_domain_sdk) as g:
+    with self.command_group('cdn custom-domain', cdn_domain_sdk, client_factory=cf_cdn) as g:
         g.command('show', 'get')
         g.command('delete', 'delete')
         g.command('list', 'list_by_endpoint')
