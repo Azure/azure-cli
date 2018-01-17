@@ -6,7 +6,8 @@ from azure.mgmt.rdbms import mysql
 from azure.mgmt.rdbms import postgresql
 
 from azure.cli.core.commands.parameters import (
-    get_resource_name_completion_list, tags_type, get_location_type, get_enum_type)
+    get_resource_name_completion_list, tags_type, get_location_type, get_enum_type,
+    get_three_state_flag)
 
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator
 
@@ -68,6 +69,8 @@ def load_arguments(self, _):
             c.argument('tier', arg_type=get_enum_type(['Basic', 'Standard']), options_list=['--performance-tier'], help='The performance tier of the server.')
             c.argument('capacity', options_list=['--compute-units'], type=int, help='Number of compute units.')
             c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The max storage size of the server, unit is MB.')
+            c.argument('backup_retention_days', options_list=['--backup-retention-days'], type=int, help='The max days of retention, unit is days.')
+            c.argument('geoRedundantBackup', options_list=['--geo-redundant-backup'], type=get_three_state_flag(), help='if geo redundandant backup is needed.')
             c.argument('tags', tags_type)
 
     for scope in ['mysql server-logs', 'postgres server-logs']:
