@@ -457,6 +457,11 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
             'azure.batch.operations.pool_operations#PoolOperations.add',
             operations.pool_operations.PoolOperations.add,
             client_factory=get_client)
+        self.command_node = _command_type.AzureBatchDataPlaneCommand(
+            'batch_tests_node',
+            'azure.batch.operations.compute_node_operations#ComputeNodeOperations.reboot',
+            operations.compute_node_operations.ComputeNodeOperations.reboot,
+            client_factory=get_client)
         self.command_job = _command_type.AzureBatchDataPlaneCommand(
             'batch_tests_job',
             'azure.batch.operations.job_operations#JobOperations.add',
@@ -622,3 +627,10 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
         self.assertFalse('yes' in args)
         self.assertTrue('json_file' in args)
         self.assertFalse('destination' in args)
+        handler = operations.compute_node_operations.ComputeNodeOperations.reboot
+        args = list(self.command_node._load_transformed_arguments(handler))
+        self.assertEqual(len(args), 7)
+        self.assertTrue('node_reboot_option' in [a for a, _ in args])
+        option = [arg for (name, arg) in args if name == 'node_reboot_option'][0]
+        self.assertIsNotNone(option.choices)
+        self.assertFalse([a for a in option.choices if "'" in a])

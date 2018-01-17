@@ -134,7 +134,7 @@ class AzCliCommand(CLICommand):
             setattr(arg.type, 'configured_default_applied', True)
             config_value = self.cli_ctx.config.get(DEFAULTS_SECTION, def_config, None)
             if config_value:
-                logger.warning("Using default '%s' for arg %s", config_value, arg.name)
+                logger.info("Configured default '%s' for arg %s", config_value, arg.name)
                 overrides.settings['default'] = config_value
                 overrides.settings['required'] = False
 

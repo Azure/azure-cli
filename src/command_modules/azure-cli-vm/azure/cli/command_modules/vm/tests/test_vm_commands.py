@@ -2273,6 +2273,17 @@ class VMSSRollingUpgrade(ScenarioTest):
         self.cmd('vmss rolling-upgrade cancel -g {rg} -n {vmss}', expect_failure=True)
 
 
+class VMSSPriorityTesting(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='vmss_low_pri', location='CentralUSEUAP')
+    def test_vmss_create_with_low_priority(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'priority': 'Low',
+            'vmss': 'vmss123'
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --admin-username clitester --admin-password PasswordPassword1! --image debian --priority {priority}')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=self.check('virtualMachineProfile.priority', self.kwargs['priority']))
+
+
 class VMLBIntegrationTesting(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_lb_integration')

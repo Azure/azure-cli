@@ -126,6 +126,7 @@ helps['aks browse'] = """
         - name: --disable-browser
           type: bool
           short-summary: Don't launch a web browser after establishing port-forwarding.
+          long-summary: Add this argument when launching a web browser manually, or for automated testing.
 """
 
 helps['aks create'] = """
