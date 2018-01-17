@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.26
+++++++
+* Warning that appears when using a configured default has been changed to an INFO level entry. Use --verbose to see.
+
 2.0.25
 ++++++
 * Minor fixes

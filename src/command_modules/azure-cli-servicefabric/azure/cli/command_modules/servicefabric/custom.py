@@ -262,8 +262,9 @@ def new_cluster(cmd,
     validate_result = _deploy_arm_template_core(
         cli_ctx, resource_group_name, template, parameters, deployment_name, 'incremental', True)
     if validate_result.error is not None:
-        raise CLIError("Template validates error \n'{}'".format(
-            validate_result.error))
+        errors_detailed = _build_detailed_error(validate_result.error, [])
+        errors_detailed.insert(0, "Error validating template. See below for more information.")
+        raise CLIError('\n'.join(errors_detailed))
     logger.info("Deployment is valid, and begin to deploy")
     _deploy_arm_template_core(cli_ctx, resource_group_name, template,
                               parameters, deployment_name, 'incremental', False)
@@ -277,6 +278,19 @@ def new_cluster(cmd,
                                   'thumbprint': cert_thumbprint}
 
     return output_dict
+
+
+def _build_detailed_error(top_error, output_list):
+    if output_list:
+        output_list.append(' Inner Error - Code: "{}" Message: "{}"'.format(top_error.code, top_error.message))
+    else:
+        output_list.append('Error - Code: "{}" Message: "{}"'.format(top_error.code, top_error.message))
+
+    if top_error.details:
+        for error in top_error.details:
+            _build_detailed_error(error, output_list)
+
+    return output_list
 
 
 def add_app_cert(cmd,

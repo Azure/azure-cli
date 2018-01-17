@@ -178,14 +178,14 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
 
     try:
         p = Popen(["docker", "ps"], stdout=PIPE, stderr=PIPE)
-        returncode = p.wait()
+        _, stderr = p.communicate()
     except OSError:
         raise CLIError(docker_not_installed)
     except CalledProcessError:
         raise CLIError(docker_not_available)
 
-    if returncode:
-        raise CLIError(docker_not_available)
+    if stderr:
+        raise CLIError(stderr.decode())
 
     login_server, username, password = get_login_credentials(
         cli_ctx=cmd.cli_ctx,
@@ -209,14 +209,35 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
         p = Popen(["docker", "login",
                    "--username", username,
                    "--password-stdin",
-                   login_server], stdin=PIPE)
-        p.communicate(input=password.encode())
+                   login_server], stdin=PIPE, stderr=PIPE)
+        _, stderr = p.communicate(input=password.encode())
     else:
         p = Popen(["docker", "login",
                    "--username", username,
                    "--password", password,
-                   login_server])
-        p.wait()
+                   login_server], stderr=PIPE)
+        _, stderr = p.communicate()
+
+    if stderr:
+        if b'error storing credentials' in stderr and b'stub received bad data' in stderr \
+           and _check_wincred(login_server):
+            # Retry once after disabling wincred
+            if use_password_stdin:
+                p = Popen(["docker", "login",
+                           "--username", username,
+                           "--password-stdin",
+                           login_server], stdin=PIPE)
+                p.communicate(input=password.encode())
+            else:
+                p = Popen(["docker", "login",
+                           "--username", username,
+                           "--password", password,
+                           login_server])
+                p.wait()
+        else:
+            import sys
+            output = getattr(sys.stderr, 'buffer', sys.stderr)
+            output.write(stderr)
 
 
 def acr_show_usage(cmd, client, registry_name, resource_group_name=None):
@@ -225,3 +246,46 @@ def acr_show_usage(cmd, client, registry_name, resource_group_name=None):
                                                        resource_group_name,
                                                        "Usage is only supported for managed registries.")
     return client.list_usages(resource_group_name, registry_name)
+
+
+def _check_wincred(login_server):
+    import platform
+    if platform.system() == 'Windows':
+        import json
+        from os.path import expanduser, isfile, join
+        config_path = join(expanduser('~'), '.docker', 'config.json')
+        logger.debug("Docker config file path %s", config_path)
+        if isfile(config_path):
+            with open(config_path) as input_file:
+                content = json.load(input_file)
+                input_file.close()
+            wincred = content.pop('credsStore', None)
+            if wincred and wincred.lower() == 'wincred':
+                # Ask for confirmation
+                from knack.prompting import prompt_y_n, NoTTYException
+                message = "This operation will disable wincred and use file system to store docker credentials." \
+                          " All registries that are currently logged in will be logged out." \
+                          "\nAre you sure you want to continue?"
+                try:
+                    if prompt_y_n(message):
+                        with open(config_path, 'w') as output_file:
+                            json.dump(content, output_file, indent=4)
+                            output_file.close()
+                            return True
+                    return False
+                except NoTTYException:
+                    return False
+            # Don't update config file or retry as this doesn't seem to be a wincred issue
+            return False
+        else:
+            content = {
+                "auths": {
+                    login_server: {}
+                }
+            }
+            with open(config_path, 'w') as output_file:
+                json.dump(content, output_file, indent=4)
+                output_file.close()
+            return True
+
+    return False

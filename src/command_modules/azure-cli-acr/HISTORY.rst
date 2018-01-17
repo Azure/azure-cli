@@ -5,6 +5,7 @@ Release History
 
 2.0.19
 ++++++
+* Add acr login fallback on wincred errors.
 * Minor fixes, enable registry logs.
 
 2.0.18

@@ -2,9 +2,15 @@
 
 Release History
 ===============
+2.0.25
+++++++
+* vmss:(PREVIEW) support low priority
 
 2.0.24
 ++++++
+* vmss:(PREVIEW) cross zone support
+* vmss:(BREAKING CHANGE)single zone scale-set will default to "Standard" load balancer instead of "Basic"
+* vm/vmss: use right term of "userAssignedIdentity" for EMSI
 * vm: (PREVIEW) support os disk swap
 * vm: support use image from other subscriptions
 

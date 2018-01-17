@@ -1143,7 +1143,7 @@ def create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, sc
 
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None, resolve_assignee=True):
-    factory = get_auth_management_client(scope)
+    factory = get_auth_management_client(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
 

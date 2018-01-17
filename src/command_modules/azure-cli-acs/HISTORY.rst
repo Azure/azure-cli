@@ -7,9 +7,13 @@ Release History
 * `acs create`: emit out an actionable error if provisioning application failed for lack of permissions
 
 
+2.0.25
+++++++
+* clarify `--disable-browser` argument
+
 2.0.24
 ++++++
-* [AKS] fix get-credentials command
+* fix get-credentials command
 * aks doesn't need to add role for SPN now
 
 2.0.23
