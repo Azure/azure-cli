@@ -3,10 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=line-too-long
-from azure.cli.core.commands.parameters import name_type
 
-def load_arguments(self, _):
-
-    with self.argument_context('example') as c:
-        c.argument('example_name', arg_type=name_type, help='The name of the example.')
+def cf_example(cli_ctx, _):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.example import ExampleManagementClient
+    return get_mgmt_service_client(cli_ctx, ExampleManagementClient).examples
