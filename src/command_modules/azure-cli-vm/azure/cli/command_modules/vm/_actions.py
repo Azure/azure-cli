@@ -82,7 +82,7 @@ def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None):
     # under hack mode(say through proxies with unsigned cert), opt out the cert verification
     response = requests.get(target_url, verify=(not should_disable_connection_verify()))
     if response.status_code != 200:
-        raise CLIError("Failed to open alias doc '{}'".format(target_url))
+        raise CLIError("Failed to retrieve image alias doc '{}'. Error: '{}'".format(target_url, response))
     dic = json.loads(response.content.decode())
     try:
         all_images = []
