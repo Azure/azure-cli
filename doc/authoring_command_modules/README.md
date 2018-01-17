@@ -5,11 +5,11 @@ The document provides instructions and guidelines on how to author command modul
 
 **Module Authoring**:<br>You are here!
 
-**Command Authoring**:<br>https://github.com/Azure/azure-cli/blob/master/doc/authoring_command_modules/authoring_commands.md
+**Command Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_command_modules/authoring_commands.md
 
-**Help Authoring**:<br>https://github.com/Azure/azure-cli/blob/master/doc/authoring_help.md
+**Help Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_help.md
 
-**Test Authoring**:<br>https://github.com/Azure/azure-cli/blob/master/doc/authoring_tests.md
+**Test Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md
 
 
 <a name="heading_set_up"></a>Set Up
