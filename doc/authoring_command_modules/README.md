@@ -81,7 +81,7 @@ Command modules should have the following structure:
 **Create an \_\_init__.py for your module**
 
 In the \_\_init__ file, you will declare a command loader class that inherits from AzCommandsLoader. You will typically override the following three methods:
-  - `__init__` - Useful for setting metadata that applies to the entire module. See command authoring for more info.
+  - `__init__` - Useful for setting metadata that applies to the entire module. For performance reasons, no heavy processing should be done here. See command authoring for more info.
   - `load_commands_table` - Register command groups and commands here. It is common to store the implementation of this method in
                             a file named `commands.py` but for very small modules this may not be necessary. See command authoring for
                             more info.
@@ -91,32 +91,32 @@ In the \_\_init__ file, you will declare a command loader class that inherits fr
 **__init__.py**
 ```Python
 from azure.cli.core import AzCommandsLoader
-from azure.cli.command_modules.example._help import helps  # pylint: disable=unused-import
+from azure.cli.command_modules.mymod._help import helps  # pylint: disable=unused-import
 
-class ExampleCommandsLoader(AzCommandsLoader):
+class MyModCommandsLoader(AzCommandsLoader):
 
     def load_command_table(self, args):
       from azure.cli.core.commands import CliCommandType
 
-      example_custom = CliCommandType(
-        operations_tmpl='azure.mgmt.example.operations#ExampleOperations.{}',
+      mymod_custom = CliCommandType(
+        operations_tmpl='azure.mgmt.mymod.operations#MyModOperations.{}',
       )
 
-      with self.command_group('example', example_custom) as g:
-        g.command('create', 'create_example')
+      with self.command_group('myfoo', mymod_custom) as g:
+        g.command('create', 'create_myfoo')
 
-COMMAND_LOADER_CLS = ExampleCommandsLoader
+COMMAND_LOADER_CLS = MyModCommandsLoader
 ```
 
 **custom.py**
 ```python
-def create_example(cmd, example_name, resource_group_name, location=None):
-    from azure.mgmt.example.models import Example
-    from azure.cli.command_modules.example._client_factory import cf_example
-    client = cf_example(cmd.cli_ctx)
+def create_myfoo(cmd, myfoo_name, resource_group_name, location=None):
+    from azure.mgmt.example.models import MyFoo
+    from azure.cli.command_modules.example._client_factory import cf_mymod
+    client = cf_mymod(cmd.cli_ctx)
 
-    example = Example(location=location)
-    return client.create_or_update(example_name, resource_group_name, example)
+    foo = MyFoo(location=location)
+    return client.create_or_update(myfoo_name, resource_group_name, foo)
 ```
 
 The snippet above shows what it takes to author a basic command.
@@ -130,18 +130,18 @@ The snippet above shows what it takes to author a basic command.
 When running the command with the `--help` flag, you should see the command.
 You can also now execute the command for yourself.
 ```
-$ az example create --help
+$ az myfoo create --help
 
 Command
-    az example create
+    az myfoo create
 
 Arguments
-    --example-name        [Required]: The argument that is required.
+    --myfoo-name          [Required]: The argument that is required.
     --resource-group-name [Required]: Also required.
     --location                      : Optional arg.
 ...
 
-$ az example create --example-name foo --resource-group-name myrg
+$ az myfoo create --myfoo-name foo --resource-group-name myrg
 {
   "name": "foo",
   "resourceGroup": "myrg",
@@ -163,7 +163,7 @@ Run an individual test:
 ```
 run_tests --module <module> --test <file>.<class>[.<test>]
 ```
-For example `run_tests --module example --test test_example.ExampleTests.test_example`
+For example `run_tests --module mymod --test test_myfoo.MyFooTests.test_myfoo`
 
 
 Style Checks
