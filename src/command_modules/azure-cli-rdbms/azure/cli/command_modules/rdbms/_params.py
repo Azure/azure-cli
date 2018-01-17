@@ -24,7 +24,7 @@ def load_arguments(self, _):
 
         with self.argument_context('{} server create'.format(command_group)) as c:
             c.expand('sku', engine.models.Sku)
-            c.ignore('name', 'family', 'size')
+            c.ignore('size')
 
             c.expand('properties', engine.models.ServerPropertiesForDefaultCreate)
             c.argument('administrator_login', required=True, arg_group='Authentication')
@@ -32,17 +32,21 @@ def load_arguments(self, _):
 
             c.expand('parameters', engine.models.ServerForCreate)
 
+            c.expand('storage_profile', engine.models.StorageProfile)
+
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False)
 
         with self.argument_context('{} server restore'. format(command_group)) as c:
             c.expand('sku', engine.models.Sku)
-            c.ignore('name', 'family', 'size', 'tier', 'capacity')
+            c.ignore('size')
 
             c.expand('properties', engine.models.ServerPropertiesForRestore)
             c.ignore('version', 'ssl_enforcement', 'storage_mb')
 
             c.expand('parameters', engine.models.ServerForCreate)
             c.ignore('tags', 'location')
+
+            c.expand('storage_profile', engine.models.StorageProfile)
 
             c.argument('source_server_id', options_list=['--source-server', '-s'], help='The name or ID of the source server to restore from.')
             c.argument('restore_point_in_time', help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
@@ -65,8 +69,8 @@ def load_arguments(self, _):
             c.argument('administrator_login', options_list=['--admin-user', '-u'])
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'], required=False, help='The password of the administrator login.')
             c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--ssl-enforcement'], help='Enable ssl enforcement or not when connect to server.')
-            c.argument('tier', arg_type=get_enum_type(['Basic', 'Standard']), options_list=['--performance-tier'], help='The performance tier of the server.')
-            c.argument('capacity', options_list=['--compute-units'], type=int, help='Number of compute units.')
+            c.argument('tier', arg_type=get_enum_type(['Basic', 'General Purpose', 'Standard']), options_list=['--performance-tier'], help='The performance tier of the server.')
+            c.argument('capacity', options_list=['--vCore'], type=int, help='Number of vCore.')
             c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The max storage size of the server, unit is MB.')
             c.argument('tags', tags_type)
 
