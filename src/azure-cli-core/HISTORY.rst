@@ -5,7 +5,6 @@ Release History
 
 2.0.26
 ++++++
-* Minor fixes
 * Remove polling indicator string after finishing LRO on Windows cmd.exe
 * Warning that appears when using a configured default has been changed to an INFO level entry. Use --verbose to see.
 
@@ -110,7 +109,7 @@ Release History
 
 2.0.5 (2017-05-05)
 ++++++++++++++++++
-* core: capture exceptions caused by unregistered provider and auto-register it
+* core: capture exceptions caused by unregistered provider and auto-register it   
 * login: avoid the bad exception when the user account has no subscription and no tenants
 * perf: persist adal token cache in memory till process exits (#2603)
 
