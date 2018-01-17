@@ -2,12 +2,9 @@
 
 Release History
 ===============
-2.0.27
-++++++
-Support raw token retrival in MSI context
-
 2.0.26
 ++++++
+* Support raw token retrival in MSI context
 * Remove polling indicator string after finishing LRO on Windows cmd.exe
 * Warning that appears when using a configured default has been changed to an INFO level entry. Use --verbose to see.
 * Add a progress indicator for wait command
