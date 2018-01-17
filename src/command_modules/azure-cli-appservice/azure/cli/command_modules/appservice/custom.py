@@ -1220,7 +1220,7 @@ def get_streaming_log(cmd, resource_group_name, name, number_of_lines=None, prov
     if provider:
         streaming_url += ('/' + provider.lstrip('/'))
     client = web_client_factory(cmd.cli_ctx)
-    user, password = _get_site_credential(client, resource_group_name, name)
+    user, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name)
     if number_of_lines:
         webapp = client.web_apps.get(resource_group_name, name)
         if not webapp.reserved:
@@ -1231,9 +1231,8 @@ def get_streaming_log(cmd, resource_group_name, name, number_of_lines=None, prov
         t = threading.Thread(target=_get_log, args=(streaming_url, user, password))
         t.daemon = True
         t.start()
-
-    while True:
-        time.sleep(100)  # so that ctrl+c can stop the command
+        while True:
+            time.sleep(100)  # so that ctrl+c can stop the command
 
 
 def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot=None):
@@ -1244,8 +1243,8 @@ def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot
     logger.warning('Downloaded logs to %s', log_file)
 
 
-def _get_site_credential(resource_group_name, name, slot=None):
-    creds = _generic_site_operation(resource_group_name, name, 'list_publishing_credentials', slot)
+def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
+    creds = _generic_site_operation(cli_ctx, resource_group_name, name, 'list_publishing_credentials', slot)
     creds = creds.result()
     return (creds.publishing_user_name, creds.publishing_password)
 
@@ -1295,28 +1294,26 @@ def _get_log(url, user_name, password, log_file=None, number_of_lines=None):
 def _print_site_logs(api_string, number_of_lines, byte_limit, http, headers):
     import sys
     import json
-    href_count = api_string.count('https')
-    json.loads(api_string)
-
     std_encoding = sys.stdout.encoding
-    if href_count > 1:
+
+    data = json.loads(api_string)
+    data_length = len(data)
+
+    if data_length > 1:
         logger.info('Will show last %i lines of logs per instance', number_of_lines)
 
-    for x in range(0, href_count):
-        index_of_path = api_string.index('\",\"path')
-        href_str = api_string[api_string.index("https"):index_of_path]
-        size = api_string[api_string.index('\"size\":') +
-                          len('\"size\":'):api_string.index(',\"href\"')]
+    for x in range(0, data_length):
+        href_str = data[x]['href']
+        size = data[x]['size']
         logger.info('\nSite Instance #%i', x + 1)
         logger.info('\nUsing endpoint: %s', href_str)
-        url = href_str
         byte_limit_exceeded = (int(size) > byte_limit)
         if byte_limit_exceeded:
             headers.update({'Range': 'bytes=-512000'})  # only get the last 512kB
 
         r = http.request(
             'GET',
-            url,
+            href_str,
             headers=headers,
             preload_content=False
         )
@@ -1333,7 +1330,6 @@ def _print_site_logs(api_string, number_of_lines, byte_limit, http, headers):
         number_of_lines = min(number_of_lines, lines_split_length)
         last_n_lines = ('\n'.join(lines_split[-(number_of_lines)::])).lstrip('\n')
         print(last_n_lines)
-        api_string = api_string[(index_of_path + len('\",\"path')):]
 
 
 def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file):
