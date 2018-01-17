@@ -625,16 +625,21 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
     master_template.add_resource(vm_resource)
 
+    if admin_password:
+        master_template.add_secure_parameter('adminPassword', admin_password)
+
     template = master_template.build()
+    parameters = master_template.build_parameters()
 
     # deploy ARM template
     deployment_name = 'vm_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
+        log_pprint_template(parameters)
         return client.validate(resource_group_name, deployment_name, properties)
 
     # creates the VM deployment
@@ -1913,17 +1918,23 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
     master_template.add_resource(vmss_resource)
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
                                output_type='object')
+
+    if admin_password:
+        master_template.add_secure_parameter('adminPassword', admin_password)
+
     template = master_template.build()
+    parameters = master_template.build_parameters()
 
     # deploy ARM template
     deployment_name = 'vmss_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
 
-    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
+        log_pprint_template(parameters)
         return client.validate(resource_group_name, deployment_name, properties, raw=no_wait)
 
     # creates the VMSS deployment

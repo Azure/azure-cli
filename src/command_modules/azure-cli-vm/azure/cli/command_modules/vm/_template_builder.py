@@ -26,6 +26,13 @@ class ArmTemplateBuilder(object):
         template['outputs'] = {}
         self.template = template
 
+        parameters = OrderedDict()
+        parameters['$schema'] = \
+            'https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#'
+        parameters['contentVersion'] = '1.0.0.0'
+        parameters['parameters'] = {}
+        self.parameters = parameters
+
     def add_resource(self, resource):
         self.template['resources'].append(resource)
 
@@ -34,6 +41,16 @@ class ArmTemplateBuilder(object):
 
     def add_parameter(self, key, value):
         self.template['parameters'][key] = value
+
+    def add_secure_parameter(self, key, value, description=None):
+        param = {
+            "type": "securestring",
+            "metadata": {
+                "description": description or 'Secure {}'.format(key)
+            }
+        }
+        self.template['parameters'][key] = param
+        self.parameters['parameters'][key] = {'value': value}
 
     def add_id_output(self, key, provider, property_type, property_name):
         new_output = {
@@ -64,6 +81,9 @@ class ArmTemplateBuilder(object):
 
     def build(self):
         return json.loads(json.dumps(self.template))
+
+    def build_parameters(self):
+        return json.loads(json.dumps(self.parameters))
 
 
 # pylint: disable=too-few-public-methods
@@ -328,7 +348,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         }
 
         if admin_password:
-            os_profile['adminPassword'] = admin_password
+            os_profile['adminPassword'] = "[parameters('adminPassword')]"
 
         if custom_data:
             os_profile['customData'] = b64encode(custom_data)
@@ -796,7 +816,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         'adminUsername': admin_username
     }
     if authentication_type == 'password':
-        os_profile['adminPassword'] = admin_password
+        os_profile['adminPassword'] = "[parameters('adminPassword')]"
     else:
         os_profile['linuxConfiguration'] = {
             'disablePasswordAuthentication': True,
