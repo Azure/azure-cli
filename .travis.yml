@@ -1,10 +1,6 @@
 dist: trusty
 sudo: off
 language: python
-services:
-  - docker
-git:
-  depth: false
 addons:
   apt:
     packages:
@@ -24,44 +20,18 @@ jobs:
       script: ./scripts/ci/precheck_header.sh
       python: 3.6
     - stage: verify
-      env: PURPOSE='Lint Command Table and Help'
-      script: ./scripts/ci/verify_linter.sh
+      env: 
+      - PURPOSE='Automation'
+      - AZURE_CLI_TEST_TARGET_PROFILE='2017-03-09'
+      script: ./scripts/ci/test_automation.sh
       python: 3.6
     - stage: verify
-      env: PURPOSE='Automation'
-      script: travis_wait 30 ./scripts/ci/test_automation.sh
-      python: 3.6
-    - stage: verify
-      env: PURPOSE='Automation'
-      script: travis_wait 30 ./scripts/ci/test_automation.sh
+      env:
+      - PURPOSE='Automation'
+      - AZURE_CLI_TEST_TARGET_PROFILE='2017-03-09'
+      script: ./scripts/ci/test_automation.sh
       python: 2.7
     - stage: verify
       script: ./scripts/ci/test_static.sh
       env: PURPOSE='Static Check'
       python: 3.6
-    - stage: verify
-      script: ./scripts/ci/test_integration.sh
-      env: PURPOSE='Integration'
-      python: 3.6
-    - stage: verify
-      script: ./scripts/ci/test_integration.sh
-      env: PURPOSE='Integration'
-      python: 2.7
-    - stage: verify
-      script: ./scripts/ci/test_perf.sh
-      env: PURPOSE='Module Load Performance'
-      python: 3.6
-    - stage: verify
-      script: ./scripts/ci/test_ref_doc.sh
-      env: PURPOSE='RefDocVerify'
-      python: 3.6
-    - stage: publish
-      script: ./scripts/ci/publish.sh
-      python: 3.6
-      env: PURPOSE='Nightly Edge Build'
-      if: branch = dev and type = push
-    - stage: publish
-      script: ./scripts/ci/build_droid.sh
-      python: 3.6
-      env: PURPOSE='Automation Docker'
-      if: repo = Azure/azure-cli and type = push
