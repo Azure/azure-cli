@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import division
 import sys
+
 import humanfriendly
 
 BAR_LEN = 70
