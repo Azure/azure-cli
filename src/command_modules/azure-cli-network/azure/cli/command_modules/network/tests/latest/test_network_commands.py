@@ -2122,11 +2122,18 @@ class NetworkZoneImportExportTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_dns_zone_import_export')
     def test_network_dns_zone_import_export(self, resource_group):
         self.kwargs.update({
-            'zone': 'myzone.com',
-            'path': os.path.join(TEST_DIR, 'zone_files', 'zone1.txt')
+            'zone': 'zone1.com',
+            'path': os.path.join(TEST_DIR, 'zone_files', 'zone1.txt'),
+            'export': os.path.join(TEST_DIR, 'zone_files', 'export.txt')
         })
         self.cmd('network dns zone import -n {zone} -g {rg} --file-name "{path}"')
-        self.cmd('network dns zone export -n {zone} -g {rg}')
+        zone1 = self.cmd('network dns zone show -g {rg} -n {zone}').get_output_in_json()
+        self.cmd('network dns zone export -n {zone} -g {rg} --file-name "{export}"')
+        self.cmd('network dns zone import -n {zone} -g {rg} --file-name "{export}"')
+        zone2 = self.cmd('network dns zone show -g {rg} -n {zone}').get_output_in_json()
+        del zone1['etag']
+        del zone2['etag']
+        self.assertDictEqual(zone1, zone2)
 
 # TODO: Troubleshoot VNET gateway issue and re-enable...
 # class NetworkWatcherScenarioTest(ScenarioTest):
