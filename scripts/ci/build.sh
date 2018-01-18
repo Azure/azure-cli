@@ -20,9 +20,12 @@ testsrc_dir=$(cd artifacts/testsrc && pwd)
 script_dir=`cd $(dirname $0); pwd`
 
 target_profile=${AZURE_CLI_TEST_TARGET_PROFILE:-latest}
-if [ "$target_profile" != "latest" ]; then
+if [ "$target_profile" = "2017-03-09" ]; then
     # example: profile-2017-03-09. Python module name can't begin with a digit.
     target_profile=profile_${target_profile//-/_}
+elif [ "$target_profile" = "2018-03-01" ]
+then
+    target_profile=hybrid_${target_profile//-/_}
 fi
 echo Pick up profile: $target_profile 
 
