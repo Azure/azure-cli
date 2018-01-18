@@ -264,14 +264,23 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', autospec=True)
     @mock.patch('threading.Thread', autospec=True)
     def test_log_stream_supply_cli_ctx(self, threading_mock, get_scm_url_mock, site_op_mock):
-        threading_mock.side_effect = ValueError('Expected error to exit early')
+
+        # test exception to exit the streaming loop
+        class ErrorToExitInfiniteLoop(Exception):
+            pass
+
+        threading_mock.side_effect = ErrorToExitInfiniteLoop('Expected error to exit early')
         get_scm_url_mock.return_value = 'http://great_url'
         cmd_mock = mock.MagicMock()
         cli_ctx_mock = mock.MagicMock()
         cmd_mock.cli_ctx = cli_ctx_mock
+
         try:
+            # action
             get_streaming_log(cmd_mock, 'rg', 'web1')
-        except ValueError:
+            self.fail('test exception was not thrown')
+        except ErrorToExitInfiniteLoop:
+            # assert
             site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'list_publishing_credentials', None)
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
@@ -290,7 +299,11 @@ class TestWebappMocked(unittest.TestCase):
         cmd_mock = mock.MagicMock()
         cli_ctx_mock = mock.MagicMock()
         cmd_mock.cli_ctx = cli_ctx_mock
+
+        # action
         download_historical_logs(cmd_mock, 'rg', 'web1')
+
+        # assert
         site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'list_publishing_credentials', None)
         get_log_mock.assert_called_with(test_scm_url + '/dump', 'great_user', 'secret_password', None)
 
