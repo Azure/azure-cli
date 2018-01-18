@@ -22,7 +22,9 @@ from azure.cli.command_modules.appservice.custom import (set_deployment_user,
                                                          bind_ssl_cert,
                                                          list_publish_profiles,
                                                          config_source_control,
-                                                         show_webapp)
+                                                         show_webapp,
+                                                         get_streaming_log,
+                                                         download_historical_logs)
 
 # pylint: disable=line-too-long
 from vsts_cd_manager.continuous_delivery_manager import ContinuousDeliveryResult
@@ -257,6 +259,53 @@ class TestWebappMocked(unittest.TestCase):
 
         result = _match_host_names_from_cert(['*.mysite.com', 'mysite.com'], ['admin.mysite.com', 'log.mysite.com', 'mysite.com'])
         self.assertEqual(set(['admin.mysite.com', 'log.mysite.com', 'mysite.com']), result)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', autospec=True)
+    @mock.patch('threading.Thread', autospec=True)
+    def test_log_stream_supply_cli_ctx(self, threading_mock, get_scm_url_mock, site_op_mock):
+
+        # test exception to exit the streaming loop
+        class ErrorToExitInfiniteLoop(Exception):
+            pass
+
+        threading_mock.side_effect = ErrorToExitInfiniteLoop('Expected error to exit early')
+        get_scm_url_mock.return_value = 'http://great_url'
+        cmd_mock = mock.MagicMock()
+        cli_ctx_mock = mock.MagicMock()
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        try:
+            # action
+            get_streaming_log(cmd_mock, 'rg', 'web1')
+            self.fail('test exception was not thrown')
+        except ErrorToExitInfiniteLoop:
+            # assert
+            site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'list_publishing_credentials', None)
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_scm_url', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.custom._get_log', autospec=True)
+    def test_download_log_supply_cli_ctx(self, get_log_mock, get_scm_url_mock, site_op_mock):
+        def test_result():
+            res = mock.MagicMock()
+            res.publishing_user_name, res.publishing_password = 'great_user', 'secret_password'
+            return res
+        test_scm_url = 'http://great_url'
+        get_scm_url_mock.return_value = test_scm_url
+        publish_cred_mock = mock.MagicMock()
+        publish_cred_mock.result = test_result
+        site_op_mock.return_value = publish_cred_mock
+        cmd_mock = mock.MagicMock()
+        cli_ctx_mock = mock.MagicMock()
+        cmd_mock.cli_ctx = cli_ctx_mock
+
+        # action
+        download_historical_logs(cmd_mock, 'rg', 'web1')
+
+        # assert
+        site_op_mock.assert_called_with(cli_ctx_mock, 'rg', 'web1', 'list_publishing_credentials', None)
+        get_log_mock.assert_called_with(test_scm_url + '/dump', 'great_user', 'secret_password', None)
 
 
 class FakedResponse(object):  # pylint: disable=too-few-public-methods
