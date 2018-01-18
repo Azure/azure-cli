@@ -48,8 +48,9 @@ def _run_pip(pip_exec_args):
 
 
 def _whl_download_from_url(url_parse_result, ext_file):
+    from azure.cli.core.util import should_disable_connection_verify
     url = url_parse_result.geturl()
-    r = requests.get(url, stream=True)
+    r = requests.get(url, stream=True, verify=(not should_disable_connection_verify()))
     if r.status_code != 200:
         raise CLIError("Request to {} failed with {}".format(url, r.status_code))
     with open(ext_file, 'wb') as f:

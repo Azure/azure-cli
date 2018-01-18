@@ -50,7 +50,8 @@ class AcrCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             'https://testregistry.azurecr.io/v2/_catalog',
             headers=_get_authorization_header('username', 'password'),
-            params=_get_pagination_params(20))
+            params=_get_pagination_params(20),
+            verify=mock.ANY)
 
         # List repositories using Bearer auth
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', None, 'password'
@@ -58,7 +59,8 @@ class AcrCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             'https://testregistry.azurecr.io/v2/_catalog',
             headers=_get_authorization_header(None, 'password'),
-            params=_get_pagination_params(20))
+            params=_get_pagination_params(20),
+            verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('requests.get', autospec=True)
@@ -78,7 +80,8 @@ class AcrCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             'https://testregistry.azurecr.io/v2/testrepository/tags/list',
             headers=_get_authorization_header('username', 'password'),
-            params=_get_pagination_params(20))
+            params=_get_pagination_params(20),
+            verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('requests.get', autospec=True)
@@ -113,7 +116,8 @@ class AcrCommandsTests(unittest.TestCase):
         mock_requests_get.assert_called_with(
             'https://testregistry.azurecr.io/v2/_acr/testrepository/manifests/list',
             headers=_get_authorization_header('username', 'password'),
-            params=_get_pagination_params(20))
+            params=_get_pagination_params(20),
+            verify=mock.ANY)
 
     @mock.patch('azure.cli.command_modules.acr.repository.validate_managed_registry', autospec=True)
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
@@ -142,13 +146,15 @@ class AcrCommandsTests(unittest.TestCase):
         acr_repository_delete(cmd, 'testregistry', 'testrepository', yes=True)
         mock_requests_delete.assert_called_with(
             'https://testregistry.azurecr.io/v2/_acr/testrepository/repository',
-            headers=_get_authorization_header('username', 'password'))
+            headers=_get_authorization_header('username', 'password'),
+            verify=mock.ANY)
 
         # Delete tag
         acr_repository_delete(cmd, 'testregistry', 'testrepository', tag='testtag', yes=True)
         mock_requests_delete.assert_called_with(
             'https://testregistry.azurecr.io/v2/_acr/testrepository/tags/testtag',
-            headers=_get_authorization_header('username', 'password'))
+            headers=_get_authorization_header('username', 'password'),
+            verify=mock.ANY)
 
         # Delete manifest with tag
         acr_repository_delete(cmd, 'testregistry', 'testrepository', tag='testtag', manifest='', yes=True)
@@ -156,16 +162,19 @@ class AcrCommandsTests(unittest.TestCase):
         expected_get_headers.update(_get_manifest_v2_header())
         mock_requests_get.assert_called_with(
             'https://testregistry.azurecr.io/v2/testrepository/manifests/testtag',
-            headers=expected_get_headers)
+            headers=expected_get_headers,
+            verify=mock.ANY)
         mock_requests_delete.assert_called_with(
             'https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
-            headers=_get_authorization_header('username', 'password'))
+            headers=_get_authorization_header('username', 'password'),
+            verify=mock.ANY)
 
         # Delete manifest with digest
         acr_repository_delete(cmd, 'testregistry', 'testrepository', manifest='sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7', yes=True)
         mock_requests_delete.assert_called_with(
             'https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
-            headers=_get_authorization_header('username', 'password'))
+            headers=_get_authorization_header('username', 'password'),
+            verify=mock.ANY)
 
     @mock.patch('azure.cli.core._profile.Profile.get_refresh_token', autospec=True)
     @mock.patch('azure.cli.command_modules.acr._docker_utils.get_registry_by_name', autospec=True)
@@ -199,7 +208,8 @@ class AcrCommandsTests(unittest.TestCase):
         # Set up AAD token with both refresh and access tokens
         mock_get_refresh_token.return_value = None, 'aadrefreshtoken', 'aadaccesstoken', 'testtenant'
         get_login_credentials(cmd.cli_ctx, 'testregistry', None, None, None)
-        mock_requests_get.assert_called_with('https://testregistry.azurecr.io/v2/')
+        mock_requests_get.assert_called_with('https://testregistry.azurecr.io/v2/',
+                                             verify=mock.ANY)
         mock_requests_post.assert_called_with(
             'https://testregistry.azurecr.io/oauth2/exchange',
             urlencode({
@@ -209,7 +219,8 @@ class AcrCommandsTests(unittest.TestCase):
                 'access_token': 'aadaccesstoken',
                 'refresh_token': 'aadrefreshtoken'
             }),
-            headers={'Content-Type': 'application/x-www-form-urlencoded'})
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            verify=mock.ANY)
 
         get_access_credentials(cmd.cli_ctx, 'testregistry', None, None, None, 'testrepository')
         mock_requests_post.assert_called_with(
@@ -220,12 +231,13 @@ class AcrCommandsTests(unittest.TestCase):
                 'scope': 'repository:testrepository:*',
                 'refresh_token': 'testrefreshtoken'
             }),
-            headers={'Content-Type': 'application/x-www-form-urlencoded'})
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            verify=mock.ANY)
 
         # Set up AAD token with only access token
         mock_get_refresh_token.return_value = None, None, 'aadaccesstoken', 'testtenant'
         get_login_credentials(cmd.cli_ctx, 'testregistry', None, None, None)
-        mock_requests_get.assert_called_with('https://testregistry.azurecr.io/v2/')
+        mock_requests_get.assert_called_with('https://testregistry.azurecr.io/v2/', verify=mock.ANY)
         mock_requests_post.assert_called_with(
             'https://testregistry.azurecr.io/oauth2/exchange',
             urlencode({
@@ -234,7 +246,8 @@ class AcrCommandsTests(unittest.TestCase):
                 'tenant': 'testtenant',
                 'access_token': 'aadaccesstoken'
             }),
-            headers={'Content-Type': 'application/x-www-form-urlencoded'})
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            verify=mock.ANY)
 
         get_access_credentials(cmd.cli_ctx, 'testregistry', None, None, None, 'testrepository')
         mock_requests_post.assert_called_with(
@@ -245,12 +258,13 @@ class AcrCommandsTests(unittest.TestCase):
                 'scope': 'repository:testrepository:*',
                 'refresh_token': 'testrefreshtoken'
             }),
-            headers={'Content-Type': 'application/x-www-form-urlencoded'})
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            verify=mock.ANY)
 
         # Set up AAD token with service principal
         mock_get_refresh_token.return_value = 'testspid', 'testsppassword', None, 'testtenant'
         get_login_credentials(cmd.cli_ctx, 'testregistry', None, None, None)
-        mock_requests_get.assert_called_with('https://testregistry.azurecr.io/v2/')
+        mock_requests_get.assert_called_with('https://testregistry.azurecr.io/v2/', verify=mock.ANY)
         mock_requests_post.assert_called_with(
             'https://testregistry.azurecr.io/oauth2/exchange',
             urlencode({
@@ -260,7 +274,8 @@ class AcrCommandsTests(unittest.TestCase):
                 'username': 'testspid',
                 'password': 'testsppassword'
             }),
-            headers={'Content-Type': 'application/x-www-form-urlencoded'})
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            verify=mock.ANY)
 
         get_access_credentials(cmd.cli_ctx, 'testregistry', None, None, None, 'testrepository')
         mock_requests_post.assert_called_with(
@@ -271,4 +286,5 @@ class AcrCommandsTests(unittest.TestCase):
                 'scope': 'repository:testrepository:*',
                 'refresh_token': 'testrefreshtoken'
             }),
-            headers={'Content-Type': 'application/x-www-form-urlencoded'})
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            verify=mock.ANY)
