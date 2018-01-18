@@ -5,6 +5,7 @@ Release History
 
 2.0.26
 ++++++
+* Remove polling indicator string after finishing LRO on Windows cmd.exe
 * Warning that appears when using a configured default has been changed to an INFO level entry. Use --verbose to see.
 
 2.0.25
