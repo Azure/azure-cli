@@ -51,7 +51,7 @@ def load_command_table(self, _):
     # region Command Types
     network_ag_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.{}',
-        client_factory=cf_load_balancers
+        client_factory=cf_application_gateways
     )
 
     network_util = CliCommandType(
