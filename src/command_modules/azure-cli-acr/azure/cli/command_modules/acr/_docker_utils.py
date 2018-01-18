@@ -17,6 +17,8 @@ from knack.util import CLIError
 from knack.prompting import prompt, prompt_pass, NoTTYException
 from knack.log import get_logger
 
+from azure.cli.core.util import should_disable_connection_verify
+
 from ._client_factory import cf_acr_registries
 from ._constants import MANAGED_REGISTRY_SKU
 from ._utils import get_registry_by_name
@@ -34,7 +36,7 @@ def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, p
     """
     login_server = login_server.rstrip('/')
 
-    challenge = requests.get('https://' + login_server + '/v2/')
+    challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
     if challenge.status_code not in [401] or 'WWW-Authenticate' not in challenge.headers:
         raise CLIError("Registry '{}' did not issue a challenge.".format(login_server))
 
@@ -82,7 +84,8 @@ def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, p
             'password': refresh
         }
 
-    response = requests.post(authhost, urlencode(content), headers=headers)
+    response = requests.post(authhost, urlencode(content), headers=headers,
+                             verify=(not should_disable_connection_verify()))
 
     if response.status_code not in [200]:
         raise CLIError(
@@ -106,7 +109,8 @@ def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, p
         'scope': scope,
         'refresh_token': refresh_token
     }
-    response = requests.post(authhost, urlencode(content), headers=headers)
+    response = requests.post(authhost, urlencode(content), headers=headers,
+                             verify=(not should_disable_connection_verify()))
     access_token = loads(response.content.decode("utf-8"))["access_token"]
 
     return access_token
