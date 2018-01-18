@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.14
+++++++
+* Clean up unused test files
+
 0.3.13
 ++++++
 * Fix issue where interactive would not start on Python 2.
