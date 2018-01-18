@@ -1526,7 +1526,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
-    _set_remote_or_local_git(functionapp, resource_group_name, name, deployment_source_url,
+    _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
                              deployment_source_branch, deployment_local_git)
 
     return functionapp
@@ -1602,7 +1602,7 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
 
 def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
     user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
-    scm_url = _get_scm_url(resource_group_name, name, slot)
+    scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     zip_url = scm_url + '/api/zipdeploy'
 
     import urllib3
