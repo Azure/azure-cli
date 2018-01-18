@@ -133,7 +133,7 @@ def update_webapp(instance, client_affinity_enabled=None):
 
 def list_webapp(cmd, resource_group_name=None):
     result = _list_app(cmd.cli_ctx, resource_group_name)
-    return [r for r in result if 'function' not in r.kind] 
+    return [r for r in result if 'function' not in r.kind]
 
 
 def list_function_app(cmd, resource_group_name=None):
