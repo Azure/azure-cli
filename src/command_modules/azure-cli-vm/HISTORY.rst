@@ -2,13 +2,11 @@
 
 Release History
 ===============
+
 2.0.25
 ++++++
 * vm/vmss create: ensure commands can run under proxy with unsigned certificates.
 * vmss:(PREVIEW) support low priority
-
-2.0.25
-++++++
 * `vm/vmss create` - `--admin-password` updated to type secureString.
 
 2.0.24
