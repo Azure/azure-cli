@@ -3,11 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import argparse
 import os
-import sys
 
-from automation.utilities.path import filter_user_selected_modules_with_tests, get_repo_root
+from automation.utilities.path import get_repo_root
 from automation.tests.nose_helper import get_nose_runner
 from automation.utilities.path import get_test_results_dir
 
@@ -16,7 +14,7 @@ def get_unittest_runner(tests):
     test_cases = list(tests)
 
     def _runner(module_paths):
-        from subprocess import check_call, CalledProcessError
+        from subprocess import CalledProcessError
         if len(module_paths) > 1:
             print('When --test is given, no more than 1 module can be selected.')
             return False
@@ -66,40 +64,31 @@ def run_tests(modules, parallel, run_live, tests):
     return result
 
 
-def main():
-    parse = argparse.ArgumentParser('Test tools')
-    parse.add_argument('--module', dest='modules', nargs='+',
-                       help='The modules of which the test to be run. Accept short names, except azure-cli, '
-                            'azure-cli-core and azure-cli-nspkg. The modules list can also be set through environment '
-                            'variable AZURE_CLI_TEST_MODULES. The value should be a string of space separated module '
-                            'names. The environment variable will be overwritten by command line parameters.')
-    parse.add_argument('--parallel', action='store_true',
-                       help='Run the tests in parallel. This will affect the test output file.')
-    parse.add_argument('--live', action='store_true', help='Run all the tests live.')
-    parse.add_argument('--test', dest='tests', action='append',
-                       help='The specific test to run in the given module. The string can represent a test class or a '
-                            'test class and a test method name. Multiple tests can be given, but they should all '
-                            'belong to one command modules.')
-    parse.add_argument('--ci', dest='ci', action='store_true', help='Run the tests in CI mode.')
-    args = parse.parse_args()
+def collect_test():
+    from importlib import import_module
 
-    if args.ci:
-        print('Run tests in CI mode')
-        selected_modules = [('CI mode', 'azure.cli', 'azure.cli')]
-    else:
-        if not args.modules and os.environ.get('AZURE_CLI_TEST_MODULES', None):
-            print('Test modules list is parsed from environment variable AZURE_CLI_TEST_MODULES.')
-            args.modules = [m.strip() for m in os.environ.get('AZURE_CLI_TEST_MODULES').split(',')]
-
-        selected_modules = filter_user_selected_modules_with_tests(args.modules)
-        if not selected_modules:
-            parse.print_help()
-            sys.exit(1)
-
-    success = run_tests(selected_modules, parallel=args.parallel, run_live=args.live, tests=args.tests)
-
-    sys.exit(0 if success else 1)
+    paths = import_module('azure.cli').__path__
+    result = []
+    collect_tests(paths, result, 'azure.cli')
+    return result
 
 
-if __name__ == '__main__':
-    main()
+def collect_tests(path, return_collection, prefix=''):
+    from unittest import TestLoader
+    from importlib import import_module
+    from pkgutil import iter_modules
+
+    loader = TestLoader()
+    for _, name, is_pkg in iter_modules(path):
+        full_name = '{}.{}'.format(prefix, name)
+        module_path = os.path.join(path[0], name)
+
+        if is_pkg:
+            collect_tests([module_path], return_collection, full_name)
+
+        if not is_pkg and name.startswith('test'):
+            test_module = import_module(full_name)
+            for suite in loader.loadTestsFromModule(test_module):
+                for test in suite._tests:  # pylint: disable=protected-access
+                    return_collection.append(
+                        '{}.{}.{}'.format(full_name, test.__class__.__name__, test._testMethodName))  # pylint: disable=protected-access

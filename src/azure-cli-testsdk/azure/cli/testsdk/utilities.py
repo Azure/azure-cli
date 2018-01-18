@@ -13,13 +13,9 @@ def create_random_name(prefix='clitest', length=24):
     return create_random_name_base(prefix=prefix, length=length)
 
 
-def find_recording_dir(cli_ctx, test_file):
+def find_recording_dir(test_file):
     """ Find the directory containing the recording of given test file based on current profile. """
-    from azure.cli.core.cloud import get_active_cloud
-    api_profile = get_active_cloud(cli_ctx).profile
-
-    base_dir = os.path.join(os.path.dirname(test_file), 'recordings')
-    return os.path.join(base_dir, api_profile)
+    return os.path.join(os.path.dirname(test_file), 'recordings')
 
 
 def get_active_api_profile(cli_ctx):
