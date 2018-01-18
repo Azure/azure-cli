@@ -5,11 +5,11 @@ The document provides instructions and guidelines on how to author command modul
 
 **Module Authoring**:<br>You are here!
 
-**Command Authoring**:<br>https://github.com/Azure/azure-cli/blob/master/doc/authoring_command_modules/authoring_commands.md
+**Command Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_command_modules/authoring_commands.md
 
-**Help Authoring**:<br>https://github.com/Azure/azure-cli/blob/master/doc/authoring_help.md
+**Help Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_help.md
 
-**Test Authoring**:<br>https://github.com/Azure/azure-cli/blob/master/doc/recording_vcr_tests.md
+**Test Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md
 
 
 <a name="heading_set_up"></a>Set Up
@@ -60,7 +60,7 @@ after installing your SDK locally.
 Currently, all command modules should start with `azure-cli-`.  
 When the CLI loads, it search for packages installed that start with that prefix.
 
-The `example_module_template` directory gives a basic command module with 1 command.
+The `example_module_template` directory gives an example command module with other useful examples.
 
 Command modules should have the following structure:
 ```
@@ -75,63 +75,77 @@ Command modules should have the following structure:
 |           `-- <MODULE_NAME>
 |               `-- __init__.py
 `-- setup.py
+`-- HISTORY.rst
 ```
 
 **Create an \_\_init__.py for your module**
 
-In the \_\_init__ file, two methods need to be defined:
-  - `load_commands` - Uses the file in the 'Writing a Command' section below to load the commands.
-  - `load_params` - Uses the file in the 'Customizing Arguments' section below to load parameter customizations.
+In the \_\_init__ file, you will declare a command loader class that inherits from AzCommandsLoader. You will typically override the following three methods:
+  - `__init__` - Useful for setting metadata that applies to the entire module. For performance reasons, no heavy processing should be done here. See command authoring for more info.
+  - `load_commands_table` - Register command groups and commands here. It is common to store the implementation of this method in
+                            a file named `commands.py` but for very small modules this may not be necessary. See command authoring for
+                            more info.
+  - `load_arguments` - Apply metadata to your command arguments. It is common to store the implementation of this method in a file 
+                       named `_params.py` but for very small modules this may not be necessary. See command authoring for more info.
 
+**__init__.py**
 ```Python
-def load_params(command):
-    import azure.cli.command_modules.<module_name>._params
+from azure.cli.core import AzCommandsLoader
+from azure.cli.command_modules.mymod._help import helps  # pylint: disable=unused-import
 
-def load_commands():
-    import azure.cli.command_modules.<module_name>.commands
+class MyModCommandsLoader(AzCommandsLoader):
+
+    def load_command_table(self, args):
+      from azure.cli.core.commands import CliCommandType
+
+      mymod_custom = CliCommandType(
+        operations_tmpl='azure.mgmt.mymod.operations#MyModOperations.{}',
+      )
+
+      with self.command_group('myfoo', mymod_custom) as g:
+        g.command('create', 'create_myfoo')
+
+COMMAND_LOADER_CLS = MyModCommandsLoader
 ```
 
+**custom.py**
 ```python
-from azure.cli.core.commands import cli_command
+def create_myfoo(cmd, myfoo_name, resource_group_name, location=None):
+    from azure.mgmt.example.models import MyFoo
+    from azure.cli.command_modules.example._client_factory import cf_mymod
+    client = cf_mymod(cmd.cli_ctx)
 
-def example(my_required_arg, my_optional_arg='MyDefault'):
-    '''Returns the params you passed in.
-    :param str my_required_arg: The argument that is required
-    '''
-    result = {'a': my_required_arg, 'b': my_optional_arg}
-    return result
-
-cli_command('example', example)
+    foo = MyFoo(location=location)
+    return client.create_or_update(myfoo_name, resource_group_name, foo)
 ```
 
 The snippet above shows what it takes to author a basic command.
-1. Import `cli_command` from `azure.cli.core.commands`  
-    This holds the core logic for creating commands.
-2. Use `cli_command` to create your command  
-    The only required parameters to this method are:  
-    - `name` Name of the command  
-    - `operation`  The callable that will execute for that command
-3. Define the callable that will execute  
+1. Create a CliCommandType which holds the metadata for your command. 
+2. Create a command group in which your command will exist, passing the command type created in the previous step.
+3. Register your command with the `command` method, defining first the name of the command and then the name of the method which will execute.
+4. Define the callable that will execute:
     The CLI inspects the callable to determine required params, defaults and help text and more.  
     Try out the example to see these in action!
 
 When running the command with the `--help` flag, you should see the command.
 You can also now execute the command for yourself.
 ```
-$ az example --help
+$ az myfoo create --help
 
 Command
-    az example
+    az myfoo create
 
 Arguments
-    --my-required-arg [Required]: The argument that is required.
-    --my-optional-arg           : Default: MyDefault.
+    --myfoo-name          [Required]: The argument that is required.
+    --resource-group-name [Required]: Also required.
+    --location                      : Optional arg.
 ...
 
-$ az example --my-required-arg abc
+$ az myfoo create --myfoo-name foo --resource-group-name myrg
 {
-  "a": "abc",
-  "b": "MyDefault"
+  "name": "foo",
+  "resourceGroup": "myrg",
+  "location": None
 }
 ```
 
@@ -141,30 +155,24 @@ Testing
 Run all tests in a module:
 
 ```
-run_tests --module <module>
-OR
-python -m unittest discover -s <path_to_your_command_module>/tests
+run_tests --module <module> [--live] [--parallel]
 ```
 
 Run an individual test:
 
 ```
-python <path_to_your_command_module>/<file> <class name>
+run_tests --module <module> --test <file>.<class>[.<test>]
 ```
-For example `python src/command_modules/azure-cli-appservice/tests/test_webapp_commands.py WebappBasicE2ETest`
+For example `run_tests --module mymod --test test_myfoo.MyFooTests.test_myfoo`
 
-Note:  
-The following is required in the test file when running an individual test.  
-```
-if __name__ == '__main__':
-    unittest.main()
-```
 
-PyLint
-------
+Style Checks
+------------
 
 ```
-pylint -r n <path_to_your_command_module>/azure
+check_style --module <module> [--pylint] [--pep8]
+OR
+azdev style --module <module> [--pylint] [--pep8]
 ```
 
 Submitting Pull Requests
@@ -172,7 +180,7 @@ Submitting Pull Requests
 
 ### Modify Change Log
 
-Modify the `HISTORY.rst` for all changed modules.
+Modify the `HISTORY.rst` for any customer-facing changes. If a module has changed at all since a previous release so that a version bump is required, it is fine to add a generic entry that says "* Minor fixes.".
 
 This will be the release notes for the next release.
 
@@ -183,14 +191,15 @@ e.g.:
 Release History
 ===============
 
+0.0.3
++++++
+* This is my customer-facing change.
+
 0.0.2
 +++++
-
-* This is my change.
+* Minor fixes.
 
 0.0.1
 +++++
-
-* This is the changelog from a prev. release.
-
+* Initial release
 ```
