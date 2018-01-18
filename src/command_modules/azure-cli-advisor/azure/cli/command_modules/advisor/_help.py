@@ -7,7 +7,7 @@ from knack.help_files import helps
 
 helps['advisor'] = """
     type: group
-    short-summary: (PREVIEW) Manage Azure Advisor.
+    short-summary: Manage Azure Advisor.
 """
 
 helps['advisor configuration'] = """

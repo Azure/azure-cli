@@ -3,9 +3,9 @@
 Release History
 ===============
 
-0.1.2
-+++++
-* Minor fixes.
+1.0.0
+++++++
+* GA release.
 
 0.1.1
 ++++++
