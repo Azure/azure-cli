@@ -25,7 +25,7 @@ class MockResponse(object):
 
 
 def mock_index_get_generator(index_url, index_data):
-    def mock_req_get(url):
+    def mock_req_get(url, verify):
         if url == index_url:
             return MockResponse(200, index_data)
         return MockResponse(404, None)

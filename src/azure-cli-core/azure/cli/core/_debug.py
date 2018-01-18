@@ -7,10 +7,9 @@ import os
 
 from knack.log import get_logger
 from knack.util import CLIError
-
+from .util import should_disable_connection_verify, DISABLE_VERIFY_VARIABLE_NAME
 logger = get_logger(__name__)
 
-DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
 ADAL_PYTHON_SSL_NO_VERIFY = "ADAL_PYTHON_SSL_NO_VERIFY"
 REQUESTS_CA_BUNDLE = "REQUESTS_CA_BUNDLE"
 
@@ -28,10 +27,6 @@ def change_ssl_cert_verification(client):
         logger.debug("Using CA bundle file at '%s'.", ca_bundle_file)
         client.config.connection.verify = ca_bundle_file
     return client
-
-
-def should_disable_connection_verify():
-    return bool(os.environ.get(DISABLE_VERIFY_VARIABLE_NAME))
 
 
 def allow_debug_adal_connection():

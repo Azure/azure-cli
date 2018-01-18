@@ -12,6 +12,8 @@ from knack.prompting import prompt_y_n, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
 
+from azure.cli.core.util import should_disable_connection_verify
+
 from ._utils import validate_managed_registry
 from ._docker_utils import get_access_credentials, log_registry_response
 
@@ -56,7 +58,8 @@ def _delete_data_from_registry(login_server, path, username, password, retry_tim
         try:
             response = requests.delete(
                 'https://{}{}'.format(login_server, path),
-                headers=_get_authorization_header(username, password)
+                headers=_get_authorization_header(username, password),
+                verify=(not should_disable_connection_verify())
             )
             log_registry_response(response)
 
@@ -84,7 +87,8 @@ def _get_manifest_digest(login_server, path, username, password, retry_times=3, 
             headers.update(_get_manifest_v2_header())
             response = requests.get(
                 'https://{}{}'.format(login_server, path),
-                headers=headers
+                headers=headers,
+                verify=(not should_disable_connection_verify())
             )
             log_registry_response(response)
 
@@ -123,7 +127,8 @@ def _obtain_data_from_registry(login_server,
                 response = requests.get(
                     'https://{}{}'.format(login_server, path),
                     headers=_get_authorization_header(username, password),
-                    params=_get_pagination_params(pagination)
+                    params=_get_pagination_params(pagination),
+                    verify=(not should_disable_connection_verify())
                 )
                 log_registry_response(response)
 
