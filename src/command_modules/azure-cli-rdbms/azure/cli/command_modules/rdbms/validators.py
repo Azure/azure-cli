@@ -24,11 +24,6 @@ def get_combined_validator(validators):
         for validator in validators:
             validator(namespace)
 
-        if namespace.sku.tier or namespace.sku.capacity:
-            namespace.sku.name = 'SkuName'
-        else:
-            namespace.parameters.sku = None
-
     return _final_validator_impl
 
 

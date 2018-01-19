@@ -66,7 +66,7 @@ def load_command_table(self, _):
     )
 
     with self.command_group('mysql server', mysql_servers_sdk, client_factory=cf_mysql_servers) as g:
-        g.command('create', 'create')
+        g.command('create', 'create_or_update')
         g.custom_command('restore', '_server_restore')
         g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get')
