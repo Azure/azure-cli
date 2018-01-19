@@ -24,7 +24,7 @@ if [ "$target_profile" != "latest" ]; then
     # example: profile-2017-03-09. Python module name can't begin with a digit.
     target_profile=profile_${target_profile//-/_}
 fi
-echo ==== $target_profile ====
+echo Pick up profile: $target_profile 
 
 ##############################################
 # Define colored output func
@@ -177,7 +177,7 @@ popd >/dev/null
 
 ##############################################
 # clear afterwards
-# rm -rf $testsrc_dir
+rm -rf $testsrc_dir
 git checkout src
 
 ##############################################
