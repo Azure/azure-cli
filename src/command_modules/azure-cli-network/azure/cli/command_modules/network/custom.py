@@ -142,9 +142,9 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0, enable_http2=None):
     from azure.cli.core.util import random_string
-    from azure.cli.command_modules.network._template_builder import \
-        (ArmTemplateBuilder, build_application_gateway_resource, build_public_ip_resource,
-         build_vnet_resource)
+    from azure.cli.core.commands.arm import ArmTemplateBuilder
+    from azure.cli.command_modules.network._template_builder import (
+        build_application_gateway_resource, build_public_ip_resource, build_vnet_resource)
 
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     IPAllocationMethod = cmd.get_models('IPAllocationMethod')
@@ -199,13 +199,16 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
             application_gateway_name))
     master_template.add_resource(app_gateway_resource)
     master_template.add_output('applicationGateway', application_gateway_name, output_type='object')
+    if cert_password:
+        master_template.add_secure_parameter('certPassword', cert_password)
 
     template = master_template.build()
+    parameters = master_template.build_parameters()
 
     # deploy ARM template
     deployment_name = 'ag_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     if validate:
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
@@ -1505,9 +1508,9 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
                          public_ip_address_type=None, subnet_type=None, validate=False,
                          no_wait=False, sku=None, frontend_ip_zone=None, public_ip_zone=None):
     from azure.cli.core.util import random_string
-    from azure.cli.command_modules.network._template_builder import \
-        (ArmTemplateBuilder, build_load_balancer_resource, build_public_ip_resource,
-         build_vnet_resource)
+    from azure.cli.core.commands.arm import ArmTemplateBuilder
+    from azure.cli.command_modules.network._template_builder import (
+        build_load_balancer_resource, build_public_ip_resource, build_vnet_resource)
 
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     IPAllocationMethod = cmd.get_models('IPAllocationMethod')
@@ -3145,8 +3148,8 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     :param bool validate: Display and validate the ARM template but do not create any resources.
     """
     from azure.cli.core.util import random_string
-    from azure.cli.command_modules.network._template_builder import \
-        ArmTemplateBuilder, build_vpn_connection_resource
+    from azure.cli.core.commands.arm import ArmTemplateBuilder
+    from azure.cli.command_modules.network._template_builder import build_vpn_connection_resource
 
     client = network_client_factory(cmd.cli_ctx).virtual_network_gateway_connections
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
@@ -3161,13 +3164,18 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
         use_policy_based_traffic_selectors)
     master_template.add_resource(vpn_connection_resource)
     master_template.add_output('resource', connection_name, output_type='object')
+    if shared_key:
+        master_template.add_secure_parameter('sharedKey', shared_key)
+    if authorization_key:
+        master_template.add_secure_parameter('authorizationKey', authorization_key)
 
     template = master_template.build()
+    parameters = master_template.build_parameters()
 
     # deploy ARM template
     deployment_name = 'vpn_connection_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
-    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     if validate:
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
