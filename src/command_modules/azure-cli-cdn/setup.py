@@ -16,7 +16,7 @@ except ImportError:
     cmdclass = {}
 
 
-VERSION = "0.0.11"
+VERSION = "0.0.12"
 # The full list of classifiers is available at
 # https://pypi.python.org/pypi?%3Aaction=list_classifiers
 CLASSIFIERS = [

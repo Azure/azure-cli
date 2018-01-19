@@ -12,14 +12,19 @@ echo `git rev-parse --verify HEAD` > ./artifacts/build.sha
 
 mkdir -p ./artifacts/build
 mkdir -p ./artifacts/source
-mkdir -p ./artifacts/app
 mkdir -p ./artifacts/testsrc
 
 output_dir=$(cd artifacts/build && pwd)
 sdist_dir=$(cd artifacts/source && pwd)
 testsrc_dir=$(cd artifacts/testsrc && pwd)
-app_dir=$(cd artifacts/app && pwd)
 script_dir=`cd $(dirname $0); pwd`
+
+target_profile=${AZURE_CLI_TEST_TARGET_PROFILE:-latest}
+if [ "$target_profile" != "latest" ]; then
+    # example: profile-2017-03-09. Python module name can't begin with a digit.
+    target_profile=profile_${target_profile//-/_}
+fi
+echo Pick up profile: $target_profile 
 
 ##############################################
 # Define colored output func
@@ -29,7 +34,6 @@ function title {
 
     echo -e ${LGREEN}$1${CLEAR}
 }
-
 
 ##############################################
 # Update version strings
@@ -61,14 +65,17 @@ for test_src in $(find src/command_modules -name tests -type d); do
     cp -R $test_src/* $testsrc_dir/$rel_path
 done
 
-for test_src in $(find src -name tests | grep -v command_modules); do
-    rel_path=${test_src##src/}
-    rel_path=(${rel_path/\// })
-    rel_path=${rel_path[1]}
+if [ "$target_profile" == "latest" ]; then
+    # don't pack core tests for profiles other than latest
+    for test_src in $(find src -name tests | grep -v command_modules); do
+        rel_path=${test_src##src/}
+        rel_path=(${rel_path/\// })
+        rel_path=${rel_path[1]}
 
-    mkdir -p $testsrc_dir/$rel_path
-    cp -R $test_src/* $testsrc_dir/$rel_path
-done
+        mkdir -p $testsrc_dir/$rel_path
+        cp -R $test_src/* $testsrc_dir/$rel_path
+    done
+fi
 
 cat >$testsrc_dir/setup.py <<EOL
 #!/usr/bin/env python
@@ -106,22 +113,30 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     packages=[
-        'azure.cli.core.tests',
 EOL
 
-for name in $(ls src/command_modules | grep azure-cli-); do
+if [ "$target_profile" == "latest" ]; then
+    echo "        'azure.cli.core.tests'," >>$testsrc_dir/setup.py
+fi
+
+for name in `ls src/command_modules | grep azure-cli-`; do
     module_name=${name##azure-cli-}
-    if [ -d src/command_modules/$name/azure/cli/command_modules/$module_name/tests ]; then
+    test_folder=src/command_modules/$name/azure/cli/command_modules/$module_name/tests
+    if [ -d $test_folder ]; then
         echo "        'azure.cli.command_modules.$module_name.tests'," >>$testsrc_dir/setup.py
+        if [ -d $test_folder/$target_profile ]; then
+            echo "        'azure.cli.command_modules.$module_name.tests.$target_profile'," >>$testsrc_dir/setup.py
+        fi
     fi
 done
 
 
 cat >>$testsrc_dir/setup.py <<EOL
     ],
-    package_data={'': ['recordings/**/*.yaml',
+    package_data={'': ['recordings/*.yaml',
                        'data/*.zip',
                        'data/*.whl',
+                       '*.zip',
                        '*.pem',
                        '*.pfx',
                        '*.txt',

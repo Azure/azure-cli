@@ -132,22 +132,21 @@ def update_webapp(instance, client_affinity_enabled=None):
 
 
 def list_webapp(cmd, resource_group_name=None):
-    from ._validators import WEB_APP_TYPES
-    return _list_app(cmd.cli_ctx, WEB_APP_TYPES, resource_group_name)
+    result = _list_app(cmd.cli_ctx, resource_group_name)
+    return [r for r in result if 'function' not in r.kind]
 
 
 def list_function_app(cmd, resource_group_name=None):
-    from ._validators import FUNCTION_APP_TYPES
-    return _list_app(cmd.cli_ctx, FUNCTION_APP_TYPES, resource_group_name)
+    result = _list_app(cmd.cli_ctx, resource_group_name)
+    return [r for r in result if 'function' in r.kind]
 
 
-def _list_app(cli_ctx, app_types, resource_group_name=None):
+def _list_app(cli_ctx, resource_group_name=None):
     client = web_client_factory(cli_ctx)
     if resource_group_name:
         result = list(client.web_apps.list_by_resource_group(resource_group_name))
     else:
         result = list(client.web_apps.list())
-    result = [x for x in result if x.kind in app_types]
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
@@ -1238,7 +1237,7 @@ def get_streaming_log(cmd, resource_group_name, name, number_of_lines=None, prov
 def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     url = scm_url.rstrip('/') + '/dump'
-    user_name, password = _get_site_credential(resource_group_name, name, slot)
+    user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
     _get_log(url, user_name, password, log_file)
     logger.warning('Downloaded logs to %s', log_file)
 
@@ -1578,7 +1577,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
-    _set_remote_or_local_git(functionapp, resource_group_name, name, deployment_source_url,
+    _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
                              deployment_source_branch, deployment_local_git)
 
     return functionapp
@@ -1652,9 +1651,9 @@ def list_locations(cmd, sku, linux_workers_enabled=None):
     return client.list_geo_regions(full_sku, linux_workers_enabled)
 
 
-def enable_zip_deploy(resource_group_name, name, src, slot=None):
-    user_name, password = _get_site_credential(resource_group_name, name, slot)
-    scm_url = _get_scm_url(resource_group_name, name, slot)
+def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
+    user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
+    scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     zip_url = scm_url + '/api/zipdeploy'
 
     import urllib3
