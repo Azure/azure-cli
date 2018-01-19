@@ -45,7 +45,7 @@ def verify_license(_):
 
 
 def init_args(root):
-    parser = root.add_parser('verify')
+    parser = root.add_parser('verify', help='Verify product feature.')
     parser.set_defaults(func=lambda _: parser.print_help())
     sub_parser = parser.add_subparsers(title='sub commands')
 
