@@ -172,6 +172,10 @@ def acr_update_set(cmd,
 
 
 def acr_login(cmd, registry_name, resource_group_name=None, username=None, password=None):
+    from azure.cli.core.util import in_cloud_console
+    if in_cloud_console():
+        raise CLIError('This command requires running the docker daemon, which is not supported in Azure Cloud Shell.')
+
     from subprocess import PIPE, Popen, CalledProcessError
     docker_not_installed = "Please verify if docker is installed."
     docker_not_available = "Please verify if docker daemon is running properly."

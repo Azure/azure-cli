@@ -21,9 +21,10 @@ ERR_UNABLE_TO_GET_EXTENSIONS = 'Unable to get extensions from index. Improper in
 
 # pylint: disable=inconsistent-return-statements
 def get_index(index_url=None):
+    from azure.cli.core.util import should_disable_connection_verify
     index_url = index_url or DEFAULT_INDEX_URL
     try:
-        response = requests.get(index_url)
+        response = requests.get(index_url, verify=(not should_disable_connection_verify()))
         if response.status_code == 200:
             return response.json()
         else:

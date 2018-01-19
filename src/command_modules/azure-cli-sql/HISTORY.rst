@@ -6,6 +6,7 @@ Release History
 2.0.20
 ++++++
 * Added az sql db rename
+* Clean up unused test files
 
 2.0.19
 ++++++

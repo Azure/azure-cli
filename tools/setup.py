@@ -31,7 +31,8 @@ DEPENDENCIES = [
     'readme_renderer>=17.2',
     'six>=1.10.0',
     'tabulate>=0.7.7',
-    'pytest'
+    'pytest',
+    'colorama>=0.3.7'
 ]
 
 setup(
@@ -55,7 +56,7 @@ setup(
         'console_scripts': [
             'azdev=automation.__main__:main',
             'check_style=automation.style:legacy_entry',
-            'run_tests=automation.tests.run:main'
+            'run_tests=automation.tests:legacy_entry_point'
         ]
     },
     install_requires=DEPENDENCIES
