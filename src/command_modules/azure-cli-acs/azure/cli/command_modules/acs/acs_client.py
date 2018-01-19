@@ -60,7 +60,7 @@ def secure_copy(user, host, src, dest, key_filename=None, allow_agent=True):
     ssh = paramiko.SSHClient()
     proxy = None
     ssh_config_file = os.path.expanduser("~/.ssh/config")
-    if os.path.exists(ssh_config_file):
+    if os.path.isfile(ssh_config_file):
         conf = paramiko.SSHConfig()
         with open(ssh_config_file) as f:
             conf.parse(f)
