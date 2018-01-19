@@ -34,6 +34,7 @@ from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.x509_thumbprin
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
 from azure.cli.core.extension import extension_exists
 from azure.cli.core._environment import get_config_dir
+from azure.cli.core.util import no_wait_params
 
 from ._client_factory import resource_service_factory
 from ._utils import create_self_signed_certificate, open_certificate
@@ -586,7 +587,7 @@ def iot_device_send_message(client, hub_name, device_id, resource_group_name=Non
 # pylint: disable=inconsistent-return-statements
 def iot_device_receive_message(client, hub_name, device_id, resource_group_name=None, lock_timeout=60):
     device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
-    result = device_client.receive_message(device_id, lock_timeout, raw=True)
+    result = device_client.receive_message(device_id, lock_timeout, **no_wait_params(True))
     if result is not None and result.response.status_code == 200:
         return {
             'ack': result.headers['iothub-ack'],

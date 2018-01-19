@@ -25,6 +25,7 @@ from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.core._profile import Profile
+from azure.cli.core.util import no_wait_params
 
 logger = get_logger(__name__)
 MAX_TASKS_PER_REQUEST = 100
@@ -64,7 +65,7 @@ def create_account(client,
     return client.create(resource_group_name=resource_group_name,
                          account_name=account_name,
                          parameters=parameters,
-                         raw=no_wait)
+                         **no_wait_params(no_wait))
 
 
 @transfer_doc(AutoStorageBaseProperties)

@@ -14,7 +14,7 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)
-from azure.cli.core.util import CLIError
+from azure.cli.core.util import CLIError, no_wait_params
 from azure.mgmt.sql.models.server_key import ServerKey
 from azure.mgmt.sql.models.encryption_protector import EncryptionProtector
 from azure.mgmt.sql.models.resource_identity import ResourceIdentity
@@ -198,7 +198,7 @@ def _db_dw_create(
         cli_ctx,
         client,
         db_id,
-        raw,
+        no_wait,
         kwargs):
 
     # Determine server location
@@ -212,8 +212,8 @@ def _db_dw_create(
         server_name=db_id.server_name,
         resource_group_name=db_id.resource_group_name,
         database_name=db_id.database_name,
-        raw=raw,
-        parameters=kwargs)
+        parameters=kwargs,
+        **no_wait_params(no_wait))
 
 
 # Creates a database. Wrapper function which uses the server location so that the user doesn't
@@ -224,7 +224,7 @@ def db_create(
         database_name,
         server_name,
         resource_group_name,
-        raw=False,
+        no_wait=False,
         **kwargs):
 
     # Verify edition
@@ -237,7 +237,7 @@ def db_create(
         cmd.cli_ctx,
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
-        raw,
+        no_wait,
         kwargs)
 
 
@@ -247,7 +247,7 @@ def _db_create_special(
         client,
         source_db,
         dest_db,
-        raw,
+        no_wait,
         kwargs):
 
     # Determine server location
@@ -264,8 +264,8 @@ def _db_create_special(
         server_name=dest_db.server_name,
         resource_group_name=dest_db.resource_group_name,
         database_name=dest_db.database_name,
-        raw=raw,
-        parameters=kwargs)
+        parameters=kwargs,
+        **no_wait_params(no_wait))
 
 
 # Copies a database. Wrapper function to make create mode more convenient.
@@ -278,7 +278,7 @@ def db_copy(
         dest_name,
         dest_server_name=None,
         dest_resource_group_name=None,
-        raw=False,
+        no_wait=False,
         **kwargs):
 
     # Determine optional values
@@ -293,7 +293,7 @@ def db_copy(
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, dest_name, dest_server_name, dest_resource_group_name),
-        raw,
+        no_wait,
         kwargs)
 
 
@@ -307,7 +307,7 @@ def db_create_replica(
         # Replica must have the same database name as the source db
         partner_server_name,
         partner_resource_group_name=None,
-        raw=False,
+        no_wait=False,
         **kwargs):
 
     # Determine optional values
@@ -322,7 +322,7 @@ def db_create_replica(
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, database_name, partner_server_name, partner_resource_group_name),
-        raw,
+        no_wait,
         kwargs)
 
 
@@ -363,7 +363,7 @@ def db_restore(
         dest_name,
         restore_point_in_time=None,
         source_database_deletion_date=None,
-        raw=False,
+        no_wait=False,
         **kwargs):
 
     if not (restore_point_in_time or source_database_deletion_date):
@@ -382,7 +382,7 @@ def db_restore(
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         # Cross-server restore is not supported. So dest server/group must be the same as source.
         DatabaseIdentity(cmd.cli_ctx, dest_name, server_name, resource_group_name),
-        raw,
+        no_wait,
         kwargs)
 
 
@@ -852,7 +852,7 @@ def dw_create(
         database_name,
         server_name,
         resource_group_name,
-        raw=False,
+        no_wait=False,
         **kwargs):
 
     # Set edition
@@ -863,7 +863,7 @@ def dw_create(
         cmd.cli_ctx,
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
-        raw,
+        no_wait,
         kwargs)
 
 

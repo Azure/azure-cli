@@ -19,7 +19,7 @@ from msrest.serialization import Deserializer
 import azure.mgmt.batchai.models as models
 
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
-from azure.cli.core.util import should_disable_connection_verify
+from azure.cli.core.util import should_disable_connection_verify, no_wait_params
 
 
 # Environment variables for specifying azure storage account and key. We want the user to make explicit
@@ -328,7 +328,7 @@ def create_cluster(cmd, client,  # pylint: disable=too-many-locals
                    ssh_key=None, password=None, image='UbuntuLTS', vm_size=None, min_nodes=0, max_nodes=None,
                    nfs_name=None, nfs_resource_group=None, nfs_mount_path='nfs', azure_file_share=None,
                    afs_mount_path='afs', container_name=None, container_mount_path='bfs', account_name=None,
-                   account_key=None, raw=False):
+                   account_key=None, no_wait=False):
     if json_file:
         with open(json_file) as f:
             json_obj = json.load(f)
@@ -351,7 +351,8 @@ def create_cluster(cmd, client,  # pylint: disable=too-many-locals
     if container_name:
         params = _add_azure_container_to_cluster_create_parameters(cmd.cli_ctx, params, container_name,
                                                                    container_mount_path, account_name, account_key)
-    return client.clusters.create(resource_group, cluster_name, params, raw=raw)
+
+    return client.clusters.create(resource_group, cluster_name, params, **no_wait_params(no_wait))
 
 
 def list_clusters(client, resource_group=None):
@@ -371,7 +372,7 @@ def set_cluster_auto_scale_parameters(client, resource_group, cluster_name, min_
 
 
 def create_job(client, resource_group, job_name, json_file, location=None, cluster_name=None,
-               cluster_resource_group=None, raw=False):
+               cluster_resource_group=None, no_wait=False):
     with open(json_file) as f:
         json_obj = json.load(f)
         params = _get_deserializer()('JobCreateParameters', json_obj)
@@ -387,7 +388,7 @@ def create_job(client, resource_group, job_name, json_file, location=None, clust
             params.cluster = models.ResourceId(cluster.id)
         if params.cluster is None:
             raise CLIError('Please provide cluster information via command line or configuration file.')
-        return client.jobs.create(resource_group, job_name, params, raw=raw)
+        return client.jobs.create(resource_group, job_name, params, **no_wait_params(no_wait))
 
 
 def list_jobs(client, resource_group=None):
@@ -441,7 +442,7 @@ def tail_file(client, resource_group, job_name, directory, file_name):
 
 def create_file_server(client, resource_group, file_server_name, json_file=None, vm_size=None, location=None,
                        user_name=None, ssh_key=None, password=None, disk_count=None, disk_size=None,
-                       storage_sku='Premium_LRS', raw=False):
+                       storage_sku='Premium_LRS', no_wait=False):
     if json_file:
         with open(json_file) as f:
             json_obj = json.load(f)
@@ -472,7 +473,7 @@ def create_file_server(client, resource_group, file_server_name, json_file=None,
         parameters.vm_size = vm_size
     if not parameters.vm_size:
         raise CLIError('Please provide VM size.')
-    return client.create(resource_group, file_server_name, parameters, raw=raw)
+    return client.create(resource_group, file_server_name, parameters, **no_wait_params(no_wait))
 
 
 def list_file_servers(client, resource_group=None):

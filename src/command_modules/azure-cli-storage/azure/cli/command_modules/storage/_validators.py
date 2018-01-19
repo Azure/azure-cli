@@ -368,7 +368,7 @@ def validate_encryption_services(cmd, namespace):
     if namespace.encryption_services:
         t_encryption_services, t_encryption_service = get_sdk(cmd.cli_ctx, ResourceType.MGMT_STORAGE,
                                                               'EncryptionServices', 'EncryptionService', mod='models')
-        services = {service: t_encryption_service(True) for service in namespace.encryption_services}
+        services = {service: t_encryption_service(enabled=True) for service in namespace.encryption_services}
 
         namespace.encryption_services = t_encryption_services(**services)
 
@@ -397,7 +397,7 @@ def validate_encryption_source(cmd, namespace):
         if not KeyVaultProperties:
             return
 
-        kv_prop = KeyVaultProperties(key_name, key_version, key_vault_uri)
+        kv_prop = KeyVaultProperties(key_name=key_name, key_version=key_version, key_vault_uri=key_vault_uri)
         namespace.encryption_key_vault_properties = kv_prop
 
 

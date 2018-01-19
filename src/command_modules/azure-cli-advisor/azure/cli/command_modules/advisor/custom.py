@@ -8,10 +8,11 @@ import uuid
 from msrestazure.azure_exceptions import CloudError
 
 from azure.mgmt.advisor.models import ConfigData, ConfigDataProperties
+from azure.cli.core.util import no_wait_params
 
 
 def cli_advisor_generate_recommendations(client):
-    response = client.generate(raw=True)
+    response = client.generate(**no_wait_params(True))
     location = response.headers['Location']
     operation_id = parse_operation_id(location)
 
