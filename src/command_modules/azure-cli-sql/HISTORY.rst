@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.20
+++++++
+* Added az sql db rename
+
 2.0.19
 ++++++
 * Updated helpfile
