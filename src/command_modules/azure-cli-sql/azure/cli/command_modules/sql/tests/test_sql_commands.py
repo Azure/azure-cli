@@ -258,6 +258,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
     @SqlServerPreparer()
     def test_sql_db_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
+        database_name_2 = "cliautomationdb02"
         update_service_objective = 'S1'
         update_storage = '10GB'
         update_storage_bytes = str(10 * 1024 * 1024 * 1024)
@@ -304,8 +305,14 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('maxSizeBytes', update_storage_bytes),
                      JMESPathCheck('tags.key1', 'value1')])
 
+        self.cmd('sql db rename -g {} -s {} -n {} --new-name {}'
+                 .format(rg, server, database_name, database_name_2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_name_2)])
+
         self.cmd('sql db delete -g {} --server {} --name {} --yes'
-                 .format(rg, server, database_name),
+                 .format(rg, server, database_name_2),
                  checks=[NoneCheck()])
 
 

@@ -242,6 +242,10 @@ def load_arguments(self, _):
                    options_list=['--secondary-server'],
                    help='Name of the server to create the new secondary database in.')
 
+    with self.argument_context('sql db rename') as c:
+        c.argument('new_name',
+                   help='The new name that the database will be renamed to.')
+
     with self.argument_context('sql db restore') as c:
         _configure_db_create_params(c, Engine.db, CreateMode.point_in_time_restore)
 
