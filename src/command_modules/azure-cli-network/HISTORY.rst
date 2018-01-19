@@ -5,8 +5,8 @@ Release History
 
 2.0.22
 ++++++
-
-* minor fixes
+* `application-gateway create`: `--cert-password` protected using secureString.
+* `vpn-connection create`: `--shared-key` and `--authorization-key` protected using secureString.
 
 2.0.21
 ++++++

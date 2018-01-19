@@ -17,7 +17,7 @@ from ..utilities.path import filter_user_selected_modules_with_tests
 def execute(args):
     from .main import run_tests, collect_test
     try:
-        current_profile = check_output(shlex.split('az cloud show --query profile -otsv')).decode('utf-8').strip()
+        current_profile = check_output(shlex.split('az cloud show --query profile -otsv'), shell=True).decode('utf-8').strip()
         if not args.profile:
             args.profile = current_profile
             print('The tests are set to run against current profile {}.'
