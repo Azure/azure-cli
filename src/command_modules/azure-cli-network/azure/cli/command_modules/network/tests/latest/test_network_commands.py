@@ -698,7 +698,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 1))
 
         self.cmd('network express-route auth show -g {rg} --circuit-name {er} -n auth1',
-                 checks=self.check('az UseStatus', 'Available'))
+                 checks=self.check('authorizationUseStatus', 'Available'))
 
         self.cmd('network express-route auth delete -g {rg} --circuit-name {er} -n auth1')
 
