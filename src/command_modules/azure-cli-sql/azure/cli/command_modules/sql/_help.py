@@ -16,19 +16,19 @@ helps['sql db'] = """
     """
 helps['sql db copy'] = """
     type: command
-    short-summary: Create a copy of a database.
+    short-summary: Creates a copy of a database.
     """
 helps['sql db create'] = """
     type: command
-    short-summary: Create a database.
+    short-summary: Creates a database.
     """
 helps['sql db delete'] = """
     type: command
-    short-summary: Delete a database.
+    short-summary: Deletes a database.
     """
 helps['sql db list'] = """
     type: command
-    short-summary: List databases a server or elastic pool.
+    short-summary: Lists databases a server or elastic pool.
     """
 helps['sql db list-editions'] = """
     type: command
@@ -42,9 +42,13 @@ helps['sql db list-editions'] = """
         - name: Show available max database sizes for P1 service objective
           text: az sql db list-editions -l westus --service-objective P1 --show-details max-size
     """
+helps['sql db rename'] = """
+    type: command
+    short-summary: Renames a database.
+    """
 helps['sql db show'] = """
     type: command
-    short-summary: Get the details for a database.
+    short-summary: Gets the details for a database.
     """
 helps['sql db show-connection-string'] = """
     type: command
@@ -55,7 +59,7 @@ helps['sql db show-connection-string'] = """
     """
 helps['sql db update'] = """
     type: command
-    short-summary: Update a database.
+    short-summary: Updates a database.
     """
 helps['sql db audit-policy'] = """
     type: group
@@ -67,11 +71,11 @@ helps['sql server ad-admin'] = """
     """
 helps['sql server ad-admin create'] = """
     type: command
-    short-summary: Create a new server Active Directory administrator.
+    short-summary: Creates a new server Active Directory administrator.
     """
 helps['sql server ad-admin update'] = """
     type: command
-    short-summary: Update an existing server Active Directory administrator.
+    short-summary: Updates an existing server Active Directory administrator.
     """
 helps['sql db audit-policy update'] = """
     type: command
@@ -104,7 +108,7 @@ helps['sql db op'] = """
 helps['sql db op cancel'] = """
     type: command
     examples:
-        - name: Cancel an operation.
+        - name: Cancels an operation.
           text: az sql db op cancel -g mygroup -s myserver -d mydb -n d2896db1-2ba8-4c84-bac1-387c430cce40
     """
 helps['sql db replica'] = """
@@ -113,23 +117,23 @@ helps['sql db replica'] = """
     """
 helps['sql db replica create'] = """
     type: command
-    short-summary: Create a database as a readable secondary replica of an existing database.
+    short-summary: Creates a database as a readable secondary replica of an existing database.
     """
 helps['sql db replica set-primary'] = """
     type: command
-    short-summary: Set the primary replica database by failing over from the current primary replica database.
+    short-summary: Sets the primary replica database by failing over from the current primary replica database.
     """
 helps['sql db replica list-links'] = """
     type: command
-    short-summary: List the replicas of a database and their replication status.
+    short-summary: Lists the replicas of a database and their replication status.
     """
 helps['sql db replica delete-link'] = """
     type: command
-    short-summary: Permanently stop data replication between two database replicas.
+    short-summary: Permanently stops data replication between two database replicas.
     """
 helps['sql db export'] = """
     type: command
-    short-summary: Export a database to a bacpac.
+    short-summary: Exports a database to a bacpac.
     examples:
         - name: Get an SAS key for use in export operation.
           text: |
@@ -169,7 +173,7 @@ helps['sql db import'] = """
     """
 helps['sql db restore'] = """
     type: command
-    short-summary: Create a new database by restoring from a backup.
+    short-summary: Creates a new database by restoring from a backup.
     """
 helps['sql db threat-policy'] = """
     type: group
@@ -177,7 +181,7 @@ helps['sql db threat-policy'] = """
     """
 helps['sql db threat-policy update'] = """
     type: command
-    short-summary: Update a database's threat detection policy.
+    short-summary: Updates a database's threat detection policy.
     long-summary: If the policy is being enabled, storage_account or both storage_endpoint and
                   storage_account_access_key must be specified.
     examples:
@@ -216,23 +220,23 @@ helps['sql dw'] = """
     """
 helps['sql dw create'] = """
     type: command
-    short-summary: Create a data warehouse.
+    short-summary: Creates a data warehouse.
     """
 helps['sql dw delete'] = """
     type: command
-    short-summary: Delete a data warehouse.
+    short-summary: Deletes a data warehouse.
     """
 helps['sql dw list'] = """
     type: command
-    short-summary: List data warehouses for a server.
+    short-summary: Lists data warehouses for a server.
     """
 helps['sql dw show'] = """
     type: command
-    short-summary: Get the details for a data warehouse.
+    short-summary: Gets the details for a data warehouse.
     """
 helps['sql dw update'] = """
     type: command
-    short-summary: Update a data warehouse.
+    short-summary: Updates a data warehouse.
     """
 helps['sql elastic-pool'] = """
     type: group
@@ -240,11 +244,11 @@ helps['sql elastic-pool'] = """
     """
 helps['sql elastic-pool create'] = """
     type: command
-    short-summary: Create an elastic pool.
+    short-summary: Creates an elastic pool.
     """
 helps['sql elastic-pool list-editions'] = """
     type: command
-    short-summary: List elastic pool editions available for the active subscription.
+    short-summary: Lists elastic pool editions available for the active subscription.
     long-summary: Also includes available pool DTU settings, storage limits, and per database
                   settings. In order to reduce verbosity, additional storage limits and per
                   database settings are hidden by default.
@@ -261,7 +265,7 @@ helps['sql elastic-pool list-editions'] = """
     """
 helps['sql elastic-pool update'] = """
     type: command
-    short-summary: Update an elastic pool.
+    short-summary: Updates an elastic pool.
     """
 helps['sql server'] = """
     type: group
@@ -269,11 +273,11 @@ helps['sql server'] = """
     """
 helps['sql server create'] = """
     type: command
-    short-summary: Create a server.
+    short-summary: Creates a server.
     """
 helps['sql server list'] = """
     type: command
-    short-summary: List available servers.
+    short-summary: Lists available servers.
     examples:
         - name: List all servers in the current subscription.
           text: az sql server list
@@ -282,7 +286,7 @@ helps['sql server list'] = """
     """
 helps['sql server update'] = """
     type: command
-    short-summary: Update a server.
+    short-summary: Updates a server.
     """
 helps['sql server conn-policy'] = """
     type: group
@@ -302,11 +306,11 @@ helps['sql server firewall-rule'] = """
     """
 helps['sql server firewall-rule create'] = """
     type: command
-    short-summary: Create a firewall rule.
+    short-summary: Creates a firewall rule.
     """
 helps['sql server firewall-rule update'] = """
     type: command
-    short-summary: Update a firewall rule.
+    short-summary: Updates a firewall rule.
     """
 helps['sql server firewall-rule show'] = """
     type: command
@@ -314,7 +318,7 @@ helps['sql server firewall-rule show'] = """
     """
 helps['sql server firewall-rule list'] = """
     type: command
-    short-summary: List a server's firewall rules.
+    short-summary: Lists a server's firewall rules.
     """
 helps['sql server key'] = """
     type: group
@@ -346,11 +350,11 @@ helps['sql server vnet-rule'] = """
     """
 helps['sql server vnet-rule update'] = """
     type: command
-    short-summary: Update a virtual network rule.
+    short-summary: Updates a virtual network rule.
     """
 helps['sql server vnet-rule create'] = """
     type: command
-    short-summary: Create a virtual network rule to allows access to an Azure SQL server.
+    short-summary: Creates a virtual network rule to allows access to an Azure SQL server.
 
     examples:
         - name: Create a vnet rule by providing the subnet id.
