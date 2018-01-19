@@ -113,7 +113,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             replay_processors=_merge_lists(default_replay_processors, replay_processors),
             recording_patches=_merge_lists(default_recording_patches, recording_patches),
             replay_patches=_merge_lists(default_replay_patches, replay_patches),
-            recording_dir=find_recording_dir(self.cli_ctx, inspect.getfile(self.__class__)),
+            recording_dir=find_recording_dir(inspect.getfile(self.__class__)),
             recording_name=recording_name
         )
 
