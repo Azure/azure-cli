@@ -1221,7 +1221,11 @@ def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sk
 
 def accept_market_ordering_term(cmd, publisher_id, offer_id, plan_id):
     from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
+    from azure.mgmt.marketplaceordering.models import AgreementTerms
     market_place_client = get_mgmt_service_client(cmd.cli_ctx, MarketplaceOrderingAgreements)
+
+    AgreementTerms._attribute_map['retrieve_datetime']['type'] = 'str'
+
     term = market_place_client.marketplace_agreements.get(publisher_id, offer_id, plan_id)
     term.accepted=True
     return market_place_client.marketplace_agreements.create(publisher_id, offer_id, plan_id, term)
