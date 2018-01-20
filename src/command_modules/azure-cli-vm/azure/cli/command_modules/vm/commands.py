@@ -232,6 +232,7 @@ def load_command_table(self, _):
         g.command('list-publishers', 'list_publishers')
         g.command('list-skus', 'list_skus')
         g.custom_command('list', 'list_vm_images')
+        g.custom_command('accept-term', 'accept_market_ordering_term')
 
     with self.command_group('vm nic', compute_vm_sdk) as g:
         g.custom_command('add', 'add_vm_nic')
