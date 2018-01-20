@@ -646,7 +646,9 @@ def add_progress_callback(cmd, namespace):
             hook.add(message='Alive', value=current, total_val=total)
             if total == current:
                 hook.end()
-    namespace.progress_callback = _update_progress
+    if namespace.no_progress != 'true':
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
 
 
 def process_blob_download_batch_parameters(namespace, cmd):
