@@ -3,13 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-
-from msrestazure.tools import is_valid_resource_id, resource_id
-
 
 def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False):
     def _validator(cmd, namespace):
+        from msrestazure.tools import is_valid_resource_id
+        from knack.util import CLIError
         name_or_id = getattr(namespace, dest)
         rg = namespace.resource_group_name
         res_ns = namespace.namespace
@@ -48,6 +46,8 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
 
 def validate_diagnostic_settings(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    from knack.util import CLIError
     resource_group_error = "--resource-group is required when name is provided for storage account or workspace or " \
                            "service bus namespace and rule. "
 
@@ -153,6 +153,7 @@ def process_metric_dimension(namespace):
 
     param_filter = ns.pop('filter', None)
     if param_filter:
+        from knack.util import CLIError
         raise CLIError('usage: --dimension and --filter parameters are mutually exclusive.')
 
     ns['filter'] = ' and '.join("{} eq '*'".format(d) for d in dimensions)

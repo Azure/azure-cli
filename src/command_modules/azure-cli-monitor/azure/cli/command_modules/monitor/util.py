@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from datetime import datetime, timedelta
 
 # ISO format with explicit indication of timezone
 DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
@@ -31,6 +30,7 @@ def get_aggregation_map():
 
 
 def validate_time_range_and_add_defaults(start_time, end_time, formatter='startTime eq {} and endTime eq {}'):
+    from datetime import datetime, timedelta
     try:
         end_time = datetime.strptime(end_time, DATE_TIME_FORMAT) if end_time else datetime.utcnow()
     except ValueError:

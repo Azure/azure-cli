@@ -9,21 +9,7 @@ from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 
-from azure.mgmt.datalake.analytics.account.models import (DataLakeAnalyticsAccountUpdateParameters,
-                                                          FirewallRule,
-                                                          DataLakeAnalyticsAccount,
-                                                          DataLakeStoreAccountInfo,
-                                                          ComputePolicyCreateOrUpdateParameters)
-
-from azure.mgmt.datalake.analytics.job.models import (JobType,
-                                                      JobState,
-                                                      CreateJobParameters,
-                                                      BuildJobParameters,
-                                                      CreateUSqlJobProperties,
-                                                      JobRelationshipProperties)
 # pylint: disable=line-too-long
-from azure.mgmt.datalake.analytics.catalog.models import (DataLakeAnalyticsCatalogCredentialCreateParameters,
-                                                          DataLakeAnalyticsCatalogCredentialUpdateParameters)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
 logger = get_logger(__name__)
@@ -80,6 +66,7 @@ def list_adla_jobs(client, account_name, top=500, name=None, submitter=None, sub
 
 def create_adla_account(cmd, client, resource_group_name, account_name, default_data_lake_store, location=None,
                         tags=None, max_degree_of_parallelism=30, max_job_count=3, query_store_retention=30, tier=None):
+    from azure.mgmt.datalake.analytics.account.models import DataLakeAnalyticsAccount, DataLakeStoreAccountInfo
     adls_list = list()
     adls_list.append(DataLakeStoreAccountInfo(default_data_lake_store))
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
@@ -98,6 +85,7 @@ def create_adla_account(cmd, client, resource_group_name, account_name, default_
 def update_adla_account(client, account_name, resource_group_name, tags=None, max_degree_of_parallelism=None,
                         max_job_count=None, query_store_retention=None, tier=None, firewall_state=None,
                         allow_azure_ips=None):
+    from azure.mgmt.datalake.analytics.account.models import DataLakeAnalyticsAccountUpdateParameters
     update_params = DataLakeAnalyticsAccountUpdateParameters(
         tags=tags,
         max_degree_of_parallelism=max_degree_of_parallelism,
@@ -132,6 +120,7 @@ def update_adla_blob_storage(client, account_name, storage_account_name, access_
 # region firewall
 def add_adla_firewall_rule(client, account_name, firewall_rule_name, start_ip_address, end_ip_address,
                            resource_group_name):
+    from azure.mgmt.datalake.analytics.account.models import FirewallRule
     create_params = FirewallRule(start_ip_address, end_ip_address)
     return client.create_or_update(resource_group_name,
                                    account_name,
@@ -143,6 +132,7 @@ def add_adla_firewall_rule(client, account_name, firewall_rule_name, start_ip_ad
 # region compute policy
 def create_adla_compute_policy(client, account_name, compute_policy_name, object_id, object_type,
                                resource_group_name, max_dop_per_job=None, min_priority_per_job=None):
+    from azure.mgmt.datalake.analytics.account.models import ComputePolicyCreateOrUpdateParameters
     if not max_dop_per_job and not min_priority_per_job:
         raise CLIError('Please specify at least one of --max-dop-per-job and --min-priority-per-job')
 
@@ -183,7 +173,7 @@ def update_adla_compute_policy(client, account_name, compute_policy_name, resour
 # region catalog
 def create_adla_catalog_credential(client, account_name, database_name, credential_name, credential_user_name, uri,
                                    credential_user_password=None):
-
+    from azure.mgmt.datalake.analytics.catalog.models import DataLakeAnalyticsCatalogCredentialCreateParameters
     if not credential_user_password:
         try:
             credential_user_password = prompt_pass('Password:', confirm=True)
@@ -199,6 +189,7 @@ def create_adla_catalog_credential(client, account_name, database_name, credenti
 
 def update_adla_catalog_credential(client, account_name, database_name, credential_name, credential_user_name, uri,
                                    credential_user_password=None, new_credential_user_password=None):
+    from azure.mgmt.datalake.analytics.catalog.models import DataLakeAnalyticsCatalogCredentialUpdateParameters
     if not credential_user_password:
         try:
             credential_user_password = prompt_pass('Current Password:', confirm=True)
@@ -261,6 +252,9 @@ def list_catalog_table_statistics(client, account_name, database_name, schema_na
 def submit_adla_job(client, account_name, job_name, script, runtime_version=None, compile_mode=None, compile_only=False,
                     degree_of_parallelism=1, priority=1000, recurrence_id=None, recurrence_name=None, pipeline_id=None,
                     pipeline_name=None, pipeline_uri=None, run_id=None):
+    from azure.mgmt.datalake.analytics.job.models import (
+        JobType, CreateJobParameters, BuildJobParameters, CreateUSqlJobProperties, JobRelationshipProperties)
+
     if not script or len(script) < 1:
         # pylint: disable=line-too-long
         raise CLIError('Could not read script content from the supplied --script param. It is either empty or an invalid file')
@@ -298,6 +292,7 @@ def submit_adla_job(client, account_name, job_name, script, runtime_version=None
 
 
 def wait_adla_job(client, account_name, job_id, wait_interval_sec=5, max_wait_time_sec=-1):
+    from azure.mgmt.datalake.analytics.job.models import JobState
     if wait_interval_sec < 1:
         raise CLIError('wait times must be greater than 0 when polling jobs. Value specified: {}'
                        .format(wait_interval_sec))

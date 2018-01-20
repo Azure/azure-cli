@@ -7,19 +7,18 @@
 Tools to encode url components using python quoting. This is needed to make non-ascii characters safe for requests.
 """
 
-from six.moves.urllib.parse import urlparse, urlunparse  # pylint: disable=import-error
-from six.moves.urllib.parse import quote as url_quote  # pylint: disable=import-error
-
 # Safe characters taken from the sdk:
 # https://github.com/Azure/azure-multiapi-storage-python/blob/d4329a838f7d2fa6f0dab584274fd1bd3e77bcc4/azure/multiapi/storage/v2017_04_17/common/_serialization.py#L83
 SAFE_CHARS = '/()$=\',~'
 
 
 def encode_for_url(url_component, safe=SAFE_CHARS):
+    from six.moves.urllib.parse import quote as url_quote  # pylint: disable=import-error
     return url_quote(url_component, safe)
 
 
 def encode_url_path(url, safe=SAFE_CHARS):
+    from six.moves.urllib.parse import urlparse, urlunparse  # pylint: disable=import-error
     url_parts = urlparse(url)
     quoted_path = encode_for_url(url_parts.path, safe)
     return urlunparse(url_parts[:2] + (quoted_path,) + url_parts[3:])
