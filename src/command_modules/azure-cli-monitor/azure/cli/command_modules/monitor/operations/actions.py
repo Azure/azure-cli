@@ -4,14 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 import argparse
-import re
-
-from knack.util import CLIError
 
 from azure.cli.command_modules.monitor.util import get_aggregation_map, get_operator_map
 
 
 def period_type(value):
+
+    import re
 
     def _get_substring(indices):
         if indices == tuple([-1, -1]):
@@ -48,6 +47,7 @@ class ConditionAction(argparse.Action):
             # specified as a quoted expression
             values = values[0].split(' ')
         if len(values) < 5:
+            from knack.util import CLIError
             raise CLIError('usage error: --condition METRIC {>,>=,<,<=} THRESHOLD {avg,min,max,total,last} DURATION')
         metric_name = ' '.join(values[:-4])
         operator = get_operator_map()[values[-4]]
@@ -66,6 +66,7 @@ class AlertAddAction(argparse._AppendAction):
         super(AlertAddAction, self).__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        from knack.util import CLIError
         _type = values[0].lower()
         if _type == 'email':
             from azure.mgmt.monitor.models import RuleEmailAction
@@ -90,6 +91,7 @@ class AlertRemoveAction(argparse._AppendAction):
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         # TYPE is artificially enforced to create consistency with the --add-action argument
         # but it could be enhanced to do additional validation in the future.
+        from knack.util import CLIError
         _type = values[0].lower()
         if _type not in ['email', 'webhook']:
             raise CLIError('usage error: {} TYPE KEY [KEY ...]'.format(option_string))

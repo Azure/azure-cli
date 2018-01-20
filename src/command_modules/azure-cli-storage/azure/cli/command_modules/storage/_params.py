@@ -3,11 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from argcomplete.completers import FilesCompleter
-from six import u as unicode_string
-
-from knack.arguments import ignore_type, CLIArgumentType
-
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type, get_enum_type)
@@ -21,7 +16,13 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
+    from argcomplete.completers import FilesCompleter
+    from six import u as unicode_string
+
+    from knack.arguments import ignore_type, CLIArgumentType
+
     from azure.cli.core.commands.parameters import get_resource_name_completion_list
+
     from .sdkutil import get_table_data_type
     from .completers import get_storage_name_completion_list
 

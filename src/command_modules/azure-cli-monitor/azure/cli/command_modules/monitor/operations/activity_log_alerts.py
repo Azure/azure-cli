@@ -3,11 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-
 
 def process_condition_parameter(namespace):
     from azure.mgmt.monitor.models import ActivityLogAlertAllOfCondition
+    from knack.util import CLIError
 
     try:
         expression = namespace.condition
@@ -58,6 +57,7 @@ def create(cmd, client, resource_group_name, activity_log_alert_name, scopes=Non
                                            ActivityLogAlertLeafCondition, ActivityLogAlertActionList)
     from azure.mgmt.monitor.models import ActivityLogAlertActionGroup as ActionGroup
     from azure.cli.core.commands.client_factory import get_subscription_id
+    from knack.util import CLIError
 
     if not scopes:
         scopes = [resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name)]
@@ -217,6 +217,7 @@ def _get_alert_settings(client, resource_group_name, activity_log_alert_name, th
     try:
         return client.get(resource_group_name=resource_group_name, activity_log_alert_name=activity_log_alert_name)
     except ErrorResponseException as ex:
+        from knack.util import CLIError
         if ex.response.status_code == 404:
             if throw_if_missing:
                 raise CLIError('Can\'t find activity log alert {} in resource group {}.'.format(activity_log_alert_name,

@@ -283,7 +283,8 @@ class AzCommandsLoader(CLICommandsLoader):
             cli_ctx=self.cli_ctx,
             resource_type=resource_type or self._get_resource_type() or PROFILE_TYPE,
             min_api=min_api or self.min_profile,
-            max_api=max_api or self.max_profile)
+            max_api=max_api or self.max_profile,
+            operation_group=operation_group)
         if isinstance(api_support, bool):
             return api_support
         elif operation_group:
