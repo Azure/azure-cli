@@ -33,7 +33,8 @@ from azure.cli.core.profiles import ResourceType
 from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
 
-from ._actions import load_images_from_aliases_doc, load_extension_images_thru_services, load_images_thru_services
+from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
+                       load_images_thru_services, _get_latest_image_version)
 from ._client_factory import _compute_client_factory, cf_public_ip_addresses
 
 logger = get_logger(__name__)
@@ -1219,16 +1220,47 @@ def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sk
     return all_images
 
 
-def accept_market_ordering_term(cmd, publisher_id, offer_id, plan_id):
-    from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
-    from azure.mgmt.marketplaceordering.models import AgreementTerms
-    market_place_client = get_mgmt_service_client(cmd.cli_ctx, MarketplaceOrderingAgreements)
+def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None):
+    from azure.cli.core.commands.parameters import get_one_of_subscription_locations
+    usage_err = 'usage error: --plan STRING --offer STRING --publish STRING --version STRING | --urn STRING'
+    location = location or get_one_of_subscription_locations(cmd.cli_ctx)
+    if urn:
+        if any([publisher, offer, sku, version]):
+            raise CLIError(usage_err)
+        publisher, offer, sku, version = urn.split(":")
+        if version.lower() == 'latest':
+            version = _get_latest_image_version(cmd.cli_ctx, location, publisher, offer, sku)
+    elif not publisher or not offer or not sku or not version:
+        raise CLIError(usage_err)
+    client = _compute_client_factory(cmd.cli_ctx)
+    return client.virtual_machine_images.get(location, publisher, offer, sku, version)
 
+
+def accept_market_ordering_term(cmd, urn=None, publisher=None, offer=None, plan=None):
+    from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
+    # pylint: disable=protected-access
+    from azure.mgmt.marketplaceordering.models import AgreementTerms
     AgreementTerms._attribute_map['retrieve_datetime']['type'] = 'str'
 
-    term = market_place_client.marketplace_agreements.get(publisher_id, offer_id, plan_id)
-    term.accepted=True
-    return market_place_client.marketplace_agreements.create(publisher_id, offer_id, plan_id, term)
+    usage_err = 'usage error: --plan STRING --offer STRING --publish STRING |--urn STRING'
+    if urn:
+        if any([publisher, offer, plan]):
+            raise CLIError(usage_err)
+        publisher, offer, _, _ = urn.split(':')
+        image = show_vm_image(cmd, urn)
+        if not image.plan:
+            logger.warning('No plan information is associated with the image, hence not term to accept')
+            return
+        plan = image.plan.name
+    else:
+        if not publisher or not offer or not plan:
+            raise CLIError(usage_err)
+
+    market_place_client = get_mgmt_service_client(cmd.cli_ctx, MarketplaceOrderingAgreements)
+
+    term = market_place_client.marketplace_agreements.get(publisher, offer, plan)
+    term.accepted = True
+    return market_place_client.marketplace_agreements.create(publisher, offer, plan, term)
 # endregion
 
 
