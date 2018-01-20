@@ -55,6 +55,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                       completer=get_storage_name_completion_list(t_table_service, 'list_tables'))
     queue_name_type = CLIArgumentType(options_list=['--queue-name', '-q'], help='The queue name.',
                                       completer=get_storage_name_completion_list(t_queue_service, 'list_queues'))
+    progress_type = CLIArgumentType(help='Include this flag to disable progress reporting for the command.',
+                                    arg_type=get_three_state_flag(return_label=True), validator=add_progress_callback)
 
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
                'referenced with --id that specifies this value. Can be combined.'
@@ -227,9 +229,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('blob_type', options_list=('--type', '-t'), validator=validate_blob_type,
                    arg_type=get_enum_type(get_blob_types()))
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
-        c.argument('progress_callback', ignore_type, validator=add_progress_callback)
-        c.extra('no_progress', help='Include this flag to disable progress reporting for the command.',
-                arg_type=get_three_state_flag(return_label=True))
+        c.extra('no_progress', progress_type)
         # TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
         # register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',),
         #                              help=argparse.SUPPRESS)
@@ -251,17 +251,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('maxsize_condition', arg_group='Content Control')
         c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group='Content Control')
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()))
-        c.argument('progress_callback', ignore_type, validator=add_progress_callback)
-        c.extra('no_progress', help='Include this flag to disable progress reporting for the command.',
-                arg_type=get_three_state_flag(return_label=True))
+        c.extra('no_progress', progress_type)
 
     with self.argument_context('storage blob download') as c:
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
         c.argument('max_connections', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
-        c.argument('progress_callback', ignore_type, validator=add_progress_callback)
-        c.extra('no_progress', help='Include this flag to disable progress reporting for the command.',
-                arg_type=get_three_state_flag(return_label=True))
+        c.extra('no_progress', progress_type)
 
     with self.argument_context('storage blob download-batch') as c:
         from azure.cli.command_modules.storage._validators import process_blob_download_batch_parameters
@@ -269,9 +265,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('source_container_name')
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('source', options_list=('--source', '-s'), validator=process_blob_download_batch_parameters)
-        c.argument('progress_callback', ignore_type, validator=add_progress_callback)
-        c.extra('no_progress', help='Include this flag to disable progress reporting for the command.',
-                arg_type=get_three_state_flag(return_label=True))
+        c.extra('no_progress', progress_type)
 
     with self.argument_context('storage blob delete') as c:
         from .sdkutil import get_delete_blob_snapshot_type_names
@@ -470,9 +464,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Path of the file to write to. The source filename will be used if not specified.',
                    validator=process_file_download_namespace, completer=FilesCompleter())
         c.argument('path', validator=None)  # validator called manually from process_file_download_namespace
-        c.argument('progress_callback', ignore_type, validator=add_progress_callback)
-        c.extra('no_progress', help='Include this flag to disable progress reporting for the command.',
-                arg_type=get_three_state_flag(return_label=True))
+        c.extra('no_progress', progress_type)
 
     with self.argument_context('storage file exists') as c:
         c.register_path_argument()
@@ -522,9 +514,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_path_argument(default_file_param='local_file_path')
         c.register_content_settings_argument(t_file_content_settings, update=False, guess_from_file='local_file_path')
         c.argument('local_file_path', options_list='--source', type=file_type, completer=FilesCompleter())
-        c.argument('progress_callback', ignore_type, validator=add_progress_callback)
-        c.extra('no_progress', help='Include this flag to disable progress reporting for the command.',
-                arg_type=get_three_state_flag(return_label=True))
+        c.extra('no_progress', progress_type)
 
     with self.argument_context('storage file url') as c:
         c.register_path_argument()
@@ -537,9 +527,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('max_connections', arg_group='Download Control')
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
         c.register_content_settings_argument(t_file_content_settings, update=False, arg_group='Content Settings')
-        c.argument('progress_callback', ignore_type, validator=add_progress_callback)
-        c.extra('no_progress', help='Include this flag to disable progress reporting for the command.',
-                arg_type=get_three_state_flag(return_label=True))
+        c.extra('no_progress', progress_type)
 
     with self.argument_context('storage file download-batch') as c:
         from ._validators import process_file_download_batch_parameters
@@ -547,9 +535,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('max_connections', arg_group='Download Control')
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
-        c.argument('progress_callback', ignore_type, validator=add_progress_callback)
-        c.extra('no_progress', help='Include this flag to disable progress reporting for the command.',
-                arg_type=get_three_state_flag(return_label=True))
+        c.extra('no_progress', progress_type)
 
     with self.argument_context('storage file delete-batch') as c:
         from ._validators import process_file_batch_source_parameters
