@@ -10,7 +10,8 @@ from knack.arguments import ignore_type, CLIArgumentType
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type, get_enum_type, get_three_state_flag)
+from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type, get_enum_type,
+                                                get_three_state_flag)
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
                           resource_type_type, services_type, validate_entity, validate_select, validate_blob_type,
