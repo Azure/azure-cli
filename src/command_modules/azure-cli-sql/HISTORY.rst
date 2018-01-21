@@ -6,7 +6,7 @@ Release History
 2.0.20
 ++++++
 * Added az sql db rename
-* Clean up unused test files
+* Support `--ids` argument for db, dw, server, elastic-pool, and server firewall-rule commands.
 
 2.0.19
 ++++++

@@ -69,8 +69,8 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1')
     @ResourceGroupPreparer(parameter_name='resource_group_2')
     def test_sql_server_mgmt(self, resource_group_1, resource_group_2, resource_group_location):
-        server1 = self.create_random_name(server_name_prefix, server_name_max_length)
-        server2 = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
+        server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
 
@@ -78,32 +78,33 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         user = admin_login
 
         # test create sql server with minimal required parameters
-        self.cmd('sql server create -g {} --name {} -l {} '
-                 '--admin-user {} --admin-password {}'
-                 .format(resource_group_1, server1, loc, user, admin_passwords[0]),
-                 checks=[
-                     JMESPathCheck('name', server1),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('administratorLogin', user),
-                     JMESPathCheck('identity', None)])
+        server_1 = self.cmd('sql server create -g {} --name {} -l {} '
+                            '--admin-user {} --admin-password {}'
+                            .format(resource_group_1, server_name_1, loc, user, admin_passwords[0]),
+                            checks=[
+                                JMESPathCheck('name', server_name_1),
+                                JMESPathCheck('resourceGroup', resource_group_1),
+                                JMESPathCheck('administratorLogin', user),
+                                JMESPathCheck('identity', None)]).get_output_in_json()
 
         # test list sql server should be 1
         self.cmd('sql server list -g {}'.format(resource_group_1), checks=[JMESPathCheck('length(@)', 1)])
 
         # test update sql server
         self.cmd('sql server update -g {} --name {} --admin-password {} -i'
-                 .format(resource_group_1, server1, admin_passwords[1]),
+                 .format(resource_group_1, server_name_1, admin_passwords[1]),
                  checks=[
-                     JMESPathCheck('name', server1),
+                     JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user),
                      JMESPathCheck('identity.type', 'SystemAssigned')])
 
         # test update without identity parameter, validate identity still exists
-        self.cmd('sql server update -g {} --name {} --admin-password {}'
-                 .format(resource_group_1, server1, admin_passwords[0]),
+        # also use --id instead of -g/-n
+        self.cmd('sql server update --id {} --admin-password {}'
+                 .format(server_1['id'], admin_passwords[0]),
                  checks=[
-                     JMESPathCheck('name', server1),
+                     JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user),
                      JMESPathCheck('identity.type', 'SystemAssigned')])
@@ -111,9 +112,9 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         # test create another sql server, with identity this time
         self.cmd('sql server create -g {} --name {} -l {} -i '
                  '--admin-user {} --admin-password {}'
-                 .format(resource_group_2, server2, loc, user, admin_passwords[0]),
+                 .format(resource_group_2, server_name_2, loc, user, admin_passwords[0]),
                  checks=[
-                     JMESPathCheck('name', server2),
+                     JMESPathCheck('name', server_name_2),
                      JMESPathCheck('resourceGroup', resource_group_2),
                      JMESPathCheck('administratorLogin', user),
                      JMESPathCheck('identity.type', 'SystemAssigned')])
@@ -126,21 +127,28 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
         # test show sql server
         self.cmd('sql server show -g {} --name {}'
-                 .format(resource_group_1, server1),
+                 .format(resource_group_1, server_name_1),
                  checks=[
-                     JMESPathCheck('name', server1),
+                     JMESPathCheck('name', server_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     JMESPathCheck('administratorLogin', user)])
+
+        self.cmd('sql server show --id {}'
+                 .format(server_1['id']),
+                 checks=[
+                     JMESPathCheck('name', server_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', user)])
 
         self.cmd('sql server list-usages -g {} -n {}'
-                 .format(resource_group_1, server1),
-                 checks=[JMESPathCheck('[0].resourceName', server1)])
+                 .format(resource_group_1, server_name_1),
+                 checks=[JMESPathCheck('[0].resourceName', server_name_1)])
 
         # test delete sql server
+        self.cmd('sql server delete --id {} --yes'
+                 .format(server_1['id']), checks=NoneCheck())
         self.cmd('sql server delete -g {} --name {} --yes'
-                 .format(resource_group_1, server1), checks=NoneCheck())
-        self.cmd('sql server delete -g {} --name {} --yes'
-                 .format(resource_group_2, server2), checks=NoneCheck())
+                 .format(resource_group_2, server_name_2), checks=NoneCheck())
 
         # test list sql server should be 0
         self.cmd('sql server list -g {}'.format(resource_group_1), checks=[NoneCheck()])
@@ -161,7 +169,7 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
         # allow_all_azure_ips_address = '0.0.0.0'
 
         # test sql server firewall-rule create
-        self.cmd('sql server firewall-rule create --name {} -g {} --server {} '
+        fw_rule_1 = self.cmd('sql server firewall-rule create --name {} -g {} --server {} '
                  '--start-ip-address {} --end-ip-address {}'
                  .format(firewall_rule_1, rg, server,
                          start_ip_address_1, end_ip_address_1),
@@ -169,9 +177,9 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', firewall_rule_1),
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('startIpAddress', start_ip_address_1),
-                     JMESPathCheck('endIpAddress', end_ip_address_1)])
+                     JMESPathCheck('endIpAddress', end_ip_address_1)]).get_output_in_json()
 
-        # test sql server firewall-rule show
+        # test sql server firewall-rule show by group/server/name
         self.cmd('sql server firewall-rule show --name {} -g {} --server {}'
                  .format(firewall_rule_1, rg, server),
                  checks=[
@@ -180,7 +188,16 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('startIpAddress', start_ip_address_1),
                      JMESPathCheck('endIpAddress', end_ip_address_1)])
 
-        # test sql server firewall-rule update
+        # test sql server firewall-rule show by id
+        self.cmd('sql server firewall-rule show --id {}'
+                 .format(fw_rule_1['id']),
+                 checks=[
+                     JMESPathCheck('name', firewall_rule_1),
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('startIpAddress', start_ip_address_1),
+                     JMESPathCheck('endIpAddress', end_ip_address_1)])
+
+        # test sql server firewall-rule update by group/server/name
         self.cmd('sql server firewall-rule update --name {} -g {} --server {} '
                  '--start-ip-address {} --end-ip-address {}'
                  .format(firewall_rule_1, rg, server,
@@ -191,10 +208,10 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('startIpAddress', start_ip_address_2),
                      JMESPathCheck('endIpAddress', end_ip_address_2)])
 
-        self.cmd('sql server firewall-rule update --name {} -g {} --server {} '
+        # test sql server firewall-rule update by id
+        self.cmd('sql server firewall-rule update --id {} '
                  '--start-ip-address {}'
-                 .format(firewall_rule_1, rg, server,
-                         start_ip_address_1),
+                 .format(fw_rule_1['id'], start_ip_address_1),
                  checks=[
                      JMESPathCheck('name', firewall_rule_1),
                      JMESPathCheck('resourceGroup', rg),
@@ -238,15 +255,12 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
         # self.cmd('sql server firewall-rule list -g {} --server {}'
         #          .format(rg, server), checks=[JMESPathCheck('length(@)', 3)])
 
-        # # test sql server firewall-rule delete
-        # self.cmd('sql server firewall-rule delete --name {} -g {} --server {}'
-        #          .format(allow_all_azure_ips_rule, rg, server), checks=NoneCheck())
-        # self.cmd('sql server firewall-rule list -g {} --server {}'
-        #          .format(rg, server), checks=[JMESPathCheck('length(@)', 2)])
-        self.cmd('sql server firewall-rule delete --name {} -g {} --server {}'
-                 .format(firewall_rule_1, rg, server), checks=NoneCheck())
+        # test sql server firewall-rule delete
+        self.cmd('sql server firewall-rule delete --id {}'
+                 .format(fw_rule_1['id']), checks=NoneCheck())
         self.cmd('sql server firewall-rule list -g {} --server {}'
                  .format(rg, server), checks=[JMESPathCheck('length(@)', 1)])
+
         self.cmd('sql server firewall-rule delete --name {} -g {} --server {}'
                  .format(firewall_rule_2, rg, server), checks=NoneCheck())
         self.cmd('sql server firewall-rule list -g {} --server {}'
@@ -259,6 +273,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
     def test_sql_db_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
         database_name_2 = "cliautomationdb02"
+        database_name_3 = "cliautomationdb03"
         update_service_objective = 'S1'
         update_storage = '10GB'
         update_storage_bytes = str(10 * 1024 * 1024 * 1024)
@@ -267,14 +282,14 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
         loc_display = 'West US'
 
         # test sql db commands
-        self.cmd('sql db create -g {} --server {} --name {}'
-                 .format(rg, server, database_name),
-                 checks=[
-                     JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('location', loc_display),
-                     JMESPathCheck('elasticPoolName', None),
-                     JMESPathCheck('status', 'Online')])
+        db1 = self.cmd('sql db create -g {} --server {} --name {}'
+                       .format(rg, server, database_name),
+                       checks=[
+                           JMESPathCheck('resourceGroup', rg),
+                           JMESPathCheck('name', database_name),
+                           JMESPathCheck('location', loc_display),
+                           JMESPathCheck('elasticPoolName', None),
+                           JMESPathCheck('status', 'Online')]).get_output_in_json()
 
         self.cmd('sql db list -g {} --server {}'
                  .format(rg, server),
@@ -284,16 +299,25 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('[0].resourceGroup', rg),
                      JMESPathCheck('[1].resourceGroup', rg)])
 
+        self.cmd('sql db list-usages -g {} --server {} --name {}'
+                 .format(rg, server, database_name),
+                 checks=[JMESPathCheck('[0].resourceName', database_name)])
+
+        # Show by group/server/name
         self.cmd('sql db show -g {} --server {} --name {}'
                  .format(rg, server, database_name),
                  checks=[
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', rg)])
 
-        self.cmd('sql db list-usages -g {} --server {} --name {}'
-                 .format(rg, server, database_name),
-                 checks=[JMESPathCheck('[0].resourceName', database_name)])
+        # Show by id
+        self.cmd('sql db show --id {}'
+                 .format(db1['id']),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', rg)])
 
+        # Update by group/server/name
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --max-size {}'
                  ' --set tags.key1=value1'
                  .format(rg, server, database_name,
@@ -305,14 +329,38 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('maxSizeBytes', update_storage_bytes),
                      JMESPathCheck('tags.key1', 'value1')])
 
-        self.cmd('sql db rename -g {} -s {} -n {} --new-name {}'
-                 .format(rg, server, database_name, database_name_2),
+        # Update by id
+        self.cmd('sql db update --id {} --set tags.key2=value2'
+                 .format(db1['id']),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', database_name_2)])
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('requestedServiceObjectiveName', update_service_objective),
+                     JMESPathCheck('maxSizeBytes', update_storage_bytes),
+                     JMESPathCheck('tags.key2', 'value2')])
 
+        # Rename by group/server/name
+        db2 = self.cmd('sql db rename -g {} -s {} -n {} --new-name {}'
+                       .format(rg, server, database_name, database_name_2),
+                       checks=[
+                           JMESPathCheck('resourceGroup', rg),
+                           JMESPathCheck('name', database_name_2)]).get_output_in_json()
+
+        # Rename by id
+        db3 = self.cmd('sql db rename --id {} --new-name {}'
+                       .format(db2['id'], database_name_3),
+                       checks=[
+                           JMESPathCheck('resourceGroup', rg),
+                           JMESPathCheck('name', database_name_3)]).get_output_in_json()
+
+        # Delete by group/server/name
         self.cmd('sql db delete -g {} --server {} --name {} --yes'
-                 .format(rg, server, database_name_2),
+                 .format(rg, server, database_name_3),
+                 checks=[NoneCheck()])
+
+        # Delete by id
+        self.cmd('sql db delete --id {} --yes'
+                 .format(db3['id']),
                  checks=[NoneCheck()])
 
 
@@ -777,19 +825,13 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', rg)])
 
-        self.cmd('sql dw show -g {} --server {} --name {}'
-                 .format(rg, server, database_name),
-                 checks=[
-                     JMESPathCheck('name', database_name),
-                     JMESPathCheck('resourceGroup', rg)])
-
         # pause/resume
         self.cmd('sql dw pause -g {} --server {} --name {}'
                  .format(rg, server, database_name),
                  checks=[NoneCheck()])
 
-        self.cmd('sql dw show -g {} --server {} --name {}'
-                 .format(rg, server, database_name),
+        self.cmd('sql dw show --id {}'
+                 .format(dw['id']),
                  checks=[
                      JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', rg),
@@ -817,9 +859,8 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('tags.key1', 'value1')])
 
         # Update DW service objective
-        self.cmd('sql dw update -g {} -s {} -n {} --service-objective {}'
-                 .format(rg, server, database_name,
-                         update_service_objective),
+        self.cmd('sql dw update --id {} --service-objective {}'
+                 .format(dw['id'], update_service_objective),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
@@ -830,6 +871,10 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
         # Delete DW
         self.cmd('sql dw delete -g {} --server {} --name {} --yes'
                  .format(rg, server, database_name),
+                 checks=[NoneCheck()])
+
+        self.cmd('sql dw delete --id {} --yes'
+                 .format(dw['id']),
                  checks=[NoneCheck()])
 
 
@@ -1021,7 +1066,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         loc_display = 'West US'
 
         # test sql elastic-pool commands
-        self.cmd('sql elastic-pool create -g {} --server {} --name {} '
+        elastic_pool_1 = self.cmd('sql elastic-pool create -g {} --server {} --name {} '
                  '--dtu {} --edition {} --db-dtu-min {} --db-dtu-max {} '
                  '--storage {}'
                  .format(rg, server, self.pool_name, dtu,
@@ -1035,10 +1080,21 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('databaseDtuMin', db_dtu_min),
                      JMESPathCheck('databaseDtuMax', db_dtu_max),
                      JMESPathCheck('edition', edition),
-                     JMESPathCheck('storageMb', storage_mb)])
+                     JMESPathCheck('storageMb', storage_mb)]).get_output_in_json()
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
                  .format(rg, server, self.pool_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', self.pool_name),
+                     JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('databaseDtuMin', db_dtu_min),
+                     JMESPathCheck('databaseDtuMax', db_dtu_max),
+                     JMESPathCheck('edition', edition),
+                     JMESPathCheck('storageMb', storage_mb)])
+
+        self.cmd('sql elastic-pool show --id {}'
+                 .format(elastic_pool_1['id']),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', self.pool_name),
@@ -1074,9 +1130,9 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('storageMb', updated_storage_mb),
                      JMESPathCheck('tags.key1', 'value1')])
 
-        self.cmd('sql elastic-pool update -g {} --server {} --name {} '
+        self.cmd('sql elastic-pool update --id {} '
                  '--dtu {} --db-dtu-min {} --db-dtu-max {} --storage {}'
-                 .format(rg, server, self.pool_name, dtu,
+                 .format(elastic_pool_1['id'], dtu,
                          updated_db_dtu_min, updated_db_dtu_max,
                          storage),
                  checks=[
@@ -1193,6 +1249,11 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
         # delete sql elastic pool
         self.cmd('sql elastic-pool delete -g {} --server {} --name {}'
                  .format(rg, server, self.pool_name),
+                 checks=[NoneCheck()])
+
+        # delete sql elastic pool by id
+        self.cmd('sql elastic-pool delete --id {}'
+                 .format(elastic_pool_1['id']),
                  checks=[NoneCheck()])
 
 

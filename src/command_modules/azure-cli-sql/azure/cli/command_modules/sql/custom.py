@@ -326,8 +326,7 @@ def db_create_replica(
         kwargs)
 
 
-# Creates a database from a database point in time backup or deleted database backup.
-# Wrapper function to make create mode more convenient.
+# Renames a database.
 def db_rename(
         cmd,
         client,
