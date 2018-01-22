@@ -38,7 +38,7 @@ def load_arguments(self, _):
         c.argument('key_kind', arg_type=get_enum_type(KeyKind))
 
     with self.argument_context('cosmosdb failover-priority-change') as c:
-        c.argument('failover_policies', validator=validate_failover_policies, help="space separated failover policies in 'regionName=failoverPriority' format. E.g \"East US\"=0 \"West US\"=1", nargs='+')
+        c.argument('failover_policies', validator=validate_failover_policies, help="space separated failover policies in 'regionName=failoverPriority' format. E.g eastus=0 westus=1", nargs='+')
 
     with self.argument_context('cosmosdb collection') as c:
         c.argument('collection_id', options_list=['--collection-name', '-c'], help='Collection Name')
