@@ -646,7 +646,7 @@ def add_progress_callback(cmd, namespace):
             hook.add(message='Alive', value=current, total_val=total)
             if total == current:
                 hook.end()
-    if namespace.no_progress != 'true':
+    if not namespace.no_progress:
         namespace.progress_callback = _update_progress
     del namespace.no_progress
 

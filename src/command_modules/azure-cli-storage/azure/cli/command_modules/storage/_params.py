@@ -56,7 +56,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     queue_name_type = CLIArgumentType(options_list=['--queue-name', '-q'], help='The queue name.',
                                       completer=get_storage_name_completion_list(t_queue_service, 'list_queues'))
     progress_type = CLIArgumentType(help='Include this flag to disable progress reporting for the command.',
-                                    arg_type=get_three_state_flag(return_label=True), validator=add_progress_callback)
+                                    action='store_true', validator=add_progress_callback)
 
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
                'referenced with --id that specifies this value. Can be combined.'
