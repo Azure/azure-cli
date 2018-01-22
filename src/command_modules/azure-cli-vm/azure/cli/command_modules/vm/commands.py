@@ -21,10 +21,9 @@ from azure.cli.command_modules.vm._validators import (
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
     process_vm_secret_namespace, process_msi_namespace, process_remove_identity_namespace)
 
-from azure.cli.core.commands import DeploymentOutputLongRunningOperation
+from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.commands import CliCommandType
 
 
 # pylint: disable=line-too-long, too-many-statements

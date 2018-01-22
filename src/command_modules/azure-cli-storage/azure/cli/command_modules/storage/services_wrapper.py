@@ -3,9 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-
-from azure.common import AzureHttpError
 from azure.cli.core.profiles import get_sdk, ResourceType
 
 from ._client_factory import generic_data_service_factory
@@ -19,6 +16,7 @@ class ServiceProperties(object):
         self.client = generic_data_service_factory(cli_ctx, service, name=account_name, key=account_key,
                                                    connection_string=connection_string, sas_token=sas_token)
         if not self.client:
+            from knack.util import CLIError
             raise CLIError('Failed to initialize data client.')
 
     def get_service_properties(self):
@@ -42,6 +40,8 @@ class ServiceProperties(object):
         return self.get_service_properties()(timeout=timeout).__dict__['cors']
 
     def add_cors(self, origins, methods, max_age, exposed_headers=None, allowed_headers=None, timeout=None):
+        from azure.common import AzureHttpError
+
         t_cors_rule = get_sdk(self.cli_ctx, ResourceType.DATA_STORAGE, 'CorsRule', mod='common.models')
         cors = self.get_cors(timeout)
         new_rule = t_cors_rule(origins, methods, max_age, exposed_headers, allowed_headers)
@@ -52,6 +52,7 @@ class ServiceProperties(object):
             # The service issue: https://msazure.visualstudio.com/DefaultCollection/One/_workitems/edit/1247479.
             # This workaround can be removed once the service is updated.
             if ex.status_code == 400 and len(cors) > 5:
+                from knack.util import CLIError
                 raise CLIError('Failed to add CORS rules. No more than 5 CORS rule can be added.')
 
             raise ex
