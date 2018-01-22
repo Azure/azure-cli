@@ -7,6 +7,7 @@ Release History
 ++++++
 * `application-gateway create`: `--cert-password` protected using secureString.
 * `vpn-connection create`: `--shared-key` and `--authorization-key` protected using secureString.
+* `asg create`: Fix missing client issue.
 
 2.0.21
 ++++++

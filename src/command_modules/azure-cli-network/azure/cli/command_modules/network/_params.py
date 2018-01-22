@@ -297,7 +297,7 @@ def load_arguments(self, _):
 
     # region ApplicationSecurityGroups
     with self.argument_context('network asg') as c:
-        c.argument('application_security_group_name', name_arg_type, id_part='name')
+        c.argument('application_security_group_name', name_arg_type, id_part='name', help='The name of the application security group.')
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
 
     # endregion
