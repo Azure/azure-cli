@@ -126,16 +126,16 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if NetworkRuleSet:
         acl = instance.network_rule_set
-        if not acl:
-            if bypass and not default_action:
-                raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
-            acl = NetworkRuleSet(bypass=bypass, virtual_network_rules=None, ip_rules=None,
-                                 default_action=default_action)
-        else:
+        if acl:
             if bypass:
                 acl.bypass = bypass
             if default_action:
                 acl.default_action = default_action
+        elif default_action:
+            acl = NetworkRuleSet(bypass=bypass, virtual_network_rules=None, ip_rules=None,
+                                 default_action=default_action)
+        elif bypass:
+            raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         params.network_rule_set = acl
 
     return params

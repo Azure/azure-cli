@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.24
+++++++
+* `storage account update`: do not create new networkRuleSet if "default_action" arg is not provided.
+
 2.0.23
 ++++++
 * Minor fixes.
