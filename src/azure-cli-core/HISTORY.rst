@@ -5,6 +5,7 @@ Release History
 
 2.0.27
 ++++++
+* Create ArgumentExtensionsLoader and incorporate it in core
 * Minor fixes
 
 2.0.26
