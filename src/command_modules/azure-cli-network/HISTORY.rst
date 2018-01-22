@@ -9,6 +9,7 @@ Release History
 * `vpn-connection create`: `--shared-key` and `--authorization-key` protected using secureString.
 * `asg create`: Fix missing client issue.
 * `dns zone export`: Fix issue with exported names. Add `--file-name/-f` parameter.
+* `dns zone import`: Fix issue where certain records were imported twice.
 
 2.0.21
 ++++++

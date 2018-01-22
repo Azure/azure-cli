@@ -1063,6 +1063,8 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
         rs_name, rs_type = key.lower().rsplit('.', 1)
         rs_name = '@' if rs_name == origin else rs_name
+        if rs_name.endswith(origin):
+            rs_name = rs_name[:-(len(origin) + 1)]
 
         try:
             record_count = len(getattr(rs, _type_to_property_name(rs_type)))

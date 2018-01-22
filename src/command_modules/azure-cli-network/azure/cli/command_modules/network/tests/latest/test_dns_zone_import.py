@@ -303,6 +303,19 @@ class TestDnsZoneImport(unittest.TestCase):
         self._check_cname(zone, 'record.' + zn, 3600, 'bar.foo.com.')
         self._check_a(zone, 'test.' + zn, [(3600, '7.8.9.0')])
 
+    def test_zone_file_6(self):
+        zn = 'abc.com.'
+        zone = self._get_zone_object('zone6.txt', zn)
+        self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
+        self._check_a(zone, 'www.' + zn, [(3600, '1.1.1.1')])
+        self._check_a(zone, zn, [(3600, '1.1.1.1')])
+        self._check_ns(zone, zn, [
+            (172800, 'ns1-03.azure-dns.com.'),
+            (172800, 'ns2-03.azure-dns.net.'),
+            (172800, 'ns3-03.azure-dns.org.'),
+            (172800, 'ns4-03.azure-dns.info.'),
+        ])
+
     def test_zone_import_errors(self):
         from knack.util import CLIError
         for f in ['fail1', 'fail2', 'fail3', 'fail4', 'fail5']:
