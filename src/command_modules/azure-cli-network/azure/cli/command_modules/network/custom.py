@@ -962,15 +962,18 @@ def export_zone(cmd, resource_group_name, zone_name, file_name=None):
                 record_obj.update({'priority': record.priority, 'weight': record.weight,
                                    'port': record.port, 'target': record.target})
             elif record_type == 'txt':
-                record_obj.update({'txt': ' '.join(record.value)})
+                record_obj.update({'txt': ''.join(record.value)})
 
             zone_obj[record_set_name][record_type].append(record_obj)
 
-    zone_file = make_zone_file(zone_obj)
-    print(zone_file)
+    zone_file_content = make_zone_file(zone_obj)
+    print(zone_file_content)
     if file_name:
-        with open(file_name, 'w') as f:
-            f.write(zone_file)
+        try:
+            with open(file_name, 'w') as f:
+                f.write(zone_file_content)
+        except IOError:
+            raise CLIError('Unable to export to file: {}'.format(file_name))
 
 
 # pylint: disable=too-many-return-statements, inconsistent-return-statements
