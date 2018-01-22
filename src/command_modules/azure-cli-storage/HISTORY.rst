@@ -6,6 +6,7 @@ Release History
 2.0.24
 ++++++
 * `storage account update`: do not create new networkRuleSet if "default_action" arg is not provided.
+* Added progress reporting for all upload/download commands, including batch.
 
 2.0.23
 ++++++

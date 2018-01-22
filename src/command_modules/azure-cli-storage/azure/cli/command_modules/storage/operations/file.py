@@ -35,7 +35,7 @@ def list_share_files(cmd, client, share_name, directory_name=None, timeout=None,
 
 
 def storage_file_upload_batch(cmd, client, destination, source, pattern=None, dryrun=False, validate_content=False,
-                              content_settings=None, max_connections=1, metadata=None):
+                              content_settings=None, max_connections=1, metadata=None, progress_callback=None):
     """ Upload local files to Azure Storage File Share in batch """
 
     from ..util import glob_files_locally
@@ -60,9 +60,9 @@ def storage_file_upload_batch(cmd, client, destination, source, pattern=None, dr
 
         _make_directory_in_files_share(client, destination, dir_name)
         create_file_args = {'share_name': destination, 'directory_name': dir_name, 'file_name': file_name,
-                            'local_file_path': src,
+                            'local_file_path': src, 'progress_callback': progress_callback,
                             'content_settings': guess_content_type(src, content_settings, settings_class),
-                            'metadata': metadata, 'max_connections': max_connections, }
+                            'metadata': metadata, 'max_connections': max_connections}
 
         if cmd.supported_api_version(min_api='2016-05-31'):
             create_file_args['validate_content'] = validate_content
@@ -76,7 +76,7 @@ def storage_file_upload_batch(cmd, client, destination, source, pattern=None, dr
 
 
 def storage_file_download_batch(cmd, client, source, destination, pattern=None, dryrun=False, validate_content=False,
-                                max_connections=1):
+                                max_connections=1, progress_callback=None):
     """
     Download files from file share to local directory in batch
     """
@@ -106,7 +106,8 @@ def storage_file_download_batch(cmd, client, source, destination, pattern=None, 
         mkdir_p(destination_dir)
 
         get_file_args = {'share_name': source, 'directory_name': pair[0], 'file_name': pair[1],
-                         'file_path': os.path.join(destination, *pair), 'max_connections': max_connections}
+                         'file_path': os.path.join(destination, *pair), 'max_connections': max_connections,
+                         'progress_callback': progress_callback}
 
         if cmd.supported_api_version(min_api='2016-05-31'):
             get_file_args['validate_content'] = validate_content
