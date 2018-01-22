@@ -286,7 +286,7 @@ def load_command_table(self, _):
     # endregion
 
     # region ApplicationSecurityGroups
-    with self.command_group('network asg', network_asg_sdk, min_api='2017-09-01') as g:
+    with self.command_group('network asg', network_asg_sdk, client_factory=cf_application_security_groups, min_api='2017-09-01') as g:
         g.custom_command('create', 'create_asg')
         g.command('show', 'get')
         g.command('list', 'list_all')
