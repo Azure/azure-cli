@@ -334,6 +334,7 @@ class AzCommandsLoader(CLICommandsLoader):
                                              'client' if operation.startswith(('azure.cli', 'azext')) else 'self')
                 if client_arg_name in op_args:
                     command_args[client_arg_name] = client
+            command_args = {k: command_args[k] for k in op_args if k in command_args}
             result = op(**command_args)
             return result
 

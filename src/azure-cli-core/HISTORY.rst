@@ -8,6 +8,7 @@ Release History
 * Remove polling indicator string after finishing LRO on Windows cmd.exe
 * Warning that appears when using a configured default has been changed to an INFO level entry. Use --verbose to see.
 * Add a progress indicator for wait command
+* Command args are only passed to method if in signature.
 
 2.0.25
 ++++++
