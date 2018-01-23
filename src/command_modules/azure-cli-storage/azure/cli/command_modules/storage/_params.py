@@ -259,6 +259,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage blob download') as c:
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
         c.argument('max_connections', type=int)
+        c.argument('start_range', type=int)
+        c.argument('end_range', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
         c.extra('no_progress', progress_type)
 
@@ -269,6 +271,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('source', options_list=('--source', '-s'), validator=process_blob_download_batch_parameters)
         c.extra('no_progress', progress_type)
+        c.argument('max_connections', type=int)
 
     with self.argument_context('storage blob delete') as c:
         from .sdkutil import get_delete_blob_snapshot_type_names
@@ -468,6 +471,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=process_file_download_namespace, completer=FilesCompleter())
         c.argument('path', validator=None)  # validator called manually from process_file_download_namespace
         c.extra('no_progress', progress_type)
+        c.argument('max_connections', type=int)
+        c.argument('start_range', type=int)
+        c.argument('end_range', type=int)
 
     with self.argument_context('storage file exists') as c:
         c.register_path_argument()
@@ -518,6 +524,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.register_content_settings_argument(t_file_content_settings, update=False, guess_from_file='local_file_path')
         c.argument('local_file_path', options_list='--source', type=file_type, completer=FilesCompleter())
         c.extra('no_progress', progress_type)
+        c.argument('max_connections', type=int)
 
     with self.argument_context('storage file url') as c:
         c.register_path_argument()
@@ -527,7 +534,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from ._validators import process_file_upload_batch_parameters
         c.argument('source', options_list=('--source', '-s'), validator=process_file_upload_batch_parameters)
         c.argument('destination', options_list=('--destination', '-d'))
-        c.argument('max_connections', arg_group='Download Control')
+        c.argument('max_connections', arg_group='Download Control', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
         c.register_content_settings_argument(t_file_content_settings, update=False, arg_group='Content Settings')
         c.extra('no_progress', progress_type)
@@ -536,7 +543,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         from ._validators import process_file_download_batch_parameters
         c.argument('source', options_list=('--source', '-s'), validator=process_file_download_batch_parameters)
         c.argument('destination', options_list=('--destination', '-d'))
-        c.argument('max_connections', arg_group='Download Control')
+        c.argument('max_connections', arg_group='Download Control', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
         c.extra('no_progress', progress_type)
 
