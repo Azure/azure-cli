@@ -44,8 +44,7 @@ class AzureAdvisorUnitTest(unittest.TestCase):
 class AzureAdvisorLiveScenarioTest(LiveScenarioTest):
 
     def test_list_disable_enable_recommendations(self):
-        self.cmd('advisor recommendation generate')
-        output = self.cmd('advisor recommendation list').get_output_in_json()
+        output = self.cmd('advisor recommendation list --refresh').get_output_in_json()
         self.assertGreater(len(output), 1)
         output = self.cmd('advisor recommendation list --category cost').get_output_in_json()
         self.assertGreater(len(output), 0)
@@ -65,33 +64,30 @@ class AzureAdvisorLiveScenarioTest(LiveScenarioTest):
 
 class AzureAdvisorScenarioTest(ScenarioTest):
 
-    def test_generate_recommendations(self):
-        self.cmd('advisor recommendation generate')
-
-    def test_get_set_configurations_subscription(self):
-        output = self.cmd('advisor configuration get').get_output_in_json()
+    def test_list_update_configurations_subscription(self):
+        output = self.cmd('advisor configuration list').get_output_in_json()
         self.assertGreater(len(output), 1)
-        self.cmd('advisor configuration set --low-cpu-threshold 20')
-        output = self.cmd('advisor configuration get').get_output_in_json()
+        self.cmd('advisor configuration update --low-cpu-threshold 20')
+        output = self.cmd('advisor configuration list').get_output_in_json()
         for entry in output['value']:
             if entry['properties']['lowCpuThreshold']:
                 self.assertEqual(entry['properties']['lowCpuThreshold'], '20')
-        self.cmd('advisor configuration set --low-cpu-threshold 5')
-        output = self.cmd('advisor configuration get').get_output_in_json()
+        self.cmd('advisor configuration update --low-cpu-threshold 5')
+        output = self.cmd('advisor configuration list').get_output_in_json()
         for entry in output['value']:
             if entry['properties']['lowCpuThreshold']:
                 self.assertEqual(entry['properties']['lowCpuThreshold'], '5')
 
     @ResourceGroupPreparer(name_prefix='cli_test_advisor')
-    def test_get_set_configurations_resource_group(self, resource_group):
-        output = self.cmd('advisor configuration get --resource-group {rg}').get_output_in_json()
+    def test_list_update_configurations_resource_group(self, resource_group):
+        output = self.cmd('advisor configuration list --resource-group {rg}').get_output_in_json()
         self.assertGreater(len(output), 0)
-        self.cmd('advisor configuration set --exclude --resource-group {rg}')
-        output = self.cmd('advisor configuration get --resource-group {rg}').get_output_in_json()
+        self.cmd('advisor configuration update --exclude --resource-group {rg}')
+        output = self.cmd('advisor configuration list --resource-group {rg}').get_output_in_json()
         self.assertGreater(len(output), 0)
         self.assertTrue(output['value'][0]['properties']['exclude'])
-        self.cmd('advisor configuration set --include --resource-group {rg}')
-        output = self.cmd('advisor configuration get --resource-group {rg}').get_output_in_json()
+        self.cmd('advisor configuration update --include --resource-group {rg}')
+        output = self.cmd('advisor configuration list --resource-group {rg}').get_output_in_json()
         self.assertGreater(len(output), 0)
         self.assertTrue(not output['value'][0]['properties']['exclude'])
 

@@ -20,19 +20,14 @@ helps['advisor recommendation'] = """
     short-summary: Review Azure Advisor recommendations.
 """
 
-helps['advisor configuration get'] = """
+helps['advisor configuration list'] = """
     type: command
-    short-summary: Get Azure Advisor configuration.
+    short-summary: List Azure Advisor configuration.
 """
 
-helps['advisor configuration set'] = """
+helps['advisor configuration update'] = """
     type: command
-    short-summary: Set Azure Advisor configuration.
-"""
-
-helps['advisor recommendation generate'] = """
-    type: command
-    short-summary: Generate Azure Advisor recommendations.
+    short-summary: Update Azure Advisor configuration.
 """
 
 helps['advisor recommendation list'] = """
