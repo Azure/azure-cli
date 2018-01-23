@@ -7,7 +7,10 @@ from knack.arguments import CLIArgumentType
 
 from azure.cli.core.commands.parameters import get_enum_type
 
-from ._validators import validate_include_or_exclude, validate_ids_or_resource_group
+from ._validators import \
+    (validate_include_or_exclude,
+     validate_ids_or_resource_group,
+     validate_threshold_or_resource_group)
 
 
 def load_arguments(self, _):
@@ -19,6 +22,8 @@ def load_arguments(self, _):
         c.argument('ids', ids_arg_type, validator=validate_ids_or_resource_group)
         c.argument('category', options_list=['--category', '-c'], help='Name of recommendation category.',
                    arg_type=get_enum_type(['Cost', 'HighAvailability', 'Performance', 'Security']))
+        c.argument('refresh', options_list=['--refresh', '-e'], action='store_true',
+                   help='Generate new recommendations.')
 
     with self.argument_context('advisor recommendation disable') as c:
         c.argument('ids', ids_arg_type)
@@ -28,9 +33,10 @@ def load_arguments(self, _):
     with self.argument_context('advisor recommendation enable') as c:
         c.argument('ids', ids_arg_type)
 
-    with self.argument_context('advisor configuration set') as c:
+    with self.argument_context('advisor configuration update') as c:
         c.argument('low_cpu_threshold', options_list=['--low-cpu-threshold', '-l'],
-                   help='Value for low CPU threshold.', arg_type=get_enum_type(['5', '10', '15', '20']))
+                   help='Value for low CPU threshold.', arg_type=get_enum_type(['5', '10', '15', '20']),
+                   validator=validate_threshold_or_resource_group)
         c.argument('exclude', options_list=['--exclude', '-e'], action='store_true',
                    help='Exclude from recommendation generation.')
         c.argument('include', options_list=['--include', '-i'], action='store_true',

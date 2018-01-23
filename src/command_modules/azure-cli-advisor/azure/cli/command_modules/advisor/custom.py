@@ -10,21 +10,9 @@ from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.advisor.models import ConfigData, ConfigDataProperties
 
 
-def cli_advisor_generate_recommendations(client):
-    response = client.generate(raw=True)
-    location = response.headers['Location']
-    operation_id = parse_operation_id(location)
-
-    try:
-        client.get_generate_status(operation_id=operation_id)
-    except CloudError as ex:
-        # Advisor API returns 204 which is not aligned with ARM guidelines
-        # so the SDK will throw an exception that we will have to ignore
-        if ex.status_code != 204:
-            raise ex
-
-
-def cli_advisor_list_recommendations(client, ids=None, resource_group_name=None, category=None):
+def cli_advisor_list_recommendations(client, ids=None, resource_group_name=None, category=None, refresh=None):
+    if refresh:
+        generate_recommendations(client)
     scope = build_filter_string(ids, resource_group_name, category)
     return client.list(scope)
 
@@ -75,14 +63,14 @@ def cli_advisor_enable_recommendations(client, ids):
     return enabledRecs
 
 
-def cli_advisor_get_configurations(client, resource_group_name=None):
+def cli_advisor_list_configurations(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list_by_subscription()
 
 
-def cli_advisor_set_configurations(client, resource_group_name=None,
-                                   low_cpu_threshold=None, exclude=None, include=None):
+def cli_advisor_update_configurations(client, resource_group_name=None,
+                                      low_cpu_threshold=None, exclude=None, include=None):
 
     cfg = ConfigData()
     cfg.properties = ConfigDataProperties()
@@ -133,3 +121,17 @@ def parse_recommendation_uri(recommendationUri):
     resourceUri = recommendationUri[:recommendationUri.find("/providers/Microsoft.Advisor/recommendations")]
     recommendationId = recommendationUri[recommendationUri.find("/recommendations/") + len('/recommendations/'):]
     return {'resourceUri': resourceUri, 'recommendationId': recommendationId}
+
+
+def generate_recommendations(client):
+    response = client.generate(raw=True)
+    location = response.headers['Location']
+    operation_id = parse_operation_id(location)
+
+    try:
+        client.get_generate_status(operation_id=operation_id)
+    except CloudError as ex:
+        # Advisor API returns 204 which is not aligned with ARM guidelines
+        # so the SDK will throw an exception that we will have to ignore
+        if ex.status_code != 204:
+            raise ex
