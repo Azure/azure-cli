@@ -59,6 +59,7 @@ helps['keyvault certificate'] = """
 """
 
 helps['keyvault certificate download'] = """
+    type: command
     short-summary: Download the public portion of a Key Vault certificate.
     long-summary: The certificate formatted as either PEM or DER. PEM is the default.
     examples:

@@ -139,22 +139,23 @@ class GatherCommands(object):
                 self.command_example[command] = examples
 
             all_params = []
-            for param in data[command]['parameters']:
+            command_params = data[command].get('parameters') or []
+            for param in command_params:
                 suppress = False
 
-                if data[command]['parameters'][param]['help'] and \
-                   '==SUPPRESS==' in data[command]['parameters'][param]['help']:
+                if command_params[param]['help'] and \
+                   '==SUPPRESS==' in command_params[param]['help']:
                     suppress = True
-                if data[command]['parameters'][param]['help'] and not suppress:
+                if command_params[param]['help'] and not suppress:
                     param_aliases = set()
 
-                    for par in data[command]['parameters'][param]['name']:
+                    for par in command_params[param]['name']:
                         param_aliases.add(par)
 
                         self.param_descript[command + " " + par] =  \
                             add_new_lines(
-                                data[command]['parameters'][param]['required'] +
-                                " " + data[command]['parameters'][param]['help'],
+                                command_params[param]['required'] +
+                                " " + command_params[param]['help'],
                                 line_min=int(cols) - 2 * TOLERANCE)
                         if par not in self.completable_param:
                             self.completable_param.append(par)

@@ -508,6 +508,7 @@ def _load_command_loader(loader, args, name, prefix):
 
     if loader_cls:
         command_loader = loader_cls(cli_ctx=loader.cli_ctx)
+        loader.loaders.append(command_loader)  # This will be used by interactive
         if command_loader.supported_api_version():
             command_table = command_loader.load_command_table(args)
             if command_table:
@@ -817,6 +818,8 @@ class AzArgumentContext(ArgumentsContext):
         self.is_stale = True
 
     def _applicable(self):
+        if self.command_loader.skip_applicability:
+            return True
         command_name = self.command_loader.command_name
         scope = self.scope
         return command_name.startswith(scope)

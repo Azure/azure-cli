@@ -623,6 +623,14 @@ def load_command_table(self, _):
         g.custom_command('generate', 'generate_vpn_client')
         g.command('show-url', 'get_vpn_profile_package_url', min_api='2017-08-01')
 
+    with self.command_group('network vnet-gateway revoked-cert', network_vgw_sdk) as g:
+        g.custom_command('create', 'create_vnet_gateway_revoked_cert')
+        g.custom_command('delete', 'delete_vnet_gateway_revoked_cert')
+
+    with self.command_group('network vnet-gateway root-cert', network_vgw_sdk) as g:
+        g.custom_command('create', 'create_vnet_gateway_root_cert')
+        g.custom_command('delete', 'delete_vnet_gateway_root_cert')
+
     # endregion
 
     # region VirtualNetworkGatewayConnections

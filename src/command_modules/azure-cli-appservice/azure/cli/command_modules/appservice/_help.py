@@ -102,7 +102,7 @@ type: group
 short-summary: Manage a web app's connection strings.
 """
 
-helps['webapp config connection-string show'] = """
+helps['webapp config connection-string list'] = """
 type: command
 short-summary: Get a web app's connection strings.
 """
@@ -599,7 +599,7 @@ helps['functionapp config appsettings'] = """
     short-summary: Configure function app settings.
 """
 
-helps['functionapp config appsettings show'] = """
+helps['functionapp config appsettings list'] = """
     type: command
     short-summary: Show settings for a function app.
 """
@@ -607,6 +607,11 @@ helps['functionapp config appsettings show'] = """
 helps['functionapp config appsettings set'] = """
     type: command
     short-summary: Update a function app's settings.
+"""
+
+helps['functionapp config appsettings delete'] = """
+    type: command
+    short-summary: Delete a function app's settings.
 """
 
 helps['functionapp config hostname'] = """
