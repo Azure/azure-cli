@@ -74,6 +74,8 @@ $ORIGIN {origin}\n\
     for record_set_name in json_obj.keys():
 
         record_set = json_obj[record_set_name]
+        if record_set_name.endswith(zone_name):
+            record_set_name = record_set_name[:-(len(zone_name) + 1)]
         if isinstance(record_set, str):
             # These are handled above so we can skip them
             continue

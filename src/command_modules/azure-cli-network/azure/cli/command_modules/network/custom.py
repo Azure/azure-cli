@@ -900,7 +900,7 @@ def _type_to_property_name(key):
     return type_dict[key.lower()]
 
 
-def export_zone(cmd, resource_group_name, zone_name):
+def export_zone(cmd, resource_group_name, zone_name, file_name=None):
     from time import localtime, strftime
 
     client = get_mgmt_service_client(cmd.cli_ctx, DnsManagementClient)
@@ -962,11 +962,18 @@ def export_zone(cmd, resource_group_name, zone_name):
                 record_obj.update({'priority': record.priority, 'weight': record.weight,
                                    'port': record.port, 'target': record.target})
             elif record_type == 'txt':
-                record_obj.update({'txt': ' '.join(record.value)})
+                record_obj.update({'txt': ''.join(record.value)})
 
             zone_obj[record_set_name][record_type].append(record_obj)
 
-    print(make_zone_file(zone_obj))
+    zone_file_content = make_zone_file(zone_obj)
+    print(zone_file_content)
+    if file_name:
+        try:
+            with open(file_name, 'w') as f:
+                f.write(zone_file_content)
+        except IOError:
+            raise CLIError('Unable to export to file: {}'.format(file_name))
 
 
 # pylint: disable=too-many-return-statements, inconsistent-return-statements
@@ -1059,6 +1066,8 @@ def import_zone(cmd, resource_group_name, zone_name, file_name):
 
         rs_name, rs_type = key.lower().rsplit('.', 1)
         rs_name = '@' if rs_name == origin else rs_name
+        if rs_name.endswith(origin):
+            rs_name = rs_name[:-(len(origin) + 1)]
 
         try:
             record_count = len(getattr(rs, _type_to_property_name(rs_type)))
