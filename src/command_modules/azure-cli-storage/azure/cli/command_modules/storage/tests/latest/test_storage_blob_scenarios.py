@@ -86,7 +86,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
             .assert_with_checks(
             [JMESPathCheck('properties.contentSettings.contentType', 'application/test-content'),
-            JMESPathCheck('properties.contentLength', file_size_kb * 1024)])
+             JMESPathCheck('properties.contentLength', file_size_kb * 1024)])
 
         self.storage_cmd('storage blob service-properties show', account_info) \
             .assert_with_checks(JMESPathCheck('hourMetrics.enabled', False))
