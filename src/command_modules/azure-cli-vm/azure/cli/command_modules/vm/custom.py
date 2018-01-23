@@ -1238,9 +1238,6 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
 
 def accept_market_ordering_term(cmd, urn=None, publisher=None, offer=None, plan=None):
     from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
-    # pylint: disable=protected-access
-    from azure.mgmt.marketplaceordering.models import AgreementTerms
-    AgreementTerms._attribute_map['retrieve_datetime']['type'] = 'str'
 
     usage_err = 'usage error: --plan STRING --offer STRING --publish STRING |--urn STRING'
     if urn:
