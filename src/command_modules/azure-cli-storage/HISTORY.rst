@@ -7,6 +7,7 @@ Release History
 ++++++
 * `storage account update`: do not create new networkRuleSet if "default_action" arg is not provided.
 * Added progress reporting for all upload/download commands, including batch.
+* `storage account check-name`: fixed bug preventing "-n" arg option.
 
 2.0.23
 ++++++
