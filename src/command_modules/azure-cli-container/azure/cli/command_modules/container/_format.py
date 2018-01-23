@@ -46,7 +46,8 @@ def _format_ip_address(container_group):
 
 def transform_log_output(result):
     '''Print log. '''
-    print(result)
+    if result:
+        print(result)
 
 
 def transform_container_group(result):

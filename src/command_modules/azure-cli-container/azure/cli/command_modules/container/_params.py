@@ -5,6 +5,7 @@
 
 from knack.util import CLIError
 from azure.cli.core.commands.parameters import (get_enum_type,
+                                                get_three_state_flag,
                                                 get_location_type,
                                                 resource_group_name_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
@@ -57,4 +58,8 @@ def load_arguments(self, _):
         c.argument('azure_file_volume_mount_path', validator=validate_volume_mount_path, help='The path within the container where the volume should be mounted. Must not contain colon (:).')
 
     with self.argument_context('container logs') as c:
-        c.argument('container_name', help='The container name to tail the logs')
+        c.argument('container_name', help='The container name to tail the logs. If omitted, the first container in the container group will be chosen')
+        c.argument('streaming', help='Wether or not to stream the tailing logs', arg_type=get_three_state_flag(return_label=True))
+
+    with self.argument_context('container attach') as c:
+        c.argument('container_name', help='The container to attach to. If omitted, the first container in the container group will be chosen')

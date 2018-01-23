@@ -34,6 +34,7 @@ DEPENDENCIES = [
     'azure-mgmt-containerinstance==0.2.0',
     'azure-cli-core',
     'pyyaml',
+    'colorama==0.3.9'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

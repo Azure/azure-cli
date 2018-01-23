@@ -16,3 +16,4 @@ def load_command_table(self, _):
                          table_transformer=transform_container_group)
         g.custom_command('delete', 'delete_container', confirmation=True)
         g.custom_command('logs', 'container_logs', client_factory=cf_container_logs, transform=transform_log_output)
+        g.custom_command('attach', 'attach_to_container')

@@ -6,11 +6,14 @@
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,unused-argument
 
 import shlex
+import threading
+import time
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
-from azure.mgmt.containerinstance.models import (ContainerGroup, Container, ContainerPort, Port, IpAddress,
-                                                 ImageRegistryCredential, ResourceRequirements, ResourceRequests,
-                                                 ContainerGroupNetworkProtocol, Volume, AzureFileVolume, VolumeMount)
+from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
+                                                 ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
+                                                 ResourceRequirements, Volume, VolumeMount)
+from ._client_factory import cf_container_groups, cf_container_logs
 
 
 ACR_SERVER_SUFFIX = '.azurecr.io/'
@@ -172,9 +175,147 @@ def create_ip_address(ip_address, ports):
         return IpAddress(ports=[Port(protocol=ContainerGroupNetworkProtocol.tcp, port=p) for p in ports])
 
 
-def container_logs(client, resource_group_name, name, container_name=None):
+# pylint: disable=inconsistent-return-statements
+def container_logs(cmd, resource_group_name, name, container_name=None, streaming=False):
     """Tail a container instance log. """
+    logs_client = cf_container_logs(cmd.cli_ctx)
+    container_group_client = cf_container_groups(cmd.cli_ctx)
+
     if container_name is None:
-        container_name = name
-    log = client.list(resource_group_name, name, container_name)
-    return log.content
+        container_name = _find_first_container(container_group_client, resource_group_name, name).name
+
+    if not streaming:
+        log = logs_client.list(resource_group_name, name, container_name)
+        return log.content
+
+    _start_streaming(
+        termination_condition=_is_container_terminated(container_group_client, resource_group_name, name, container_name),
+        shupdown_grace_period=5,
+        stream_target=_stream_logs,
+        stream_args=(logs_client, resource_group_name, name, container_name))
+
+
+def attach_to_container(cmd, resource_group_name, name, container_name=None):
+    logs_client = cf_container_logs(cmd.cli_ctx)
+    container_group_client = cf_container_groups(cmd.cli_ctx)
+
+    if container_name is None:
+        container_name = _find_first_container(container_group_client, resource_group_name, name).name
+
+    _start_streaming(
+        termination_condition=_is_container_terminated(container_group_client, resource_group_name, name, container_name),
+        shupdown_grace_period=5,
+        stream_target=_stream_container_events_and_logs,
+        stream_args=(container_group_client, logs_client, resource_group_name, name, container_name))
+
+
+# Start streaming.
+def _start_streaming(termination_condition, shupdown_grace_period, stream_target, stream_args):
+    import colorama
+    colorama.init()
+
+    try:
+        t = threading.Thread(target=stream_target, args=stream_args)
+        t.daemon = True
+        t.start()
+
+        while True:
+            if termination_condition:
+                time.sleep(shupdown_grace_period)
+                break
+            time.sleep(15)
+
+    finally:
+        colorama.deinit()
+
+
+# Stream logs for a container.
+def _stream_logs(client, resource_group_name, name, container_name):
+    lastOutputLines = 0
+    while True:
+        log = client.list(resource_group_name, name, container_name)
+        lines = log.content.split('\n')
+        currentOutputLines = len(lines)
+
+        _move_console_cursor_up(lastOutputLines)
+        print(log.content)
+
+        lastOutputLines = currentOutputLines
+        time.sleep(2)
+
+
+# Stream container events and logs.
+def _stream_container_events_and_logs(container_group_client, logs_client, resource_group_name, name, container_name):
+    lastOutputLines = 0
+    lastContainerState = None
+
+    while True:
+        _, container = _find_container(container_group_client, resource_group_name, name, container_name)
+
+        container_state = 'Unknown'
+        if container.instance_view and container.instance_view.current_state and container.instance_view.current_state.state:
+            container_state = container.instance_view.current_state.state
+
+        _move_console_cursor_up(lastOutputLines)
+        if container_state != lastContainerState:
+            print("Container '{}' is in state '{}'...".format(container_name, container_state))
+
+        currentOutputLines = 0
+        if container.instance_view and container.instance_view.events:
+            for event in container.instance_view.events:
+                print('(count: {}) {}'.format(event.count, event.message))
+                currentOutputLines += 1
+
+        lastOutputLines = currentOutputLines
+        lastContainerState = container_state
+
+        if container_state == 'Running':
+            print('\nStart streaming logs:')
+            break
+
+        time.sleep(5)
+
+    _stream_logs(logs_client, resource_group_name, name, container_name)
+
+
+# Check if a container should be considered terminated.
+def _is_container_terminated(client, resource_group_name, name, container_name):
+    container_group, container = _find_container(client, resource_group_name, name, container_name)
+
+    # If a container group is terminated, assume the container is also terminated.
+    if container_group.instance_view and container_group.instance_view.state:
+        if container_group.instance_view.state == 'Succeeded' or container_group.instance_view.state == 'Failed':
+            return True
+
+    # If the restart policy is Always, assume the container will be restarted.
+    if container_group.restart_policy:
+        if container_group.restart_policy == 'Always':
+            return False
+
+    # Only assume the container is terminated if its state is Terminated.
+    if container.instance_view and container.instance_view.current_state and container.instance_view.current_state.state == 'Terminated':
+        return True
+
+    return False
+
+
+# Find the first container in the container group.
+def _find_first_container(client, resource_group_name, name):
+    container_group = client.get(resource_group_name, name)
+    return container_group.containers[0]
+
+
+# Find a container in a container group.
+def _find_container(client, resource_group_name, name, container_name):
+    container_group = client.get(resource_group_name, name)
+    containers = [c for c in container_group.containers if c.name == container_name]
+
+    if len(containers) != 1:
+        raise CLIError("Found 0 or more than 1 container with name '{}'".format(container_name))
+
+    return container_group, containers[0]
+
+
+# Move console cursor up.
+def _move_console_cursor_up(lines):
+    print('\033[{}A\033[K'.format(lines), end='')

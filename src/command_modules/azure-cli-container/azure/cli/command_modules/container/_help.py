@@ -54,3 +54,8 @@ helps['container logs'] = """
     type: command
     short-summary: Examine the logs for a container group.
 """
+
+helps['container attach'] = """
+    type: command
+    short-summary: Attach (not interactively) to a container in a container group.
+"""
