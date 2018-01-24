@@ -6,6 +6,7 @@ Release History
 2.0.25
 ++++++
 * clarify `--disable-browser` argument
+* improve tab completion for --vm-size arguments
 
 2.0.24
 ++++++
