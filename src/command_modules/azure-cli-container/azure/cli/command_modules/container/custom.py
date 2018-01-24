@@ -189,7 +189,8 @@ def container_logs(cmd, resource_group_name, name, container_name=None, streamin
         return log.content
 
     _start_streaming(
-        termination_condition=_is_container_terminated(container_group_client, resource_group_name, name, container_name),
+        terminate_condition=_is_container_terminated,
+        terminate_condition_args=(container_group_client, resource_group_name, name, container_name),
         shupdown_grace_period=5,
         stream_target=_stream_logs,
         stream_args=(logs_client, resource_group_name, name, container_name))
@@ -203,14 +204,15 @@ def attach_to_container(cmd, resource_group_name, name, container_name=None):
         container_name = _find_first_container(container_group_client, resource_group_name, name).name
 
     _start_streaming(
-        termination_condition=_is_container_terminated(container_group_client, resource_group_name, name, container_name),
+        terminate_condition=_is_container_terminated,
+        terminate_condition_args=(container_group_client, resource_group_name, name, container_name),
         shupdown_grace_period=5,
         stream_target=_stream_container_events_and_logs,
         stream_args=(container_group_client, logs_client, resource_group_name, name, container_name))
 
 
 # Start streaming.
-def _start_streaming(termination_condition, shupdown_grace_period, stream_target, stream_args):
+def _start_streaming(terminate_condition, terminate_condition_args, shupdown_grace_period, stream_target, stream_args):
     import colorama
     colorama.init()
 
@@ -219,11 +221,10 @@ def _start_streaming(termination_condition, shupdown_grace_period, stream_target
         t.daemon = True
         t.start()
 
-        while True:
-            if termination_condition:
-                time.sleep(shupdown_grace_period)
-                break
+        while not terminate_condition(*terminate_condition_args):
             time.sleep(15)
+
+        time.sleep(shupdown_grace_period)
 
     finally:
         colorama.deinit()
