@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.9
++++++
+* Updated to use the 0.4.0 EventGrid Python SDK.
+
 0.1.8
 +++++
 * Minor fixes.
