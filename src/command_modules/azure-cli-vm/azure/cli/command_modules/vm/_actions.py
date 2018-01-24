@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import json
-import re
 
 from knack.util import CLIError
 
@@ -163,6 +162,7 @@ def _partial_matched(pattern, string):
     if not pattern:
         return True  # empty pattern means wildcard-match
     pattern = r'.*' + pattern
+    import re
     return re.match(pattern, string, re.I)  # pylint: disable=no-member
 
 

@@ -4,9 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 
-from collections import OrderedDict
-
-
 def export_artifacts(formula):
     """ Exports artifacts from the given formula. This method removes some of the properties of the
         artifact model as they do not play important part for users in create or read context.
@@ -27,6 +24,7 @@ def transform_artifact_source_list(artifact_source_list):
 
 
 def transform_artifact_source(result):
+    from collections import OrderedDict
     return OrderedDict([('name', result['name']),
                         ('sourceType', result['sourceType']),
                         ('status', result.get('status')),
@@ -38,6 +36,7 @@ def transform_arm_template_list(arm_template_list):
 
 
 def transform_arm_template(result):
+    from collections import OrderedDict
     return OrderedDict([('name', result['name']),
                         ('resourceGroup', result['resourceGroup']),
                         ('publisher', result.get('publisher'))])
@@ -48,12 +47,14 @@ def transform_vm_list(vm_list):
 
 
 def _transform_vm_dict(result):
+    from collections import OrderedDict
     return OrderedDict([('name', result['name']),
                         ('location', result['location']),
                         ('osType', result['osType'])])
 
 
 def transform_vm(result):
+    from collections import OrderedDict
     return OrderedDict([('name', result.name),
                         ('location', result.location),
                         ('osType', result.os_type)])
