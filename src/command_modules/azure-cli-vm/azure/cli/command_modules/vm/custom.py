@@ -1236,7 +1236,7 @@ def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=N
     return client.virtual_machine_images.get(location, publisher, offer, sku, version)
 
 
-def accept_market_ordering_term(cmd, urn=None, publisher=None, offer=None, plan=None):
+def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
     from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
 
     usage_err = 'usage error: --plan STRING --offer STRING --publish STRING |--urn STRING'
@@ -1246,7 +1246,7 @@ def accept_market_ordering_term(cmd, urn=None, publisher=None, offer=None, plan=
         publisher, offer, _, _ = urn.split(':')
         image = show_vm_image(cmd, urn)
         if not image.plan:
-            logger.warning('No plan information is associated with the image, hence not term to accept')
+            logger.warning("Image '%s' has no terms to accept.", urn)
             return
         plan = image.plan.name
     else:

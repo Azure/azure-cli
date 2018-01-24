@@ -353,12 +353,12 @@ class VMImageWithPlanTest(ScenarioTest):
             'sku': 'basic-byol',
             'plan': 'basic-byol'
         })
-        urn = '{}:{}:{}:7.2.362142710'.format(self.kwargs['publisher'], self.kwargs['offer'], self.kwargs['sku'])
-        self.cmd('vm image show --urn ' + urn, checks=self.check('plan.name', self.kwargs['plan']))
-        self.cmd('vm image accept-term -p {publisher} --offer {offer} --plan {plan}', checks=self.check('accepted', True))
+        self.kwargs['urn'] = '{publisher}:{offer}:{sku}:7.2.362142710'.format(**self.kwargs)
+        self.cmd('vm image show --urn {urn}', checks=self.check('plan.name', '{plan}'))
+        self.cmd('vm image accept-terms -p {publisher} --offer {offer} --plan {plan}', checks=self.check('accepted', True))
         # repeat the same command using --urn
-        self.cmd('vm image accept-term --urn ' + urn, checks=self.check('accepted', True))
-        self.cmd('vm create -g {rg} -n vm1 --no-wait --image ' + urn)
+        self.cmd('vm image accept-terms --urn {urn}', checks=self.check('accepted', True))
+        self.cmd('vm create -g {rg} -n vm1 --no-wait --image {urn}')
 
 
 class VMCreateFromUnmanagedDiskTest(ScenarioTest):
