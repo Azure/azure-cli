@@ -153,6 +153,7 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
     def test_network_app_gateway_with_defaults(self, resource_group):
         self.cmd('network application-gateway create -g {rg} -n ag1 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n ag1 --exists')
+        self.cmd('network application-gateway update -g {rg} -n ag1 --no-wait')
         self.cmd('network application-gateway update -g {rg} -n ag1 --no-wait --capacity 3 --sku standard_small --tags foo=doo')
         self.cmd('network application-gateway wait -g {rg} -n ag1 --updated')
 
