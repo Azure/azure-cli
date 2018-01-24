@@ -170,9 +170,9 @@ helps['acr repository delete'] = """
     type: command
     short-summary: Delete a repository, manifest, or tag in a container registry.
     parameters:
-    - name: --manifest
-      populator-commands:
-        - az acr repository show-manifests
+        - name: --manifest
+          populator-commands:
+            - az acr repository show-manifests
     examples:
         - name: Delete a repository from a container registry.
           text:
