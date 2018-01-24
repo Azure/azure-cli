@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.0.20
+++++++
+* Clean up unused test files
+
+2.0.19
+++++++
+* Updated helpfile
+
 2.0.18
 ++++++
 * Update for CLI core changes.

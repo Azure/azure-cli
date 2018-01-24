@@ -51,7 +51,6 @@ def load_arguments(self, _):
         c.argument('virtual_machine_scale_set_name', options_list=['--vmss-name'], completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
 
     # region MixedScopes
-
     for scope in ['vm', 'disk', 'snapshot', 'image']:
         with self.argument_context(scope) as c:
             c.argument('tags', tags_type)
@@ -66,7 +65,6 @@ def load_arguments(self, _):
     for scope in ['disk create', 'snapshot create']:
         with self.argument_context(scope) as c:
             c.argument('source', help='source to create the disk/snapshot from, including unmanaged blob uri, managed disk id or name, or snapshot id or name')
-
     # endregion
 
     # region Disks
@@ -116,6 +114,11 @@ def load_arguments(self, _):
         c.argument('platform_fault_domain_count', type=int, help='Fault Domain count.')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
         c.argument('unmanaged', action='store_true', min_api='2016-04-30-preview', help='contained VMs should use unmanaged disks')
+
+    with self.argument_context('vm availability-set update') as c:
+        if self.supported_api_version(max_api='2016-04-30-preview', operation_group='virtual_machines'):
+            c.argument('name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/availabilitySets'), help='Name of the availability set')
+            c.argument('availability_set_name', options_list=['--availability-set-name'])
     # endregion
 
     # region VirtualMachines
@@ -131,6 +134,9 @@ def load_arguments(self, _):
 
     with self.argument_context('vm capture') as c:
         c.argument('overwrite', action='store_true')
+
+    with self.argument_context('vm update') as c:
+        c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to. Feature registration for 'Microsoft.Compute/AllowManagedDisksReplaceOSDisk' is needed")
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
@@ -187,8 +193,12 @@ def load_arguments(self, _):
 
     with self.argument_context('vm image') as c:
         c.argument('publisher_name', options_list=['--publisher', '-p'])
-        c.argument('offer', options_list=['--offer', '-f'])
-        c.argument('sku', options_list=['--sku', '-s'])
+        c.argument('publisher', options_list=['--publisher', '-p'], help='image publisher')
+        c.argument('offer', options_list=['--offer', '-f'], help='image offer')
+        c.argument('plan', help='image billing plan')
+        c.argument('sku', options_list=['--sku', '-s'], help='image sku')
+        c.argument('version', help="image sku's version")
+        c.argument('urn', help="URN, in format of 'publisher:offer:sku:versin'. If specified, other argument values can be omitted")
 
     with self.argument_context('vm image list') as c:
         c.argument('image_location', get_location_type(self.cli_ctx))
@@ -251,6 +261,7 @@ def load_arguments(self, _):
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
 
     with self.argument_context('vmss create') as c:
+        VMPriorityTypes = self.get_models('VirtualMachinePriorityTypes', resource_type=ResourceType.MGMT_COMPUTE)
         c.argument('name', name_arg_type)
         c.argument('nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
         c.argument('single_placement_group', default=None, help="Enable single placement group. This flag will default to True if instance count <=100, and default to False for instance count >100.", arg_type=get_enum_type(['true', 'false']))
@@ -261,6 +272,8 @@ def load_arguments(self, _):
         c.argument('health_probe', help='(Preview) probe name from the existing load balancer, mainly used for rolling upgrade')
         c.argument('vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
         c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
+        c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default='Regular'),
+                   help="(PREVIEW)Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
@@ -271,7 +284,7 @@ def load_arguments(self, _):
         c.argument('backend_pool_name', help='Name to use for the backend pool when creating a new load balancer or application gateway.')
         c.argument('backend_port', help='When creating a new load balancer, backend port to open with NAT rules (Defaults to 22 on Linux and 3389 on Windows). When creating an application gateway, the backend port to use for the backend HTTP settings.', type=int)
         c.argument('load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', options_list=['--load-balancer', '--lb'])
-        c.argument('load_balancer_sku', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-08-01', help='SKU when creating a new Load Balancer.', options_list=['--lb-sku'], arg_type=get_enum_type(LoadBalancerSkuName, default='Basic'))
+        c.argument('load_balancer_sku', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-08-01', help="SKU when creating a new Load Balancer. Default to 'Basic' for any non-zonal scaleset and 'Standard' otherwise", options_list=['--lb-sku'], arg_type=get_enum_type(LoadBalancerSkuName))
         c.argument('nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'])
 
     with self.argument_context('vmss create', min_api='2017-03-30', arg_group='Network') as c:

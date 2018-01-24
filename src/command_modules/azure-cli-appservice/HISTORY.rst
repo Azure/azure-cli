@@ -2,10 +2,16 @@
 
 Release History
 ===============
+0.1.25
+++++++
+* fix broken webapp log tail/download
+* relieve the 'kind' check on webapp/functionapp
 
 0.1.24
 ++++++
 * `webapp config ssl upload`: fix a bug where the hosting_environment_profile was null
+* `webapp browse`: adding support for browse to handle custom domain URL
+* `webapp log tail`: fixing a bug where support for slots was not working
 
 0.1.23
 ++++++

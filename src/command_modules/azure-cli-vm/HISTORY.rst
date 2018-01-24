@@ -2,8 +2,20 @@
 
 Release History
 ===============
+
+2.0.25
+++++++
+* vm image: support accept market terms to use vm images
+* vm/vmss create: ensure commands can run under proxy with unsigned certificates.
+* vmss:(PREVIEW) support low priority
+* `vm/vmss create` - `--admin-password` updated to type secureString.
+
 2.0.24
 ++++++
+* vmss:(PREVIEW) cross zone support
+* vmss:(BREAKING CHANGE)single zone scale-set will default to "Standard" load balancer instead of "Basic"
+* vm/vmss: use right term of "userAssignedIdentity" for EMSI
+* vm: (PREVIEW) support os disk swap
 * vm: support use image from other subscriptions
 
 2.0.23

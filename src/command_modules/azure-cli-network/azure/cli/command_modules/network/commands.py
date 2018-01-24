@@ -51,7 +51,7 @@ def load_command_table(self, _):
     # region Command Types
     network_ag_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.{}',
-        client_factory=cf_load_balancers
+        client_factory=cf_application_gateways
     )
 
     network_util = CliCommandType(
@@ -265,7 +265,7 @@ def load_command_table(self, _):
 
     with self.command_group('network application-gateway ssl-policy') as g:
         g.custom_command('set', 'set_ag_ssl_policy_2017_06_01', min_api='2017-06-01', no_wait_param='no_wait', validator=process_ag_ssl_policy_set_namespace, doc_string_source='ApplicationGatewaySslPolicy')
-        g.custom_command('set', 'set_ag_ssl_policy_2017_03_01', max_api='2017-03-01', no_wait_param='no_wait', validator=process_ag_ssl_policy_set_namespace, doc_string_source='ApplicationGatewaySslPolicy')
+        g.custom_command('set', 'set_ag_ssl_policy_2017_03_01', max_api='2017-03-01', no_wait_param='no_wait', validator=process_ag_ssl_policy_set_namespace)
         g.custom_command('show', 'show_ag_ssl_policy', exception_handler=empty_on_404)
 
     with self.command_group('network application-gateway ssl-policy', network_ag_sdk, min_api='2017-06-01') as g:
@@ -286,7 +286,7 @@ def load_command_table(self, _):
     # endregion
 
     # region ApplicationSecurityGroups
-    with self.command_group('network asg', network_asg_sdk, min_api='2017-09-01') as g:
+    with self.command_group('network asg', network_asg_sdk, client_factory=cf_application_security_groups, min_api='2017-09-01') as g:
         g.custom_command('create', 'create_asg')
         g.command('show', 'get')
         g.command('list', 'list_all')
@@ -477,17 +477,16 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkWatchers
-    with self.command_group('network watcher', network_watcher_sdk) as g:
+    with self.command_group('network watcher', network_watcher_sdk, min_api='2016-09-01') as g:
         g.custom_command('configure', 'configure_network_watcher')
         g.command('list', 'list_all')
-
         g.custom_command('test-ip-flow', 'check_nw_ip_flow', client_factory=cf_network_watcher)
         g.custom_command('test-connectivity', 'check_nw_connectivity', client_factory=cf_network_watcher, validator=process_nw_test_connectivity_namespace)
         g.custom_command('show-next-hop', 'show_nw_next_hop', client_factory=cf_network_watcher)
         g.custom_command('show-security-group-view', 'show_nw_security_view', client_factory=cf_network_watcher)
         g.command('show-topology', 'get_topology', validator=process_nw_topology_namespace)
 
-    with self.command_group('network watcher packet-capture', network_watcher_pc_sdk) as g:
+    with self.command_group('network watcher packet-capture', network_watcher_pc_sdk, min_api='2016-09-01') as g:
         g.custom_command('create', 'create_nw_packet_capture', client_factory=cf_packet_capture, validator=process_nw_packet_capture_create_namespace)
         g.command('show', 'get')
         g.command('show-status', 'get_status')
@@ -495,14 +494,13 @@ def load_command_table(self, _):
         g.command('stop', 'stop')
         g.command('list', 'list')
 
-    with self.command_group('network watcher flow-log', client_factory=cf_network_watcher) as g:
+    with self.command_group('network watcher flow-log', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
         g.custom_command('configure', 'set_nsg_flow_logging', validator=process_nw_flow_log_set_namespace)
         g.custom_command('show', 'show_nsg_flow_logging', validator=process_nw_flow_log_show_namespace)
 
-    with self.command_group('network watcher troubleshooting', client_factory=cf_network_watcher) as g:
+    with self.command_group('network watcher troubleshooting', client_factory=cf_network_watcher, min_api='2016-09-01') as g:
         g.custom_command('start', 'start_nw_troubleshooting', no_wait_param='no_wait', validator=process_nw_troubleshooting_start_namespace)
         g.custom_command('show', 'show_nw_troubleshooting_result', validator=process_nw_troubleshooting_show_namespace)
-
     # endregion
 
     # region PublicIPAddresses
@@ -520,14 +518,14 @@ def load_command_table(self, _):
     # endregion
 
     # region RouteFilters
-    with self.command_group('network route-filter', network_rf_sdk) as g:
+    with self.command_group('network route-filter', network_rf_sdk, min_api='2016-12-01') as g:
         g.custom_command('create', 'create_route_filter', client_factory=cf_route_filters)
         g.custom_command('list', 'list_route_filters', client_factory=cf_route_filters)
         g.command('show', 'get')
         g.command('delete', 'delete')
         g.generic_update_command('update', setter_arg_name='route_filter_parameters')
 
-    with self.command_group('network route-filter rule', network_rfr_sdk) as g:
+    with self.command_group('network route-filter rule', network_rfr_sdk, min_api='2016-12-01') as g:
         g.custom_command('create', 'create_route_filter_rule', client_factory=cf_route_filter_rules)
         g.command('list', 'list_by_route_filter')
         g.command('show', 'get')

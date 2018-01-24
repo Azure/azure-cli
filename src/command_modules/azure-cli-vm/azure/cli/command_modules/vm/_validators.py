@@ -19,7 +19,7 @@ from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
 
 from ._client_factory import _compute_client_factory
-
+from ._actions import _get_latest_image_version
 logger = get_logger(__name__)
 
 
@@ -227,16 +227,8 @@ def _get_image_plan_info_if_exists(cmd, namespace):
     try:
         compute_client = _compute_client_factory(cmd.cli_ctx)
         if namespace.os_version.lower() == 'latest':
-            top_one = compute_client.virtual_machine_images.list(namespace.location,
-                                                                 namespace.os_publisher,
-                                                                 namespace.os_offer,
-                                                                 namespace.os_sku,
-                                                                 top=1,
-                                                                 orderby='name desc')
-            if not top_one:
-                raise CLIError("Can't resolve the vesion of '{}'".format(namespace.image))
-
-            image_version = top_one[0].name
+            image_version = _get_latest_image_version(cmd.cli_ctx, namespace.location, namespace.os_publisher,
+                                                      namespace.os_offer, namespace.os_sku)
         else:
             image_version = namespace.os_version
 

@@ -25,7 +25,7 @@ helps['dla job submit'] = """
           short-summary: Name for the submitted job.
         - name: --script
           type: string
-          short-summary: Script to submit. This may be an @{file} to load from a file.
+          short-summary: Script to submit. This may be '@{file}' to load from a file.
         - name: --runtime-version
           short-summary: The runtime version to use.
           long-summary: This parameter is used for explicitly overwriting the default runtime. It should only be done if you know what you are doing.

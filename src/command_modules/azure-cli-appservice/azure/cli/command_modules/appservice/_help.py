@@ -499,7 +499,7 @@ helps['webapp list'] = """
     examples:
         - name: List default host name and state for all web apps.
           text: >
-            az webapp list --query "[].{ hostName: defaultHostName, state: state }"
+            az webapp list --query "[].{hostName: defaultHostName, state: state}"
         - name: List all running web apps.
           text: >
             az webapp list --query "[?state=='Running']"
@@ -547,7 +547,7 @@ helps['functionapp list'] = """
     examples:
         - name: List default host name and state for all function apps.
           text: >
-            az functionapp list --query "[].{ hostName: defaultHostName, state: state }"
+            az functionapp list --query "[].{hostName: defaultHostName, state: state}"
         - name: List all running function apps.
           text: >
             az functionapp list --query "[?state=='Running']"

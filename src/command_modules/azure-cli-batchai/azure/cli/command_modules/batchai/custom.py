@@ -19,6 +19,7 @@ from msrest.serialization import Deserializer
 import azure.mgmt.batchai.models as models
 
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
+from azure.cli.core.util import should_disable_connection_verify
 
 
 # Environment variables for specifying azure storage account and key. We want the user to make explicit
@@ -431,7 +432,8 @@ def tail_file(client, resource_group, job_name, directory, file_name):
     # Stream the file
     downloaded = 0
     while True:
-        r = requests.get(url, headers={'Range': 'bytes={0}-'.format(downloaded)})
+        r = requests.get(url, headers={'Range': 'bytes={0}-'.format(downloaded)},
+                         verify=(not should_disable_connection_verify()))
         if int(r.status_code / 100) == 2:
             downloaded += len(r.content)
             print(r.content.decode(), end='')

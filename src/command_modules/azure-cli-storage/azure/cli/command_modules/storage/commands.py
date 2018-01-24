@@ -128,13 +128,15 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
     with self.command_group('storage blob incremental-copy',
                             operations_tmpl='azure.multiapi.storage.blob.pageblobservice#PageBlobService.{}',
                             client_factory=page_blob_service_factory,
-                            resource_type=ResourceType.DATA_STORAGE) as g:
+                            resource_type=ResourceType.DATA_STORAGE,
+                            min_api='2016-05-31') as g:
         g.storage_command('start', 'incremental_copy_blob')
 
     with self.command_group('storage blob incremental-copy',
                             operations_tmpl='azure.multiapi.storage.blob.blockblobservice#BlockBlobService.{}',
                             client_factory=page_blob_service_factory,
-                            resource_type=ResourceType.DATA_STORAGE) as g:
+                            resource_type=ResourceType.DATA_STORAGE,
+                            min_api='2016-05-31') as g:
         g.storage_command('cancel', 'abort_copy_blob')
 
     with self.command_group('storage blob service-properties', command_type=base_blob_sdk) as g:

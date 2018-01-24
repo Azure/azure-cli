@@ -5,6 +5,8 @@
 
 from knack.help_files import helps
 
+#  pylint: disable=line-too-long
+
 
 def add_helps(command_group, server_type):
     helps['{}'.format(command_group)] = """
@@ -33,7 +35,7 @@ def add_helps(command_group, server_type):
                     - name: Restore 'testsvr2' to 'testsvrnew', where 'testsvrnew' is in a different resource group than the backup.
                       text: |
                         az {0} server restore -g testgroup -n testsvrnew \\
-                            -s "/subscriptions/{{SubID}}/resourceGroups/{{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2" \\
+                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2" \\
                             --restore-point-in-time "2017-06-15T13:10:00Z"
                 """.format(command_group, server_type)
     helps['{} server update'.format(command_group)] = """

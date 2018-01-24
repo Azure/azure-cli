@@ -20,7 +20,7 @@ LABEL maintainer="Microsoft" \
       org.label-schema.usage="https://docs.microsoft.com/en-us/cli/azure/install-az-cli2#docker" \
       org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.vcs-url="https://github.com/Azure/azure-cli.git" \
-      org.label-schema.docker.cmd="docker run -v \${HOME}/.azure:/root/.azure -it azuresdk/azure-cli-python:$CLI_VERSION"
+      org.label-schema.docker.cmd="docker run -v \${HOME}/.azure:/root/.azure -it microsoft/azure-cli:$CLI_VERSION"
 
 WORKDIR azure-cli
 COPY . /azure-cli

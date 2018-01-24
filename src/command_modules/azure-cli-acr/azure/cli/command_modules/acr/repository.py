@@ -12,8 +12,10 @@ from knack.prompting import prompt_y_n, NoTTYException
 from knack.util import CLIError
 from knack.log import get_logger
 
+from azure.cli.core.util import should_disable_connection_verify
+
 from ._utils import validate_managed_registry
-from ._docker_utils import get_access_credentials
+from ._docker_utils import get_access_credentials, log_registry_response
 
 
 logger = get_logger(__name__)
@@ -55,9 +57,11 @@ def _delete_data_from_registry(login_server, path, username, password, retry_tim
         errorMessage = None
         try:
             response = requests.delete(
-                'https://{}/{}'.format(login_server, path),
-                headers=_get_authorization_header(username, password)
+                'https://{}{}'.format(login_server, path),
+                headers=_get_authorization_header(username, password),
+                verify=(not should_disable_connection_verify())
             )
+            log_registry_response(response)
 
             if response.status_code == 200 or response.status_code == 202:
                 return
@@ -75,16 +79,18 @@ def _delete_data_from_registry(login_server, path, username, password, retry_tim
         raise CLIError(errorMessage)
 
 
-def _get_manifest_digest(login_server, path, username, password, retry_times=3, retry_interval=5):
+def _get_manifest_digest(login_server, path, username, password, retry_times=3, retry_interval=5):  # pylint: disable=inconsistent-return-statements
     for i in range(0, retry_times):
         errorMessage = None
         try:
             headers = _get_authorization_header(username, password)
             headers.update(_get_manifest_v2_header())
             response = requests.get(
-                'https://{}/{}'.format(login_server, path),
-                headers=headers
+                'https://{}{}'.format(login_server, path),
+                headers=headers,
+                verify=(not should_disable_connection_verify())
             )
+            log_registry_response(response)
 
             if response.status_code == 200 and response.headers and 'Docker-Content-Digest' in response.headers:
                 return response.headers['Docker-Content-Digest']
@@ -98,6 +104,7 @@ def _get_manifest_digest(login_server, path, username, password, retry_times=3, 
             errorMessage = str(e)
             logger.debug('Retrying %s with exception %s', i + 1, errorMessage)
             time.sleep(retry_interval)
+
     if errorMessage:
         raise CLIError(errorMessage)
 
@@ -119,10 +126,12 @@ def _obtain_data_from_registry(login_server,
             errorMessage = None
             try:
                 response = requests.get(
-                    'https://{}/{}'.format(login_server, path),
+                    'https://{}{}'.format(login_server, path),
                     headers=_get_authorization_header(username, password),
-                    params=_get_pagination_params(pagination)
+                    params=_get_pagination_params(pagination),
+                    verify=(not should_disable_connection_verify())
                 )
+                log_registry_response(response)
 
                 if response.status_code == 200:
                     result = response.json()[result_index]

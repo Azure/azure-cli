@@ -444,7 +444,10 @@ class Profile(object):
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
-        if user_type == _USER:
+        identity_id, msi_port = Profile._try_parse_for_msi_port(account[_SUBSCRIPTION_NAME])
+        if msi_port is not None:
+            creds = Profile.get_msi_token(resource, msi_port, identity_id)
+        elif user_type == _USER:
             creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                               account[_TENANT_ID], resource)
         else:

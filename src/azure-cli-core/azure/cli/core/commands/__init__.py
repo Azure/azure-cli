@@ -22,7 +22,6 @@ from knack.util import CLIError
 from azure.cli.core import EXCLUDED_PARAMS
 import azure.cli.core.telemetry as telemetry
 
-
 logger = get_logger(__name__)
 
 CLI_COMMAND_KWARGS = ['transform', 'table_transformer', 'confirmation', 'exception_handler', 'min_api', 'max_api',
@@ -98,7 +97,6 @@ def _expand_file_prefixed_files(args):
 
 
 def _pre_command_table_create(cli_ctx, args):
-
     cli_ctx.refresh_request_id()
     return _expand_file_prefixed_files(args)
 
@@ -134,7 +132,7 @@ class AzCliCommand(CLICommand):
             setattr(arg.type, 'configured_default_applied', True)
             config_value = self.cli_ctx.config.get(DEFAULTS_SECTION, def_config, None)
             if config_value:
-                logger.warning("Using default '%s' for arg %s", config_value, arg.name)
+                logger.info("Configured default '%s' for arg %s", config_value, arg.name)
                 overrides.settings['default'] = config_value
                 overrides.settings['required'] = False
 
@@ -163,8 +161,8 @@ class AzCliCommand(CLICommand):
             arg.type.settings['default'] = arg_default
 
     def __call__(self, *args, **kwargs):
-        if self.command_source and isinstance(self.command_source, ExtensionCommandSource) and\
-           self.command_source.overrides_command:
+        if self.command_source and isinstance(self.command_source, ExtensionCommandSource) and \
+                self.command_source.overrides_command:
             logger.warning(self.command_source.get_command_warn_msg())
         return super(AzCliCommand, self).__call__(*args, **kwargs)
 
@@ -281,9 +279,9 @@ class AzCliCommandInvoker(CommandInvoker):
             params = self._filter_params(expanded_arg)
 
             command_source = self.commands_loader.command_table[command].command_source
-            telemetry.set_command_details(self.data['command'],
-                                          self.data['output'],
-                                          [p for p in args if p.startswith('-')],
+            telemetry.set_command_details(self.data['command'], self.data['output'],
+                                          [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
+                                           (p.startswith('-') and len(p) > 1)],
                                           extension_name=command_source.extension_name if command_source else None)
             if command_source:
                 self.data['command_extension_name'] = command_source.extension_name
@@ -432,7 +430,11 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
                                 logger.info(result)
 
     def __call__(self, poller):
+        import colorama
         from msrest.exceptions import ClientException
+
+        # https://github.com/azure/azure-cli/issues/3555
+        colorama.init()
 
         correlation_message = ''
         self.cli_ctx.get_progress_controller().begin()
@@ -474,6 +476,8 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
             handle_long_running_operation_exception(client_exception)
 
         self.cli_ctx.get_progress_controller().end()
+        colorama.deinit()
+
         return result
 
 
@@ -538,7 +542,7 @@ class ExtensionCommandSource(object):
         if self.overrides_command:
             if self.extension_name:
                 return "The behavior of this command has been altered by the following extension: " \
-                    "{}".format(self.extension_name)
+                       "{}".format(self.extension_name)
             return "The behavior of this command has been altered by an extension."
         else:
             if self.extension_name:
@@ -845,9 +849,11 @@ class AzArgumentContext(ArgumentsContext):
         resource_type = merged_kwargs.get('resource_type', None)
         min_api = merged_kwargs.get('min_api', None)
         max_api = merged_kwargs.get('max_api', None)
+        operation_group = merged_kwargs.get('operation_group', None)
         if self.command_loader.supported_api_version(resource_type=resource_type,
                                                      min_api=min_api,
-                                                     max_api=max_api):
+                                                     max_api=max_api,
+                                                     operation_group=operation_group):
             super(AzArgumentContext, self).argument(dest, **merged_kwargs)
         else:
             super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
@@ -874,6 +880,7 @@ class AzArgumentContext(ArgumentsContext):
             """
             Return a validator which will aggregate multiple arguments to one complex argument.
             """
+
             def _expansion_validator_impl(namespace):
                 """
                 The validator create a argument of a given type from a specific set of arguments from CLI
@@ -928,8 +935,10 @@ class AzArgumentContext(ArgumentsContext):
         resource_type = merged_kwargs.get('resource_type', None)
         min_api = merged_kwargs.get('min_api', None)
         max_api = merged_kwargs.get('max_api', None)
+        operation_group = merged_kwargs.get('operation_group', None)
         if self.command_loader.supported_api_version(resource_type=resource_type,
                                                      min_api=min_api,
-                                                     max_api=max_api):
+                                                     max_api=max_api,
+                                                     operation_group=operation_group):
             merged_kwargs.pop('dest', None)
             super(AzArgumentContext, self).extra(argument_dest=dest, **merged_kwargs)

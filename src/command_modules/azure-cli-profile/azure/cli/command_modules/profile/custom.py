@@ -67,7 +67,7 @@ def get_access_token(cmd, subscription=None, resource=None):
     return {
         'tokenType': creds[0],
         'accessToken': creds[1],
-        'expiresOn': creds[2]['expiresOn'],
+        'expiresOn': creds[2].get('expiresOn', 'N/A'),
         'subscription': subscription,
         'tenant': tenant
     }

@@ -11,15 +11,17 @@ except ImportError:
 
 from json import loads
 import requests
+from msrest.http_logger import log_request, log_response
 
 from knack.util import CLIError
 from knack.prompting import prompt, prompt_pass, NoTTYException
 from knack.log import get_logger
 
+from azure.cli.core.util import should_disable_connection_verify
+
 from ._client_factory import cf_acr_registries
 from ._constants import MANAGED_REGISTRY_SKU
 from ._utils import get_registry_by_name
-from .credential import get_acr_credentials
 
 
 logger = get_logger(__name__)
@@ -34,7 +36,7 @@ def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, p
     """
     login_server = login_server.rstrip('/')
 
-    challenge = requests.get('https://' + login_server + '/v2/')
+    challenge = requests.get('https://' + login_server + '/v2/', verify=(not should_disable_connection_verify()))
     if challenge.status_code not in [401] or 'WWW-Authenticate' not in challenge.headers:
         raise CLIError("Registry '{}' did not issue a challenge.".format(login_server))
 
@@ -82,7 +84,8 @@ def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, p
             'password': refresh
         }
 
-    response = requests.post(authhost, urlencode(content), headers=headers)
+    response = requests.post(authhost, urlencode(content), headers=headers,
+                             verify=(not should_disable_connection_verify()))
 
     if response.status_code not in [200]:
         raise CLIError(
@@ -106,7 +109,8 @@ def _get_aad_token(cli_ctx, login_server, only_refresh_token, repository=None, p
         'scope': scope,
         'refresh_token': refresh_token
     }
-    response = requests.post(authhost, urlencode(content), headers=headers)
+    response = requests.post(authhost, urlencode(content), headers=headers,
+                             verify=(not should_disable_connection_verify()))
     access_token = loads(response.content.decode("utf-8"))["access_token"]
 
     return access_token
@@ -130,7 +134,7 @@ def _get_credentials(cli_ctx,
     :param str repository: Repository for which the access token is requested
     :param str permission: The requested permission on the repository, '*' or 'pull'
     """
-    registry, _ = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
+    registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
     login_server = registry.login_server
 
     # 1. if username was specified, verify that password was also specified
@@ -146,17 +150,16 @@ def _get_credentials(cli_ctx,
     # 2. if we don't yet have credentials, attempt to get a refresh token
     if not password and registry.sku.name in MANAGED_REGISTRY_SKU:
         try:
-            username = "00000000-0000-0000-0000-000000000000" if only_refresh_token else None
-            password = _get_aad_token(login_server, only_refresh_token, repository, permission)
+            username = '00000000-0000-0000-0000-000000000000' if only_refresh_token else None
+            password = _get_aad_token(cli_ctx, login_server, only_refresh_token, repository, permission)
             return login_server, username, password
         except CLIError as e:
             logger.warning("Unable to get AAD authorization tokens with message: %s", str(e))
 
     # 3. if we still don't have credentials, attempt to get the admin credentials (if enabled)
-    if not password:
+    if not password and registry.admin_user_enabled:
         try:
-            client = cf_acr_registries(cli_ctx)
-            cred = get_acr_credentials(cli_ctx, client, registry_name)
+            cred = cf_acr_registries(cli_ctx).list_credentials(resource_group_name, registry_name)
             username = cred.username
             password = cred.passwords[0].value
             return login_server, username, password
@@ -217,3 +220,11 @@ def get_access_credentials(cli_ctx,
                             only_refresh_token=False,
                             repository=repository,
                             permission=permission)
+
+
+def log_registry_response(response):
+    """Log the HTTP request and response of a registry API call.
+    :param Response response: The response object
+    """
+    log_request(None, response.request)
+    log_response(None, response.request, response, result=response)

@@ -8,7 +8,6 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._client_factory import cf_web_client, cf_plans, cf_webapps
-from ._validators import validate_existing_function_app, validate_existing_web_app
 
 
 def output_slots_in_table(slots):
@@ -70,8 +69,7 @@ def load_command_table(self, _):
     with self.command_group('webapp', webapp_sdk) as g:
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
-        g.custom_command('show', 'show_webapp', validator=validate_existing_web_app,
-                         exception_handler=empty_on_404, table_transformer=transform_web_output)
+        g.custom_command('show', 'show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_webapp')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')
@@ -174,8 +172,7 @@ def load_command_table(self, _):
     with self.command_group('functionapp') as g:
         g.custom_command('create', 'create_function')
         g.custom_command('list', 'list_function_app', table_transformer=transform_web_list_output)
-        g.custom_command('show', 'show_webapp', validator=validate_existing_function_app,
-                         exception_handler=empty_on_404, table_transformer=transform_web_output)
+        g.custom_command('show', 'show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output)
         g.custom_command('delete', 'delete_function_app')
         g.custom_command('stop', 'stop_webapp')
         g.custom_command('start', 'start_webapp')

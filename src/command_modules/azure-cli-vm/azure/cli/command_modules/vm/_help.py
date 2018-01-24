@@ -60,7 +60,7 @@ helps['vm create'] = """
             az vm create -g MyResourceGroup -n MyVm --attach-os-disk MyOsDisk --os-type linux
         - name: 'Create an Ubuntu Linux VM using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init.'
           text: >
-            az vm create -g MyResourceGroup -n MyVm --image debian --custom_data MyCloudInitScript.yml
+            az vm create -g MyResourceGroup -n MyVm --image debian --custom-data MyCloudInitScript.yml
         - name: Create a Debian VM with SSH key authentication and a public DNS entry, located on an existing virtual network and availability set.
           text: |
             az vm create -n MyVm -g MyResourceGroup --image debian --vnet-name MyVnet --subnet subnet1 \\
@@ -124,7 +124,7 @@ helps['vmss create'] = """
                 --public-ip-per-vm --vm-domain-name myvmss --dns-servers 10.0.0.6 10.0.0.5
         - name: 'Create a Linux VM scale set using a cloud-init script for configuration. See: https://docs.microsoft.com/azure/virtual-machines/virtual-machines-linux-using-cloud-init'
           text: >
-            az vmss create -g MyResourceGroup -n MyVmss --image debian --custom_data MyCloudInitScript.yml
+            az vmss create -g MyResourceGroup -n MyVmss --image debian --custom-data MyCloudInitScript.yml
         - name: Create a Debian VM scaleset using Key Vault secrets.
           text: >
             az keyvault certificate create --vault-name vaultname -n cert1 \\
@@ -494,11 +494,11 @@ helps['vm diagnostics set'] = """
                 --account-name $my_diagnostic_storage_account --expiry 9999-12-31T23:59Z \\
                 --permissions wlacu --resource-types co --services bt -o tsv)
 
-            protected_settings="{'storageAccountName': '${my_diagnostic_storage_account}', \\
-                'storageAccountSasToken': '${storage_sastoken}'}"
+            protected_settings="{'storageAccountName': '{my_diagnostic_storage_account}', \\
+                'storageAccountSasToken': '{storage_sastoken}'}"
 
-            az vm diagnostics set --settings "${default_config}" \\
-                --protected-settings "${protected_settings}" \\
+            az vm diagnostics set --settings "{default_config}" \\
+                --protected-settings "{protected_settings}" \\
                 --resource-group $my_resource_group --vm-name $my_linux_vm
 """
 
@@ -697,11 +697,11 @@ helps['vm extension image show'] = """
             location=westus\n
 
             latest=$(az vm extension image list-versions \\
-              --publisher ${publisher} -l ${location} -n ${extension} \\
+              --publisher {publisher} -l {location} -n {extension} \\
               --query "[].name" -o tsv | sort | tail -n 1)
 
-            az vm extension image show -l ${location} \\
-              --publisher ${publisher} -n ${extension} --version ${latest}
+            az vm extension image show -l {location} \\
+              --publisher {publisher} -n {extension} --version {latest}
 """
 
 helps['vm image'] = """
@@ -765,7 +765,12 @@ helps['vm image show'] = """
           text: >
             latest=$(az vm image list -p OpenLogic -s 7.3 --all --query \\
                 "[?offer=='CentOS'].version" -o tsv | sort -u | tail -n 1)
-            az vm image show -l westus -f CentOS -p OpenLogic --s 7.3 --version ${latest}
+            az vm image show -l westus -f CentOS -p OpenLogic --s 7.3 --version {latest}
+"""
+
+helps['vm image accept-term'] = """
+    type: command
+    short-summary: Accept Azure Marketplace term so that the image can be used to create VMs
 """
 
 helps['vm nic'] = """
@@ -890,9 +895,9 @@ deallocate_generalize_capture = """        - name: Deallocate, generalize, and c
         - name: Deallocate, generalize, and capture multiple stopped virtual machines.
           text: |
             vms_ids=$(az vm list -g MyResourceGroup --query "[].id" -o tsv)
-            az vm deallocate --ids ${vms_ids}
-            az vm generalize --ids ${vms_ids}
-            az vm capture --ids ${vms_ids} --vhd-name-prefix MyPrefix
+            az vm deallocate --ids {vms_ids}
+            az vm generalize --ids {vms_ids}
+            az vm capture --ids {vms_ids} --vhd-name-prefix MyPrefix
 """
 
 helps['vmss encryption'] = """
@@ -1015,7 +1020,7 @@ helps['vm open-port'] = """
         network commands directly (nsg rule create, etc).
     examples:
         - name: Open all ports on a VM to inbound traffic.
-          text: az vm open-port -g MyResourceGroup -n MyVm --port *
+          text: az vm open-port -g MyResourceGroup -n MyVm --port '*'
         - name: Open a range of ports on a VM to inbound traffic with the highest priority.
           text: az vm open-port -g MyResourceGroup -n MyVm --port 80-100 --priority 100
 {0}

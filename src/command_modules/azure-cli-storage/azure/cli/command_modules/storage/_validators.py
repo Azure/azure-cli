@@ -638,6 +638,19 @@ def get_source_file_or_blob_service_client(cmd, namespace):
                                                  sas_token=identifier.sas_token)
 
 
+def add_progress_callback(cmd, namespace):
+    def _update_progress(current, total):
+        hook = cmd.cli_ctx.get_progress_controller(det=True)
+
+        if total:
+            hook.add(message='Alive', value=current, total_val=total)
+            if total == current:
+                hook.end()
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
 def process_blob_download_batch_parameters(namespace, cmd):
     """Process the parameters for storage blob download command"""
 

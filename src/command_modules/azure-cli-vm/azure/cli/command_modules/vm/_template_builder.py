@@ -4,66 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 
-from collections import OrderedDict
-import json
-
 from enum import Enum
 
 from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType
-
-
-class ArmTemplateBuilder(object):
-
-    def __init__(self):
-        template = OrderedDict()
-        template['$schema'] = \
-            'https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#'
-        template['contentVersion'] = '1.0.0.0'
-        template['parameters'] = {}
-        template['variables'] = {}
-        template['resources'] = []
-        template['outputs'] = {}
-        self.template = template
-
-    def add_resource(self, resource):
-        self.template['resources'].append(resource)
-
-    def add_variable(self, key, value):
-        self.template['variables'][key] = value
-
-    def add_parameter(self, key, value):
-        self.template['parameters'][key] = value
-
-    def add_id_output(self, key, provider, property_type, property_name):
-        new_output = {
-            key: {
-                'type': 'string',
-                'value': "[resourceId('{}/{}', '{}')]".format(
-                    provider, property_type, property_name)
-            }
-        }
-        self.template['outputs'].update(new_output)
-
-    def add_output(self, key, property_name, provider=None, property_type=None,
-                   output_type='string', path=None):
-
-        if provider and property_type:
-            value = "[reference(resourceId('{provider}/{type}', '{property}'),providers('{provider}', '{type}').apiVersions[0])".format(  # pylint: disable=line-too-long
-                provider=provider, type=property_type, property=property_name)
-        else:
-            value = "[reference('{}')".format(property_name)
-        value = '{}.{}]'.format(value, path) if path else '{}]'.format(value)
-        new_output = {
-            key: {
-                'type': output_type,
-                'value': value
-            }
-        }
-        self.template['outputs'].update(new_output)
-
-    def build(self):
-        return json.loads(json.dumps(self.template))
+from azure.cli.core.commands.arm import ArmTemplateBuilder
 
 
 # pylint: disable=too-few-public-methods
@@ -143,8 +88,12 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         'dependsOn': [],
         'properties': public_ip_properties
     }
-    if zone:
+
+    # when multiple zones are provided(through a x-zone scale set), we don't propagate to PIP becasue it doesn't
+    # support x-zone; rather we will rely on the Standard LB to work with such scale sets
+    if zone and len(zone) == 1:
         public_ip['zones'] = zone
+
     if sku and cmd.supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         public_ip['sku'] = {'name': sku}
     return public_ip
@@ -324,7 +273,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         }
 
         if admin_password:
-            os_profile['adminPassword'] = admin_password
+            os_profile['adminPassword'] = "[parameters('adminPassword')]"
 
         if custom_data:
             os_profile['customData'] = b64encode(custom_data)
@@ -661,6 +610,24 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
     }
     if sku and cmd.supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         lb['sku'] = {'name': sku}
+        # LB rule is the way to enable SNAT so outbound connections are possible
+        if sku.lower() == 'standard':
+            lb_properties['loadBalancingRules'] = [{
+                "name": "LBRule",
+                "properties": {
+                    "frontendIPConfiguration": {
+                        'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(lb_id, frontend_ip_name)
+                    },
+                    "backendAddressPool": {
+                        "id": "[concat({}, '/backendAddressPools/', '{}')]".format(lb_id, backend_pool_name)
+                    },
+                    "protocol": "tcp",
+                    "frontendPort": 80,
+                    "backendPort": 80,
+                    "enableFloatingIP": False,
+                    "idleTimeoutInMinutes": 5,
+                }
+            }]
     return lb
 
 
@@ -692,7 +659,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
-                        single_placement_group=None, custom_data=None, secrets=None, license_type=None, zones=None):
+                        single_placement_group=None, custom_data=None, secrets=None, license_type=None,
+                        zones=None, priority=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -772,8 +740,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         'computerNamePrefix': naming_prefix,
         'adminUsername': admin_username
     }
-    if authentication_type == 'password':
-        os_profile['adminPassword'] = admin_password
+    if authentication_type == 'password' and admin_password:
+        os_profile['adminPassword'] = "[parameters('adminPassword')]"
     else:
         os_profile['linuxConfiguration'] = {
             'disablePasswordAuthentication': True,
@@ -836,6 +804,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     if cmd.supported_api_version(min_api='2016-04-30-preview').virtual_machine_scale_sets:  # pylint: disable=no-member
         vmss_properties['singlePlacementGroup'] = single_placement_group
+
+    if priority and cmd.supported_api_version(min_api='2017-12-01').virtual_machine_scale_sets:  # pylint: disable=no-member
+        vmss_properties['virtualMachineProfile']['priority'] = priority
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
