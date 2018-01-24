@@ -87,7 +87,7 @@ class LoadFreshTable(object):
 
             # if there is extra help for this command but it's not reflected in the command table
             if command_name not in data and help_type == 'command':
-                logger.info('Command: %s not found in command table', command_name)
+                logger.debug('Command: %s not found in command table', command_name)
                 continue
 
             short_summary = help_entry.get('short-summary')
@@ -105,7 +105,7 @@ class LoadFreshTable(object):
                     param_name = param['name'].split()[0]
 
                     if param_name not in data[command_name]['parameters']:
-                        logger.info('Command %s does not have parameter: %s', command_name, param_name)
+                        logger.debug('Command %s does not have parameter: %s', command_name, param_name)
                         continue
 
                     if 'short-summary' in param:
@@ -155,7 +155,7 @@ class LoadFreshTable(object):
 
         self.load_help_files(cmd_table_data)
         elapsed = timeit.default_timer() - start_time
-        logger.info('Command table dumped: {} sec'.format(elapsed))
+        logger.debug('Command table dumped: {} sec'.format(elapsed))
         self.command_table = main_loader.command_table
 
         # dump into the cache file
