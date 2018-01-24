@@ -9,7 +9,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 class TestMonitorMetrics(ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer()
-    def test_monitor_metrics(self, resource_group, storage_account):
+    def test_monitor_metrics_scenario(self, resource_group, storage_account):
         resource_id = self.cmd(
             'az storage account show -n {} -g {} --query id -otsv'.format(storage_account, resource_group)).output
 

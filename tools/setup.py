@@ -31,7 +31,7 @@ DEPENDENCIES = [
     'readme_renderer>=17.2',
     'six>=1.10.0',
     'tabulate>=0.7.7',
-    'pytest',
+    'pytest-xdist',
     'colorama>=0.3.7'
 ]
 

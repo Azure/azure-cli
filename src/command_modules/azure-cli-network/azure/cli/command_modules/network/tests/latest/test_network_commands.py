@@ -283,35 +283,6 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
         ])
 
 
-@api_version_constraint(ResourceType.MGMT_NETWORK, max_api='2017-03-01')
-class NetworkAppGatewayPrivateIpScenarioTest20170301(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_ag_private_ip')
-    def test_network_app_gateway_with_private_ip(self, resource_group):
-
-        self.kwargs.update({
-            'private_ip': '10.0.0.15',
-            'pass': 'password',
-            'path': os.path.join(TEST_DIR, 'TestCert.pfx')
-        })
-
-        self.cmd('network application-gateway create -g {rg} -n ag3 --subnet subnet1 --private-ip-address {private_ip} --cert-file "{path}" --cert-password {pass} --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n ag3 --exists')
-        self.cmd('network application-gateway show -g {rg} -n ag3', checks=[
-            self.check('frontendIpConfigurations[0].privateIpAddress', self.kwargs['private_ip']),
-            self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Static')
-        ])
-        self.kwargs['path'] = os.path.join(TEST_DIR, 'TestCert2.pfx')
-        self.cmd('network application-gateway ssl-cert update -g {rg} --gateway-name ag3 -n ag3SslCert --cert-file "{path}" --cert-password {pass}')
-        self.cmd('network application-gateway wait -g {rg} -n ag3 --updated')
-        self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 --disabled-ssl-protocols tlsv1_0 tlsv1_1 --no-wait')
-        self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3',
-                 checks=self.check('disabledSslProtocols.length(@)', 2))
-        self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 --clear --no-wait')
-        self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3',
-                 checks=self.is_empty())
-
-
 @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
 class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
 

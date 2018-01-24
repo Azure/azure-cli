@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import subprocess
 import json
 import shlex
 import logging
@@ -164,26 +163,23 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
 
 
 class ExecutionResult(object):
-    def __init__(self, cli_ctx, command, expect_failure=False, in_process=True):
+    def __init__(self, cli_ctx, command, expect_failure=False):
         self.output = ''
         self.applog = ''
+        self.command_coverage = {}
 
-        if in_process:
-            self._in_process_execute(cli_ctx, command, expect_failure=expect_failure)
-        else:
-            self._out_of_process_execute(command)
+        self._in_process_execute(cli_ctx, command, expect_failure=expect_failure)
 
+        log_val = ('Logging ' + self.applog) if self.applog else ''
         if expect_failure and self.exit_code == 0:
-            logger.error('Command "%s" => %d. (It did not fail as expected) Output: %s. %s', command,
-                         self.exit_code, self.output, ('Logging ' + self.applog) if self.applog else '')
+            logger.error('Command "%s" => %d. (It did not fail as expected). %s\n', command,
+                         self.exit_code, log_val)
             raise AssertionError('The command did not fail as it was expected.')
         elif not expect_failure and self.exit_code != 0:
-            logger.error('Command "%s" => %d. Output: %s. %s', command, self.exit_code, self.output,
-                         ('Logging ' + self.applog) if self.applog else '')
+            logger.error('Command "%s" => %d. %s\n', command, self.exit_code, log_val)
             raise AssertionError('The command failed. Exit code: {}'.format(self.exit_code))
 
-        logger.info('Command "%s" => %d. Output: %s. %s', command, self.exit_code, self.output,
-                    ('Logging ' + self.applog) if self.applog else '')
+        logger.info('Command "%s" => %d. %s\n', command, self.exit_code, log_val)
 
         self.json_value = None
         self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'
@@ -245,14 +241,6 @@ class ExecutionResult(object):
         finally:
             stdout_buf.close()
             logging_buf.close()
-
-    def _out_of_process_execute(self, command):
-        try:
-            self.output = subprocess.check_output(shlex.split(command)).decode('utf-8')
-            self.exit_code = 0
-        except subprocess.CalledProcessError as error:
-            self.exit_code, self.output = error.returncode, error.output.decode('utf-8')
-            self.process_error = error
 
 
 execute = ExecutionResult
