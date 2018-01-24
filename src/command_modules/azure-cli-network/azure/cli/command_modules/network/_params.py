@@ -113,9 +113,9 @@ def load_arguments(self, _):
         c.argument('servers', ag_servers_type)
 
     with self.argument_context('network application-gateway update', arg_group=None) as c:
-        c.argument('sku')
+        c.argument('sku', default=None)
         c.argument('enable_http2')
-        c.argument('capacity')
+        c.argument('capacity', help='The number of instances to use with the application gateway.')
 
     ag_subresources = [
         {'name': 'auth-cert', 'display': 'authentication certificate', 'ref': 'authentication_certificates'},
