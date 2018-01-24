@@ -22,7 +22,6 @@ from knack.util import CLIError
 from azure.cli.core import EXCLUDED_PARAMS
 import azure.cli.core.telemetry as telemetry
 
-
 logger = get_logger(__name__)
 
 CLI_COMMAND_KWARGS = ['transform', 'table_transformer', 'confirmation', 'exception_handler', 'min_api', 'max_api',
@@ -98,7 +97,6 @@ def _expand_file_prefixed_files(args):
 
 
 def _pre_command_table_create(cli_ctx, args):
-
     cli_ctx.refresh_request_id()
     return _expand_file_prefixed_files(args)
 
@@ -163,8 +161,8 @@ class AzCliCommand(CLICommand):
             arg.type.settings['default'] = arg_default
 
     def __call__(self, *args, **kwargs):
-        if self.command_source and isinstance(self.command_source, ExtensionCommandSource) and\
-           self.command_source.overrides_command:
+        if self.command_source and isinstance(self.command_source, ExtensionCommandSource) and \
+                self.command_source.overrides_command:
             logger.warning(self.command_source.get_command_warn_msg())
         return super(AzCliCommand, self).__call__(*args, **kwargs)
 
@@ -281,9 +279,9 @@ class AzCliCommandInvoker(CommandInvoker):
             params = self._filter_params(expanded_arg)
 
             command_source = self.commands_loader.command_table[command].command_source
-            telemetry.set_command_details(self.data['command'],
-                                          self.data['output'],
-                                          [p for p in args if p.startswith('-')],
+            telemetry.set_command_details(self.data['command'], self.data['output'],
+                                          [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
+                                           (p.startswith('-') and len(p) > 1)],
                                           extension_name=command_source.extension_name if command_source else None)
             if command_source:
                 self.data['command_extension_name'] = command_source.extension_name
@@ -544,7 +542,7 @@ class ExtensionCommandSource(object):
         if self.overrides_command:
             if self.extension_name:
                 return "The behavior of this command has been altered by the following extension: " \
-                    "{}".format(self.extension_name)
+                       "{}".format(self.extension_name)
             return "The behavior of this command has been altered by an extension."
         else:
             if self.extension_name:
@@ -882,6 +880,7 @@ class AzArgumentContext(ArgumentsContext):
             """
             Return a validator which will aggregate multiple arguments to one complex argument.
             """
+
             def _expansion_validator_impl(namespace):
                 """
                 The validator create a argument of a given type from a specific set of arguments from CLI
