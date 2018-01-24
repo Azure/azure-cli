@@ -39,6 +39,7 @@ DEPENDENCIES = [
     'azure-mgmt-network==1.7.0',
     'azure-mgmt-resource==1.2.1',
     'azure-multiapi-storage==0.1.7',
+    'azure-mgmt-marketplaceordering==0.1.0',
     'azure-cli-core'
 ]
 

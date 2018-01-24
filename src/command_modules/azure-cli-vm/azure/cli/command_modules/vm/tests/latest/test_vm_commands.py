@@ -329,7 +329,7 @@ class VMCustomImageTest(ScenarioTest):
         ])
 
 
-class VMCustomImageWithPlanTest(ScenarioTest):
+class VMImageWithPlanTest(ScenarioTest):
 
     @ResourceGroupPreparer()
     def test_custom_image_with_plan(self, resource_group):
@@ -343,6 +343,22 @@ class VMCustomImageWithPlanTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n vm1 --admin-username cliuser --image {prepared_image_with_plan_info} --generate-ssh-keys --plan-publisher microsoft-ads --plan-name {plan} --plan-product linux-data-science-vm-ubuntu')
         self.cmd('vm show -g {rg} -n vm1',
                  checks=self.check('plan.name', '{plan}'))
+
+    @ResourceGroupPreparer()
+    def test_vm_create_with_market_place_image(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'location': resource_group_location,
+            'publisher': 'kemptech',
+            'offer': 'vlm-azure',
+            'sku': 'basic-byol',
+            'plan': 'basic-byol'
+        })
+        self.kwargs['urn'] = '{publisher}:{offer}:{sku}:7.2.362142710'.format(**self.kwargs)
+        self.cmd('vm image show --urn {urn}', checks=self.check('plan.name', '{plan}'))
+        self.cmd('vm image accept-terms -p {publisher} --offer {offer} --plan {plan}', checks=self.check('accepted', True))
+        # repeat the same command using --urn
+        self.cmd('vm image accept-terms --urn {urn}', checks=self.check('accepted', True))
+        self.cmd('vm create -g {rg} -n vm1 --no-wait --image {urn}')
 
 
 class VMCreateFromUnmanagedDiskTest(ScenarioTest):
