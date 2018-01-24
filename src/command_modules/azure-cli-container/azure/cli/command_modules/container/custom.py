@@ -176,7 +176,7 @@ def create_ip_address(ip_address, ports):
 
 
 # pylint: disable=inconsistent-return-statements
-def container_logs(cmd, resource_group_name, name, container_name=None, streaming=False):
+def container_logs(cmd, resource_group_name, name, container_name=None, follow=False):
     """Tail a container instance log. """
     logs_client = cf_container_logs(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
@@ -186,7 +186,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, streamin
     if container_name is None:
         container_name = container_group.containers[0].name
 
-    if not streaming:
+    if not follow:
         log = logs_client.list(resource_group_name, name, container_name)
         return log.content
 
