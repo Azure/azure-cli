@@ -6,6 +6,7 @@ Release History
 2.0.22
 ++++++
 * `application-gateway create`: `--cert-password` protected using secureString.
+* `application-gateway update`: Fix issue where `--sku` erroneously applied a default value.
 * `vpn-connection create`: `--shared-key` and `--authorization-key` protected using secureString.
 * `asg create`: Fix missing client issue.
 * `dns zone export`: Fix issue with exported names. Add `--file-name/-f` parameter.
