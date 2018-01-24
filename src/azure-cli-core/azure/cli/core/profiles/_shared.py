@@ -230,7 +230,7 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
     api_version_obj = get_api_version(api_profile, resource_type, as_sdk_profile=True) \
         if isinstance(resource_type, ResourceType) else api_profile
     if isinstance(api_version_obj, SDKProfile):
-        api_version_obj = getattr(api_version_obj.profile, operation_group or '', api_version_obj.default_api_version)
+        api_version_obj = api_version_obj.profile.get(operation_group or '', api_version_obj.default_api_version)
     return _validate_api_version(api_version_obj, min_api, max_api)
 
 

@@ -2281,7 +2281,8 @@ class VMSSPriorityTesting(ScenarioTest):
             'vmss': 'vmss123'
         })
         self.cmd('vmss create -g {rg} -n {vmss} --admin-username clitester --admin-password PasswordPassword1! --image debian --priority {priority}')
-        self.cmd('vmss show -g {rg} -n {vmss}', checks=self.check('virtualMachineProfile.priority', self.kwargs['priority']))
+        self.cmd('vmss show -g {rg} -n {vmss}',
+                 checks=self.check('virtualMachineProfile.priority', '{priority}'))
 
 
 class VMLBIntegrationTesting(ScenarioTest):

@@ -272,7 +272,7 @@ class AzCommandsLoader(CLICommandsLoader):
     def get_api_version(self, resource_type=None, operation_group=None):
         from azure.cli.core.profiles import get_api_version
         resource_type = resource_type or self._get_resource_type()
-        version =  get_api_version(self.cli_ctx, resource_type)
+        version = get_api_version(self.cli_ctx, resource_type)
         if isinstance(version, str):
             return version
         else:
@@ -281,7 +281,7 @@ class AzCommandsLoader(CLICommandsLoader):
                 return version
             else:
                 from azure.cli.core.profiles._shared import APIVersionException
-                raise APIVersionException()
+                raise APIVersionException(operation_group, self.cli_ctx.cloud.profile)
 
     def supported_api_version(self, resource_type=None, min_api=None, max_api=None, operation_group=None):
         from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE

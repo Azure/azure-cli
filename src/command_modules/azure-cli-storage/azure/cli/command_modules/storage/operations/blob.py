@@ -96,6 +96,7 @@ def storage_blob_copy_batch(cmd, client, source_client,
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False,
                                 progress_callback=None):
     def _download_blob(blob_service, container, destination_folder, blob_name):
+        import os
         # TODO: try catch IO exception
         destination_path = os.path.join(destination_folder, blob_name)
         destination_folder = os.path.dirname(destination_path)
