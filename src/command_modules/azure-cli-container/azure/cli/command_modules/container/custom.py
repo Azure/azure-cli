@@ -180,9 +180,11 @@ def container_logs(cmd, resource_group_name, name, container_name=None, streamin
     """Tail a container instance log. """
     logs_client = cf_container_logs(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
+    container_group = container_group_client.get(resource_group_name, name)
 
+    # If container name is not present, use the first container.
     if container_name is None:
-        container_name = _find_first_container(container_group_client, resource_group_name, name).name
+        container_name = container_group.containers[0].name
 
     if not streaming:
         log = logs_client.list(resource_group_name, name, container_name)
@@ -193,15 +195,17 @@ def container_logs(cmd, resource_group_name, name, container_name=None, streamin
         terminate_condition_args=(container_group_client, resource_group_name, name, container_name),
         shupdown_grace_period=5,
         stream_target=_stream_logs,
-        stream_args=(logs_client, resource_group_name, name, container_name))
+        stream_args=(logs_client, resource_group_name, name, container_name, container_group.restart_policy))
 
 
 def attach_to_container(cmd, resource_group_name, name, container_name=None):
     logs_client = cf_container_logs(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
+    container_group = container_group_client.get(resource_group_name, name)
 
+    # If container name is not present, use the first container.
     if container_name is None:
-        container_name = _find_first_container(container_group_client, resource_group_name, name).name
+        container_name = container_group.containers[0].name
 
     _start_streaming(
         terminate_condition=_is_container_terminated,
@@ -221,8 +225,8 @@ def _start_streaming(terminate_condition, terminate_condition_args, shupdown_gra
         t.daemon = True
         t.start()
 
-        while not terminate_condition(*terminate_condition_args):
-            time.sleep(15)
+        while not terminate_condition(*terminate_condition_args) and t.is_alive():
+            time.sleep(10)
 
         time.sleep(shupdown_grace_period)
 
@@ -231,12 +235,17 @@ def _start_streaming(terminate_condition, terminate_condition_args, shupdown_gra
 
 
 # Stream logs for a container.
-def _stream_logs(client, resource_group_name, name, container_name):
+def _stream_logs(client, resource_group_name, name, container_name, restart_policy):
     lastOutputLines = 0
     while True:
         log = client.list(resource_group_name, name, container_name)
         lines = log.content.split('\n')
         currentOutputLines = len(lines)
+
+        # Should only happen when the container restarts.
+        if currentOutputLines < lastOutputLines and restart_policy == 'Always':
+            print("\033[31mWarning: container '{}' got restarted; the tail of the current log might be missing. Exiting...\033[30m".format(container_name))
+            break
 
         _move_console_cursor_up(lastOutputLines)
         print(log.content)
@@ -251,7 +260,7 @@ def _stream_container_events_and_logs(container_group_client, logs_client, resou
     lastContainerState = None
 
     while True:
-        _, container = _find_container(container_group_client, resource_group_name, name, container_name)
+        container_group, container = _find_container(container_group_client, resource_group_name, name, container_name)
 
         container_state = 'Unknown'
         if container.instance_view and container.instance_view.current_state and container.instance_view.current_state.state:
@@ -276,7 +285,7 @@ def _stream_container_events_and_logs(container_group_client, logs_client, resou
 
         time.sleep(5)
 
-    _stream_logs(logs_client, resource_group_name, name, container_name)
+    _stream_logs(logs_client, resource_group_name, name, container_name, container_group.restart_policy)
 
 
 # Check if a container should be considered terminated.
@@ -298,12 +307,6 @@ def _is_container_terminated(client, resource_group_name, name, container_name):
         return True
 
     return False
-
-
-# Find the first container in the container group.
-def _find_first_container(client, resource_group_name, name):
-    container_group = client.get(resource_group_name, name)
-    return container_group.containers[0]
 
 
 # Find a container in a container group.
