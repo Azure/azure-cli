@@ -8,6 +8,7 @@ from __future__ import print_function
 from collections import OrderedDict
 import re
 from subprocess import check_output, STDOUT, CalledProcessError
+import sys
 
 def mean(data):
     """Return the sample arithmetic mean of data."""
@@ -38,11 +39,12 @@ high_threshold = 25
 high_modules = ['network', 'vm', 'batch']
 lo_threshold = 10
 
-results = OrderedDict()
+results = {}
 try:
     # Time the module loading X times
     for _ in range(0, num_runs):
-        lines = check_output('az -h --debug'.split(), shell=True, stderr=STDOUT)
+        use_shell = sys.platform.lower() in ['windows', 'win32']
+        lines = check_output('az -h --debug'.split(), shell=use_shell, stderr=STDOUT)
         try:
             lines = lines.decode().splitlines()
         except:
@@ -59,7 +61,9 @@ try:
 
     failed_mods = []
     print('{:<20} {:>12} {:>12}'.format('Module', 'Average', 'Stdev'))
-    for mod, val in results.items():
+    mods = sorted(results.keys())
+    for mod in mods:
+        val = results[mod]
         mean_val = mean(val)
         stdev_val = pstdev(val)
         print('{:<20} {:>12.0f} {:>12.0f}'.format(mod, mean_val, stdev_val))
