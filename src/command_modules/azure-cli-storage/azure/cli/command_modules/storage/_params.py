@@ -81,9 +81,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('if_match')
         c.argument('if_none_match')
 
-    for item in ['check-name', 'delete', 'list', 'show', 'show-usage', 'update', 'keys']:
+    for item in ['delete', 'list', 'show', 'show-usage', 'update', 'keys']:
         with self.argument_context('storage account {}'.format(item)) as c:
             c.argument('account_name', acct_name_type, options_list=['--name', '-n'])
+
+    with self.argument_context('storage account check-name') as c:
+        c.argument('name', options_list=['--name', '-n'])
 
     with self.argument_context('storage account create') as c:
         t_account_type, t_sku_name, t_kind = self.get_models('AccountType', 'SkuName', 'Kind',
