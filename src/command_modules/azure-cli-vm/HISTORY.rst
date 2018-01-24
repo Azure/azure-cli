@@ -5,6 +5,7 @@ Release History
 
 2.0.25
 ++++++
+* vm image: support accept market terms to use vm images
 * vm/vmss create: ensure commands can run under proxy with unsigned certificates.
 * vmss:(PREVIEW) support low priority
 * `vm/vmss create` - `--admin-password` updated to type secureString.

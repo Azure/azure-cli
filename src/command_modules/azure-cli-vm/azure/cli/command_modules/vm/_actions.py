@@ -173,3 +173,15 @@ def _create_image_instance(publisher, offer, sku, version):
         'sku': sku,
         'version': version
     }
+
+
+def _get_latest_image_version(cli_ctx, location, publisher, offer, sku):
+    top_one = _compute_client_factory(cli_ctx).virtual_machine_images.list(location,
+                                                                           publisher,
+                                                                           offer,
+                                                                           sku,
+                                                                           top=1,
+                                                                           orderby='name desc')
+    if not top_one:
+        raise CLIError("Can't resolve the vesion of '{}:{}:{}'".format(publisher, offer, sku))
+    return top_one[0].name

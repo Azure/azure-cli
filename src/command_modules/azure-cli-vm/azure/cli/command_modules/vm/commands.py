@@ -227,11 +227,12 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vm_extension_images')
 
     with self.command_group('vm image', compute_vm_image_sdk) as g:
-        g.command('show', 'get', exception_handler=empty_on_404)
         g.command('list-offers', 'list_offers')
         g.command('list-publishers', 'list_publishers')
         g.command('list-skus', 'list_skus')
         g.custom_command('list', 'list_vm_images')
+        g.custom_command('accept-terms', 'accept_market_ordering_terms')
+        g.custom_command('show', 'show_vm_image', exception_handler=empty_on_404)
 
     with self.command_group('vm nic', compute_vm_sdk) as g:
         g.custom_command('add', 'add_vm_nic')
