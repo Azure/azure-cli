@@ -33,7 +33,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-core',
     'six',
-    'azure-mgmt-eventgrid==0.3.0',
+    'azure-mgmt-eventgrid==0.4.0',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
