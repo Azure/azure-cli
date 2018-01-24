@@ -10,6 +10,14 @@ import re
 from subprocess import check_output, STDOUT, CalledProcessError
 import sys
 
+
+NUM_RUNS = 3
+
+HIGH_THRESHOLD = 35
+HIGH_MODULES = ['network', 'vm', 'batch', 'storage']
+LO_THRESHOLD = 10
+
+
 def init(root):
     parser = root.add_parser('module-load-perf', help='Verify that modules load within an acceptable timeframe.')
     parser.set_defaults(func=run_verifications)
@@ -39,16 +47,11 @@ def pstdev(data):
 
 def run_verifications(args):
     regex = r"[^']*'([^']*)'[\D]*([\d\.]*)"
-    num_runs = 3
-
-    high_threshold = 25
-    high_modules = ['network', 'vm', 'batch']
-    lo_threshold = 10
 
     results = {}
     try:
         # Time the module loading X times
-        for _ in range(0, num_runs):
+        for _ in range(0, NUM_RUNS):
             use_shell = sys.platform.lower() in ['windows', 'win32']
             lines = check_output('az -h --debug'.split(), shell=use_shell, stderr=STDOUT)
             try:
@@ -73,7 +76,7 @@ def run_verifications(args):
             mean_val = mean(val)
             stdev_val = pstdev(val)
             print('{:<20} {:>12.0f} {:>12.0f}'.format(mod, mean_val, stdev_val))
-            threshold = high_threshold if mod in high_modules else lo_threshold
+            threshold = HIGH_THRESHOLD if mod in HIGH_MODULES else LO_THRESHOLD
             if mean_val > threshold:
                 failed_mods.append({
                     'name': mod,
