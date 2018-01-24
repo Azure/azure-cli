@@ -7,6 +7,7 @@ Release History
 ++++++
 * `storage account update`: do not create new networkRuleSet if "default_action" arg is not provided.
 * Added progress reporting for all upload/download commands, including batch.
+* Added 'snapshot' column to table output for blob list/show.
 
 2.0.23
 ++++++

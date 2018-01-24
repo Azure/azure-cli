@@ -56,7 +56,8 @@ def transform_blob_output(result):
         ('Blob Tier', 'properties.blobTier'),
         ('Length', 'properties.contentLength'),
         ('Content Type', 'properties.contentSettings.contentType'),
-        ('Last Modified', 'properties.lastModified')
+        ('Last Modified', 'properties.lastModified'),
+        ('Snapshot', 'snapshot')
     ])
 
 
