@@ -8,9 +8,6 @@ from argcomplete.completers import FilesCompleter
 
 from knack.arguments import CLIArgumentType
 
-from azure.mgmt.compute.models import CachingTypes, UpgradeMode
-from azure.mgmt.storage.models import SkuName
-
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
@@ -24,27 +21,26 @@ from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_asg_names_or_ids)
 
 
-# REUSABLE ARGUMENT DEFINITIONS
-
-name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
-multi_ids_type = CLIArgumentType(nargs='+')
-existing_vm_name = CLIArgumentType(overrides=name_arg_type,
-                                   configured_default='vm',
-                                   help="The name of the Virtual Machine. You can configure the default using `az configure --defaults vm=<name>`",
-                                   completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
-existing_disk_name = CLIArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
-existing_snapshot_name = CLIArgumentType(overrides=name_arg_type, help='The name of the snapshot', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'), id_part='name')
-existing_image_name = CLIArgumentType(overrides=name_arg_type, help='The name of the custom image', completer=get_resource_name_completion_list('Microsoft.Compute/images'), id_part='name')
-vmss_name_type = CLIArgumentType(name_arg_type,
-                                 configured_default='vmss',
-                                 completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
-                                 help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
-                                 id_part='name')
-disk_sku = CLIArgumentType(help='Underlying storage SKU.', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
-
-
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
+    from azure.mgmt.compute.models import CachingTypes, UpgradeMode
+    from azure.mgmt.storage.models import SkuName
+
+    # REUSABLE ARGUMENT DEFINITIONS
+    name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
+    multi_ids_type = CLIArgumentType(nargs='+')
+    existing_vm_name = CLIArgumentType(overrides=name_arg_type,
+                                       configured_default='vm',
+                                       help="The name of the Virtual Machine. You can configure the default using `az configure --defaults vm=<name>`",
+                                       completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines'), id_part='name')
+    existing_disk_name = CLIArgumentType(overrides=name_arg_type, help='The name of the managed disk', completer=get_resource_name_completion_list('Microsoft.Compute/disks'), id_part='name')
+    existing_snapshot_name = CLIArgumentType(overrides=name_arg_type, help='The name of the snapshot', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'), id_part='name')
+    vmss_name_type = CLIArgumentType(name_arg_type,
+                                     configured_default='vmss',
+                                     completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'),
+                                     help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
+                                     id_part='name')
+    disk_sku = CLIArgumentType(help='Underlying storage SKU.', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']))
 
     # special case for `network nic scale-set list` command alias
     with self.argument_context('network nic scale-set list') as c:
