@@ -552,7 +552,7 @@ helps['resource link update'] = """
 helps['resource link delete'] = """
     type: command
     short-summary: Delete a link between resources.
-    long-summary: A link-id is of the form /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/{provider-namespace}/{resource-type}/{resource-name}/Microsoft.Resources/links/{link-name}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
 """
 helps['resource link list'] = """
     type: command

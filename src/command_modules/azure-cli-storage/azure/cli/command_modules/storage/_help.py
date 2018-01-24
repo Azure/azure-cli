@@ -116,8 +116,6 @@ helps['storage account delete'] = """
     examples:
         - name: Delete a storage account using a resource ID.
           text: az storage account delete --ids /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Storage/storageAccounts/{StorageAccount}
-        - name: Delete a storage account using an account name and resource group.
-          text: az storage account delete -n MyStorageAccount -g MyResourceGroup
 """
 
 helps['storage account show-connection-string'] = """

@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.17
+++++++
+* Updated helpfile
+
 0.1.16
 ++++++
 * Added support for device provisioning service
