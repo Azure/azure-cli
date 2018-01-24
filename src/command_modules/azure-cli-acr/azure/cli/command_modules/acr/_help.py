@@ -179,9 +179,9 @@ helps['acr repository delete'] = """
         - name: Delete the manifest referenced by a tag. This also deletes any associated layer data and all other tags referencing the manifest.
           text:
             az acr repository delete -n MyRegistry --repository MyRepository --tag MyTag --manifest
-        - name: Delete a manifest from a repository. This also deletes any associated layer data and all tags referencing the manifest.
+        - name: Delete a manifest using sha256 digest from a repository. This also deletes any associated layer data and all tags referencing the manifest.
           text:
-            az acr repository delete -n MyRegistry --repository MyRepository --manifest MyManifest
+            az acr repository delete -n MyRegistry --repository MyRepository --manifest sha256:abc123
 """
 
 helps['acr webhook list'] = """
