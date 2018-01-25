@@ -170,14 +170,8 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer()
     def test_metrics_operations(self, resource_group, storage_account_info):
         self.storage_cmd('storage metrics show', storage_account_info) \
-            .assert_with_checks(JMESPathCheck('file.hour.enabled', True),
+            .assert_with_checks(JMESPathCheck('file.hour.enabled', False),
                                 JMESPathCheck('file.minute.enabled', False))
-
-        self.storage_cmd('storage metrics update --services f --hour false --retention 1 ', storage_account_info)
-
-        self.storage_cmd('storage metrics show', storage_account_info).assert_with_checks(
-            JMESPathCheck('file.hour.enabled', False),
-            JMESPathCheck('file.minute.enabled', False))
 
         self.storage_cmd('storage metrics update --services f --api true --hour true --minute true --retention 1 ',
                          storage_account_info)
