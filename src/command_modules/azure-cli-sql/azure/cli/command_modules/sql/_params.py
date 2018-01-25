@@ -223,25 +223,6 @@ def load_arguments(self, _):
                    options_list=['--service-objective'],
                    help='Name of the service objective for the new database.')
 
-    with self.argument_context('sql db create-replica') as c:
-        _configure_db_create_params(c, Engine.db, CreateMode.online_secondary)
-
-        c.argument('elastic_pool_name',
-                   help='Name of the elastic pool to create the new database in.')
-
-        c.argument('requested_service_objective_name',
-                   options_list=['--service-objective'],
-                   help='Name of the service objective for the new secondary database.')
-
-        c.argument('secondary_resource_group_name',
-                   options_list=['--secondary-resource-group'],
-                   help='Name of the resource group to create the new secondary database in.'
-                   ' If unspecified, defaults to the origin resource group.')
-
-        c.argument('secondary_server_name',
-                   options_list=['--secondary-server'],
-                   help='Name of the server to create the new secondary database in.')
-
     with self.argument_context('sql db restore') as c:
         _configure_db_create_params(c, Engine.db, CreateMode.point_in_time_restore)
 

@@ -218,6 +218,8 @@ class AzCommandsLoader(CLICommandsLoader):
         self.min_profile = min_profile
         self.max_profile = max_profile
         self.module_kwargs = kwargs
+        self.command_name = None
+        self.skip_applicability = False
         self._command_group_cls = command_group_cls or AzCommandGroup
         self._argument_context_cls = argument_context_cls or AzArgumentContext
 

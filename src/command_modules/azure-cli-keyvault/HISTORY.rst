@@ -5,7 +5,7 @@ Release History
 
 2.0.17
 ++++++
-* Performance fixes.
+* Minor fixes.
 
 2.0.16
 ++++++

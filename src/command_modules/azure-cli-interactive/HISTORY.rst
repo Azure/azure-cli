@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.15
+++++++
+* Fixed issue where command option completions no longer appeared.
+
 0.3.14
 ++++++
 * Clean up unused test files
