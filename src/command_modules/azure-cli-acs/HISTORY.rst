@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.26
+++++++
+* `aks create` VM node size default changed from "Standard_D1_v2" to "Standard_DS1_v2"
+
 2.0.25
 ++++++
 * clarify `--disable-browser` argument
