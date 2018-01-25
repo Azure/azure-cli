@@ -618,7 +618,7 @@ for record in dns_record_types:
             az network dns record-set {2} show -g MyResourceGroup -n MyRecordSet -z www.mysite.com
     """.format(record.upper(), indef_article, record)
 
-for record in dns_record_types:
+for record in [r for r in dns_record_types if r != 'cname']:
     indef_article = 'an' if record.startswith('a') else 'a'
 
     helps['network dns record-set {} update'.format(record)] = """
@@ -2200,7 +2200,7 @@ helps['network watcher flow-log show'] = """
 
 # endregion
 
-helps['network vnet list-service-endpoints'] = """
+helps['network vnet list-endpoint-services'] = """
     type: command
     short-summary: List which services support VNET service tunneling for a given region.
 """

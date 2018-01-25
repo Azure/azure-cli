@@ -5,7 +5,7 @@ Release History
 
 0.1.1
 +++++
-* Performance fixes.
+* Minor fixes.
 
 0.1.0
 +++++

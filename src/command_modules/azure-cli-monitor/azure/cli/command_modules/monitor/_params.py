@@ -114,7 +114,7 @@ def load_arguments(self, _):
 
     # region Diagnostic
     with self.argument_context('monitor diagnostic-settings') as c:
-        c.argument('name', options_list=('-n', '--name'))
+        c.argument('name', options_list=('--name', '-n'))
 
     with self.argument_context('monitor diagnostic-settings show') as c:
         c.resource_parameter_context('resource_uri', required=True, arg_group='Target Resource')

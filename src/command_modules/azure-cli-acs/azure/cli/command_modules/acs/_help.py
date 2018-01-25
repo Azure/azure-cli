@@ -71,9 +71,14 @@ helps['acs dcos'] = """
     short-summary: Commands to manage a DC/OS-orchestrated Azure Container Service.
 """
 
-helps['acs install-cli'] = """
+helps['acs dcos install-cli'] = """
     type: command
-    short-summary: Download and install the DC/OS or Kubernetes command-line tool for a cluster.
+    short-summary: Download and install the DC/OS command-line tool for a cluster.
+"""
+
+helps['acs kubernetes install-cli'] = """
+    type: command
+    short-summary: Download and install the Kubernetes command-line tool for a cluster.
 """
 
 helps['acs kubernetes'] = """
