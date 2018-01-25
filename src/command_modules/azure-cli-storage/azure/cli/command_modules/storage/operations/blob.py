@@ -94,7 +94,7 @@ def storage_blob_copy_batch(cmd, client, source_client,
 
 # pylint: disable=unused-argument
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False,
-                                progress_callback=None):
+                                progress_callback=None, max_connections=2):
     def _download_blob(blob_service, container, destination_folder, blob_name):
         import os
         # TODO: try catch IO exception
@@ -103,7 +103,7 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         if not os.path.exists(destination_folder):
             mkdir_p(destination_folder)
 
-        blob = blob_service.get_blob_to_path(container, blob_name, destination_path,
+        blob = blob_service.get_blob_to_path(container, blob_name, destination_path, max_connections=max_connections,
                                              progress_callback=progress_callback)
         return blob.name
 
