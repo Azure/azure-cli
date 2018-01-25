@@ -170,14 +170,14 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
 
         # test sql server firewall-rule create
         fw_rule_1 = self.cmd('sql server firewall-rule create --name {} -g {} --server {} '
-                 '--start-ip-address {} --end-ip-address {}'
-                 .format(firewall_rule_1, rg, server,
-                         start_ip_address_1, end_ip_address_1),
-                 checks=[
-                     JMESPathCheck('name', firewall_rule_1),
-                     JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('startIpAddress', start_ip_address_1),
-                     JMESPathCheck('endIpAddress', end_ip_address_1)]).get_output_in_json()
+                             '--start-ip-address {} --end-ip-address {}'
+                             .format(firewall_rule_1, rg, server,
+                                     start_ip_address_1, end_ip_address_1),
+                             checks=[
+                                 JMESPathCheck('name', firewall_rule_1),
+                                 JMESPathCheck('resourceGroup', rg),
+                                 JMESPathCheck('startIpAddress', start_ip_address_1),
+                                 JMESPathCheck('endIpAddress', end_ip_address_1)]).get_output_in_json()
 
         # test sql server firewall-rule show by group/server/name
         self.cmd('sql server firewall-rule show --name {} -g {} --server {}'
@@ -1067,20 +1067,20 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
 
         # test sql elastic-pool commands
         elastic_pool_1 = self.cmd('sql elastic-pool create -g {} --server {} --name {} '
-                 '--dtu {} --edition {} --db-dtu-min {} --db-dtu-max {} '
-                 '--storage {}'
-                 .format(rg, server, self.pool_name, dtu,
-                         edition, db_dtu_min, db_dtu_max, storage),
-                 checks=[
-                     JMESPathCheck('resourceGroup', rg),
-                     JMESPathCheck('name', self.pool_name),
-                     JMESPathCheck('location', loc_display),
-                     JMESPathCheck('state', 'Ready'),
-                     JMESPathCheck('dtu', dtu),
-                     JMESPathCheck('databaseDtuMin', db_dtu_min),
-                     JMESPathCheck('databaseDtuMax', db_dtu_max),
-                     JMESPathCheck('edition', edition),
-                     JMESPathCheck('storageMb', storage_mb)]).get_output_in_json()
+                                  '--dtu {} --edition {} --db-dtu-min {} --db-dtu-max {} '
+                                  '--storage {}'
+                                  .format(rg, server, self.pool_name, dtu,
+                                          edition, db_dtu_min, db_dtu_max, storage),
+                                  checks=[
+                                      JMESPathCheck('resourceGroup', rg),
+                                      JMESPathCheck('name', self.pool_name),
+                                      JMESPathCheck('location', loc_display),
+                                      JMESPathCheck('state', 'Ready'),
+                                      JMESPathCheck('dtu', dtu),
+                                      JMESPathCheck('databaseDtuMin', db_dtu_min),
+                                      JMESPathCheck('databaseDtuMax', db_dtu_max),
+                                      JMESPathCheck('edition', edition),
+                                      JMESPathCheck('storageMb', storage_mb)]).get_output_in_json()
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
                  .format(rg, server, self.pool_name),
