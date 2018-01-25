@@ -62,23 +62,23 @@ def create_container(client,
 
     ports = ports or [80]
 
-    container_resource_requirements = create_resource_requirements(cpu=cpu, memory=memory)
+    container_resource_requirements = _create_resource_requirements(cpu=cpu, memory=memory)
 
-    image_registry_credentials = create_image_registry_credentials(registry_login_server=registry_login_server,
-                                                                   registry_username=registry_username,
-                                                                   registry_password=registry_password,
-                                                                   image=image)
+    image_registry_credentials = _create_image_registry_credentials(registry_login_server=registry_login_server,
+                                                                    registry_username=registry_username,
+                                                                    registry_password=registry_password,
+                                                                    image=image)
 
     command = shlex.split(command_line) if command_line else None
 
-    azure_file_volume = create_azure_file_volume(azure_file_volume_share_name=azure_file_volume_share_name,
-                                                 azure_file_volume_account_name=azure_file_volume_account_name,
-                                                 azure_file_volume_account_key=azure_file_volume_account_key)
+    azure_file_volume = _create_azure_file_volume(azure_file_volume_share_name=azure_file_volume_share_name,
+                                                  azure_file_volume_account_name=azure_file_volume_account_name,
+                                                  azure_file_volume_account_key=azure_file_volume_account_key)
 
-    azure_file_volume_mount = create_azure_file_volume_mount(azure_file_volume=azure_file_volume,
-                                                             azure_file_volume_mount_path=azure_file_volume_mount_path)
+    azure_file_volume_mount = _create_azure_file_volume_mount(azure_file_volume=azure_file_volume,
+                                                              azure_file_volume_mount_path=azure_file_volume_mount_path)
 
-    cgroup_ip_address = create_ip_address(ip_address, ports)
+    cgroup_ip_address = _create_ip_address(ip_address, ports)
 
     container = Container(name=name,
                           image=image,
@@ -100,14 +100,14 @@ def create_container(client,
 
 
 # pylint: disable=inconsistent-return-statements
-def create_resource_requirements(cpu, memory):
+def _create_resource_requirements(cpu, memory):
     """Create resource requirements. """
     if cpu or memory:
         container_resource_requests = ResourceRequests(memory_in_gb=memory, cpu=cpu)
         return ResourceRequirements(requests=container_resource_requests)
 
 
-def create_image_registry_credentials(registry_login_server, registry_username, registry_password, image):
+def _create_image_registry_credentials(registry_login_server, registry_username, registry_password, image):
     """Create image registry credentials. """
     image_registry_credentials = None
     if registry_login_server:
@@ -140,7 +140,7 @@ def create_image_registry_credentials(registry_login_server, registry_username, 
     return image_registry_credentials
 
 
-def create_azure_file_volume(azure_file_volume_share_name, azure_file_volume_account_name, azure_file_volume_account_key):
+def _create_azure_file_volume(azure_file_volume_share_name, azure_file_volume_account_name, azure_file_volume_account_key):
     """Create Azure File volume. """
     azure_file_volume = None
     if azure_file_volume_share_name:
@@ -160,7 +160,7 @@ def create_azure_file_volume(azure_file_volume_share_name, azure_file_volume_acc
 
 
 # pylint: disable=inconsistent-return-statements
-def create_azure_file_volume_mount(azure_file_volume, azure_file_volume_mount_path):
+def _create_azure_file_volume_mount(azure_file_volume, azure_file_volume_mount_path):
     """Create Azure File volume mount. """
     if azure_file_volume_mount_path:
         if not azure_file_volume:
@@ -170,7 +170,7 @@ def create_azure_file_volume_mount(azure_file_volume, azure_file_volume_mount_pa
 
 
 # pylint: disable=inconsistent-return-statements
-def create_ip_address(ip_address, ports):
+def _create_ip_address(ip_address, ports):
     """Create IP address. """
     if ip_address and ip_address.lower() == 'public':
         return IpAddress(ports=[Port(protocol=ContainerGroupNetworkProtocol.tcp, port=p) for p in ports])
@@ -200,6 +200,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 
 
 def attach_to_container(cmd, resource_group_name, name, container_name=None):
+    """Attach to a container. """
     logs_client = cf_container_logs(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
     container_group = container_group_client.get(resource_group_name, name)
@@ -216,8 +217,8 @@ def attach_to_container(cmd, resource_group_name, name, container_name=None):
         stream_args=(container_group_client, logs_client, resource_group_name, name, container_name))
 
 
-# Start streaming.
 def _start_streaming(terminate_condition, terminate_condition_args, shupdown_grace_period, stream_target, stream_args):
+    """Start streaming for the stream target. """
     import colorama
     colorama.init()
 
@@ -235,8 +236,8 @@ def _start_streaming(terminate_condition, terminate_condition_args, shupdown_gra
         colorama.deinit()
 
 
-# Stream logs for a container.
 def _stream_logs(client, resource_group_name, name, container_name, restart_policy):
+    """Stream logs for a container. """
     lastOutputLines = 0
     while True:
         log = client.list(resource_group_name, name, container_name)
@@ -255,8 +256,8 @@ def _stream_logs(client, resource_group_name, name, container_name, restart_poli
         time.sleep(2)
 
 
-# Stream container events and logs.
 def _stream_container_events_and_logs(container_group_client, logs_client, resource_group_name, name, container_name):
+    """Stream container events and logs. """
     lastOutputLines = 0
     lastContainerState = None
 
@@ -289,8 +290,8 @@ def _stream_container_events_and_logs(container_group_client, logs_client, resou
     _stream_logs(logs_client, resource_group_name, name, container_name, container_group.restart_policy)
 
 
-# Check if a container should be considered terminated.
 def _is_container_terminated(client, resource_group_name, name, container_name):
+    """Check if a container should be considered terminated. """
     container_group, container = _find_container(client, resource_group_name, name, container_name)
 
     # If a container group is terminated, assume the container is also terminated.
@@ -310,8 +311,8 @@ def _is_container_terminated(client, resource_group_name, name, container_name):
     return False
 
 
-# Find a container in a container group.
 def _find_container(client, resource_group_name, name, container_name):
+    """Find a container in a container group. """
     container_group = client.get(resource_group_name, name)
     containers = [c for c in container_group.containers if c.name == container_name]
 
@@ -321,8 +322,8 @@ def _find_container(client, resource_group_name, name, container_name):
     return container_group, containers[0]
 
 
-# Move console cursor up.
 def _move_console_cursor_up(lines):
+    """Move console cursor up. """
     if lines > 0:
         # Use stdout.write to support Python 2
         sys.stdout.write('\033[{}A\033[K\033[J'.format(lines))

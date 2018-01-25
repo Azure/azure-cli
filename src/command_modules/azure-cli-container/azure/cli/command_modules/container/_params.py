@@ -59,7 +59,7 @@ def load_arguments(self, _):
 
     with self.argument_context('container logs') as c:
         c.argument('container_name', help='The container name to tail the logs. If omitted, the first container in the container group will be chosen')
-        c.argument('follow', help='Wether or not to stream the tailing logs', arg_type=get_three_state_flag(return_label=True))
+        c.argument('follow', help='Indicate to stream the tailing logs', arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('container attach') as c:
         c.argument('container_name', help='The container to attach to. If omitted, the first container in the container group will be chosen')
