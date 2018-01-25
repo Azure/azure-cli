@@ -8,7 +8,6 @@ from __future__ import print_function
 import getpass
 import json
 import os
-import re
 
 try:
     from urllib.parse import urlparse
@@ -20,11 +19,8 @@ from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-err
 from knack.log import get_logger
 from knack.util import CLIError
 
-from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
-
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
 from azure.cli.core.commands.validators import validate_file_or_dict
-from azure.keyvault import KeyVaultId
 
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
@@ -33,7 +29,8 @@ from azure.cli.core.profiles import ResourceType
 from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
 
-from ._actions import load_images_from_aliases_doc, load_extension_images_thru_services, load_images_thru_services
+from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
+                       load_images_thru_services, _get_latest_image_version)
 from ._client_factory import _compute_client_factory, cf_public_ip_addresses
 
 logger = get_logger(__name__)
@@ -224,6 +221,7 @@ def _normalize_extension_version(cli_ctx, publisher, vm_extension_name, version,
 
 def _parse_rg_name(strid):
     '''From an ID, extract the contained (resource group, name) tuple.'''
+    from msrestazure.tools import parse_resource_id
     parts = parse_resource_id(strid)
     return (parts['resource_group'], parts['name'])
 
@@ -492,11 +490,13 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               zone=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
-    from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder, build_vm_resource,
+    from azure.cli.core.commands.arm import ArmTemplateBuilder
+    from azure.cli.command_modules.vm._template_builder import (build_vm_resource,
                                                                 build_storage_account_resource, build_nic_resource,
                                                                 build_vnet_resource, build_nsg_resource,
                                                                 build_public_ip_resource, StorageProfile,
                                                                 build_msi_role_assignment, build_vm_msi_extension)
+    from msrestazure.tools import resource_id, is_valid_resource_id
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     network_id_template = resource_id(
@@ -625,16 +625,21 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
     master_template.add_resource(vm_resource)
 
+    if admin_password:
+        master_template.add_secure_parameter('adminPassword', admin_password)
+
     template = master_template.build()
+    parameters = master_template.build_parameters()
 
     # deploy ARM template
     deployment_name = 'vm_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
+        log_pprint_template(parameters)
         return client.validate(resource_group_name, deployment_name, properties)
 
     # creates the VM deployment
@@ -662,6 +667,7 @@ def get_vm(cmd, resource_group_name, vm_name, expand=None):
 
 
 def get_vm_details(cmd, resource_group_name, vm_name):
+    from msrestazure.tools import parse_resource_id
     result = get_instance_view(cmd, resource_group_name, vm_name)
     network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
     public_ips = []
@@ -769,6 +775,8 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
 
 def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_security_group_name=None,
                  apply_to_subnet=False):
+    from msrestazure.tools import parse_resource_id
+
     network = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
 
     vm = get_vm(cmd, resource_group_name, vm_name)
@@ -857,6 +865,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, no_wait=False, **kwargs):
+    from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     vm = kwargs['parameters']
     if os_disk is not None:
         if is_valid_resource_id(os_disk):
@@ -910,7 +919,8 @@ def create_av_set(cmd, availability_set_name, resource_group_name,
                   location=None, no_wait=False,
                   unmanaged=False, tags=None, validate=False):
     from azure.cli.core.util import random_string
-    from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder, build_av_set_resource)
+    from azure.cli.core.commands.arm import ArmTemplateBuilder
+    from azure.cli.command_modules.vm._template_builder import build_av_set_resource
 
     tags = tags or {}
 
@@ -992,6 +1002,7 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
 
 
 def get_boot_log(cmd, resource_group_name, vm_name):
+    import re
     import sys
     BlockBlobService = cmd.get_sdk('blob.blockblobservice#BlockBlobService', resource_type=ResourceType.DATA_STORAGE)
 
@@ -1094,6 +1105,7 @@ def show_default_diagnostics_configuration(is_windows_os=False):
 def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk,
                              new=False, sku=None, size_gb=None, lun=None, caching=None):
     '''attach a managed disk'''
+    from msrestazure.tools import parse_resource_id
     vm = get_vm(cmd, resource_group_name, vm_name)
     DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
         'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
@@ -1210,11 +1222,52 @@ def list_vm_images(cmd, image_location=None, publisher_name=None, offer=None, sk
     for i in all_images:
         i['urn'] = ':'.join([i['publisher'], i['offer'], i['sku'], i['version']])
     return all_images
+
+
+def show_vm_image(cmd, urn=None, publisher=None, offer=None, sku=None, version=None, location=None):
+    from azure.cli.core.commands.parameters import get_one_of_subscription_locations
+    usage_err = 'usage error: --plan STRING --offer STRING --publish STRING --version STRING | --urn STRING'
+    location = location or get_one_of_subscription_locations(cmd.cli_ctx)
+    if urn:
+        if any([publisher, offer, sku, version]):
+            raise CLIError(usage_err)
+        publisher, offer, sku, version = urn.split(":")
+        if version.lower() == 'latest':
+            version = _get_latest_image_version(cmd.cli_ctx, location, publisher, offer, sku)
+    elif not publisher or not offer or not sku or not version:
+        raise CLIError(usage_err)
+    client = _compute_client_factory(cmd.cli_ctx)
+    return client.virtual_machine_images.get(location, publisher, offer, sku, version)
+
+
+def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan=None):
+    from azure.mgmt.marketplaceordering import MarketplaceOrderingAgreements
+
+    usage_err = 'usage error: --plan STRING --offer STRING --publish STRING |--urn STRING'
+    if urn:
+        if any([publisher, offer, plan]):
+            raise CLIError(usage_err)
+        publisher, offer, _, _ = urn.split(':')
+        image = show_vm_image(cmd, urn)
+        if not image.plan:
+            logger.warning("Image '%s' has no terms to accept.", urn)
+            return
+        plan = image.plan.name
+    else:
+        if not publisher or not offer or not plan:
+            raise CLIError(usage_err)
+
+    market_place_client = get_mgmt_service_client(cmd.cli_ctx, MarketplaceOrderingAgreements)
+
+    term = market_place_client.marketplace_agreements.get(publisher, offer, plan)
+    term.accepted = True
+    return market_place_client.marketplace_agreements.create(publisher, offer, plan, term)
 # endregion
 
 
 # region VirtualMachines NetworkInterfaces (NICs)
 def show_vm_nic(cmd, resource_group_name, vm_name, nic):
+    from msrestazure.tools import parse_resource_id
     vm = get_vm(cmd, resource_group_name, vm_name)
     found = next(
         (n for n in vm.network_profile.network_interfaces if nic.lower() == n.id.lower()), None
@@ -1345,6 +1398,8 @@ def _get_vault_id_from_name(cli_ctx, client, vault_name):
 
 def get_vm_format_secret(cmd, secrets, certificate_store=None):
     from azure.mgmt.keyvault import KeyVaultManagementClient
+    from azure.keyvault import KeyVaultId
+    import re
     client = get_mgmt_service_client(cmd.cli_ctx, KeyVaultManagementClient).vaults
     grouped_secrets = {}
 
@@ -1378,6 +1433,7 @@ def get_vm_format_secret(cmd, secrets, certificate_store=None):
 
 
 def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, certificate_store=None):
+    from msrestazure.tools import parse_resource_id
     from ._vm_utils import create_keyvault_data_plane_client, get_key_vault_base_url
     VaultSecretGroup, SubResource, VaultCertificate = cmd.get_models(
         'VaultSecretGroup', 'SubResource', 'VaultCertificate')
@@ -1677,12 +1733,14 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 identity_role_id=None, zones=None, priority=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
-    from azure.cli.command_modules.vm._template_builder import (ArmTemplateBuilder, StorageProfile, build_vmss_resource,
+    from azure.cli.core.commands.arm import ArmTemplateBuilder
+    from azure.cli.command_modules.vm._template_builder import (StorageProfile, build_vmss_resource,
                                                                 build_vnet_resource, build_public_ip_resource,
                                                                 build_load_balancer_resource,
                                                                 build_vmss_storage_account_pool_resource,
                                                                 build_application_gateway_resource,
                                                                 build_msi_role_assignment, build_nsg_resource)
+    from msrestazure.tools import resource_id, is_valid_resource_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
     network_id_template = resource_id(
         subscription=subscription_id, resource_group=resource_group_name,
@@ -1913,17 +1971,23 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
     master_template.add_resource(vmss_resource)
     master_template.add_output('VMSS', vmss_name, 'Microsoft.Compute', 'virtualMachineScaleSets',
                                output_type='object')
+
+    if admin_password:
+        master_template.add_secure_parameter('adminPassword', admin_password)
+
     template = master_template.build()
+    parameters = master_template.build_parameters()
 
     # deploy ARM template
     deployment_name = 'vmss_deploy_' + random_string(32)
     client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
     DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
 
-    properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
+    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     if validate:
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
+        log_pprint_template(parameters)
         return client.validate(resource_group_name, deployment_name, properties, raw=no_wait)
 
     # creates the VMSS deployment
@@ -1999,6 +2063,7 @@ def list_vmss(cmd, resource_group_name=None):
 
 
 def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_name):
+    from msrestazure.tools import parse_resource_id
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
     # find the load balancer

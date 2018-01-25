@@ -14,15 +14,15 @@ from azure.cli.command_modules.monitor.operations.actions import (
     AlertAddAction, AlertRemoveAction, ConditionAction, period_type)
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
 from azure.cli.command_modules.monitor.validators import process_webhook_prop
-from azure.mgmt.monitor.models.monitor_management_client_enums import ConditionOperator, TimeAggregationOperator
-from azure.mgmt.monitor.models import LogProfileResource, RetentionPolicy
 
 
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
 
-    name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
+    from azure.mgmt.monitor.models.monitor_management_client_enums import ConditionOperator, TimeAggregationOperator
+    from azure.mgmt.monitor.models import LogProfileResource, RetentionPolicy
 
+    name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
 
     with self.argument_context('monitor') as c:
@@ -114,7 +114,7 @@ def load_arguments(self, _):
 
     # region Diagnostic
     with self.argument_context('monitor diagnostic-settings') as c:
-        c.argument('name', options_list=('-n', '--name'))
+        c.argument('name', options_list=('--name', '-n'))
 
     with self.argument_context('monitor diagnostic-settings show') as c:
         c.resource_parameter_context('resource_uri', required=True, arg_group='Target Resource')

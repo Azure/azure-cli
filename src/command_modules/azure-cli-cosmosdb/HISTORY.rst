@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.17
+++++++
+* Fix parameter description for failover policies.
+
 0.1.16
 ++++++
 * Update for CLI core changes.

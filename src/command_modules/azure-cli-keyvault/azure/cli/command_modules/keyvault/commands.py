@@ -38,7 +38,7 @@ def load_command_table(self, _):
 
     # Management Plane Commands
     with self.command_group('keyvault', kv_vaults_sdk, client_factory=keyvault_client_vaults_factory) as g:
-        g.custom_command('create', 'create_keyvault')
+        g.custom_command('create', 'create_keyvault', doc_string_source='azure.mgmt.keyvault.models#VaultProperties')
         g.custom_command('recover', 'recover_keyvault')
         g.custom_command('list', 'list_keyvault')
         g.command('show', 'get', exception_handler=empty_on_404)

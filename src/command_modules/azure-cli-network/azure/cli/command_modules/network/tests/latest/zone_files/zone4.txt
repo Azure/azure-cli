@@ -1,7 +1,7 @@
-; This zone file assumes the zone name is 'example.com'
+; This zone file assumes the zone name is 'zone4.com'
 ; Note, first record must be SOA.
 
-@ IN SOA ns1.example.com. hostmaster (
+@ IN SOA ns1.zone4.com. hostmaster (
 			2003080800 ; se = serial number
 			12h ; ref = refresh
 			15m ; ret = update retry
@@ -57,6 +57,6 @@ c1 10 IN A 11.1.2.3
 c1 20 IN A 11.2.3.3 ; Same record set as c1 above, should use TTL 10 and give warning
 c2 10 IN A 11.2.3.4 ; Will have TTL of 5 because of the below record...
 
-$ORIGIN c2.example.com.
+$ORIGIN c2.zone4.com.
 $TTL 5
 @ IN A 11.5.6.7 ; Same record set as c2 above, should use TTL 5 for entire record set and give warning

@@ -3,6 +3,15 @@
 Release History
 ===============
 
+2.0.24
+++++++
+* `storage account update`: do not create new networkRuleSet if "default_action" arg is not provided.
+* Added progress reporting for all upload/download commands, including batch.
+* `storage account check-name`: fixed bug preventing "-n" arg option.
+* Added 'snapshot' column to table output for blob list/show.
+* Fixed bugs with various parameters that needed to be parsed as ints, added test coverage.
+* Small fix with test, `storage blob service-properties show`: "hourMetrics.enabled" defaults to false.
+
 2.0.23
 ++++++
 * Minor fixes.

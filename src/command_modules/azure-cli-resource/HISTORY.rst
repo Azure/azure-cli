@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.22
+++++++
+* `deployment create/validate`: Fix bug where warning was incorrectly displayed when a template 'type' field contained
+                                uppercase values.
+
 2.0.21
 ++++++
 * Helpfile changes

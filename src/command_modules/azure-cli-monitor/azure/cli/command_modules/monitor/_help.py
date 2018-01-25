@@ -193,10 +193,6 @@ helps['monitor metrics list'] = """
 helps['monitor metrics list-definitions'] = """
     type: command
     short-summary: Lists the metric definitions for the resource.
-    parameters:
-        - name: --metric-names
-          type: string
-          short-summary: The list of the metrics definitions to be shown.
 """
 
 # endregion
@@ -219,9 +215,6 @@ helps['monitor diagnostic-settings create'] = """
             parameters:
                 - name: --name -n
                   short-summary: The name of the diagnostic settings.
-                - name: --resource-id
-                  type: string
-                  short-summary: The identifier of the resource.
                 - name: --resource-group -g
                   type: string
                   short-summary: Name of the resource group for the Log Analytics and Storage Account when the name of
@@ -229,9 +222,6 @@ helps['monitor diagnostic-settings create'] = """
                 - name: --logs
                   type: string
                   short-summary: JSON encoded list of logs settings. Use '@{file}' to load from a file.
-                - name: --event-hub-name
-                  type: string
-                  short-summary: The name of the event hub. If none is specified, the default event hub will be selected.
                 - name: --metrics
                   type: string
                   short-summary: JSON encoded list of metric settings. Use '@{file}' to load from a file.
@@ -247,8 +237,6 @@ helps['monitor diagnostic-settings create'] = """
                                  selected.
                 - name: --event-hub-rule
                   short-summary: The resource Id for the event hub authorization rule
-                - name: --tags
-                  short-summary: Space separated tags in 'key[=value]' format. Use the "" value to clear existing tags.
             """
 helps['monitor diagnostic-settings update'] = """
             type: command
@@ -400,8 +388,6 @@ helps['monitor activity-log alert update'] = """
           long-summary: >
             The possible values for the field are 'resourceId', 'category', 'caller', 'level', 'operationName', 'resourceGroup',
             'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties.'.
-        - name: --enable
-          short-summary: Enable or disable this activity log alert. Takes a boolean value of 'true' or 'false'.
     examples:
         - name: Update the condition
           text: >

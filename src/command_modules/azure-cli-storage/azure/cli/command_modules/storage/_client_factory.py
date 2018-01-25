@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.profiles import ResourceType, get_sdk
 
@@ -35,6 +33,7 @@ def generic_data_service_factory(cli_ctx, service, name=None, key=None, connecti
         message = str(val_exception)
         if message == _ERROR_STORAGE_MISSING_INFO:
             message = NO_CREDENTIALS_ERROR_MESSAGE
+        from knack.util import CLIError
         raise CLIError(message)
 
 

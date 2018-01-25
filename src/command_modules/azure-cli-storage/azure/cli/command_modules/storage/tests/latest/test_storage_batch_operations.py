@@ -16,7 +16,8 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         src_container = self.create_container(storage_account_info)
 
         # upload test files to storage account
-        self.storage_cmd('storage blob upload-batch -s "{}" -d {}', storage_account_info, test_dir, src_container)
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
+                         test_dir, src_container)
         self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
             JMESPathCheck('length(@)', 41))
 
@@ -54,7 +55,8 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
     def test_storage_blob_batch_upload_scenarios(self, test_dir, storage_account_info):
         # upload files without pattern
         container = self.create_container(storage_account_info)
-        self.storage_cmd('storage blob upload-batch -s "{}" -d {}', storage_account_info, test_dir, container)
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
+                         test_dir, container)
         self.storage_cmd('storage blob list -c {}', storage_account_info, container).assert_with_checks(
             JMESPathCheck('length(@)', 41))
 
@@ -87,7 +89,8 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
     def test_storage_file_batch_download_scenarios(self, test_dir, storage_account_info):
         src_share = self.create_share(storage_account_info)
 
-        self.storage_cmd('storage file upload-batch -s "{}" -d {}', storage_account_info, test_dir, src_share)
+        self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
+                         test_dir, src_share)
 
         # download without pattern
         local_folder = self.create_temp_dir()
@@ -121,7 +124,8 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         # upload without pattern
         src_share = self.create_share(storage_account_info)
         local_folder = self.create_temp_dir()
-        self.storage_cmd('storage file upload-batch -s "{}" -d {}', storage_account_info, test_dir, src_share)
+        self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
+                         test_dir, src_share)
         self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share, local_folder)
         self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
 

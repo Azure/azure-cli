@@ -169,6 +169,10 @@ helps['acr repository show-manifests'] = """
 helps['acr repository delete'] = """
     type: command
     short-summary: Delete a repository, manifest, or tag in a container registry.
+    parameters:
+        - name: --manifest
+          populator-commands:
+            - az acr repository show-manifests
     examples:
         - name: Delete a repository from a container registry.
           text:
@@ -179,9 +183,9 @@ helps['acr repository delete'] = """
         - name: Delete the manifest referenced by a tag. This also deletes any associated layer data and all other tags referencing the manifest.
           text:
             az acr repository delete -n MyRegistry --repository MyRepository --tag MyTag --manifest
-        - name: Delete a manifest from a repository. This also deletes any associated layer data and all tags referencing the manifest.
+        - name: Delete a manifest using a sha256 based digest. This also deletes any associated layer data and all tags referencing the manifest.
           text:
-            az acr repository delete -n MyRegistry --repository MyRepository --manifest MyManifest
+            az acr repository delete -n MyRegistry --repository MyRepository --manifest sha256:abc123
 """
 
 helps['acr webhook list'] = """

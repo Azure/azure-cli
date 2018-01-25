@@ -3,11 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
-import os.path
-from fnmatch import fnmatch
-from datetime import datetime, timedelta
-
 
 def collect_blobs(blob_service, container, pattern=None):
     """
@@ -72,12 +67,15 @@ def filter_none(iterable):
 
 def glob_files_locally(folder_path, pattern):
     """glob files in local folder based on the given pattern"""
+    import os
+
     pattern = os.path.join(folder_path, pattern.lstrip('/')) if pattern else None
 
     from os import walk
     len_folder_path = len(folder_path) + 1
     for root, _, files in walk(folder_path):
         for f in files:
+            from fnmatch import fnmatch
             full_path = os.path.join(root, f)
             if pattern and fnmatch(full_path, pattern):
                 yield (full_path, full_path[len_folder_path:])
@@ -87,6 +85,7 @@ def glob_files_locally(folder_path, pattern):
 
 def glob_files_remotely(cmd, client, share_name, pattern):
     """glob the files in remote file share based on the given pattern"""
+    import os
     from collections import deque
     t_dir, t_file = cmd.get_models('file.models#Directory', 'file.models#File')
 
@@ -95,6 +94,7 @@ def glob_files_remotely(cmd, client, share_name, pattern):
         current_dir = queue.pop()
         for f in client.list_directories_and_files(share_name, current_dir):
             if isinstance(f, t_file):
+                from fnmatch import fnmatch
                 if (pattern and fnmatch(os.path.join(current_dir, f.name), pattern)) or (not pattern):
                     yield current_dir, f.name
             elif isinstance(f, t_dir):
@@ -102,6 +102,7 @@ def glob_files_remotely(cmd, client, share_name, pattern):
 
 
 def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob):
+    from datetime import datetime, timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('blob.sharedaccesssignature#BlobSharedAccessSignature')
     else:
@@ -114,6 +115,7 @@ def create_short_lived_blob_sas(cmd, account_name, account_key, container, blob)
 
 
 def create_short_lived_file_sas(cmd, account_name, account_key, share, directory_name, file_name):
+    from datetime import datetime, timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('file.sharedaccesssignature#FileSharedAccessSignature')
     else:
@@ -129,6 +131,7 @@ def create_short_lived_file_sas(cmd, account_name, account_key, share, directory
 
 
 def create_short_lived_container_sas(cmd, account_name, account_key, container):
+    from datetime import datetime, timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('blob.sharedaccesssignature#BlobSharedAccessSignature')
     else:
@@ -141,6 +144,7 @@ def create_short_lived_container_sas(cmd, account_name, account_key, container):
 
 
 def create_short_lived_share_sas(cmd, account_name, account_key, share):
+    from datetime import datetime, timedelta
     if cmd.supported_api_version(min_api='2017-04-17'):
         t_sas = cmd.get_models('file.sharedaccesssignature#FileSharedAccessSignature')
     else:
@@ -154,6 +158,7 @@ def create_short_lived_share_sas(cmd, account_name, account_key, share):
 
 def mkdir_p(path):
     import errno
+    import os
     try:
         os.makedirs(path)
     except OSError as exc:  # Python <= 2.5
@@ -168,6 +173,8 @@ def _pattern_has_wildcards(p):
 
 
 def _match_path(pattern, *args):
+    from fnmatch import fnmatch
+    import os
     return fnmatch(os.path.join(*args), pattern) if pattern else True
 
 

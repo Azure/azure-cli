@@ -5,8 +5,15 @@ Release History
 
 2.0.22
 ++++++
-
-* minor fixes
+* `application-gateway create`: `--cert-password` protected using secureString.
+* `application-gateway update`: Fix issue where `--sku` erroneously applied a default value.
+* `vpn-connection create`: `--shared-key` and `--authorization-key` protected using secureString.
+* `asg create`: Fix missing client issue.
+* `dns zone export`: Fix issue with exported names. Add `--file-name/-f` parameter.
+                     Fix issue where long TXT records were incorrectly exported.
+                     Fix issue where quoted TXT records were incorrectly exported without escaped quotes.
+* `dns zone import`: Fix issue where certain records were imported twice.
+* Restored `vnet-gateway root-cert` and `vnet-gateway revoked-cert` commands.
 
 2.0.21
 ++++++
