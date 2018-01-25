@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.1.18
+++++++
+* Add '--follow' option for streaming logs
+* Add 'az container attach' command to attach to a container
+
 0.1.17
 ++++++
 * Minor fixes
