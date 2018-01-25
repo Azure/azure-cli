@@ -1823,11 +1823,12 @@ class MSIScenarioTest(ScenarioTest):
             ])
 
             # create a windows vm with reader role on the linux vm
-            self.cmd('vm create -g {rg} -n {vm2} --image Win2016Datacenter --assign-identity --scope {vm1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1!', checks=[
+            result = self.cmd('vm create -g {rg} -n {vm2} --image Win2016Datacenter --assign-identity --scope {vm1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1!', checks=[
                 self.check('identity.role', 'reader'),
                 self.check('identity.scope', '{vm1_id}'),
                 self.check('identity.port', 50342)
             ])
+            uuid.UUID(result.get_output_in_json()['identity']['systemAssignedIdentity'])
 
             self.cmd('vm extension list -g {rg} --vm-name {vm2}', checks=[
                 self.check('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForWindows'),
@@ -1838,11 +1839,12 @@ class MSIScenarioTest(ScenarioTest):
             # create a linux vm w/o identity and later enable it
             vm3_result = self.cmd('vm create -g {rg} -n {vm3} --image debian --admin-username admin123 --admin-password PasswordPassword1!').get_output_in_json()
             self.assertIsNone(vm3_result.get('identity'))
-            self.cmd('vm assign-identity -g {rg} -n {vm3} --scope {vm1_id} --role reader --port 50343', checks=[
+            result = self.cmd('vm assign-identity -g {rg} -n {vm3} --scope {vm1_id} --role reader --port 50343', checks=[
                 self.check('role', 'reader'),
                 self.check('scope', '{vm1_id}'),
                 self.check('port', 50343)
             ])
+            uuid.UUID(result.get_output_in_json()['systemAssignedIdentity'])
 
             self.cmd('vm extension list -g {rg} --vm-name {vm3}', checks=[
                 self.check('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
@@ -1864,11 +1866,10 @@ class MSIScenarioTest(ScenarioTest):
         })
         # Fixing the role assignment guids so test can run under playback. The assignments will
         # be auto-deleted when the RG gets recycled, so the same ids can be reused.
-        guids = [uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C138'),
-                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C137'),
-                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C136'),
-                 uuid.UUID('CD58500A-F421-4815-B5CF-A36A1E16C135')]
-        with mock.patch('azure.cli.command_modules.vm.custom._gen_guid', side_effect=guids, autospec=True):
+        guids = [uuid.UUID('CD58500A-F421-4815-B5C1-A36A1E16C148'),
+                 uuid.UUID('CD58500A-F421-4815-B5C1-A36A1E16C147'),
+                 uuid.UUID('CD58500A-F421-4815-B5C1-A36A1E16C140')]
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=guids, autospec=True):
             # create linux vm with default configuration
             self.cmd('vmss create -g {rg} -n {vmss1} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope}', checks=[
                 self.check('vmss.identity.role', 'Contributor'),
@@ -1883,11 +1884,13 @@ class MSIScenarioTest(ScenarioTest):
             ])
 
             # create a windows vm with reader role on the linux vm
-            self.cmd('vmss create -g {rg} -n {vmss2} --image Win2016Datacenter --instance-count 1 --assign-identity --scope {vmss1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1!', checks=[
+            result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2016Datacenter --instance-count 1 --assign-identity --scope {vmss1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1!', checks=[
                 self.check('vmss.identity.role', 'reader'),
                 self.check('vmss.identity.scope', '{vmss1_id}'),
                 self.check('vmss.identity.port', 50342)
-            ])
+            ]).get_output_in_json()
+            uuid.UUID(result['vmss']['identity']['systemAssignedIdentity'])
+
             self.cmd('vmss extension list -g {rg} --vmss-name {vmss2}', checks=[
                 self.check('[0].type', 'ManagedIdentityExtensionForWindows'),
                 self.check('[0].publisher', 'Microsoft.ManagedIdentity'),
@@ -1895,21 +1898,20 @@ class MSIScenarioTest(ScenarioTest):
             ])
 
             # create a linux vm w/o identity and later enable it
-            vmss3_result = self.cmd('vmss create -g {rg} -n {vmss3} --image debian --instance-count 1 --admin-username admin123 --admin-password PasswordPassword1!').get_output_in_json()['vmss']
-            self.assertIsNone(vmss3_result.get('identity'))
+            result = self.cmd('vmss create -g {rg} -n {vmss3} --image debian --instance-count 1 --admin-username admin123 --admin-password PasswordPassword1!').get_output_in_json()['vmss']
+            self.assertIsNone(result.get('identity'))
 
-            # skip playing back till the test issue gets addressed https://github.com/Azure/azure-cli/issues/4016
-            if self.is_live:
-                self.cmd('vmss assign-identity -g {rg} -n {vmss3} --scope "{vmss1_id}" --role reader --port 50343', checks=[
-                    self.check('role', 'reader'),
-                    self.check('scope', '{vmss1_id}'),
-                    self.check('port', 50343)
-                ])
+            result = self.cmd('vmss assign-identity -g {rg} -n {vmss3} --scope "{vmss1_id}" --role reader --port 50343', checks=[
+                self.check('role', 'reader'),
+                self.check('scope', '{vmss1_id}'),
+                self.check('port', 50343)
+            ]).get_output_in_json()
+            uuid.UUID(result['systemAssignedIdentity'])
 
-                self.cmd('vmss extension list -g {rg} --vmss-name {vmss3}', checks=[
-                    self.check('[0].type', 'ManagedIdentityExtensionForLinux'),
-                    self.check('[0].settings.port', 50343)
-                ])
+            self.cmd('vmss extension list -g {rg} --vmss-name {vmss3}', checks=[
+                self.check('[0].type', 'ManagedIdentityExtensionForLinux'),
+                self.check('[0].settings.port', 50343)
+            ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_msi_no_scope')
     def test_msi_no_scope(self, resource_group):
@@ -1994,6 +1996,7 @@ class MSIScenarioTest(ScenarioTest):
             self.check('length(identity.userAssignedIdentities)', 1)
         ]).get_output_in_json()
         self.assertEqual(result['identity']['userAssignedIdentities'][0].lower(), emsi_result['id'].lower())
+        self.assertFalse(result['identity']['systemAssignedIdentity'])
 
         # create a vm with system + user assigned identities
         result = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys --admin-username ubuntuadmin').get_output_in_json()

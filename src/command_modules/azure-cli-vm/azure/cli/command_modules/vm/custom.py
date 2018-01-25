@@ -67,13 +67,13 @@ extension_mappings = {
 }
 
 
-def _construct_identity_info(identity_scope, identity_role, port, external_identities):
+def _construct_identity_info(identity_scope, identity_role, port, implicit_identity, external_identities):
     info = {'port': port}
     if identity_scope:
         info['scope'] = identity_scope
         info['role'] = str(identity_role)  # could be DefaultStr, so convert to string
-    if external_identities:
-        info['userAssignedIdentities'] = external_identities
+    info['userAssignedIdentities'] = external_identities or []
+    info['systemAssignedIdentity'] = implicit_identity or ''
     return info
 
 
@@ -449,7 +449,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
                            version=_MSI_EXTENSION_VERSION,
                            settings={'port': port})
     LongRunningOperation(cmd.cli_ctx)(poller)
-    return _construct_identity_info(identity_scope, identity_role, port, external_identities)
+    return _construct_identity_info(identity_scope, identity_role, port, vm.identity.principal_id, external_identities)
 
 
 def list_user_assigned_identities(cmd, resource_group_name=None):
@@ -653,7 +653,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
     if assign_identity is not None:
         if enable_local_identity and not identity_scope:
             _show_missing_access_warning(resource_group_name, vm_name, 'vm')
-        setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, _MSI_PORT, external_identities))
+        setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, _MSI_PORT,
+                                                         vm.identity.principal_id, external_identities))
     return vm
 
 
@@ -1711,7 +1712,8 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
     if vmss.upgrade_policy.mode == UpgradeMode.manual:
         logger.warning("With manual upgrade mode, you will need to run 'az vmss update-instances -g %s -n %s "
                        "--instance-ids *' to propagate the change", resource_group_name, vmss_name)
-    return _construct_identity_info(identity_scope, identity_role, port, external_identities)
+    return _construct_identity_info(identity_scope, identity_role, port,
+                                    vmss.identity.principal_id, external_identities)
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -2004,10 +2006,11 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
     deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
         client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait))
     if assign_identity is not None:
+        vmss_info = get_vmss(cmd, resource_group_name, vmss_name)
         if enable_local_identity and not identity_scope:
             _show_missing_access_warning(resource_group_name, vmss_name, 'vmss')
         deployment_result['vmss']['identity'] = _construct_identity_info(identity_scope, identity_role, _MSI_PORT,
-                                                                         external_identities)
+                                                                         vmss_info.identity.principal_id, external_identities)
     return deployment_result
 
 
