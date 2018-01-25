@@ -8,7 +8,6 @@ from __future__ import print_function
 import getpass
 import json
 import os
-import re
 
 try:
     from urllib.parse import urlparse
@@ -20,11 +19,8 @@ from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-err
 from knack.log import get_logger
 from knack.util import CLIError
 
-from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id
-
 from azure.cli.command_modules.vm._validators import _get_resource_group_from_vault_name
 from azure.cli.core.commands.validators import validate_file_or_dict
-from azure.keyvault import KeyVaultId
 
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
@@ -225,6 +221,7 @@ def _normalize_extension_version(cli_ctx, publisher, vm_extension_name, version,
 
 def _parse_rg_name(strid):
     '''From an ID, extract the contained (resource group, name) tuple.'''
+    from msrestazure.tools import parse_resource_id
     parts = parse_resource_id(strid)
     return (parts['resource_group'], parts['name'])
 
@@ -499,6 +496,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
                                                                 build_vnet_resource, build_nsg_resource,
                                                                 build_public_ip_resource, StorageProfile,
                                                                 build_msi_role_assignment, build_vm_msi_extension)
+    from msrestazure.tools import resource_id, is_valid_resource_id
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
     network_id_template = resource_id(
@@ -669,6 +667,7 @@ def get_vm(cmd, resource_group_name, vm_name, expand=None):
 
 
 def get_vm_details(cmd, resource_group_name, vm_name):
+    from msrestazure.tools import parse_resource_id
     result = get_instance_view(cmd, resource_group_name, vm_name)
     network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
     public_ips = []
@@ -776,6 +775,8 @@ def list_vm_ip_addresses(cmd, resource_group_name=None, vm_name=None):
 
 def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_security_group_name=None,
                  apply_to_subnet=False):
+    from msrestazure.tools import parse_resource_id
+
     network = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
 
     vm = get_vm(cmd, resource_group_name, vm_name)
@@ -864,6 +865,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 
 
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None, no_wait=False, **kwargs):
+    from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     vm = kwargs['parameters']
     if os_disk is not None:
         if is_valid_resource_id(os_disk):
@@ -1000,6 +1002,7 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
 
 
 def get_boot_log(cmd, resource_group_name, vm_name):
+    import re
     import sys
     BlockBlobService = cmd.get_sdk('blob.blockblobservice#BlockBlobService', resource_type=ResourceType.DATA_STORAGE)
 
@@ -1102,6 +1105,7 @@ def show_default_diagnostics_configuration(is_windows_os=False):
 def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk,
                              new=False, sku=None, size_gb=None, lun=None, caching=None):
     '''attach a managed disk'''
+    from msrestazure.tools import parse_resource_id
     vm = get_vm(cmd, resource_group_name, vm_name)
     DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
         'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
@@ -1263,6 +1267,7 @@ def accept_market_ordering_terms(cmd, urn=None, publisher=None, offer=None, plan
 
 # region VirtualMachines NetworkInterfaces (NICs)
 def show_vm_nic(cmd, resource_group_name, vm_name, nic):
+    from msrestazure.tools import parse_resource_id
     vm = get_vm(cmd, resource_group_name, vm_name)
     found = next(
         (n for n in vm.network_profile.network_interfaces if nic.lower() == n.id.lower()), None
@@ -1393,6 +1398,8 @@ def _get_vault_id_from_name(cli_ctx, client, vault_name):
 
 def get_vm_format_secret(cmd, secrets, certificate_store=None):
     from azure.mgmt.keyvault import KeyVaultManagementClient
+    from azure.keyvault import KeyVaultId
+    import re
     client = get_mgmt_service_client(cmd.cli_ctx, KeyVaultManagementClient).vaults
     grouped_secrets = {}
 
@@ -1426,6 +1433,7 @@ def get_vm_format_secret(cmd, secrets, certificate_store=None):
 
 
 def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, certificate_store=None):
+    from msrestazure.tools import parse_resource_id
     from ._vm_utils import create_keyvault_data_plane_client, get_key_vault_base_url
     VaultSecretGroup, SubResource, VaultCertificate = cmd.get_models(
         'VaultSecretGroup', 'SubResource', 'VaultCertificate')
@@ -1732,6 +1740,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                                                                 build_vmss_storage_account_pool_resource,
                                                                 build_application_gateway_resource,
                                                                 build_msi_role_assignment, build_nsg_resource)
+    from msrestazure.tools import resource_id, is_valid_resource_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
     network_id_template = resource_id(
         subscription=subscription_id, resource_group=resource_group_name,
@@ -2054,6 +2063,7 @@ def list_vmss(cmd, resource_group_name=None):
 
 
 def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_name):
+    from msrestazure.tools import parse_resource_id
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vm_scale_set_name)
     # find the load balancer

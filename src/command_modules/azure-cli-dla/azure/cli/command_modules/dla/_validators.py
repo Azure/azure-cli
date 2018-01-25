@@ -2,15 +2,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from msrest.serialization import Deserializer
-from msrest.exceptions import DeserializationError
-
-from msrestazure.tools import parse_resource_id
 
 from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
 
 
 # Helpers
@@ -21,6 +16,7 @@ def _get_resource_group_from_account_name(client, account_name):
     :return: resource group name or None
     :rtype: str
     """
+    from msrestazure.tools import parse_resource_id
     for acct in client.list():
         id_comps = parse_resource_id(acct.id)
         if id_comps['name'] == account_name:
@@ -32,6 +28,7 @@ def _get_resource_group_from_account_name(client, account_name):
 
 # COMMAND NAMESPACE VALIDATORS
 def validate_resource_group_name(cmd, ns):
+    from azure.mgmt.datalake.analytics.account import DataLakeAnalyticsAccountManagementClient
     if not ns.resource_group_name:
         account_name = ns.account_name
         client = get_mgmt_service_client(cmd.cli_ctx, DataLakeAnalyticsAccountManagementClient).account
@@ -41,6 +38,8 @@ def validate_resource_group_name(cmd, ns):
 
 def datetime_format(value):
     """Validate the correct format of a datetime string and deserialize."""
+    from msrest.serialization import Deserializer
+    from msrest.exceptions import DeserializationError
     try:
         datetime_obj = Deserializer.deserialize_iso(value)
     except DeserializationError:
