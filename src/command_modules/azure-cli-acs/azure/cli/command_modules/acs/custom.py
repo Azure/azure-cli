@@ -1325,6 +1325,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     raise retry_exception
 
 
+def aks_get_all_versions(cmd, client, location):
+    return client.list_orchestrators(location, resource_type='managedClusters')
+
+
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                         path=os.path.join(os.path.expanduser('~'), '.kube', 'config')):
     access_profile = client.get_access_profiles(

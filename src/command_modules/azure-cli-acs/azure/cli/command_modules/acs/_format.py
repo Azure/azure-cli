@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from collections import OrderedDict
+from distutils.version import StrictVersion
 
 
 def aks_list_table_format(results):
@@ -52,3 +53,12 @@ def aks_get_versions_table_format(result):
     for k in ['name', 'resourceGroup', 'masterVersion', 'masterUpgrades', 'nodePoolVersion', 'nodePoolUpgrades']:
         table_row[k] = result.get(k)
     return [table_row]
+
+
+def aks_versions_table_format(result):
+    """Format get-all-versions results as a summary for display with "-o table"."""
+    orchestrators = result.get('orchestrators', {})
+    versions = sorted((o.get('orchestratorVersion') for o in orchestrators), key=StrictVersion)
+
+    # format versions as a list of dicts
+    return [{'kubernetesVersion': v} for v in versions]

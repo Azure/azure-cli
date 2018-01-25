@@ -10,6 +10,7 @@ from azure.cli.core.util import empty_on_404
 from ._client_factory import cf_container_services
 from ._client_factory import cf_managed_clusters
 from ._format import aks_get_versions_table_format
+from ._format import aks_versions_table_format
 from ._format import aks_list_table_format
 from ._format import aks_show_table_format
 
@@ -68,3 +69,6 @@ def load_command_table(self, _):
                          confirmation='Kubernetes may be unavailable during cluster upgrades.\n' +
                          'Are you sure you want to perform this operation?')
         g.generic_wait_command('wait')
+
+    with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
+        g.custom_command('get-all-versions', 'aks_get_all_versions', table_transformer=aks_versions_table_format)
