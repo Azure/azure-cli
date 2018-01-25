@@ -8,6 +8,7 @@
 import shlex
 import threading
 import time
+import sys
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
@@ -188,14 +189,14 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 
     if not follow:
         log = logs_client.list(resource_group_name, name, container_name)
-        return log.content
-
-    _start_streaming(
-        terminate_condition=_is_container_terminated,
-        terminate_condition_args=(container_group_client, resource_group_name, name, container_name),
-        shupdown_grace_period=5,
-        stream_target=_stream_logs,
-        stream_args=(logs_client, resource_group_name, name, container_name, container_group.restart_policy))
+        print(log.content)
+    else:
+        _start_streaming(
+            terminate_condition=_is_container_terminated,
+            terminate_condition_args=(container_group_client, resource_group_name, name, container_name),
+            shupdown_grace_period=5,
+            stream_target=_stream_logs,
+            stream_args=(logs_client, resource_group_name, name, container_name, container_group.restart_policy))
 
 
 def attach_to_container(cmd, resource_group_name, name, container_name=None):
@@ -243,8 +244,8 @@ def _stream_logs(client, resource_group_name, name, container_name, restart_poli
         currentOutputLines = len(lines)
 
         # Should only happen when the container restarts.
-        if currentOutputLines < lastOutputLines and restart_policy == 'Always':
-            print("\033[31mWarning: container '{}' got restarted; the tail of the current log might be missing. Exiting...\033[30m".format(container_name))
+        if currentOutputLines < lastOutputLines and restart_policy != 'Never':
+            print("Warning: you're having '--restart-policy={}'; the container '{}' was just restarted; the tail of the current log might be missing. Exiting...".format(restart_policy, container_name))
             break
 
         _move_console_cursor_up(lastOutputLines)
@@ -272,8 +273,8 @@ def _stream_container_events_and_logs(container_group_client, logs_client, resou
 
         currentOutputLines = 0
         if container.instance_view and container.instance_view.events:
-            for event in container.instance_view.events:
-                print('(count: {}) {}'.format(event.count, event.message))
+            for event in sorted(container.instance_view.events, key=lambda e: e.last_timestamp):
+                print('(count: {}) (last timestamp: {}) {}'.format(event.count, event.last_timestamp, event.message))
                 currentOutputLines += 1
 
         lastOutputLines = currentOutputLines
@@ -283,7 +284,7 @@ def _stream_container_events_and_logs(container_group_client, logs_client, resou
             print('\nStart streaming logs:')
             break
 
-        time.sleep(5)
+        time.sleep(2)
 
     _stream_logs(logs_client, resource_group_name, name, container_name, container_group.restart_policy)
 
@@ -322,4 +323,6 @@ def _find_container(client, resource_group_name, name, container_name):
 
 # Move console cursor up.
 def _move_console_cursor_up(lines):
-    print('\033[{}A\033[K'.format(lines), end='')
+    if lines > 0:
+        # Use stdout.write to support Python 2
+        sys.stdout.write('\033[{}A\033[K\033[J'.format(lines))
