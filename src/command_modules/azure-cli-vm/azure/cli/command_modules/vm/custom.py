@@ -1001,10 +1001,32 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
     set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done'))
 
 
+class BootLogStreamWriter(object):  # pylint: disable=too-few-public-methods
+
+    def __init__(self, out):
+        self.out = out
+        self.unicode_ignored = False
+
+    def write(self, str_or_bytes):
+        content = str_or_bytes
+        if isinstance(str_or_bytes, bytes):
+            content = str_or_bytes.decode('utf8')
+        try:
+            self.out.write(content)
+        except UnicodeEncodeError:
+            # e.g. 'charmap' codec can't encode characters in position 258829-258830: character maps to <undefined>
+            import unicodedata
+            ascii_content = unicodedata.normalize('NFKD', content).encode('ascii', 'ignore')
+            self.out.write(ascii_content.decode())
+            self.unicode_ignored = True
+            logger.warning("A few unicode characters have been ignored because the shell is not able to display. "
+                           "To see the full log, use a shell with unicode capacity")
+
+
 def get_boot_log(cmd, resource_group_name, vm_name):
     import re
     import sys
-    from azure.cli.core.profiles import ResourceType, get_api_version, get_sdk
+    from azure.cli.core.profiles import get_sdk
     BlockBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
 
     client = _compute_client_factory(cmd.cli_ctx)
@@ -1045,31 +1067,8 @@ def get_boot_log(cmd, resource_group_name, vm_name):
         keys.keys[0].value,
         endpoint_suffix=cmd.cli_ctx.cloud.suffixes.storage_endpoint)  # pylint: disable=no-member
 
-    class StreamWriter(object):  # pylint: disable=too-few-public-methods
-
-        def __init__(self, out):
-            import codecs
-            self.out = out
-            self.ignore_unicode = False
-
-        def write(self, str_or_bytes):
-            content = str_or_bytes
-            if isinstance(str_or_bytes, bytes):
-                content = str_or_bytes.decode()
-            try:
-                self.out.write(content)
-            except UnicodeEncodeError:
-                # UnicodeEncodeError: 'charmap' codec can't encode characters in position 258829-258830: character maps to <undefined>
-                import unicodedata
-                ascii_content = unicodedata.normalize('NFKD', content).encode('ascii','ignore')
-                self.out.write(ascii_content.decode())
-                self.ignore_unicode=True
-                logger.warning("A few unicode characters have been ignored as your shell is not able to display. "
-                               "To see full log, use shell with unicode capacity")
-
-
     # our streamwriter not seekable, so no parallel.
-    storage_client.get_blob_to_stream(container, blob, StreamWriter(sys.stdout), max_connections=1)
+    storage_client.get_blob_to_stream(container, blob, BootLogStreamWriter(sys.stdout), max_connections=1)
 # endregion
 
 
