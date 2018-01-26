@@ -14,6 +14,6 @@ pip install $ALL_MODULES
 echo '=== List installed packages'
 pip freeze
 
-echo '=== Begin testing'
+echo '=== Test Module Loading Performance'
 unset AZURE_CLI_DIAGNOSTICS_TELEMETRY
 azdev verify module-load-perf
