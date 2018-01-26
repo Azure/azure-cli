@@ -1005,7 +1005,6 @@ class BootLogStreamWriter(object):  # pylint: disable=too-few-public-methods
 
     def __init__(self, out):
         self.out = out
-        self.unicode_ignored = False
 
     def write(self, str_or_bytes):
         content = str_or_bytes
@@ -1018,7 +1017,6 @@ class BootLogStreamWriter(object):  # pylint: disable=too-few-public-methods
             import unicodedata
             ascii_content = unicodedata.normalize('NFKD', content).encode('ascii', 'ignore')
             self.out.write(ascii_content.decode())
-            self.unicode_ignored = True
             logger.warning("A few unicode characters have been ignored because the shell is not able to display. "
                            "To see the full log, use a shell with unicode capacity")
 
