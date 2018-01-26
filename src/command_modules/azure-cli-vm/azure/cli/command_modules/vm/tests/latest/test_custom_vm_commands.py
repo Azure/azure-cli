@@ -429,10 +429,10 @@ class TestVMBootLog(unittest.TestCase):
     def test_vm_boot_log_handle_unicode(self, logger_warning__mock):
         import sys
         writer = BootLogStreamWriter(sys.stdout)
+        writer.write('hello')
         writer.write(u'\u54c8')  # a random unicode trying to fail default output
-        logger_warning__mock.assert_called_with(
-            "A few unicode characters have been ignored because the shell is not able to display. "
-            "To see the full log, use a shell with unicode capacity")
+
+        # we are good once we are here 
 
     @mock.patch('azure.cli.core.profiles.get_sdk', autospec=True)
     def test_vm_boot_log_init_storage_sdk(self, get_sdk_mock):
