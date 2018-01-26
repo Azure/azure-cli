@@ -68,6 +68,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'db_create', no_wait_param='raw')
         g.custom_command('copy', 'db_copy', no_wait_param='raw')
         g.custom_command('restore', 'db_restore', no_wait_param='raw')
+        g.custom_command('rename', 'db_rename')
         g.command('show', 'get')
         g.custom_command('list', 'db_list')
         g.command('delete', 'delete', confirmation=True)

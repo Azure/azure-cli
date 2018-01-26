@@ -42,6 +42,10 @@ helps['sql db list-editions'] = """
         - name: Show available max database sizes for P1 service objective
           text: az sql db list-editions -l westus --service-objective P1 --show-details max-size
     """
+helps['sql db rename'] = """
+    type: command
+    short-summary: Rename a database.
+    """
 helps['sql db show'] = """
     type: command
     short-summary: Get the details for a database.
