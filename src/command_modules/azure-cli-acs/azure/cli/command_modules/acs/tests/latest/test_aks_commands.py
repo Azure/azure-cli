@@ -60,7 +60,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 3),
             self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_D1_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.exists('kubernetesVersion')
         ])
@@ -169,7 +169,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('name', '{name}'),
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].vmSize', 'Standard_D1_v2'),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
             self.check('dnsPrefix', '{dns_name_prefix}'),
             self.check('provisioningState', 'Succeeded'),
             self.check('kubernetesVersion', '{k8s_version}')
