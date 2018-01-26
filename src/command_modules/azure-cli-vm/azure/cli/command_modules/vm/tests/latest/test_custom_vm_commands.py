@@ -437,18 +437,18 @@ class TestVMBootLog(unittest.TestCase):
     @mock.patch('azure.cli.core.profiles.get_sdk', autospec=True)
     def test_vm_boot_log_init_storage_sdk(self, get_sdk_mock):
 
-        class ErrorToExitInfiniteLoop(Exception):
+        class ErrorToExitCommandEarly(Exception):
             pass
 
         cmd_mock = mock.MagicMock()
         cli_ctx_mock = mock.MagicMock()
         cmd_mock.cli_ctx = cli_ctx_mock
-        get_sdk_mock.side_effect = ErrorToExitInfiniteLoop()
+        get_sdk_mock.side_effect = ErrorToExitCommandEarly()
 
         try:
             get_boot_log(cmd_mock, 'rg1', 'vm1')
             self.fail("'get_boot_log' didn't exit early")
-        except ErrorToExitInfiniteLoop:
+        except ErrorToExitCommandEarly:
             get_sdk_mock.assert_called_with(cli_ctx_mock, ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
 
 
