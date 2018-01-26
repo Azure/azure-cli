@@ -11,11 +11,17 @@ from subprocess import check_output, STDOUT, CalledProcessError
 import sys
 
 
+TOTAL = 'ALL'
 NUM_RUNS = 3
-
-HIGH_THRESHOLD = 35
-HIGH_MODULES = ['network', 'vm', 'batch', 'storage']
-LO_THRESHOLD = 10
+DEFAULT_THRESHOLD = 10
+# explicit thresholds that deviate from the default
+THRESHOLDS = {
+    'network': 25,
+    'vm': 25,
+    'batch': 25,
+    'storage': 50,
+    TOTAL: 300
+}
 
 
 def init(root):
@@ -45,51 +51,76 @@ def pstdev(data):
     ss = sq_deviation(data)
     return (ss/n) ** 0.5
 
+
+def print_values(data):
+    print('{:<20} {:>12} {:>12} {:>12} {:>25}'.format('Module', 'Average', 'Threshold', 'Stdev', 'Values'))
+    for key, val in data.items():
+        print('{:<20} {:>12.0f} {:>12.0f} {:>12.0f} {:>25}'.format(
+            key, val['average'], val['threshold'], val['stdev'], str(val['values'])))
+
+
 def run_verifications(args):
     regex = r"[^']*'([^']*)'[\D]*([\d\.]*)"
 
-    results = {}
+    results = {TOTAL: []}
     try:
+        use_shell = sys.platform.lower() in ['windows', 'win32']
         # Time the module loading X times
-        for _ in range(0, NUM_RUNS):
-            use_shell = sys.platform.lower() in ['windows', 'win32']
+        for i in range(0, NUM_RUNS + 1):
             lines = check_output('az -h --debug'.split(), shell=use_shell, stderr=STDOUT)
+            if i == 0:
+                # Ignore the first run since it can be longer due to *.pyc file compilation
+                continue
+
             try:
                 lines = lines.decode().splitlines()
             except:
                 lines = lines.splitlines()
+            total_time = 0
             for line in lines:
                 if line.startswith('DEBUG: Loaded module'):
                     matches = re.match(regex, line)
                     mod = matches.group(1)
                     val = float(matches.group(2)) * 1000
+                    total_time = total_time + val
                     if mod in results:
                         results[mod].append(val)
                     else:
                         results[mod] = [val]
+            results[TOTAL].append(total_time)
 
-        failed_mods = []
-        print('{:<20} {:>12} {:>12}'.format('Module', 'Average', 'Stdev'))
+        passed_mods = {}
+        failed_mods = {}
+
         mods = sorted(results.keys())
         for mod in mods:
             val = results[mod]
             mean_val = mean(val)
             stdev_val = pstdev(val)
-            print('{:<20} {:>12.0f} {:>12.0f}'.format(mod, mean_val, stdev_val))
-            threshold = HIGH_THRESHOLD if mod in HIGH_MODULES else LO_THRESHOLD
+            threshold = THRESHOLDS.get(mod) or DEFAULT_THRESHOLD
+            statistics = {
+                'average': mean_val,
+                'stdev': stdev_val,
+                'threshold': threshold,
+                'values': val
+            }
             if mean_val > threshold:
-                failed_mods.append({
-                    'name': mod,
-                    'average': mean_val,
-                    'stdev': stdev_val,
-                    'threshold': threshold
-                })
+                failed_mods[mod] = statistics
+            else:
+                passed_mods[mod] = statistics
 
 
-        if failed_mods:
+        if not failed_mods:
+            print('== PASSED MODULES ==')
+            print_values(passed_mods)
+            print('\nPASSED: Average load time all modules: {} ms'.format(
+                int(passed_mods[TOTAL]['average'])))
+            sys.exit(0)
+        else:
+            print('== PASSED MODULES ==')
+            print_values(passed_mods)
             print('\nFAILED MODULES')
-            print('{:<20} {:>12} {:>12}'.format('Module', 'Average', 'Threshold'))
-            for item in failed_mods:
-                print('{:<20} {:>12.0f} {:>12.0f}'.format(item['name'], item['average'], item['threshold']))
+            print_values(failed_mods)
+            sys.exit(1)
     except CalledProcessError as ex:
         print(ex.output)
