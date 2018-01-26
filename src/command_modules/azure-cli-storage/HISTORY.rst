@@ -15,6 +15,7 @@ Release History
 * Added 'snapshot' column to table output for blob list/show.
 * Fixed bugs with various parameters that needed to be parsed as ints, added test coverage.
 * Small fix with test, `storage blob service-properties show`: "hourMetrics.enabled" defaults to false.
+* Minor fixes
 
 2.0.23
 ++++++
