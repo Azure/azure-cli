@@ -1001,10 +1001,31 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
     set_vm(cmd, vm, ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'enabling boot diagnostics', 'done'))
 
 
+class BootLogStreamWriter(object):  # pylint: disable=too-few-public-methods
+
+    def __init__(self, out):
+        self.out = out
+
+    def write(self, str_or_bytes):
+        content = str_or_bytes
+        if isinstance(str_or_bytes, bytes):
+            content = str_or_bytes.decode('utf8')
+        try:
+            self.out.write(content)
+        except UnicodeEncodeError:
+            # e.g. 'charmap' codec can't encode characters in position 258829-258830: character maps to <undefined>
+            import unicodedata
+            ascii_content = unicodedata.normalize('NFKD', content).encode('ascii', 'ignore')
+            self.out.write(ascii_content.decode())
+            logger.warning("A few unicode characters have been ignored because the shell is not able to display. "
+                           "To see the full log, use a shell with unicode capacity")
+
+
 def get_boot_log(cmd, resource_group_name, vm_name):
     import re
     import sys
-    BlockBlobService = cmd.get_sdk('blob.blockblobservice#BlockBlobService', resource_type=ResourceType.DATA_STORAGE)
+    from azure.cli.core.profiles import get_sdk
+    BlockBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
 
     client = _compute_client_factory(cmd.cli_ctx)
 
@@ -1044,19 +1065,8 @@ def get_boot_log(cmd, resource_group_name, vm_name):
         keys.keys[0].value,
         endpoint_suffix=cmd.cli_ctx.cloud.suffixes.storage_endpoint)  # pylint: disable=no-member
 
-    class StreamWriter(object):  # pylint: disable=too-few-public-methods
-
-        def __init__(self, out):
-            self.out = out
-
-        def write(self, str_or_bytes):
-            if isinstance(str_or_bytes, bytes):
-                self.out.write(str_or_bytes.decode())
-            else:
-                self.out.write(str_or_bytes)
-
     # our streamwriter not seekable, so no parallel.
-    storage_client.get_blob_to_stream(container, blob, StreamWriter(sys.stdout), max_connections=1)
+    storage_client.get_blob_to_stream(container, blob, BootLogStreamWriter(sys.stdout), max_connections=1)
 # endregion
 
 

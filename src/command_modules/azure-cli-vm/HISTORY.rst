@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.26
+++++++
+* vm boot-diagnostic: fix the broken get log command
 
 2.0.25
 ++++++
