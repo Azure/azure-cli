@@ -432,7 +432,7 @@ class TestVMBootLog(unittest.TestCase):
         writer.write('hello')
         writer.write(u'\u54c8')  # a random unicode trying to fail default output
 
-        # we are good once we are here 
+        # we are good once we are here
 
     @mock.patch('azure.cli.core.profiles.get_sdk', autospec=True)
     def test_vm_boot_log_init_storage_sdk(self, get_sdk_mock):
