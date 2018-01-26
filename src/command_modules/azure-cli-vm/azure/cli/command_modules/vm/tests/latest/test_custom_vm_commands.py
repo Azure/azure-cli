@@ -8,12 +8,13 @@ import mock
 
 from knack.util import CLIError
 
-from azure.cli.command_modules.vm.custom import enable_boot_diagnostics, disable_boot_diagnostics, \
-    _merge_secrets
-from azure.cli.command_modules.vm.custom import (_get_access_extension_upgrade_info,
+from azure.cli.command_modules.vm.custom import (enable_boot_diagnostics, disable_boot_diagnostics,
+                                                 _merge_secrets, BootLogStreamWriter,
+                                                 _get_access_extension_upgrade_info,
                                                  _LINUX_ACCESS_EXT,
                                                  _WINDOWS_ACCESS_EXT,
-                                                 _get_extension_instance_name)
+                                                 _get_extension_instance_name,
+                                                 get_boot_log)
 from azure.cli.command_modules.vm.custom import \
     (attach_unmanaged_data_disk, detach_data_disk, get_vmss_instance_view)
 
@@ -420,6 +421,35 @@ class TestVmCustom(unittest.TestCase):
 
         # assert
         self.assertEqual(result, 'extension-name')
+
+
+class TestVMBootLog(unittest.TestCase):
+
+    @mock.patch('azure.cli.command_modules.vm.custom.logger.warning')
+    def test_vm_boot_log_handle_unicode(self, logger_warning__mock):
+        import sys
+        writer = BootLogStreamWriter(sys.stdout)
+        writer.write('hello')
+        writer.write(u'\u54c8')  # a random unicode trying to fail default output
+
+        # we are good once we are here
+
+    @mock.patch('azure.cli.core.profiles.get_sdk', autospec=True)
+    def test_vm_boot_log_init_storage_sdk(self, get_sdk_mock):
+
+        class ErrorToExitCommandEarly(Exception):
+            pass
+
+        cmd_mock = mock.MagicMock()
+        cli_ctx_mock = mock.MagicMock()
+        cmd_mock.cli_ctx = cli_ctx_mock
+        get_sdk_mock.side_effect = ErrorToExitCommandEarly()
+
+        try:
+            get_boot_log(cmd_mock, 'rg1', 'vm1')
+            self.fail("'get_boot_log' didn't exit early")
+        except ErrorToExitCommandEarly:
+            get_sdk_mock.assert_called_with(cli_ctx_mock, ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
 
 
 class FakedVM(object):  # pylint: disable=too-few-public-methods
