@@ -3,6 +3,24 @@
 Release History
 ===============
 
+0.3.15
+++++++
+* Fixed issue where command option completions no longer appeared.
+
+0.3.14
+++++++
+* Clean up unused test files
+
+0.3.13
+++++++
+* Fix issue where interactive would not start on Python 2.
+* Fix errors on start up
+* Fix some commands not running in interactive mode
+
+0.3.12
+++++++
+* Update for CLI core changes.
+
 0.3.11
 ++++++
 * minor fixes

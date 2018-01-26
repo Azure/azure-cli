@@ -4,23 +4,23 @@
 # --------------------------------------------------------------------------------------------
 
 
-def cf_advisor(**_):
+def cf_advisor(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.advisor import AdvisorManagementClient
-    return get_mgmt_service_client(AdvisorManagementClient)
+    return get_mgmt_service_client(cli_ctx, AdvisorManagementClient)
 
 
-def advisor_mgmt_client_factory(kwargs):
-    return cf_advisor(**kwargs)
+def advisor_mgmt_client_factory(cli_ctx, kwargs):
+    return cf_advisor(cli_ctx, **kwargs)
 
 
-def recommendations_mgmt_client_factory(kwargs):
-    return cf_advisor(**kwargs).recommendations
+def recommendations_mgmt_client_factory(cli_ctx, kwargs):
+    return cf_advisor(cli_ctx, **kwargs).recommendations
 
 
-def suppressions_mgmt_client_factory(kwargs):
-    return cf_advisor(**kwargs).suppressions
+def suppressions_mgmt_client_factory(cli_ctx, kwargs):
+    return cf_advisor(cli_ctx, **kwargs).suppressions
 
 
-def configurations_mgmt_client_factory(kwargs):
-    return cf_advisor(**kwargs).configurations
+def configurations_mgmt_client_factory(cli_ctx, kwargs):
+    return cf_advisor(cli_ctx, **kwargs).configurations

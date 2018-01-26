@@ -12,8 +12,13 @@ import uuid
 from dateutil.relativedelta import relativedelta
 import dateutil.parser
 
-from azure.cli.core.util import CLIError, todict, get_file_json, shell_safe_json_parse
-from azure.cli.core import get_az_logger
+from knack.log import get_logger
+from knack.util import CLIError, todict
+
+from msrestazure.azure_exceptions import CloudError
+from azure.graphrbac.models.graph_error import GraphErrorException
+
+from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
                                              RoleDefinitionProperties)
@@ -28,34 +33,31 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 
-logger = get_az_logger(__name__)
+logger = get_logger(__name__)
 
 _CUSTOM_RULE = 'CustomRole'
 
+# pylint: disable=too-many-lines
 
-def list_role_definitions(name=None, resource_group_name=None, scope=None,
+
+def list_role_definitions(cmd, name=None, resource_group_name=None, scope=None,
                           custom_role_only=False):
-    definitions_client = _auth_client_factory(scope).role_definitions
+    definitions_client = _auth_client_factory(cmd.cli_ctx, scope).role_definitions
     scope = _build_role_scope(resource_group_name, scope,
                               definitions_client.config.subscription_id)
     return _search_role_definitions(definitions_client, name, scope, custom_role_only)
 
 
-def get_role_definition_name_completion_list(prefix, **kwargs):  # pylint: disable=unused-argument
-    definitions = list_role_definitions()
-    return [x.properties.role_name for x in list(definitions)]
+def create_role_definition(cmd, role_definition):
+    return _create_update_role_definition(cmd.cli_ctx, role_definition, for_update=False)
 
 
-def create_role_definition(role_definition):
-    return _create_update_role_definition(role_definition, for_update=False)
+def update_role_definition(cmd, role_definition):
+    return _create_update_role_definition(cmd.cli_ctx, role_definition, for_update=True)
 
 
-def update_role_definition(role_definition):
-    return _create_update_role_definition(role_definition, for_update=True)
-
-
-def _create_update_role_definition(role_definition, for_update):
-    definitions_client = _auth_client_factory().role_definitions
+def _create_update_role_definition(cli_ctx, role_definition, for_update):
+    definitions_client = _auth_client_factory(cli_ctx).role_definitions
     if os.path.exists(role_definition):
         role_definition = get_file_json(role_definition)
     else:
@@ -82,7 +84,7 @@ def _create_update_role_definition(role_definition, for_update):
         role_name = matched[0].properties.role_name
         role_id = matched[0].name
     else:
-        role_id = uuid.uuid4()
+        role_id = _gen_guid()
 
     if not for_update and 'assignableScopes' not in role_definition:
         raise CLIError("please provide 'assignableScopes'")
@@ -102,9 +104,9 @@ def _create_update_role_definition(role_definition, for_update):
                                                role_definition=definition)
 
 
-def delete_role_definition(name, resource_group_name=None, scope=None,
+def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
                            custom_role_only=False):
-    definitions_client = _auth_client_factory(scope).role_definitions
+    definitions_client = _auth_client_factory(cmd.cli_ctx, scope).role_definitions
     scope = _build_role_scope(resource_group_name, scope,
                               definitions_client.config.subscription_id)
     roles = _search_role_definitions(definitions_client, name, scope, custom_role_only)
@@ -121,13 +123,16 @@ def _search_role_definitions(definitions_client, name, scope, custom_role_only=F
     return roles
 
 
-def create_role_assignment(role, assignee, resource_group_name=None, scope=None):
-    return _create_role_assignment(role, assignee, resource_group_name, scope)
+def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None, scope=None):
+    if bool(assignee) == bool(assignee_object_id):
+        raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
+    return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id,
+                                   resource_group_name, scope, resolve_assignee=(not assignee_object_id))
 
 
-def _create_role_assignment(role, assignee, resource_group_name=None, scope=None,
+def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
                             resolve_assignee=True):
-    factory = _auth_client_factory(scope)
+    factory = _auth_client_factory(cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
 
@@ -135,23 +140,23 @@ def _create_role_assignment(role, assignee, resource_group_name=None, scope=None
                               assignments_client.config.subscription_id)
 
     role_id = _resolve_role_id(role, scope, definitions_client)
-    object_id = _resolve_object_id(assignee) if resolve_assignee else assignee
+    object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
     properties = RoleAssignmentProperties(role_id, object_id)
-    assignment_name = uuid.uuid4()
+    assignment_name = _gen_guid()
     custom_headers = None
     return assignments_client.create(scope, assignment_name, properties,
                                      custom_headers=custom_headers)
 
 
-def list_role_assignments(assignee=None, role=None, resource_group_name=None,
-                          scope=None, include_inherited=False, show_all=False, include_groups=False,
-                          include_classic_administrators=False):
+def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=None,
+                          scope=None, include_inherited=False,
+                          show_all=False, include_groups=False, include_classic_administrators=False):
     '''
     :param include_groups: include extra assignments to the groups of which the user is a
     member(transitively). Supported only for a user principal.
     '''
-    graph_client = _graph_client_factory()
-    factory = _auth_client_factory(scope)
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    factory = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
 
@@ -163,13 +168,13 @@ def list_role_assignments(assignee=None, role=None, resource_group_name=None,
         scope = _build_role_scope(resource_group_name, scope,
                                   definitions_client.config.subscription_id)
 
-    assignments = _search_role_assignments(assignments_client, definitions_client,
+    assignments = _search_role_assignments(cmd.cli_ctx, assignments_client, definitions_client,
                                            scope, assignee, role,
                                            include_inherited, include_groups)
 
     results = todict(assignments) if assignments else []
     if include_classic_administrators:
-        results += _backfill_assignments_for_co_admins(factory, assignee)
+        results += _backfill_assignments_for_co_admins(cmd.cli_ctx, factory, assignee)
 
     if not results:
         return []
@@ -187,37 +192,32 @@ def list_role_assignments(assignee=None, role=None, resource_group_name=None,
     # fill in principal names
     principal_ids = set(i['properties']['principalId'] for i in results if i['properties']['principalId'])
     if principal_ids:
-        principals = _get_object_stubs(graph_client, principal_ids)
-        principal_dics = {i.object_id: _get_displayable_name(i) for i in principals}
-        for i in [r for r in results if not r['properties'].get('principalName')]:
-            i['properties']['principalName'] = ''
-            if principal_dics.get(i['properties']['principalId']):
-                i['properties']['principalName'] = principal_dics[i['properties']['principalId']]
+        try:
+            principals = _get_object_stubs(graph_client, principal_ids)
+            principal_dics = {i.object_id: _get_displayable_name(i) for i in principals}
+
+            for i in [r for r in results if not r['properties'].get('principalName')]:
+                i['properties']['principalName'] = ''
+                if principal_dics.get(i['properties']['principalId']):
+                    i['properties']['principalName'] = principal_dics[i['properties']['principalId']]
+        except (CloudError, GraphErrorException) as ex:
+            # failure on resolving principal due to graph permission should not fail the whole thing
+            logger.info("Failed to resolve graph object information per error '%s'", ex)
 
     return results
 
 
-def _get_displayable_name(graph_object):
-    if graph_object.user_principal_name:
-        return graph_object.user_principal_name
-    elif graph_object.service_principal_names:
-        return graph_object.service_principal_names[0]
-    return graph_object.display_name or ''
-
-
-def _backfill_assignments_for_co_admins(authz_client, assignee=None):
-    co_admins = authz_client.classic_administrators.list('2015-06-01')  # known swagger bug on api-version handling
+def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
+    co_admins = auth_client.classic_administrators.list('2015-06-01')  # known swagger bug on api-version handling
     co_admins = [x for x in co_admins if x.properties.email_address]
-    graph_client = _graph_client_factory()
+    graph_client = _graph_client_factory(cli_ctx)
     if assignee:  # apply assignee filter if applicable
-        try:
-            uuid.UUID(assignee)
+        if _is_guid(assignee):
             result = _get_object_stubs(graph_client, [assignee])
             if not result:
                 return []
             assignee = _get_displayable_name(result[0]).lower()
-        except ValueError:
-            pass
+
         co_admins = [x for x in co_admins if assignee == x.properties.email_address.lower()]
 
     if not co_admins:
@@ -240,15 +240,23 @@ def _backfill_assignments_for_co_admins(authz_client, assignee=None):
                 'principalName': email,
                 'roleDefinitionName': admin.properties.role,
                 'roleDefinitionId': 'NA(classic admin role)',
-                'scope': '/subscriptions/' + authz_client.config.subscription_id
+                'scope': '/subscriptions/' + auth_client.config.subscription_id
             }
         })
     return result
 
 
-def delete_role_assignments(ids=None, assignee=None, role=None,
+def _get_displayable_name(graph_object):
+    if graph_object.user_principal_name:
+        return graph_object.user_principal_name
+    elif graph_object.service_principal_names:
+        return graph_object.service_principal_names[0]
+    return graph_object.display_name or ''
+
+
+def delete_role_assignments(cmd, ids=None, assignee=None, role=None,
                             resource_group_name=None, scope=None, include_inherited=False):
-    factory = _auth_client_factory(scope)
+    factory = _auth_client_factory(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
     ids = ids or []
@@ -261,7 +269,7 @@ def delete_role_assignments(ids=None, assignee=None, role=None,
 
     scope = _build_role_scope(resource_group_name, scope,
                               assignments_client.config.subscription_id)
-    assignments = _search_role_assignments(assignments_client, definitions_client,
+    assignments = _search_role_assignments(cmd.cli_ctx, assignments_client, definitions_client,
                                            scope, assignee, role, include_inherited,
                                            include_groups=False)
 
@@ -272,11 +280,11 @@ def delete_role_assignments(ids=None, assignee=None, role=None,
         raise CLIError('No matched assignments were found to delete')
 
 
-def _search_role_assignments(assignments_client, definitions_client,
+def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
                              scope, assignee, role, include_inherited, include_groups):
     assignee_object_id = None
     if assignee:
-        assignee_object_id = _resolve_object_id(assignee)
+        assignee_object_id = _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=True)
 
     # combining filters is unsupported, so we pick the best, and do limited maunal filtering
     if assignee_object_id:
@@ -323,12 +331,9 @@ def _resolve_role_id(role, scope, definitions_client):
                 role, re.I):
         role_id = role
     else:
-        try:
-            uuid.UUID(role)
+        if _is_guid(role):
             role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
                 definitions_client.config.subscription_id, role)
-        except ValueError:
-            pass
         if not role_id:  # retrieve role id
             role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
             if not role_defs:
@@ -393,9 +398,6 @@ def create_user(client, user_principal_name, display_name, password,
     return client.create(param)
 
 
-create_user.__doc__ = UserCreateParameters.__doc__
-
-
 def list_groups(client, display_name=None, query_filter=None):
     '''
     list groups in the directory
@@ -412,7 +414,6 @@ def create_application(client, display_name, homepage, identifier_uris,
                        available_to_other_tenants=False, password=None, reply_urls=None,
                        key_value=None, key_type=None, key_usage=None, start_date=None,
                        end_date=None):
-    from azure.graphrbac.models import GraphErrorException
     password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                          key_usage, start_date, end_date)
 
@@ -463,11 +464,10 @@ def delete_application(client, identifier):
 def _resolve_application(client, identifier):
     result = list(client.list(filter="identifierUris/any(s:s eq '{}')".format(identifier)))
     if not result:
-        try:
-            uuid.UUID(identifier)
+        if _is_guid(identifier):
             # it is either app id or object id, let us verify
             result = list(client.list(filter="appId eq '{}'".format(identifier)))
-        except ValueError:
+        else:
             raise CLIError("Application '{}' doesn't exist".format(identifier))
 
     return result[0].object_id if result else identifier
@@ -494,26 +494,25 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     password_creds = None
     key_creds = None
     if password:
-        password_creds = [PasswordCredential(start_date, end_date, str(uuid.uuid4()), password)]
+        password_creds = [PasswordCredential(start_date, end_date, str(_gen_guid()), password)]
     elif key_value:
-        key_creds = [KeyCredential(start_date, end_date, key_value, str(uuid.uuid4()),
+        key_creds = [KeyCredential(start_date, end_date, key_value, str(_gen_guid()),
                                    key_usage, key_type)]
 
     return (password_creds, key_creds)
 
 
-def create_service_principal(identifier):
-    return _create_service_principal(identifier)
+def create_service_principal(cmd, identifier):
+    return _create_service_principal(cmd.cli_ctx, identifier)
 
 
-def _create_service_principal(identifier, resolve_app=True):
-    client = _graph_client_factory()
+def _create_service_principal(cli_ctx, identifier, resolve_app=True):
+    client = _graph_client_factory(cli_ctx)
 
     if resolve_app:
-        try:
-            uuid.UUID(identifier)
+        if _is_guid(identifier):
             result = list(client.applications.list(filter="appId eq '{}'".format(identifier)))
-        except ValueError:
+        else:
             result = list(client.applications.list(
                 filter="identifierUris/any(s:s eq '{}')".format(identifier)))
 
@@ -531,8 +530,8 @@ def show_service_principal(client, identifier):
     return client.get(object_id)
 
 
-def delete_service_principal(identifier):
-    client = _graph_client_factory()
+def delete_service_principal(cmd, identifier):
+    client = _graph_client_factory(cmd.cli_ctx)
     sp = client.service_principals.get(_resolve_service_principal(client.service_principals, identifier))
     app_object_id = None
 
@@ -543,10 +542,10 @@ def delete_service_principal(identifier):
         if result:
             app_object_id = result[0].object_id
 
-    assignments = list_role_assignments(assignee=identifier, show_all=True)
+    assignments = list_role_assignments(cmd, assignee=identifier, show_all=True)
     if assignments:
         logger.warning('Removing role assignments')
-        delete_role_assignments([a['id'] for a in assignments])
+        delete_role_assignments(cmd, [a['id'] for a in assignments])
 
     if app_object_id:  # delete the application, and AAD service will automatically clean up the SP
         client.applications.delete(app_object_id)
@@ -559,19 +558,18 @@ def _resolve_service_principal(client, identifier):
     result = list(client.list(filter="servicePrincipalNames/any(c:c eq '{}')".format(identifier)))
     if result:
         return result[0].object_id
-    try:
-        uuid.UUID(identifier)
+    if _is_guid(identifier):
         return identifier  # assume an object id
-    except ValueError:
+    else:
         raise CLIError("service principal '{}' doesn't exist".format(identifier))
 
 
-def _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert,
+def _process_service_principal_creds(cli_ctx, years, app_start_date, app_end_date, cert, create_cert,
                                      password, keyvault):
 
     if not any((cert, create_cert, password, keyvault)):
         # 1 - Simplest scenario. Use random password
-        return str(uuid.uuid4()), None, None, None, None
+        return str(_gen_guid()), None, None, None, None
 
     if password:
         # 2 - Password supplied -- no certs
@@ -594,14 +592,12 @@ def _process_service_principal_creds(years, app_start_date, app_end_date, cert, 
     elif create_cert and keyvault:
         # 5 - Create self-signed cert in KeyVault
         public_cert_string, cert_file, cert_start_date, cert_end_date = \
-            _create_self_signed_cert_with_keyvault(
-                years, keyvault, cert)
+            _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, cert)
     elif keyvault:
         import base64
-        from azure.cli.core._profile import CLOUD
         # 6 - Use existing cert from KeyVault
-        kv_client = _get_keyvault_client()
-        vault_base = 'https://{}{}/'.format(keyvault, CLOUD.suffixes.keyvault_dns)
+        kv_client = _get_keyvault_client(cli_ctx)
+        vault_base = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
         cert_obj = kv_client.get_certificate(vault_base, cert, '')
         public_cert_string = base64.b64encode(cert_obj.cer).decode('utf-8')  # pylint: disable=no-member
         cert_start_date = cert_obj.attributes.not_before  # pylint: disable=no-member
@@ -628,17 +624,18 @@ def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_
     return (app_start_date, app_end_date, cert_start_date, cert_end_date)
 
 
+# pylint: disable=inconsistent-return-statements
 def create_service_principal_for_rbac(
         # pylint:disable=too-many-statements,too-many-locals, too-many-branches
-        name=None, password=None, years=None,
+        cmd, name=None, password=None, years=None,
         create_cert=False, cert=None,
         scopes=None, role='Contributor',
         show_auth_for_sdk=None, skip_assignment=False, keyvault=None):
     import time
     import pytz
 
-    graph_client = _graph_client_factory()
-    role_client = _auth_client_factory().role_assignments
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+    role_client = _auth_client_factory(cmd.cli_ctx).role_assignments
     scopes = scopes or ['/subscriptions/' + role_client.config.subscription_id]
     years = years or 1
     sp_oid = None
@@ -664,7 +661,7 @@ def create_service_principal_for_rbac(
         name = 'http://' + app_display_name  # just a valid uri, no need to exist
 
     password, public_cert_string, cert_file, cert_start_date, cert_end_date = \
-        _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert,
+        _process_service_principal_creds(cmd.cli_ctx, years, app_start_date, app_end_date, cert, create_cert,
                                          password, keyvault)
 
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
@@ -684,7 +681,7 @@ def create_service_principal_for_rbac(
     # retry till server replication is done
     for l in range(0, _RETRY_TIMES):
         try:
-            aad_sp = _create_service_principal(app_id, resolve_app=False)
+            aad_sp = _create_service_principal(cmd.cli_ctx, app_id, resolve_app=False)
             break
         except Exception as ex:  # pylint: disable=broad-except
             if l < _RETRY_TIMES and (
@@ -704,7 +701,7 @@ def create_service_principal_for_rbac(
         for scope in scopes:
             for l in range(0, _RETRY_TIMES):
                 try:
-                    _create_role_assignment(role, sp_oid, None, scope, resolve_assignee=False)
+                    _create_role_assignment(cmd.cli_ctx, role, sp_oid, None, scope, resolve_assignee=False)
                     break
                 except Exception as ex:
                     if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
@@ -723,7 +720,7 @@ def create_service_principal_for_rbac(
     if show_auth_for_sdk:
         import json
         from azure.cli.core._profile import Profile
-        profile = Profile()
+        profile = Profile(cli_ctx=cmd.cli_ctx)
         result = profile.get_sp_auth_info(scopes[0].split('/')[2] if scopes else None,
                                           app_id, password, cert_file)
         # sdk-auth file should be in json format all the time, hence the print
@@ -745,12 +742,12 @@ def create_service_principal_for_rbac(
     return result
 
 
-def _get_keyvault_client():
+def _get_keyvault_client(cli_ctx):
     from azure.cli.core._profile import Profile
     from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
 
     def _get_token(server, resource, scope):  # pylint: disable=unused-argument
-        return Profile().get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
+        return Profile(cli_ctx=cli_ctx).get_login_credentials(resource)[0]._token_retriever()  # pylint: disable=protected-access
 
     return KeyVaultClient(KeyVaultAuthentication(_get_token))
 
@@ -806,12 +803,11 @@ def _create_self_signed_cert(start_date, end_date):  # pylint: disable=too-many-
     return (cert_string, creds_file, cert_start_date, cert_end_date)
 
 
-def _create_self_signed_cert_with_keyvault(years, keyvault, keyvault_cert_name):  # pylint: disable=too-many-locals
-    from azure.cli.core._profile import CLOUD
+def _create_self_signed_cert_with_keyvault(cli_ctx, years, keyvault, keyvault_cert_name):  # pylint: disable=too-many-locals
     import base64
     import time
 
-    kv_client = _get_keyvault_client()
+    kv_client = _get_keyvault_client(cli_ctx)
     cert_policy = {
         'issuer_parameters': {
             'name': 'Self'
@@ -846,7 +842,7 @@ def _create_self_signed_cert_with_keyvault(years, keyvault, keyvault_cert_name):
             'validity_in_months': ((years * 12) + 1)
         }
     }
-    vault_base_url = 'https://{}{}/'.format(keyvault, CLOUD.suffixes.keyvault_dns)
+    vault_base_url = 'https://{}{}/'.format(keyvault, cli_ctx.cloud.suffixes.keyvault_dns)
     kv_client.create_certificate(vault_base_url, keyvault_cert_name, cert_policy)
     while kv_client.get_certificate_operation(vault_base_url, keyvault_cert_name).status != 'completed':  # pylint: disable=no-member, line-too-long
         time.sleep(5)
@@ -897,10 +893,10 @@ def _get_public(x509):
     return stripped
 
 
-def reset_service_principal_credential(name, password=None, create_cert=False,
+def reset_service_principal_credential(cmd, name, password=None, create_cert=False,
                                        cert=None, years=None, keyvault=None, append=False):
     import pytz
-    client = _graph_client_factory()
+    client = _graph_client_factory(cmd.cli_ctx)
 
     # pylint: disable=no-member
 
@@ -925,7 +921,7 @@ def reset_service_principal_credential(name, password=None, create_cert=False,
     cert_file = None
 
     password, public_cert_string, cert_file, cert_start_date, cert_end_date = \
-        _process_service_principal_creds(years, app_start_date, app_end_date, cert, create_cert,
+        _process_service_principal_creds(cmd.cli_ctx, years, app_start_date, app_end_date, cert, create_cert,
                                          password, keyvault)
 
     app_start_date, app_end_date, cert_start_date, cert_end_date = \
@@ -941,7 +937,7 @@ def reset_service_principal_credential(name, password=None, create_cert=False,
         app_creds.append(PasswordCredential(
             start_date=app_start_date,
             end_date=app_end_date,
-            key_id=str(uuid.uuid4()),
+            key_id=str(_gen_guid()),
             value=password
         ))
 
@@ -953,7 +949,7 @@ def reset_service_principal_credential(name, password=None, create_cert=False,
             start_date=app_start_date,
             end_date=app_end_date,
             value=public_cert_string,
-            key_id=str(uuid.uuid4()),
+            key_id=str(_gen_guid()),
             usage='Verify',
             type='AsymmetricX509Cert'
         ))
@@ -973,22 +969,41 @@ def reset_service_principal_credential(name, password=None, create_cert=False,
     return result
 
 
-def _resolve_object_id(assignee):
-    client = _graph_client_factory()
+def _resolve_object_id(cli_ctx, assignee, fallback_to_object_id=False):
+    client = _graph_client_factory(cli_ctx)
     result = None
-    if assignee.find('@') >= 0:  # looks like a user principal name
-        result = list(client.users.list(filter="userPrincipalName eq '{}'".format(assignee)))
-    if not result:
-        result = list(client.service_principals.list(
-            filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
-    if not result:  # assume an object id, let us verify it
-        result = _get_object_stubs(client, [assignee])
+    try:
+        if assignee.find('@') >= 0:  # looks like a user principal name
+            result = list(client.users.list(filter="userPrincipalName eq '{}'".format(assignee)))
+        if not result:
+            result = list(client.service_principals.list(
+                filter="servicePrincipalNames/any(c:c eq '{}')".format(assignee)))
+        if not result:  # assume an object id, let us verify it
+            result = _get_object_stubs(client, [assignee])
 
-    # 2+ matches should never happen, so we only check 'no match' here
-    if not result:
-        raise CLIError("No matches in graph database for '{}'".format(assignee))
+        # 2+ matches should never happen, so we only check 'no match' here
+        if not result:
+            raise CLIError("No matches in graph database for '{}'".format(assignee))
 
-    return result[0].object_id
+        return result[0].object_id
+    except (CloudError, GraphErrorException):
+        if fallback_to_object_id and _is_guid(assignee):
+            return assignee
+        raise
+
+
+def _is_guid(guid):
+    try:
+        uuid.UUID(guid)
+        return True
+    except ValueError:
+        pass
+    return False
+
+
+# for injecting test seams to produce predicatable role assignment id for playback
+def _gen_guid():
+    return uuid.uuid4()
 
 
 def _get_object_stubs(graph_client, assignees):

@@ -3,8 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import CLIError
-from ..util import validate_time_range_and_add_defaults
+from azure.cli.command_modules.monitor.util import validate_time_range_and_add_defaults
 
 
 def list_activity_log(client, filters=None, correlation_id=None, resource_group=None, resource_id=None,
@@ -31,6 +30,7 @@ def list_activity_log(client, filters=None, correlation_id=None, resource_group=
     if filters:
         odata_filters = filters
     else:
+        from knack.util import CLIError
         collection = [correlation_id, resource_group, resource_id, resource_provider]
         if not _single(collection):
             raise CLIError("usage error: [--correlation-id ID | --resource-group NAME | "
@@ -89,6 +89,7 @@ def _activity_log_select_filter_builder(events=None):
 
 def _build_odata_filter(default_filter, field_name, field_value, field_label):
     if not field_value:
+        from knack.util import CLIError
         raise CLIError('Value for {} can not be empty.'.format(field_name))
 
     return _add_condition(default_filter, field_label, field_value)

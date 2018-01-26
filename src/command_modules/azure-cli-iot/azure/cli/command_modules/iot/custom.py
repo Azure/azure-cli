@@ -7,18 +7,48 @@
 from __future__ import print_function
 from os.path import exists
 from enum import Enum
-from azure.cli.core.util import CLIError
+from knack.config import CLIConfig
+from knack.util import CLIError
+from knack.log import get_logger
+
 from azure.mgmt.iothub.models.iot_hub_client_enums import IotHubSku, AccessRights
 from azure.mgmt.iothub.models.iot_hub_description import IotHubDescription
 from azure.mgmt.iothub.models.iot_hub_sku_info import IotHubSkuInfo
 from azure.mgmt.iothub.models.shared_access_signature_authorization_rule import SharedAccessSignatureAuthorizationRule
+
+from azure.mgmt.iothubprovisioningservices.models import (ProvisioningServiceDescription,
+                                                          IotDpsPropertiesDescription,
+                                                          IotHubDefinitionDescription,
+                                                          IotDpsSkuInfo,
+                                                          IotDpsSku,
+                                                          SharedAccessSignatureAuthorizationRuleAccessRightsDescription)
+
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.iot_hub_device_client import IotHubDeviceClient
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.authentication import Authentication
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.device_description import DeviceDescription
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.x509_thumbprint import X509Thumbprint
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
-from ._factory import resource_service_factory
+from azure.cli.core.extension import extension_exists
+from azure.cli.core._environment import get_config_dir
+
+from ._client_factory import resource_service_factory
 from ._utils import create_self_signed_certificate, open_certificate
+
+logger = get_logger(__name__)
+
+
+# IoT Extension run once awareness
+if not extension_exists('azure_cli_iot_ext'):
+    config = CLIConfig(get_config_dir())
+    ran_before = config.getboolean('iot', 'first_run', fallback=False)
+    if not ran_before:
+        extension_text = """
+                         Comprehensive IoT data-plane functionality is available
+                         in the Azure IoT CLI Extension. For more info and install guide
+                         go to https://github.com/Azure/azure-iot-cli-extension
+                         """
+        logger.warning(extension_text)
+        config.set_value('iot', 'first_run', 'yes')
 
 
 # CUSTOM TYPE
@@ -38,6 +68,215 @@ class SimpleAccessRights(Enum):
     registry_write = AccessRights.registry_write.value
     service_connect = AccessRights.service_connect.value
     device_connect = AccessRights.device_connect.value
+
+
+# CUSTOM METHODS FOR DPS
+def iot_dps_list(client, resource_group_name=None):
+    if resource_group_name is None:
+        return client.iot_dps_resource.list_by_subscription()
+    return client.iot_dps_resource.list_by_resource_group(resource_group_name)
+
+
+def iot_dps_get(client, dps_name, resource_group_name=None):
+    if resource_group_name is None:
+        return _get_iot_dps_by_name(client, dps_name, resource_group_name)
+    return client.iot_dps_resource.get(dps_name, resource_group_name)
+
+
+def iot_dps_create(cmd, client, dps_name, resource_group_name, location=None, sku=IotDpsSku.s1.value, unit=1):
+    cli_ctx = cmd.cli_ctx
+    _check_dps_name_availability(client.iot_dps_resource, dps_name)
+    location = _ensure_location(cli_ctx, resource_group_name, location)
+    dps_property = IotDpsPropertiesDescription()
+    dps_description = ProvisioningServiceDescription(location, dps_property, IotDpsSkuInfo(sku, unit))
+    return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
+
+
+def iot_dps_update(client, dps_name, parameters, resource_group_name):
+    return client.iot_dps_resource.create_or_update(resource_group_name, dps_name, parameters)
+
+
+def iot_dps_delete(client, dps_name, resource_group_name):
+    return client.iot_dps_resource.delete(dps_name, resource_group_name)
+
+
+# DPS access policy methods
+def iot_dps_access_policy_list(client, dps_name, resource_group_name):
+    iot_dps_get(client, dps_name, resource_group_name)
+    return client.iot_dps_resource.list_keys(dps_name, resource_group_name)
+
+
+def iot_dps_access_policy_get(client, dps_name, resource_group_name, access_policy_name):
+    iot_dps_get(client, dps_name, resource_group_name)
+    return client.iot_dps_resource.list_keys_for_key_name(dps_name, access_policy_name, resource_group_name)
+
+
+def iot_dps_access_policy_create(client, dps_name, resource_group_name, access_policy_name, rights, primary_key=None, secondary_key=None):
+    dps_access_policies = []
+    dps_access_policies.extend(iot_dps_access_policy_list(client, dps_name, resource_group_name))
+    if _is_policy_existed(dps_access_policies, access_policy_name):
+        raise CLIError("Access policy {0} already existed.".format(access_policy_name))
+
+    access_policy_rights = _convert_rights_to_access_rights(rights)
+    dps_access_policies.append(SharedAccessSignatureAuthorizationRuleAccessRightsDescription(
+        access_policy_name, access_policy_rights, primary_key, secondary_key))
+
+    dps = iot_dps_get(client, dps_name, resource_group_name)
+    dps_property = IotDpsPropertiesDescription(None, None, dps.properties.iot_hubs, dps.properties.allocation_policy, dps_access_policies)
+    dps_description = ProvisioningServiceDescription(dps.location, dps_property, dps.sku)
+
+    client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
+    return iot_dps_access_policy_get(client, dps_name, resource_group_name, access_policy_name)
+
+
+def iot_dps_access_policy_update(client, dps_name, resource_group_name, access_policy_name, primary_key=None, secondary_key=None, rights=None):
+    dps_access_policies = []
+    dps_access_policies.extend(iot_dps_access_policy_list(client, dps_name, resource_group_name))
+    if not _is_policy_existed(dps_access_policies, access_policy_name):
+        raise CLIError("Access policy {0} doesn't existed.".format(access_policy_name))
+
+    for policy in dps_access_policies:
+        if policy.key_name == access_policy_name:
+            if primary_key is not None:
+                policy.primary_key = primary_key
+            if secondary_key is not None:
+                policy.secondary_key = secondary_key
+            if rights is not None:
+                policy.rights = _convert_rights_to_access_rights(rights)
+
+    dps = iot_dps_get(client, dps_name, resource_group_name)
+    dps_property = IotDpsPropertiesDescription(None, None, dps.properties.iot_hubs, dps.properties.allocation_policy, dps_access_policies)
+    dps_description = ProvisioningServiceDescription(dps.location, dps_property, dps.sku)
+
+    client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
+    return iot_dps_access_policy_get(client, dps_name, resource_group_name, access_policy_name)
+
+
+def iot_dps_access_policy_delete(client, dps_name, resource_group_name, access_policy_name):
+    dps_access_policies = []
+    dps_access_policies.extend(iot_dps_access_policy_list(client, dps_name, resource_group_name))
+    if not _is_policy_existed(dps_access_policies, access_policy_name):
+        raise CLIError("Access policy {0} doesn't existed.".format(access_policy_name))
+    updated_policies = [p for p in dps_access_policies if p.key_name.lower() != access_policy_name.lower()]
+
+    dps = iot_dps_get(client, dps_name, resource_group_name)
+    dps_property = IotDpsPropertiesDescription(None, None, dps.properties.iot_hubs, dps.properties.allocation_policy, updated_policies)
+    dps_description = ProvisioningServiceDescription(dps.location, dps_property, dps.sku)
+
+    client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
+    return iot_dps_access_policy_list(client, dps_name, resource_group_name)
+
+
+# DPS linked hub methods
+def iot_dps_linked_hub_list(client, dps_name, resource_group_name):
+    dps = iot_dps_get(client, dps_name, resource_group_name)
+    return dps.properties.iot_hubs
+
+
+def iot_dps_linked_hub_get(client, dps_name, resource_group_name, linked_hub):
+    dps = iot_dps_get(client, dps_name, resource_group_name)
+    for hub in dps.properties.iot_hubs:
+        if hub.name == linked_hub:
+            return hub
+    raise CLIError("Linked hub '{0}' does not exist. Use 'iot dps linked-hub show to see all linked hubs.".format(linked_hub))
+
+
+def iot_dps_linked_hub_create(client, dps_name, resource_group_name, connection_string, location, apply_allocation_policy=None, allocation_weight=None):
+    dps_linked_hubs = []
+    dps_linked_hubs.extend(iot_dps_linked_hub_list(client, dps_name, resource_group_name))
+    dps_linked_hubs.append(IotHubDefinitionDescription(connection_string, location, apply_allocation_policy, allocation_weight))
+
+    dps = iot_dps_get(client, dps_name, resource_group_name)
+    dps_property = IotDpsPropertiesDescription(None, None, dps_linked_hubs, dps.properties.allocation_policy, dps.properties.authorization_policies)
+    dps_description = ProvisioningServiceDescription(dps.location, dps_property, dps.sku)
+
+    client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
+    return iot_dps_linked_hub_list(client, dps_name, resource_group_name)
+
+
+def iot_dps_linked_hub_update(client, dps_name, resource_group_name, linked_hub, apply_allocation_policy=None, allocation_weight=None):
+    dps_linked_hubs = []
+    dps_linked_hubs.extend(iot_dps_linked_hub_list(client, dps_name, resource_group_name))
+    if not _is_linked_hub_existed(dps_linked_hubs, linked_hub):
+        raise CLIError("Access policy {0} doesn't existed.".format(linked_hub))
+
+    for hub in dps_linked_hubs:
+        if hub.name == linked_hub:
+            if apply_allocation_policy is not None:
+                hub.apply_allocation_policy = apply_allocation_policy
+            if allocation_weight is not None:
+                hub.allocation_weight = allocation_weight
+
+    dps = iot_dps_get(client, dps_name, resource_group_name)
+    dps_property = IotDpsPropertiesDescription(None, None, dps_linked_hubs, dps.properties.allocation_policy, dps.properties.authorization_policies)
+    dps_description = ProvisioningServiceDescription(dps.location, dps_property, dps.sku)
+
+    client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
+    return iot_dps_linked_hub_get(client, dps_name, resource_group_name, linked_hub)
+
+
+def iot_dps_linked_hub_delete(client, dps_name, resource_group_name, linked_hub):
+    dps_linked_hubs = []
+    dps_linked_hubs.extend(iot_dps_linked_hub_list(client, dps_name, resource_group_name))
+    if not _is_linked_hub_existed(dps_linked_hubs, linked_hub):
+        raise CLIError("Linked hub {0} doesn't existed.".format(linked_hub))
+    updated_hub = [p for p in dps_linked_hubs if p.name.lower() != linked_hub.lower()]
+
+    dps = iot_dps_get(client, dps_name, resource_group_name)
+    dps_property = IotDpsPropertiesDescription(None, None, updated_hub, dps.properties.allocation_policy, dps.properties.authorization_policies)
+    dps_description = ProvisioningServiceDescription(dps.location, dps_property, dps.sku)
+
+    client.iot_dps_resource.create_or_update(resource_group_name, dps_name, dps_description)
+    return iot_dps_linked_hub_list(client, dps_name, resource_group_name)
+
+
+# DPS certificate methods
+def iot_dps_certificate_list(client, dps_name, resource_group_name):
+    return client.dps_certificates.list(resource_group_name, dps_name)
+
+
+def iot_dps_certificate_get(client, dps_name, resource_group_name, certificate_name):
+    return client.dps_certificate.get(certificate_name, resource_group_name, dps_name)
+
+
+def iot_dps_certificate_create(client, dps_name, resource_group_name, certificate_name, certificate_path):
+    cert_list = client.dps_certificates.list(resource_group_name, dps_name)
+    for cert in cert_list.value:
+        if cert.name == certificate_name:
+            raise CLIError("Certificate '{0}' already exists. Use 'iot dps certificate update'"
+                           " to update an existing certificate.".format(certificate_name))
+    certificate = open_certificate(certificate_path)
+    if not certificate:
+        raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
+    return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, None, certificate)
+
+
+def iot_dps_certificate_update(client, dps_name, resource_group_name, certificate_name, certificate_path, etag):
+    cert_list = client.dps_certificates.list(resource_group_name, dps_name)
+    for cert in cert_list.value:
+        if cert.name == certificate_name:
+            certificate = open_certificate(certificate_path)
+            if not certificate:
+                raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
+            return client.dps_certificate.create_or_update(resource_group_name, dps_name, certificate_name, etag, certificate)
+    raise CLIError("Certificate '{0}' does not exist. Use 'iot dps certificate create' to create a new certificate."
+                   .format(certificate_name))
+
+
+def iot_dps_certificate_delete(client, dps_name, resource_group_name, certificate_name, etag):
+    return client.dps_certificate.delete(resource_group_name, etag, dps_name, certificate_name)
+
+
+def iot_dps_certificate_gen_code(client, dps_name, resource_group_name, certificate_name, etag):
+    return client.dps_certificate.generate_verification_code(certificate_name, etag, resource_group_name, dps_name)
+
+
+def iot_dps_certificate_verify(client, dps_name, resource_group_name, certificate_name, certificate_path, etag):
+    certificate = open_certificate(certificate_path)
+    if not certificate:
+        raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
+    return client.dps_certificate.verify_certificate(certificate_name, etag, resource_group_name, dps_name,
+                                                     None, None, None, None, None, None, None, None, certificate)
 
 
 # CUSTOM METHODS
@@ -74,7 +313,8 @@ def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_p
             if not certificate:
                 raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
             return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, etag, certificate)
-    raise CLIError("Certificate '{0}' does not exist. Use 'iot hub certificate create' to create a new certificate.".format(certificate_name))
+    raise CLIError("Certificate '{0}' does not exist. Use 'iot hub certificate create' to create a new certificate."
+                   .format(certificate_name))
 
 
 def iot_hub_certificate_delete(client, hub_name, certificate_name, etag, resource_group_name=None):
@@ -95,9 +335,10 @@ def iot_hub_certificate_verify(client, hub_name, certificate_name, certificate_p
     return client.certificates.verify(resource_group_name, hub_name, certificate_name, etag, certificate)
 
 
-def iot_hub_create(client, hub_name, resource_group_name, location=None, sku=IotHubSku.f1.value, unit=1):
+def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None, sku=IotHubSku.f1.value, unit=1):
+    cli_ctx = cmd.cli_ctx
     _check_name_availability(client.iot_hub_resource, hub_name)
-    location = _ensure_location(resource_group_name, location)
+    location = _ensure_location(cli_ctx, resource_group_name, location)
     hub_description = IotHubDescription(location, client.iot_hub_resource.config.subscription_id, resource_group_name,
                                         IotHubSkuInfo(name=sku, capacity=unit))
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub_description)
@@ -131,6 +372,7 @@ def iot_hub_delete(client, hub_name, resource_group_name=None):
     return client.iot_hub_resource.delete(resource_group_name, hub_name)
 
 
+# pylint: disable=inconsistent-return-statements
 def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=None, policy_name='iothubowner',
                                    key_type=KeyType.primary.value):
     if hub_name is None:
@@ -296,6 +538,7 @@ def iot_device_delete(client, hub_name, device_id, resource_group_name=None, eta
     return device_client.delete(device_id, etag)
 
 
+# pylint: disable=inconsistent-return-statements
 def iot_device_show_connection_string(client, hub_name, device_id=None, resource_group_name=None, top=20,
                                       key_type=KeyType.primary.value):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
@@ -318,6 +561,7 @@ def iot_device_send_message(client, hub_name, device_id, resource_group_name=Non
     return device_client.send_message(device_id, data, message_id, correlation_id, user_id)
 
 
+# pylint: disable=inconsistent-return-statements
 def iot_device_receive_message(client, hub_name, device_id, resource_group_name=None, lock_timeout=60):
     device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
     result = device_client.receive_message(device_id, lock_timeout, raw=True)
@@ -399,9 +643,9 @@ def _get_iot_hub_by_name(client, hub_name):
     return target_hub
 
 
-def _ensure_location(resource_group_name, location):
+def _ensure_location(cli_ctx, resource_group_name, location):
     if location is None:
-        resource_group_client = resource_service_factory().resource_groups
+        resource_group_client = resource_service_factory(cli_ctx).resource_groups
         return resource_group_client.get(resource_group_name).location
     return location
 
@@ -435,3 +679,30 @@ def _convert_perms_to_access_rights(perm_list):
         'deviceconnect_registryread_registrywrite_serviceconnect': AccessRights.registry_read_registry_write_service_connect_device_connect
     }
     return access_rights_mapping[perm_key]
+
+
+def _is_linked_hub_existed(hubs, hub_name):
+    hub_set = set([h.name.lower() for h in hubs])
+    return hub_name.lower() in hub_set
+
+
+def _get_iot_dps_by_name(client, dps_name, resource_group=None):
+    all_dps = iot_dps_list(client, resource_group)
+    if all_dps is None:
+        raise CLIError("No DPS found in current subscription.")
+    try:
+        target_dps = next(x for x in all_dps if dps_name.lower() == x.name.lower())
+    except StopIteration:
+        raise CLIError("No DPS found with name {} in current subscription.".format(dps_name))
+    return target_dps
+
+
+def _check_dps_name_availability(iot_dps_resource, dps_name):
+    name_availability = iot_dps_resource.check_provisioning_service_name_availability(dps_name)
+    if name_availability is not None and not name_availability.name_available:
+        raise CLIError(name_availability.message)
+
+
+def _convert_rights_to_access_rights(right_list):
+    right_set = set(right_list)  # remove duplicate
+    return ",".join(list(right_set))

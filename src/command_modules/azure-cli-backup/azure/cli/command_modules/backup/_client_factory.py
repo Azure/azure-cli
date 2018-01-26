@@ -6,119 +6,113 @@
 # Base Client Factories
 
 
-def _resource_client_factory(**_):
+def _resource_client_factory(cli_ctx, **_):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
-def _compute_client_factory():
+def _compute_client_factory(cli_ctx, **_):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(ResourceType.MGMT_COMPUTE)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE)
 
 
-def _common_client_factory():
+def _common_client_factory(cli_ctx, **_):
     from azure.mgmt.recoveryservices import RecoveryServicesClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-    return get_mgmt_service_client(RecoveryServicesClient)
+    return get_mgmt_service_client(cli_ctx, RecoveryServicesClient)
 
 
-def _backup_client_factory():
+def _backup_client_factory(cli_ctx, **_):
     from azure.mgmt.recoveryservicesbackup import RecoveryServicesBackupClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
-    return get_mgmt_service_client(RecoveryServicesBackupClient)
+    return get_mgmt_service_client(cli_ctx, RecoveryServicesBackupClient)
+
 
 # External Deps Client Factories
+def virtual_machines_cf(cli_ctx, *_):
+    return _compute_client_factory(cli_ctx).virtual_machines
 
 
-def virtual_machines_cf():
-    return _compute_client_factory().virtual_machines
+def resources_cf(cli_ctx, *_):
+    return _resource_client_factory(cli_ctx).resources
 
-
-def resources_cf():
-    return _resource_client_factory().resources
 
 # Internal Deps Client Factories
+def vaults_cf(cli_ctx, *_):
+    return _common_client_factory(cli_ctx).vaults
 
 
-def vaults_cf(_):
-    return _common_client_factory().vaults
+def backup_storage_configs_cf(cli_ctx, *_):
+    return _common_client_factory(cli_ctx).backup_storage_configs
 
-
-def backup_storage_configs_cf(_):
-    return _common_client_factory().backup_storage_configs
 
 # Protection Client Factories
+def protection_policies_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).protection_policies
 
 
-def protection_policies_cf(_):
-    return _backup_client_factory().protection_policies
+def protection_containers_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).protection_containers
 
 
-def protection_containers_cf():
-    return _backup_client_factory().protection_containers
+def protection_container_refresh_operation_results_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).protection_container_refresh_operation_results
 
 
-def protection_container_refresh_operation_results_cf():
-    return _backup_client_factory().protection_container_refresh_operation_results
+def protected_items_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).protected_items
 
-
-def protected_items_cf(_):
-    return _backup_client_factory().protected_items
 
 # Backup Client Factories
+def backup_policies_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_policies
 
 
-def backup_policies_cf(_):
-    return _backup_client_factory().backup_policies
+def backup_protection_containers_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_protection_containers
 
 
-def backup_protection_containers_cf(_):
-    return _backup_client_factory().backup_protection_containers
+def backup_protectable_items_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_protectable_items
 
 
-def backup_protectable_items_cf():
-    return _backup_client_factory().backup_protectable_items
+def backup_protected_items_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_protected_items
 
 
-def backup_protected_items_cf(_):
-    return _backup_client_factory().backup_protected_items
+def backup_operation_statuses_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_operation_statuses
 
 
-def backup_operation_statuses_cf():
-    return _backup_client_factory().backup_operation_statuses
+def backups_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backups
 
 
-def backups_cf(_):
-    return _backup_client_factory().backups
+def backup_jobs_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).backup_jobs
 
-
-def backup_jobs_cf(_):
-    return _backup_client_factory().backup_jobs
 
 # Job Client Factories
+def job_details_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).job_details
 
 
-def job_details_cf(_):
-    return _backup_client_factory().job_details
+def job_cancellations_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).job_cancellations
 
-
-def job_cancellations_cf(_):
-    return _backup_client_factory().job_cancellations
 
 # Recovery Client Factories
+def recovery_points_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).recovery_points
 
 
-def recovery_points_cf(_):
-    return _backup_client_factory().recovery_points
+def restores_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).restores
 
 
-def restores_cf(_):
-    return _backup_client_factory().restores
-
-
-def item_level_recovery_connections_cf(_):
-    return _backup_client_factory().item_level_recovery_connections
+def item_level_recovery_connections_cf(cli_ctx, *_):
+    return _backup_client_factory(cli_ctx).item_level_recovery_connections

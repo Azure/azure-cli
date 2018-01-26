@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.2.1
++++++
+* Added two new commands for reservations. Reservation Summaries and Reservation Details
 
 0.2.0
 +++++

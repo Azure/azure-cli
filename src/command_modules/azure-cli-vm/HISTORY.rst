@@ -2,10 +2,36 @@
 
 Release History
 ===============
-2.0.20
+
+2.0.25
+++++++
+* vm image: support accept market terms to use vm images
+* vm/vmss create: ensure commands can run under proxy with unsigned certificates.
+* vmss:(PREVIEW) support low priority
+* `vm/vmss create` - `--admin-password` updated to type secureString.
+
+2.0.24
+++++++
+* vmss:(PREVIEW) cross zone support
+* vmss:(BREAKING CHANGE)single zone scale-set will default to "Standard" load balancer instead of "Basic"
+* vm/vmss: use right term of "userAssignedIdentity" for EMSI
+* vm: (PREVIEW) support os disk swap
+* vm: support use image from other subscriptions
+
+2.0.23
+++++++
+* vmss: ensure app-gateway has a name when defaults to it for large scalesets
+
+2.0.22
 ++++++
 * VM/VMSS: (Preview) support user assigned identity
-* add missing hyphen to help message
+
+2.0.21
+++++++
+* Minor fixes
+
+2.0.20
+++++++
 * Minor fixes
 
 2.0.19
@@ -16,7 +42,7 @@ Release History
 2.0.18
 ++++++
 * `vmss create`: fix a bug that blocks using Basic tier of VM sizes
-* `vm/vmss create`: expose `plan` arguments for using custom images with billing informations
+* `vm/vmss create`: expose `plan` arguments for using custom images with billing informations 
 * vm : support `vm secret add/remove/list`
 * vm : `vm format-secret` is copied to `vm secret format`. The old one will be removed in future
 * Minor fixes.
@@ -56,7 +82,7 @@ Release History
 * `vmss get-instance-view`: Fix issue where extra, erroneous information was displayed when using `--instance-id *`
 * `vmss create`: Added support for `--lb-sku`
 * `vm/vmss create`: remove human names from the admin name blacklist
-* `vm/vmss create`: fix issue where the command would throw an error if unable to extract plan information from an image.
+* `vm/vmss create`: fix issue where the command would throw an error if unable to extract plan information from an image. 
 * `vmss create`: fix a crash when create a scaleset with an internal LB
 * `vm availability-set create`: Fix issue where --no-wait argument did not work.
 
@@ -90,7 +116,7 @@ Release History
 
 2.0.9 (2017-06-21)
 ++++++++++++++++++
-* vm/vmss: lower thread number used for 'vm image list --all' to avoid exceeding the OS opened file limits
+* vm/vmss: lower thread number used for 'vm image list --all' to avoid exceeding the OS opened file limits  
 * diagnostics: Fix a typo in default Linux Diagnostic extension config
 * vmss create: fix failure when running with --use-unmanaged-disk
 

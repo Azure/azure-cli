@@ -30,7 +30,9 @@ DEPENDENCIES = [
     'nose>=1.3.7',
     'readme_renderer>=17.2',
     'six>=1.10.0',
-    'tabulate>=0.7.7'
+    'tabulate>=0.7.7',
+    'pytest',
+    'colorama>=0.3.7'
 ]
 
 setup(
@@ -47,14 +49,15 @@ setup(
         'automation.style',
         'automation.tests',
         'automation.setup',
-        'automation.coverage'
+        'automation.coverage',
+        'automation.verify'
     ],
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'azdev=automation.__main__:main',
-            'check_style=automation.style.run:main',
-            'run_tests=automation.tests.run:main'
-            ]
+            'check_style=automation.style:legacy_entry',
+            'run_tests=automation.tests:legacy_entry_point'
+        ]
     },
     install_requires=DEPENDENCIES
 )

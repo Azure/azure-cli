@@ -6,47 +6,56 @@
 set -e
 
 ##############################################
-# clean up
+# clean up and dir search
 mkdir -p ./artifacts
 echo `git rev-parse --verify HEAD` > ./artifacts/build.sha
 
 mkdir -p ./artifacts/build
 mkdir -p ./artifacts/source
-mkdir -p ./artifacts/app
 mkdir -p ./artifacts/testsrc
 
 output_dir=$(cd artifacts/build && pwd)
 sdist_dir=$(cd artifacts/source && pwd)
 testsrc_dir=$(cd artifacts/testsrc && pwd)
-app_dir=$(cd artifacts/app && pwd)
+script_dir=`cd $(dirname $0); pwd`
+
+target_profile=${AZURE_CLI_TEST_TARGET_PROFILE:-latest}
+if [ "$target_profile" != "latest" ]; then
+    # example: profile-2017-03-09. Python module name can't begin with a digit.
+    target_profile=profile_${target_profile//-/_}
+fi
+echo Pick up profile: $target_profile 
 
 ##############################################
-# Copy app scripts for batch run - To be retired in the future
-cp $(cd $(dirname $0); pwd)/app/* $app_dir
+# Define colored output func
+function title {
+    LGREEN='\033[1;32m'
+    CLEAR='\033[0m'
+
+    echo -e ${LGREEN}$1${CLEAR}
+}
 
 ##############################################
 # Update version strings
-if $TRAVIS; then
-    $(cd $(dirname $0); pwd)/version.sh $1
-fi
+title 'Determine version'
+. $script_dir/version.sh $1
+echo -n $version > ./artifacts/version
 
 ##############################################
 # build product packages
-echo 'Build Azure CLI and its command modules'
+title 'Build Azure CLI and its command modules'
 for setup_file in $(find src -name 'setup.py'); do
-    pushd $(dirname $setup_file)
-    echo ""
+    pushd $(dirname $setup_file) >/dev/null
     echo "Building module at $(pwd) ..."
     python setup.py -q bdist_wheel -d $output_dir
     python setup.py -q sdist -d $sdist_dir
-    popd
+    popd >/dev/null
 done
 
 ##############################################
 # build test packages
-echo 'Build Azure CLI tests package'
+title 'Build Azure CLI tests package'
 
-echo "Copy test source code into $build_src ..."
 for test_src in $(find src/command_modules -name tests -type d); do
     rel_path=${test_src##src/command_modules/}
     rel_path=(${rel_path/\// })
@@ -56,21 +65,24 @@ for test_src in $(find src/command_modules -name tests -type d); do
     cp -R $test_src/* $testsrc_dir/$rel_path
 done
 
-for test_src in $(find src -name tests | grep -v command_modules); do
-    rel_path=${test_src##src/}
-    rel_path=(${rel_path/\// })
-    rel_path=${rel_path[1]}
+if [ "$target_profile" == "latest" ]; then
+    # don't pack core tests for profiles other than latest
+    for test_src in $(find src -name tests | grep -v command_modules); do
+        rel_path=${test_src##src/}
+        rel_path=(${rel_path/\// })
+        rel_path=${rel_path[1]}
 
-    mkdir -p $testsrc_dir/$rel_path
-    cp -R $test_src/* $testsrc_dir/$rel_path
-done
+        mkdir -p $testsrc_dir/$rel_path
+        cp -R $test_src/* $testsrc_dir/$rel_path
+    done
+fi
 
 cat >$testsrc_dir/setup.py <<EOL
 #!/usr/bin/env python
 
 from setuptools import setup
 
-VERSION = "1.0.0.dev$TRAVIS_BUILD_NUMBER"
+VERSION = "1.0.0.dev$version"
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
@@ -101,23 +113,31 @@ setup(
     zip_safe=False,
     classifiers=CLASSIFIERS,
     packages=[
-        'azure.cli.core.tests',
 EOL
 
-for name in $(ls src/command_modules | grep azure-cli-); do
+if [ "$target_profile" == "latest" ]; then
+    echo "        'azure.cli.core.tests'," >>$testsrc_dir/setup.py
+fi
+
+for name in `ls src/command_modules | grep azure-cli-`; do
     module_name=${name##azure-cli-}
-    if [ -d src/command_modules/$name/azure/cli/command_modules/$module_name/tests ]; then
+    test_folder=src/command_modules/$name/azure/cli/command_modules/$module_name/tests
+    if [ -d $test_folder ]; then
         echo "        'azure.cli.command_modules.$module_name.tests'," >>$testsrc_dir/setup.py
+        if [ -d $test_folder/$target_profile ]; then
+            echo "        'azure.cli.command_modules.$module_name.tests.$target_profile'," >>$testsrc_dir/setup.py
+        fi
     fi
 done
 
 
 cat >>$testsrc_dir/setup.py <<EOL
     ],
-    package_data={'': ['recordings/**/*.yaml', 
+    package_data={'': ['recordings/*.yaml',
                        'data/*.zip',
                        'data/*.whl',
-                       '*.pem', 
+                       '*.zip',
+                       '*.pem',
                        '*.pfx',
                        '*.txt',
                        '*.json',
@@ -126,9 +146,9 @@ cat >>$testsrc_dir/setup.py <<EOL
                        '*.md',
                        '*.bat',
                        '*.txt',
-                       '*.cer', 
+                       '*.cer',
                        '**/*.cer',
-                       '**/*.pem', 
+                       '**/*.pem',
                        '**/*.pfx',
                        '**/*.txt',
                        '**/*.json',
@@ -141,17 +161,26 @@ cat >>$testsrc_dir/setup.py <<EOL
 )
 EOL
 
-pushd $testsrc_dir
-python setup.py -q bdist_wheel -d $output_dir 
+cat >>$testsrc_dir/setup.cfg <<EOL
+[bdist_wheel]
+universal=1
+EOL
+
+cat >>$testsrc_dir/README.txt <<EOL
+Azure CLI Test Cases
+EOL
+
+pushd $testsrc_dir >/dev/null
+python setup.py -q bdist_wheel -d $output_dir
 python setup.py -q sdist -d $sdist_dir
-popd
+popd >/dev/null
 
 ##############################################
 # clear afterwards
-rm -rf $testsrc_dir  
+rm -rf $testsrc_dir
 git checkout src
 
 ##############################################
-# summary 
-echo 'Build result:'
-ls -R ./artifacts
+# summary
+title 'Results'
+echo $(ls $sdist_dir | wc -l) packages created.

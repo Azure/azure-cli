@@ -3,10 +3,23 @@
 Release History
 ===============
 
+2.0.25
+++++++
+* clarify `--disable-browser` argument
+* improve tab completion for --vm-size arguments
+
+2.0.24
+++++++
+* fix get-credentials command
+* aks doesn't need to add role for SPN now
+
+2.0.23
+++++++
+* Update for CLI core changes.
+
 2.0.22
 ++++++
 * add korea south and korea central to preview regions
-* update `az aks install-connector` and `az aks remove-connector` commands to use the virtual-kubelet
 * use new flattened managed cluster representation which removes separate "properties" object
 
 2.0.21

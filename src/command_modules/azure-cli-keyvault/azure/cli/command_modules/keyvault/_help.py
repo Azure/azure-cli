@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 
 helps['keyvault'] = """
@@ -59,6 +59,7 @@ helps['keyvault certificate'] = """
 """
 
 helps['keyvault certificate download'] = """
+    type: command
     short-summary: Download the public portion of a Key Vault certificate.
     long-summary: The certificate formatted as either PEM or DER. PEM is the default.
     examples:

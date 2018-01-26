@@ -5,50 +5,43 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.core.application import APPLICATION
-from azure.cli.core.commands import cli_command
-from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
-from azure.cli.command_modules.cosmosdb._client_factory import (cf_cosmosdb)
-from ._client_factory import get_document_client_factory
-from ._command_type import cli_cosmosdb_data_plane_command
+from azure.cli.core.commands import CliCommandType
 
-if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
-    mgmt_path = 'azure.mgmt.cosmosdb.operations.database_accounts_operations#'
-    custome_path = 'azure.cli.command_modules.cosmosdb.custom#'
+from azure.cli.command_modules.cosmosdb._client_factory import cf_db_accounts
 
-    def deprecate(argv):
-        if argv[0] == 'documentdb':
-            from azure.cli.core.util import CLIError
-            raise CLIError('All documentdb commands have been renamed to cosmosdb')
 
-    APPLICATION.register(APPLICATION.COMMAND_PARSER_PARSING, deprecate)
+def load_command_table(self, _):
 
-    def db_accounts_factory(_):
-        return cf_cosmosdb().database_accounts
+    cosmosdb_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.cosmosdb.operations.database_accounts_operations#DatabaseAccountsOperations.{}',
+        client_factory=cf_db_accounts)
 
-    cli_command(__name__, 'cosmosdb show', mgmt_path + 'DatabaseAccountsOperations.get', db_accounts_factory)
-    cli_command(__name__, 'cosmosdb list-keys', mgmt_path + 'DatabaseAccountsOperations.list_keys', db_accounts_factory)
-    cli_command(__name__, 'cosmosdb list-read-only-keys', mgmt_path + 'DatabaseAccountsOperations.list_read_only_keys', db_accounts_factory)
-    cli_command(__name__, 'cosmosdb list-connection-strings', mgmt_path + 'DatabaseAccountsOperations.list_connection_strings', db_accounts_factory)
-    cli_command(__name__, 'cosmosdb regenerate-key', mgmt_path + 'DatabaseAccountsOperations.regenerate_key', db_accounts_factory)
-    cli_command(__name__, 'cosmosdb check-name-exists', mgmt_path + 'DatabaseAccountsOperations.check_name_exists', db_accounts_factory)
-    cli_command(__name__, 'cosmosdb delete', mgmt_path + 'DatabaseAccountsOperations.delete', db_accounts_factory)
-    cli_command(__name__, 'cosmosdb failover-priority-change', mgmt_path + 'DatabaseAccountsOperations.failover_priority_change', db_accounts_factory)
-    cli_command(__name__, 'cosmosdb create', custome_path + 'cli_cosmosdb_create', db_accounts_factory)
-    cli_command(__name__, 'cosmosdb update', custome_path + 'cli_cosmosdb_update', db_accounts_factory)
-    cli_command(__name__, 'cosmosdb list', custome_path + 'cli_cosmosdb_list', db_accounts_factory)
+    with self.command_group('cosmosdb', cosmosdb_sdk, client_factory=cf_db_accounts) as g:
+        g.command('show', 'get')
+        g.command('list-keys', 'list_keys')
+        g.command('list-read-only-keys', 'list_read_only_keys')
+        g.command('list-connection-strings', 'list_connection_strings')
+        g.command('regenerate-key', 'regenerate_key')
+        g.command('check-name-exists', 'check_name_exists')
+        g.command('delete', 'delete')
+        g.command('failover-priority-change', 'failover_priority_change')
+        g.custom_command('create', 'cli_cosmosdb_create')
+        g.custom_command('update', 'cli_cosmosdb_update')
+        g.custom_command('list', 'cli_cosmosdb_list')
 
     # # database operations
-    cli_cosmosdb_data_plane_command('cosmosdb database show', custome_path + 'cli_cosmosdb_database_show', get_document_client_factory)
-    cli_cosmosdb_data_plane_command('cosmosdb database list', custome_path + 'cli_cosmosdb_database_list', get_document_client_factory)
-    cli_cosmosdb_data_plane_command('cosmosdb database exists', custome_path + 'cli_cosmosdb_database_exists', get_document_client_factory)
-    cli_cosmosdb_data_plane_command('cosmosdb database create', custome_path + 'cli_cosmosdb_database_create', get_document_client_factory)
-    cli_cosmosdb_data_plane_command('cosmosdb database delete', custome_path + 'cli_cosmosdb_database_delete', get_document_client_factory)
+    with self.command_group('cosmosdb database') as g:
+        g.cosmosdb_custom('show', 'cli_cosmosdb_database_show')
+        g.cosmosdb_custom('list', 'cli_cosmosdb_database_list')
+        g.cosmosdb_custom('exists', 'cli_cosmosdb_database_exists')
+        g.cosmosdb_custom('create', 'cli_cosmosdb_database_create')
+        g.cosmosdb_custom('delete', 'cli_cosmosdb_database_delete')
 
     # collection operations
-    cli_cosmosdb_data_plane_command('cosmosdb collection show', custome_path + 'cli_cosmosdb_collection_show', get_document_client_factory)
-    cli_cosmosdb_data_plane_command('cosmosdb collection list', custome_path + 'cli_cosmosdb_collection_list', get_document_client_factory)
-    cli_cosmosdb_data_plane_command('cosmosdb collection exists', custome_path + 'cli_cosmosdb_collection_exists', get_document_client_factory)
-    cli_cosmosdb_data_plane_command('cosmosdb collection create', custome_path + 'cli_cosmosdb_collection_create', get_document_client_factory)
-    cli_cosmosdb_data_plane_command('cosmosdb collection delete', custome_path + 'cli_cosmosdb_collection_delete', get_document_client_factory)
-    cli_cosmosdb_data_plane_command('cosmosdb collection update', custome_path + 'cli_cosmosdb_collection_update', get_document_client_factory)
+    with self.command_group('cosmosdb collection') as g:
+        g.cosmosdb_custom('show', 'cli_cosmosdb_collection_show')
+        g.cosmosdb_custom('list', 'cli_cosmosdb_collection_list')
+        g.cosmosdb_custom('exists', 'cli_cosmosdb_collection_exists')
+        g.cosmosdb_custom('create', 'cli_cosmosdb_collection_create')
+        g.cosmosdb_custom('delete', 'cli_cosmosdb_collection_delete')
+        g.cosmosdb_custom('update', 'cli_cosmosdb_collection_update')

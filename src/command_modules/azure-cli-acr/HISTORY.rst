@@ -2,6 +2,18 @@
 
 Release History
 ===============
+2.0.20
+++++++
+* minor fix
+
+2.0.19
+++++++
+* Add acr login fallback on wincred errors.
+* Minor fixes, enable registry logs.
+
+2.0.18
+++++++
+* Update for CLI core changes.
 
 2.0.17
 ++++++

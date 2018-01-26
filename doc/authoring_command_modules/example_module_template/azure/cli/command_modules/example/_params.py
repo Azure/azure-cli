@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+from azure.cli.core.commands.parameters import name_type
 
-from azure.cli.core.commands import register_cli_argument
+def load_arguments(self, _):
 
-
-register_cli_argument('example', 'example_param', options_list=('--myparam', '-n'), help='The description of the param here.')
+    with self.argument_context('example') as c:
+        c.argument('example_name', arg_type=name_type, help='The name of the example.')

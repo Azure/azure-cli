@@ -1,6 +1,8 @@
 dist: trusty
 sudo: off
 language: python
+services:
+  - docker
 addons:
   apt:
     packages:
@@ -42,4 +44,10 @@ jobs:
     - stage: publish
       script: ./scripts/ci/publish.sh
       python: 3.6
+      env: PURPOSE='Nightly Edge Build'
       if: branch = dev and type = push
+    - stage: publish
+      script: ./scripts/ci/build_droid.sh
+      python: 3.6
+      env: PURPOSE='Automation Docker'
+      if: repo = Azure/azure-cli and type = push
