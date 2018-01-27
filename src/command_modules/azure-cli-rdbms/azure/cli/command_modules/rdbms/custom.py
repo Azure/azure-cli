@@ -7,6 +7,10 @@ from msrestazure.tools import (
     resource_id, is_valid_resource_id, parse_resource_id)
 
 
+
+SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
+
+
 # need to replace source sever name with source server id, so customer server restore function
 # The parameter list should be the same as that in factory to use the ParametersContext
 # auguments and validators
@@ -42,6 +46,9 @@ def _server_restore(cmd, client, resource_group_name, server_name, parameters, *
 
 def _server_update_custom_func(instance,
                                capacity=None,
+                               name=None,
+                               storage_mb=None,
+                               backup_retention_days=None,
                                administrator_login_password=None,
                                ssl_enforcement=None,
                                tags=None):
@@ -51,12 +58,19 @@ def _server_update_custom_func(instance,
     ServerUpdateParameters = getattr(module, 'ServerUpdateParameters')
 
     if capacity is not None:
+        instance.sku.name = _get_sku_name(instance.sku.tier, instance.sku.family, capacity)
         instance.sku.capacity = capacity
     else:
         instance.sku = None
 
+    if storage_mb is not None:
+        instance.storage_profile.storage_mb = storage_mb
+
+    if backup_retention_days is not None:
+        instance.storage_profile.backup_retention_days = backup_retention_days
+
     params = ServerUpdateParameters(sku=instance.sku,
-                                    storage_mb=None,
+                                    storage_profile=instance.storage_profile,
                                     administrator_login_password=administrator_login_password,
                                     version=None,
                                     ssl_enforcement=ssl_enforcement,
@@ -64,6 +78,16 @@ def _server_update_custom_func(instance,
 
     return params
 
+def _create_server_for_mysql(cmd, client, resource_group_name, server_name, parameters, **kwargs):
+     parameters.sku.name = _get_sku_name(parameters.sku.tier, parameters.sku.family, parameters.sku.capacity)
+     return client.create_or_update(resource_group_name, server_name, parameters)
+
+def _create_server_for_pgsql(cmd, client, resource_group_name, server_name, parameters, **kwargs):
+     parameters.sku.name = _get_sku_name(parameters.sku.tier, parameters.sku.family, parameters.sku.capacity)
+     return client.create(resource_group_name, server_name, parameters)
+
+def _get_sku_name(tier, family, capacity):
+    return '{}_{}_{}'.format(SKU_TIER_MAP[tier], family, str(capacity))
 
 # define custom func for firewall rule update, because flatten make generic update not work
 def _firewall_rule_custom_setter(client, resource_group_name, server_name, firewall_rule_name,
