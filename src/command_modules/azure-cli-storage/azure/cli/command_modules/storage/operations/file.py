@@ -33,7 +33,10 @@ def list_share_files(cmd, client, share_name, directory_name=None, timeout=None,
     if exclude_dir:
         t_file_properties = cmd.get_models('file.models#FileProperties')
 
-        return list(f for f in generator if isinstance(f.properties, t_file_properties))
+        return {
+            'generator': (f for f in generator if isinstance(f.properties, t_file_properties)),
+            'next_marker': generator.next_marker
+        }
 
     return generator
 
