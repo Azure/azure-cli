@@ -25,9 +25,10 @@ SERVER_NAME_MAX_LENGTH = 63
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine_type='mysql', engine_parameter_name='database_engine',
-                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='westeurope',
+                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='centralus',
                  admin_user='cloudsa', admin_password='SecretPassword123',
-                 resource_group_parameter_name='resource_group', skip_delete=True):
+                 resource_group_parameter_name='resource_group', skip_delete=True,
+                 performance_tier='GeneralPurpose', family='Gen4', vcore=4):
         super(ServerPreparer, self).__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
         from azure.cli.testsdk import TestCli
         self.cli_ctx = TestCli()
@@ -39,15 +40,21 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
         self.admin_password = admin_password
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
+        self.performance_tier = performance_tier
+        self.family = family
+        self.capacity = vcore
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
-        template = 'az {} server create -l {} -g {} -n {} -u {} -p {}'
+        template = 'az {} server create -l {} -g {} -n {} -u {} -p {} --performance-tier {}  --family {} --vcore {}'
         execute(self.cli_ctx, template.format(self.engine_type,
                                               self.location,
                                               group, name,
                                               self.admin_user,
-                                              self.admin_password))
+                                              self.admin_password,
+                                              self.performance_tier,
+                                              self.family,
+                                              self.capacity))
         return {self.parameter_name: name,
                 self.engine_parameter_name: self.engine_type}
 
@@ -67,29 +74,25 @@ class ServerMgmtScenarioTest(ScenarioTest):
     def test_mysql_server_mgmt(self, resource_group_1, resource_group_2):
         self._test_server_mgmt('mysql', resource_group_1, resource_group_2)
 
-    @ResourceGroupPreparer(parameter_name='resource_group_1')
-    @ResourceGroupPreparer(parameter_name='resource_group_2')
-    def test_postgres_server_mgmt(self, resource_group_1, resource_group_2):
-        self._test_server_mgmt('postgres', resource_group_1, resource_group_2)
-
     def _test_server_mgmt(self, database_engine, resource_group_1, resource_group_2):
         servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
                    self.create_random_name('azuredbclirestore', SERVER_NAME_MAX_LENGTH)]
         admin_login = 'cloudsa'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         edition = 'Basic'
-        old_cu = 100
-        new_cu = 50
+        old_cu = 1
+        new_cu = 2
+        family = 'Gen4'
 
         rg = resource_group_1
-        loc = 'westeurope'
+        loc = 'centralus'
 
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {} '
-                 '--performance-tier {} --compute-units {} --tags key=1'
+                 '--performance-tier {}  --family {} --vcore {} --tags key=1'
                  .format(database_engine, rg, servers[0], loc,
-                         admin_login, admin_passwords[0], edition, old_cu),
+                         admin_login, admin_passwords[0], edition, family, old_cu),
                  checks=[
                      JMESPathCheck('name', servers[0]),
                      JMESPathCheck('resourceGroup', rg),
@@ -105,7 +108,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                           checks=[
                               JMESPathCheck('name', servers[0]),
                               JMESPathCheck('administratorLogin', admin_login),
-                              JMESPathCheck('sku.capacity', 100),
+                              JMESPathCheck('sku.capacity', old_cu),
                               JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
 
         # test update server
@@ -120,7 +123,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('tags.key', '2'),
                      JMESPathCheck('administratorLogin', admin_login)])
 
-        self.cmd('{} server update -g {} --name {} --compute-units {}'
+        self.cmd('{} server update -g {} --name {} --vcore {}'
                  .format(database_engine, rg, servers[0], new_cu),
                  checks=[
                      JMESPathCheck('name', servers[0]),
@@ -142,7 +145,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login)])
 
         # test update server per property
-        self.cmd('{} server update -g {} --name {} --compute-units {}'
+        self.cmd('{} server update -g {} --name {} --vcore {}'
                  .format(database_engine, rg, servers[0], old_cu),
                  checks=[
                      JMESPathCheck('name', servers[0]),
@@ -208,14 +211,6 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='mysql')
     def test_mysql_proxy_resources_mgmt(self, resource_group, server, database_engine):
-        self._test_firewall_mgmt(resource_group, server, database_engine)
-        self._test_db_mgmt(resource_group, server, database_engine)
-        self._test_configuration_mgmt(resource_group, server, database_engine)
-        self._test_log_file_mgmt(resource_group, server, database_engine)
-
-    @ResourceGroupPreparer()
-    @ServerPreparer(engine_type='postgres')
-    def test_postgres_proxy_resources_mgmt(self, resource_group, server, database_engine):
         self._test_firewall_mgmt(resource_group, server, database_engine)
         self._test_db_mgmt(resource_group, server, database_engine)
         self._test_configuration_mgmt(resource_group, server, database_engine)
