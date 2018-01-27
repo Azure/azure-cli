@@ -129,7 +129,7 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
                          file_name1, share1, local_file)
         self.storage_cmd('storage file upload -p "{}" --share-name {} --source "{}"', account_info,
                          file_name2, share1, local_file)
-        result1 = self.storage_cmd('storage file list --num-results 1 -s {}', account_info,
+        result1 = self.storage_cmd('storage file list --num-results 1 -s {} --exclude-dir', account_info,
                                    share1).get_output_in_json()[0]
         result2 = self.storage_cmd('storage file list --num-results 1 -s {} --marker {}', account_info,
                                    share1, result1["nextMarker"]).get_output_in_json()[0]
@@ -137,6 +137,23 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
         # verify paging results
         self.assertIn(result1["name"], [file_name1, file_name2])
         self.assertIn(result2["name"], [file_name1, file_name2])
+        self.assertTrue(result1["name"] != result2["name"])
+        self.assertTrue(not result2["nextMarker"])
+
+        dir_name1 = self.create_random_name(prefix='dir', length=24)
+        dir_name2 = self.create_random_name(prefix='dir', length=24)
+
+        # directory list paging
+        self.storage_cmd('storage directory create -n {} --share-name {}', account_info, dir_name1, share2)
+        self.storage_cmd('storage directory create -n {} --share-name {}', account_info, dir_name2, share2)
+        result1 = self.storage_cmd('storage directory list --num-results 1 -s {}', account_info,
+                                   share2).get_output_in_json()[0]
+        result2 = self.storage_cmd('storage directory list --num-results 1 -s {} --marker {}', account_info,
+                                   share2, result1["nextMarker"]).get_output_in_json()[0]
+
+        # verify paging results
+        self.assertIn(result1["name"], [dir_name1, dir_name2])
+        self.assertIn(result2["name"], [dir_name1, dir_name2])
         self.assertTrue(result1["name"] != result2["name"])
         self.assertTrue(not result2["nextMarker"])
 
