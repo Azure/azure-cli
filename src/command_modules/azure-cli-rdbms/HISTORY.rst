@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.0.12
+++++++
+* New business model changes
 
 0.0.11
 ++++++

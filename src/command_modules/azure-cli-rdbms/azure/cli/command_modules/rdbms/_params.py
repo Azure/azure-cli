@@ -24,19 +24,21 @@ def load_arguments(self, _):
 
         with self.argument_context('{} server create'.format(command_group)) as c:
             c.expand('sku', engine.models.Sku)
-            c.ignore('name', 'family', 'size')
 
             c.expand('properties', engine.models.ServerPropertiesForDefaultCreate)
             c.argument('administrator_login', required=True, arg_group='Authentication')
             c.argument('administrator_login_password', arg_group='Authentication')
 
             c.expand('parameters', engine.models.ServerForCreate)
-
+            c.expand('storage_profile', engine.models.StorageProfile)
+            c.argument('capacity', options_list=['--vcore'], type=int, required=True, help='Number of vcore.')
+            c.argument('family', options_list=['--family'], arg_type=get_enum_type(['Gen4', 'Gen5']), required=True, help='Hardware generation.')
+            c.argument('tier', arg_type=get_enum_type(['Basic', 'GeneralPurpose', 'MemoryOptimized']), required=True, options_list=['--performance-tier'], help='The performance tier of the server.')
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False)
 
         with self.argument_context('{} server restore'. format(command_group)) as c:
             c.expand('sku', engine.models.Sku)
-            c.ignore('name', 'family', 'size', 'tier', 'capacity')
+            c.ignore('size')
 
             c.expand('properties', engine.models.ServerPropertiesForRestore)
             c.ignore('version', 'ssl_enforcement', 'storage_mb')
@@ -44,6 +46,8 @@ def load_arguments(self, _):
             c.expand('parameters', engine.models.ServerForCreate)
             c.ignore('tags', 'location')
 
+            c.expand('storage_profile', engine.models.StorageProfile)
+         
             c.argument('source_server_id', options_list=['--source-server', '-s'], help='The name or ID of the source server to restore from.')
             c.argument('restore_point_in_time', help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
 
@@ -61,13 +65,17 @@ def load_arguments(self, _):
 
     for scope in ['mysql server', 'postgres server']:
         with self.argument_context(scope) as c:
+            c.ignore('size', 'name')
+
             c.argument('server_name', options_list=['--name', '-n'], id_part='name', help='Name of the server.')
             c.argument('administrator_login', options_list=['--admin-user', '-u'])
             c.argument('administrator_login_password', options_list=['--admin-password', '-p'], required=False, help='The password of the administrator login.')
             c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--ssl-enforcement'], help='Enable ssl enforcement or not when connect to server.')
-            c.argument('tier', arg_type=get_enum_type(['Basic', 'Standard']), options_list=['--performance-tier'], help='The performance tier of the server.')
-            c.argument('capacity', options_list=['--compute-units'], type=int, help='Number of compute units.')
+            c.argument('tier', arg_type=get_enum_type(['Basic', 'GeneralPurpose', 'MemoryOptimized']), required=False, options_list=['--performance-tier'], help='The performance tier of the server.')
+            c.argument('capacity', options_list=['--vcore'], type=int, required=False, help='Number of vcore.')
+            c.argument('family', options_list=['--family'], arg_type=get_enum_type(['Gen4', 'Gen5']), required=False, help='Hardware generation.')
             c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The max storage size of the server, unit is MB.')
+            c.argument('backup_retention_days', options_list=['--backup-retention-days'], type=int, help='The max days of retention, unit is days.')
             c.argument('tags', tags_type)
 
     for scope in ['mysql server-logs', 'postgres server-logs']:
