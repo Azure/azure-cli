@@ -102,7 +102,11 @@ def create_boolean_result_output_transformer(property_name):
 
 
 def transform_storage_list_output(result):
-    return list(result)
+    def set_marker(item):
+        print(result)
+        item.next_marker = result.next_marker
+        return item
+    return list(map(set_marker, result))
 
 
 def transform_url(result):
