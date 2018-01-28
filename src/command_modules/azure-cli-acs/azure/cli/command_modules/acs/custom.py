@@ -58,7 +58,7 @@ from azure.mgmt.containerservice.models import ContainerServiceStorageProfileTyp
 from azure.mgmt.containerservice.models import ManagedCluster
 
 from ._client_factory import cf_container_services
-from ._client_factory import cf_resources
+from ._client_factory import cf_resource_groups
 from ._client_factory import get_auth_management_client
 from ._client_factory import get_graph_rbac_management_client
 
@@ -322,7 +322,7 @@ def k8s_install_connector(cmd, client, name, resource_group_name, connector_name
     except OSError:
         raise CLIError(helm_not_installed)
     # Validate if the RG exists
-    groups = cf_resources(cmd.cli_ctx).resource_groups
+    groups = cf_resource_groups(cmd.cli_ctx)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rgkaci = groups.get(resource_group_name)
     # Auto assign the location
@@ -704,7 +704,7 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
-    groups = cf_resources(cmd.cli_ctx).resource_groups
+    groups = cf_resource_groups(cmd.cli_ctx)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rg = groups.get(resource_group_name)
     if location is None:
@@ -1268,7 +1268,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
-    groups = cf_resources(cmd.cli_ctx).resource_groups
+    groups = cf_resource_groups(cmd.cli_ctx)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rg = groups.get(resource_group_name)
     if location is None:

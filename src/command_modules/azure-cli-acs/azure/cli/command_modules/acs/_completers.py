@@ -66,11 +66,11 @@ def _get_location(cmd, namespace):
 
 
 def _get_location_from_resource_group(cmd, resource_group_name):
-    from ._client_factory import cf_resources
+    from ._client_factory import cf_resource_groups
     from msrestazure.azure_exceptions import CloudError
 
     try:
-        rg = cf_resources(cmd.cli_ctx).resource_groups.get(resource_group_name)
+        rg = cf_resource_groups(cmd.cli_ctx).get(resource_group_name)
         return rg.location
     except CloudError as err:
         from argcomplete import warn
