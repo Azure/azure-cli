@@ -5,11 +5,10 @@
 
 from azure.cli.core.commands.client_factory import configure_common_settings
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType
 
 
 def cf_compute_service(cli_ctx, *_):
-    from azure.cli.core.profiles import ResourceType
-
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE)
 
 
@@ -19,6 +18,10 @@ def cf_container_services(cli_ctx, *_):
 
 def cf_managed_clusters(cli_ctx, *_):
     return get_container_service_client(cli_ctx).managed_clusters
+
+
+def cf_resources(cli_ctx, *_):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
 def get_auth_management_client(cli_ctx, scope=None, **_):

@@ -58,7 +58,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'aks_create', no_wait_param='no_wait')
         g.command('delete', 'delete', no_wait_param='raw', confirmation=True)
         g.custom_command('get-credentials', 'aks_get_credentials')
-        g.command('get-versions', 'get_upgrade_profile', table_transformer=aks_get_versions_table_format)
+        g.command('get-upgrades', 'get_upgrade_profile', table_transformer=aks_get_versions_table_format)
         g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)
         g.custom_command('install-connector', 'k8s_install_connector')
         g.custom_command('list', 'aks_list', table_transformer=aks_list_table_format)
@@ -71,4 +71,4 @@ def load_command_table(self, _):
         g.generic_wait_command('wait')
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
-        g.custom_command('get-all-versions', 'aks_get_all_versions', table_transformer=aks_versions_table_format)
+        g.custom_command('get-versions', 'aks_get_versions', table_transformer=aks_versions_table_format)

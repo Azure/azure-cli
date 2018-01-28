@@ -200,9 +200,14 @@ helps['aks get-credentials'] = """
           short-summary: Kubernetes configuration file to update. Use "-" to print YAML to stdout instead.
 """
 
+helps['aks get-upgrades'] = """
+    type: command
+    short-summary: Get the upgrade versions available for a managed Kubernetes cluster.
+"""
+
 helps['aks get-versions'] = """
     type: command
-    short-summary: Get versions available to upgrade a managed Kubernetes cluster.
+    short-summary: Get the versions available for creating a managed Kubernetes cluster.
 """
 
 helps['aks install-cli'] = """
