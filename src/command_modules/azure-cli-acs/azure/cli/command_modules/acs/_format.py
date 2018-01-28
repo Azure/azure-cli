@@ -6,6 +6,16 @@
 from collections import OrderedDict
 from distutils.version import StrictVersion
 
+from jmespath import compile as compile_jmes, functions, Options
+
+
+class CustomFunctions(functions.Functions):
+
+    @functions.signature({'types': ['array']})
+    def _func_sort_versions(self, s):
+        """Custom JMESPath `sort_versions` function that sorts an array of strings as software versions."""
+        return sorted(s, key=StrictVersion)
+
 
 def aks_list_table_format(results):
     """"Format a list of managed clusters as summary results for display with "-o table"."""
@@ -18,47 +28,38 @@ def aks_show_table_format(result):
 
 
 def _aks_table_format(result):
-    # put results in an ordered dict so the headers are predictable
-    table_row = OrderedDict()
-    for k in ['name', 'location', 'resourceGroup', 'kubernetesVersion', 'provisioningState', 'fqdn']:
-        table_row[k] = result.get(k)
-    return table_row
+    parsed = compile_jmes("""{
+        name: name,
+        location: location,
+        resourceGroup: resourceGroup,
+        kubernetesVersion: kubernetesVersion,
+        provisioningState: provisioningState,
+        fqdn: fqdn
+    }""")
+    # use ordered dicts so headers are predictable
+    return parsed.search(result, Options(dict_cls=OrderedDict))
 
 
-def aks_get_versions_table_format(result):
-    """Format get-versions upgrade results as a summary for display with "-o table"."""
-    master = result.get('controlPlaneProfile', {})
-    result['masterVersion'] = master.get('kubernetesVersion', 'unknown')
-    master_upgrades = master.get('upgrades', [])
-    result['masterUpgrades'] = ', '.join(master_upgrades) if master_upgrades else 'None available'
-
-    agents = result.get('agentPoolProfiles', [])
-    versions, upgrades = [], []
-    for agent in agents:
-        version = agent.get('kubernetesVersion', 'unknown')
-        agent_upgrades = agent.get('upgrades', [])
-        upgrade = ', '.join(agent_upgrades) if agent_upgrades else 'None available'
-        name = agent.get('name')
-        if name:  # multiple agent pools, presumably
-            version = "{}: {}".format(name, version)
-            upgrade = "{}: {}".format(name, upgrades)
-        versions.append(version)
-        upgrades.append(upgrade)
-
-    result['nodePoolVersion'] = ', '.join(versions)
-    result['nodePoolUpgrades'] = ', '.join(upgrades)
-
-    # put results in an ordered dict so the headers are predictable
-    table_row = OrderedDict()
-    for k in ['name', 'resourceGroup', 'masterVersion', 'masterUpgrades', 'nodePoolVersion', 'nodePoolUpgrades']:
-        table_row[k] = result.get(k)
-    return [table_row]
+def aks_upgrades_table_format(result):
+    """Format get-upgrades results as a summary for display with "-o table"."""
+    # This expression assumes there is one node pool, and that the master and nodes upgrade in lockstep.
+    parsed = compile_jmes("""{
+        name: name,
+        resourceGroup: resourceGroup,
+        masterVersion: controlPlaneProfile.kubernetesVersion || `unknown`,
+        nodePoolVersion: agentPoolProfiles[0].kubernetesVersion || `unknown`,
+        upgrades: agentPoolProfiles[0].upgrades | sort_versions(@) | join(`, `, @) || `None available`
+    }""")
+    # use ordered dicts so headers are predictable
+    return parsed.search(result, Options(dict_cls=OrderedDict, custom_functions=CustomFunctions()))
 
 
 def aks_versions_table_format(result):
-    """Format get-all-versions results as a summary for display with "-o table"."""
-    orchestrators = result.get('orchestrators', {})
-    versions = sorted((o.get('orchestratorVersion') for o in orchestrators), key=StrictVersion)
-
-    # format versions as a list of dicts
-    return [{'kubernetesVersion': v} for v in versions]
+    """Format get-versions results as a summary for display with "-o table"."""
+    parsed = compile_jmes("""orchestrators[].{
+        kubernetesVersion: orchestratorVersion,
+        upgradesAvailable: upgrades[].orchestratorVersion | sort_versions(@) | join(`, `, @) || `None available`
+    }""")
+    # use ordered dicts so headers are predictable
+    results = parsed.search(result, Options(dict_cls=OrderedDict, custom_functions=CustomFunctions()))
+    return sorted(results, key=lambda x: StrictVersion(x.get('kubernetesVersion')), reverse=True)
