@@ -106,9 +106,6 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     else:  # windows webapp without runtime specified
         site_config.app_settings.append(NameValuePair("WEBSITE_NODE_DEFAULT_VERSION",
                                                       node_default_version))
-
-    site_config.app_settings.append(NameValuePair("SCM_DO_BUILD_DURING_DEPLOYMENT",
-                                                  True))
     if site_config.app_settings:
         for setting in site_config.app_settings:
             logger.info('Will set appsetting %s', setting)
@@ -1722,6 +1719,10 @@ def create_deploy_webapp(cmd, name, location=None,
     logger.warning("Creating app '%s' ....", name)
     create_webapp(cmd, rg, name, asp, runtime_version)
     logger.warning("Webapp creation complete")
+
+    # setting to build after deployment
+    logger.warning("Updating app settings to enable build after deployment")
+    update_app_settings(cmd, rg, name, ["SCM_DO_BUILD_DURING_DEPLOYMENT=true"])
 
     # zip contents & deploy
     logger.warning("Creating zip with contents of dir %s ...", src_dir)
