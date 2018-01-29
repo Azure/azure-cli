@@ -275,28 +275,35 @@ class Profile(object):
         for s in consolidated:
             s[_SUBSCRIPTION_NAME] = "{}@{}".format(base_name, msi_port)
         # key-off subscription name to allow accounts with same id(but under different identities)
-        self._set_subscriptions(consolidated, key_name=_SUBSCRIPTION_NAME)
+        self._set_subscriptions(consolidated, secondary_key_name=_SUBSCRIPTION_NAME)
         return deepcopy(consolidated)
 
-    def _set_subscriptions(self, new_subscriptions, merge=True, key_name=_SUBSCRIPTION_ID):
+    def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
+
+        def _get_key_name(x, secondary_key_name):
+            return (x[_SUBSCRIPTION_ID] if secondary_key_name is None
+                    else '{}-{}'.format(x[_SUBSCRIPTION_ID], x[secondary_key_name]))
+
         existing_ones = self.load_cached_subscriptions(all_clouds=True)
         active_one = next((x for x in existing_ones if x.get(_IS_DEFAULT_SUBSCRIPTION)), None)
-        active_subscription_id = active_one[key_name] if active_one else None
+        active_subscription_id = active_one[_SUBSCRIPTION_ID] if active_one else None
+        active_secondary_key_val = active_one[secondary_key_name] if (active_one and secondary_key_name) else None
         active_cloud = self.cli_ctx.cloud
         default_sub_id = None
 
         # merge with existing ones
         if merge:
-            dic = collections.OrderedDict((x[key_name], x) for x in existing_ones)
+            dic = collections.OrderedDict((_get_key_name(x, secondary_key_name), x) for x in existing_ones)
         else:
             dic = collections.OrderedDict()
 
-        dic.update((x[key_name], x) for x in new_subscriptions)
+        dic.update((_get_key_name(x, secondary_key_name), x) for x in new_subscriptions)
         subscriptions = list(dic.values())
         if subscriptions:
             if active_one:
                 new_active_one = next(
-                    (x for x in new_subscriptions if x[key_name] == active_subscription_id),
+                    (x for x in new_subscriptions if x[_SUBSCRIPTION_ID] == active_subscription_id and
+                     (active_secondary_key_val is None or x[secondary_key_name] == active_secondary_key_val)),
                     None)
 
                 for s in subscriptions:
