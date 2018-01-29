@@ -7,7 +7,8 @@ import os.path
 
 from knack.help_files import helps
 
-SERVICE_PRINCIPAL_CACHE = os.path.join('$HOME', '.azure', 'acsServicePrincipal.json')
+ACS_SERVICE_PRINCIPAL_CACHE = os.path.join('$HOME', '.azure', 'acsServicePrincipal.json')
+AKS_SERVICE_PRINCIPAL_CACHE = os.path.join('$HOME', '.azure', 'aksServicePrincipal.json')
 
 
 # ACS command help
@@ -64,7 +65,7 @@ helps['acs create'] = """
                 }}]'
         - name: Create a DCOS cluster with agent-profiles specified from a file.
           text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles MyAgentProfiles.json
-""".format(sp_cache=SERVICE_PRINCIPAL_CACHE)
+""".format(sp_cache=ACS_SERVICE_PRINCIPAL_CACHE)
 
 helps['acs dcos'] = """
     type: group
@@ -144,7 +145,7 @@ helps['aks create'] = """
         - name: --service-principal
           type: string
           short-summary: Service principal used for authentication to Azure APIs.
-          long-summary:  If not specified, a new service principal with the contributor role is created and cached at
+          long-summary:  If not specified, a new service principal is created and cached at
                          {sp_cache} to be used by subsequent `az aks` commands.
         - name: --client-secret
           type: string
@@ -181,7 +182,7 @@ helps['aks create'] = """
           text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.8.1
         - name: Create a Kubernetes cluster with a larger node pool.
           text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
-""".format(sp_cache=SERVICE_PRINCIPAL_CACHE)
+""".format(sp_cache=AKS_SERVICE_PRINCIPAL_CACHE)
 
 helps['aks delete'] = """
     type: command
@@ -217,7 +218,7 @@ helps['aks install-cli'] = """
 
 helps['aks install-connector'] = """
     type: command
-    short-summary: Install the Azure Container Instances (ACI) Connector on a managed Kubernetes cluster.
+    short-summary: Install the ACI Connector on a managed Kubernetes cluster.
     parameters:
         - name: --chart-url
           type: string
@@ -231,7 +232,7 @@ helps['aks install-connector'] = """
         - name: --service-principal
           type: string
           short-summary: Service principal used for authentication to Azure APIs.
-          long-summary:  If not specified, a new service principal with the contributor role is created and cached at
+          long-summary:  If not specified, a new service principal is created and cached at
                          {sp_cache} to be used by subsequent `az aks` commands.
         - name: --client-secret
           type: string
@@ -258,7 +259,7 @@ helps['aks install-connector'] = """
           text: |-
             az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
               --connector-name MyConnector --chart-url <CustomURL>
-""".format(sp_cache=SERVICE_PRINCIPAL_CACHE)
+""".format(sp_cache=AKS_SERVICE_PRINCIPAL_CACHE)
 
 helps['aks list'] = """
     type: command
