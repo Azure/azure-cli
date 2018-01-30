@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.18
+++++++
+* ad app update: expose "--available-to-other-tenants"
 
 2.0.17
 ++++++
