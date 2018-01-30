@@ -34,3 +34,18 @@ helps['consumption usage list'] = """
     type: command
     short-summary: Show the details of Azure resource consumption, either as an invoice or within a billing period.
 """
+
+helps['consumption budget'] = """
+    type: group
+    short-summary: Budget....
+"""
+
+helps['consumption marketplace'] = """
+    type: group
+    short-summary: Marketplace .....
+"""
+
+helps['consumption pricesheet'] = """
+    type: group
+    short-summary: Show the details of Azure resource consumption, either as an invoice or within a billing period.
+"""

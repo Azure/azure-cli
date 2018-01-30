@@ -46,3 +46,30 @@ def reservation_details_output(result):
 
 def transform_reservation_details_list_output(result):
     return [reservation_details_output(item) for item in result]
+
+def transform_budget_output(result):
+    #TODO implement
+return result
+
+def transform_marketplace_output(result)
+    #TODO implement
+return result
+
+def transform_pricesheet_output(result):
+    result.billing_period_id = str(result.billing_period_id)
+    result.meter_id = str(result.meter_id)
+    result.meter_name = str(result.meter_name)
+    result.unit_of_measure = str(result.unit_of_measure)
+    result.included_quantity = str(result.included_quantity)
+    result.part_number = str(result.part_number)
+    result.unit_price = str(result.unit_price)
+    result.currency_code = str(result.currency_code)
+
+    if result.meter_details:        
+        result.meter_details.meter_name = str(result.meter_details.meter_name)
+        result.meter_details.meter_category = str(result.meter_details.meter_category)
+        result.meter_details.unit = str(result.meter_details.unit)
+        result.meter_details.meter_location = str(result.meter_details.meter_location)
+        result.meter_details.total_included_quantity = str(result.meter_details.total_included_quantity)
+        result.meter_details.pretax_standard_rate = str(result.meter_details.pretax_standard_rate)
+    return result

@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.2.2
++++++
+* Added new commands for budgets, marketplace and pricesheet APIs
+
 0.2.1
 +++++
 * Added two new commands for reservations. Reservation Summaries and Reservation Details

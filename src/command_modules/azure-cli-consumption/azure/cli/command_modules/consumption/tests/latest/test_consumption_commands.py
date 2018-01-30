@@ -54,6 +54,30 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         self.assertTrue(reservationdetails['totalReservedQuantity'])
         self.assertTrue(reservationdetails['usageDate'])
         self.assertTrue(reservationdetails['usedHours'])
+#TODO
+    def _validate_pricesheet(self, pricesheet, includeMeterDetails = false){
+        self.assertIsNotNone(pricesheet)
+        self.assertEqual(pricesheet['type'], 'Microsoft.Consumption/pricesheets')
+        self.assertEqual(pricesheet['name'], 'default')
+        self.assertTrue(pricesheet['id'])
+        self.assertIsNotNone(pricesheet['billingPeriodId'])
+        self.assertIsNotNone(pricesheet['meterId'])
+        self.assertIsNotNone(pricesheet['meterName'])
+        self.assertIsNotNone(pricesheet['unitOfMeasure'])
+        self.assertIsNotNone(pricesheet['includedQuantity'])
+        self.assertIsNotNone(pricesheet['partNumber'])
+        self.assertIsNotNone(pricesheet['unitPrice'])
+        self.assertIsNotNone(pricesheet['currencyCode'])
+
+        if includeMeterDetails:
+            self.assertIsNotNone(pricesheet['meterDetails'])
+            self.assertIsNotNone(pricesheet['meterDetails']['meterName'])
+            self.assertIsNotNone(pricesheet['meterDetails']['meterCategory'])
+            self.assertIsNotNone(pricesheet['meterDetails']['meterLocation'])
+            self.assertIsNotNone(pricesheet['meterDetails']['totalIncludedQuantity'])
+            self.assertIsNotNone(pricesheet['meterDetails']['pretaxStandardRate'])
+        else:
+            self.assertIsNone(pricesheet['meterDetails'])
 
     def test_list_usages_billing_period(self):
         self.kwargs.update({
@@ -127,3 +151,14 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         reservations_details_list = self.cmd('consumption reservations details list -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -i f37f4b70-52ba-4344-a8bd-28abfd21d640 -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
         self.assertTrue(reservations_details_list)
         self._validate_reservation_details(reservations_details_list[0])
+
+#TODO
+    def test_pricesheet_with_subscriptionid(self):
+        pricesheet_output = self.cmd('consumption price sheet ....').get_output_in_json()
+        #self.assertTrue(pricesheet_get)
+        self._validate_pricesheet(pricesheet_output[0], false)
+#TODO
+    def test_pricesheet_with_subscriptionid_with_meter_details(self):
+        pricesheet_output = self.cmd('consumption price sheet ....').get_output_in_json()
+        #self.assertTrue(pricesheet_get)
+        self._validate_pricesheet(pricesheet_output[0], true)
