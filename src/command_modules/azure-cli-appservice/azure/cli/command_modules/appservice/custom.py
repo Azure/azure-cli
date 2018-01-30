@@ -40,7 +40,8 @@ from .create_util import (
     get_node_runtime_version_toSet,
     create_resource_group,
     check_resource_group_exists,
-    check_resource_group_supports_Linux
+    check_resource_group_supports_linux,
+    check_if_asp_exists
 )
 
 logger = get_logger(__name__)
@@ -1633,11 +1634,9 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
     return response.json()
 
 
-def create_deploy_webapp(cmd, name, location=None,
-                         dryrun=False):
+def create_deploy_webapp(cmd, name, location=None, dryrun=False):
     import os
     import json
-
     sku = "S1"
     os_val = "Linux"
     language = "node"
@@ -1658,8 +1657,6 @@ def create_deploy_webapp(cmd, name, location=None,
 
     # the code to deploy is expected to be the current directory the command is running from
     src_dir = os.getcwd()
-    # TODO: For debuggin only remove before adding to PR
-    src_dir = 'P:\\CLI\\New_Node\\angular-cosmosdb-master'
 
     # if dir is empty, show a message in dry run
     do_deployment = False if os.listdir(src_dir) == [] else True
@@ -1678,8 +1675,18 @@ def create_deploy_webapp(cmd, name, location=None,
             node_version = data['version']
             version_used_create = get_node_runtime_version_toSet(node_version)
 
+    # ResourceGroup: check if default RG is set
+    default_rg = cmd.cli_ctx.config.get('defaults', 'group')
+    if (default_rg and check_resource_group_supports_linux(cmd, default_rg, location)):
+        rg = default_rg
+        rg_mssg = "[Using default ResourceGroup]"
+    else:
+        rg_mssg = ""
+
     runtime_version = "{}|{}".format(language, version_used_create)
     src_path = "{} {}".format(src_dir.replace("\\", "\\\\"), str_no_contents_warn)
+    rg_str = "{} {}".format(rg, rg_mssg)
+
     dry_run_str = r""" {
             "name" : "%s",
             "appServicePlan" : "%s",
@@ -1691,7 +1698,7 @@ def create_deploy_webapp(cmd, name, location=None,
             "version_detected": "%s",
             "version_to_create": "%s"
             }
-            """ % (name, asp, rg, full_sku, os_val, location, src_path,
+            """ % (name, asp, rg_str, full_sku, os_val, location, src_path,
                    node_version, runtime_version)
 
     create_json = json.dumps(json.loads(dry_run_str), indent=4, sort_keys=True)
@@ -1711,9 +1718,12 @@ def create_deploy_webapp(cmd, name, location=None,
         logger.warning("Resource Group '%s' already exists.", rg)
 
     # create asp
-    logger.warning("Creating App service plan '%s' ...", asp)
-    create_app_service_plan(cmd, rg, asp, True, sku, 1, loc_name)
-    logger.warning("AppServicePlan creation complete")
+    if not check_if_asp_exists(cmd, rg, asp):
+        logger.warning("Creating App service plan '%s' ...", asp)
+        create_app_service_plan(cmd, rg, asp, True, sku, 1, loc_name)
+        logger.warning("AppServicePlan creation complete")
+    else:
+        logger.warning("AppServicePlan '%s' already exists.", asp)
 
     # create the Linux app
     logger.warning("Creating app '%s' ....", name)

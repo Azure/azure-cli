@@ -60,9 +60,21 @@ def check_resource_group_exists(cmd, rg_name):
     return rcf.resource_groups.check_existence(rg_name)
 
 
-def check_resource_group_supports_Linux(cmd, rg_name, location):
+def check_resource_group_supports_linux(cmd, rg_name, location):
     # get all appservice plans from RG
     client = web_client_factory(cmd.cli_ctx)
     plans = list(client.app_service_plans.list_by_resource_group(rg_name))
     # filter by location & reserverd=false
-    return plans
+    for item in plans:
+        if item.location == location and not item.reserved:
+            return False
+    return True
+
+
+def check_if_asp_exists(cmd, rg_name, asp_name):
+    # get all appservice plans from RG
+    client = web_client_factory(cmd.cli_ctx)
+    for item in list(client.app_service_plans.list_by_resource_group(rg_name)):
+        if item.name == asp_name:
+            return True
+    return False
