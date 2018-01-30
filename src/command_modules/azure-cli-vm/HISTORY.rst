@@ -4,11 +4,11 @@ Release History
 ===============
 2.0.26
 ++++++
+* msi: output principal id on enabling system assigned identity
 * vm boot-diagnostic: fix the broken get log command
 
 2.0.25
 ++++++
-* msi: output principal id on enabling system assigned identity
 * vm image: support accept market terms to use vm images
 * vm/vmss create: ensure commands can run under proxy with unsigned certificates.
 * vmss:(PREVIEW) support low priority
