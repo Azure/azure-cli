@@ -506,7 +506,7 @@ class TestProfile(unittest.TestCase):
         test_client_id = '12345678-38d6-4fb2-bad9-b7b93a3e8888'
         msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id, 'MSIClient-{}@{}'.format(test_client_id, test_port), self.state1, test_tenant_id)
         consolidated = profile._normalize_properties(test_user, [msi_subscription], True)
-        profile._set_subscriptions(consolidated, key_name='name')
+        profile._set_subscriptions(consolidated, secondary_key_name='name')
 
         # setup a response for the token request
         test_token_entry = {
@@ -551,7 +551,7 @@ class TestProfile(unittest.TestCase):
                                             'MSIObject-{}@12345'.format(test_object_id),
                                             self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
         consolidated = profile._normalize_properties('userAssignedIdentity', [msi_subscription], True)
-        profile._set_subscriptions(consolidated, key_name='name')
+        profile._set_subscriptions(consolidated, secondary_key_name='name')
 
         # setup a response for the token request
         test_token_entry = {
@@ -592,7 +592,7 @@ class TestProfile(unittest.TestCase):
                                             'MSIResource-{}@12345'.format(test_res_id),
                                             self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
         consolidated = profile._normalize_properties('userAssignedIdentity', [msi_subscription], True)
-        profile._set_subscriptions(consolidated, key_name='name')
+        profile._set_subscriptions(consolidated, secondary_key_name='name')
 
         # setup a response for the token request
         test_token_entry = {
