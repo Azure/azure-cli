@@ -1,6 +1,8 @@
 dist: trusty
 sudo: off
 language: python
+services:
+  - docker
 addons:
   apt:
     packages:
@@ -11,8 +13,13 @@ install: echo 'skip'
 cache: pip
 jobs:
   include:
-    - stage: build
-      script: ./scripts/ci/build.sh
+    - stage: precheck
+      env: PURPOSE='PEP8'
+      script: ./scripts/ci/precheck_pep8.sh
+      python: 3.6
+    - stage: precheck
+      env: PURPOSE='Headers'
+      script: ./scripts/ci/precheck_header.sh
       python: 3.6
     - stage: verify
       env: PURPOSE='Automation'
@@ -37,4 +44,10 @@ jobs:
     - stage: publish
       script: ./scripts/ci/publish.sh
       python: 3.6
+      env: PURPOSE='Nightly Edge Build'
       if: branch = dev and type = push
+    - stage: publish
+      script: ./scripts/ci/build_droid.sh
+      python: 3.6
+      env: PURPOSE='Automation Docker'
+      if: repo = Azure/azure-cli and type = push

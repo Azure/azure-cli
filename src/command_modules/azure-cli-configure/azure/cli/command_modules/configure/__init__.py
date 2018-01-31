@@ -3,12 +3,30 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core import AzCommandsLoader
+from azure.cli.core.commands import CliCommandType
+
 import azure.cli.command_modules.configure._help  # pylint: disable=unused-import
 
 
-def load_params(_):
-    import azure.cli.command_modules.configure._params  # pylint: disable=redefined-outer-name, unused-variable
+class ConfigureCommandsLoader(AzCommandsLoader):
+
+    def __init__(self, cli_ctx=None):
+        super(ConfigureCommandsLoader, self).__init__(cli_ctx=cli_ctx)
+
+    def load_command_table(self, args):
+
+        configure_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.configure.custom#{}')
+
+        with self.command_group('', configure_custom) as g:
+            g.command('configure', 'handle_configure')
+
+        return self.command_table
+
+    def load_arguments(self, command):
+
+        with self.argument_context('configure') as c:
+            c.argument('defaults', nargs='+', options_list=('--defaults', '-d'))
 
 
-def load_commands():
-    import azure.cli.command_modules.configure.commands  # pylint: disable=redefined-outer-name, unused-variable
+COMMAND_LOADER_CLS = ConfigureCommandsLoader

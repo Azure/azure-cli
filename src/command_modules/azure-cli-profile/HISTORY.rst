@@ -2,6 +2,17 @@
 
 Release History
 ===============
+2.0.18
+++++++
+* ensure 'get-access-token' work inside a VM with identity
+
+2.0.17
+++++++
+* Update for CLI core changes.
+
+2.0.16
+++++++
+* support login with user assigned identities
 
 2.0.15
 ++++++

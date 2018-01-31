@@ -3,6 +3,32 @@
 Release History
 ===============
 
+2.0.22
+++++++
+* `application-gateway create`: `--cert-password` protected using secureString.
+* `application-gateway update`: Fix issue where `--sku` erroneously applied a default value.
+* `vpn-connection create`: `--shared-key` and `--authorization-key` protected using secureString.
+* `asg create`: Fix missing client issue.
+* `dns zone export`: Fix issue with exported names. Add `--file-name/-f` parameter.
+                     Fix issue where long TXT records were incorrectly exported.
+                     Fix issue where quoted TXT records were incorrectly exported without escaped quotes.
+* `dns zone import`: Fix issue where certain records were imported twice.
+* Restored `vnet-gateway root-cert` and `vnet-gateway revoked-cert` commands.
+
+2.0.21
+++++++
+* `vnet-gateway update`: Fix issue when trying to change to/from active-standby mode.
+* `application-gateway create/update`: Add support for HTTP2.
+
+2.0.20
+++++++
+* Update for CLI core changes.
+
+2.0.19
+++++++
+* `route-table create/update`: Add support for `--disable-bgp-route-propagation`.
+* `public-ip create/update`: Add support for `--ip-tags`
+
 2.0.18
 ++++++
 * `dns`: Add support for CAA records.

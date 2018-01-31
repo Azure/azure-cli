@@ -1,0 +1,2175 @@
+interactions:
+- request:
+    body: '{"location": "eastus", "tags": {"use": "az-test"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['50']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001","name":"clitest000001","location":"eastus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['212']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 24 Jan 2018 20:35:37 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp create-for-rbac]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28x%3Ax%20eq%20%27http%3A%2F%2Fclitest000002%27%29&api-version=1.6
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[]}'}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['166']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Wed, 24 Jan 2018 20:35:43 GMT']
+      duration: ['1255739']
+      expires: ['-1']
+      ocp-aad-diagnostics-server-name: [ebQrbCsVSayqudnQkepewePNN+0/zDgfVv/e3pL6KeY=]
+      ocp-aad-session-key: [o6d9a4nny9kfXaJ569P02ha73yMVEb1uvH20flTSnskeQodKsxD4kapocOCr0hztjbUYqj8d0raHh8s9cDitxAYYFwLwtYdhywAkwB46t9BVb57F0fbWrApqWtZ27zzoZYWsE4ppbO4iJraYmBzFIzYbhuRliay8Feo5Jopw3NmuMzRrvXtTYeVVtP7uvDk6UiuBQYHl8Cj7sm0FM4O7dg.BTpBzvpQJm1xdCZPHi3PRG8mSQ7EKb00T5gq4WjzKv0]
+      pragma: [no-cache]
+      request-id: [2c1f0470-1397-47de-ad9b-a48796a1beb3]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: 'b''{"availableToOtherTenants": false, "displayName": "azure-cli-2018-01-24-20-35-43",
+      "homepage": "http://azure-cli-2018-01-24-20-35-43", "identifierUris": ["http://clitest000002"],
+      "passwordCredentials": [{"startDate": "2018-01-24T20:35:43.168232Z", "endDate":
+      "2019-01-24T20:35:43.168232Z", "keyId": "e09eabd0-8e6f-46ae-8809-dfa60fbd79ad",
+      "value": "e66ad637-e7bd-4cb2-b837-5f03b084db90"}]}'''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp create-for-rbac]
+      Connection: [keep-alive]
+      Content-Length: ['393']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: POST
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications?api-version=1.6
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.Application/@Element","odata.type":"Microsoft.DirectoryServices.Application","objectType":"Application","objectId":"47477a19-b413-4036-ace9-a3f4ce015baf","deletionTimestamp":null,"acceptMappedClaims":null,"addIns":[],"appId":"8322f5ed-adf7-4931-8d40-28b0e53f60c2","appRoles":[],"availableToOtherTenants":false,"displayName":"azure-cli-2018-01-24-20-35-43","errorUrl":null,"groupMembershipClaims":null,"homepage":"http://azure-cli-2018-01-24-20-35-43","identifierUris":["http://clitest000002"],"informationalUrls":{"termsOfService":null,"support":null,"privacy":null,"marketing":null},"keyCredentials":[],"knownClientApplications":[],"logoutUrl":null,"oauth2AllowImplicitFlow":false,"oauth2AllowUrlPathMatching":false,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2018-01-24-20-35-43 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2018-01-24-20-35-43","id":"ff7ca080-1e56-4cb2-be7e-6c1d3cfe4e7a","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2018-01-24-20-35-43 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2018-01-24-20-35-43","value":"user_impersonation"}],"oauth2RequirePostResponse":false,"optionalClaims":null,"parentalControlSettings":{"countriesBlockedForMinors":[],"legalAgeGroupRule":"Allow"},"passwordCredentials":[{"customKeyIdentifier":null,"endDate":"2019-01-24T20:35:43.168232Z","keyId":"e09eabd0-8e6f-46ae-8809-dfa60fbd79ad","startDate":"2018-01-24T20:35:43.168232Z","value":null}],"publicClient":null,"recordConsentConditions":null,"replyUrls":[],"requiredResourceAccess":[],"samlMetadataUrl":null,"tokenEncryptionKeyId":null,"isDeviceOnlyAuthSupported":null}'}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['1859']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Wed, 24 Jan 2018 20:35:42 GMT']
+      duration: ['3856909']
+      expires: ['-1']
+      location: ['https://graph.windows.net/00000000-0000-0000-0000-000000000000/directoryObjects/47477a19-b413-4036-ace9-a3f4ce015baf/Microsoft.DirectoryServices.Application']
+      ocp-aad-diagnostics-server-name: [5stv4QctyxLjPHV9xBDTh2WNkwX68uZ2lNGZapY1qgU=]
+      ocp-aad-session-key: [p9YjzNGWSpqdCTdF9h9EEg9LnvaRaUDUBTLoYpXSHh_y9mcKvupXtGMkCwApNcLBXPdIQMmpdsa3x4FxeSc5zz0ZIdSDPZ7w9SHlyHLK9RpzxDUnGQ6OHdrxvnMOAzSwiYYYQAhCzqvLUJbfUMXEyV36UX_cHys0EtgekLaDQhZA5cCUnbB5oKJVHBZe7Wo50gUwPYAEQ-29dg8vy4DkJQ.DCyTzODwdfBSZnU0kM7NGfPvxHjcQkonBGqVze5mLWU]
+      pragma: [no-cache]
+      request-id: [9e506228-4730-4837-ad31-a78234691c35]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 201, message: Created}
+- request:
+    body: '{"appId": "8322f5ed-adf7-4931-8d40-28b0e53f60c2", "accountEnabled": true}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp create-for-rbac]
+      Connection: [keep-alive]
+      Content-Length: ['73']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: POST
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?api-version=1.6
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal/@Element","odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"549d3c25-fb44-44cd-b5de-58a13fb1d825","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2018-01-24-20-35-43","appId":"8322f5ed-adf7-4931-8d40-28b0e53f60c2","appOwnerTenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2018-01-24-20-35-43","errorUrl":null,"homepage":"http://azure-cli-2018-01-24-20-35-43","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2018-01-24-20-35-43 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2018-01-24-20-35-43","id":"ff7ca080-1e56-4cb2-be7e-6c1d3cfe4e7a","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2018-01-24-20-35-43 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2018-01-24-20-35-43","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"Microsoft","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["8322f5ed-adf7-4931-8d40-28b0e53f60c2","http://clitest000002"],"servicePrincipalType":"Application","tags":[],"tokenEncryptionKeyId":null}'}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['1523']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Wed, 24 Jan 2018 20:35:44 GMT']
+      duration: ['4390741']
+      expires: ['-1']
+      location: ['https://graph.windows.net/00000000-0000-0000-0000-000000000000/directoryObjects/549d3c25-fb44-44cd-b5de-58a13fb1d825/Microsoft.DirectoryServices.ServicePrincipal']
+      ocp-aad-diagnostics-server-name: [UnB1dyVfhwVY3Vs+F9n0MgBThZibCNHiF4I7uellQRo=]
+      ocp-aad-session-key: [S8gi2EwmvjpxJWFJOV530jwy6jlD8OKr9QZQsinqTolm2v5BnlbpgkQl5bDhlveqTkIfptTeYOgNq0NHWqpYsTEzupPZzvHVvRbiu_qID8zCG8RnxwgjcG6bZ-m7EbYw1a2qTsu73Wq4eXO4g5jB4zvIw719buaEQvpcoBOqgYsE2vEw72hcmtQde236lYppUTTJyP0SS9yiChFVcCEnCQ.ZpV9E2RHgeuqnkw-9AiyW3rkyisPAx5S5WIwkntxlV0]
+      pragma: [no-cache]
+      request-id: [4b57c478-7149-4f3e-8f33-e3a6c203bad5]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001","name":"clitest000001","location":"eastus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['212']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 24 Jan 2018 20:35:47 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: 'b''b\''{"location": "eastus", "tags": {"scenario_test": ""}, "properties":
+      {"dnsPrefix": "cliaksdns000004", "kubernetesVersion": "1.7.7", "agentPoolProfiles":
+      [{"name": "nodepool1", "count": 3, "vmSize": "Standard_D1_v2", "dnsPrefix":
+      "cliaksdns000004", "storageProfile": "ManagedDisks", "osType": "Linux"}], "linuxProfile":
+      {"adminUsername": "azureuser", "ssh": {"publicKeys": [{"keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
+      test@example.com\\\\n"}]}}, "servicePrincipalProfile": {"clientId": "http://clitest000002",
+      "secret": "e66ad637-e7bd-4cb2-b837-5f03b084db90"}}}\'''''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks create]
+      Connection: [keep-alive]
+      Content-Length: ['1256']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"code\": \"ServicePrincipalNotFound\",\n  \"message\": \"\
+        Service principal clientID: http://clitest000002 not found in Active Directory\
+        \ tenant 72f988bf-86f1-41af-91ab-2d7cd011db47, Please see https://aka.ms/acs-sp-help\
+        \ for more details.\"\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['241']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:35:49 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+    status: {code: 400, message: Bad Request}
+- request:
+    body: 'b''b\''{"location": "eastus", "tags": {"scenario_test": ""}, "properties":
+      {"dnsPrefix": "cliaksdns000004", "kubernetesVersion": "1.7.7", "agentPoolProfiles":
+      [{"name": "nodepool1", "count": 3, "vmSize": "Standard_D1_v2", "dnsPrefix":
+      "cliaksdns000004", "storageProfile": "ManagedDisks", "osType": "Linux"}], "linuxProfile":
+      {"adminUsername": "azureuser", "ssh": {"publicKeys": [{"keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
+      test@example.com\\\\n"}]}}, "servicePrincipalProfile": {"clientId": "http://clitest000002",
+      "secret": "e66ad637-e7bd-4cb2-b837-5f03b084db90"}}}\'''''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks create]
+      Connection: [keep-alive]
+      Content-Length: ['1256']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"code\": \"ServicePrincipalNotFound\",\n  \"message\": \"\
+        Service principal clientID: http://clitest000002 not found in Active Directory\
+        \ tenant 72f988bf-86f1-41af-91ab-2d7cd011db47, Please see https://aka.ms/acs-sp-help\
+        \ for more details.\"\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['241']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:35:55 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+    status: {code: 400, message: Bad Request}
+- request:
+    body: 'b''b\''{"location": "eastus", "tags": {"scenario_test": ""}, "properties":
+      {"dnsPrefix": "cliaksdns000004", "kubernetesVersion": "1.7.7", "agentPoolProfiles":
+      [{"name": "nodepool1", "count": 3, "vmSize": "Standard_D1_v2", "dnsPrefix":
+      "cliaksdns000004", "storageProfile": "ManagedDisks", "osType": "Linux"}], "linuxProfile":
+      {"adminUsername": "azureuser", "ssh": {"publicKeys": [{"keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
+      test@example.com\\\\n"}]}}, "servicePrincipalProfile": {"clientId": "http://clitest000002",
+      "secret": "e66ad637-e7bd-4cb2-b837-5f03b084db90"}}}\'''''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks create]
+      Connection: [keep-alive]
+      Content-Length: ['1256']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"code\": \"ServicePrincipalNotFound\",\n  \"message\": \"\
+        Service principal clientID: http://clitest000002 not found in Active Directory\
+        \ tenant 72f988bf-86f1-41af-91ab-2d7cd011db47, Please see https://aka.ms/acs-sp-help\
+        \ for more details.\"\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['241']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:36:00 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 400, message: Bad Request}
+- request:
+    body: 'b''b\''{"location": "eastus", "tags": {"scenario_test": ""}, "properties":
+      {"dnsPrefix": "cliaksdns000004", "kubernetesVersion": "1.7.7", "agentPoolProfiles":
+      [{"name": "nodepool1", "count": 3, "vmSize": "Standard_D1_v2", "dnsPrefix":
+      "cliaksdns000004", "storageProfile": "ManagedDisks", "osType": "Linux"}], "linuxProfile":
+      {"adminUsername": "azureuser", "ssh": {"publicKeys": [{"keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
+      test@example.com\\\\n"}]}}, "servicePrincipalProfile": {"clientId": "http://clitest000002",
+      "secret": "e66ad637-e7bd-4cb2-b837-5f03b084db90"}}}\'''''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks create]
+      Connection: [keep-alive]
+      Content-Length: ['1256']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"code\": \"ServicePrincipalNotFound\",\n  \"message\": \"\
+        Service principal clientID: http://clitest000002 not found in Active Directory\
+        \ tenant 72f988bf-86f1-41af-91ab-2d7cd011db47, Please see https://aka.ms/acs-sp-help\
+        \ for more details.\"\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['241']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:36:06 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 400, message: Bad Request}
+- request:
+    body: 'b''b\''{"location": "eastus", "tags": {"scenario_test": ""}, "properties":
+      {"dnsPrefix": "cliaksdns000004", "kubernetesVersion": "1.7.7", "agentPoolProfiles":
+      [{"name": "nodepool1", "count": 3, "vmSize": "Standard_D1_v2", "dnsPrefix":
+      "cliaksdns000004", "storageProfile": "ManagedDisks", "osType": "Linux"}], "linuxProfile":
+      {"adminUsername": "azureuser", "ssh": {"publicKeys": [{"keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==
+      test@example.com\\\\n"}]}}, "servicePrincipalProfile": {"clientId": "http://clitest000002",
+      "secret": "e66ad637-e7bd-4cb2-b837-5f03b084db90"}}}\'''''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks create]
+      Connection: [keep-alive]
+      Content-Length: ['1256']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"agentPoolProfiles\"\
+        : [\n    {\n     \"name\": \"nodepool1\",\n     \"count\": 3,\n     \"vmSize\"\
+        : \"Standard_D1_v2\",\n     \"storageProfile\": \"ManagedDisks\",\n     \"\
+        osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\": {\n    \"adminUsername\"\
+        : \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\": [\n      {\n      \
+        \ \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/a1f4bbe7-d7e3-400c-bd1b-8ebe03993f10?api-version=2017-08-31']
+      cache-control: [no-cache]
+      content-length: ['1597']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:36:18 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"agentPoolProfiles\"\
+        : [\n    {\n     \"name\": \"nodepool1\",\n     \"count\": 3,\n     \"vmSize\"\
+        : \"Standard_D1_v2\",\n     \"storageProfile\": \"ManagedDisks\",\n     \"\
+        osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\": {\n    \"adminUsername\"\
+        : \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\": [\n      {\n      \
+        \ \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1597']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:36:19 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"agentPoolProfiles\"\
+        : [\n    {\n     \"name\": \"nodepool1\",\n     \"count\": 3,\n     \"vmSize\"\
+        : \"Standard_D1_v2\",\n     \"storageProfile\": \"ManagedDisks\",\n     \"\
+        osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\": {\n    \"adminUsername\"\
+        : \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\": [\n      {\n      \
+        \ \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1597']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:36:50 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"agentPoolProfiles\"\
+        : [\n    {\n     \"name\": \"nodepool1\",\n     \"count\": 3,\n     \"vmSize\"\
+        : \"Standard_D1_v2\",\n     \"storageProfile\": \"ManagedDisks\",\n     \"\
+        osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\": {\n    \"adminUsername\"\
+        : \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\": [\n      {\n      \
+        \ \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1597']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:37:20 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"agentPoolProfiles\"\
+        : [\n    {\n     \"name\": \"nodepool1\",\n     \"count\": 3,\n     \"vmSize\"\
+        : \"Standard_D1_v2\",\n     \"storageProfile\": \"ManagedDisks\",\n     \"\
+        osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\": {\n    \"adminUsername\"\
+        : \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\": [\n      {\n      \
+        \ \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1597']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:37:50 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"agentPoolProfiles\"\
+        : [\n    {\n     \"name\": \"nodepool1\",\n     \"count\": 3,\n     \"vmSize\"\
+        : \"Standard_D1_v2\",\n     \"storageProfile\": \"ManagedDisks\",\n     \"\
+        osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\": {\n    \"adminUsername\"\
+        : \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\": [\n      {\n      \
+        \ \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1597']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:38:22 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"agentPoolProfiles\"\
+        : [\n    {\n     \"name\": \"nodepool1\",\n     \"count\": 3,\n     \"vmSize\"\
+        : \"Standard_D1_v2\",\n     \"storageProfile\": \"ManagedDisks\",\n     \"\
+        osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\": {\n    \"adminUsername\"\
+        : \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\": [\n      {\n      \
+        \ \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1597']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:38:53 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"agentPoolProfiles\"\
+        : [\n    {\n     \"name\": \"nodepool1\",\n     \"count\": 3,\n     \"vmSize\"\
+        : \"Standard_D1_v2\",\n     \"storageProfile\": \"ManagedDisks\",\n     \"\
+        osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\": {\n    \"adminUsername\"\
+        : \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\": [\n      {\n      \
+        \ \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1597']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:39:23 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"agentPoolProfiles\"\
+        : [\n    {\n     \"name\": \"nodepool1\",\n     \"count\": 3,\n     \"vmSize\"\
+        : \"Standard_D1_v2\",\n     \"storageProfile\": \"ManagedDisks\",\n     \"\
+        osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\": {\n    \"adminUsername\"\
+        : \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\": [\n      {\n      \
+        \ \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1597']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:39:54 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"agentPoolProfiles\"\
+        : [\n    {\n     \"name\": \"nodepool1\",\n     \"count\": 3,\n     \"vmSize\"\
+        : \"Standard_D1_v2\",\n     \"storageProfile\": \"ManagedDisks\",\n     \"\
+        osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\": {\n    \"adminUsername\"\
+        : \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\": [\n      {\n      \
+        \ \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1597']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:40:25 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"agentPoolProfiles\"\
+        : [\n    {\n     \"name\": \"nodepool1\",\n     \"count\": 3,\n     \"vmSize\"\
+        : \"Standard_D1_v2\",\n     \"storageProfile\": \"ManagedDisks\",\n     \"\
+        osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\": {\n    \"adminUsername\"\
+        : \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\": [\n      {\n      \
+        \ \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1597']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:40:55 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"agentPoolProfiles\"\
+        : [\n    {\n     \"name\": \"nodepool1\",\n     \"count\": 3,\n     \"vmSize\"\
+        : \"Standard_D1_v2\",\n     \"storageProfile\": \"ManagedDisks\",\n     \"\
+        osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\": {\n    \"adminUsername\"\
+        : \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\": [\n      {\n      \
+        \ \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1597']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:41:27 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"fqdn\": \"cliaksdns000004-08f2a272.hcp.eastus.azmk8s.io\"\
+        ,\n   \"agentPoolProfiles\": [\n    {\n     \"name\": \"nodepool1\",\n   \
+        \  \"count\": 3,\n     \"vmSize\": \"Standard_D1_v2\",\n     \"storageProfile\"\
+        : \"ManagedDisks\",\n     \"osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\"\
+        : {\n    \"adminUsername\": \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\"\
+        : [\n      {\n       \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1658']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:41:57 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"fqdn\": \"cliaksdns000004-08f2a272.hcp.eastus.azmk8s.io\"\
+        ,\n   \"agentPoolProfiles\": [\n    {\n     \"name\": \"nodepool1\",\n   \
+        \  \"count\": 3,\n     \"vmSize\": \"Standard_D1_v2\",\n     \"storageProfile\"\
+        : \"ManagedDisks\",\n     \"osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\"\
+        : {\n    \"adminUsername\": \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\"\
+        : [\n      {\n       \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1658']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:42:29 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"fqdn\": \"cliaksdns000004-08f2a272.hcp.eastus.azmk8s.io\"\
+        ,\n   \"agentPoolProfiles\": [\n    {\n     \"name\": \"nodepool1\",\n   \
+        \  \"count\": 3,\n     \"vmSize\": \"Standard_D1_v2\",\n     \"storageProfile\"\
+        : \"ManagedDisks\",\n     \"osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\"\
+        : {\n    \"adminUsername\": \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\"\
+        : [\n      {\n       \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1658']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:42:59 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"fqdn\": \"cliaksdns000004-08f2a272.hcp.eastus.azmk8s.io\"\
+        ,\n   \"agentPoolProfiles\": [\n    {\n     \"name\": \"nodepool1\",\n   \
+        \  \"count\": 3,\n     \"vmSize\": \"Standard_D1_v2\",\n     \"storageProfile\"\
+        : \"ManagedDisks\",\n     \"osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\"\
+        : {\n    \"adminUsername\": \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\"\
+        : [\n      {\n       \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1658']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:43:30 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"fqdn\": \"cliaksdns000004-08f2a272.hcp.eastus.azmk8s.io\"\
+        ,\n   \"agentPoolProfiles\": [\n    {\n     \"name\": \"nodepool1\",\n   \
+        \  \"count\": 3,\n     \"vmSize\": \"Standard_D1_v2\",\n     \"storageProfile\"\
+        : \"ManagedDisks\",\n     \"osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\"\
+        : {\n    \"adminUsername\": \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\"\
+        : [\n      {\n       \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1658']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:44:01 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"fqdn\": \"cliaksdns000004-08f2a272.hcp.eastus.azmk8s.io\"\
+        ,\n   \"agentPoolProfiles\": [\n    {\n     \"name\": \"nodepool1\",\n   \
+        \  \"count\": 3,\n     \"vmSize\": \"Standard_D1_v2\",\n     \"storageProfile\"\
+        : \"ManagedDisks\",\n     \"osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\"\
+        : {\n    \"adminUsername\": \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\"\
+        : [\n      {\n       \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1658']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:44:31 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"fqdn\": \"cliaksdns000004-08f2a272.hcp.eastus.azmk8s.io\"\
+        ,\n   \"agentPoolProfiles\": [\n    {\n     \"name\": \"nodepool1\",\n   \
+        \  \"count\": 3,\n     \"vmSize\": \"Standard_D1_v2\",\n     \"storageProfile\"\
+        : \"ManagedDisks\",\n     \"osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\"\
+        : {\n    \"adminUsername\": \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\"\
+        : [\n      {\n       \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1658']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:45:03 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"fqdn\": \"cliaksdns000004-08f2a272.hcp.eastus.azmk8s.io\"\
+        ,\n   \"agentPoolProfiles\": [\n    {\n     \"name\": \"nodepool1\",\n   \
+        \  \"count\": 3,\n     \"vmSize\": \"Standard_D1_v2\",\n     \"storageProfile\"\
+        : \"ManagedDisks\",\n     \"osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\"\
+        : {\n    \"adminUsername\": \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\"\
+        : [\n      {\n       \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1658']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:45:33 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"fqdn\": \"cliaksdns000004-08f2a272.hcp.eastus.azmk8s.io\"\
+        ,\n   \"agentPoolProfiles\": [\n    {\n     \"name\": \"nodepool1\",\n   \
+        \  \"count\": 3,\n     \"vmSize\": \"Standard_D1_v2\",\n     \"storageProfile\"\
+        : \"ManagedDisks\",\n     \"osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\"\
+        : {\n    \"adminUsername\": \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\"\
+        : [\n      {\n       \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1658']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:46:04 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Creating\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"fqdn\": \"cliaksdns000004-08f2a272.hcp.eastus.azmk8s.io\"\
+        ,\n   \"agentPoolProfiles\": [\n    {\n     \"name\": \"nodepool1\",\n   \
+        \  \"count\": 3,\n     \"vmSize\": \"Standard_D1_v2\",\n     \"storageProfile\"\
+        : \"ManagedDisks\",\n     \"osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\"\
+        : {\n    \"adminUsername\": \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\"\
+        : [\n      {\n       \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1658']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:46:35 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks wait]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003\"\
+        ,\n  \"location\": \"eastus\",\n  \"name\": \"cliakstest000003\",\n  \"tags\"\
+        : {\n   \"scenario_test\": \"\"\n  },\n  \"type\": \"Microsoft.ContainerService/ManagedClusters\"\
+        ,\n  \"properties\": {\n   \"provisioningState\": \"Succeeded\",\n   \"kubernetesVersion\"\
+        : \"1.7.7\",\n   \"dnsPrefix\": \"cliaksdns000004\",\n   \"fqdn\": \"cliaksdns000004-08f2a272.hcp.eastus.azmk8s.io\"\
+        ,\n   \"agentPoolProfiles\": [\n    {\n     \"name\": \"nodepool1\",\n   \
+        \  \"count\": 3,\n     \"vmSize\": \"Standard_D1_v2\",\n     \"storageProfile\"\
+        : \"ManagedDisks\",\n     \"osType\": \"Linux\"\n    }\n   ],\n   \"linuxProfile\"\
+        : {\n    \"adminUsername\": \"azureuser\",\n    \"ssh\": {\n     \"publicKeys\"\
+        : [\n      {\n       \"keyData\": \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCbIg1guRHbI0lV11wWDt1r2cUdcNd27CJsg+SfgC7miZeubtwUhbsPdhMQsfDyhOWHq1+ZL0M+nJZV63d/1dhmhtgyOqejUwrPlzKhydsbrsdUor+JmNJDdW01v7BXHyuymT8G4s09jCasNOwiufbP/qp72ruu0bIA1nySsvlf9pCQAuFkAnVnf/rFhUlOkhtRpwcq8SUNY2zRHR/EKb/4NWY1JzR4sa3q2fWIJdrrX0DvLoa5g9bIEd4Df79ba7v+yiUBOS0zT2ll+z4g9izHK3EO5d8hL4jYxcjKs+wcslSYRWrascfscLgMlMGh0CdKeNTDjHpGPncaf3Z+FwwwjWeuiNBxv7bJo13/8B/098KlVDl4GZqsoBCEjPyJfV6hO0y/LkRGkk7oHWKgeWAfKtfLItRp00eZ4fcJNK9kCaSMmEugoZWcI7NGbZXzqFWqbpRI7NcDP9+WIQ+i9U5vqWsqd/zng4kbuAJ6UuKqIzB0upYrLShfQE3SAck8oaLhJqqq56VfDuASNpJKidV+zq27HfSBmbXnkR/5AK337dc3MXKJypoK/QPMLKUAP5XLPbs+NddJQV7EZXd29DLgp+fRIg3edpKdO7ZErWhv7d+3Kws+e1Y+ypmR2WIVSwVyBEUfgv2C8Ts9gnTF4pNcEY/S2aBicz5Ew2+jdyGNQQ==\
+        \ test@example.com\\n\"\n      }\n     ]\n    }\n   },\n   \"servicePrincipalProfile\"\
+        : {\n    \"clientId\": \"http://clitest000002\"\n   }\n  }\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1659']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:47:07 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.ContainerService/managedClusters/cliakstest000003?api-version=2017-08-31
+  response:
+    body: {string: ''}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31']
+      cache-control: [no-cache]
+      content-length: ['0']
+      content-type: [text/plain; charset=utf-8]
+      date: ['Wed, 24 Jan 2018 20:47:08 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:47:42 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:48:14 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:48:45 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:49:15 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:49:45 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:50:17 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:50:48 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:51:18 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:51:49 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:52:20 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:52:51 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:53:22 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:53:53 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:54:24 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:54:54 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:55:26 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:55:56 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:56:28 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:56:59 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:57:30 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"InProgress\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        \n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['126']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:58:00 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [aks delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 azure-mgmt-containerservice/3.0.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ContainerService/locations/eastus/operations/686a8a21-e484-45b6-9935-3eeca17e6610?api-version=2017-08-31
+  response:
+    body: {string: "{\n  \"name\": \"218a6a68-84e4-b645-9935-3eeca17e6610\",\n  \"\
+        status\": \"Succeeded\",\n  \"startTime\": \"2018-01-24T20:47:09.8176568Z\"\
+        ,\n  \"endTime\": \"2018-01-24T20:58:21.7282224Z\"\n }"}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['170']
+      content-type: [application/json]
+      date: ['Wed, 24 Jan 2018 20:58:31 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [nginx]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%278322f5ed-adf7-4931-8d40-28b0e53f60c2%27%29&api-version=1.6
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"549d3c25-fb44-44cd-b5de-58a13fb1d825","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2018-01-24-20-35-43","appId":"8322f5ed-adf7-4931-8d40-28b0e53f60c2","appOwnerTenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2018-01-24-20-35-43","errorUrl":null,"homepage":"http://azure-cli-2018-01-24-20-35-43","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2018-01-24-20-35-43 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2018-01-24-20-35-43","id":"ff7ca080-1e56-4cb2-be7e-6c1d3cfe4e7a","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2018-01-24-20-35-43 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2018-01-24-20-35-43","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"Microsoft","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://clitest000002","8322f5ed-adf7-4931-8d40-28b0e53f60c2"],"servicePrincipalType":"Application","tags":[],"tokenEncryptionKeyId":null}]}'}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['1526']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Wed, 24 Jan 2018 20:58:35 GMT']
+      duration: ['1125064']
+      expires: ['-1']
+      ocp-aad-diagnostics-server-name: [q4xdW5Eam+nA8Gmr8wXBfFiMX1F+vK+gBordZAyoY70=]
+      ocp-aad-session-key: [NVCjjTYZwQqvd0p4VEwiJpGhrTRnGnPCnnMn7f01h8Ib4dS4HijC82P5nOvan8Ctp-Ftiy4-xDFF3tVpHr44bQ1cTMYs4NNAYPP5eLIVpj5CX2PdxBEWtvcDasqe2nbFFswRLM2ZBrRdJbQwI2wUYDeLRDcYOnJK3bvvjekSgzH1XfF_3RD5VN1hXZqkfjwDxlvc0mfY-B5z9m9LvikLxA.0kD0oJkPX5b8Q2J4ERauBY5ao5TS5XO5fjSbDMe5U1Y]
+      pragma: [no-cache]
+      request-id: [3675b07a-fc0f-43ce-99dc-b7ff625d8222]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals/549d3c25-fb44-44cd-b5de-58a13fb1d825?api-version=1.6
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal/@Element","odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"549d3c25-fb44-44cd-b5de-58a13fb1d825","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2018-01-24-20-35-43","appId":"8322f5ed-adf7-4931-8d40-28b0e53f60c2","appOwnerTenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2018-01-24-20-35-43","errorUrl":null,"homepage":"http://azure-cli-2018-01-24-20-35-43","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2018-01-24-20-35-43 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2018-01-24-20-35-43","id":"ff7ca080-1e56-4cb2-be7e-6c1d3cfe4e7a","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2018-01-24-20-35-43 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2018-01-24-20-35-43","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"Microsoft","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://clitest000002","8322f5ed-adf7-4931-8d40-28b0e53f60c2"],"servicePrincipalType":"Application","tags":[],"tokenEncryptionKeyId":null}'}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['1523']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Wed, 24 Jan 2018 20:58:36 GMT']
+      duration: ['3516059']
+      expires: ['-1']
+      ocp-aad-diagnostics-server-name: [cfnZyxQgV11jokDDHNQ9KBHdkjg3J6BRZzXT/71HQG4=]
+      ocp-aad-session-key: [QCO9F-2rOJuvPjd0VdBRbiPZTD2jHvamnwxJMWaSoKcrPbiUUINnNBdcacigvxfDsfUOHdXPQvY9piN8zpmNJ-VwTGTasnzDoQctiUQD8gceS14fsHccRQIbS4wIOFulwtOfT9z2NYWkYiGj_EGubhVcr38ayJO9a0S-s5U7yVeHzDdfMSLkqcMOXBs-l2vaeCTpWn6xAze4he--9N8lhA.4Yx3UKGohATuF3sywfLCVls5wiHkJHhHUyEAi09pyFk]
+      pragma: [no-cache]
+      request-id: [5d5faec3-4f34-4d3a-ad23-cbf44585c708]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications?$filter=identifierUris%2Fany%28s%3As%20eq%20%27http%3A%2F%2Fclitest000002%27%29&api-version=1.6
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.Application","value":[{"odata.type":"Microsoft.DirectoryServices.Application","objectType":"Application","objectId":"47477a19-b413-4036-ace9-a3f4ce015baf","deletionTimestamp":null,"acceptMappedClaims":null,"addIns":[],"appId":"8322f5ed-adf7-4931-8d40-28b0e53f60c2","appRoles":[],"availableToOtherTenants":false,"displayName":"azure-cli-2018-01-24-20-35-43","errorUrl":null,"groupMembershipClaims":null,"homepage":"http://azure-cli-2018-01-24-20-35-43","identifierUris":["http://clitest000002"],"informationalUrls":{"termsOfService":null,"support":null,"privacy":null,"marketing":null},"keyCredentials":[],"knownClientApplications":[],"logoutUrl":null,"oauth2AllowImplicitFlow":false,"oauth2AllowUrlPathMatching":false,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2018-01-24-20-35-43 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2018-01-24-20-35-43","id":"ff7ca080-1e56-4cb2-be7e-6c1d3cfe4e7a","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2018-01-24-20-35-43 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2018-01-24-20-35-43","value":"user_impersonation"}],"oauth2RequirePostResponse":false,"optionalClaims":null,"parentalControlSettings":{"countriesBlockedForMinors":[],"legalAgeGroupRule":"Allow"},"passwordCredentials":[{"customKeyIdentifier":null,"endDate":"2019-01-24T20:35:43.168232Z","keyId":"e09eabd0-8e6f-46ae-8809-dfa60fbd79ad","startDate":"2018-01-24T20:35:43.168232Z","value":null}],"publicClient":null,"recordConsentConditions":null,"replyUrls":[],"requiredResourceAccess":[],"samlMetadataUrl":null,"tokenEncryptionKeyId":null,"isDeviceOnlyAuthSupported":null}]}'}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['1862']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Wed, 24 Jan 2018 20:58:38 GMT']
+      duration: ['695806']
+      expires: ['-1']
+      ocp-aad-diagnostics-server-name: [2YNZyWY4LM/0gxa9nMCJa9oe6ttnYrs+gIRavg2zwms=]
+      ocp-aad-session-key: [eVfcYzlQBhd3H88jOEaNtBw78sf_tlfnga1OxWHU_GucGLZQVE6D74FMHXKHUQIRc3181i6m4gAij3ExzIRxZ7ZBYtEKna3ngGKpcSXcWbIwYJP2T7p_Dy-iEy93hBzbDIHIzDlVOrntezhKecmGqGNtI0vCUVQ39MGevIpHmM8f9m1AfaJEGjGaXnNgZ_iMFvhScncr7xZCFnWrSg1ZSQ.ZlqsW8Be6T-0bsLb5tt_Xruw656qtZxZh_dYmG-p0gA]
+      pragma: [no-cache]
+      request-id: [70826502-19fb-49b7-917e-813fbabe9ebf]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28c%3Ac%20eq%20%278322f5ed-adf7-4931-8d40-28b0e53f60c2%27%29&api-version=1.6
+  response:
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal","value":[{"odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"549d3c25-fb44-44cd-b5de-58a13fb1d825","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"azure-cli-2018-01-24-20-35-43","appId":"8322f5ed-adf7-4931-8d40-28b0e53f60c2","appOwnerTenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"azure-cli-2018-01-24-20-35-43","errorUrl":null,"homepage":"http://azure-cli-2018-01-24-20-35-43","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+        the application to access azure-cli-2018-01-24-20-35-43 on behalf of the signed-in
+        user.","adminConsentDisplayName":"Access azure-cli-2018-01-24-20-35-43","id":"ff7ca080-1e56-4cb2-be7e-6c1d3cfe4e7a","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        the application to access azure-cli-2018-01-24-20-35-43 on your behalf.","userConsentDisplayName":"Access
+        azure-cli-2018-01-24-20-35-43","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"Microsoft","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["http://clitest000002","8322f5ed-adf7-4931-8d40-28b0e53f60c2"],"servicePrincipalType":"Application","tags":[],"tokenEncryptionKeyId":null}]}'}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      content-length: ['1526']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Wed, 24 Jan 2018 20:58:41 GMT']
+      duration: ['1402096']
+      expires: ['-1']
+      ocp-aad-diagnostics-server-name: [j4TfrIcuXv6cz1XEFyVQir6Ee64fZtWPXl/gd62UzeM=]
+      ocp-aad-session-key: [eTDdPsN-Yq-9JnLx_YCi4j6OIwOWOneDXX-DzreoeGRPOCq_v7pnHTg4tR2qQ1PuJfQ3eM8oSR_OdQaTYCXxJ2WNbQo7WfiDpLtmTMC_uhfzndrQs-f6YRBNb82KLUbLCax4hoR6lxHwuvEkLIe8h8XQfabui_7ty8865qC3I_MEhEKs7YDX3_CP27U5Bay5Zp-4WBsr0-USUCySPqmy6w.XYhFw8aMM4lt1ajpzPeBC9krabHx6kclR58GBG5Db0s]
+      pragma: [no-cache]
+      request-id: [8cc845de-2ffb-4763-84d8-c1c16a744a31]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp delete]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 authorizationmanagementclient/0.30.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments?$filter=principalId%20eq%20%27549d3c25-fb44-44cd-b5de-58a13fb1d825%27&api-version=2015-07-01
+  response:
+    body: {string: '{"value":[]}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['12']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 24 Jan 2018 20:58:41 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [x-ms-gateway-slice=productionb; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-request-charge: ['1']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [ad sp delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications/47477a19-b413-4036-ace9-a3f4ce015baf?api-version=1.6
+  response:
+    body: {string: ''}
+    headers:
+      access-control-allow-origin: ['*']
+      cache-control: [no-cache]
+      dataserviceversion: [1.0;]
+      date: ['Wed, 24 Jan 2018 20:58:42 GMT']
+      duration: ['2500225']
+      expires: ['-1']
+      ocp-aad-diagnostics-server-name: [4faI+PQU6I9bj2peJs4PPsoHg3OyFdftj7Uo0GY4ujA=]
+      ocp-aad-session-key: [J3CAOpvKssOaeqS5FePRIUl7ZMa82INC5eTEImi1AulA_S6nbgNWWlbbG8gSx1d3M0SDdjZhVTkGWsyOcTfseUxOEu-ybUVZ8tVGLqmVCJS7E_dFFe_V6BXKnbvgHIr8j2DiWjfXHZCKgBkkZ7ewTk7l69MuSCQDrN4uv3gRYB02BwiZPal_EhRhYflNqQUYswRYk664JuFZI6CdGYpEvA.6NQueoSEe1cADYGZ536A3_3v4nvXGtjLrJQ7GqVk7RU]
+      pragma: [no-cache]
+      request-id: [62fd3c41-287a-4a58-bc0d-a7481988aa2d]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-dirapi-data-contract-version: ['1.6']
+      x-powered-by: [ASP.NET, ASP.NET]
+    status: {code: 204, message: No Content}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
+          msrest/0.4.25 msrest_azure/0.4.20 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest000001?api-version=2017-05-10
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Wed, 24 Jan 2018 20:58:44 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUTlI1RUtGSVRSRi1FQVNUVVMiLCJqb2JMb2NhdGlvbiI6ImVhc3R1cyJ9?api-version=2017-05-10']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+version: 1

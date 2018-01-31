@@ -4,23 +4,30 @@
 # --------------------------------------------------------------------------------------------
 
 import sys
-import os
 
-import azure.cli.main
+from knack.completion import ARGCOMPLETE_ENV_NAME
+from knack.log import get_logger
+
+from azure.cli.core import get_default_cli
+
 import azure.cli.core.telemetry as telemetry
+
+logger = get_logger(__name__)
+
+
+def cli_main(cli, args):
+    return cli.invoke(args)
+
+
+az_cli = get_default_cli()
+
+telemetry.set_application(az_cli, ARGCOMPLETE_ENV_NAME)
 
 try:
     telemetry.start()
-    args = sys.argv[1:]
 
-    # Check if we are in argcomplete mode - if so, we
-    # need to pick up our args from environment variables
-    if os.environ.get('_ARGCOMPLETE'):
-        comp_line = os.environ.get('COMP_LINE')
-        if comp_line:
-            args = comp_line.split()[1:]
+    exit_code = cli_main(az_cli, sys.argv[1:])
 
-    exit_code = azure.cli.main.main(args)
     if exit_code and exit_code != 0:
         telemetry.set_failure()
     else:

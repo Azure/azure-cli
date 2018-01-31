@@ -33,15 +33,16 @@ def get_command_modules_paths(include_prefix=False):
         yield name, folder
 
 
-def get_command_modules_paths_with_tests():
-    return get_module_paths_with_tests(get_command_modules_paths())
+def get_command_modules_paths_with_tests(profile):
+    return get_module_paths_with_tests(get_command_modules_paths(), profile)
 
 
-def get_core_modules_paths_with_tests():
-    for name, path in get_core_modules_paths():
-        for root, dirs, files in os.walk(path):
-            if os.path.basename(root) == 'tests':
-                yield name, path, root
+def get_core_modules_paths_with_tests(profile):
+    if profile == 'latest':
+        for name, path in get_core_modules_paths():
+            for root, dirs, files in os.walk(path):
+                if os.path.basename(root) == 'tests':
+                    yield name, path, root
 
 
 def get_core_modules_paths():
@@ -49,10 +50,10 @@ def get_core_modules_paths():
         yield os.path.basename(os.path.dirname(path)), os.path.dirname(path)
 
 
-def get_module_paths_with_tests(modules):
+def get_module_paths_with_tests(modules, profile):
     for name, path in modules:
         name = name.replace(COMMAND_MODULE_PREFIX, '')
-        test_folder = os.path.join(path, 'azure', 'cli', 'command_modules', name, 'tests')
+        test_folder = os.path.join(path, 'azure', 'cli', 'command_modules', name, 'tests', profile)
         if os.path.exists(test_folder):
             yield name, path, test_folder
 
@@ -122,11 +123,11 @@ def filter_user_selected_modules(user_input_modules):
         return list((name, module) for name, module in existing_modules)
 
 
-def filter_user_selected_modules_with_tests(user_input_modules):
+def filter_user_selected_modules_with_tests(user_input_modules, profile):
     import itertools
 
-    existing_modules = list(itertools.chain(get_core_modules_paths_with_tests(),
-                                            get_command_modules_paths_with_tests()))
+    existing_modules = list(itertools.chain(get_core_modules_paths_with_tests(profile),
+                                            get_command_modules_paths_with_tests(profile)))
 
     if user_input_modules:
         selected_modules = set(user_input_modules)
@@ -139,58 +140,3 @@ def filter_user_selected_modules_with_tests(user_input_modules):
                     if name in selected_modules)
     else:
         return list((name, module, test) for name, module, test in existing_modules)
-
-
-if __name__ == '__main__':
-    print('Automation utility')
-    print('All modules and their paths')
-
-    module_paths = get_all_module_paths()
-    template = '  {:' + str(max([len(m) for m, _ in module_paths]) + 2) + '}{}'
-
-    for m, p in module_paths:
-        print(template.format(m, p))
-
-    print('Total: {}\n\n'.format(len(module_paths)))
-
-    print('Core modules and their paths')
-
-    module_paths = list(get_core_modules_paths())
-    template = '  {:' + str(max([len(m) for m, _ in module_paths]) + 2) + '}{}'
-
-    for m, p in module_paths:
-        print(template.format(m, p))
-
-    print('Total: {}\n\n'.format(len(module_paths)))
-
-    print('Command modules and their paths')
-
-    module_paths = list(get_command_modules_paths())
-    template = '  {:' + str(max([len(m) for m, _ in module_paths]) + 2) + '}{}'
-
-    for m, p in module_paths:
-        print(template.format(m, p))
-
-    print('Total: {}\n\n'.format(len(module_paths)))
-
-    print('Core modules and their paths as well as tests')
-
-    module_paths = list(get_core_modules_paths_with_tests())
-    name_len = str(max([len(m) for m, _, _ in module_paths]) + 2)
-    template = '  {:' + name_len + '}{}\n  {:' + name_len + '}{}'
-
-    for m, p, t in module_paths:
-        print(template.format(m, p, '', t))
-
-    print('Total: {}\n\n'.format(len(module_paths)))
-
-    print('Command modules and their paths as well as tests')
-
-    module_paths = list(get_command_modules_paths_with_tests())
-    name_len = str(max([len(m) for m, _, _ in module_paths]) + 2)
-    template = '  {:' + name_len + '}{}\n  {:' + name_len + '}{}'
-
-    for m, p, t in module_paths:
-        print(template.format(m, p, '', t))
-
-    print('Total: {}\n\n'.format(len(module_paths)))

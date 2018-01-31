@@ -10,42 +10,59 @@ from docutils.statemachine import ViewList
 from sphinx.util.compat import Directive
 from sphinx.util.nodes import nested_parse_with_titles
 
-from azure.cli.core.application import Application, Configuration
-import azure.cli.core._help as _help
+from knack.help_files import helps
 
-app = Application(Configuration())
-for cmd in app.configuration.get_command_table():
-    try:
-        app.execute(cmd.split() + ['-h'])
-    except:
-        pass
+from knack.help import GroupHelpFile
+from azure.cli.core import MainCommandsLoader, AzCli
+from azure.cli.core.commands import AzCliCommandInvoker
+from azure.cli.core.parser import AzCliCommandParser
+from azure.cli.core._help import AzCliHelp, CliCommandHelpFile, ArgumentGroupRegistry
+
+
+def get_help_files(cli_ctx):
+    invoker = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls, parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
+    cli_ctx.invocation = invoker
+    cmd_table = invoker.commands_loader.load_command_table(None)
+    for command in cmd_table:
+        invoker.commands_loader.load_arguments(command)
+    invoker.parser.load_command_table(invoker.commands_loader.command_table)
+
+    parser_keys = []
+    parser_values = []
+    sub_parser_keys = []
+    sub_parser_values = []
+    _store_parsers(invoker.parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values)
+    for cmd, parser in zip(parser_keys, parser_values):
+        if cmd not in sub_parser_keys:
+            sub_parser_keys.append(cmd)
+            sub_parser_values.append(parser)
+    help_files = []
+    for cmd, parser in zip(sub_parser_keys, sub_parser_values):
+        try:
+            help_file = GroupHelpFile(cmd, parser) if _is_group(parser) else CliCommandHelpFile(cmd, parser)
+            help_file.load(parser)
+            help_files.append(help_file)
+        except Exception as ex:
+            print("Skipped '{}' due to '{}'".format(cmd, ex))
+    help_files = sorted(help_files, key=lambda x: x.command)
+    return help_files
 
 class AzHelpGenDirective(Directive):
     def make_rst(self):
         INDENT = '   '
         DOUBLEINDENT = INDENT * 2
-        parser_keys = []
-        parser_values = []
-        sub_parser_keys = []
-        sub_parser_values = []
-        _store_parsers(app.parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values)
-        for cmd, parser in zip(parser_keys, parser_values):
-            if cmd not in sub_parser_keys:
-                sub_parser_keys.append(cmd)
-                sub_parser_values.append(parser)
+
+        az_cli = AzCli(cli_name='az',
+               commands_loader_cls=MainCommandsLoader,
+               invocation_cls=AzCliCommandInvoker,
+               parser_cls=AzCliCommandParser,
+               help_cls=AzCliHelp)
+        help_files = get_help_files(az_cli)
+
         doc_source_map = _load_doc_source_map()
-        help_files = []
-        for cmd, parser in zip(sub_parser_keys, sub_parser_values):
-            try:
-                help_file = _help.GroupHelpFile(cmd, parser) if _is_group(parser) else _help.CommandHelpFile(cmd, parser)
-                help_file.load(parser)
-                help_files.append(help_file)
-            except Exception as ex:
-                print("Skipped '{}' due to '{}'".format(cmd, ex))
-        help_files = sorted(help_files, key=lambda x: x.command)
 
         for help_file in help_files:
-            is_command = isinstance(help_file, _help.CommandHelpFile)
+            is_command = isinstance(help_file, CliCommandHelpFile)
             yield '.. cli{}:: {}'.format('command' if is_command else 'group', help_file.command if help_file.command else 'az') #it is top level group az if command is empty
             yield ''
             yield '{}:summary: {}'.format(INDENT, help_file.short_summary)
@@ -60,7 +77,7 @@ class AzHelpGenDirective(Directive):
             yield ''
 
             if is_command and help_file.parameters:
-               group_registry = _help.ArgumentGroupRegistry(
+               group_registry = ArgumentGroupRegistry(
                   [p.group_name for p in help_file.parameters if p.group_name]) 
 
                for arg in sorted(help_file.parameters,
@@ -103,6 +120,7 @@ class AzHelpGenDirective(Directive):
 
 def setup(app):
     app.add_directive('azhelpgen', AzHelpGenDirective)
+
 
 def _store_parsers(parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values):
     for s in parser.subparsers.values():

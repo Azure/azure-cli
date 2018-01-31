@@ -4,11 +4,15 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
+
+from knack.log import get_logger
+from knack.util import CLIError
+
 from azure.cli.core import __version__ as core_version
 
-logger = azlogging.get_az_logger(__name__)
+
+logger = get_logger(__name__)
+
 
 NO_CREDENTIALS_ERROR_MESSAGE = """
 No credentials specified to access Cosmos DB service. Please provide any of the following:
@@ -39,7 +43,7 @@ def _get_url_connection(url_collection, account_name):
     return None
 
 
-def get_document_client_factory(kwargs):
+def cf_cosmosdb_document(cli_ctx, kwargs):
     from pydocumentdb import document_client
     service_type = document_client.DocumentClient
 
@@ -52,7 +56,7 @@ def get_document_client_factory(kwargs):
 
         if name and resource_group and not key:
             # if resource group name is provided find key
-            keys = cf_cosmosdb().database_accounts.list_keys(resource_group, name)
+            keys = cf_cosmosdb(cli_ctx).database_accounts.list_keys(resource_group, name)
             key = keys.primary_master_key
 
         url_connection = _get_url_connection(url_connection, name)
@@ -72,7 +76,11 @@ def get_document_client_factory(kwargs):
     return client
 
 
-def cf_cosmosdb(**_):
+def cf_cosmosdb(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.cosmosdb import CosmosDB
-    return get_mgmt_service_client(CosmosDB)
+    return get_mgmt_service_client(cli_ctx, CosmosDB)
+
+
+def cf_db_accounts(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).database_accounts

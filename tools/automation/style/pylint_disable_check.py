@@ -59,7 +59,6 @@ def main():
     src_folder = os.path.join(get_repo_root(), 'src')
     all_rules = [e for e in get_all_rules(src_folder)]
 
-
     with open('pylint_report.txt', 'w') as f:
         f.write('GROUP BY RULES\n')
         f.writelines(tabulate.tabulate(sorted(group_by_rules(all_rules), key=lambda each: each[1], reverse=True),

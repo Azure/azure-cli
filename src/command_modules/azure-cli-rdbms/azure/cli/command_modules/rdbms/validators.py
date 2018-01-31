@@ -3,19 +3,21 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.validators import \
-    (get_default_location_from_resource_group, validate_tags)
-from azure.cli.core.prompting import prompt_pass, NoTTYException
-from azure.cli.core.util import CLIError
+from knack.prompting import prompt_pass, NoTTYException
+from knack.util import CLIError
+
+from azure.cli.core.commands.validators import (
+    get_default_location_from_resource_group, validate_tags)
 
 
 def get_combined_validator(validators):
-    def _final_valiator_impl(namespace):
+    def _final_validator_impl(cmd, namespace):
         # do additional creation validation
-        if namespace.subcommand == 'create':
+        verb = cmd.name.rsplit(' ', 1)[1]
+        if verb == 'create':
             storage_validator(namespace)
             password_validator(namespace)
-            get_default_location_from_resource_group(namespace)
+            get_default_location_from_resource_group(cmd, namespace)
 
         validate_tags(namespace)
 
@@ -27,7 +29,7 @@ def get_combined_validator(validators):
         else:
             namespace.parameters.sku = None
 
-    return _final_valiator_impl
+    return _final_validator_impl
 
 
 def configuration_value_validator(ns):
@@ -46,6 +48,5 @@ def password_validator(ns):
 
 
 def storage_validator(ns):
-    if ns.storage_mb:
-        if ns.storage_mb > 1023 * 1024:
-            raise ValueError('The size of storage cannot exceed 1023GB.')
+    if ns.storage_mb and ns.storage_mb > 1023 * 1024:
+        raise ValueError('The size of storage cannot exceed 1023GB.')

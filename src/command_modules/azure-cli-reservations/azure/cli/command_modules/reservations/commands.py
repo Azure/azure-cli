@@ -5,27 +5,45 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.core.commands import cli_command
-from azure.cli.command_modules.reservations._client_factory import reservation_mgmt_client_factory, reservation_order_mgmt_client_factory
+from azure.cli.core.commands import CliCommandType
+from azure.cli.command_modules.reservations._client_factory import (
+    reservation_mgmt_client_factory, reservation_order_mgmt_client_factory)
 from ._exception_handler import reservations_exception_handler
 
-reservation_path = 'azure.mgmt.reservations.operations.reservation_operations#'
-reservation_order_path = 'azure.mgmt.reservations.operations.reservation_order_operations#'
-custom_path = 'azure.cli.command_modules.reservations.custom#'
-reservation_client_path = 'azure.mgmt.reservations.azure_reservation_api#'
 
+def load_command_table(self, _):
+    def reservations_type(*args, **kwargs):
+        return CliCommandType(*args, exception_handler=reservations_exception_handler, **kwargs)
 
-def reservation_command(*args, **kwargs):
-    cli_command(*args, exception_handler=reservations_exception_handler, **kwargs)
+    reservations_order_sdk = reservations_type(
+        operations_tmpl='azure.mgmt.reservations.operations.reservation_order_operations#ReservationOrderOperations.{}',
+        client_factory=reservation_order_mgmt_client_factory
+    )
 
+    reservations_sdk = reservations_type(
+        operations_tmpl='azure.mgmt.reservations.operations.reservation_operations#ReservationOperations.{}',
+        client_factory=reservation_mgmt_client_factory
+    )
 
-reservation_command(__name__, 'reservations reservation-order list', reservation_order_path + 'ReservationOrderOperations.list', reservation_order_mgmt_client_factory)
-reservation_command(__name__, 'reservations reservation-order show', reservation_order_path + 'ReservationOrderOperations.get', reservation_order_mgmt_client_factory)
-reservation_command(__name__, 'reservations reservation-order-id list', reservation_client_path + 'AzureReservationAPI.get_applied_reservation_list', reservation_order_mgmt_client_factory)
-reservation_command(__name__, 'reservations catalog show', reservation_client_path + 'AzureReservationAPI.get_catalog', reservation_order_mgmt_client_factory)
-reservation_command(__name__, 'reservations reservation list', reservation_path + 'ReservationOperations.list', reservation_mgmt_client_factory)
-reservation_command(__name__, 'reservations reservation show', reservation_path + 'ReservationOperations.get', reservation_mgmt_client_factory)
-reservation_command(__name__, 'reservations reservation update', custom_path + 'cli_reservation_update_reservation', reservation_mgmt_client_factory)
-reservation_command(__name__, 'reservations reservation split', custom_path + 'cli_reservation_split_reservation', reservation_mgmt_client_factory)
-reservation_command(__name__, 'reservations reservation merge', custom_path + 'cli_reservation_merge_reservation', reservation_mgmt_client_factory)
-reservation_command(__name__, 'reservations reservation list-history', reservation_path + 'ReservationOperations.list_revisions', reservation_mgmt_client_factory)
+    reservations_client_sdk = reservations_type(
+        operations_tmpl='azure.mgmt.reservations.azure_reservation_api#AzureReservationAPI.{}',
+        client_factory=reservation_order_mgmt_client_factory
+    )
+
+    with self.command_group('reservations reservation-order', reservations_order_sdk) as g:
+        g.command('list', 'list')
+        g.command('show', 'get')
+
+    with self.command_group('reservations reservation', reservations_sdk) as g:
+        g.command('list', 'list')
+        g.command('show', 'get')
+        g.command('list-history', 'list_revisions')
+        g.custom_command('update', 'cli_reservation_update_reservation')
+        g.custom_command('split', 'cli_reservation_split_reservation')
+        g.custom_command('merge', 'cli_reservation_merge_reservation')
+
+    with self.command_group('reservations reservation-order-id', reservations_client_sdk) as g:
+        g.command('list', 'get_applied_reservation_list')
+
+    with self.command_group('reservations catalog', reservations_client_sdk) as g:
+        g.command('show', 'get_catalog')

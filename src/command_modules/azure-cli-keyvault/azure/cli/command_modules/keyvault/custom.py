@@ -9,39 +9,24 @@ import os
 import re
 import time
 
+from knack.log import get_logger
+from knack.util import CLIError
+
 from OpenSSL import crypto
-from msrestazure.azure_exceptions import CloudError
-from azure.keyvault.models import (CertificateAttributes,
-                                   CertificatePolicy,
-                                   IssuerParameters,
-                                   KeyProperties,
-                                   LifetimeAction,
-                                   SecretProperties,
-                                   X509CertificateProperties,
-                                   SubjectAlternativeNames,
-                                   Trigger,
-                                   Action)
-from azure.keyvault.models import ActionType, KeyUsageType
-from azure.mgmt.keyvault.models import (VaultProperties,
-                                        AccessPolicyEntry,
-                                        Permissions,
-                                        CertificatePermissions,
-                                        KeyPermissions,
-                                        SecretPermissions,
-                                        StoragePermissions,
-                                        Sku,
-                                        SkuName)
-from azure.graphrbac import GraphRbacManagementClient
+
 import azure.cli.core.telemetry as telemetry
-from azure.cli.core.util import CLIError
-import azure.cli.core.azlogging as azlogging
-from azure.keyvault import KeyVaultClient
+
 from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 
 def _default_certificate_profile():
+
+    from azure.keyvault.models import \
+        (Action, ActionType, KeyUsageType, CertificateAttributes, CertificatePolicy, IssuerParameters,
+         KeyProperties, LifetimeAction, SecretProperties, X509CertificateProperties, Trigger)
+
     template = CertificatePolicy(
         key_properties=KeyProperties(
             exportable=True,
@@ -89,6 +74,10 @@ def _default_certificate_profile():
 
 
 def _scaffold_certificate_profile():
+    from azure.keyvault.models import \
+        (Action, ActionType, KeyUsageType, CertificateAttributes, CertificatePolicy, IssuerParameters,
+         KeyProperties, LifetimeAction, SecretProperties, X509CertificateProperties, SubjectAlternativeNames, Trigger)
+
     template = CertificatePolicy(
         key_properties=KeyProperties(
             exportable=True,
@@ -144,7 +133,9 @@ def list_keyvault(client, resource_group_name=None):
     return list(vault_list)
 
 
+# pylint: disable=inconsistent-return-statements
 def _get_current_user_object_id(graph_client):
+    from msrestazure.azure_exceptions import CloudError
     try:
         current_user = graph_client.objects.get_current_user()
         if current_user and current_user.object_id:  # pylint:disable=no-member
@@ -158,11 +149,11 @@ def _get_object_id_by_spn(graph_client, spn):
         filter="servicePrincipalNames/any(c:c eq '{}')".format(spn)))
     if not accounts:
         logger.warning("Unable to find user with spn '%s'", spn)
-        return
+        return None
     if len(accounts) > 1:
         logger.warning("Multiple service principals found with spn '%s'. "
                        "You can avoid this by specifying object id.", spn)
-        return
+        return None
     return accounts[0].object_id
 
 
@@ -170,11 +161,11 @@ def _get_object_id_by_upn(graph_client, upn):
     accounts = list(graph_client.users.list(filter="userPrincipalName eq '{}'".format(upn)))
     if not accounts:
         logger.warning("Unable to find user with upn '%s'", upn)
-        return
+        return None
     if len(accounts) > 1:
         logger.warning("Multiple users principals found with upn '%s'. "
                        "You can avoid this by specifying object id.", upn)
-        return
+        return None
     return accounts[0].object_id
 
 
@@ -189,6 +180,7 @@ def _get_object_id_from_subscription(graph_client, subscription):
     else:
         logger.warning('Current credentials are not from a user or service principal. '
                        'Azure Key Vault does not work with certificate credentials.')
+    return None
 
 
 def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
@@ -199,6 +191,7 @@ def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
     return _get_object_id_from_subscription(graph_client, subscription)
 
 
+# region KeyVault Vault
 def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argument
     """
     Get a default certificate policy to be used with `az keyvault certificate create`
@@ -210,12 +203,14 @@ def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argume
     return _scaffold_certificate_profile() if scaffold else _default_certificate_profile()
 
 
-def recover_keyvault(client, vault_name, resource_group_name, location):
-    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters, CreateMode
-    from azure.cli.core._profile import Profile, CLOUD
-    profile = Profile()
+def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
+    from azure.mgmt.keyvault.models import (
+        VaultCreateOrUpdateParameters, CreateMode, Sku, SkuName)
+    from azure.cli.core._profile import Profile
+
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials(
-        resource=CLOUD.endpoints.active_directory_graph_resource_id)
+        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
     params = VaultCreateOrUpdateParameters(location,
                                            properties={'tenant_id': tenant_id,
@@ -227,25 +222,29 @@ def recover_keyvault(client, vault_name, resource_group_name, location):
                                    parameters=params)
 
 
-def create_keyvault(client,  # pylint: disable=too-many-locals
-                    resource_group_name, vault_name, location=None, sku=SkuName.standard.value,
+def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
+                    resource_group_name, vault_name, location=None, sku=None,
                     enabled_for_deployment=None,
                     enabled_for_disk_encryption=None,
                     enabled_for_template_deployment=None,
                     enable_soft_delete=None,
                     no_self_perms=None,
                     tags=None):
-    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
-    from azure.cli.core._profile import Profile, CLOUD
+    from azure.mgmt.keyvault.models import (
+        VaultCreateOrUpdateParameters, Permissions, KeyPermissions, SecretPermissions,
+        CertificatePermissions, StoragePermissions, AccessPolicyEntry, Sku, VaultProperties)
+    from azure.cli.core._profile import Profile
     from azure.graphrbac.models import GraphErrorException
-    profile = Profile()
+    from azure.graphrbac import GraphRbacManagementClient
+
+    profile = Profile(cli_ctx=cmd.cli_ctx)
     cred, _, tenant_id = profile.get_login_credentials(
-        resource=CLOUD.endpoints.active_directory_graph_resource_id)
+        resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
     graph_client = GraphRbacManagementClient(
         cred,
         tenant_id,
-        base_url=CLOUD.endpoints.active_directory_graph_resource_id)
+        base_url=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     subscription = profile.get_subscription()
     if no_self_perms:
         access_policies = []
@@ -319,9 +318,6 @@ def create_keyvault(client,  # pylint: disable=too-many-locals
                                    parameters=parameters)
 
 
-create_keyvault.__doc__ = VaultProperties.__doc__
-
-
 def update_keyvault_setter(client, parameters, resource_group_name, vault_name):
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
     return client.create_or_update(resource_group_name=resource_group_name,
@@ -345,27 +341,30 @@ def update_keyvault(instance, enabled_for_deployment=None, enabled_for_disk_encr
     return instance
 
 
-def _object_id_args_helper(object_id, spn, upn):
+def _object_id_args_helper(cli_ctx, object_id, spn, upn):
     if not object_id:
-        from azure.cli.core._profile import Profile, CLOUD
-        profile = Profile()
+        from azure.cli.core._profile import Profile
+        from azure.graphrbac import GraphRbacManagementClient
+
+        profile = Profile(cli_ctx=cli_ctx)
         cred, _, tenant_id = profile.get_login_credentials(
-            resource=CLOUD.endpoints.active_directory_graph_resource_id)
+            resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
         graph_client = GraphRbacManagementClient(cred,
                                                  tenant_id,
-                                                 base_url=CLOUD.endpoints.active_directory_graph_resource_id)
+                                                 base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
         object_id = _get_object_id(graph_client, spn=spn, upn=upn)
         if not object_id:
             raise CLIError('Unable to get object id from principal name.')
     return object_id
 
 
-def set_policy(client, resource_group_name, vault_name,
+def set_policy(cmd, client, resource_group_name, vault_name,
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
                certificate_permissions=None):
     """ Update security policy settings for a Key Vault. """
-    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
-    object_id = _object_id_args_helper(object_id, spn, upn)
+    from azure.mgmt.keyvault.models import (
+        VaultCreateOrUpdateParameters, AccessPolicyEntry, Permissions)
+    object_id = _object_id_args_helper(cmd.cli_ctx, object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
     # Find the existing policy to set
@@ -396,11 +395,10 @@ def set_policy(client, resource_group_name, vault_name,
                                        properties=vault.properties))
 
 
-def delete_policy(client,
-                  resource_group_name, vault_name, object_id=None, spn=None, upn=None):
+def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, spn=None, upn=None):
     """ Delete security policy settings for a Key Vault. """
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
-    object_id = _object_id_args_helper(object_id, spn, upn)
+    object_id = _object_id_args_helper(cmd.cli_ctx, object_id, spn, upn)
     vault = client.get(resource_group_name=resource_group_name,
                        vault_name=vault_name)
     prev_policies_len = len(vault.properties.access_policies)
@@ -415,8 +413,10 @@ def delete_policy(client,
                                        location=vault.location,
                                        tags=vault.tags,
                                        properties=vault.properties))
+# endregion
 
 
+# region KeyVault Key
 def create_key(client, vault_base_url, key_name, destination, key_size=None, key_ops=None,
                disabled=False, expires=None, not_before=None, tags=None):
     from azure.keyvault.models import KeyAttributes
@@ -425,25 +425,16 @@ def create_key(client, vault_base_url, key_name, destination, key_size=None, key
         vault_base_url, key_name, destination, key_size, key_ops, key_attrs, tags)
 
 
-create_key.__doc__ = KeyVaultClient.create_key.__doc__
-
-
 def backup_key(client, vault_base_url, key_name, file_path):
     backup = client.backup_key(vault_base_url, key_name).value
     with open(file_path, 'wb') as output:
         output.write(backup)
 
 
-backup_key.__doc__ = KeyVaultClient.backup_key.__doc__
-
-
 def restore_key(client, vault_base_url, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
     return client.restore_key(vault_base_url, data)
-
-
-restore_key.__doc__ = KeyVaultClient.restore_key.__doc__
 
 
 def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False, expires=None,
@@ -522,8 +513,10 @@ def import_key(client, vault_base_url, key_name, destination=None, key_ops=None,
 
     return client.import_key(
         vault_base_url, key_name, key_obj, destination == 'hsm', key_attrs, tags)
+# endregion
 
 
+# region KeyVault Secret
 def download_secret(client, vault_base_url, secret_name, file_path, encoding=None,
                     secret_version=''):
     """ Download a secret from a KeyVault. """
@@ -563,22 +556,20 @@ def backup_secret(client, vault_base_url, secret_name, file_path):
         output.write(backup)
 
 
-backup_secret.__doc__ = KeyVaultClient.backup_secret.__doc__
-
-
 def restore_secret(client, vault_base_url, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
     return client.restore_secret(vault_base_url, data)
+# endregion
 
 
-restore_key.__doc__ = KeyVaultClient.restore_key.__doc__
-
-
+# region KeyVault Certificate
+# pylint: disable=inconsistent-return-statements
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
                        disabled=False, tags=None, validity=None):
+    from azure.keyvault.models import CertificateAttributes
     cert_attrs = CertificateAttributes(not disabled)
-    logger.info("Starting long running operation 'keyvault certificate create'")
+    logger.info("Starting long-running operation 'keyvault certificate create'")
 
     if validity is not None:
         certificate_policy['x509_certificate_properties']['validity_in_months'] = validity
@@ -595,13 +586,13 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
         check = client.get_certificate_operation(vault_base_url, certificate_name)
         if check.status != 'inProgress':
             logger.info(
-                "Long running operation 'keyvault certificate create' finished with result %s.",
+                "Long-running operation 'keyvault certificate create' finished with result %s.",
                 check)
             return check
         try:
             time.sleep(10)
         except KeyboardInterrupt:
-            logger.info("Long running operation wait cancelled.")
+            logger.info("Long-running operation wait cancelled.")
             raise
         except Exception as client_exception:
             telemetry.set_exception(exception=client_exception, fault_type='cert-create-error',
@@ -617,9 +608,6 @@ def create_certificate(client, vault_base_url, certificate_name, certificate_pol
             raise CLIError('{}'.format(message))
 
 
-create_certificate.__doc__ = KeyVaultClient.create_certificate.__doc__
-
-
 def _asn1_to_iso8601(asn1_date):
     import dateutil.parser
     if isinstance(asn1_date, bytes):
@@ -630,6 +618,7 @@ def _asn1_to_iso8601(asn1_date):
 def import_certificate(client, vault_base_url, certificate_name, certificate_data,
                        disabled=False, password=None, certificate_policy=None, tags=None):
     import binascii
+    from azure.keyvault.models import CertificateAttributes, SecretProperties, CertificatePolicy
 
     x509 = None
     content_type = None
@@ -832,3 +821,4 @@ def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
     client.set_certificate_issuer(
         vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
         issuer.attributes)
+# endregion

@@ -3,7 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
+
+#  pylint: disable=line-too-long
 
 
 def add_helps(command_group, server_type):
@@ -38,7 +40,7 @@ def add_helps(command_group, server_type):
                     - name: Restore 'testsvr2' to 'testsvrnew', where 'testsvrnew' is in a different resource group than the backup.
                       text: |
                         az {0} server restore -g testgroup -n testsvrnew \\
-                            -s "/subscriptions/{{SubID}}/resourceGroups/{{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2" \\
+                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2" \\
                             --restore-point-in-time "2017-06-15T13:10:00Z"
                 """.format(command_group, server_type)
     helps['{} server update'.format(command_group)] = """
@@ -146,23 +148,23 @@ def add_helps(command_group, server_type):
                 type: group
                 short-summary: Manage {0} databases on a server.
                 """.format(server_type)
-    helps['{} db create'.format(command_group)] = """
-                type: command
-                short-summary: Create a {0} database.
-                examples:
-                    - name: Create database 'testdb' in the server 'testsvr' with the default parameters.
-                      text: az {1} db create -g testgroup -s testsvr -n testdb
-                    - name: Create database 'testdb' in server 'testsvr' with a given character set and collation rules.
-                      text: az {1} db create -g testgroup -s testsvr -n testdb --charset <valid_charset> --collation <valid_collation>
-                """.format(server_type, command_group)
-    helps['{} db delete'.format(command_group)] = """
-                type: command
-                short-summary: Delete a database.
-                """
-    helps['{} db show'.format(command_group)] = """
-                type: command
-                short-summary: Show the details of a database.
-                """
+    # helps['{} db create'.format(command_group)] = """
+    #             type: command
+    #             short-summary: Create a {0} database.
+    #             examples:
+    #                 - name: Create database 'testdb' in the server 'testsvr' with the default parameters.
+    #                   text: az {1} db create -g testgroup -s testsvr -n testdb
+    #                 - name: Create database 'testdb' in server 'testsvr' with a given character set and collation rules.
+    #                   text: az {1} db create -g testgroup -s testsvr -n testdb --charset <valid_charset> --collation <valid_collation>
+    #             """.format(server_type, command_group)
+    # helps['{} db delete'.format(command_group)] = """
+    #             type: command
+    #             short-summary: Delete a database.
+    #             """
+    # helps['{} db show'.format(command_group)] = """
+    #             type: command
+    #             short-summary: Show the details of a database.
+    #             """
     helps['{} db list'.format(command_group)] = """
                 type: command
                 short-summary: List the databases for a server.

@@ -3,6 +3,20 @@
 Release History
 ===============
 
+2.0.17
+++++++
+* role assignment: expose --assignee-object-id to bypass graph query
+
+2.0.16
+++++++
+* Update for CLI core changes.
+
+2.0.15
+++++++
+* `role assignment list`: show default assignments for classic administrators
+* `ad sp reset-credentials`: support to add credentials instead of overwriting
+* `create-for-rbac`: emit out an actionable error if provisioning application failed for lack of permissions
+
 2.0.14
 ++++++
 * minor fixes

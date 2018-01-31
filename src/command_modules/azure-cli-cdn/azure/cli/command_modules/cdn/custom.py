@@ -18,13 +18,6 @@ def default_content_types():
             "application/xml"]
 
 
-def list_profiles(client, resource_group_name=None):
-    profiles = client.profiles
-    profile_list = profiles.list_by_resource_group(resource_group_name=resource_group_name) \
-        if resource_group_name else profiles.list()
-    return list(profile_list)
-
-
 def _update_mapper(existing, new, keys):
     for key in keys:
         existing_value = getattr(existing, key)
@@ -32,7 +25,17 @@ def _update_mapper(existing, new, keys):
         setattr(new, key, new_value if new_value is not None else existing_value)
 
 
-def update_endpoint(instance,
+# region Custom Commands
+# pylint: disable=unused-argument
+def list_profiles(cmd, client, resource_group_name=None):
+    profiles = client.profiles
+    profile_list = profiles.list_by_resource_group(resource_group_name=resource_group_name) \
+        if resource_group_name else profiles.list()
+    return list(profile_list)
+
+
+# pylint: disable=unused-argument
+def update_endpoint(cmd, instance,
                     origin_host_header=None,
                     origin_path=None,
                     content_types_to_compress=None,
@@ -68,10 +71,8 @@ def update_endpoint(instance,
     return params
 
 
-update_endpoint.__doc__ = EndpointUpdateParameters.__doc__
-
-
-def create_endpoint(client, resource_group_name, profile_name, name, origins, location=None,
+# pylint: disable=unused-argument
+def create_endpoint(cmd, client, resource_group_name, profile_name, name, origins, location=None,
                     origin_host_header=None, origin_path=None, content_types_to_compress=None,
                     is_compression_enabled=None, is_http_allowed=None, is_https_allowed=None,
                     query_string_caching_behavior=QueryStringCachingBehavior.ignore_query_string.
@@ -95,10 +96,9 @@ def create_endpoint(client, resource_group_name, profile_name, name, origins, lo
     return client.endpoints.create(resource_group_name, profile_name, name, endpoint)
 
 
-create_endpoint.__doc__ = Endpoint.__doc__
-
-
-def create_custom_domain(client, resource_group_name, profile_name, endpoint_name, name, hostname):
+# pylint: disable=unused-argument
+def create_custom_domain(cmd, client, resource_group_name, profile_name, endpoint_name, name, hostname,
+                         location=None, tags=None):
     return client.custom_domains.create(resource_group_name,
                                         profile_name,
                                         endpoint_name,
@@ -106,18 +106,19 @@ def create_custom_domain(client, resource_group_name, profile_name, endpoint_nam
                                         hostname)
 
 
-def update_profile(instance, tags=None):
+# pylint: disable=unused-argument
+def update_profile(cmd, instance, tags=None):
     params = ProfileUpdateParameters(tags=tags)
     _update_mapper(instance, params, ['tags'])
     return params
 
 
-update_profile.__doc__ = ProfileUpdateParameters.__doc__
-
-
-def create_profile(client, resource_group_name, name,
+# pylint: disable=unused-argument
+def create_profile(cmd, client, resource_group_name, name,
                    sku=SkuName.standard_akamai.value,
                    location=None, tags=None):
     from azure.mgmt.cdn.models import (Profile, Sku)
     profile = Profile(location, Sku(name=sku), tags=tags)
     return client.profiles.create(resource_group_name, name, profile)
+
+# endregion

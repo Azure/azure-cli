@@ -2,6 +2,31 @@
 
 Release History
 ===============
+2.0.26
+++++++
+* Support raw token retrival in MSI context
+* Remove polling indicator string after finishing LRO on Windows cmd.exe
+* Warning that appears when using a configured default has been changed to an INFO level entry. Use --verbose to see.
+* Add a progress indicator for wait command
+
+2.0.25
+++++++
+* Minor fixes
+
+2.0.24
+++++++
+* Minor fixes
+
+2.0.23
+++++++
+* Minor fixes
+
+2.0.22
+++++++
+* Minor fixes
+* Modified the AZURE_US_GOV_CLOUD's AAD authority endpoint from login.microsoftonline.com to login.microsoftonline.us.
+* Introduce SDKProfile to support azure-mgmt-compute 3.1.0rc1 and integrated profile support.
+* Improve telemetry: remove inifinity retry loop from SynchronousSender.
 
 2.0.21
 ++++++
@@ -85,7 +110,7 @@ Release History
 
 2.0.5 (2017-05-05)
 ++++++++++++++++++
-* core: capture exceptions caused by unregistered provider and auto-register it   
+* core: capture exceptions caused by unregistered provider and auto-register it
 * login: avoid the bad exception when the user account has no subscription and no tenants
 * perf: persist adal token cache in memory till process exits (#2603)
 

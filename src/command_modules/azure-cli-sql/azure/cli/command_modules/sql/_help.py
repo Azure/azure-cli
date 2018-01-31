@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 
 helps['sql'] = """
@@ -284,6 +284,18 @@ helps['sql server update'] = """
     type: command
     short-summary: Update a server.
     """
+helps['sql server conn-policy'] = """
+    type: group
+    short-summary: Manage a server's connection policy.
+    """
+helps['sql server conn-policy show'] = """
+    type: command
+    short-summary: Gets a server's secure connection policy.
+    """
+helps['sql server conn-policy update'] = """
+    type: command
+    short-summary: Updates a server's secure connection policy.
+    """
 helps['sql server firewall-rule'] = """
     type: group
     short-summary: Manage a server's firewall rules.
@@ -342,7 +354,9 @@ helps['sql server vnet-rule create'] = """
 
     examples:
         - name: Create a vnet rule by providing the subnet id.
-          text: az sql server vnet-rule create --subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rgName/providers/Microsoft.Network/virtualNetworks/vnetName/subnets/subnetName
+          text: |
+            az sql server vnet-rule create \\
+              --subnet /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/Microsoft.Network/virtualNetworks/{VNETName}/subnets/{SubnetName}
         - name: Create a vnet rule by providing the vnet and subnet name. The subnet id is created by taking the resource group name and subscription id of the SQL server.
           text: az sql server vnet-rule create --subnet subnetName --vnet-name vnetName
     """

@@ -5,21 +5,29 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.core.commands import cli_command
-from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
-from azure.cli.command_modules.billing._client_factory import \
-    (invoices_mgmt_client_factory,
-     billing_periods_mgmt_client_factory)
+from azure.cli.core.commands import CliCommandType
+from azure.cli.command_modules.billing._client_factory import (
+    invoices_mgmt_client_factory, billing_periods_mgmt_client_factory)
 from ._exception_handler import billing_exception_handler
 
-if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
-    billing_periods_path = 'azure.mgmt.billing.operations.billing_periods_operations#'
-    custom_path = 'azure.cli.command_modules.billing.custom#'
 
-    def billing_command(*args, **kwargs):
-        cli_command(*args, exception_handler=billing_exception_handler, **kwargs)
+def load_command_table(self, _):
+    billing_invoice_util = CliCommandType(
+        operations_tmpl='azure.mgmt.billing.operations.invoices_operations#InvoicesOperations.{}',
+        client_factory=invoices_mgmt_client_factory,
+        exception_handler=billing_exception_handler
+    )
 
-    billing_command(__name__, 'billing invoice list', custom_path + 'cli_billing_list_invoices', invoices_mgmt_client_factory)
-    billing_command(__name__, 'billing invoice show', custom_path + 'cli_billing_get_invoice', invoices_mgmt_client_factory)
-    billing_command(__name__, 'billing period list', custom_path + 'cli_billing_list_periods', billing_periods_mgmt_client_factory)
-    billing_command(__name__, 'billing period show', billing_periods_path + 'BillingPeriodsOperations.get', billing_periods_mgmt_client_factory)
+    billing_period_util = CliCommandType(
+        operations_tmpl='azure.mgmt.billing.operations.billing_periods_operations#BillingPeriodsOperations.{}',
+        client_factory=billing_periods_mgmt_client_factory,
+        exception_handler=billing_exception_handler
+    )
+
+    with self.command_group('billing invoice', billing_invoice_util, client_factory=invoices_mgmt_client_factory) as g:
+        g.custom_command('list', 'cli_billing_list_invoices')
+        g.custom_command('show', 'cli_billing_get_invoice')
+
+    with self.command_group('billing period', billing_period_util, client_factory=billing_periods_mgmt_client_factory) as g:
+        g.custom_command('list', 'cli_billing_list_periods')
+        g.command('show', 'get')

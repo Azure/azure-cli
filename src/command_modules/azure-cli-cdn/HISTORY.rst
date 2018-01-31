@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.0.12
+++++++
+* `cdn custom-domain create`: Fixed missing client issue.
+
+0.0.11
+++++++
+* Update for CLI core changes.
+
 0.0.10
 ++++++
 * minor fixes

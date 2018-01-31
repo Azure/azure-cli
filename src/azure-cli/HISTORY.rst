@@ -3,6 +3,26 @@
 Release History
 ===============
 
+2.0.26
+++++++
+* Minor fixes
+
+2.0.25
+++++++
+* Minor fixes
+
+2.0.24
+++++++
+* Minor fixes
+
+2.0.23
+++++++
+* Minor fixes
+
+2.0.22
+++++++
+* Remove `az component` commands. Use `az extension` instead. `az component` has been deprecated for several months now.
+
 2.0.21
 ++++++
 * Minor fixes

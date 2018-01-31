@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 
 helps['appservice'] = """
@@ -102,7 +102,7 @@ type: group
 short-summary: Manage a web app's connection strings.
 """
 
-helps['webapp config connection-string show'] = """
+helps['webapp config connection-string list'] = """
 type: command
 short-summary: Get a web app's connection strings.
 """
@@ -318,10 +318,11 @@ helps['webapp deployment source config-zip'] = """
     short-summary: Perform deployment using the kudu zip push deployment for a webapp.
     long-summary: >
         By default Kudu assumes that zip deployments do not require any build-related actions like
-        npm install or dotnet publish. This can be overridden by including an .ini file on your
-        zip file with the setting SCM_DO_BUILD_DURING_DEPLOYMENT = true to enable Kudu detection
-        logic and build script generation process. Alternatley the setting can be enabled using the
-        az webapp config appsettings set command.
+        npm install or dotnet publish. This can be overridden by including a .deployment file on your
+        zip file with the following content '[config] SCM_DO_BUILD_DURING_DEPLOYMENT = true',
+        to enable Kudu detection logic and build script generation process.
+        See https://github.com/projectkudu/kudu/wiki/Configurable-settings#enabledisable-build-actions-preview.
+        Alternately the setting can be enabled using the az webapp config appsettings set command.
     examples:
          - name: Perform deployment by using zip file content.
            text: >
@@ -505,7 +506,7 @@ helps['webapp list'] = """
     examples:
         - name: List default host name and state for all web apps.
           text: >
-            az webapp list --query "[].{ hostName: defaultHostName, state: state }"
+            az webapp list --query "[].{hostName: defaultHostName, state: state}"
         - name: List all running web apps.
           text: >
             az webapp list --query "[?state=='Running']"
@@ -557,7 +558,7 @@ helps['functionapp list'] = """
     examples:
         - name: List default host name and state for all function apps.
           text: >
-            az functionapp list --query "[].{ hostName: defaultHostName, state: state }"
+            az functionapp list --query "[].{hostName: defaultHostName, state: state}"
         - name: List all running function apps.
           text: >
             az functionapp list --query "[?state=='Running']"
@@ -598,7 +599,7 @@ helps['functionapp config appsettings'] = """
     short-summary: Configure function app settings.
 """
 
-helps['functionapp config appsettings show'] = """
+helps['functionapp config appsettings list'] = """
     type: command
     short-summary: Show settings for a function app.
 """
@@ -606,6 +607,11 @@ helps['functionapp config appsettings show'] = """
 helps['functionapp config appsettings set'] = """
     type: command
     short-summary: Update a function app's settings.
+"""
+
+helps['functionapp config appsettings delete'] = """
+    type: command
+    short-summary: Delete a function app's settings.
 """
 
 helps['functionapp config hostname'] = """
@@ -727,10 +733,11 @@ helps['functionapp deployment source config-zip'] = """
     short-summary: Perform deployment using the kudu zip push deployment for a function app.
     long-summary: >
         By default Kudu assumes that zip deployments do not require any build-related actions like
-        npm install or dotnet publish. This can be overridden by including an .ini file on your
-        zip file with the setting SCM_DO_BUILD_DURING_DEPLOYMENT = true to enable Kudu detection
-        logic and build script generation process. Alternatley the setting can be enabled using the
-        az functionapp config appsettings set command.
+        npm install or dotnet publish. This can be overridden by including an .deployment file on your
+        zip file with the following content '[config] SCM_DO_BUILD_DURING_DEPLOYMENT = true',
+        to enable Kudu detection logic and build script generation process.
+        See https://github.com/projectkudu/kudu/wiki/Configurable-settings#enabledisable-build-actions-preview.
+        Alternately the setting can be enabled using the az functionapp config appsettings set command.
     examples:
          - name: Perform deployment by using zip file content.
            text: >

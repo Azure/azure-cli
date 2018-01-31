@@ -4,58 +4,26 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+
 from collections import OrderedDict
 
-from azure.cli.core.profiles import ResourceType, supported_api_version
-from azure.cli.core.commands import cli_command
-from azure.cli.core.commands.arm import \
-    (cli_generic_update_command, cli_generic_wait_command, deployment_validate_table_format)
 from azure.cli.core.util import empty_on_404
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.commands import CliCommandType
 
-from azure.cli.command_modules.resource._client_factory import (_resource_client_factory,
-                                                                cf_resource_groups,
-                                                                cf_providers,
-                                                                cf_features,
-                                                                cf_tags,
-                                                                cf_deployments,
-                                                                cf_deployment_operations,
-                                                                cf_policy_definitions,
-                                                                cf_policy_set_definitions,
-                                                                cf_resource_links,
-                                                                cf_resource_managedapplications,
-                                                                cf_resource_managedappdefinitions)
-
-
-# Subscription lock commands
-cli_command(__name__, 'account lock create', 'azure.cli.command_modules.resource.custom#create_lock')
-cli_command(__name__, 'account lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
-cli_command(__name__, 'account lock list', 'azure.cli.command_modules.resource.custom#list_locks')
-cli_command(__name__, 'account lock show', 'azure.cli.command_modules.resource.custom#get_lock',
-            exception_handler=empty_on_404)
-cli_command(__name__, 'account lock update', 'azure.cli.command_modules.resource.custom#update_lock')
+from azure.cli.command_modules.resource._client_factory import (
+    cf_resource_groups, cf_providers, cf_features, cf_tags, cf_deployments,
+    cf_deployment_operations, cf_policy_definitions, cf_policy_set_definitions, cf_resource_links,
+    cf_resource_managedapplications, cf_resource_managedappdefinitions)
+from azure.cli.command_modules.resource._validators import process_deployment_create_namespace
 
 
 # Resource group commands
 def transform_resource_group_list(result):
-    return [OrderedDict([('Name', r['name']), ('Location', r['location']), ('Status', r['properties']['provisioningState'])]) for r in result]
+    return [OrderedDict([
+        ('Name', r['name']), ('Location', r['location']), ('Status', r['properties']['provisioningState'])]) for r in result]
 
 
-cli_command(__name__, 'group delete', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.delete', cf_resource_groups, no_wait_param='raw', confirmation=True)
-cli_generic_wait_command(__name__, 'group wait', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups)
-cli_command(__name__, 'group show', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get', cf_resource_groups, exception_handler=empty_on_404)
-cli_command(__name__, 'group exists', 'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.check_existence', cf_resource_groups)
-cli_command(__name__, 'group list', 'azure.cli.command_modules.resource.custom#list_resource_groups', table_transformer=transform_resource_group_list)
-cli_command(__name__, 'group create', 'azure.cli.command_modules.resource.custom#create_resource_group')
-cli_command(__name__, 'group export', 'azure.cli.command_modules.resource.custom#export_group_as_template')
-cli_command(__name__, 'group lock create', 'azure.cli.command_modules.resource.custom#create_lock')
-cli_command(__name__, 'group lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
-cli_command(__name__, 'group lock list', 'azure.cli.command_modules.resource.custom#list_locks')
-cli_command(__name__, 'group lock show', 'azure.cli.command_modules.resource.custom#get_lock',
-            exception_handler=empty_on_404)
-cli_command(__name__, 'group lock update', 'azure.cli.command_modules.resource.custom#update_lock')
-
-
-# Resource commands
 def transform_resource_list(result):
     transformed = []
     for r in result:
@@ -68,110 +36,210 @@ def transform_resource_list(result):
     return transformed
 
 
-cli_command(__name__, 'resource create', 'azure.cli.command_modules.resource.custom#create_resource')
-cli_command(__name__, 'resource delete', 'azure.cli.command_modules.resource.custom#delete_resource')
-cli_command(__name__, 'resource show', 'azure.cli.command_modules.resource.custom#show_resource', exception_handler=empty_on_404)
-cli_command(__name__, 'resource list', 'azure.cli.command_modules.resource.custom#list_resources', table_transformer=transform_resource_list)
-cli_command(__name__, 'resource tag', 'azure.cli.command_modules.resource.custom#tag_resource')
-cli_command(__name__, 'resource move', 'azure.cli.command_modules.resource.custom#move_resource')
-cli_command(__name__, 'resource invoke-action', 'azure.cli.command_modules.resource.custom#invoke_resource_action')
-cli_command(__name__, 'resource lock create', 'azure.cli.command_modules.resource.custom#create_lock')
-cli_command(__name__, 'resource lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
-cli_command(__name__, 'resource lock list', 'azure.cli.command_modules.resource.custom#list_locks')
-cli_command(__name__, 'resource lock show', 'azure.cli.command_modules.resource.custom#get_lock',
-            exception_handler=empty_on_404)
-cli_command(__name__, 'resource lock update', 'azure.cli.command_modules.resource.custom#update_lock')
-
-# Resource provider commands
-cli_command(__name__, 'provider list', 'azure.mgmt.resource.resources.operations.providers_operations#ProvidersOperations.list', cf_providers)
-cli_command(__name__, 'provider show', 'azure.mgmt.resource.resources.operations.providers_operations#ProvidersOperations.get', cf_providers, exception_handler=empty_on_404)
-cli_command(__name__, 'provider register', 'azure.cli.command_modules.resource.custom#register_provider')
-cli_command(__name__, 'provider unregister', 'azure.cli.command_modules.resource.custom#unregister_provider')
-cli_command(__name__, 'provider operation list', 'azure.cli.command_modules.resource.custom#list_provider_operations')
-cli_command(__name__, 'provider operation show', 'azure.cli.command_modules.resource.custom#show_provider_operations')
-
-if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-10'):
-    # Resource feature commands
-    feature_table_transform = '{Name:name, RegistrationState:properties.state}'
-    cli_command(__name__, 'feature list', 'azure.cli.command_modules.resource.custom#list_features', cf_features, table_transformer='[].' + feature_table_transform)
-    cli_command(__name__, 'feature show', 'azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.get', cf_features, exception_handler=empty_on_404, table_transformer=feature_table_transform)
-    cli_command(__name__, 'feature register', 'azure.cli.command_modules.resource.custom#register_feature', cf_features)
-
-# Tag commands
-cli_command(__name__, 'tag list', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.list', cf_tags)
-cli_command(__name__, 'tag create', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.create_or_update', cf_tags)
-cli_command(__name__, 'tag delete', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.delete', cf_tags)
-cli_command(__name__, 'tag add-value', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.create_or_update_value', cf_tags)
-cli_command(__name__, 'tag remove-value', 'azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.delete_value', cf_tags)
-
-
 # Resource group deployment commands
 def transform_deployments_list(result):
     sort_list = sorted(result, key=lambda deployment: deployment['properties']['timestamp'])
     return [OrderedDict([('Name', r['name']), ('Timestamp', r['properties']['timestamp']), ('State', r['properties']['provisioningState'])]) for r in sort_list]
 
 
-cli_command(__name__, 'group deployment create', 'azure.cli.command_modules.resource.custom#deploy_arm_template', no_wait_param='no_wait')
-cli_generic_wait_command(__name__, 'group deployment wait', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments)
-if supported_api_version(resource_type=ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-10'):
-    cli_command(__name__, 'group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list_by_resource_group', cf_deployments, table_transformer=transform_deployments_list)
-else:
-    cli_command(__name__, 'group deployment list', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.list', cf_deployments, table_transformer=transform_deployments_list)
-cli_command(__name__, 'group deployment show', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.get', cf_deployments, exception_handler=empty_on_404)
-cli_command(__name__, 'group deployment delete', 'azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.delete', cf_deployments)
-cli_command(__name__, 'group deployment validate', 'azure.cli.command_modules.resource.custom#validate_arm_template', table_transformer=deployment_validate_table_format)
-cli_command(__name__, 'group deployment export', 'azure.cli.command_modules.resource.custom#export_deployment_as_template')
+# pylint: disable=too-many-statements
+def load_command_table(self, _):
+    from azure.cli.core.commands.arm import deployment_validate_table_format
 
-# Resource group deployment operations commands
-cli_command(__name__, 'group deployment operation list', 'azure.mgmt.resource.resources.operations.deployment_operations#DeploymentOperations.list', cf_deployment_operations)
-cli_command(__name__, 'group deployment operation show', 'azure.cli.command_modules.resource.custom#get_deployment_operations', cf_deployment_operations, exception_handler=empty_on_404)
+    resource_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.resource.custom#{}')
 
-cli_generic_update_command(__name__, 'resource update',
-                           'azure.cli.command_modules.resource.custom#show_resource',
-                           'azure.cli.command_modules.resource.custom#update_resource')
+    resource_group_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.{}',
+        client_factory=cf_resource_groups,
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+    )
 
-cli_generic_update_command(__name__, 'group update',
-                           'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.get',
-                           'azure.mgmt.resource.resources.operations.resource_groups_operations#ResourceGroupsOperations.create_or_update',
-                           lambda: _resource_client_factory().resource_groups)
+    resource_provider_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.resources.operations.providers_operations#ProvidersOperations.{}',
+        client_factory=cf_providers,
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+    )
 
-cli_command(__name__, 'policy assignment create', 'azure.cli.command_modules.resource.custom#create_policy_assignment')
-cli_command(__name__, 'policy assignment delete', 'azure.cli.command_modules.resource.custom#delete_policy_assignment')
-cli_command(__name__, 'policy assignment list', 'azure.cli.command_modules.resource.custom#list_policy_assignment')
-cli_command(__name__, 'policy assignment show', 'azure.cli.command_modules.resource.custom#show_policy_assignment', exception_handler=empty_on_404)
+    resource_feature_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.features.operations.features_operations#FeaturesOperations.{}',
+        client_factory=cf_features,
+        resource_type=ResourceType.MGMT_RESOURCE_FEATURES
+    )
 
-cli_command(__name__, 'policy definition create', 'azure.cli.command_modules.resource.custom#create_policy_definition')
-cli_command(__name__, 'policy definition delete', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.delete', cf_policy_definitions)
-cli_command(__name__, 'policy definition list', 'azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.list', cf_policy_definitions)
-cli_command(__name__, 'policy definition show', 'azure.cli.command_modules.resource.custom#get_policy_definition', exception_handler=empty_on_404)
-cli_command(__name__, 'policy definition update', 'azure.cli.command_modules.resource.custom#update_policy_definition')
+    resource_tag_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.resources.operations.tags_operations#TagsOperations.{}',
+        client_factory=cf_tags,
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+    )
 
-if supported_api_version(ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview'):
-    cli_command(__name__, 'policy set-definition create', 'azure.cli.command_modules.resource.custom#create_policy_setdefinition')
-    cli_command(__name__, 'policy set-definition delete', 'azure.mgmt.resource.policy.operations#PolicySetDefinitionsOperations.delete', cf_policy_set_definitions)
-    cli_command(__name__, 'policy set-definition list', 'azure.mgmt.resource.policy.operations#PolicySetDefinitionsOperations.list', cf_policy_set_definitions)
-    cli_command(__name__, 'policy set-definition show', 'azure.cli.command_modules.resource.custom#get_policy_setdefinition', exception_handler=empty_on_404)
-    cli_command(__name__, 'policy set-definition update', 'azure.cli.command_modules.resource.custom#update_policy_setdefinition')
+    resource_deployment_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.resources.operations.deployments_operations#DeploymentsOperations.{}',
+        client_factory=cf_deployments,
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+    )
 
-cli_command(__name__, 'lock create', 'azure.cli.command_modules.resource.custom#create_lock')
-cli_command(__name__, 'lock delete', 'azure.cli.command_modules.resource.custom#delete_lock')
-cli_command(__name__, 'lock list', 'azure.cli.command_modules.resource.custom#list_locks')
-cli_command(__name__, 'lock show', 'azure.cli.command_modules.resource.custom#get_lock', exception_handler=empty_on_404)
-cli_command(__name__, 'lock update', 'azure.cli.command_modules.resource.custom#update_lock')
+    resource_deployment_operation_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.resources.operations.deployment_operations#DeploymentOperations.{}',
+        client_factory=cf_deployment_operations,
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+    )
 
-cli_command(__name__, 'resource link create', 'azure.cli.command_modules.resource.custom#create_resource_link')
-cli_command(__name__, 'resource link delete', 'azure.mgmt.resource.links.operations#ResourceLinksOperations.delete', cf_resource_links)
-cli_command(__name__, 'resource link show', 'azure.mgmt.resource.links.operations#ResourceLinksOperations.get', cf_resource_links, exception_handler=empty_on_404)
-cli_command(__name__, 'resource link list', 'azure.cli.command_modules.resource.custom#list_resource_links')
-cli_command(__name__, 'resource link update', 'azure.cli.command_modules.resource.custom#update_resource_link')
+    resource_policy_definitions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.policy.operations#PolicyDefinitionsOperations.{}',
+        client_factory=cf_policy_definitions,
+        resource_type=ResourceType.MGMT_RESOURCE_POLICY
+    )
 
-if supported_api_version(ResourceType.MGMT_RESOURCE_RESOURCES, min_api='2017-05-10'):
-    cli_command(__name__, 'managedapp create', 'azure.cli.command_modules.resource.custom#create_application')
-    cli_command(__name__, 'managedapp delete', 'azure.mgmt.resource.managedapplications.operations#ApplicationsOperations.delete', cf_resource_managedapplications)
-    cli_command(__name__, 'managedapp show', 'azure.cli.command_modules.resource.custom#show_application', exception_handler=empty_on_404)
-    cli_command(__name__, 'managedapp list', 'azure.cli.command_modules.resource.custom#list_applications')
+    resource_policy_set_definitions_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.policy.operations#PolicySetDefinitionsOperations.{}',
+        client_factory=cf_policy_set_definitions,
+        resource_type=ResourceType.MGMT_RESOURCE_POLICY
+    )
 
-    cli_command(__name__, 'managedapp definition create', 'azure.cli.command_modules.resource.custom#create_applicationdefinition')
-    cli_command(__name__, 'managedapp definition delete', 'azure.mgmt.resource.managedapplications.operations#ApplicationDefinitionsOperations.delete', cf_resource_managedappdefinitions)
-    cli_command(__name__, 'managedapp definition show', 'azure.cli.command_modules.resource.custom#show_applicationdefinition')
-    cli_command(__name__, 'managedapp definition list', 'azure.mgmt.resource.managedapplications.operations#ApplicationDefinitionsOperations.list_by_resource_group', cf_resource_managedappdefinitions, exception_handler=empty_on_404)
+    resource_lock_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.locks.operations#ManagementLocksOperations.{}',
+        resource_type=ResourceType.MGMT_RESOURCE_LOCKS
+    )
+
+    resource_link_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.links.operations#ResourceLinksOperations.{}',
+        client_factory=cf_resource_links,
+        resource_type=ResourceType.MGMT_RESOURCE_LINKS
+    )
+    resource_managedapp_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.managedapplications.operations#ApplicationsOperations.{}',
+        client_factory=cf_resource_managedapplications,
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+    )
+
+    resource_managedapp_def_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.resource.managedapplications.operations#ApplicationDefinitionsOperations.{}',
+        client_factory=cf_resource_managedappdefinitions,
+        resource_type=ResourceType.MGMT_RESOURCE_RESOURCES
+    )
+
+    with self.command_group('account lock', resource_lock_sdk, resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
+        g.custom_command('create', 'create_lock')
+        g.custom_command('delete', 'delete_lock')
+        g.custom_command('list', 'list_locks')
+        g.custom_command('show', 'get_lock', exception_handler=empty_on_404)
+        g.custom_command('update', 'update_lock')
+
+    with self.command_group('group', resource_group_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+        g.command('delete', 'delete', no_wait_param='raw', confirmation=True)
+        g.command('show', 'get', exception_handler=empty_on_404)
+        g.command('exists', 'check_existence')
+        g.custom_command('list', 'list_resource_groups', table_transformer=transform_resource_group_list)
+        g.custom_command('create', 'create_resource_group')
+        g.custom_command('export', 'export_group_as_template')
+        g.generic_update_command('update')
+        g.generic_wait_command('wait')
+
+    with self.command_group('group lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
+        g.custom_command('create', 'create_lock')
+        g.custom_command('delete', 'delete_lock')
+        g.custom_command('list', 'list_locks')
+        g.custom_command('show', 'get_lock', exception_handler=empty_on_404)
+        g.custom_command('update', 'update_lock')
+
+    with self.command_group('resource', resource_custom, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+        g.custom_command('create', 'create_resource')
+        g.custom_command('delete', 'delete_resource')
+        g.custom_command('show', 'show_resource', exception_handler=empty_on_404)
+        g.custom_command('list', 'list_resources', table_transformer=transform_resource_list)
+        g.custom_command('tag', 'tag_resource')
+        g.custom_command('move', 'move_resource')
+        g.custom_command('invoke-action', 'invoke_resource_action')
+        g.generic_update_command('update', getter_name='show_resource', setter_name='update_resource',
+                                 client_factory=None)
+
+    with self.command_group('resource lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
+        g.custom_command('create', 'create_lock')
+        g.custom_command('delete', 'delete_lock')
+        g.custom_command('list', 'list_locks')
+        g.custom_command('show', 'get_lock', exception_handler=empty_on_404)
+        g.custom_command('update', 'update_lock')
+
+    # Resource provider commands
+    with self.command_group('provider', resource_provider_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
+        g.command('list', 'list')
+        g.command('show', 'get', exception_handler=empty_on_404)
+        g.custom_command('register', 'register_provider')
+        g.custom_command('unregister', 'unregister_provider')
+        g.custom_command('operation list', 'list_provider_operations')
+        g.custom_command('operation show', 'show_provider_operations')
+
+    # Resource feature commands
+    with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, min_api='2017-05-10') as g:
+        feature_table_transform = '{Name:name, RegistrationState:properties.state}'
+        g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
+        g.command('show', 'get', exception_handler=empty_on_404, table_transformer=feature_table_transform)
+        g.custom_command('register', 'register_feature')
+
+    # Tag commands
+    with self.command_group('tag', resource_tag_sdk) as g:
+        g.command('list', 'list')
+        g.command('create', 'create_or_update')
+        g.command('delete', 'delete')
+        g.command('add-value', 'create_or_update_value')
+        g.command('remove-value', 'delete_value')
+
+    with self.command_group('group deployment', resource_deployment_sdk) as g:
+        g.custom_command('create', 'deploy_arm_template', no_wait_param='no_wait', validator=process_deployment_create_namespace)
+        g.command('list', 'list_by_resource_group', table_transformer=transform_deployments_list, min_api='2017-05-10')
+        g.command('list', 'list', table_transformer=transform_deployments_list, max_api='2016-09-01')
+        g.command('show', 'get', exception_handler=empty_on_404)
+        g.command('delete', 'delete')
+        g.custom_command('validate', 'validate_arm_template', table_transformer=deployment_validate_table_format)
+        g.custom_command('export', 'export_deployment_as_template')
+        g.generic_wait_command('wait')
+
+    with self.command_group('group deployment operation', resource_deployment_operation_sdk) as g:
+        g.command('list', 'list')
+        g.custom_command('show', 'get_deployment_operations', client_factory=cf_deployment_operations, exception_handler=empty_on_404)
+
+    with self.command_group('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
+        g.custom_command('create', 'create_policy_assignment')
+        g.custom_command('delete', 'delete_policy_assignment')
+        g.custom_command('list', 'list_policy_assignment')
+        g.custom_command('show', 'show_policy_assignment', exception_handler=empty_on_404)
+
+    with self.command_group('policy definition', resource_policy_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY) as g:
+        g.custom_command('create', 'create_policy_definition')
+        g.command('delete', 'delete')
+        g.command('list', 'list')
+        g.custom_command('show', 'get_policy_definition', exception_handler=empty_on_404)
+        g.custom_command('update', 'update_policy_definition')
+
+    with self.command_group('policy set-definition', resource_policy_set_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as g:
+        g.custom_command('create', 'create_policy_setdefinition')
+        g.command('delete', 'delete')
+        g.command('list', 'list')
+        g.custom_command('show', 'get_policy_setdefinition', exception_handler=empty_on_404)
+        g.custom_command('update', 'update_policy_setdefinition')
+
+    with self.command_group('lock', resource_type=ResourceType.MGMT_RESOURCE_LOCKS) as g:
+        g.custom_command('create', 'create_lock')
+        g.custom_command('delete', 'delete_lock')
+        g.custom_command('list', 'list_locks')
+        g.custom_command('show', 'get_lock', exception_handler=empty_on_404)
+        g.custom_command('update', 'update_lock')
+
+    with self.command_group('resource link', resource_link_sdk, resource_type=ResourceType.MGMT_RESOURCE_LINKS) as g:
+        g.custom_command('create', 'create_resource_link')
+        g.command('delete', 'delete')
+        g.command('show', 'get', exception_handler=empty_on_404)
+        g.custom_command('list', 'list_resource_links')
+        g.custom_command('update', 'update_resource_link')
+
+    with self.command_group('managedapp', resource_managedapp_sdk, min_api='2017-05-10') as g:
+        g.custom_command('create', 'create_application')
+        g.command('delete', 'delete')
+        g.custom_command('show', 'show_application', exception_handler=empty_on_404)
+        g.custom_command('list', 'list_applications')
+
+    with self.command_group('managedapp definition', resource_managedapp_def_sdk, min_api='2017-05-10') as g:
+        g.custom_command('create', 'create_applicationdefinition')
+        g.command('delete', 'delete')
+        g.custom_command('show', 'show_applicationdefinition')
+        g.command('list', 'list_by_resource_group', exception_handler=empty_on_404)

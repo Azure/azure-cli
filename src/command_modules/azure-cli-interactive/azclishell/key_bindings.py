@@ -11,141 +11,101 @@ from prompt_toolkit.keys import Keys
 from prompt_toolkit.key_binding.manager import KeyBindingManager
 
 import azclishell.configuration
-from azclishell.telemetry import SHELL_TELEMETRY as shell_telemetry
 
 
-manager = KeyBindingManager(
-    enable_system_bindings=True,
-    enable_auto_suggest_bindings=True,
-    enable_abort_and_exit_bindings=True
-)
+class InteractiveKeyBindings(object):
 
-registry = manager.registry
+    def __init__(self, shell_ctx):
 
-_SECTION = 1
+        manager = KeyBindingManager(
+            enable_system_bindings=True,
+            enable_auto_suggest_bindings=True,
+            enable_abort_and_exit_bindings=True
+        )
+        self.shell_ctx = shell_ctx
+        self.registry = manager.registry
 
-PROMPTING = False
-EXAMPLE_REPL = False
-SHOW_DEFAULT = False
-SYMBOLS = False
+        # pylint: disable=too-few-public-methods
+        class _PromptFilter(Filter):
+            def __call__(self, *a, **kw):
+                return not shell_ctx.is_prompting
 
+        # pylint: disable=too-few-public-methods
+        class _ExampleFilter(Filter):
+            def __call__(self, *a, **kw):
+                return not shell_ctx.is_example_repl
 
-# pylint: disable=too-few-public-methods
-class _PromptFilter(Filter):
-    def __call__(self, *a, **kw):
-        return not PROMPTING
+        @self.registry.add_binding(Keys.ControlD, eager=True)
+        def exit_(event):
+            """ exits the program when Control D is pressed """
+            shell_ctx.telemetry.track_key('ControlD')
+            event.cli.set_return_value(None)
 
+        @self.registry.add_binding(Keys.Enter, filter=_PromptFilter() & _ExampleFilter())
+        def enter_(event):
+            """ Sends the command to the terminal"""
+            event.cli.set_return_value(event.cli.current_buffer)
 
-# pylint: disable=too-few-public-methods
-class _ExampleFilter(Filter):
-    def __call__(self, *a, **kw):
-        return not EXAMPLE_REPL
+        @self.registry.add_binding(Keys.ControlY, eager=True)
+        def pan_up(event):
+            """ Pans the example pan up"""
+            shell_ctx.telemetry.track_key('ControlY')
 
+            if shell_ctx._section > 1:
+                shell_ctx._section -= 1
 
-@registry.add_binding(Keys.ControlD, eager=True)
-def exit_(event):
-    """ exits the program when Control D is pressed """
-    shell_telemetry.track_key('ControlD')
-    event.cli.set_return_value(None)
+        @self.registry.add_binding(Keys.ControlN, eager=True)
+        def pan_down(event):
+            """ Pans the example pan down"""
+            shell_ctx.telemetry.track_key('ControlN')
 
+            if shell_ctx._section < 10:
+                shell_ctx._section += 1
 
-@registry.add_binding(Keys.Enter, filter=_PromptFilter() & _ExampleFilter())
-def enter_(event):
-    """ Sends the command to the terminal"""
-    event.cli.set_return_value(event.cli.current_buffer)
+        @self.registry.add_binding(Keys.F1, eager=True)
+        def config_settings(event):
+            """ opens the configuration """
+            shell_ctx.telemetry.track_key('F1')
 
+            shell_ctx.is_prompting = True
+            config = shell_ctx.config
+            answer = ""
+            questions = {
+                "Do you want command descriptions": "command_description",
+                "Do you want parameter descriptions": "param_description",
+                "Do you want examples": "examples"
+            }
+            for question in questions:
+                while answer.lower() != 'y' and answer.lower() != 'n':
+                    answer = prompt(u'\n%s (y/n): ' % question)
+                config.set_val('Layout', questions[question], self.format_response(answer))
+                answer = ""
 
-@registry.add_binding(Keys.ControlY, eager=True)
-def pan_up(event):
-    """ Pans the example pan up"""
-    global _SECTION
-    shell_telemetry.track_key('ControlY')
+            shell_ctx.is_prompting = False
+            print("\nPlease restart the interactive mode for changes to take effect.\n\n")
+            event.cli.set_return_value(event.cli.current_buffer)
 
-    if _SECTION > 1:
-        _SECTION -= 1
+        @self.registry.add_binding(Keys.F2, eager=True)
+        def toggle_default(event):
+            """ shows the defaults"""
+            shell_ctx.telemetry.track_key('F2')
 
+            shell_ctx.is_showing_default = not shell_ctx.is_showing_default
 
-@registry.add_binding(Keys.ControlN, eager=True)
-def pan_down(event):
-    """ Pans the example pan down"""
-    global _SECTION
-    shell_telemetry.track_key('ControlN')
+        @self.registry.add_binding(Keys.F3, eager=True)
+        def toggle_symbols(event):
+            """ shows the symbol bindings"""
+            shell_ctx.telemetry.track_key('F3')
 
-    if _SECTION < 10:
-        _SECTION += 1
+            shell_ctx.is_symbols = not shell_ctx.is_symbols
 
-
-@registry.add_binding(Keys.F1, eager=True)
-def config_settings(event):
-    """ opens the configuration """
-    global PROMPTING
-    shell_telemetry.track_key('F1')
-
-    PROMPTING = True
-    config = azclishell.configuration.CONFIGURATION
-    answer = ""
-    questions = {
-        "Do you want command descriptions": "command_description",
-        "Do you want parameter descriptions": "param_description",
-        "Do you want examples": "examples"
-    }
-    for question in questions:
-        while answer.lower() != 'y' and answer.lower() != 'n':
-            answer = prompt(u'\n%s (y/n): ' % question)
-        config.set_val('Layout', questions[question], format_response(answer))
-        answer = ""
-
-    PROMPTING = False
-    print("\nPlease restart the interactive mode for changes to take effect.\n\n")
-    event.cli.set_return_value(event.cli.current_buffer)
-
-
-@registry.add_binding(Keys.F2, eager=True)
-def toggle_default(event):
-    """ shows the defaults"""
-    global SHOW_DEFAULT
-    shell_telemetry.track_key('F2')
-
-    SHOW_DEFAULT = not SHOW_DEFAULT
-
-
-@registry.add_binding(Keys.F3, eager=True)
-def toggle_symbols(event):
-    """ shows the symbol bindings"""
-    global SYMBOLS
-    shell_telemetry.track_key('F3')
-
-    SYMBOLS = not SYMBOLS
-
-
-def get_symbols():
-    """ gets the symbols """
-    return SYMBOLS
-
-
-def get_show_default():
-    """ gets the defaults """
-    return SHOW_DEFAULT
-
-
-def format_response(response):
-    """ formats a response in a binary """
-    conversion = azclishell.configuration.CONFIGURATION.BOOLEAN_STATES
-    if response in conversion:
-        if conversion[response]:
-            return 'yes'
+    def format_response(self, response):
+        """ formats a response in a binary """
+        conversion = self.shell_ctx.config.BOOLEAN_STATES
+        if response in conversion:
+            if conversion[response]:
+                return 'yes'
+            else:
+                return 'no'
         else:
-            return 'no'
-    else:
-        raise ValueError('Invalid response: input should equate to true or false')
-
-
-def get_section():
-    """ gets which section to display """
-    return _SECTION
-
-
-def sub_section():
-    """ subtracts which section so not to overflow """
-    global _SECTION
-    _SECTION -= 1
+            raise ValueError('Invalid response: input should equate to true or false')
