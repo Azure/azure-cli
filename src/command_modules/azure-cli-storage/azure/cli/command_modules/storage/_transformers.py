@@ -112,7 +112,7 @@ def transform_storage_list_output(result):
         item.next_marker = next_marker
         return item
 
-    return list(map(set_marker, result))
+    return [set_marker(item) for item in result]
 
 
 def transform_url(result):
