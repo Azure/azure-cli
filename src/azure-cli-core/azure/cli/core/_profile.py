@@ -280,9 +280,13 @@ class Profile(object):
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
 
-        def _get_key_name(x, secondary_key_name):
-            return (x[_SUBSCRIPTION_ID] if secondary_key_name is None
-                    else '{}-{}'.format(x[_SUBSCRIPTION_ID], x[secondary_key_name]))
+        def _get_key_name(account, secondary_key_name):
+            return (account[_SUBSCRIPTION_ID] if secondary_key_name is None
+                    else '{}-{}'.format(account[_SUBSCRIPTION_ID], account[secondary_key_name]))
+
+        def _match_account(account, subscription_id, secondary_key_name, secondary_key_val):
+            return (account[_SUBSCRIPTION_ID] == subscription_id and
+                    (secondary_key_val is None or account[secondary_key_name] == secondary_key_val))
 
         existing_ones = self.load_cached_subscriptions(all_clouds=True)
         active_one = next((x for x in existing_ones if x.get(_IS_DEFAULT_SUBSCRIPTION)), None)
@@ -302,9 +306,8 @@ class Profile(object):
         if subscriptions:
             if active_one:
                 new_active_one = next(
-                    (x for x in new_subscriptions if x[_SUBSCRIPTION_ID] == active_subscription_id and
-                     (active_secondary_key_val is None or x[secondary_key_name] == active_secondary_key_val)),
-                    None)
+                    (x for x in new_subscriptions if _match_account(x, active_subscription_id, secondary_key_name,
+                                                                    active_secondary_key_val)), None)
 
                 for s in subscriptions:
                     s[_IS_DEFAULT_SUBSCRIPTION] = False
