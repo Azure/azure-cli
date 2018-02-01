@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.16
+++++++
+* Point to azureProfile.json in .azure directory.
+
 0.3.15
 ++++++
 * Fixed issue where command option completions no longer appeared.
