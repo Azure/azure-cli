@@ -13,7 +13,7 @@ from ._exception_handler import subscription_exception_handler
 
 def load_command_table(self, _):
     subscription_definition_util = CliCommandType(
-        operations_tmpl='azure.mgmt.subscription.operations.subscription_definitions_operations#SubscriptionDefinitionOperations.{}',
+        operations_tmpl='azure.mgmt.subscription.operations.subscription_definitions_operations#SubscriptionDefinitionsOperations.{}',
         client_factory=subscription_definitions_mgmt_client_factory,
         exception_handler=subscription_exception_handler
     )

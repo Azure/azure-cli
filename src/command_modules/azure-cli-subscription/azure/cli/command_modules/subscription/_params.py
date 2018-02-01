@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.command_modules.subscription._completers import get_offer_type_completion_list
+
 
 # pylint: disable=line-too-long
 def load_arguments(self, _):
