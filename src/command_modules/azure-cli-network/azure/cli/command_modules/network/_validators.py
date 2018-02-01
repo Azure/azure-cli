@@ -531,6 +531,7 @@ def process_auth_create_namespace(namespace):
 
 def process_lb_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
+    validate_tags(namespace)
 
     if namespace.subnet and namespace.public_ip_address:
         raise ValueError(
@@ -573,6 +574,8 @@ def process_lb_frontend_ip_namespace(namespace):
 def process_local_gateway_create_namespace(cmd, namespace):
     ns = namespace
     get_default_location_from_resource_group(cmd, ns)
+    validate_tags(ns)
+
     use_bgp_settings = any([ns.asn or ns.bgp_peering_address or ns.peer_weight])
     if use_bgp_settings and (not ns.asn or not ns.bgp_peering_address):
         raise ValueError(
@@ -581,6 +584,7 @@ def process_local_gateway_create_namespace(cmd, namespace):
 
 def process_nic_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
+    validate_tags(namespace)
 
     validate_address_pool_id_list(namespace)
     validate_inbound_nat_rule_id_list(namespace)
@@ -594,6 +598,7 @@ def process_nic_create_namespace(cmd, namespace):
 
 def process_public_ip_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
+    validate_tags(namespace)
 
 
 def process_route_table_create_namespace(cmd, namespace):
@@ -678,6 +683,8 @@ def process_vnet_create_namespace(cmd, namespace):
 def process_vnet_gateway_create_namespace(cmd, namespace):
     ns = namespace
     get_default_location_from_resource_group(cmd, ns)
+    validate_tags(ns)
+
     get_virtual_network_validator()(ns)
 
     get_public_ip_validator()(ns)
@@ -705,6 +712,7 @@ def process_vnet_gateway_update_namespace(namespace):
 def process_vpn_connection_create_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id
     get_default_location_from_resource_group(cmd, namespace)
+    validate_tags(namespace)
 
     args = [a for a in [namespace.express_route_circuit2,
                         namespace.local_gateway2,
