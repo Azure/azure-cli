@@ -5,7 +5,7 @@ Release History
 
 0.3.16
 ++++++
-* Point to azureProfile.json in .azure directory.
+* Fix issue where user is prompted to login when using interactive mode in Cloud Shell.
 
 0.3.15
 ++++++
