@@ -634,7 +634,7 @@ def _get_device_dns_suffix():
 def _get_device_client(client, resource_group_name, hub_name, device_id):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     server_suffix = _get_device_dns_suffix()
-    base_url = '{0}{1}'.format(server_suffix, hub_name)
+    base_url = '{0}{1}'.format(hub_name, server_suffix)
     uri = '{0}/devices/{1}'.format(base_url, device_id)
     access_policy = iot_hub_policy_get(client, hub_name, 'iothubowner', resource_group_name)
     creds = SasTokenAuthentication(uri, access_policy.key_name, access_policy.primary_key)
