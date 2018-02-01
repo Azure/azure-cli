@@ -6,6 +6,11 @@ Release History
 2.0.23
 ++++++
 * `network public-ip create`: Fix `--tags` option.
+* `network lb create`: Fix `--tags` option.
+* `network local-gateway create`: Fix `--tags` option.
+* `network nic create`: Fix `--tags` option.
+* `network vnet-gateway create`: Fix `--tags` option.
+* `network vpn-connection create`: Fix `--tags` option.
 
 2.0.22
 ++++++
