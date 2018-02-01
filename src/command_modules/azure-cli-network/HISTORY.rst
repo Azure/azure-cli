@@ -14,6 +14,7 @@ Release History
                      Fix issue where quoted TXT records were incorrectly exported without escaped quotes.
 * `dns zone import`: Fix issue where certain records were imported twice.
 * Restored `vnet-gateway root-cert` and `vnet-gateway revoked-cert` commands.
+* `network public-ip create`: Fix `--tags` option.
 
 2.0.21
 ++++++

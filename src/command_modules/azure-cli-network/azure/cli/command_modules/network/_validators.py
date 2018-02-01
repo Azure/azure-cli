@@ -594,6 +594,7 @@ def process_nic_create_namespace(cmd, namespace):
 
 def process_public_ip_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
+    validate_tags(namespace)
 
 
 def process_route_table_create_namespace(cmd, namespace):
