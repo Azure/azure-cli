@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.16
+++++++
+* Fix issue where user is prompted to login when using interactive mode in Cloud Shell.
+
 0.3.15
 ++++++
 * Fixed issue where command option completions no longer appeared.
