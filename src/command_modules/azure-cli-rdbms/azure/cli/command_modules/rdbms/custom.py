@@ -17,8 +17,10 @@ SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 def _server_restore(cmd, client, resource_group_name, server_name, parameters, **kwargs):
     source_server = kwargs['source_server_id']
 
+    
+
     if not is_valid_resource_id(source_server):
-        if len(source_server.split('/')) == 1:
+        if len(source_server.split('/')) == 1:            
             from azure.cli.core.commands.client_factory import get_subscription_id
             from azure.mgmt.rdbms.mysql.operations.servers_operations import ServersOperations
             provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
@@ -41,8 +43,13 @@ def _server_restore(cmd, client, resource_group_name, server_name, parameters, *
     except Exception as e:
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
 
+def _restore_mysql(cmd, client, resource_group_name, server_name, parameters, **kwargs):
+    _server_restore(cmd, client, resource_group_name, server_name, parameters, **kwargs)
     return client.create_or_update(resource_group_name, server_name, parameters)
 
+def _restore_postgresql(cmd, client, resource_group_name, server_name, parameters, **kwargs):
+    _server_restore(cmd, client, resource_group_name, server_name, parameters, **kwargs)
+    return client.create(resource_group_name, server_name, parameters)
 
 def _server_update_custom_func(instance,
                                capacity=None,
@@ -52,6 +59,7 @@ def _server_update_custom_func(instance,
                                administrator_login_password=None,
                                ssl_enforcement=None,
                                tags=None):
+    from azure.mgmt.rdbms.mysql.models import StorageProfile
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))

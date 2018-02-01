@@ -1,6 +1,39 @@
 interactions:
 - request:
-    body: !!python/unicode '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:28:35 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzoa97ojNotVBgKHFBWzRXY05L8Wt8xRcuT1TpveZM2gmfTEk_0ZSkJSq1Dj4k5HMDFLfdQEYmx7QPo7DsqK9gfDY-ZTCz9NOueYp05msrscO4gUTrLDV2p1CuEgVbk8C-Q7fNkpXQFDPjxxQ7ShdmCxbcC0fLMjgR85oElYbQRMwgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"location": "westus", "tags": {"use": "az-test"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -8,76 +41,144 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:12:04 GMT']
+      date: ['Wed, 31 Jan 2018 23:28:37 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
-    body: !!python/unicode '{"properties": {"createMode": "Default", "administratorLogin":
-      "cloudsa", "administratorLoginPassword": "SecretPassword123"}, "location": "westeurope"}'
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:28:38 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzzO0aODNfvAJy6Elq0cmIUckXn99fW0ZdUoXKWuHC1DIWOz9u5Geg7wMFY970Pf1d3zx7ePjVHPGu7dnJNjQ5D0cHDv8yNA4tpZEyqmF3H5n1xkRX4Sanun_O-k3kg2DQxswAqii1VPpgkQp893Tm5LSGoyrui-JCY7cOP2uRf4cgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"sku": {"name": "gp_Gen4_4", "tier": "GeneralPurpose", "capacity": 4,
+      "family": "Gen4"}, "properties": {"sku": {"name": "gp_Gen4_4", "tier": "GeneralPurpose",
+      "capacity": 4, "family": "Gen4"}, "createMode": "Default", "administratorLogin":
+      "cloudsa", "administratorLoginPassword": "SecretPassword123"}, "location": "centralus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server create]
       Connection: [keep-alive]
-      Content-Length: ['151']
+      Content-Length: ['328']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"UpsertElasticServer","startTime":"2017-12-26T23:12:05.583Z"}'}
+    body: {string: '{"operation":"UpsertElasticServer","startTime":"2018-01-31T23:28:42.327Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/b81cbcf5-8a05-4c98-a440-31a500d0279f?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/654d5743-58f3-43c9-89b6-e4c4bf527db4?api-version=2017-12-01']
       cache-control: [no-cache]
       content-length: ['74']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:12:07 GMT']
+      date: ['Wed, 31 Jan 2018 23:28:40 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/b81cbcf5-8a05-4c98-a440-31a500d0279f?api-version=2017-04-30-preview']
+      location: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/operationResults/654d5743-58f3-43c9-89b6-e4c4bf527db4?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1192']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:29:40 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzIIh4GVHgz1kMF39rOJkhSe66jF3hCHUqU0jYmkfd8LY-zE1Vyhm-_t4ldiVPqTrluwNm5luT83Fqtk_Xghz9MmWIMsqGtBdQSznY-kkqiO9JsqUNnCbwgDAahugDMQdjUW6R6PycDeSccHE9G2j9H7bnS6RZWU1Mc06oOuojP3MgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/b81cbcf5-8a05-4c98-a440-31a500d0279f?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/654d5743-58f3-43c9-89b6-e4c4bf527db4?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"b81cbcf5-8a05-4c98-a440-31a500d0279f","status":"InProgress","startTime":"2017-12-26T23:12:05.583Z"}'}
+    body: {string: '{"name":"654d5743-58f3-43c9-89b6-e4c4bf527db4","status":"InProgress","startTime":"2018-01-31T23:28:42.327Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['108']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:13:08 GMT']
+      date: ['Wed, 31 Jan 2018 23:29:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -88,30 +189,35 @@ interactions:
 - request:
     body: null
     headers:
-      Accept: [application/json]
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [postgres server create]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/b81cbcf5-8a05-4c98-a440-31a500d0279f?api-version=2017-04-30-preview
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
   response:
-    body: {string: !!python/unicode '{"name":"b81cbcf5-8a05-4c98-a440-31a500d0279f","status":"InProgress","startTime":"2017-12-26T23:12:05.583Z"}'}
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
     headers:
-      cache-control: [no-cache]
-      content-length: ['108']
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:14:08 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
+      date: ['Wed, 31 Jan 2018 23:30:41 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzyMIc6w5QLFqPAVA3ZRi8pGyY5z6p8KeGtdp64Gmm5_Bgb0oftVbrSbvlLzIyojnccDdeZ1WMO0Bc1IEUE2gM7hk-9zl5QVNTZAxut4sTYuZQGlHqinyHi8cQohoVuc3O-EjQGpUtBAq2nz_Js_kyrMLvBpcsOs4uivFv7sr9jwsgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -121,19 +227,19 @@ interactions:
       CommandName: [postgres server create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/b81cbcf5-8a05-4c98-a440-31a500d0279f?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/654d5743-58f3-43c9-89b6-e4c4bf527db4?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"b81cbcf5-8a05-4c98-a440-31a500d0279f","status":"Succeeded","startTime":"2017-12-26T23:12:05.583Z"}'}
+    body: {string: '{"name":"654d5743-58f3-43c9-89b6-e4c4bf527db4","status":"Succeeded","startTime":"2018-01-31T23:28:42.327Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['107']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:11 GMT']
+      date: ['Wed, 31 Jan 2018 23:30:46 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -144,24 +250,57 @@ interactions:
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:30:46 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzAPoCxHfX0KfacdV-lQXy2wBpLvFzGd2G-y68ZOtH6UKGUYM7OQdSirmnCEpVwzXtmNFuDs046B9zHIHgHilUCzMIf3Ws9YCqLzSFLIvKkIlMGqNfRuoOyj7mDOfg-umCTNOyJBvFMYIboWtaE8qic9-CsV7DHvugBiV3RTFFqfUgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"sku":{"name":"PGSQLB100","tier":"Basic","capacity":100},"properties":{"administratorLogin":"cloudsa","storageMB":51200,"version":"9.6","sslEnforcement":"Enabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.postgres.database.azure.com","earliestRestoreDate":"2017-12-26T23:22:05.99+00:00"},"location":"westeurope","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforPostgreSQL/servers"}'}
+    body: {string: '{"sku":{"name":"GP_Gen4_4","tier":"GeneralPurpose","family":"Gen4","capacity":4},"properties":{"administratorLogin":"cloudsa","storageProfile":{"storageMB":5120,"backupRetentionDays":7,"geoRedundantBackup":"Disabled"},"version":"9.5","sslEnforcement":"Enabled","userVisibleState":"Ready","fullyQualifiedDomainName":"azuredbclitest000002.orcasql-cus1-a.mscds.com","earliestRestoreDate":"2018-01-31T23:38:42.733+00:00"},"location":"centralus","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002","name":"azuredbclitest000002","type":"Microsoft.DBforPostgreSQL/servers"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['764']
+      content-length: ['858']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:11 GMT']
+      date: ['Wed, 31 Jan 2018 23:30:48 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -170,8 +309,40 @@ interactions:
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"properties": {"endIpAddress": "255.255.255.255", "startIpAddress":
-      "0.0.0.0"}}'
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:30:49 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzd9JMKGL2uiDACdyaA3hcnvV3oZaVjGYJEZVCgC90z2-gUOnRAya4oz2nErbNZqjOYqWQMbznk5utyyRYLXymnTZOS87aJ8GQ2UfvjOolN38Ns5ik_8kHhNqjIvpXCMN-f4AeS4McfiOiMhKXF6kfCJ3qCz4CHYrWn7Xa87begsMgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"startIpAddress": "0.0.0.0", "endIpAddress": "255.255.255.255"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -179,27 +350,60 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['80']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"UpsertElasticServerFirewallRules","startTime":"2017-12-26T23:15:14.167Z"}'}
+    body: {string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2018-01-31T23:30:51.673Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/cf0e03d4-3fbd-44a2-8ba7-149b31f12fef?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/e21ab221-9982-4b41-9b9c-f037fc8db70c?api-version=2017-12-01']
       cache-control: [no-cache]
       content-length: ['87']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:14 GMT']
+      date: ['Wed, 31 Jan 2018 23:30:50 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/cf0e03d4-3fbd-44a2-8ba7-149b31f12fef?api-version=2017-04-30-preview']
+      location: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/operationResults/e21ab221-9982-4b41-9b9c-f037fc8db70c?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1192']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:04 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzQYe_Yh8pboPrzKn5kx_MHNukZNLVmhvw3VznoS0YxmHH99rzmbpVz2vdOZ1Eh9G_p29bA53k2jPMaJjBq3UNmsWog9Qp_kcWFT5TQAKYXHA7frPTzG-BpO6tIQGhDxlyqExSq1YnG2b4cv6Li7JhnRj6BkFwqrmoui2PQEgfEv8gAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
 - request:
     body: null
     headers:
@@ -208,19 +412,19 @@ interactions:
       CommandName: [postgres server firewall-rule create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/cf0e03d4-3fbd-44a2-8ba7-149b31f12fef?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/e21ab221-9982-4b41-9b9c-f037fc8db70c?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"cf0e03d4-3fbd-44a2-8ba7-149b31f12fef","status":"Succeeded","startTime":"2017-12-26T23:15:14.167Z"}'}
+    body: {string: '{"name":"e21ab221-9982-4b41-9b9c-f037fc8db70c","status":"Succeeded","startTime":"2018-01-31T23:30:51.673Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['107']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:29 GMT']
+      date: ['Wed, 31 Jan 2018 23:31:06 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -231,30 +435,96 @@ interactions:
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:06 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHz8cP1jbIgtOPfEf-IT6ky5hrAl59J7IlhB8GOmO6JBRVZKIjiCwL6m4zhk5axPqH7I9SpkEoAtSWwJLZ6my5DmB4ovwBMBuMy5fI4RRo8oTINMg5-CidByHK9iySvH1LgG5UCaYET_VLjJE5Uvtqn_CXNIfhC6I9xWcGIFfqe9nMgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    body: {string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['426']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:31 GMT']
+      date: ['Wed, 31 Jan 2018 23:31:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:09 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHz2N0B2JoGkiLAmu-boB6Lg-cWVwN7kDLEs7xXoCcHHXJUPS65-KeR4bkeZBOKbPBNeY0u6dODpzsLaJ1WKWOYXcqG5JHncmdhMZCxZXOZFvU-DAdyZC-oZ9c3QNdDfWHi4kuJF84CT3qHyfxMoDPzOLDD5Z-BDfzLB9BYr3qvWFogAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -264,19 +534,19 @@ interactions:
       CommandName: [postgres server firewall-rule show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    body: {string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['426']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:32 GMT']
+      date: ['Wed, 31 Jan 2018 23:31:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -287,24 +557,57 @@ interactions:
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:10 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHz7su3W3julYuzDavW_IFP4YafuI7W4lm4RqD9MUTlGV7oWeBAd-KMlCuD13uUGfUXqUf2r30Bi37ZhPfh2Fdmd3bWh_c_si5-x2t0ULun_zU-jBctzwhYSzzqXoSeUZbeZ-_5CgTi-DD7QtxA9cJgZ8TbGQSjo3HplpE_1nutxvwgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    body: {string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['426']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:33 GMT']
+      date: ['Wed, 31 Jan 2018 23:31:11 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -313,8 +616,40 @@ interactions:
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"properties": {"endIpAddress": "123.123.123.124", "startIpAddress":
-      "123.123.123.123"}}'
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:11 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzI69mrU1qSlzMbNVCQGNBEGUD_o88Shp1VYw2-TNZDoVkq3lg4TwHD5qLV6NA_OLu0lPKNC87SI6zgM4LREqOqQwGq35iEPHuWX-N93Qd1aEng6as65vlHYqiVl0fpTpB1Ncl4Gi2qutSw706Vv3qRHffBV2pmOag3Q76k4sNXVcgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"startIpAddress": "123.123.123.123", "endIpAddress": "123.123.123.124"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -322,257 +657,60 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['88']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"UpsertElasticServerFirewallRules","startTime":"2017-12-26T23:15:33.847Z"}'}
+    body: {string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2018-01-31T23:31:14.27Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/25854233-1cfb-4d65-8287-317594de1944?api-version=2017-04-30-preview']
-      cache-control: [no-cache]
-      content-length: ['87']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:33 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/25854233-1cfb-4d65-8287-317594de1944?api-version=2017-04-30-preview']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1190']
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [postgres server firewall-rule update]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/25854233-1cfb-4d65-8287-317594de1944?api-version=2017-04-30-preview
-  response:
-    body: {string: !!python/unicode '{"name":"25854233-1cfb-4d65-8287-317594de1944","status":"Succeeded","startTime":"2017-12-26T23:15:33.847Z"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['107']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:49 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [postgres server firewall-rule update]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
-  response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['434']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:49 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [postgres server firewall-rule update]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
-  response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['434']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:51 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-    status: {code: 200, message: OK}
-- request:
-    body: !!python/unicode '{"properties": {"endIpAddress": "123.123.123.124", "startIpAddress":
-      "0.0.0.0"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [postgres server firewall-rule update]
-      Connection: [keep-alive]
-      Content-Length: ['80']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
-  response:
-    body: {string: !!python/unicode '{"operation":"UpsertElasticServerFirewallRules","startTime":"2017-12-26T23:15:52.287Z"}'}
-    headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/0dbab360-221e-404f-a086-a04fb95641da?api-version=2017-04-30-preview']
-      cache-control: [no-cache]
-      content-length: ['87']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:15:51 GMT']
-      expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/0dbab360-221e-404f-a086-a04fb95641da?api-version=2017-04-30-preview']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1190']
-    status: {code: 202, message: Accepted}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [postgres server firewall-rule update]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/0dbab360-221e-404f-a086-a04fb95641da?api-version=2017-04-30-preview
-  response:
-    body: {string: !!python/unicode '{"name":"0dbab360-221e-404f-a086-a04fb95641da","status":"Succeeded","startTime":"2017-12-26T23:15:52.287Z"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['107']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:08 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [postgres server firewall-rule update]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
-  response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['426']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:11 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [postgres server firewall-rule update]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
-  response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['426']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:12 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-HTTPAPI/2.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-    status: {code: 200, message: OK}
-- request:
-    body: !!python/unicode '{"properties": {"endIpAddress": "255.255.255.255", "startIpAddress":
-      "0.0.0.0"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [postgres server firewall-rule update]
-      Connection: [keep-alive]
-      Content-Length: ['80']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
-  response:
-    body: {string: !!python/unicode '{"operation":"UpsertElasticServerFirewallRules","startTime":"2017-12-26T23:16:13.21Z"}'}
-    headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/abd75b19-ab1b-4811-bc2b-1b15b362c022?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/5567a8da-8a2b-45b4-96c5-92619c3539f9?api-version=2017-12-01']
       cache-control: [no-cache]
       content-length: ['86']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:13 GMT']
+      date: ['Wed, 31 Jan 2018 23:31:12 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/abd75b19-ab1b-4811-bc2b-1b15b362c022?api-version=2017-04-30-preview']
+      location: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/operationResults/5567a8da-8a2b-45b4-96c5-92619c3539f9?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1190']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:27 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzNXCn7TnmpRR7NNNW8jlZgjFygnsVbmNrs1h29dhN1Exx-cbY4ZL5qoqQDHuslMS9tULJPiCmmo7_WJ6U6Gwwjy5ag9c8CIosxsmVVpGvVnDX6dDAqRtSLnwyQdBzKMGaiMYHjQ4T5E6kgAE0cMTSt_ctz3s0iTE5gWd1kMcQ5QkgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
 - request:
     body: null
     headers:
@@ -581,19 +719,19 @@ interactions:
       CommandName: [postgres server firewall-rule update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/abd75b19-ab1b-4811-bc2b-1b15b362c022?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/5567a8da-8a2b-45b4-96c5-92619c3539f9?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"abd75b19-ab1b-4811-bc2b-1b15b362c022","status":"Succeeded","startTime":"2017-12-26T23:16:13.21Z"}'}
+    body: {string: '{"name":"5567a8da-8a2b-45b4-96c5-92619c3539f9","status":"Succeeded","startTime":"2018-01-31T23:31:14.27Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['106']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:29 GMT']
+      date: ['Wed, 31 Jan 2018 23:31:28 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -604,24 +742,57 @@ interactions:
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:29 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHz-zaTCFzBijLjsr8b3gXQE0B9krx9QCDo9rSCr75FpAqImQUeNf0OtihQU4xeN4scM7vMwluvj8KqVI4xT26USu2RDOe8jjya8OdN1NVAx-3FJTBSFc_NWLf0qbC9fDlhXU1t95J3lG63q1nB1j38dClsqyaWjzdaPGXRp4KNu5kgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    body: {string: '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['426']
+      content-length: ['434']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:28 GMT']
+      date: ['Wed, 31 Jan 2018 23:31:30 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -630,8 +801,532 @@ interactions:
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"properties": {"endIpAddress": "123.123.123.124", "startIpAddress":
-      "123.123.123.123"}}'
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:30 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzx_pVicNxa4FaJve0pmmjMQEcQL7I8OSwgx6QsCu-M-RQ5gipDYiT_TTZEebaLaf21Ut-C-O4EUVHkdZixhOqsTmHFSxcTNMOKRUueWghephuTjir5xJGI79j1FSA2ZUqVfWjDhcoJDWC7YWwzNmOZyAPZLffpu2UoJrAgh4KKkYgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [postgres server firewall-rule update]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
+  response:
+    body: {string: '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['434']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:31 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:31 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzVuj3Wc0mPCer32qiFbGNwxvjWZd_yH7UwfWq0TJ6gXvqyMaoYE18rOUN4by2oR2gRVKCy4glL096Jvcwf1GCOfatHfIF_gSrh1uDR8Jo5tBbXFPYzogwko0MItxCHPoYmWCnDT7grRrIWIbDOlCPD17u9VegT4VA9Gws9k4vWjYgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"startIpAddress": "0.0.0.0", "endIpAddress": "123.123.123.124"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [postgres server firewall-rule update]
+      Connection: [keep-alive]
+      Content-Length: ['80']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
+  response:
+    body: {string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2018-01-31T23:31:34.65Z"}'}
+    headers:
+      azure-asyncoperation: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/ec5535aa-be50-4a00-a983-0c1f187be00d?api-version=2017-12-01']
+      cache-control: [no-cache]
+      content-length: ['86']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:32 GMT']
+      expires: ['-1']
+      location: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/operationResults/ec5535aa-be50-4a00-a983-0c1f187be00d?api-version=2017-12-01']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:47 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzRt0VJ--4SqYVj1epazRxkvt6_nhuEW-C_GrkHsLNBWaHSYlQvIb_xQ26vau3tRF6coOLEjvLhhsmGFLvhVmVGB_7l5KZmQhccoKw-WpXr5oGHUUTT62M459Zl0wpi7euEVzrEP6pFu-5NNsOqduBbGTeeOCq3Qi2y3w9kAMO880gAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [postgres server firewall-rule update]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/ec5535aa-be50-4a00-a983-0c1f187be00d?api-version=2017-12-01
+  response:
+    body: {string: '{"name":"ec5535aa-be50-4a00-a983-0c1f187be00d","status":"Succeeded","startTime":"2018-01-31T23:31:34.65Z"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['106']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:49 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:49 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzMo2C81ACgxN3Ox5SFZzSzZ51sp3ujVpxErlSQziyVQjDsg4LdJIUe-mfgEYiAooXg0BMxdT46dRNJjLSm3SEpBbnA2xen_NcqF5cZToIW-QsFkx5X4QwRw3LdsZg4bfBrKKjlG42qBEACRkcQWAy-Q9_fABG23olIXTxz6OKzjogAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [postgres server firewall-rule update]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
+  response:
+    body: {string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['426']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:50 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:50 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzPA30qAVVpungX-2eYEAbjq9rFo8UaE7ny76bTGvzSvwFEfWUlx8PuSyMpdKBAEPYKvfPWZqFiCEbLlH2ifFP0lJs5x7WBt4Iuj0__iWVCIhZrwGXKikV6w7bCygSc5hq3hOte5YjUa8tBl5enk0RKJFsR_P8GAjIA4Z3EEGboZYgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [postgres server firewall-rule update]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
+  response:
+    body: {string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['426']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:52 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:52 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzAygX7OWoeJb1IHQQG3irJWbbN7LD5Akm3r05XwHGPazxaEeC1esCh1h6WtQu7dJBtz-AgcEa__14BJagDeyei4DqOY03pODzDgid8tTSDSrb5QAPyVCIIHeIDa7IzVPc_s33gR5uxQlNEc-IN3y-YIP5txcbE06KqlfySCw_OAYgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"startIpAddress": "0.0.0.0", "endIpAddress": "255.255.255.255"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [postgres server firewall-rule update]
+      Connection: [keep-alive]
+      Content-Length: ['80']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
+  response:
+    body: {string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2018-01-31T23:31:54.917Z"}'}
+    headers:
+      azure-asyncoperation: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/949e80c2-e0bf-4aad-aee7-809a975b45fc?api-version=2017-12-01']
+      cache-control: [no-cache]
+      content-length: ['87']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:31:53 GMT']
+      expires: ['-1']
+      location: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/operationResults/949e80c2-e0bf-4aad-aee7-809a975b45fc?api-version=2017-12-01']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:32:08 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzemCVEQzz6FlPFdNlzT40EWfvTSF_aWTkaAYx7uEtGU8RTi6p8kUpZJpuonY_gUnb9kYvAv8hgQoosDxSWWxK9Cv2oWXJpWt0IAwBg28G21gJl7QJOZQpAPfRAFlmx-sVft9O31_RZSmOtN-JOs_6CP2b3KXCjPxX9zSMvFOpnywgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [postgres server firewall-rule update]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/949e80c2-e0bf-4aad-aee7-809a975b45fc?api-version=2017-12-01
+  response:
+    body: {string: '{"name":"949e80c2-e0bf-4aad-aee7-809a975b45fc","status":"Succeeded","startTime":"2018-01-31T23:31:54.917Z"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['107']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:32:08 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:32:09 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzWSuUj5gANxCvmBxbYvinEXYmOg1l6a_HiP4OgwpMKvv8cgLnmW8hQZlQBQi6j7lo_PCB5wEl47gg-fK__WAmYPGpD9Z7XOMbXZ9OrHH4FkK9ROFipujBkeZjoN00oqqdhvZnrLLHnHzssET7q9E0uNZRs3B4rmDB0Mc0TAKNZQAgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [postgres server firewall-rule update]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
+      accept-language: [en-US]
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
+  response:
+    body: {string: '{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['426']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:32:10 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:32:11 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHz32Wy9dZx4EVdLlN1z3CQ1hkZ5Kwl7Adn9qmmKP8EsnIxA4q3lv4NykeUkQjYlFgg-7mrvwU9-HTJSJbxXhMKeAqxA2o-YnVqhLdswfJa3ZxXkol0jJqLGKWwte4D8VzFVTurkrb3GWRQ2F-yI_LUEoResJZlkPbwMuwz_nGIp9wgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"startIpAddress": "123.123.123.123", "endIpAddress": "123.123.123.124"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -639,27 +1334,60 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['88']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"UpsertElasticServerFirewallRules","startTime":"2017-12-26T23:16:30.91Z"}'}
+    body: {string: '{"operation":"UpsertElasticServerFirewallRules","startTime":"2018-01-31T23:32:13.983Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/afa7c677-4252-46f0-8b83-c8ead4f4e873?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/03892739-16aa-4cef-9331-9480c6abbff3?api-version=2017-12-01']
       cache-control: [no-cache]
-      content-length: ['86']
+      content-length: ['87']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:30 GMT']
+      date: ['Wed, 31 Jan 2018 23:32:12 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/afa7c677-4252-46f0-8b83-c8ead4f4e873?api-version=2017-04-30-preview']
+      location: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/operationResults/03892739-16aa-4cef-9331-9480c6abbff3?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1192']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:32:27 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzptv56eeFqsWgeQQc4rSuOJ_6dwuaAxQr9I1wax7PatiOrgYa1JXT3UoV1WjzGzisLxMZ6aVSP2aK-euDFrcQg-gveZoQ8dyiNuNN2MIMEfM5AyF7egYKMjGSJedDNlKMHzmdfdzyN8mMAsBVAjir5kbzBYAW8ugXyFUdI3rS4LsgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
 - request:
     body: null
     headers:
@@ -668,19 +1396,19 @@ interactions:
       CommandName: [postgres server firewall-rule create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/afa7c677-4252-46f0-8b83-c8ead4f4e873?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/03892739-16aa-4cef-9331-9480c6abbff3?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"afa7c677-4252-46f0-8b83-c8ead4f4e873","status":"Succeeded","startTime":"2017-12-26T23:16:30.91Z"}'}
+    body: {string: '{"name":"03892739-16aa-4cef-9331-9480c6abbff3","status":"Succeeded","startTime":"2018-01-31T23:32:13.983Z"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['106']
+      content-length: ['107']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:46 GMT']
+      date: ['Wed, 31 Jan 2018 23:32:28 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -691,30 +1419,96 @@ interactions:
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:32:29 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzXCw89XARxFygGeCMwzKXs2D50s9KoQG0lGg-hXlsRWX01u94lx9GHuUgNKz2LSwAp7-DU5zZk4NwixXpaYF2z0jDkUpeUAFrNw-_35UYuPbBxU9WNtLO3gnVHBCw57rbwiKFVCxfGOgJ1SrirudLCVBfC1ur_TxxFbb98jjPMrQgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2","name":"rule2","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
+    body: {string: '{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2","name":"rule2","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['434']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:48 GMT']
+      date: ['Wed, 31 Jan 2018 23:32:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:32:30 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzTYHl0Z4I3saz95qeupvpTJOt3-SRsybPLkzPEKYSkIFwB6LA4mumxx8TrJj_y1gHFZQG3KDEFfa5VPQ1ebiuFcVSR6PG98-4XR8XcHJaRnFiH_udTOkEavCUYjq2Y-HaJX5KmV4DeRkV6ZmO8Tk84ojrYhv1OCfflfqQn3SYK4IgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -724,25 +1518,58 @@ interactions:
       CommandName: [postgres server firewall-rule list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"},{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2","name":"rule2","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}]}'}
+    body: {string: '{"value":[{"properties":{"startIpAddress":"0.0.0.0","endIpAddress":"255.255.255.255"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1","name":"rule1","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"},{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2","name":"rule2","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['873']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:49 GMT']
+      date: ['Wed, 31 Jan 2018 23:32:31 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:32:31 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzo58aUs29XqdApJQAJXiX8ggfczeVAXxAd5k2j42Lb3e1AGzO8x71ROTtU9Yix8Jn-EURGiMhbkPAvHfwl9N-f5Bmj3zvTvG5pzZMPStFI6_0lIV9IPddRzIVMYKFxMRB6kB9NkCTdA8a6hhhLE7DLP9m5PHnVpw-6UFzLDnWJg8gAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -753,27 +1580,60 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule1?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"DropElasticServerFirewallRule","startTime":"2017-12-26T23:16:50.443Z"}'}
+    body: {string: '{"operation":"DropElasticServerFirewallRule","startTime":"2018-01-31T23:32:34.403Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/cc91da86-4b3e-490f-8b4f-26df33740ace?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/33b25a7e-14fe-4885-a76d-f472b2bdb0f6?api-version=2017-12-01']
       cache-control: [no-cache]
       content-length: ['84']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:16:50 GMT']
+      date: ['Wed, 31 Jan 2018 23:32:32 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/cc91da86-4b3e-490f-8b4f-26df33740ace?api-version=2017-04-30-preview']
+      location: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/operationResults/33b25a7e-14fe-4885-a76d-f472b2bdb0f6?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1189']
+      x-ms-ratelimit-remaining-subscription-writes: ['1196']
     status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:32:48 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzffXKUHlvcn9SXjERYaIY0JDpiYOnvI56Ys62IF7Jo-E7KkTAq_UbJ0EUDL0lRismpzwvIhmhUjvC28cOULIvELVwBLDsoRNd-CiL9B4Hxvm8NIGaIPh9pNbjU4xWVU8Wo3dFHYjAAzElIZFstEJ9S-Bd6LKla4WaDmi7paAl7fAgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
 - request:
     body: null
     headers:
@@ -782,19 +1642,19 @@ interactions:
       CommandName: [postgres server firewall-rule delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/cc91da86-4b3e-490f-8b4f-26df33740ace?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/33b25a7e-14fe-4885-a76d-f472b2bdb0f6?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"cc91da86-4b3e-490f-8b4f-26df33740ace","status":"Succeeded","startTime":"2017-12-26T23:16:50.443Z"}'}
+    body: {string: '{"name":"33b25a7e-14fe-4885-a76d-f472b2bdb0f6","status":"Succeeded","startTime":"2018-01-31T23:32:34.403Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['107']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:06 GMT']
+      date: ['Wed, 31 Jan 2018 23:32:49 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -805,30 +1665,96 @@ interactions:
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:32:48 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzE31kPtNlEp1uxtPjV_7tkdOPp-uKChFZBgw-M7k1_7SDu1zKdG07XZpD-X4WvaRKZU9Np-X3FpKNPgMvSUreop_m0XBuEmBLU3wczU_aKb5QeC7ujggJqlUvI5s23w4y4uTOt_FvkMyxFaoDQqwpxU9yB7BbhBpoh9IZmGGLJoUgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2","name":"rule2","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}]}'}
+    body: {string: '{"value":[{"properties":{"startIpAddress":"123.123.123.123","endIpAddress":"123.123.123.124"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2","name":"rule2","type":"Microsoft.DBforPostgreSQL/servers/firewallRules"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['446']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:07 GMT']
+      date: ['Wed, 31 Jan 2018 23:32:50 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:32:49 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzhJE2vzprn1e0VqTzOtsj--cG3HmiO8AE6_1IOHl6soXcedJrb77o0J6B1tgtA-sib-f_K0nirwQF-GJSJ8nzvsy5kS5gZDOHqnXkn_ZXMvfh5OZPyrn-yh98PVlrEDMilXLqj2OqQTm0YaBdCEsquz6tkMCaVmgvD5Rp79ymb2wgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -839,27 +1765,60 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules/rule2?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"DropElasticServerFirewallRule","startTime":"2017-12-26T23:17:07.877Z"}'}
+    body: {string: '{"operation":"DropElasticServerFirewallRule","startTime":"2018-01-31T23:32:52.72Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/f8f95df8-1446-46fb-a6ce-6aaf8ed99f26?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/8f648240-d750-41d8-b611-946c19f56ab4?api-version=2017-12-01']
       cache-control: [no-cache]
-      content-length: ['84']
+      content-length: ['83']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:08 GMT']
+      date: ['Wed, 31 Jan 2018 23:32:51 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/f8f95df8-1446-46fb-a6ce-6aaf8ed99f26?api-version=2017-04-30-preview']
+      location: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/operationResults/8f648240-d750-41d8-b611-946c19f56ab4?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1189']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:33:05 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHz8Wt7j7L8RElluHLn_iJ63x-ILR4RBedppmaTpakpWtgo1qrZiiGSu4BbfVasvNx8kQk6J1gzeKfPYlQs_cqvBXwBFrEN8wA0KhGbXXD0a5ZIGxy22BIL2-5j1V9DUEfr8jKgAhX7zB-oB9K6x7N0Hei9tqVEmuMV1TeCSqChT6UgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
 - request:
     body: null
     headers:
@@ -868,19 +1827,19 @@ interactions:
       CommandName: [postgres server firewall-rule delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/f8f95df8-1446-46fb-a6ce-6aaf8ed99f26?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/8f648240-d750-41d8-b611-946c19f56ab4?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"f8f95df8-1446-46fb-a6ce-6aaf8ed99f26","status":"Succeeded","startTime":"2017-12-26T23:17:07.877Z"}'}
+    body: {string: '{"name":"8f648240-d750-41d8-b611-946c19f56ab4","status":"Succeeded","startTime":"2018-01-31T23:32:52.72Z"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['107']
+      content-length: ['106']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:24 GMT']
+      date: ['Wed, 31 Jan 2018 23:33:07 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -891,30 +1850,96 @@ interactions:
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:33:07 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzS3PX3-NzfDurImT6z5sapV9xGQ_id_ZbYuBTMlZVz35__-bPTwpaas3AoEgSdQ_eBgE44p-sYpuflL0Zlyotd0NW7Uu1p1FTnSaEzR04wN-KGGc1GzwokPDZOMiMbHsY9X2_e-mIQhqdewrGh17vv2_7hgyVV_M7GYGsMNh2lWQgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server firewall-rule list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/firewallRules?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"value":[]}'}
+    body: {string: '{"value":[]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['12']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:25 GMT']
+      date: ['Wed, 31 Jan 2018 23:33:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:33:08 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzxrfUhmf4urOTNcQCBPOJW5oKdcy-4utLkzdv7Du3nm7d73bj_Wf3RWTfvm73xK4945CsRZWMyNnfyzBdt0PM4I2Y4Gw8A8lTgHVyQLzAdPboNm1J_g6MV3C0QYdYgfwp1l8DDWhCBsXOr7TtMlJmqQHzI7yzs_l8r3h5OpCQVIMgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -924,26 +1949,59 @@ interactions:
       CommandName: [postgres db list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/databases?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/databases?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"charset":"UTF8","collation":"English_United
+    body: {string: '{"value":[{"properties":{"charset":"UTF8","collation":"English_United
         States.1252"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/databases/postgres","name":"postgres","type":"Microsoft.DBforPostgreSQL/servers/databases"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['434']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:25 GMT']
+      date: ['Wed, 31 Jan 2018 23:33:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:33:10 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHz_1t6UJWBl_SITWmumM7Fo4F5vC1bsJvREuuijdyUSNuKbKejchAUy8mcNrrnMtznmVQFsTluT-CkvwGJGfi5PS8sx0jOn5GyWChMhlsWxRpA5shLlyVVWWE3UgXRioNw5-NhPV1zet4QqFuN6WjcU3nXtIT7A9tLw2tZm9PR05EgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -953,20 +2011,20 @@ interactions:
       CommandName: [postgres server configuration show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"value":"on","description":"Enable
-        input of NULL elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"}'}
+    body: {string: '{"properties":{"value":"on","description":"Enable input of NULL
+        elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['542']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:27 GMT']
+      date: ['Wed, 31 Jan 2018 23:33:11 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -975,7 +2033,40 @@ interactions:
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"properties": {"value": "off"}}'
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:33:10 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzQ8ELZBVY54HncuzQsnoJKzOyPsCIzn7Sh9YEHOx_zrzdXATlKI2hwUKUb8nx7sSWnPK7HcgbVCAqxM_AiGVzKbQTX7XuifhOpfFp4wCQqz9F-ovXboPJ05axV3wUVsvA4K6PmZEgH_fVGBroQOwC439E5X-UgtsDv-ze1bR_FRsgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"value": "off"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -983,48 +2074,81 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['32']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"UpdateElasticServerConfig","startTime":"2017-12-26T23:17:28.493Z"}'}
+    body: {string: '{"operation":"UpdateElasticServerConfig","startTime":"2018-01-31T23:33:14.08Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/8cf0d720-d929-488e-8cbd-44f57c7c7d55?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/3efadf73-a9a2-4fd1-bfc6-64455f3d8399?api-version=2017-12-01']
       cache-control: [no-cache]
-      content-length: ['80']
+      content-length: ['79']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:28 GMT']
+      date: ['Wed, 31 Jan 2018 23:33:12 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/8cf0d720-d929-488e-8cbd-44f57c7c7d55?api-version=2017-04-30-preview']
+      location: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/operationResults/3efadf73-a9a2-4fd1-bfc6-64455f3d8399?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1191']
+      x-ms-ratelimit-remaining-subscription-writes: ['1195']
     status: {code: 202, message: Accepted}
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:33:27 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzDGdVvRj0M_Hi5Hb7OSYaQmQFwDr-IsjT3CKrQD43bK2Egp2yZmTYLL-FOaiQCSmAVSejvbEKwLBB8-XZ6ThoO5d9vzhfWyGKaJDTVOci-72uvE8rt6it6teOnOskuM0uVhuQwxnlqwM1ZtAdXoFSz3utsE0OAmzDRnJbzO8FL0YgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server configuration set]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/8cf0d720-d929-488e-8cbd-44f57c7c7d55?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/3efadf73-a9a2-4fd1-bfc6-64455f3d8399?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"8cf0d720-d929-488e-8cbd-44f57c7c7d55","status":"Succeeded","startTime":"2017-12-26T23:17:28.493Z"}'}
+    body: {string: '{"name":"3efadf73-a9a2-4fd1-bfc6-64455f3d8399","status":"Succeeded","startTime":"2018-01-31T23:33:14.08Z"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['107']
+      content-length: ['106']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:44 GMT']
+      date: ['Wed, 31 Jan 2018 23:33:28 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -1035,25 +2159,58 @@ interactions:
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:33:28 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzd4cHaedWyTl1Kq1YKWsZl7sXCykRMShKBIZfLjanikPNeWSpeE-NxmQByw1e5-oDfO_fRwd5goGqBwCQhAQeYlAz8Qc33rY2hJj64If_1cV8WEPe83cZCmntmwExpx3wNAkiQdC7hZSplVc31PTGDezF3dlQrcYH4BeU7mnrlisgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server configuration set]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"value":"off","description":"Enable
-        input of NULL elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"user-override"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"}'}
+    body: {string: '{"properties":{"value":"off","description":"Enable input of NULL
+        elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"user-override"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['542']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:45 GMT']
+      date: ['Wed, 31 Jan 2018 23:33:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -1062,7 +2219,40 @@ interactions:
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"properties": {"source": "system-default"}}'
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:33:30 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzWwIODWyALDEoZyAEw1rpmue7Zg7dyOtIRPNcEhlsUtdQqtCoc5_t1nn-EqX3wW1L-b1tYjCqmx8Y0lgL8HHHS2x-4sqN5LYbrRc31ZI9rJfoSRjHddZIX5T3gLKXPaGO7noFrMbQCsCGjn-xA2djRmuQPtQpwbo_tZx6NCKzi1IgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"source": "system-default"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -1070,27 +2260,60 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['44']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"operation":"UpdateElasticServerConfig","startTime":"2017-12-26T23:17:46.313Z"}'}
+    body: {string: '{"operation":"UpdateElasticServerConfig","startTime":"2018-01-31T23:33:33.223Z"}'}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/eb96b2ca-7018-407d-99ea-36930d22101b?api-version=2017-04-30-preview']
+      azure-asyncoperation: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/1d1100fe-f5b5-4f39-9225-3f393a3253c7?api-version=2017-12-01']
       cache-control: [no-cache]
       content-length: ['80']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:17:46 GMT']
+      date: ['Wed, 31 Jan 2018 23:33:31 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/operationResults/eb96b2ca-7018-407d-99ea-36930d22101b?api-version=2017-04-30-preview']
+      location: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/operationResults/1d1100fe-f5b5-4f39-9225-3f393a3253c7?api-version=2017-12-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1190']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:33:46 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzlRQFudbnY3954E7ie2FOhDUZtmLRfE7Nihg5W4cpRWFGAiCcFKjuGu9NvZfOipjPiOymCMnh0GSvNCjBBJav0meTTRbb3dlSwfPz56reo90IIR4FvjgUGLeeWm-OxCKpN_BafO_yVB3VCv81Lo6-2BffbKTWjcFDeUY0gDvbUhogAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
 - request:
     body: null
     headers:
@@ -1099,19 +2322,19 @@ interactions:
       CommandName: [postgres server configuration set]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/westeurope/azureAsyncOperation/eb96b2ca-7018-407d-99ea-36930d22101b?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.DBforPostgreSQL/locations/centralus/azureAsyncOperation/1d1100fe-f5b5-4f39-9225-3f393a3253c7?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"name":"eb96b2ca-7018-407d-99ea-36930d22101b","status":"Succeeded","startTime":"2017-12-26T23:17:46.313Z"}'}
+    body: {string: '{"name":"1d1100fe-f5b5-4f39-9225-3f393a3253c7","status":"Succeeded","startTime":"2018-01-31T23:33:33.223Z"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['107']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:18:02 GMT']
+      date: ['Wed, 31 Jan 2018 23:33:48 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -1122,31 +2345,97 @@ interactions:
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:33:48 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzZYI0doosHV1ZRWuJteVPkv_sy02TqAEJGOo-QrX-AA4ul-DG1Y7590YDiiAinxEwnjFYIN7pHjd7t_YOBNWC6QOxZMMBvnKn4UhA6reVH9mmZx6xFgtQwsQDQOXX6lFSqDMHMYandVrTXTg0MnhMzoVkHztVcQh7hzC0vkD-e8AgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server configuration set]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"properties":{"value":"on","description":"Enable
-        input of NULL elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"}'}
+    body: {string: '{"properties":{"value":"on","description":"Enable input of NULL
+        elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['542']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:18:02 GMT']
+      date: ['Wed, 31 Jan 2018 23:33:48 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:33:50 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzBQVPIRbSup7gKxVOc7kIlF05XSt_ZaPGZzf3GDED6Jhfow23V97W4VWLgdwHCV5EHCJ4wffByBVSo9D-9ErTZlpk3T8a88CoLk7CpcvkWRVX4RekpD39oUxyA400hedZjA4C22iTUD7QVaPG5AUinIWVV90aZ9cmLUljAuA-gbsgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1156,15 +2445,15 @@ interactions:
       CommandName: [postgres server configuration list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"value":"on","description":"Enable
-        input of NULL elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"safe_encoding","description":"Sets
+    body: {string: '{"value":[{"properties":{"value":"on","description":"Enable input
+        of NULL elements in arrays.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/array_nulls","name":"array_nulls","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"safe_encoding","description":"Sets
         whether \"\\''\" is allowed in string literals.","defaultValue":"safe_encoding","dataType":"Enumeration","allowedValues":"safe_encoding,on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/backslash_quote","name":"backslash_quote","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"hex","description":"Sets
         the output format for bytea.","defaultValue":"hex","dataType":"Enumeration","allowedValues":"escape,hex","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/bytea_output","name":"bytea_output","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"on","description":"Check
         function bodies during CREATE FUNCTION.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/check_function_bodies","name":"check_function_bodies","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"sql_ascii","description":"Sets
@@ -1229,14 +2518,11 @@ interactions:
         logged. -1 disables logging statement durations.","defaultValue":"-1","dataType":"Integer","allowedValues":"-1-2147483647","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/log_min_duration_statement","name":"log_min_duration_statement","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"error","description":"Causes
         all statements generating error at or above this level to be logged.","defaultValue":"error","dataType":"Enumeration","allowedValues":"debug5,debug4,debug3,debug2,debug1,info,notice,warning,error,log,fatal,panic","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/log_min_error_statement","name":"log_min_error_statement","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"warning","description":"Sets
         the message levels that are logged.","defaultValue":"warning","dataType":"Enumeration","allowedValues":"debug5,debug4,debug3,debug2,debug1,info,notice,warning,error,log,fatal,panic","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/log_min_messages","name":"log_min_messages","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"none","description":"Sets
-        the type of statements logged.","defaultValue":"none","dataType":"Enumeration","allowedValues":"none,ddl,mod,all","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/log_statement","name":"log_statement","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"64","description":"Sets
-        the maximum number of locks per transaction.","defaultValue":"64","dataType":"Integer","allowedValues":"10-2147483647","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/max_locks_per_transaction","name":"max_locks_per_transaction","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"64","description":"Sets
-        the maximum number of predicate locks per transaction.","defaultValue":"64","dataType":"Integer","allowedValues":"10-2147483647","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/max_pred_locks_per_transaction","name":"max_pred_locks_per_transaction","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"0","description":"Sets
-        the maximum number of simultaneously prepared transactions.","defaultValue":"0","dataType":"Integer","allowedValues":"0-8388607","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/max_prepared_transactions","name":"max_prepared_transactions","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"off","description":"When
+        the type of statements logged.","defaultValue":"none","dataType":"Enumeration","allowedValues":"none,ddl,mod,all","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/log_statement","name":"log_statement","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"off","description":"When
         generating SQL fragments, quote all identifiers.","defaultValue":"off","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/quote_all_identifiers","name":"quote_all_identifiers","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"4.0","description":"Sets
         the planner''s estimate of the cost of a nonsequentially fetched disk page.","defaultValue":"4.0","dataType":"Numeric","allowedValues":"0-1.79769e+308","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/random_page_cost","name":"random_page_cost","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"\"$user\",
         public","description":"Sets the schema search order for names that are not
-        schema-qualified.","defaultValue":"\"$user\", public","dataType":"String","allowedValues":"[A-Za-z.\"$,
+        schema-qualified.","defaultValue":"\"$user\", public","dataType":"String","allowedValues":"[A-Za-z0-9.\"$,
         ]+","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/search_path","name":"search_path","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"1.0","description":"Sets
         the planner''s estimate of the cost of a sequentially fetched disk page.","defaultValue":"1.0","dataType":"Numeric","allowedValues":"0-1.79769e+308","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/seq_page_cost","name":"seq_page_cost","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"on","description":"Causes
         subtables to be included by default in various commands.","defaultValue":"on","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/sql_inheritance","name":"sql_inheritance","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"on","description":"Causes
@@ -1248,24 +2534,16 @@ interactions:
         \"expr=NULL\" as \"expr IS NULL\".","defaultValue":"off","dataType":"Boolean","allowedValues":"on,off","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/transform_null_equals","name":"transform_null_equals","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"base64","description":"Sets
         how binary values are to be encoded in XML.","defaultValue":"base64","dataType":"Enumeration","allowedValues":"base64,hex","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/xmlbinary","name":"xmlbinary","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"content","description":"Sets
         whether XML data in implicit parsing and serialization operations is to be
-        considered as documents or content fragments.","defaultValue":"content","dataType":"Enumeration","allowedValues":"content,document","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/xmloption","name":"xmloption","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"off","description":"Forces
-        use of parallel query facilities.","defaultValue":"off","dataType":"Enumeration","allowedValues":"off,on,regress","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/force_parallel_mode","name":"force_parallel_mode","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"0","description":"Sets
-        the maximum allowed duration of any idling transaction.","defaultValue":"0","dataType":"Integer","allowedValues":"0-2147483647","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/idle_in_transaction_session_timeout","name":"idle_in_transaction_session_timeout","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"0","description":"Sets
-        the maximum number of parallel processes per executor node.","defaultValue":"0","dataType":"Integer","allowedValues":"0-1024","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/max_parallel_workers_per_gather","name":"max_parallel_workers_per_gather","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"8388608","description":"Sets
-        the minimum size of relations to be considered for parallel scan.","defaultValue":"8388608","dataType":"Integer","allowedValues":"0-715827882","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/min_parallel_relation_size","name":"min_parallel_relation_size","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"1000","description":"Sets
-        the planner''s estimate of the cost of starting up worker processes for parallel
-        query.","defaultValue":"1000","dataType":"Numeric","allowedValues":"0-1.79769e+308","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/parallel_setup_cost","name":"parallel_setup_cost","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"0.1","description":"Sets
-        the planner''s estimate of the cost of passing each tuple (row) from worker
-        to master backend.","defaultValue":"0.1","dataType":"Numeric","allowedValues":"0-1.79769e+308","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/parallel_tuple_cost","name":"parallel_tuple_cost","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"8096","description":"Sets
+        considered as documents or content fragments.","defaultValue":"content","dataType":"Enumeration","allowedValues":"content,document","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/xmloption","name":"xmloption","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"8096","description":"Sets
         the amount of memory to be used by internal sort operations and hash tables
         before writing to temporary disk files.","defaultValue":"8096","dataType":"Integer","allowedValues":"8096-2097151","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/work_mem","name":"work_mem","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"8096","description":"Sets
         the maximum number of temporary buffers used by each database session.","defaultValue":"8096","dataType":"Integer","allowedValues":"8096-16384","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/temp_buffers","name":"temp_buffers","type":"Microsoft.DBforPostgreSQL/servers/configurations"},{"properties":{"value":"3","description":"Sets
         how many days a log file is saved for.","defaultValue":"3","dataType":"Integer","allowedValues":"1-7","source":"system-default"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/configurations/log_retention_days","name":"log_retention_days","type":"Microsoft.DBforPostgreSQL/servers/configurations"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['48202']
+      content-length: ['42755']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:18:03 GMT']
+      date: ['Wed, 31 Jan 2018 23:33:51 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -1276,30 +2554,96 @@ interactions:
 - request:
     body: null
     headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:33:50 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzZZMuYIJT02avwuv-_3UxHt4OHZtinsvqELyGOnbf2cP4oSdGomjS5TOmakOhaXpBxEjfLfIjl1m2lSHYqU49xwwOE4SK4isfLrCMtkmg_XR6asLmMZXmaCalo2Z5tljLLu0vvr4cDHzsGiLRjPR3QlHL84I7j-uCpDk63bDDwVggAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [postgres server-logs list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 postgresqlmanagementclient/0.1.0 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/logFiles?api-version=2017-04-30-preview
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/logFiles?api-version=2017-12-01
   response:
-    body: {string: !!python/unicode '{"value":[{"properties":{"name":"postgresql-2017-12-26_231444.log","sizeInKB":1,"createdTime":"0001-01-01T00:00:00+00:00","lastModifiedTime":"2017-12-26T23:17:48+00:00","type":"text","url":"https://wasd2prodweu1afse3.file.core.windows.net/bc641191b2114665ab06f050c0e9388f/pg_log/postgresql-2017-12-26_231444.log?sv=2015-04-05&sr=f&sig=GLq6WHcUL99pED9HX%2FKej5hhYvlIdn673Fvk%2Fqh37QE%3D&se=2017-12-27T00%3A18%3A05Z&sp=r"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/logFiles/postgresql-2017-12-26_231444.log","name":"postgresql-2017-12-26_231444.log","type":"Microsoft.DBforPostgreSQL/servers/logFiles"}]}'}
+    body: {string: '{"value":[{"properties":{"name":"postgresql-2018-01-31_232951.log","sizeInKB":3,"createdTime":"0001-01-01T00:00:00+00:00","lastModifiedTime":"2018-01-31T23:33:32+00:00","type":"text","url":"https://wasd2orcascus1aelsfs1.file.core.windows.net/04f2ad93e5e54d73b05e7e8c9d4a8aa9/pg_log/postgresql-2018-01-31_232951.log?sv=2015-04-05&sr=f&sig=CyALAGYdGUqil2MyubELDfxgfYD6boLbkYmbU%2Br6YTI%3D&se=2018-02-01T00%3A33%3A54Z&sp=r"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.DBforPostgreSQL/servers/azuredbclitest000002/logFiles/postgresql-2018-01-31_232951.log","name":"postgresql-2018-01-31_232951.log","type":"Microsoft.DBforPostgreSQL/servers/logFiles"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['817']
+      content-length: ['818']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 26 Dec 2017 23:18:05 GMT']
+      date: ['Wed, 31 Jan 2018 23:33:52 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.4.7]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/common/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['101']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 31 Jan 2018 23:33:52 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/8.5]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHz20NrZWJYssYgp0qsK3TO80K4zaxn0pIbp1k4-tN9heKFnTcXCyNcM3125y4FWY-eGQXW-y4bP31eYi16qXMlLM4ETfiRWtaGIocRfmi70_Z8ucd0mb7W9qFXFlpLsOagUDMxCmq90JbHlcR-zbcw_K-N9xNRF9VtooBtlVc9RFUgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1310,22 +2654,22 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.3.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.15 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.26]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: !!python/unicode ''}
+    body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 26 Dec 2017 23:18:06 GMT']
+      date: ['Wed, 31 Jan 2018 23:33:54 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdLQzMzWkFDTkFQRTdPV1JINVpCNFQ2SkFIRFZXSkVEM0xSUHw1NTM0MEUwMjgzMTkwNDk5LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdYUllCVEFGTFFaT1VPTlk3S0FCWVRXUDNTT0tMVU9SQUg2S3w4MTY0N0Q3MERBOTFCQ0EyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1192']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 version: 1

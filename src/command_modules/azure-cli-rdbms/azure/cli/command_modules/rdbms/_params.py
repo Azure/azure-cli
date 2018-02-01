@@ -37,8 +37,7 @@ def load_arguments(self, _):
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False)
 
         with self.argument_context('{} server restore'. format(command_group)) as c:
-            c.expand('sku', engine.models.Sku)
-            c.ignore('size')
+            c.ignore('sku', 'storage_profile')
 
             c.expand('properties', engine.models.ServerPropertiesForRestore)
             c.ignore('version', 'ssl_enforcement', 'storage_mb')
@@ -46,8 +45,6 @@ def load_arguments(self, _):
             c.expand('parameters', engine.models.ServerForCreate)
             c.ignore('tags', 'location')
 
-            c.expand('storage_profile', engine.models.StorageProfile)
-         
             c.argument('source_server_id', options_list=['--source-server', '-s'], help='The name or ID of the source server to restore from.')
             c.argument('restore_point_in_time', help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
 
