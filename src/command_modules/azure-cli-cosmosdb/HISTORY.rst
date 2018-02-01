@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.18
+++++++
+* Added support for setting capabilities and minor fixes.
+
 0.1.17
 ++++++
 * Fix parameter description for failover policies.
