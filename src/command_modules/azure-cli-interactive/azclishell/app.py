@@ -634,7 +634,7 @@ class AzInteractiveShell(object):
             azure_folder = self.config.config_dir
             if not os.path.exists(azure_folder):
                 os.makedirs(azure_folder)
-            ACCOUNT.load(os.path.join(azure_folder, 'azureProfile.json'))
+            ACCOUNT.load(os.path.join(get_config_dir(), 'azureProfile.json'))
             CONFIG.load(os.path.join(azure_folder, 'az.json'))
             SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
 
