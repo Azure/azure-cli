@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import argparse
+from collections import OrderedDict
+import json
 import re
 from six import string_types
 
@@ -22,8 +24,74 @@ from azure.cli.core.profiles import ResourceType
 logger = get_logger(__name__)
 
 
+class ArmTemplateBuilder(object):
+
+    def __init__(self):
+        template = OrderedDict()
+        template['$schema'] = \
+            'https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#'
+        template['contentVersion'] = '1.0.0.0'
+        template['parameters'] = {}
+        template['variables'] = {}
+        template['resources'] = []
+        template['outputs'] = {}
+        self.template = template
+        self.parameters = OrderedDict()
+
+    def add_resource(self, resource):
+        self.template['resources'].append(resource)
+
+    def add_variable(self, key, value):
+        self.template['variables'][key] = value
+
+    def add_parameter(self, key, value):
+        self.template['parameters'][key] = value
+
+    def add_secure_parameter(self, key, value, description=None):
+        param = {
+            "type": "securestring",
+            "metadata": {
+                "description": description or 'Secure {}'.format(key)
+            }
+        }
+        self.template['parameters'][key] = param
+        self.parameters[key] = {'value': value}
+
+    def add_id_output(self, key, provider, property_type, property_name):
+        new_output = {
+            key: {
+                'type': 'string',
+                'value': "[resourceId('{}/{}', '{}')]".format(
+                    provider, property_type, property_name)
+            }
+        }
+        self.template['outputs'].update(new_output)
+
+    def add_output(self, key, property_name, provider=None, property_type=None,
+                   output_type='string', path=None):
+
+        if provider and property_type:
+            value = "[reference(resourceId('{provider}/{type}', '{property}'),providers('{provider}', '{type}').apiVersions[0])".format(  # pylint: disable=line-too-long
+                provider=provider, type=property_type, property=property_name)
+        else:
+            value = "[reference('{}')".format(property_name)
+        value = '{}.{}]'.format(value, path) if path else '{}]'.format(value)
+        new_output = {
+            key: {
+                'type': output_type,
+                'value': value
+            }
+        }
+        self.template['outputs'].update(new_output)
+
+    def build(self):
+        return json.loads(json.dumps(self.template))
+
+    def build_parameters(self):
+        return json.loads(json.dumps(self.parameters))
+
+
 def handle_long_running_operation_exception(ex):
-    import json
     import azure.cli.core.telemetry as telemetry
 
     telemetry.set_exception(
@@ -53,7 +121,7 @@ def handle_long_running_operation_exception(ex):
 
 
 def deployment_validate_table_format(result):
-    from collections import OrderedDict
+
     if result.get('error', None):
         error_result = OrderedDict()
         error_result['result'] = result['error']['code']

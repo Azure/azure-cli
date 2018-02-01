@@ -43,13 +43,13 @@ def load_command_table(self, _):
     # ACS Mesos DC/OS commands
     with self.command_group('acs dcos', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('browse', 'dcos_browse')
-        g.custom_command('install-cli', 'dcos_install_cli')
+        g.custom_command('install-cli', 'dcos_install_cli', client_factory=None)
 
     # ACS Kubernetes commands
     with self.command_group('acs kubernetes', container_services_sdk, client_factory=cf_container_services) as g:
         g.custom_command('browse', 'k8s_browse')
         g.custom_command('get-credentials', 'k8s_get_credentials')
-        g.custom_command('install-cli', 'k8s_install_cli')
+        g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)
 
     # AKS commands
     with self.command_group('aks', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
@@ -58,7 +58,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete', no_wait_param='raw', confirmation=True)
         g.custom_command('get-credentials', 'aks_get_credentials')
         g.command('get-versions', 'get_upgrade_profile', table_transformer=aks_get_versions_table_format)
-        g.custom_command('install-cli', 'k8s_install_cli')
+        g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)
         g.custom_command('install-connector', 'k8s_install_connector')
         g.custom_command('list', 'aks_list', table_transformer=aks_list_table_format)
         g.custom_command('remove-connector', 'k8s_uninstall_connector')

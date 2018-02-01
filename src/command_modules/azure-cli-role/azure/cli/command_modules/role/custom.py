@@ -437,17 +437,20 @@ def create_application(client, display_name, homepage, identifier_uris,
 
 def update_application(client, identifier, display_name=None, homepage=None,
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
-                       key_type=None, key_usage=None, start_date=None, end_date=None):
+                       key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None):
     object_id = _resolve_application(client, identifier)
-    password_creds, key_creds = _build_application_creds(password, key_value, key_type,
-                                                         key_usage, start_date, end_date)
 
+    password_creds, key_creds = None, None
+    if any([key_value, key_type, key_usage, start_date, end_date]):
+        password_creds, key_creds = _build_application_creds(password, key_value, key_type,
+                                                             key_usage, start_date, end_date)
     app_patch_param = ApplicationUpdateParameters(display_name=display_name,
                                                   homepage=homepage,
                                                   identifier_uris=identifier_uris,
                                                   reply_urls=reply_urls,
                                                   key_credentials=key_creds,
-                                                  password_credentials=password_creds)
+                                                  password_credentials=password_creds,
+                                                  available_to_other_tenants=available_to_other_tenants)
     return client.patch(object_id, app_patch_param)
 
 

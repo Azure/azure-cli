@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from collections import OrderedDict
-
 from azure.cli.core.profiles import get_sdk, ResourceType
 
 
@@ -15,6 +13,7 @@ def build_table_output(result, projection):
 
     final_list = []
 
+    from collections import OrderedDict
     for item in result:
         def _value_from_path(each_item, path):
             obj = each_item
@@ -56,7 +55,8 @@ def transform_blob_output(result):
         ('Blob Tier', 'properties.blobTier'),
         ('Length', 'properties.contentLength'),
         ('Content Type', 'properties.contentSettings.contentType'),
-        ('Last Modified', 'properties.lastModified')
+        ('Last Modified', 'properties.lastModified'),
+        ('Snapshot', 'snapshot')
     ])
 
 
@@ -71,6 +71,7 @@ def transform_share_list(result):
 def transform_file_output(result):
     """ Transform to convert SDK file/dir list output to something that
     more clearly distinguishes between files and directories. """
+    from collections import OrderedDict
     new_result = []
 
     iterable = result if isinstance(result, list) else result.get('items', result)
@@ -89,6 +90,7 @@ def transform_file_output(result):
 
 
 def transform_entity_show(result):
+    from collections import OrderedDict
     timestamp = result.pop('Timestamp')
     result.pop('etag')
 
@@ -103,6 +105,7 @@ def transform_entity_show(result):
 
 
 def transform_message_show(result):
+    from collections import OrderedDict
     ordered_result = []
     for item in result:
         new_result = OrderedDict()
@@ -130,9 +133,8 @@ def transform_file_directory_result(cli_ctx):
     in order to align the object's properties so as to offer a better view to the file and dir
     list.
     """
-    t_file, t_dir = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'File', 'Directory', mod='file.models')
-
     def transformer(result):
+        t_file, t_dir = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'File', 'Directory', mod='file.models')
         return_list = []
         for each in result:
             if isinstance(each, t_file):

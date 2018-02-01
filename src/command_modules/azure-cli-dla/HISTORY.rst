@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.0.18
+++++++
+* Performance fixes.
+
 0.0.17
 ++++++
 * Update helpfile

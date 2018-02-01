@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.1
++++++
+* Minor fixes.
+
 0.1.0
 +++++
 * BC: Add multi-diagnostic settings support. `--name` is required in `monitor diagnostic-settings create`.

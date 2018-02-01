@@ -55,7 +55,7 @@ class Configuration(object):
                       'y': True, 'Y': True, 'n': False, 'N': False}
 
     """ Configuration information """
-    def __init__(self, cli_config):
+    def __init__(self, cli_config, style=None):
         self.config = configparser.ConfigParser({
             'firsttime': 'yes',
             'style': 'default'

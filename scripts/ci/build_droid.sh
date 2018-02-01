@@ -35,13 +35,13 @@ cp $dp0/a01/Dockerfile.py36 artifacts/
 title 'Determine docker image name'
 image_owner=${TRAVIS_REPO_SLUG%/azure-cli} 
 image_owner=${image_owner:="private-${USER}"}
-image_owner=${image_owner,,}
+image_owner=`echo $image_owner | tr '[:upper:]' '[:lower:]'`
 version=`cat artifacts/version`
 image_name=azureclidev.azurecr.io/azurecli-test-$image_owner:python3.6-$version
 echo 'Image name: $image_name'
 
 title 'Login docker registry'
-if [ -n $AZURECLIDEV_ACR_SP_USERNAME ] && [ -n $AZURECLIDEV_ACR_SP_PASSWORD ]; then
+if [ $AZURECLIDEV_ACR_SP_USERNAME ] && [ $AZURECLIDEV_ACR_SP_PASSWORD ]; then
     docker login azureclidev.azurecr.io -u $AZURECLIDEV_ACR_SP_USERNAME -p $AZURECLIDEV_ACR_SP_PASSWORD
 fi
 

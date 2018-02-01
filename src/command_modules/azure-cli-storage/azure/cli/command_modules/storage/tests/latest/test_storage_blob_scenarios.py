@@ -89,7 +89,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
              JMESPathCheck('properties.contentLength', file_size_kb * 1024)])
 
         self.storage_cmd('storage blob service-properties show', account_info) \
-            .assert_with_checks(JMESPathCheck('hourMetrics.enabled', True))
+            .assert_with_checks(JMESPathCheck('hourMetrics.enabled', False))
 
         if not skip_download:
             downloaded = os.path.join(local_dir, 'test.file')
@@ -98,6 +98,10 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                              account_info, blob_name, container, downloaded)
             self.assertTrue(os.path.isfile(downloaded), 'The file is not downloaded.')
             self.assertEqual(file_size_kb * 1024, os.stat(downloaded).st_size,
+                             'The download file size is not right.')
+            self.storage_cmd('storage blob download -n {} -c {} --file "{}" --start-range 10 --end-range 499',
+                             account_info, blob_name, container, downloaded)
+            self.assertEqual(490, os.stat(downloaded).st_size,
                              'The download file size is not right.')
 
         # Verify the requests in cassette to ensure the count of the block requests is expected

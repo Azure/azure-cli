@@ -250,7 +250,7 @@ def _urlretrieve(url, filename):
         f.write(req.read())
 
 
-def dcos_install_cli(cmd, client, install_location=None, client_version='1.8'):
+def dcos_install_cli(cmd, install_location=None, client_version='1.8'):
     """
     Downloads the dcos command line from Mesosphere
     """
@@ -280,7 +280,7 @@ def dcos_install_cli(cmd, client, install_location=None, client_version='1.8'):
         raise CLIError('Connection error while attempting to download client ({})'.format(err))
 
 
-def k8s_install_cli(cmd, client, client_version='latest', install_location=None):
+def k8s_install_cli(cmd, client_version='latest', install_location=None):
     """Install kubectl, a command-line interface for Kubernetes clusters."""
 
     if client_version == 'latest':
@@ -1254,7 +1254,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                location=None,
                admin_username="azureuser",
                kubernetes_version="1.7.7",
-               node_vm_size="Standard_D1_v2",
+               node_vm_size="Standard_DS1_v2",
                node_osdisk_size=0,
                node_count=3,
                service_principal=None, client_secret=None,

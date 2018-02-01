@@ -129,11 +129,11 @@ def load_arguments(self, _):
         c.argument('install_location', default=_get_default_install_location('dcos'))
 
     with self.argument_context('acs kubernetes get-credentials') as c:
-        c.argument('path', options_list=['--file', '-f'], )
+        c.argument('path', options_list=['--file', '-f'])
 
     with self.argument_context('acs kubernetes install-cli') as c:
         c.argument('install_location', type=file_type, completer=FilesCompleter(),
-                   default=os.path.join(os.path.expanduser('~'), '.kube', 'config'))
+                   default=_get_default_install_location('kubectl'))
         c.argument('ssh_key_file', required=False, type=file_type, default=os.path.join('~', '.ssh', 'id_rsa'),
                    completer=FilesCompleter(), help='Path to an SSH key file to use.')
 

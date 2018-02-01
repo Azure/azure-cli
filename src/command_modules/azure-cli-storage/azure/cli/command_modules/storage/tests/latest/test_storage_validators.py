@@ -13,7 +13,7 @@ from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
 from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
 
-from azure.cli.command_modules.storage._validators import (get_permission_validator, get_datetime_type, datetime,
+from azure.cli.command_modules.storage._validators import (get_permission_validator, get_datetime_type,
                                                            ipv4_range_type, resource_type_type, services_type,
                                                            process_blob_source_uri, get_char_options_validator)
 from azure.cli.testsdk import api_version_constraint
@@ -75,9 +75,10 @@ class TestStorageValidators(unittest.TestCase):
             get_datetime_type(True)(input)
 
     def test_datetime_type(self):
+        import datetime
         input = "2017-01-01T12:30Z"
         actual = get_datetime_type(False)(input)
-        expected = datetime(2017, 1, 1, 12, 30, 0)
+        expected = datetime.datetime(2017, 1, 1, 12, 30, 0)
         self.assertEqual(actual, expected)
 
         input = "2017-01-01 12:30"

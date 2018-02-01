@@ -326,6 +326,32 @@ def db_create_replica(
         kwargs)
 
 
+# Renames a database.
+def db_rename(
+        cmd,
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        new_name):
+
+    client.rename(
+        resource_group_name,
+        server_name,
+        database_name,
+        id=DatabaseIdentity(
+            cmd.cli_ctx,
+            new_name,
+            server_name,
+            resource_group_name
+        ).id())
+
+    return client.get(
+        resource_group_name,
+        server_name,
+        new_name)
+
+
 # Creates a database from a database point in time backup or deleted database backup.
 # Wrapper function to make create mode more convenient.
 def db_restore(

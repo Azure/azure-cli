@@ -5,7 +5,6 @@
 
 """Custom operations for storage account commands"""
 
-from knack.util import CLIError
 from azure.cli.command_modules.storage._client_factory import storage_client_factory
 
 
@@ -30,6 +29,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if NetworkRuleSet and (bypass or default_action):
         if bypass and not default_action:
+            from knack.util import CLIError
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         params.network_rule_set = NetworkRuleSet(bypass=bypass, default_action=default_action, ip_rules=None,
                                                  virtual_network_rules=None)
@@ -87,6 +87,7 @@ def show_storage_account_usage(cmd):
     return next((x for x in scf.usage.list() if x.name.value == 'StorageAccounts'), None)  # pylint: disable=no-member
 
 
+# pylint: disable=too-many-locals
 def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=None, use_subdomain=None,
                            encryption_services=None, encryption_key_source=None, encryption_key_vault_properties=None,
                            access_tier=None, https_only=None, assign_identity=False, bypass=None, default_action=None):
@@ -126,16 +127,17 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if NetworkRuleSet:
         acl = instance.network_rule_set
-        if not acl:
-            if bypass and not default_action:
-                raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
-            acl = NetworkRuleSet(bypass=bypass, virtual_network_rules=None, ip_rules=None,
-                                 default_action=default_action)
-        else:
+        if acl:
             if bypass:
                 acl.bypass = bypass
             if default_action:
                 acl.default_action = default_action
+        elif default_action:
+            acl = NetworkRuleSet(bypass=bypass, virtual_network_rules=None, ip_rules=None,
+                                 default_action=default_action)
+        elif bypass:
+            from knack.util import CLIError
+            raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         params.network_rule_set = acl
 
     return params
@@ -156,6 +158,7 @@ def add_network_rule(cmd, client, resource_group_name, storage_account_name, act
     if subnet:
         from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(subnet):
+            from knack.util import CLIError
             raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
         VirtualNetworkRule = cmd.get_models('VirtualNetworkRule')
         if not rules.virtual_network_rules:
