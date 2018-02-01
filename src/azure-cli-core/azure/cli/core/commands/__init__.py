@@ -193,16 +193,12 @@ class AzCliCommandInvoker(CommandInvoker):
     def execute(self, args):
         import knack.events as events
         from knack.util import CommandResultItem, todict
-        from azure.cli.core import ArgumentExtensionsLoader
 
         # TODO: Can't simply be invoked as an event because args are transformed
         args = _pre_command_table_create(self.cli_ctx, args)
 
         self.cli_ctx.raise_event(events.EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
         self.commands_loader.load_command_table(args)
-        arg_ext_loader = ArgumentExtensionsLoader(reserved_commands=self.commands_loader.command_table.keys())
-        arg_ext_loader.load_argument_extensions()
-        args = arg_ext_loader.process(args)
         command = self._rudimentary_get_command(args)
 
         try:
@@ -242,7 +238,8 @@ class AzCliCommandInvoker(CommandInvoker):
         self.commands_loader.command_table = self.commands_loader.command_table  # update with the truncated table
         self.commands_loader.command_name = command
         self.commands_loader.load_arguments(command)
-        self.cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, cmd_tbl=self.commands_loader.command_table)
+        self.cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE,
+                                 cmd_tbl=self.commands_loader.command_table, args=args)
         self.parser.cli_ctx = self.cli_ctx
         self.parser.load_command_table(self.commands_loader.command_table)
 
@@ -523,8 +520,7 @@ def _load_command_loader(loader, args, name, prefix):
                     # else:
                     loader.cmd_to_loader_map[cmd] = [command_loader]
     else:
-        logger.debug("Module '%s' is missing `COMMAND_LOADER_CLS` entry. %s", name,
-                     "Trying to import it with ArgumentExtensionsLoader...")
+        logger.debug("Module '%s' is missing `COMMAND_LOADER_CLS` entry.", name)
     return command_table
 
 

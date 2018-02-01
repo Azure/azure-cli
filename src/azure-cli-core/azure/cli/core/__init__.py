@@ -205,52 +205,6 @@ class MainCommandsLoader(CLICommandsLoader):
                 loader._update_command_definitions()  # pylint: disable=protected-access
 
 
-class ArgumentExtensionsLoader(object):
-    """ Load extenions that would modify the input arguments of the CLI """
-
-    def __init__(self, **kwargs):
-        self.extensions = None
-        self.kwargs = kwargs
-
-    def load_argument_extensions(self):
-        self.extensions = list(ArgumentExtensionsLoader.get_argument_extensions())
-
-    def process(self, args):
-        """ Go through each argument extension and process the input arguments """
-        import traceback
-
-        for ext_name, ext_cls in self.extensions:
-            try:
-                ext_instance = ext_cls(**self.kwargs)
-                args = ext_instance.transform(args)
-            except (TypeError, AttributeError):
-                logger.warning("Unable to process input arguments with extension module '%s'. %s", ext_name,
-                               "Use --debug for more information.")
-                logger.debug(traceback.format_exc())
-        return args
-
-    @staticmethod
-    def get_argument_extensions():
-        import traceback
-        from importlib import import_module
-        from azure.cli.core.extension import (
-            get_extension_names, get_extension_path, get_extension_modname)
-
-        extensions = get_extension_names()
-        for ext_name in extensions:
-            ext_dir = get_extension_path(ext_name)
-            try:
-                ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
-                mod = import_module(ext_mod)
-                arg_ext_cls = getattr(mod, 'ARG_EXT_CLS', None)
-                if arg_ext_cls:
-                    yield (ext_name, arg_ext_cls)
-                    logger.debug("Loaded argument extension '%s'", ext_name)
-            except Exception:  # pylint: disable=broad-except
-                logger.warning("Unable to load extension '%s'. Use --debug for more information.", ext_name)
-                logger.debug(traceback.format_exc())
-
-
 class AzCommandsLoader(CLICommandsLoader):
 
     def __init__(self, cli_ctx=None, min_profile=None, max_profile='latest',
