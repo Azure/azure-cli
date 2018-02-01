@@ -99,6 +99,7 @@ def cli_cosmosdb_update(client,
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
+    # Workaround until PATCH support for all properties
     if capabilities is not None:
         if len(locations) or \
            default_consistency_level is not None or \
@@ -111,7 +112,21 @@ def cli_cosmosdb_update(client,
         else:
             async_docdb_create = client.patch(resource_group_name, account_name, tags=tags, capabilities=capabilities)
             docdb_account = async_docdb_create.result()
-            docdb_account = client.get(resource_group_name, account_name)  # Workaround
+            docdb_account = client.get(resource_group_name, account_name)
+            return docdb_account
+
+    # Workaround until PATCH support for all properties
+    if tags is not None:
+        if len(locations) == 0 and\
+           default_consistency_level is None and\
+           max_staleness_prefix is None and\
+           max_interval is None and\
+           ip_range_filter is None and\
+           enable_automatic_failover is None:
+
+            async_docdb_create = client.patch(resource_group_name, account_name, tags=tags, capabilities=capabilities)
+            docdb_account = async_docdb_create.result()
+            docdb_account = client.get(resource_group_name, account_name)
             return docdb_account
 
     update_consistency_policy = False
