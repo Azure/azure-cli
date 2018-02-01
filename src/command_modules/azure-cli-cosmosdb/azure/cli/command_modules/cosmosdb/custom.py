@@ -78,7 +78,6 @@ def cli_cosmosdb_create(cmd, client,
         enable_automatic_failover=enable_automatic_failover,
         capabilities=capabilities)
 
-
     async_docdb_create = client.create_or_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_create.result()
     docdb_account = client.get(resource_group_name, account_name)  # Workaround
