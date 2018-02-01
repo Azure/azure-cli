@@ -18,7 +18,7 @@ def load_command_table(self, _):
         exception_handler=subscription_exception_handler
     )
 
-    with self.command_group('subscriptiondefinition', subscription_definition_util) as g:
+    with self.command_group('subscriptiondefinition', subscription_definition_util, client_factory=subscription_definitions_mgmt_client_factory) as g:
         g.command('list', 'list')
         g.command('show', 'get')
         g.custom_command('create', 'cli_subscription_create_subscription_definition')

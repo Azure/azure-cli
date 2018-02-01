@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.mgmt.subscription.models import SubscriptionDefinition
+
 
 def cli_subscription_create_subscription_definition(client, name, offer_type, subscription_display_name=None):
     """Create a subscription definition."""
