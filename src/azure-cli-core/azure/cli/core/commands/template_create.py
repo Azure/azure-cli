@@ -90,7 +90,7 @@ def get_folded_parameter_validator(
         raise CLIError('Cannot use default_none=True if allow_none=False')
 
     # construct the validator
-    def validator(namespace):
+    def validator(cmd, namespace):  # pylint: disable=unused-argument
         from msrestazure.tools import resource_id
         type_field_name = '{}_type'.format(property_name)
         property_val = getattr(namespace, property_name, None)
