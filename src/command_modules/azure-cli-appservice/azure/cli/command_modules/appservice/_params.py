@@ -74,6 +74,10 @@ def load_arguments(self, _):
         c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|5.6\". Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
         c.argument('plan', options_list=['--plan', '-p'], completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
+    with self.argument_context('webapp new') as c:
+        c.argument('name', options_list=['--name', '-n'], help='name of the new webapp')
+        c.argument('dryrun', help="shows summary of the create operation instead of actually creating and deploying the app", default=False)
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False, help='the location the app service plan will be created in')
 
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)

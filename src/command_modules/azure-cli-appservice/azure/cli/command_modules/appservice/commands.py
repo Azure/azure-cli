@@ -67,6 +67,7 @@ def load_command_table(self, _):
         client_factory=cf_webapps
     )
     with self.command_group('webapp', webapp_sdk) as g:
+        g.custom_command('new', 'create_deploy_webapp', exception_handler=ex_handler_factory())
         g.custom_command('create', 'create_webapp', exception_handler=ex_handler_factory())
         g.custom_command('list', 'list_webapp', table_transformer=transform_web_list_output)
         g.custom_command('show', 'show_webapp', exception_handler=empty_on_404, table_transformer=transform_web_output)

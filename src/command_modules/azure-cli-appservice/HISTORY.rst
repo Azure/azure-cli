@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+0.1.26
+++++++
+* adding webapp new command for quick start (create + deployment) of node apps on Linux
+
 0.1.25
 ++++++
 * fix broken webapp log tail/download

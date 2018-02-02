@@ -468,6 +468,15 @@ helps['webapp browse'] = """
     short-summary: Open a web app in a browser.
 """
 
+helps['webapp new'] = """
+    type: command
+    short-summary: Create and deploy a node web app
+    examples:
+        - name: Create a web app with the default configuration.
+          text: >
+            az webapp new -n MyUniqueAppName
+"""
+
 helps['webapp create'] = """
     type: command
     short-summary: Create a web app.
