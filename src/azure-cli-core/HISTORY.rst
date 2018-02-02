@@ -5,7 +5,7 @@ Release History
 2.0.27
 ++++++
 * auth: key on both subscription id and name on msi login
-* Add new knack event EVENT_INVOKER_PRE_TRUNCATE_CMD_TBL
+* Raise 'CommandInvoker.OnPreTruncateCommandTable' before truncating command table
 * Minor fixes
 
 2.0.26
