@@ -166,7 +166,7 @@ helps['aks create'] = """
           short-summary: Size in GB of the OS disk for each node in the node pool.
         - name: --kubernetes-version -k
           type: string
-          short-summary: Version of Kubernetes to use for creating the cluster, such as "1.7.7" or "1.8.2".
+          short-summary: Version of Kubernetes to use for creating the cluster, such as "1.7.12" or "1.8.6".
         - name: --ssh-key-value
           type: string
           short-summary: Public key path or key contents to install on node VMs for SSH access. For example,
