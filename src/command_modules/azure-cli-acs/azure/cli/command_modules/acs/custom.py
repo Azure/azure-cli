@@ -1236,8 +1236,8 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False):
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not find dashboard pod: {}'.format(err))
     if dashboard_pod:
-        # remove the "pods/" prefix from the name
-        dashboard_pod = str(dashboard_pod)[5:].strip()
+        # remove any "pods/" or "pod/" prefix from the name
+        dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
     else:
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
     # launch kubectl port-forward locally to access the remote dashboard
