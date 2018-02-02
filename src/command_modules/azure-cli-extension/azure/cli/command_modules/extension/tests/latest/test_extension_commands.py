@@ -216,9 +216,6 @@ class TestExtensionCommands(unittest.TestCase):
             update_extension(MY_EXT_NAME, extra_index_urls=[test_index])
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.4+dev')
-        # Removing extension for cleanup of this test.
-        remove_extension(MY_EXT_NAME)
-        pass
 
 
 if __name__ == '__main__':
