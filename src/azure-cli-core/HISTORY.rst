@@ -5,7 +5,7 @@ Release History
 
 2.0.27
 ++++++
-* Create ArgumentExtensionsLoader and incorporate it in core
+* Add new knack event EVENT_INVOKER_PRE_TRUNCATE_CMD_TBL
 * Minor fixes
 
 2.0.26

@@ -189,16 +189,20 @@ class AzCliCommand(CLICommand):
 # pylint: disable=too-few-public-methods
 class AzCliCommandInvoker(CommandInvoker):
 
-    # pylint: disable=too-many-statements,too-many-locals
+    # pylint: disable=too-many-statements
     def execute(self, args):
         import knack.events as events
         from knack.util import CommandResultItem, todict
+
+        events.EVENT_INVOKER_PRE_TRUNCATE_CMD_TBL = 'CommandInvoker.OnPreTruncateCommandTable'
 
         # TODO: Can't simply be invoked as an event because args are transformed
         args = _pre_command_table_create(self.cli_ctx, args)
 
         self.cli_ctx.raise_event(events.EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
         self.commands_loader.load_command_table(args)
+        self.cli_ctx.raise_event(events.EVENT_INVOKER_PRE_TRUNCATE_CMD_TBL,
+                                 load_cmd_tbl_func=self.commands_loader.load_command_table, args=args)
         command = self._rudimentary_get_command(args)
 
         try:
@@ -238,8 +242,6 @@ class AzCliCommandInvoker(CommandInvoker):
         self.commands_loader.command_table = self.commands_loader.command_table  # update with the truncated table
         self.commands_loader.command_name = command
         self.commands_loader.load_arguments(command)
-        self.cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE,
-                                 cmd_tbl=self.commands_loader.command_table, args=args)
         self.parser.cli_ctx = self.cli_ctx
         self.parser.load_command_table(self.commands_loader.command_table)
 
