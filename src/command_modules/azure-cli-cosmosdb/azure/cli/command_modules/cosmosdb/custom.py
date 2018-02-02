@@ -100,7 +100,7 @@ def cli_cosmosdb_update(client,
 
     # Workaround until PATCH support for all properties
     if capabilities is not None:
-        if len(locations) or \
+        if locations or \
            default_consistency_level is not None or \
            max_staleness_prefix is not None or \
            max_interval is not None or \
@@ -116,7 +116,7 @@ def cli_cosmosdb_update(client,
 
     # Workaround until PATCH support for all properties
     if tags is not None:
-        if len(locations) == 0 and\
+        if not locations and\
            default_consistency_level is None and\
            max_staleness_prefix is None and\
            max_interval is None and\
