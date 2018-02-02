@@ -2,6 +2,10 @@
 
 Release History
 ===============
+unreleased
+++++++
+* fix backup/restore
+
 0.1.25
 ++++++
 * fix broken webapp log tail/download
