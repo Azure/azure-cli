@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.19
+++++++
+* When logging in, provide non-async flag for Profile to flush tokens to disk.
+
 2.0.18
 ++++++
 * ensure 'get-access-token' work inside a VM with identity
