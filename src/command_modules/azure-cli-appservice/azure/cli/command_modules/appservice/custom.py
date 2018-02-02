@@ -41,7 +41,7 @@ logger = get_logger(__name__)
 # pylint:disable=no-member,too-many-lines,too-many-locals
 
 # region "Common routines shared with quick-start extensions."
-# Please maintain compatibility in both interface and functionalities"
+# Please maintain compatibility in both interfaces and functionalities"
 
 
 def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,
@@ -182,6 +182,10 @@ def get_sku_name(tier):
     else:
         raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
+
+# deprecated, do not use
+def _get_sku_name(tier):
+    return get_sku_name(tier)
 # endregion
 
 
