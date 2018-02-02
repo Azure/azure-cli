@@ -882,8 +882,6 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
                    target_name=None, overwrite=None, ignore_hostname_conflict=None, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     storage_blob_name = backup_name
-    webapp_info = client.web_apps.get(resource_group_name, webapp_name)
-    app_service_plan = webapp_info.server_farm_id.split('/')[-1]
     if not storage_blob_name.lower().endswith('.zip'):
         storage_blob_name += '.zip'
     location = _get_location_from_webapp(client, resource_group_name, webapp_name)
@@ -891,8 +889,7 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
     restore_request = RestoreRequest(location, storage_account_url=storage_account_url,
                                      blob_name=storage_blob_name, overwrite=overwrite,
                                      site_name=target_name, databases=db_setting,
-                                     ignore_conflicting_host_names=ignore_hostname_conflict,
-                                     app_service_plan=app_service_plan)
+                                     ignore_conflicting_host_names=ignore_hostname_conflict)
     if slot:
         return client.web_apps.restore_slot(resource_group_name, webapp_name, 0, restore_request, slot)
 
