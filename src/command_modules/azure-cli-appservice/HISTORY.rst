@@ -2,9 +2,10 @@
 
 Release History
 ===============
-unreleased
+0.1.26
 ++++++
 * fix backup/restore
+* minor changes
 
 0.1.25
 ++++++
