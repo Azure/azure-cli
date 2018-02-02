@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.26
+++++++
+* minor changes
+
 0.1.25
 ++++++
 * fix broken webapp log tail/download
