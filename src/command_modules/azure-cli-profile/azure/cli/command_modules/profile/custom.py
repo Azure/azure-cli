@@ -103,7 +103,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
     interactive = False
 
-    profile = Profile(cli_ctx=cmd.cli_ctx, use_global_creds_cache=False)
+    profile = Profile(cli_ctx=cmd.cli_ctx, async_persist=False)
 
     if in_cloud_console():
         console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
