@@ -80,7 +80,7 @@ def validate_k8s_version(namespace):
             namespace.kubernetes_version = found[0]
         else:
             raise CLIError('--kubernetes-version should be the full version number, '
-                        'such as "1.7.12" or "1.8.6"')
+                           'such as "1.7.12" or "1.8.6"')
 
 
 def validate_k8s_client_version(namespace):
