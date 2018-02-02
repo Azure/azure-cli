@@ -10,3 +10,8 @@ helps['subscriptiondefinition'] = """
     type: group
     short-summary: Manage Azure Subscription Definitions.
 """
+
+helps['subscriptiondefinition create'] = """
+    type: group
+    short-summary: Create a subscription definition.
+"""
