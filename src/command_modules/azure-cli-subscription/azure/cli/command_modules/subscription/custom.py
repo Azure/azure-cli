@@ -6,10 +6,10 @@
 from azure.mgmt.subscription.models import SubscriptionDefinition
 
 
-def cli_subscription_create_subscription_definition(client, subscription_definition_name, 
+def cli_subscription_create_subscription_definition(client, subscription_definition_name,
                                                     offer_type, subscription_display_name=None):
     new_def = SubscriptionDefinition(
-        subscription_display_name=subscription_display_name if subscription_display_name else 
+        subscription_display_name=subscription_display_name if subscription_display_name else
                                   subscription_definition_name,
         offer_type=offer_type)
 
