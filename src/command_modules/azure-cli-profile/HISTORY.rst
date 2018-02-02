@@ -4,7 +4,7 @@ Release History
 ===============
 2.0.19
 ++++++
-* When logging in, provide non-async flag for Profile to flush tokens to disk.
+* Enable `az login` in from interactive mode.
 
 2.0.18
 ++++++
