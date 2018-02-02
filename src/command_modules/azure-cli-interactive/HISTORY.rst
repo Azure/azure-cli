@@ -6,6 +6,7 @@ Release History
 0.3.16
 ++++++
 * Fix issue where user is prompted to login when using interactive mode in Cloud Shell.
+* `az login` flushes tokens to disk right away instead of waiting until command process finishes.
 
 0.3.15
 ++++++

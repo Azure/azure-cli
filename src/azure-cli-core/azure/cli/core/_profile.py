@@ -111,10 +111,7 @@ class Profile(object):
         self.cli_ctx = cli_ctx or get_default_cli()
         self._storage = storage or ACCOUNT
         self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
-        if use_global_creds_cache:
-            self._creds_cache = CredsCache(self.cli_ctx, _AUTH_CTX_FACTORY, async_persist=True)
-        else:
-            self._creds_cache = CredsCache(self.auth_ctx_factory, async_persist=False)
+        self._creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory, async_persist=use_global_creds_cache)
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
         self._msi_creds = None
