@@ -5,6 +5,7 @@ Release History
 
 2.0.26
 ++++++
+* `aks create` defaults to letting the server choose the version of Kubernetes
 * `aks create` VM node size default changed from "Standard_D1_v2" to "Standard_DS1_v2"
 * improve reliability when locating the dashboard pod for `az aks browse`
 
