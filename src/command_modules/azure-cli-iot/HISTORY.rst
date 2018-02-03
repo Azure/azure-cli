@@ -5,6 +5,7 @@ Release History
 
 0.1.16
 ++++++
+* Minor fixes.
 * Added support for device provisioning service
 * Added deprecation messages in commands and command help.
 * Added IoT run once check to warn users about the availability of the IoT Extension.
