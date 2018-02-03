@@ -71,14 +71,16 @@ def validate_create_parameters(namespace):
 
 
 def validate_k8s_version(namespace):
-    """Validates a string as a possible Kubernetes version."""
-    k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+\.\d+.*)$')
-    found = k8s_release_regex.findall(namespace.kubernetes_version)
-    if found:
-        namespace.kubernetes_version = found[0]
-    else:
-        raise CLIError('--kubernetes-version should be the full version number, '
-                       'such as "1.7.7" or "1.8.1"')
+    """Validates a string as a possible Kubernetes version. An empty string is also valid, which tells the server
+    to use its default version."""
+    if namespace.kubernetes_version:
+        k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+\.\d+.*)$')
+        found = k8s_release_regex.findall(namespace.kubernetes_version)
+        if found:
+            namespace.kubernetes_version = found[0]
+        else:
+            raise CLIError('--kubernetes-version should be the full version number, '
+                           'such as "1.7.12" or "1.8.6"')
 
 
 def validate_k8s_client_version(namespace):
