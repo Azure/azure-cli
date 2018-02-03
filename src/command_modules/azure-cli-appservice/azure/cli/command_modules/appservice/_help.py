@@ -279,10 +279,6 @@ type: command
 short-summary: Update deployment credentials.
 long-summary: All function and web apps in the subscription will be impacted since they share
               the same deployment credentials.
-examples:
-    - name: Set FTP and git deployment credentials for all apps.
-      text: >
-        az webapp deployment user set --user-name MyUserName
 """
 
 helps['webapp deployment slot'] = """
@@ -380,9 +376,6 @@ helps['appservice plan create'] = """
     type: command
     short-summary: Create an app service plan.
     examples:
-        - name: Create a basic app service plan.
-          text: >
-            az appservice plan create -g MyResourceGroup -n MyPlan
         - name: Create a standard app service plan with with four Linux workers.
           text: >
             az appservice plan create -g MyResourceGroup -n MyPlan \\
@@ -541,10 +534,6 @@ helps['functionapp create'] = """
     type: command
     short-summary: Create a function app.
     long-summary: The function app's name must be able to produce a unique FQDN as AppName.azurewebsites.net.
-    examples:
-        - name: Create a basic function app.
-          text: >
-            az functionapp create -g MyResourceGroup  -p MyPlan -n MyUniqueAppName -s MyStorageAccount
 """
 
 helps['functionapp delete'] = """
@@ -721,11 +710,6 @@ helps['functionapp deployment user set'] = """
     short-summary: Update deployment credentials.
     long-summary: All function and web apps in the subscription will be impacted since they share
                   the same deployment credentials.
-    examples:
-        - name: Set FTP and git deployment credentials for all apps.
-          text: >
-            az functionapp deployment user set
-            --user-name MyUserName
 """
 
 helps['functionapp deployment source config-zip'] = """

@@ -6,7 +6,6 @@
 
 from knack.help_files import helps  # pylint: disable=unused-import
 
-
 helps['eventgrid'] = """
     type: group
     short-summary: Manage Azure Event Grid topics and subscriptions.
@@ -18,10 +17,7 @@ helps['eventgrid topic'] = """
 helps['eventgrid topic create'] = """
     type: command
     short-summary: Create a topic.
-    examples:
-        - name: Create a new topic.
-          text: az eventgrid topic create -g rg1 --name topic1 -l westus2
-    """
+"""
 helps['eventgrid topic update'] = """
     type: command
     short-summary: Update a topic.

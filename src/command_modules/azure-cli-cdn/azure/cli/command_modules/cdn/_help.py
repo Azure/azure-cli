@@ -25,10 +25,6 @@ helps['cdn profile create'] = """
           short-summary: >
             The pricing tier (defines a CDN provider, feature list and rate) of the CDN profile.
             Defaults to Standard_Akamai.
-    examples:
-        - name: Create a CDN profile using Verizon premium CDN.
-          text: >
-            az cdn profile create -g group -n profile --sku Premium_Verizon
 """
 
 helps['cdn profile update'] = """
@@ -39,19 +35,11 @@ helps['cdn profile update'] = """
 helps['cdn profile delete'] = """
     type: command
     short-summary: Delete a CDN profile.
-    examples:
-        - name: Delete a CDN profile.
-          text: >
-            az cdn profile create -g group -n profile
 """
 
 helps['cdn profile list'] = """
     type: command
     short-summary: List CDN profiles.
-    examples:
-        - name: List CDN profiles in a resource group.
-          text: >
-            az cdn profile list -g group
 """
 
 helps['cdn endpoint'] = """
@@ -94,28 +82,16 @@ helps['cdn endpoint update'] = """
 helps['cdn endpoint delete'] = """
     type: command
     short-summary: Delete a CDN endpoint.
-    examples:
-        - name: Delete a CDN endpoint.
-          text: >
-            az cdn endpoint delete -g group -n endpoint --profile-name profile-name
 """
 
 helps['cdn endpoint start'] = """
     type: command
     short-summary: Start a CDN endpoint.
-    examples:
-        - name: Start a CDN endpoint.
-          text: >
-            az cdn endpoint start -g group -n endpoint --profile-name profile-name
 """
 
 helps['cdn endpoint stop'] = """
     type: command
     short-summary: Stop a CDN endpoint.
-    examples:
-        - name: Stop a CDN endpoint.
-          text: >
-            az cdn endpoint stop -g group -n endpoint --profile-name profile-name
 """
 
 helps['cdn endpoint load'] = """
@@ -141,10 +117,6 @@ helps['cdn endpoint purge'] = """
 helps['cdn endpoint list'] = """
     type: command
     short-summary: List available endpoints for a CDN.
-    examples:
-        - name: List all endpoints within a given CDN profile.
-          text: >
-            az cdn endpoint list -g group --profile-name profile-name
 """
 
 helps['cdn custom-domain'] = """
@@ -155,21 +127,11 @@ helps['cdn custom-domain'] = """
 helps['cdn custom-domain delete'] = """
     type: command
     short-summary: Delete the custom domain of a CDN.
-    examples:
-        - name: Delete a custom domain.
-          text: >
-            az cdn custom-domain delete -g group --endpoint-name endpoint --profile-name profile \\
-                -n domain-name
 """
 
 helps['cdn custom-domain show'] = """
     type: command
     short-summary: Show details for the custom domain of a CDN.
-    examples:
-        - name: Get the details of a custom domain.
-          text: >
-            az cdn custom-domain show -g group --endpoint-name endpoint --profile-name profile \\
-                -n domain-name
 """
 
 helps['cdn custom-domain create'] = """

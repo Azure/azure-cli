@@ -69,18 +69,14 @@ helps['lock create'] = """
     short-summary: Create a lock.
     long-summary: 'Locks can exist at three different scopes: subscription, resource group and resource.'
     examples:
-        - name: Create a read-only subscription level lock.
-          text: >
-            az lock create --name lockName --resource-group group --lock-type ReadOnly
-    """
+        - name: Create a subscription-level lock.
+          text: az lock create --name BasicLock --resource-group Group --lock-type ReadOnly
+
+"""
 helps['lock delete'] = """
     type: command
     short-summary: Delete a lock.
-    examples:
-        - name: Delete a resource group-level lock
-          text: >
-            az lock delete --name lockName --resource-group group
-    """
+"""
 helps['lock list'] = """
     type: command
     short-summary: List lock information.
@@ -88,17 +84,10 @@ helps['lock list'] = """
         - name: List out the locks on a vnet resource. Includes locks in the associated group and subscription.
           text: >
             az lock list --resource myvnet --resource-type Microsoft.Network/virtualNetworks -g group
-        - name: List out all locks on the subscription level
-          text: >
-            az lock list
     """
 helps['lock show'] = """
     type: command
-    short-summary: Show the properties of a lock
-    examples:
-        - name: Show a subscription level lock
-          text: >
-            az lock show -n lockname
+    short-summary: Show the properties of a lock.
     """
 helps['lock update'] = """
     type: command
@@ -115,34 +104,18 @@ helps['account lock'] = """
 helps['account lock create'] = """
     type: command
     short-summary: Create a subscription lock.
-    examples:
-        - name: Create a read-only subscription level lock.
-          text: >
-            az account lock create --lock-type ReadOnly -n lockName
     """
 helps['account lock delete'] = """
     type: command
     short-summary: Delete a subscription lock.
-    examples:
-        - name: Delete a subscription lock
-          text: >
-            az account lock delete --name lockName
     """
 helps['account lock list'] = """
     type: command
     short-summary: List lock information in the subscription.
-    examples:
-        - name: List out all locks on the subscription level
-          text: >
-            az account lock list
     """
 helps['account lock show'] = """
     type: command
     short-summary: Show the details of a subscription lock
-    examples:
-        - name: Show a subscription level lock
-          text: >
-            az account lock show -n lockname
     """
 helps['account lock update'] = """
     type: command
@@ -285,13 +258,6 @@ helps['resource'] = """
 helps['resource list'] = """
     type: command
     short-summary: List resources.
-    examples:
-        - name: List all resources in the West US region.
-          text: >
-            az resource list --location westus
-        - name: List all resources with the name 'resourceName'.
-          text: >
-            az resource list --name 'resourceName'
         - name: List all resources with the tag 'test'.
           text: >
              az resource list --tag test
@@ -415,28 +381,17 @@ helps['group'] = """
 helps['group exists'] = """
     type: command
     short-summary: Check if a resource group exists.
-    examples:
-        - name: Check if 'MyResourceGroup' exists.
-          text: >
-            az group exists -n MyResourceGroup
 """
 
 helps['group create'] = """
     type: command
     short-summary: Create a new resource group.
-    examples:
-        - name: Create a new resource group in the West US region.
-          text: >
-            az group create -l westus -n MyResourceGroup
 """
 
 helps['group delete'] = """
     type: command
     short-summary: Delete a resource group.
-    examples:
-        - name: Delete a resource group.
-          text: >
-            az group delete -n MyResourceGroup
+    long-summary: This also deletes all resources which are part of the resource group.
 """
 
 helps['group list'] = """
@@ -514,42 +469,22 @@ helps['group lock'] = """
 helps['group lock create'] = """
     type: command
     short-summary: Create a resource group lock.
-    examples:
-        - name: Create a read-only resource group level lock.
-          text: >
-            az group lock create --lock-type ReadOnly -n lockName -g MyResourceGroup
     """
 helps['group lock delete'] = """
     type: command
     short-summary: Delete a resource group lock.
-    examples:
-        - name: Delete a resource group lock
-          text: >
-            az group lock delete --name lockName -g MyResourceGroup
     """
 helps['group lock list'] = """
     type: command
     short-summary: List lock information in the resource-group.
-    examples:
-        - name: List out all locks on the resource group level
-          text: >
-            az group lock list -g MyResourceGroup
     """
 helps['group lock show'] = """
     type: command
     short-summary: Show the details of a resource group lock
-    examples:
-        - name: Show a resource group level lock
-          text: >
-            az group lock show -n lockname -g MyResourceGroup
     """
 helps['group lock update'] = """
     type: command
     short-summary: Update a resource group lock.
-    examples:
-        - name: Update a resource group lock with new notes and type
-          text: >
-            az group lock update --name lockName -g MyResourceGroup --notes newNotesHere --lock-type CanNotDelete
     """
 helps['provider'] = """
     type: group
@@ -618,10 +553,6 @@ helps['resource link delete'] = """
     type: command
     short-summary: Delete a link between resources.
     long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
-    examples:
-        - name: Delete link {LinkID}
-          text: >
-            az resource link delete --link-id {LinkID}
 """
 helps['resource link list'] = """
     type: command

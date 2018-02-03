@@ -34,43 +34,21 @@ helps['acr replication'] = """
 helps['acr check-name'] = """
     type: command
     short-summary: Checks if a container registry name is available for use.
-    examples:
-        - name: Check if a registry name already exists.
-          text: >
-            az acr check-name -n doesthisnameexist
 """
 
 helps['acr list'] = """
     type: command
-    short-summary: Lists all the container registries under the current subscription.
-    examples:
-        - name: List container registries and show the results in a table.
-          text: >
-            az acr list -o table
-        - name: List container registries in a resource group and show the results in a table.
-          text: >
-            az acr list -g MyResourceGroup -o table
+    short-summary: Lists available container registries for a subscription or resource group.
 """
 
 helps['acr create'] = """
     type: command
     short-summary: Creates a container registry.
-    examples:
-        - name: Create a managed container registry with the Standard SKU.
-          text: >
-            az acr create -n MyRegistry -g MyResourceGroup --sku Standard
-        - name: Create a container registry with a new storage account with the Classic SKU.
-          text: >
-            az acr create -n MyRegistry -g MyResourceGroup --sku Classic
 """
 
 helps['acr delete'] = """
     type: command
     short-summary: Deletes a container registry.
-    examples:
-        - name: Delete a container registry.
-          text: >
-            az acr delete -n MyRegistry
 """
 
 helps['acr show'] = """
@@ -100,34 +78,20 @@ helps['acr update'] = """
 helps['acr login'] = """
     type: command
     short-summary: Log in to a container registry through Docker.
-    examples:
-        - name: Log in to a container registry
-          text: >
-            az acr login -n MyRegistry
 """
 
 helps['acr show-usage'] = """
     type: command
     short-summary: Get the quota usages for a container registry.
-    examples:
-        - name: Get the quota usages for a container registry.
-          text: >
-            az acr show-usage -n MyRegistry
 """
 
 helps['acr credential show'] = """
     type: command
     short-summary: Get the login credentials for a container registry.
     examples:
-        - name: Get the login credentials for a container registry.
+        - name: Get the username and password used to log into a container registry.
           text: >
-            az acr credential show -n MyRegistry
-        - name: Get the username used to log in to a container registry.
-          text: >
-            az acr credential show -n MyRegistry --query username
-        - name: Get a password used to log in to a container registry.
-          text: >
-            az acr credential show -n MyRegistry --query passwords[0].value
+            az acr credential show -n MyRegistry --query {user:username, password:passwords[0].value}
 """
 
 helps['acr credential renew'] = """
@@ -142,28 +106,16 @@ helps['acr credential renew'] = """
 helps['acr repository list'] = """
     type: command
     short-summary: List repositories in a container registry.
-    examples:
-        - name: List repositories in a given container registry.
-          text:
-            az acr repository list -n MyRegistry
 """
 
 helps['acr repository show-tags'] = """
     type: command
     short-summary: Show tags for a repository in a container registry.
-    examples:
-        - name: Show tags of a repository in a container registry.
-          text:
-            az acr repository show-tags -n MyRegistry --repository MyRepository
 """
 
 helps['acr repository show-manifests'] = """
     type: command
     short-summary: Show manifests of a repository in a container registry.
-    examples:
-        - name: Show manifests of a repository in a container registry.
-          text:
-            az acr repository show-manifests -n MyRegistry --repository MyRepository
 """
 
 helps['acr repository delete'] = """
@@ -191,10 +143,6 @@ helps['acr repository delete'] = """
 helps['acr webhook list'] = """
     type: command
     short-summary: List all of the webhooks for a container registry.
-    examples:
-        - name: List webhooks and show the results in a table.
-          text: >
-            az acr webhook list -r MyRegistry -o table
 """
 
 helps['acr webhook create'] = """
@@ -212,19 +160,11 @@ helps['acr webhook create'] = """
 helps['acr webhook delete'] = """
     type: command
     short-summary: Delete a webhook from a container registry.
-    examples:
-        - name: Delete a webhook from a container registry.
-          text: >
-            az acr webhook delete -n MyWebhook -r MyRegistry
 """
 
 helps['acr webhook show'] = """
     type: command
     short-summary: Get the details of a webhook.
-    examples:
-        - name: Get the details of a webhook.
-          text: >
-            az acr webhook show -n MyWebhook -r MyRegistry
 """
 
 helps['acr webhook update'] = """
@@ -245,64 +185,36 @@ helps['acr webhook update'] = """
 helps['acr webhook get-config'] = """
     type: command
     short-summary: Get the service URI and custom headers for the webhook.
-    examples:
-        - name: Get the configuration information for a webhook.
-          text: >
-            az acr webhook get-config -n MyWebhook -r MyRegistry
 """
 
 helps['acr webhook ping'] = """
     type: command
     short-summary: Trigger a ping event for a webhook.
-    examples:
-        - name: Trigger a ping event for a webhook.
-          text: >
-            az acr webhook ping -n MyWebhook -r MyRegistry
 """
 
 helps['acr webhook list-events'] = """
     type: command
     short-summary: List recent events for a webhook.
-    examples:
-        - name: List recent events for a webhook.
-          text: >
-            az acr webhook list-events -n MyWebhook -r MyRegistry
 """
 
 helps['acr replication list'] = """
     type: command
     short-summary: List all of the replications for a container registry.
-    examples:
-        - name: List replications and show the results in a table.
-          text: >
-            az acr replication list -r MyRegistry -o table
 """
 
 helps['acr replication create'] = """
     type: command
     short-summary: Create a replication for a container registry.
-    examples:
-        - name: Create a replication for a container registry.
-          text: >
-            az acr replication create -r MyRegistry -l westus
 """
 
 helps['acr replication delete'] = """
     type: command
-    short-summary: Delete a replication from a container registry.
-    examples:
-        - name: Delete a replication from a container registry.
-          text: >
-            az acr replication delete -n MyReplication -r MyRegistry
+    short-summary: Delete a replication for a container registry.
 """
 
 helps['acr replication show'] = """
     type: command
     short-summary: Get the details of a replication.
-    examples:
-        - name: Get the details of a replication.
-          text: >
-            az acr replication show -n MyReplication -r MyRegistry
 """
 
 helps['acr replication update'] = """

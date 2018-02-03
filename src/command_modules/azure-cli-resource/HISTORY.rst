@@ -10,7 +10,7 @@ Release History
 
 2.0.21
 ++++++
-* Helpfile changes
+* Updated helpfile
 
 2.0.20
 ++++++

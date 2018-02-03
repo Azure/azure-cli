@@ -139,13 +139,7 @@ helps['lab vm claim'] = """
                 - name: --name -n
                   short-summary: Name of the virtual machine to claim.
             examples:
-                - name: Claim any available virtual machine in the lab.
-                  text: >
-                    az lab vm claim -g {ResourceGroup} --lab-name {LabName}
-                - name: Claim a specific virtual machine in the lab.
-                  text: >
-                    az lab vm claim -g {ResourceGroup} --lab-name {LabName} --name {VMName}
-                - name: Claim multiple virtual machines in the lab by IDs.
+                - name: Claim multiple virtual machines in the lab by ID.
                   text: |
                     az lab vm claim --ids \\
                         /subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/microsoft.devtestlab/labs/{LabName}/virtualmachines/{VMName1} \\
