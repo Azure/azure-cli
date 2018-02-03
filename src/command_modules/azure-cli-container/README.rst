@@ -30,8 +30,8 @@ Commands to create an Azure container group
         --command-line                : The command line to run when the container is started, e.g.
                                         '/bin/bash -c myscript.sh'.
         --cpu                         : The required number of CPU cores of the containers.  Default: 1.
-        --environment-variables -e    : A list of environment variable for the container. Space
-                                        separated values in 'key=value' format.
+        --environment-variables -e    : A list of environment variable for the container.
+                                        Space-separated values in 'key=value' format.
         --ip-address                  : The IP address type of the container group.  Allowed values:
                                         Public.
         --location -l                 : Location. You can configure the default location using `az
@@ -95,7 +95,7 @@ Commands to get an Azure container group
     Arguments
 
     Resource Id Arguments
-        --ids              : One or more resource IDs (space delimited). If provided, no other 'Resource
+        --ids              : One or more resource IDs (space-delimited). If provided, no other 'Resource
                             Id' arguments should be specified.
         --name -n          : The name of the container group.
         --resource-group -g: Name of resource group. You can configure the default group using `az
@@ -120,7 +120,7 @@ Commands to tail the logs of a Azure container group
         --container-name   : The container name to tail the logs.
 
     Resource Id Arguments
-        --ids              : One or more resource IDs (space delimited). If provided, no other 'Resource
+        --ids              : One or more resource IDs (space-delimited). If provided, no other 'Resource
                             Id' arguments should be specified.
         --name -n          : The name of the container group.
         --resource-group -g: Name of resource group. You can configure the default group using `az
@@ -145,7 +145,7 @@ Commands to delete an Azure container group
         --yes -y           : Do not prompt for confirmation.
 
     Resource Id Arguments
-        --ids              : One or more resource IDs (space delimited). If provided, no other 'Resource
+        --ids              : One or more resource IDs (space-delimited). If provided, no other 'Resource
                             Id' arguments should be specified.
         --name -n          : The name of the container group.
         --resource-group -g: Name of resource group. You can configure the default group using `az
