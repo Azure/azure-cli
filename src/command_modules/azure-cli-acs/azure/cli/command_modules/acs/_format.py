@@ -9,10 +9,10 @@ from distutils.version import StrictVersion
 from jmespath import compile as compile_jmes, functions, Options
 
 
-class CustomFunctions(functions.Functions):
+class CustomFunctions(functions.Functions):  # pylint: disable=too-few-public-methods
 
     @functions.signature({'types': ['array']})
-    def _func_sort_versions(self, s):
+    def _func_sort_versions(self, s):  # pylint: disable=no-self-use
         """Custom JMESPath `sort_versions` function that sorts an array of strings as software versions."""
         return sorted(s, key=StrictVersion)
 
