@@ -6,12 +6,12 @@
 from knack.help_files import helps
 
 
-helps['account subscriptiondefinition'] = """
+helps['subscriptiondefinition'] = """
     type: group
     short-summary: Manage Azure Subscription Definitions.
 """
 
-helps['account subscriptiondefinition create'] = """
+helps['subscriptiondefinition create'] = """
     type: group
     short-summary: Create a subscription definition.
 """

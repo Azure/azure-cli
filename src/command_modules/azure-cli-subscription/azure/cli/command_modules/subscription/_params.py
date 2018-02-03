@@ -14,4 +14,4 @@ def load_arguments(self, _):
 
     for scope in ['account subscriptiondefinition create', 'account subscriptiondefinition show']:
         with self.argument_context(scope) as c:
-            c.argument('subscription_definition_name', options_list=['--name', '-n'], help='Name of the test subscription definition.')
+            c.argument('subscription_definition_name', options_list=['--name', '-n'], help='Name of the subscription definition.')
