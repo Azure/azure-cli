@@ -99,6 +99,7 @@ def cli_cosmosdb_update(client,
     existing = client.get(resource_group_name, account_name)
 
     # Workaround until PATCH support for all properties
+    #pylint: disable=too-many-boolean-expressions
     if capabilities is not None:
         if locations or \
            default_consistency_level is not None or \
@@ -115,6 +116,7 @@ def cli_cosmosdb_update(client,
             return docdb_account
 
     # Workaround until PATCH support for all properties
+    #pylint: disable=too-many-boolean-expressions
     if tags is not None:
         if not locations and\
            default_consistency_level is None and\
