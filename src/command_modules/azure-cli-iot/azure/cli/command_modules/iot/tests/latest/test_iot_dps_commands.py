@@ -4,13 +4,14 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
 
 from ._test_utils import _create_test_cert, _delete_test_cert, _create_verification_cert
 import random
 
 
-class IoTDpsTest(ScenarioTest):
+# TODO: Convert back to ScenarioTest and re-record when #5213 is addressed.
+class IoTDpsTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
     def test_dps_lifecycle(self, group_name, group_location):
@@ -56,7 +57,10 @@ class IoTDpsTest(ScenarioTest):
         new_right = 'EnrollmentWrite'
 
         # Create access policy
-        self.cmd('az iot dps access-policy create -g {} --dps-name {} -n {} -r {}'.format(group_name, dps_name, policy_name, right))
+        self.cmd('az iot dps access-policy create -g {} --dps-name {} -n {} -r {}'.format(group_name, dps_name, policy_name, right), checks=[
+            self.check('keyName', policy_name),
+            self.check('rights', right)
+        ])
 
         # List access policy
         self.cmd('az iot dps access-policy list -g {} --dps-name {}'.format(group_name, dps_name), checks=[
@@ -72,7 +76,11 @@ class IoTDpsTest(ScenarioTest):
         ])
 
         # Create update policy
-        self.cmd('az iot dps access-policy update -g {} --dps-name {} -n {} -r {}'.format(group_name, dps_name, policy_name, new_right))
+        self.cmd('az iot dps access-policy update -g {} --dps-name {} -n {} -r {}'.format(group_name, dps_name, policy_name, new_right),
+                 checks=[
+                     self.check('keyName', policy_name),
+                     self.check('rights', new_right)
+        ])
 
         # Delete policy
         self.cmd('az iot dps access-policy delete -g {} --dps-name {} -n {}'.format(group_name, dps_name, policy_name))

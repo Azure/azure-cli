@@ -79,7 +79,7 @@ helps['iot dps update'] = """
     examples:
         - name: Update Allocation Policy to 'GeoLatency' of an Azure IoT Hub device provisioning service 'MyDps'
           text: >
-            az iot dps update --name MyDps --resource-group MyResourceGroup --set properties.allocationPolicy="GeoLatency"
+            az iot dps delete --name MyDps --resource-group MyResourceGroup --set properties.allocationPolicy="GeoLatency"
 """
 
 helps['iot dps access-policy'] = """
