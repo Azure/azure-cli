@@ -57,7 +57,7 @@ helps['lab vm create'] = """
                 - name: --artifacts
                   short-summary: JSON encoded array of artifacts to be applied. Use '@{file}' to load from a file.
                 - name: --tags
-                  short-summary: Space separated tags in `key[=value]` format.
+                  short-summary: Space-separated tags in `key[=value]` format.
                   long-summary: Tags may be cleared by assigning the empty value "" to them.
                 - name: --allow-claim
                   short-summary: Flag indicating if the VM should be created as claimable.
@@ -131,7 +131,7 @@ helps['lab vm claim'] = """
             short-summary: Claim a virtual machine from the Lab.
             parameters:
                 - name: --ids
-                  short-summary: Space separated list of VM IDs to claim.
+                  short-summary: Space-separated list of VM IDs to claim.
                 - name: --resource-group -g
                   short-summary: Name of lab's resource group.
                 - name: --lab-name
