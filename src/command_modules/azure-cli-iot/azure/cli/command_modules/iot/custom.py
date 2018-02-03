@@ -391,7 +391,7 @@ def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=No
 
 def _get_single_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type):
     access_policy = iot_hub_policy_get(client, hub_name, policy_name, resource_group_name)
-    server_suffix = _get_device_dns_suffix()
+    server_suffix = _get_device_dns_suffix(cmd.cli_ctx)
     conn_str_template = 'HostName={}{};SharedAccessKeyName={};SharedAccessKey={}'
     key = access_policy.secondary_key if key_type == KeyType.secondary else access_policy.primary_key
     return conn_str_template.format(hub_name, server_suffix, policy_name, key)
@@ -612,7 +612,7 @@ def _get_single_device_connection_string(client, hub_name, device_id, resource_g
     device = device_client.get(device_id)
     if device is None:
         raise CLIError("Device {} not found.".format(device_id))
-    server_suffix = _get_device_dns_suffix()
+    server_suffix = _get_device_dns_suffix(cmd.cli_ctx)
     conn_str_template = "HostName={0}{1};DeviceId={2};{3}={4}"
     keys = device.authentication.symmetric_key
     if any([keys.primary_key, keys.secondary_key]):
@@ -624,16 +624,16 @@ def _get_single_device_connection_string(client, hub_name, device_id, resource_g
         return conn_str_template.format(hub_name, server_suffix, device_id, 'x509', 'true')
 
 
-def _get_device_dns_suffix():
+def _get_device_dns_suffix(cli_ctx):
     # Allow dns suffix to be overridden by environment variable for testing purposes
     from os import getenv
     from azure.cli.core._profile import get_active_cloud
-    return getenv('_AZURE_CLI_IOT_DNS_SUFFIX', default=get_active_cloud().suffixes.iot_device_hostname)
+    return getenv('_AZURE_CLI_IOT_DNS_SUFFIX', default=get_active_cloud(cli_ctx).suffixes.iot_device_hostname)
 
 
 def _get_device_client(client, resource_group_name, hub_name, device_id):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    server_suffix = _get_device_dns_suffix()
+    server_suffix = _get_device_dns_suffix(cmd.cli_ctx)
     base_url = '{0}{1}'.format(hub_name, server_suffix)
     uri = '{0}/devices/{1}'.format(base_url, device_id)
     access_policy = iot_hub_policy_get(client, hub_name, 'iothubowner', resource_group_name)
