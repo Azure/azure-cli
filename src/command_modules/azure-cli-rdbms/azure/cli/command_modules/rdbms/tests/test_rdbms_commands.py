@@ -28,7 +28,7 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
                  name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='centralus',
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True,
-                 performance_tier='GeneralPurpose', family='Gen4', vcore=4):
+                 sku_name='GP_Gen4_2'):
         super(ServerPreparer, self).__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
         from azure.cli.testsdk import TestCli
         self.cli_ctx = TestCli()
@@ -40,21 +40,18 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
         self.admin_password = admin_password
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
-        self.performance_tier = performance_tier
-        self.family = family
-        self.capacity = vcore
+        self.sku_name = sku_name
+        
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
-        template = 'az {} server create -l {} -g {} -n {} -u {} -p {} --performance-tier {}  --family {} --vcore {}'
+        template = 'az {} server create -l {} -g {} -n {} -u {} -p {} --sku-name {}'
         execute(self.cli_ctx, template.format(self.engine_type,
                                               self.location,
                                               group, name,
                                               self.admin_user,
                                               self.admin_password,
-                                              self.performance_tier,
-                                              self.family,
-                                              self.capacity))
+                                              self.sku_name))
         return {self.parameter_name: name,
                 self.engine_parameter_name: self.engine_type}
 
@@ -84,10 +81,11 @@ class ServerMgmtScenarioTest(ScenarioTest):
                    self.create_random_name('azuredbclirestore', SERVER_NAME_MAX_LENGTH)]
         admin_login = 'cloudsa'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
-        edition = 'Basic'
-        old_cu = 1
-        new_cu = 2
+        edition = 'GeneralPurpose'
+        old_cu = 2
+        new_cu = 4
         family = 'Gen4'
+        skuname =  '{}_{}_{}'.format("GP", family, old_cu)
 
         rg = resource_group_1
         loc = 'centralus'
@@ -95,9 +93,9 @@ class ServerMgmtScenarioTest(ScenarioTest):
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {} '
-                 '--performance-tier {}  --family {} --vcore {} --tags key=1'
+                 '--sku-name {} --tags key=1'
                  .format(database_engine, rg, servers[0], loc,
-                         admin_login, admin_passwords[0], edition, family, old_cu),
+                         admin_login, admin_passwords[0], skuname),
                  checks=[
                      JMESPathCheck('name', servers[0]),
                      JMESPathCheck('resourceGroup', rg),

@@ -24,16 +24,13 @@ def load_arguments(self, _):
 
         with self.argument_context('{} server create'.format(command_group)) as c:
             c.expand('sku', engine.models.Sku)
-
+            c.ignore('size', 'family', 'capacity', 'tier')
             c.expand('properties', engine.models.ServerPropertiesForDefaultCreate)
             c.argument('administrator_login', required=True, arg_group='Authentication')
             c.argument('administrator_login_password', arg_group='Authentication')
 
             c.expand('parameters', engine.models.ServerForCreate)
             c.expand('storage_profile', engine.models.StorageProfile)
-            c.argument('capacity', options_list=['--vcore'], type=int, required=True, help='Number of vcore.')
-            c.argument('family', options_list=['--family'], arg_type=get_enum_type(['Gen4', 'Gen5']), required=True, help='Hardware generation.')
-            c.argument('tier', arg_type=get_enum_type(['Basic', 'GeneralPurpose', 'MemoryOptimized']), required=True, options_list=['--performance-tier'], help='The performance tier of the server.')
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False)
 
         with self.argument_context('{} server restore'. format(command_group)) as c:
@@ -62,7 +59,7 @@ def load_arguments(self, _):
 
     for scope in ['mysql server', 'postgres server']:
         with self.argument_context(scope) as c:
-            c.ignore('size', 'name')
+            c.ignore('size','family', 'capacity', 'tier')
 
             c.argument('server_name', options_list=['--name', '-n'], id_part='name', help='Name of the server.')
             c.argument('administrator_login', options_list=['--admin-user', '-u'])

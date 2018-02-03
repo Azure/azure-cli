@@ -53,7 +53,6 @@ def _restore_postgresql(cmd, client, resource_group_name, server_name, parameter
 
 def _server_update_custom_func(instance,
                                capacity=None,
-                               name=None,
                                storage_mb=None,
                                backup_retention_days=None,
                                administrator_login_password=None,
@@ -87,11 +86,9 @@ def _server_update_custom_func(instance,
     return params
 
 def _create_server_for_mysql(cmd, client, resource_group_name, server_name, parameters, **kwargs):
-     parameters.sku.name = _get_sku_name(parameters.sku.tier, parameters.sku.family, parameters.sku.capacity)
      return client.create_or_update(resource_group_name, server_name, parameters)
 
 def _create_server_for_pgsql(cmd, client, resource_group_name, server_name, parameters, **kwargs):
-     parameters.sku.name = _get_sku_name(parameters.sku.tier, parameters.sku.family, parameters.sku.capacity)
      return client.create(resource_group_name, server_name, parameters)
 
 def _get_sku_name(tier, family, capacity):
