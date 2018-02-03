@@ -150,8 +150,8 @@ def load_arguments(self, _):
         c.expand('parameters', LogProfileResource)
         c.argument('name', options_list=['--log-profile-resource-name'])
         c.argument('log_profile_name', options_list=['--name', '-n'])
-        c.argument('categories', nargs='+', help="Space separated categories of the logs.Some values are: 'Write', 'Delete', and/or 'Action.'")
-        c.argument('locations', nargs='+', help="Space separated list of regions for which Activity Log events should be stored.")
+        c.argument('categories', nargs='+', help="Space-separated categories of the logs.Some values are: 'Write', 'Delete', and/or 'Action.'")
+        c.argument('locations', nargs='+', help="Space-separated list of regions for which Activity Log events should be stored.")
     # endregion
 
     # region ActivityLog
