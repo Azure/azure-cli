@@ -4,6 +4,24 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
+from azure.mgmt.sql.models.sku import Sku
+
+# Important note: if cmd validator exists, then individual param validators will not b
+# executed. See C:\git\azure-cli\env\lib\site-packages\knack\invocation.py `def _validation`
+
+
+def validate_sku(cmd, namespace):
+    from azure.cli.core.util import CLIError
+
+    if namespace.sku:
+        namespace.sku = Sku(namespace.sku)
+
+    if namespace.tier:
+        if not namespace.sku:
+            raise CLIError('Temporary error: tier specified without sku')
+        namespace.sku.tier = tier
+
+    print(namespace.sku)
 
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
@@ -20,10 +38,7 @@ def validate_create_db(cmd, namespace):
             child_type_1='elasticPools',
             child_name_1=namespace.elastic_pool_id)
 
-    print(dir(namespace))
-    print(namespace.name)
-
-
+    validate_sku(cmd, namespace)
 
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.

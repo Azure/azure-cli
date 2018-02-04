@@ -338,6 +338,7 @@ class AzCliCommandInvoker(CommandInvoker):
         return kwargs
 
     def _validate_cmd_level(self, ns, cmd_validator):  # pylint: disable=no-self-use
+        print('_validate_cmd_level')
         if cmd_validator:
             cmd_validator(**self._build_kwargs(cmd_validator, ns))
         try:
@@ -346,6 +347,7 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
 
     def _validate_arg_level(self, ns, **_):  # pylint: disable=no-self-use
+        print('_validate_arg_level')
         for validator in getattr(ns, '_argument_validators', []):
             validator(**self._build_kwargs(validator, ns))
         try:

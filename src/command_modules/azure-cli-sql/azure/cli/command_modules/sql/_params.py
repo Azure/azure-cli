@@ -133,16 +133,19 @@ def _configure_db_create_params(
         return _patch_action
 
     arg_ctx.expand('parameters', Database)
-    #arg_ctx.ignore('sku')
-    arg_ctx.expand('sku', Sku,
-        prepatches={'name': set_options_list(['--service-objective', '--sku-todo'])},
-    )
 
-    # SKU-related arguments are handled in custom code
-    arg_ctx.argument('tier', options_list=['--tier', '--edition'])
+    # sku & tier parameters are processed in validate_sku function
+    arg_ctx.extra('sku',
+                  options_list=['--sku', '--service-objective'],
+                  required=False)
+    arg_ctx.extra('tier',
+                  options_list=['--tier', '--edition'],
+                  help='The edition of the database.')
 
-    # elastic-pool is converted to elastic-pool-id in validator
-    arg_ctx.extra('elastic_pool_id', options_list=['--elastic-pool'], help='The elastic pool name or resource id.')
+    # elastic-pool-id is processed in validate_create_db
+    arg_ctx.argument('elastic_pool_id',
+                     options_list=['--elastic-pool'],
+                     help='The elastic pool name or resource id.')
 
     # The following params are always ignored because their values are filled in by wrapper
     # functions.
@@ -214,11 +217,6 @@ def load_arguments(self, _):
                    ' sizes are supported (in addition to limitations being placed on'
                    ' each edition): 100MB, 500MB, 1GB, 5GB, 10GB, 20GB,'
                    ' 30GB, 150GB, 200GB, 500GB. If no unit is specified, defaults to bytes (B).')
-
-        # Adjust help text.
-        c.argument('tier',
-                   options_list=['--edition'],
-                   help='The edition of the database.')
 
     with self.argument_context('sql db create') as c:
         _configure_db_create_params(c, Engine.db, CreateMode.default)
