@@ -224,6 +224,9 @@ def db_create(
         database_name,
         server_name,
         resource_group_name,
+        elastic_pool_name=None,
+        sku=None,
+        tier=None,
         raw=False,
         **kwargs):
 
@@ -314,7 +317,7 @@ def db_create_replica(
     partner_resource_group_name = partner_resource_group_name or resource_group_name
 
     # Set create mode
-    kwargs['create_mode'] = CreateMode.online_secondary.value
+    kwargs['create_mode'] = CreateMode.secondary.value
 
     # Replica must have the same database name as the source db
     return _db_create_special(

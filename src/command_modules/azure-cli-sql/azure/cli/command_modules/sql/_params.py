@@ -14,6 +14,7 @@ from azure.mgmt.sql.models.elastic_pool import ElasticPool
 from azure.mgmt.sql.models.import_extension_request \
     import ImportExtensionRequest
 from azure.mgmt.sql.models.export_request import ExportRequest
+from azure.mgmt.sql.models.sku import Sku
 from azure.mgmt.sql.models.server import Server
 from azure.mgmt.sql.models.server_azure_ad_administrator import ServerAzureADAdministrator
 from azure.mgmt.sql.models.sql_management_client_enums import (
@@ -126,7 +127,25 @@ def _configure_db_create_params(
         raise ValueError('Engine {} does not support create mode {}'.format(engine, create_mode))
 
     # Include all Database params as a starting point. We will filter from there.
+    def set_options_list(options_list):
+        def _patch_action(xxx):
+            xxx.options_list = options_list
+        return _patch_action
+
     arg_ctx.expand('parameters', Database)
+    arg_ctx.ignore('sku')
+    # arg_ctx.expand('sku', Sku,
+    #     prepatches={'name': set_options_list(['--sku-name'])}
+    # )
+
+    # SKU-related arguments are handled in custom code
+    arg_ctx.argument('sku',
+                     options_list=['--sku', '--service-objective'])
+    arg_ctx.argument('tier',
+                     options_list=['--tier', '--edition'])
+
+    # Elastic pool ID is handled in custom code
+    arg_ctx.ignore('elastic_pool_id')
 
     # The following params are always ignored because their values are filled in by wrapper
     # functions.
@@ -136,9 +155,8 @@ def _configure_db_create_params(
     # be not exposed for now.
     arg_ctx.ignore('read_scale')
 
-    # Service objective id is not user-friendly and won't be exposed.
-    # Better to use service objective name instead.
-    arg_ctx.ignore('requested_service_objective_id')
+    # TODO: Determine what to do with this
+    arg_ctx.ignore('catalog_collation')
 
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
@@ -148,11 +166,16 @@ def _configure_db_create_params(
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
         arg_ctx.ignore('restore_point_in_time', 'source_database_deletion_date')
 
-    # 'collation', 'edition', and 'max_size_bytes' are ignored (or rejected) when creating a copy
+    # Various restore-related params whose restore mode are not yet supported
+    arg_ctx.ignore('recoverable_database_id',
+                   'recovery_services_recovery_point_id',
+                   'restorable_dropped_database_id',
+                   'long_term_retention_backup_resource_id')
+
+    # 'collation', 'tier', and 'max_size_bytes' are ignored (or rejected) when creating a copy
     # or secondary because their values are determined by the source db.
-    if create_mode in [CreateMode.copy, CreateMode.non_readable_secondary,
-                       CreateMode.online_secondary]:
-        arg_ctx.ignore('collation', 'edition', 'max_size_bytes')
+    if create_mode in [CreateMode.copy, CreateMode.secondary]:
+        arg_ctx.ignore('collation', 'tier', 'max_size_bytes')
 
     # collation and max_size_bytes are ignored when restoring because their values are determined by
     # the source db.
@@ -164,11 +187,7 @@ def _configure_db_create_params(
         arg_ctx.ignore('elastic_pool_name')
 
         # Edition is always 'DataWarehouse'
-        arg_ctx.ignore('edition')
-
-    # recovery_services_recovery_point_resource_id is only for long-term-retention restore
-    if create_mode != CreateMode.restore_long_term_retention_backup:
-        arg_ctx.ignore('recovery_services_recovery_point_resource_id')
+        arg_ctx.ignore('tier')
 
 
 # pylint: disable=too-many-statements
@@ -200,7 +219,7 @@ def load_arguments(self, _):
                    ' 30GB, 150GB, 200GB, 500GB. If no unit is specified, defaults to bytes (B).')
 
         # Adjust help text.
-        c.argument('edition',
+        c.argument('tier',
                    options_list=['--edition'],
                    help='The edition of the database.')
 
@@ -256,7 +275,7 @@ def load_arguments(self, _):
                    ' Must match the deleted time of a deleted database in the same server.'
                    ' Either --time or --deleted-time (or both) must be specified.')
 
-        c.argument('edition',
+        c.argument('tier',
                    help='The edition for the new database.')
         c.argument('elastic_pool_name',
                    help='Name of the elastic pool to create the new database in.')
@@ -284,7 +303,7 @@ def load_arguments(self, _):
         # We could used get_enum_type here, but that will validate the inputs which means there
         # will be no way to query for new editions/service objectives that are made available after
         # this version of CLI is released.
-        c.argument('edition',
+        c.argument('tier',
                    arg_group=search_arg_group,
                    help='Edition to search for. If unspecified, all editions are shown.')
         c.argument('service_objective',
@@ -354,7 +373,7 @@ def load_arguments(self, _):
     #           sql db replica
     #####
     with self.argument_context('sql db replica create') as c:
-        _configure_db_create_params(c, Engine.db, CreateMode.online_secondary)
+        _configure_db_create_params(c, Engine.db, CreateMode.secondary)
 
         c.argument('elastic_pool_name',
                    options_list=['--elastic-pool'],
@@ -580,7 +599,7 @@ def load_arguments(self, _):
         # We could used 'arg_type=get_enum_type' here, but that will validate the inputs which means there
         # will be no way to query for new editions that are made available after
         # this version of CLI is released.
-        c.argument('edition',
+        c.argument('tier',
                    arg_group=search_arg_group,
                    help='Edition to search for. If unspecified, all editions are shown.')
         c.argument('dtu',

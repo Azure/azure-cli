@@ -862,7 +862,7 @@ class AzArgumentContext(ArgumentsContext):
         else:
             super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
 
-    def expand(self, dest, model_type, group_name=None, patches=None):
+    def expand(self, dest, model_type, group_name=None, patches=None, prepatches=None):
         # TODO:
         # two privates symbols are imported here. they should be made public or this utility class
         # should be moved into azure.cli.core
@@ -874,6 +874,9 @@ class AzArgumentContext(ArgumentsContext):
 
         if not patches:
             patches = dict()
+
+        if not prepatches:
+            prepatches = dict()
 
         # fetch the documentation for model parameters first. for models, which are the classes
         # derive from msrest.serialization.Model and used in the SDK API to carry parameters, the
@@ -901,7 +904,11 @@ class AzArgumentContext(ArgumentsContext):
 
         expanded_arguments = []
         for name, arg in extract_args_from_signature(model_type.__init__, excluded_params=EXCLUDED_PARAMS):
-            arg = arg.type
+            if name in prepatches:
+                print('prepatching ', name)
+                prepatches[name](arg)
+
+            arg = arg.type # <-- WHY???
             if name in parameter_docs:
                 arg.settings['help'] = parameter_docs[name]
 
