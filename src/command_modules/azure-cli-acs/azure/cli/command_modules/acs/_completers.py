@@ -10,19 +10,23 @@ from azure.cli.core.decorators import Completer
 @Completer
 def get_k8s_upgrades_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     """Return Kubernetes versions available for upgrading an existing cluster."""
-    location = _get_location(cmd.cli_ctx, namespace)
-    return get_k8s_upgrades(cmd.cli_ctx, location, None, None)
+    resource_group = getattr(namespace, 'resource_group_name', None)
+    name = getattr(namespace, 'name', None)
+    return get_k8s_upgrades(cmd.cli_ctx, resource_group, name) if resource_group and name else None
 
 
-def get_k8s_upgrades(cli_ctx, location, resource_group, name):
-    return ['get_k8s_upgrades', 'NOT', 'IMPLEMENTED']
+def get_k8s_upgrades(cli_ctx, resource_group, name):
+    from ._client_factory import cf_managed_clusters
+
+    results = cf_managed_clusters(cli_ctx).get_upgrade_profile(resource_group, name).as_dict()
+    return results['control_plane_profile']['upgrades']
 
 
 @Completer
 def get_k8s_versions_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     """Return Kubernetes versions available for provisioning a new cluster."""
     location = _get_location(cmd.cli_ctx, namespace)
-    return get_k8s_versions(cmd.cli_ctx, location)
+    return get_k8s_versions(cmd.cli_ctx, location) if location else None
 
 
 def get_k8s_versions(cli_ctx, location):
@@ -57,9 +61,9 @@ def _get_location(cli_ctx, namespace):
     finally by the subscription if neither argument was provided.
     """
     location = None
-    if namespace.location:
+    if getattr(namespace, 'location', None):
         location = namespace.location
-    elif namespace.resource_group_name:
+    elif getattr(namespace, 'resource_group_name', None):
         location = _get_location_from_resource_group(cli_ctx, namespace.resource_group_name)
     if not location:
         location = get_one_of_subscription_locations(cli_ctx)
