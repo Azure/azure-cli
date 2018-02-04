@@ -14,7 +14,10 @@ class CustomFunctions(functions.Functions):  # pylint: disable=too-few-public-me
     @functions.signature({'types': ['array']})
     def _func_sort_versions(self, s):  # pylint: disable=no-self-use
         """Custom JMESPath `sort_versions` function that sorts an array of strings as software versions."""
-        return sorted(s, key=StrictVersion)
+        try:
+            return sorted(s, key=StrictVersion)
+        except (TypeError, ValueError):  # if it wasn't sortable, return the input so the pipeline continues
+            return s
 
 
 def aks_list_table_format(results):
@@ -48,7 +51,7 @@ def aks_upgrades_table_format(result):
         resourceGroup: resourceGroup,
         masterVersion: controlPlaneProfile.kubernetesVersion || `unknown`,
         nodePoolVersion: agentPoolProfiles[0].kubernetesVersion || `unknown`,
-        upgrades: agentPoolProfiles[0].upgrades | sort_versions(@) | join(`, `, @) || `None available`
+        upgrades: controlPlaneProfile.upgrades || [`None available`] | sort_versions(@) | join(`, `, @)
     }""")
     # use ordered dicts so headers are predictable
     return parsed.search(result, Options(dict_cls=OrderedDict, custom_functions=CustomFunctions()))
@@ -58,7 +61,7 @@ def aks_versions_table_format(result):
     """Format get-versions results as a summary for display with "-o table"."""
     parsed = compile_jmes("""orchestrators[].{
         kubernetesVersion: orchestratorVersion,
-        upgradesAvailable: upgrades[].orchestratorVersion | sort_versions(@) | join(`, `, @) || `None available`
+        upgrades: upgrades[].orchestratorVersion || [`None available`] | sort_versions(@) | join(`, `, @)
     }""")
     # use ordered dicts so headers are predictable
     results = parsed.search(result, Options(dict_cls=OrderedDict, custom_functions=CustomFunctions()))

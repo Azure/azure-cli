@@ -167,7 +167,9 @@ helps['aks create'] = """
           short-summary: Size in GB of the OS disk for each node in the node pool.
         - name: --kubernetes-version -k
           type: string
-          short-summary: Version of Kubernetes to use for creating the cluster, such as "1.7.12" or "1.8.6".
+          short-summary: Version of Kubernetes to use for creating the cluster, such as "1.7.12" or "1.8.7".
+          populator-commands:
+          - "`az aks get-versions`"
         - name: --ssh-key-value
           type: string
           short-summary: Public key path or key contents to install on node VMs for SSH access. For example,
@@ -179,7 +181,7 @@ helps['aks create'] = """
         - name: Create a Kubernetes cluster with an existing SSH public key.
           text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
         - name: Create a Kubernetes cluster with a specific version.
-          text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.8.1
+          text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.8.7
         - name: Create a Kubernetes cluster with a larger node pool.
           text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
 """.format(sp_cache=AKS_SERVICE_PRINCIPAL_CACHE)
@@ -307,9 +309,9 @@ helps['aks upgrade'] = """
     parameters:
         - name: --kubernetes-version -k
           type: string
-          short-summary: Version of Kubernetes to upgrade the cluster to, such as "1.7.7" or "1.8.2".
+          short-summary: Version of Kubernetes to upgrade the cluster to, such as "1.7.12" or "1.8.7".
           populator-commands:
-          - "`az aks get-versions`"
+          - "`az aks get-upgrades`"
 """
 
 helps['aks wait'] = """
