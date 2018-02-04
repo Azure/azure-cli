@@ -24,7 +24,6 @@ def validate_sku(cmd, namespace):
     print(namespace.sku)
 
 
-# Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
 def validate_create_db(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
 
