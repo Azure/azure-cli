@@ -397,7 +397,7 @@ def _get_single_hub_connection_string(client, hub_name, resource_group_name, pol
     return conn_str_template.format(hub_name, server_suffix, policy_name, key)
 
 
-def iot_hub_sku_list(client, hub_name, resource_group_name=None):
+def iot_hub_sku_list(cmd, client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     return client.iot_hub_resource.get_valid_skus(resource_group_name, hub_name)
 
