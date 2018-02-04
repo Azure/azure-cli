@@ -144,8 +144,8 @@ def _configure_db_create_params(
     arg_ctx.argument('tier',
                      options_list=['--tier', '--edition'])
 
-    # Elastic pool ID is handled in custom code
-    arg_ctx.ignore('elastic_pool_id')
+    # elastic-pool is converted to elastic-pool-id in validator
+    arg_ctx.extra('elastic_pool_name', options_list=['--elastic-pool'], help='The elastic pool name')
 
     # The following params are always ignored because their values are filled in by wrapper
     # functions.

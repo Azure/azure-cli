@@ -26,7 +26,10 @@ from ._util import (
     get_sql_subscription_usages_operations,
     get_sql_virtual_network_rules_operations,
 )
-from ._validators import validate_subnet
+from ._validators import (
+    validate_create_db,
+    validate_subnet
+)
 
 
 # pylint: disable=line-too-long,too-many-statements
@@ -65,7 +68,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations.databases_operations#DatabasesOperations.{}',
         client_factory=get_sql_databases_operations)
     with self.command_group('sql db', database_operations, client_factory=get_sql_databases_operations) as g:
-        g.custom_command('create', 'db_create', no_wait_param='raw')
+        g.custom_command('create', 'db_create', no_wait_param='raw', validator=validate_create_db)
         g.custom_command('copy', 'db_copy', no_wait_param='raw')
         g.custom_command('restore', 'db_restore', no_wait_param='raw')
         g.custom_command('rename', 'db_rename')
