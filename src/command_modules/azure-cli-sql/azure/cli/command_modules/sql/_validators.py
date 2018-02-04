@@ -10,13 +10,7 @@ from azure.cli.core.util import CLIError
 def validate_create_db(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
 
-    elastic_pool_id = namespace.virtual_network_subnet_id
-    elastic_pool_id_is_id = is_valid_resource_id(elastic_pool_id)
-    elastic_pool_name = namespace.elastic_pool_name
-
-    if is_valid_resource_id(elastic_pool_id) and not elastic_pool_name:
-        pass
-    elif elastic_pool_name and not elastic_pool_id:
+    if not is_valid_resource_id(namespace.elastic_pool_id):
         namespace.elastic_pool_id = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
             resource_group=namespace.resource_group_name,
@@ -24,10 +18,11 @@ def validate_create_db(cmd, namespace):
             type='servers',
             name=namespace.server_name,
             child_type_1='elasticPools',
-            child_name_1=elastic_pool_name)
-    else:
-        raise CLIError('incorrect usage: [--elastic-pool-id ID | --elastic-pool NAME]')
-    delattr(namespace, 'elastic_pool_name')
+            child_name_1=namespace.elastic_pool_id)
+
+    print(dir(namespace))
+    print(namespace.name)
+
 
 
 

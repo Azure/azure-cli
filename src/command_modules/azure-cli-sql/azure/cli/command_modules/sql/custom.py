@@ -224,9 +224,6 @@ def db_create(
         database_name,
         server_name,
         resource_group_name,
-        elastic_pool_name=None,
-        sku=None,
-        tier=None,
         raw=False,
         **kwargs):
 

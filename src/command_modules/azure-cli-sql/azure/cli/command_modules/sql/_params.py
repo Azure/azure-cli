@@ -133,19 +133,16 @@ def _configure_db_create_params(
         return _patch_action
 
     arg_ctx.expand('parameters', Database)
-    arg_ctx.ignore('sku')
-    # arg_ctx.expand('sku', Sku,
-    #     prepatches={'name': set_options_list(['--sku-name'])}
-    # )
+    #arg_ctx.ignore('sku')
+    arg_ctx.expand('sku', Sku,
+        prepatches={'name': set_options_list(['--service-objective', '--sku-todo'])},
+    )
 
     # SKU-related arguments are handled in custom code
-    arg_ctx.argument('sku',
-                     options_list=['--sku', '--service-objective'])
-    arg_ctx.argument('tier',
-                     options_list=['--tier', '--edition'])
+    arg_ctx.argument('tier', options_list=['--tier', '--edition'])
 
     # elastic-pool is converted to elastic-pool-id in validator
-    arg_ctx.extra('elastic_pool_name', options_list=['--elastic-pool'], help='The elastic pool name')
+    arg_ctx.extra('elastic_pool_id', options_list=['--elastic-pool'], help='The elastic pool name or resource id.')
 
     # The following params are always ignored because their values are filled in by wrapper
     # functions.
