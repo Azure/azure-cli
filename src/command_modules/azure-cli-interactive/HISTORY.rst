@@ -6,6 +6,7 @@ Release History
 0.3.16
 ++++++
 * Fix issue where user is prompted to login when using interactive mode in Cloud Shell.
+* Fixed regression with missing parameter completions.
 
 0.3.15
 ++++++
