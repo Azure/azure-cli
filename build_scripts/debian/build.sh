@@ -29,7 +29,7 @@ tmp_pkg_dir=$(mktemp -d)
 working_dir=$(mktemp -d)
 cd $working_dir
 source_dir=$local_repo
-deb_file=$local_repo/../azure-cli_${CLI_VERSION}-1_all.deb
+deb_file=$local_repo/../azure-cli_${CLI_VERSION}-${CLI_VERSION_REVISION:=1}_all.deb
 az_completion_file=$source_dir/az.completion
 # clean up old build output
 if [ -d "$source_dir/debian" ]
@@ -73,7 +73,7 @@ $debian_directory_creator $cli_debian_dir_tmp $az_completion_file $source_dir
 cp -r $cli_debian_dir_tmp/* $source_dir/debian
 cd $source_dir
 dpkg-buildpackage -us -uc
-echo "The archive is available at $working_dir/azure-cli_${CLI_VERSION}-1_all.deb"
+echo "The archive is available at $working_dir/azure-cli_${CLI_VERSION}-${CLI_VERSION_REVISION:=1}_all.deb"
 cp $deb_file ${BUILD_ARTIFACT_DIR}
 echo "The archive has also been copied to ${BUILD_ARTIFACT_DIR}"
 echo "Done."
