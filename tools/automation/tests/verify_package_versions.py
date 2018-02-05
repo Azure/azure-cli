@@ -30,13 +30,15 @@ def contains_no_plus_dev(mod_version):
         return False
     return True
 
+
 def changes_require_version_bump(mod_name, mod_version, mod_path):
     revision_range = os.environ.get('TRAVIS_COMMIT_RANGE', None)
     if revision_range:
         cmd = ["git", "log", "--pretty=format:* %s", revision_range, "--", mod_path, ":(exclude)*/tests/*"]
         changes = subprocess.check_output(cmd, cwd=mod_path, universal_newlines=True).strip()
         if changes and is_available_on_pypi(mod_name, mod_version):
-            print("There are changes to {} and the current version {} is already available on PyPI! Bump the version.".format(mod_name, mod_version))
+            print("There are changes to {} and the current version {} is already available on PyPI! "
+                  "Bump the version.".format(mod_name, mod_version))
             print("Changes are as follows:")
             print(changes)
             return False
@@ -46,8 +48,10 @@ def changes_require_version_bump(mod_name, mod_version, mod_path):
         # There's no revision range so we'll ignore this check
         return True
 
+
 def check_package_version(mod_name, mod_path):
-    mod_version = subprocess.check_output('python setup.py --version'.split(), cwd=mod_path, universal_newlines=True).strip()
+    mod_version = subprocess.check_output('python setup.py --version'.split(), cwd=mod_path,
+                                          universal_newlines=True).strip()
     checks = []
     if mod_name in ['azure-cli', 'azure-cli-core']:
         checks.append(is_unreleased_version(mod_name, mod_version))

@@ -4,66 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 
-from collections import OrderedDict
-import json
-
 from enum import Enum
 
 from azure.cli.core.util import b64encode
-from azure.cli.core.profiles import get_api_version, supported_api_version, ResourceType
-
-
-class ArmTemplateBuilder(object):
-
-    def __init__(self):
-        template = OrderedDict()
-        template['$schema'] = \
-            'https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#'
-        template['contentVersion'] = '1.0.0.0'
-        template['parameters'] = {}
-        template['variables'] = {}
-        template['resources'] = []
-        template['outputs'] = {}
-        self.template = template
-
-    def add_resource(self, resource):
-        self.template['resources'].append(resource)
-
-    def add_variable(self, key, value):
-        self.template['variables'][key] = value
-
-    def add_parameter(self, key, value):
-        self.template['parameters'][key] = value
-
-    def add_id_output(self, key, provider, property_type, property_name):
-        new_output = {
-            key: {
-                'type': 'string',
-                'value': "[resourceId('{}/{}', '{}')]".format(
-                    provider, property_type, property_name)
-            }
-        }
-        self.template['outputs'].update(new_output)
-
-    def add_output(self, key, property_name, provider=None, property_type=None,
-                   output_type='string', path=None):
-
-        if provider and property_type:
-            value = "[reference(resourceId('{provider}/{type}', '{property}'),providers('{provider}', '{type}').apiVersions[0])".format(  # pylint: disable=line-too-long
-                provider=provider, type=property_type, property=property_name)
-        else:
-            value = "[reference('{}')".format(property_name)
-        value = '{}.{}]'.format(value, path) if path else '{}]'.format(value)
-        new_output = {
-            key: {
-                'type': output_type,
-                'value': value
-            }
-        }
-        self.template['outputs'].update(new_output)
-
-    def build(self):
-        return json.loads(json.dumps(self.template))
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.commands.arm import ArmTemplateBuilder
 
 
 # pylint: disable=too-few-public-methods
@@ -115,7 +60,7 @@ def build_output_deployment_resource(key, property_name, property_provider, prop
     return deployment
 
 
-def build_storage_account_resource(name, location, tags, sku):
+def build_storage_account_resource(_, name, location, tags, sku):
     storage_account = {
         'type': 'Microsoft.Storage/storageAccounts',
         'name': name,
@@ -128,14 +73,14 @@ def build_storage_account_resource(name, location, tags, sku):
     return storage_account
 
 
-def build_public_ip_resource(name, location, tags, address_allocation, dns_name, sku, zone):
+def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
         public_ip_properties['dnsSettings'] = {'domainNameLabel': dns_name}
 
     public_ip = {
-        'apiVersion': get_api_version(ResourceType.MGMT_NETWORK),
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_NETWORK),
         'type': 'Microsoft.Network/publicIPAddresses',
         'name': name,
         'location': location,
@@ -143,14 +88,18 @@ def build_public_ip_resource(name, location, tags, address_allocation, dns_name,
         'dependsOn': [],
         'properties': public_ip_properties
     }
-    if zone:
+
+    # when multiple zones are provided(through a x-zone scale set), we don't propagate to PIP becasue it doesn't
+    # support x-zone; rather we will rely on the Standard LB to work with such scale sets
+    if zone and len(zone) == 1:
         public_ip['zones'] = zone
-    if sku and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
+
+    if sku and cmd.supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         public_ip['sku'] = {'name': sku}
     return public_ip
 
 
-def build_nic_resource(name, location, tags, vm_name, subnet_id, private_ip_address=None,
+def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_address=None,
                        nsg_id=None, public_ip_id=None, application_security_groups=None):
 
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
@@ -195,7 +144,7 @@ def build_nic_resource(name, location, tags, vm_name, subnet_id, private_ip_addr
     return nic
 
 
-def build_nsg_resource(name, location, tags, nsg_rule_type):
+def build_nsg_resource(_, name, location, tags, nsg_rule_type):
 
     rule_name = 'rdp' if nsg_rule_type == 'rdp' else 'default-allow-ssh'
     rule_dest_port = '3389' if nsg_rule_type == 'rdp' else '22'
@@ -230,7 +179,7 @@ def build_nsg_resource(name, location, tags, nsg_rule_type):
     return nsg
 
 
-def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None,
+def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None,
                         subnet_prefix=None, dns_servers=None):
     vnet = {
         'name': name,
@@ -257,7 +206,7 @@ def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None,
     return vnet
 
 
-def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition_id,
+def build_msi_role_assignment(cmd, vm_vmss_name, vm_vmss_resource_id, role_definition_id,
                               role_assignment_guid, identity_scope, is_vm=True):
     from msrestazure.tools import parse_resource_id
     from azure.mgmt.authorization import AuthorizationManagementClient
@@ -272,7 +221,7 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
 
     # pylint: disable=line-too-long
     msi_rp_api_version = '2015-08-31-PREVIEW'
-    authorization_api_version = get_mgmt_service_client(AuthorizationManagementClient).api_version
+    authorization_api_version = get_mgmt_service_client(cmd.cli_ctx, AuthorizationManagementClient).api_version
     return {
         'name': name,
         'type': assignment_type,
@@ -289,12 +238,12 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
     }
 
 
-def build_vm_msi_extension(vm_name, location, role_assignment_guid, port, is_linux, extension_version):
+def build_vm_msi_extension(cmd, vm_name, location, role_assignment_guid, port, is_linux, extension_version):
     ext_type_name = 'ManagedIdentityExtensionFor' + ('Linux' if is_linux else 'Windows')
     return {
         'type': 'Microsoft.Compute/virtualMachines/extensions',
         'name': vm_name + '/' + ext_type_name,
-        'apiVersion': get_api_version(ResourceType.MGMT_COMPUTE),
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_extensions'),
         'location': location,
         'dependsOn': [role_assignment_guid or 'Microsoft.Compute/virtualMachines/' + vm_name],
         'properties': {
@@ -308,7 +257,7 @@ def build_vm_msi_extension(vm_name, location, role_assignment_guid, port, is_lin
 
 
 def build_vm_resource(  # pylint: disable=too-many-locals
-        name, location, tags, size, storage_profile, nics, admin_username,
+        cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
         os_caching=None, data_caching=None, storage_sku=None,
@@ -324,7 +273,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         }
 
         if admin_password:
-            os_profile['adminPassword'] = admin_password
+            os_profile['adminPassword'] = "[parameters('adminPassword')]"
 
         if custom_data:
             os_profile['customData'] = b64encode(custom_data)
@@ -439,9 +388,8 @@ def build_vm_resource(  # pylint: disable=too-many-locals
     if license_type:
         vm_properties['licenseType'] = license_type
 
-    vm_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
     vm = {
-        'apiVersion': vm_api_version,
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
         'type': 'Microsoft.Compute/virtualMachines',
         'name': name,
         'location': location,
@@ -528,7 +476,7 @@ def _build_frontend_ip_config(name, public_ip_id=None, private_ip_address=None,
     return frontend_ip_config
 
 
-def build_application_gateway_resource(name, location, tags, backend_pool_name, backend_port, frontend_ip_name,
+def build_application_gateway_resource(_, name, location, tags, backend_pool_name, backend_port, frontend_ip_name,
                                        public_ip_id, subnet_id, gateway_subnet_id,
                                        private_ip_address, private_ip_allocation, sku, capacity):
     frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
@@ -619,7 +567,7 @@ def build_application_gateway_resource(name, location, tags, backend_pool_name, 
     return ag
 
 
-def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_pool_name,
+def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, nat_pool_name,
                                  backend_port, frontend_ip_name, public_ip_id, subnet_id,
                                  private_ip_address, private_ip_allocation, sku):
     lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(name)
@@ -656,16 +604,34 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_po
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': get_api_version(ResourceType.MGMT_NETWORK),
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_NETWORK),
         'dependsOn': [],
         'properties': lb_properties
     }
-    if sku and supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
+    if sku and cmd.supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
         lb['sku'] = {'name': sku}
+        # LB rule is the way to enable SNAT so outbound connections are possible
+        if sku.lower() == 'standard':
+            lb_properties['loadBalancingRules'] = [{
+                "name": "LBRule",
+                "properties": {
+                    "frontendIPConfiguration": {
+                        'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(lb_id, frontend_ip_name)
+                    },
+                    "backendAddressPool": {
+                        "id": "[concat({}, '/backendAddressPools/', '{}')]".format(lb_id, backend_pool_name)
+                    },
+                    "protocol": "tcp",
+                    "frontendPort": 80,
+                    "backendPort": 80,
+                    "enableFloatingIP": False,
+                    "idleTimeoutInMinutes": 5,
+                }
+            }]
     return lb
 
 
-def build_vmss_storage_account_pool_resource(loop_name, location, tags, storage_sku):
+def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, storage_sku):
 
     storage_resource = {
         'type': 'Microsoft.Storage/storageAccounts',
@@ -685,7 +651,7 @@ def build_vmss_storage_account_pool_resource(loop_name, location, tags, storage_
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
-def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
+def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         public_ip_per_vm, vm_domain_name, dns_servers, nsg, accelerated_networking,
                         admin_username, authentication_type, storage_profile, os_disk_name,
@@ -693,7 +659,8 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
-                        single_placement_group=None, custom_data=None, secrets=None, license_type=None, zones=None):
+                        single_placement_group=None, custom_data=None, secrets=None, license_type=None,
+                        zones=None, priority=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -773,8 +740,8 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         'computerNamePrefix': naming_prefix,
         'adminUsername': admin_username
     }
-    if authentication_type == 'password':
-        os_profile['adminPassword'] = admin_password
+    if authentication_type == 'password' and admin_password:
+        os_profile['adminPassword'] = "[parameters('adminPassword')]"
     else:
         os_profile['linuxConfiguration'] = {
             'disablePasswordAuthentication': True,
@@ -805,7 +772,7 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         }
     }
 
-    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    if cmd.supported_api_version(min_api='2017-03-30', operation_group='virtual_machine_scale_sets'):
         if dns_servers:
             nic_config['properties']['dnsSettings'] = {'dnsServers': dns_servers}
 
@@ -832,19 +799,21 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
     if license_type:
         vmss_properties['virtualMachineProfile']['licenseType'] = license_type
 
-    if health_probe and supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2017-03-30'):
+    if health_probe and cmd.supported_api_version(min_api='2017-03-30', operation_group='virtual_machine_scale_sets'):
         vmss_properties['virtualMachineProfile']['networkProfile']['healthProbe'] = {'id': health_probe}
 
-    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
+    if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='virtual_machine_scale_sets'):
         vmss_properties['singlePlacementGroup'] = single_placement_group
 
-    vmss_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
+    if priority and cmd.supported_api_version(min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
+        vmss_properties['virtualMachineProfile']['priority'] = priority
+
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': vmss_api_version,
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
         'dependsOn': [],
         'sku': {
             'name': vm_sku,
@@ -857,21 +826,20 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
     return vmss
 
 
-def build_av_set_resource(name, location, tags,
+def build_av_set_resource(cmd, name, location, tags,
                           platform_update_domain_count, platform_fault_domain_count, unmanaged):
-    av_set_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
     av_set = {
         'type': 'Microsoft.Compute/availabilitySets',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': av_set_api_version,
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='availability_sets'),
         "properties": {
             'platformFaultDomainCount': platform_fault_domain_count,
         }
     }
 
-    if supported_api_version(ResourceType.MGMT_COMPUTE, '2016-04-30-preview'):
+    if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='availability_sets'):
         av_set['sku'] = {
             'name': 'Classic' if unmanaged else 'Aligned'
         }

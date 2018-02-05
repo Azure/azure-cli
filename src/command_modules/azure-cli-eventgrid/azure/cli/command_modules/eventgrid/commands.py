@@ -5,40 +5,49 @@
 
 # pylint: disable=line-too-long
 
-from azure.cli.core.commands import cli_command
-from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
+from azure.cli.core.commands import CliCommandType
 from ._client_factory import (topics_factory, event_subscriptions_factory, topic_types_factory)
 
-if not supported_api_version(PROFILE_TYPE, max_api='2017-03-09-profile'):
-    topics_mgmt_path = 'azure.mgmt.eventgrid.operations.topics_operations#'
-    topic_types_mgmt_path = 'azure.mgmt.eventgrid.operations.topic_types_operations#'
-    custom_path = 'azure.cli.command_modules.eventgrid.custom#'
 
-    cli_command(__name__, 'eventgrid topic create', topics_mgmt_path + 'TopicsOperations.create_or_update', topics_factory)
-    cli_command(__name__, 'eventgrid topic show', topics_mgmt_path + 'TopicsOperations.get', topics_factory)
-    cli_command(__name__, 'eventgrid topic key list', topics_mgmt_path + 'TopicsOperations.list_shared_access_keys', topics_factory)
-    cli_command(__name__, 'eventgrid topic key regenerate', topics_mgmt_path + 'TopicsOperations.regenerate_key', topics_factory)
-    cli_command(__name__, 'eventgrid topic delete', topics_mgmt_path + 'TopicsOperations.delete', topics_factory)
-    cli_command(__name__, 'eventgrid topic list', custom_path + 'cli_topic_list', topics_factory)
+def load_command_table(self, _):
+    topics_mgmt_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventgrid.operations.topics_operations#TopicsOperations.{}',
+        client_factory=topics_factory
+    )
 
-    cli_command(__name__, 'eventgrid event-subscription create', custom_path + 'cli_eventgrid_event_subscription_arm_create', event_subscriptions_factory)
-    cli_command(__name__, 'eventgrid event-subscription show', custom_path + 'cli_eventgrid_event_subscription_arm_get', event_subscriptions_factory)
-    cli_command(__name__, 'eventgrid event-subscription show-endpoint-url', custom_path + 'cli_eventgrid_event_subscription_arm_get_full_url', event_subscriptions_factory)
-    cli_command(__name__, 'eventgrid event-subscription delete', custom_path + 'cli_eventgrid_event_subscription_arm_delete', event_subscriptions_factory)
-    cli_command(__name__, 'eventgrid event-subscription list', custom_path + 'cli_event_subscription_list', event_subscriptions_factory)
+    topic_type_mgmt_util = CliCommandType(
+        operations_tmpl='azure.mgmt.eventgrid.operations.topic_types_operations#TopicTypesOperations.{}',
+        client_factory=topic_types_factory
+    )
 
-    cli_command(__name__, 'eventgrid topic event-subscription create', custom_path + 'cli_eventgrid_event_subscription_topic_create', event_subscriptions_factory)
-    cli_command(__name__, 'eventgrid topic event-subscription show', custom_path + 'cli_eventgrid_event_subscription_topic_get', event_subscriptions_factory)
-    cli_command(__name__, 'eventgrid topic event-subscription show-endpoint-url', custom_path + 'cli_eventgrid_event_subscription_topic_get_full_url', event_subscriptions_factory)
-    cli_command(__name__, 'eventgrid topic event-subscription delete', custom_path + 'cli_eventgrid_event_subscription_topic_delete', event_subscriptions_factory)
-    cli_command(__name__, 'eventgrid topic event-subscription list', custom_path + 'cli_topic_event_subscription_list', event_subscriptions_factory)
+    with self.command_group('eventgrid topic', topics_mgmt_util, client_factory=topics_factory) as g:
+        g.command('create', 'create_or_update')
+        g.command('show', 'get')
+        g.command('key list', 'list_shared_access_keys')
+        g.command('key regenerate', 'regenerate_key')
+        g.command('delete', 'delete')
+        g.custom_command('list', 'cli_topic_list')
+        g.generic_update_command('update',
+                                 getter_name='get',
+                                 setter_name='update',
+                                 client_factory=topics_factory)
 
-    cli_command(__name__, 'eventgrid resource event-subscription create', custom_path + 'cli_eventgrid_event_subscription_resource_create', event_subscriptions_factory)
-    cli_command(__name__, 'eventgrid resource event-subscription show', custom_path + 'cli_eventgrid_event_subscription_resource_get', event_subscriptions_factory)
-    cli_command(__name__, 'eventgrid resource event-subscription show-endpoint-url', custom_path + 'cli_eventgrid_event_subscription_resource_get_full_url', event_subscriptions_factory)
-    cli_command(__name__, 'eventgrid resource event-subscription delete', custom_path + 'cli_eventgrid_event_subscription_resource_delete', event_subscriptions_factory)
-    cli_command(__name__, 'eventgrid resource event-subscription list', custom_path + 'cli_resource_event_subscription_list', event_subscriptions_factory)
+    custom_tmpl = 'azure.cli.command_modules.eventgrid.custom#{}'
+    eventgrid_custom = CliCommandType(operations_tmpl=custom_tmpl)
 
-    cli_command(__name__, 'eventgrid topic-type list', topic_types_mgmt_path + 'TopicTypesOperations.list', topic_types_factory)
-    cli_command(__name__, 'eventgrid topic-type show', topic_types_mgmt_path + 'TopicTypesOperations.get', topic_types_factory)
-    cli_command(__name__, 'eventgrid topic-type list-event-types', topic_types_mgmt_path + 'TopicTypesOperations.list_event_types', topic_types_factory)
+    with self.command_group('eventgrid event-subscription', client_factory=event_subscriptions_factory) as g:
+        g.custom_command('create', 'cli_eventgrid_event_subscription_create')
+        g.custom_command('show', 'cli_eventgrid_event_subscription_get')
+        g.custom_command('delete', 'cli_eventgrid_event_subscription_delete')
+        g.custom_command('list', 'cli_event_subscription_list')
+        g.generic_update_command('update',
+                                 getter_type=eventgrid_custom,
+                                 setter_type=eventgrid_custom,
+                                 getter_name='event_subscription_getter',
+                                 setter_name='event_subscription_setter',
+                                 custom_func_name='update_event_subscription')
+
+    with self.command_group('eventgrid topic-type', topic_type_mgmt_util) as g:
+        g.command('list', 'list')
+        g.command('show', 'get')
+        g.command('list-event-types', 'list_event_types')

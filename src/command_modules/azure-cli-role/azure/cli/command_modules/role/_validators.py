@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import uuid
-from azure.cli.core.util import CLIError
+from knack.util import CLIError
 from ._client_factory import _graph_client_factory
 
 VARIANT_GROUP_ID_ARGS = ['object_id', 'group_id', 'group_object_id']
@@ -17,7 +17,7 @@ def validate_group(namespace):
     try:
         uuid.UUID(value)
     except ValueError:
-        client = _graph_client_factory()
+        client = _graph_client_factory(namespace.cmd.cli_ctx)
         sub_filters = []
         sub_filters.append("startswith(displayName,'{}')".format(value))
         sub_filters.append("displayName eq '{}'".format(value))
@@ -32,12 +32,13 @@ def validate_group(namespace):
 
 
 def validate_member_id(namespace):
-    from azure.cli.core._profile import Profile, CLOUD
+    from azure.cli.core._profile import Profile
+    cli_ctx = namespace.cmd.cli_ctx
     try:
         uuid.UUID(namespace.url)
-        profile = Profile()
+        profile = Profile(cli_ctx=cli_ctx)
         _, _, tenant_id = profile.get_login_credentials()
-        graph_url = CLOUD.endpoints.active_directory_graph_resource_id
+        graph_url = cli_ctx.cloud.endpoints.active_directory_graph_resource_id
         namespace.url = '{}{}/directoryObjects/{}'.format(graph_url, tenant_id,
                                                           namespace.url)
     except ValueError:

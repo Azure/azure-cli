@@ -4,19 +4,19 @@
 # --------------------------------------------------------------------------------------------
 
 
-def batchai_client_factory(_=None):
+def batchai_client_factory(cli_ctx, _=None):
     from azure.mgmt.batchai import BatchAIManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(BatchAIManagementClient)
+    return get_mgmt_service_client(cli_ctx, BatchAIManagementClient)
 
 
-def cluster_client_factory(_):
-    return batchai_client_factory().clusters
+def cluster_client_factory(cli_ctx, _):
+    return batchai_client_factory(cli_ctx).clusters
 
 
-def job_client_factory(_):
-    return batchai_client_factory().jobs
+def job_client_factory(cli_ctx, _):
+    return batchai_client_factory(cli_ctx).jobs
 
 
-def file_server_client_factory(_):
-    return batchai_client_factory().file_servers
+def file_server_client_factory(cli_ctx, _):
+    return batchai_client_factory(cli_ctx).file_servers

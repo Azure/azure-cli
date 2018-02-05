@@ -2,10 +2,40 @@
 
 Release History
 ===============
+
+2.0.26
+++++++
+* `aks create` defaults to letting the server choose the version of Kubernetes
+* `aks create` VM node size default changed from "Standard_D1_v2" to "Standard_DS1_v2"
+* improve reliability when locating the dashboard pod for `az aks browse`
+
+2.0.25
+++++++
+* clarify `--disable-browser` argument
+* improve tab completion for --vm-size arguments
+
+2.0.24
+++++++
+* fix get-credentials command
+* aks doesn't need to add role for SPN now
+
+2.0.23
+++++++
+* Update for CLI core changes.
+
+2.0.22
+++++++
+* add korea south and korea central to preview regions
+* use new flattened managed cluster representation which removes separate "properties" object
+
+2.0.21
+++++++
+* add `az aks install-connector` and `az aks remove-connector` commands
+
 2.0.20
 ++++++
 * `acs create`: emit out an actionable error if provisioning application failed for lack of permissions
-
+* fix `aks get-credentials -f` without fully-qualified path
 
 2.0.19
 ++++++

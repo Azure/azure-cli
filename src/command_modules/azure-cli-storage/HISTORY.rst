@@ -3,6 +3,32 @@
 Release History
 ===============
 
+2.0.24
+++++++
+* `storage account update`: do not create new networkRuleSet if "default_action" arg is not provided.
+* Added progress reporting for all upload/download commands, including batch.
+* `storage account check-name`: fixed bug preventing "-n" arg option.
+* Added 'snapshot' column to table output for blob list/show.
+* Fixed bugs with various parameters that needed to be parsed as ints, added test coverage.
+* Small fix with test, `storage blob service-properties show`: "hourMetrics.enabled" defaults to false.
+
+2.0.23
+++++++
+* Minor fixes.
+
+2.0.22
+++++++
+* Update for CLI core changes.
+
+2.0.21
+++++++
+* Update managed storage SDK to 1.5.0
+* Support storage v2
+
+2.0.20
+++++++
+* Update multiapi storage package dependency to 0.1.7
+
 2.0.19
 ++++++
 * `storage account create`: defaults --sku to 'Standard_RAGRS'

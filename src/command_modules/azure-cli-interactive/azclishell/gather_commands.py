@@ -12,8 +12,6 @@ from azclishell.command_tree import CommandBranch, CommandHead
 from azclishell.util import get_window_dim
 
 
-CONFIGURATION = azclishell.configuration.CONFIGURATION
-
 TOLERANCE = 10
 
 GLOBAL_PARAM_DESCRIPTIONS = {
@@ -71,7 +69,7 @@ def add_new_lines(long_phrase, line_min=None, tolerance=TOLERANCE):
 # pylint: disable=too-many-instance-attributes
 class GatherCommands(object):
     """ grabs all the cached commands from files """
-    def __init__(self):
+    def __init__(self, config):
         # everything that is completable
         self.completable = []
         # a completable to the description of what is does
@@ -91,7 +89,7 @@ class GatherCommands(object):
         self.output_options = OUTPUT_OPTIONS
         self.global_param = GLOBAL_PARAM
 
-        self.gather_from_files()
+        self._gather_from_files(config)
 
     def add_exit(self):
         """ adds the exits from the application """
@@ -107,10 +105,10 @@ class GatherCommands(object):
         self.command_param["quit"] = ""
         self.command_param["exit"] = ""
 
-    def gather_from_files(self):
+    def _gather_from_files(self, config):
         """ gathers from the files in a way that is convienent to use """
-        command_file = CONFIGURATION.get_help_files()
-        cache_path = os.path.join(azclishell.configuration.get_config_dir(), 'cache')
+        command_file = config.get_help_files()
+        cache_path = os.path.join(config.config_dir, 'cache')
         cols = _get_window_columns()
 
         with open(os.path.join(cache_path, command_file), 'r') as help_file:
@@ -141,22 +139,23 @@ class GatherCommands(object):
                 self.command_example[command] = examples
 
             all_params = []
-            for param in data[command]['parameters']:
+            command_params = data[command].get('parameters') or []
+            for param in command_params:
                 suppress = False
 
-                if data[command]['parameters'][param]['help'] and \
-                   '==SUPPRESS==' in data[command]['parameters'][param]['help']:
+                if command_params[param]['help'] and \
+                   '==SUPPRESS==' in command_params[param]['help']:
                     suppress = True
-                if data[command]['parameters'][param]['help'] and not suppress:
+                if command_params[param]['help'] and not suppress:
                     param_aliases = set()
 
-                    for par in data[command]['parameters'][param]['name']:
+                    for par in command_params[param]['name']:
                         param_aliases.add(par)
 
                         self.param_descript[command + " " + par] =  \
                             add_new_lines(
-                                data[command]['parameters'][param]['required'] +
-                                " " + data[command]['parameters'][param]['help'],
+                                command_params[param]['required'] +
+                                " " + command_params[param]['help'],
                                 line_min=int(cols) - 2 * TOLERANCE)
                         if par not in self.completable_param:
                             self.completable_param.append(par)

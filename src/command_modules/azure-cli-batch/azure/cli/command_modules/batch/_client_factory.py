@@ -4,66 +4,65 @@
 # --------------------------------------------------------------------------------------------
 
 
-def account_mgmt_client_factory(kwargs):
-    return batch_client_factory(**kwargs).batch_account
+def mgmt_batch_account_client_factory(cli_ctx, _):
+    return batch_client_factory(cli_ctx).batch_account
 
 
-def application_mgmt_client_factory(kwargs):
-    return batch_client_factory(**kwargs).application
+def mgmt_application_client_factory(cli_ctx, _):
+    return batch_client_factory(cli_ctx).application
 
 
-def application_package_client_factory(kwargs):
-    return batch_client_factory(**kwargs).application_package
+def mgmt_application_package_client_factory(cli_ctx, _):
+    return batch_client_factory(cli_ctx).application_package
 
 
-def location_client_factory(kwargs):
-    return batch_client_factory(**kwargs).location
+def mgmt_location_client_factory(cli_ctx, _):
+    return batch_client_factory(cli_ctx).location
 
 
-def application_client_factory(kwargs):
-    return batch_data_service_factory(kwargs).application
+def application_client_factory(cli_ctx, kwargs):
+    return batch_data_service_factory(cli_ctx, kwargs).application
 
 
-def account_client_factory(kwargs):
-    return batch_data_service_factory(kwargs).account
+def account_client_factory(cli_ctx, kwargs):
+    return batch_data_service_factory(cli_ctx, kwargs).account
 
 
-def certificate_client_factory(kwargs):
-    return batch_data_service_factory(kwargs).certificate
+def certificate_client_factory(cli_ctx, kwargs):
+    return batch_data_service_factory(cli_ctx, kwargs).certificate
 
 
-def pool_client_factory(kwargs):
-    return batch_data_service_factory(kwargs).pool
+def pool_client_factory(cli_ctx, kwargs):
+    return batch_data_service_factory(cli_ctx, kwargs).pool
 
 
-def job_client_factory(kwargs):
-    return batch_data_service_factory(kwargs).job
+def job_client_factory(cli_ctx, kwargs):
+    return batch_data_service_factory(cli_ctx, kwargs).job
 
 
-def job_schedule_client_factory(kwargs):
-    return batch_data_service_factory(kwargs).job_schedule
+def job_schedule_client_factory(cli_ctx, kwargs):
+    return batch_data_service_factory(cli_ctx, kwargs).job_schedule
 
 
-def task_client_factory(kwargs):
-    return batch_data_service_factory(kwargs).task
+def task_client_factory(cli_ctx, kwargs):
+    return batch_data_service_factory(cli_ctx, kwargs).task
 
 
-def file_client_factory(kwargs):
-    return batch_data_service_factory(kwargs).file
+def file_client_factory(cli_ctx, kwargs):
+    return batch_data_service_factory(cli_ctx, kwargs).file
 
 
-def compute_node_client_factory(kwargs):
-    return batch_data_service_factory(kwargs).compute_node
+def compute_node_client_factory(cli_ctx, kwargs):
+    return batch_data_service_factory(cli_ctx, kwargs).compute_node
 
 
-def batch_client_factory(**_):
+def batch_client_factory(cli_ctx, **_):
     from azure.mgmt.batch import BatchManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    return get_mgmt_service_client(cli_ctx, BatchManagementClient)
 
-    return get_mgmt_service_client(BatchManagementClient)
 
-
-def batch_data_service_factory(kwargs):
+def batch_data_service_factory(cli_ctx, kwargs):
     import azure.batch.batch_service_client as batch
     import azure.batch.batch_auth as batchauth
 
@@ -74,10 +73,10 @@ def batch_data_service_factory(kwargs):
 
     credentials = None
     if not account_key:
-        from azure.cli.core._profile import Profile, CLOUD
-        profile = Profile()
+        from azure.cli.core._profile import Profile
+        profile = Profile(cli_ctx=cli_ctx)
         credentials, _, _ = profile.get_login_credentials(
-            resource=CLOUD.endpoints.batch_resource_id)
+            resource=cli_ctx.cloud.endpoints.batch_resource_id)
     else:
         credentials = batchauth.SharedKeyCredentials(account_name, account_key)
     if not account_endpoint.startswith('https://'):

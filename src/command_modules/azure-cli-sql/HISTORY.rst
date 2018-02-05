@@ -3,9 +3,27 @@
 Release History
 ===============
 
+2.0.20
+++++++
+* Added az sql db rename
+* Support `--ids` argument for db, dw, server, elastic-pool, and server firewall-rule commands.
+
+2.0.19
+++++++
+* Updated helpfile
+
+2.0.18
+++++++
+* Update for CLI core changes.
+
+2.0.17
+++++++
+* Update managed storage SDK dependency
+
 2.0.16
-++++++++++
+++++++
 * Added az sql db list-usages and az sql db show-usage commands.
+* Added sql server conn-policy show/update commands.
 
 2.0.15
 ++++++

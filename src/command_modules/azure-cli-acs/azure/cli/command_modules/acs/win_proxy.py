@@ -3,11 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ctypes import (POINTER, Structure, Union, byref, c_ulong,
-                    create_unicode_buffer, sizeof, windll)
+from ctypes import POINTER, Structure, Union, byref, c_ulong, create_unicode_buffer, sizeof, windll
 from ctypes.wintypes import BOOL, DWORD, FILETIME, LPVOID, WCHAR
 
-from azure.cli.command_modules.acs.proxy import Proxy
+from .proxy import Proxy
 
 LPWSTR = POINTER(WCHAR)
 HINTERNET = LPVOID
@@ -30,42 +29,42 @@ class WinProxy(Proxy):
 
     def disable_http_proxy(self):
         """
-        Disables the HTTP proxy
+        Disables the HTTP proxy on Windows
         """
         self._set_internet_options(None, False)
 
     def _set_internet_options(self, setting, on=True):
         """
-        Sets the internet options
+        Sets internet options with the wininet API
         """
-        InternetSetOption = windll.wininet.InternetSetOptionW
-        InternetSetOption.argtypes = [LPVOID, DWORD, LPVOID, DWORD]
-        InternetSetOption.restype = BOOL
+        internet_set_option = windll.wininet.InternetSetOptionW
+        internet_set_option.argtypes = [LPVOID, DWORD, LPVOID, DWORD]
+        internet_set_option.restype = BOOL
 
-        List = INTERNET_PER_CONN_OPTION_LIST()
-        Option = (INTERNET_PER_CONN_OPTION * 3)()
-        nSize = c_ulong(sizeof(INTERNET_PER_CONN_OPTION_LIST))
+        option_list = InternetPerConnOptionList()
+        option = (InternetPerConnOption * 3)()
+        size = c_ulong(sizeof(InternetPerConnOptionList))
 
-        Option[0].dwOption = self.INTERNET_PER_CONN_FLAGS
-        Option[0].Value.dwValue = (2 if on else 1)
-        Option[1].dwOption = self.INTERNET_PER_CONN_PROXY_SERVER
-        Option[1].Value.pszValue = setting
-        Option[2].dwOption = self.INTERNET_PER_CONN_PROXY_BYPASS
-        Option[2].Value.pszValue = create_unicode_buffer('<-loopback>')
+        option[0].dwOption = self.INTERNET_PER_CONN_FLAGS
+        option[0].Value.dwValue = (2 if on else 1)
+        option[1].dwOption = self.INTERNET_PER_CONN_PROXY_SERVER
+        option[1].Value.pszValue = setting
+        option[2].dwOption = self.INTERNET_PER_CONN_PROXY_BYPASS
+        option[2].Value.pszValue = create_unicode_buffer('<-loopback>')
 
-        List.dwSize = sizeof(INTERNET_PER_CONN_OPTION_LIST)
-        List.pszConnection = None
-        List.dwOptionCount = 3
-        List.dwOptionError = 0
-        List.pOptions = Option
+        option_list.dwSize = sizeof(InternetPerConnOptionList)
+        option_list.pszConnection = None
+        option_list.dwOptionCount = 3
+        option_list.dwOptionError = 0
+        option_list.pOptions = option
 
-        InternetSetOption(None, self.INTERNET_OPTION_PER_CONNECTION_OPTION, byref(List), nSize)
-        InternetSetOption(None, self.INTERNET_OPTION_SETTINGS_CHANGED, None, 0)
-        InternetSetOption(None, self.INTERNET_OPTION_REFRESH, None, 0)
+        internet_set_option(None, self.INTERNET_OPTION_PER_CONNECTION_OPTION, byref(option_list), size)
+        internet_set_option(None, self.INTERNET_OPTION_SETTINGS_CHANGED, None, 0)
+        internet_set_option(None, self.INTERNET_OPTION_REFRESH, None, 0)
 
 
 # pylint: disable=too-few-public-methods
-class INTERNET_PER_CONN_OPTION(Structure):
+class InternetPerConnOption(Structure):
     class Value(Union):
         _fields_ = [
             ('dwValue', DWORD),
@@ -79,13 +78,13 @@ class INTERNET_PER_CONN_OPTION(Structure):
     ]
 
 
-class INTERNET_PER_CONN_OPTION_LIST(Structure):
+class InternetPerConnOptionList(Structure):
     _fields_ = [
         ('dwSize', DWORD),
         ('pszConnection', LPWSTR),
         ('dwOptionCount', DWORD),
         ('dwOptionError', DWORD),
-        ('pOptions', POINTER(INTERNET_PER_CONN_OPTION)),
+        ('pOptions', POINTER(InternetPerConnOption)),
     ]
 
     dwSize = None

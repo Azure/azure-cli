@@ -4,13 +4,10 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import division
 import sys
-import platform
 
 import humanfriendly
-BAR_LEN = 70
 
-if platform.system() == 'Windows':
-    humanfriendly.erase_line_code = ''
+BAR_LEN = 70
 
 
 class ProgressViewBase(object):
@@ -120,7 +117,10 @@ class IndeterminateStandardOut(ProgressViewBase):
             self.spinner = humanfriendly.Spinner(
                 label='In Progress', stream=self.out, hide_cursor=False)
         msg = args.get('message', 'In Progress')
-        self.spinner.step(label=msg)
+        try:
+            self.spinner.step(label=msg)
+        except OSError:
+            pass
 
     def clear(self):
         try:

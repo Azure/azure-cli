@@ -4,10 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 
+# pylint: disable=inconsistent-return-statements
 def ex_handler_factory(creating_plan=False, no_throw=False):
     def _polish_bad_errors(ex):
         import json
-        from azure.cli.core.util import CLIError
+        from knack.util import CLIError
         try:
             detail = json.loads(ex.response.text)['Message']
             if creating_plan:
@@ -28,23 +29,23 @@ def ex_handler_factory(creating_plan=False, no_throw=False):
     return _polish_bad_errors
 
 
-def web_client_factory(**_):
+def web_client_factory(cli_ctx, **_):
     from azure.mgmt.web import WebSiteManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(WebSiteManagementClient)
+    return get_mgmt_service_client(cli_ctx, WebSiteManagementClient)
 
 
-def cf_plans(_):
-    return web_client_factory().app_service_plans
+def cf_plans(cli_ctx, _):
+    return web_client_factory(cli_ctx).app_service_plans
 
 
-def cf_webapps(_):
-    return web_client_factory().web_apps
+def cf_webapps(cli_ctx, _):
+    return web_client_factory(cli_ctx).web_apps
 
 
-def cf_providers(_):
-    return web_client_factory().provider  # pylint: disable=no-member
+def cf_providers(cli_ctx, _):
+    return web_client_factory(cli_ctx).provider  # pylint: disable=no-member
 
 
-def cf_web_client(_):
-    return web_client_factory()
+def cf_web_client(cli_ctx, _):
+    return web_client_factory(cli_ctx)

@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import CLIError
-from ._factory import get_acr_service_client
+from knack.util import CLIError
+from ._client_factory import cf_acr_registries
 
 
-def validate_registry_name(namespace):
+def validate_registry_name(cmd, namespace):
     if namespace.registry_name:
-        client = get_acr_service_client().registries
+        client = cf_acr_registries(cmd.cli_ctx)
         registry_name = namespace.registry_name
 
         result = client.check_name_availability(registry_name)

@@ -3,6 +3,19 @@
 Release History
 ===============
 
+0.0.9
+++++++
+* Added detailed errors to validation response when creating cluster.
+* Fix missing client issue with several commands.
+
+0.0.8
+++++++
+* Update for CLI core changes.
+
+0.0.7
++++++
+* Minor fixes.
+
 0.0.6
 +++++
 * Minor fixes.

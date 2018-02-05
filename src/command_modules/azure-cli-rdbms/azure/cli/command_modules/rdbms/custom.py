@@ -3,22 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from msrestazure.tools import \
-    (resource_id, is_valid_resource_id, parse_resource_id)
+from msrestazure.tools import (
+    resource_id, is_valid_resource_id, parse_resource_id)
 
 
 # need to replace source sever name with source server id, so customer server restore function
 # The parameter list should be the same as that in factory to use the ParametersContext
 # auguments and validators
-def _server_restore(
-        client,
-        resource_group_name,
-        server_name,
-        parameters,
-        **kwargs):
-    """
-    Create a new server by restoring from a server backup.
-    """
+def _server_restore(cmd, client, resource_group_name, server_name, parameters, **kwargs):
     source_server = kwargs['source_server_id']
 
     if not is_valid_resource_id(source_server):
@@ -26,7 +18,7 @@ def _server_restore(
             from azure.cli.core.commands.client_factory import get_subscription_id
             from azure.mgmt.rdbms.mysql.operations.servers_operations import ServersOperations
             provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
-            source_server = resource_id(subscription=get_subscription_id(),
+            source_server = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                         resource_group=resource_group_name,
                                         namespace=provider,
                                         type='servers',
@@ -93,24 +85,11 @@ def _firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_ad
 
 
 #        Custom funcs for server logs        #
-
 def _download_log_files(
         client,
         resource_group_name,
         server_name,
         file_name):
-    """
-     Download log file(s) of a given server to current directory.
-
-    :param resource_group_name: The name of the resource group that
-    contains the resource. You can obtain this value from the Azure
-    Resource Manager API or the portal.
-    :type resource_group_name: str
-    :param server_name: Name of the server.
-    :type server_name: str
-    :param file_name: Space separated list of log filenames on the server to download.
-    :type filename_contains: str
-    """
     from six.moves.urllib.request import urlretrieve  # pylint: disable=import-error
 
     # list all files
@@ -123,22 +102,6 @@ def _download_log_files(
 
 def _list_log_files_with_filter(client, resource_group_name, server_name, filename_contains=None,
                                 file_last_written=None, max_file_size=None):
-    """List all the log files of a given server.
-
-    :param resource_group_name: The name of the resource group that
-    contains the resource. You can obtain this value from the Azure
-    Resource Manager API or the portal.
-    :type resource_group_name: str
-    :param server_name: The name of the server.
-    :type server_name: str
-    :param filename_contains: The pattern that file name should match.
-    :type filename_contains: str
-    :param file_last_written: Interger in hours to indicate file last modify time,
-    default value is 72.
-    :type file_last_written: int
-    :param max_file_size: The file size limitation to filter files.
-    :type max_file_size: int
-    """
     import re
     from datetime import datetime, timedelta
     from dateutil.tz import tzutc
@@ -166,13 +129,7 @@ def _list_log_files_with_filter(client, resource_group_name, server_name, filena
 
 
 #        Custom funcs for list servers        #
-def _server_list_custom_func(
-        client,
-        resource_group_name=None):
-    """
-    List servers by resource group name or subscription
-    """
-
+def _server_list_custom_func(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()

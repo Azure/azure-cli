@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.1.16
+++++++
+* Update for CLI core changes.
+
+0.1.15
+++++++
+* Fix incorrect order of parameters for container logs
+
 0.1.14
 ++++++
 * Fixed default ports regression

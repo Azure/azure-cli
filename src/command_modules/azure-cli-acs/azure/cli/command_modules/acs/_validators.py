@@ -7,11 +7,26 @@ import os
 import os.path
 import re
 
+from knack.log import get_logger
+
 from azure.cli.core.util import CLIError
-import azure.cli.core.azlogging as azlogging
 import azure.cli.core.keys as keys
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
+
+
+def validate_connector_name(namespace):
+    """Validates a string as a legal connector name.
+
+    This validation will also occur server-side in the kubernetes, but that may take
+    for a while. So it's more user-friendly to validate in the CLI pre-flight.
+    """
+    # https://github.com/kubernetes/community/blob/master/contributors/design-proposals/architecture/identifiers.md
+    regex = re.compile(r'^[a-z0-9]([a-z0-9\-]*[a-z0-9])?$')
+    found = regex.findall(namespace.connector_name)
+    if not found:
+        raise CLIError('--connector-name must consist of lower case alphanumeric characters or dashes (-), '
+                       'and must start and end with an alphanumeric character.')
 
 
 def validate_ssh_key(namespace):
@@ -56,14 +71,16 @@ def validate_create_parameters(namespace):
 
 
 def validate_k8s_version(namespace):
-    """Validates a string as a possible Kubernetes version."""
-    k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+\.\d+.*)$')
-    found = k8s_release_regex.findall(namespace.kubernetes_version)
-    if found:
-        namespace.kubernetes_version = found[0]
-    else:
-        raise CLIError('--kubernetes-version should be the full version number, '
-                       'such as "1.7.7" or "1.8.1"')
+    """Validates a string as a possible Kubernetes version. An empty string is also valid, which tells the server
+    to use its default version."""
+    if namespace.kubernetes_version:
+        k8s_release_regex = re.compile(r'^[v|V]?(\d+\.\d+\.\d+.*)$')
+        found = k8s_release_regex.findall(namespace.kubernetes_version)
+        if found:
+            namespace.kubernetes_version = found[0]
+        else:
+            raise CLIError('--kubernetes-version should be the full version number, '
+                           'such as "1.7.12" or "1.8.6"')
 
 
 def validate_k8s_client_version(namespace):

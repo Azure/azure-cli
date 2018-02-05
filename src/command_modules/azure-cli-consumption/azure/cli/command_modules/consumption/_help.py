@@ -3,11 +3,26 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 helps['consumption'] = """
     type: group
     short-summary: Manage consumption of Azure resources.
+"""
+
+helps['consumption reservations'] = """
+    type: group
+    short-summary: Manage reservations for Azure resources.
+"""
+
+helps['consumption reservations summaries'] = """
+    type: group
+    short-summary: Manage reservations summaries for daily or monthly.
+"""
+
+helps['consumption reservations details'] = """
+    type: group
+    short-summary: Manage reservations details.
 """
 
 helps['consumption usage'] = """

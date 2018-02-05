@@ -2,6 +2,20 @@
 
 Release History
 ===============
+
+2.0.22
+++++++
+* `deployment create/validate`: Fix bug where warning was incorrectly displayed when a template 'type' field contained
+                                uppercase values.
+
+2.0.21
+++++++
+* Helpfile changes
+
+2.0.20
+++++++
+* Update for CLI core changes.
+
 2.0.19
 ++++++
 * `resource show`: expose `--include-response-body` to show the response body in the output

@@ -2,15 +2,17 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
+from knack.prompting import prompt_y_n
+from knack.util import CLIError
+from knack.log import get_logger
+
 from azure.mgmt.cognitiveservices.models import CognitiveServicesAccountCreateParameters, Sku
-from azure.cli.core.prompting import prompt_y_n
-from azure.cli.core.util import CLIError
 
-import azure.cli.core.azlogging as azlogging
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 
-def listresources(client, resource_group_name=None):
+def list_resources(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list()

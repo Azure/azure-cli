@@ -2,6 +2,47 @@
 
 Release History
 ===============
+2.0.26
+++++++
+* msi: output principal id on enabling system assigned identity
+* vm boot-diagnostic: fix the broken get log command
+
+2.0.25
+++++++
+* vm image: support accept market terms to use vm images
+* vm/vmss create: ensure commands can run under proxy with unsigned certificates.
+* vmss:(PREVIEW) support low priority
+* `vm/vmss create` - `--admin-password` updated to type secureString.
+
+2.0.24
+++++++
+* vmss:(PREVIEW) cross zone support
+* vmss:(BREAKING CHANGE)single zone scale-set will default to "Standard" load balancer instead of "Basic"
+* vm/vmss: use right term of "userAssignedIdentity" for EMSI
+* vm: (PREVIEW) support os disk swap
+* vm: support use image from other subscriptions
+
+2.0.23
+++++++
+* vmss: ensure app-gateway has a name when defaults to it for large scalesets
+
+2.0.22
+++++++
+* VM/VMSS: (Preview) support user assigned identity
+
+2.0.21
+++++++
+* Minor fixes
+
+2.0.20
+++++++
+* Minor fixes
+
+2.0.19
+++++++
+* show zone information on `az vm list-skus -otable`
+* Update the storage multiapi package reference
+
 2.0.18
 ++++++
 * `vmss create`: fix a bug that blocks using Basic tier of VM sizes

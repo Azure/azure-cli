@@ -5,11 +5,14 @@
 from wheel.install import WHEEL_INFO_RE
 from pkg_resources import parse_version
 
-from azure.cli.core.extension import ext_compat_with_cli
-import azure.cli.core.azlogging as azlogging
-from ._index import get_index_extensions
+from knack.log import get_logger
 
-logger = azlogging.get_az_logger(__name__)
+from azure.cli.core.extension import ext_compat_with_cli
+
+from azure.cli.command_modules.extension._index import get_index_extensions
+
+
+logger = get_logger(__name__)
 
 
 class NoExtensionCandidatesError(Exception):
@@ -24,6 +27,7 @@ def _is_not_platform_specific(item):
     logger.debug("Skipping '%s' as not universal wheel."
                  "We do not currently support platform specific extension detection. "
                  "They can be installed with the full URL %s", item['filename'], item.get('downloadUrl'))
+    return False
 
 
 def _is_compatible_with_cli_version(item):
@@ -33,6 +37,7 @@ def _is_compatible_with_cli_version(item):
     logger.debug("Skipping '%s' as not compatible with this version of the CLI. "
                  "Extension compatibility result: is_compatible=%s cli_core_version=%s min_required=%s "
                  "max_required=%s", item['filename'], is_compatible, cli_core_version, min_required, max_required)
+    return False
 
 
 def _is_greater_than_cur_version(cur_version):
@@ -46,6 +51,7 @@ def _is_greater_than_cur_version(cur_version):
             return True
         logger.debug("Skipping '%s' as %s not greater than current version %s", item['filename'],
                      item_version, cur_version_parsed)
+        return False
     return filter_func
 
 

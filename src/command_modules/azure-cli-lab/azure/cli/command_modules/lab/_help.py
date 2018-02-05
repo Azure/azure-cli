@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps
+from knack.help_files import helps
 
 
 helps['lab'] = """
@@ -55,10 +55,10 @@ helps['lab vm create'] = """
                   short-summary: 'Type of IP configuration to use for the VM. Allowed values are: shared, public, private.'
                   long-summary: If omitted, will be selected based on the VM's vnet.
                 - name: --artifacts
-                  short-summary: JSON encoded array of artifacts to be applied. Use @{file} to load from a file.
+                  short-summary: JSON encoded array of artifacts to be applied. Use '@{file}' to load from a file.
                 - name: --tags
                   short-summary: Space separated tags in `key[=value]` format.
-                  long-summary: Tags may be cleared by assigning the empty value `""` to them.
+                  long-summary: Tags may be cleared by assigning the empty value "" to them.
                 - name: --allow-claim
                   short-summary: Flag indicating if the VM should be created as claimable.
                 - name: --disk-type
@@ -70,25 +70,25 @@ helps['lab vm create'] = """
             examples:
                 - name: Create a VM in the lab from a gallery image.
                   text: >
-                    az lab vm create --lab-name MyLab -g MyRG --name MyVM --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2
+                    az lab vm create --lab-name {LabName} -g {ResourceGroup} --name {VMName} --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2
                 - name: Create a VM in the lab from a gallery image with SSH authentication.
                   text: >
-                    az lab vm create --lab-name MyLab -g MyRG --name MyVM --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2 --authentication-type ssh
+                    az lab vm create --lab-name {LabName} -g {ResourceGroup} --name {VMName} --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2 --authentication-type ssh
                 - name: Create a claimable VM in the lab from a gallery image with password authentication.
                   text: >
-                    az lab vm create --lab-name MyLab -g MyRG --name MyVM --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2 --allow-claim
+                    az lab vm create --lab-name {LabName} -g {ResourceGroup} --name {VMName} --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2 --allow-claim
                 - name: Create a windows VM in the lab from a gallery image with password authentication.
                   text: >
-                    az lab vm create --lab-name MyLab -g MyRG --name MyVM --image "Windows Server 2008 R2 SP1" --image-type gallery --size Standard_DS1_v2
+                    az lab vm create --lab-name {LabName} -g {ResourceGroup} --name {VMName} --image "Windows Server 2008 R2 SP1" --image-type gallery --size Standard_DS1_v2
                 - name: Create a VM in the lab from a custom image.
                   text: >
-                    az lab vm create --lab-name MyLab -g MyRG --name MyVM --image "jenkins_custom" --image-type custom --size Standard_DS1_v2
+                    az lab vm create --lab-name {LabName} -g {ResourceGroup} --name {VMName} --image "jenkins_custom" --image-type custom --size Standard_DS1_v2
                 - name: Create a VM in the lab with a public IP.
                   text: >
-                    az lab vm create --lab-name MyLab -g MyRG --name MyVM --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2 --ip-configuration public
+                    az lab vm create --lab-name {LabName} -g {ResourceGroup} --name {VMName} --image "Ubuntu Server 16.04 LTS" --image-type gallery --size Standard_DS1_v2 --ip-configuration public
                 - name: Create a VM from a formula.
                   text: >
-                    az lab vm create --lab-name MyLab -g MyRG --name MyVM --formula MyFormula --artifacts @/artifacts.json
+                    az lab vm create --lab-name {LabName} -g {ResourceGroup} --name {VMName} --formula MyFormula --artifacts '@artifacts.json'
             """
 helps['lab vm list'] = """
             type: command
@@ -124,7 +124,7 @@ helps['lab vm apply-artifacts'] = """
                 - name: --name -n
                   short-summary: Name of the virtual machine.
                 - name: --artifacts
-                  short-summary: JSON encoded array of artifacts to be applied. Use @{file} to load from a file.
+                  short-summary: JSON encoded array of artifacts to be applied. Use '@{file}' to load from a file.
             """
 helps['lab vm claim'] = """
             type: command
@@ -141,15 +141,15 @@ helps['lab vm claim'] = """
             examples:
                 - name: Claim any available virtual machine in the lab.
                   text: >
-                    az lab vm claim -g MyRG --lab-name MyLab
+                    az lab vm claim -g {ResourceGroup} --lab-name {LabName}
                 - name: Claim a specific virtual machine in the lab.
                   text: >
-                    az lab vm claim -g MyRG --lab-name MyLab --name MyVM
-                - name: Claim multiple virtual machines in the lab using `--ids`.
+                    az lab vm claim -g {ResourceGroup} --lab-name {LabName} --name {VMName}
+                - name: Claim multiple virtual machines in the lab by IDs.
                   text: |
                     az lab vm claim --ids \\
-                        /subscriptions/{SubID}/resourcegroups/{MyRG}/providers/microsoft.devtestlab/labs/{MyLab}/virtualmachines/{MyVM1} \\
-                        /subscriptions/{SubID}/resourcegroups/{MyRG}/providers/microsoft.devtestlab/labs/{MyLab}/virtualmachines/{MyVM2}
+                        /subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/microsoft.devtestlab/labs/{LabName}/virtualmachines/{VMName1} \\
+                        /subscriptions/{SubID}/resourcegroups/{ResourceGroup}/providers/microsoft.devtestlab/labs/{LabName}/virtualmachines/{VMName2}
             """
 helps['lab custom-image'] = """
             type: group
@@ -175,13 +175,13 @@ helps['lab custom-image create'] = """
                   short-summary: The current state of the virtual machine.
                   long-summary: >
                     For Windows virtual machines: NonSysprepped, SysprepRequested, SysprepApplied
-                    For Linux virtual machines - NonDeprovisioned, DeprovisionRequested, DeprovisionApplied
+                    For Linux virtual machines: NonDeprovisioned, DeprovisionRequested, DeprovisionApplied
             examples:
                 - name: Create a custom image in the lab from a running Windows virtual machine without applying sysprep.
                   text: |
-                    az lab custom-image create --lab-name MyLab -g MyRG --name MyVM \\
+                    az lab custom-image create --lab-name {LabName} -g {ResourceGroup} --name {VMName} \\
                         --os-type Windows --os-state NonSysprepped \\
-                        --source-vm-id "/subscriptions/{SubID}/resourcegroups/{MyRG}/microsoft.devtestlab/labs/{MyLab}/virtualmachines/{MyVM}"
+                        --source-vm-id "/subscriptions/{SubID}/resourcegroups/{ResourceGroup}/microsoft.devtestlab/labs/{LabName}/virtualmachines/{VMName}"
 """
 helps['lab gallery-image'] = """
             type: group
@@ -276,7 +276,7 @@ helps['lab environment create'] = """
                   populator-commands:
                     - az lab artifact-source list
                 - name: --parameters
-                  short-summary: JSON encoded list of parameters. Use @{file} to load from a file.
+                  short-summary: JSON encoded list of parameters. Use '@{file}' to load from a file.
                 - name: --tags
                   short-summary: The tags for the resource.
             """
