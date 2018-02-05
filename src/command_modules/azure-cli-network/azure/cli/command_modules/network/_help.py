@@ -1241,7 +1241,7 @@ helps['network nic list'] = """
     type: command
     short-summary: List network interfaces.
     long-summary: >
-        Does not list network interfaces attached to VMs in VM scale sets. Use 'az vmss nic list' or 'az vmss nic list-vm-nics' to display that information.  
+        Does not list network interfaces attached to VMs in VM scale sets. Use 'az vmss nic list' or 'az vmss nic list-vm-nics' to display that information.
         To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
     examples:
         - name: List all NICs by internal DNS suffix.
