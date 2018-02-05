@@ -3,6 +3,9 @@
 Release History
 ===============
 
+2.0.24
+++++++
+
 2.0.23
 ++++++
 * `network public-ip create`: Fix `--tags` option.
