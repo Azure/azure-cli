@@ -71,9 +71,13 @@ class LoadFreshTable(object):
     this class generates and dumps the fresh command table into a file
     as well as installs all the modules
     """
-    def __init__(self, shell_ctx):
+    def __init__(self):
         self.command_table = None
+        self.shell_ctx = None
+
+    def __call__(self, shell_ctx):
         self.shell_ctx = shell_ctx
+        return self
 
     def load_help_files(self, data):
         """ loads all the extra information from help files """
@@ -173,3 +177,6 @@ def get_cache_dir(shell_ctx):
     if not os.path.exists(cache_path):
         os.makedirs(cache_path)
     return cache_path
+
+
+FRESH_TABLE = LoadFreshTable()
