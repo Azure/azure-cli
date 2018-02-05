@@ -19,8 +19,8 @@ SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
 
 
 def initialize_command_table_attributes(completer):
-    from azclishell._dump_commands import LoadFreshTable
-    completer.cmdtab = LoadFreshTable(completer.shell_ctx).command_table
+    from azclishell._dump_commands import FRESH_TABLE
+    completer.cmdtab = FRESH_TABLE(completer.shell_ctx).command_table
     if completer.cmdtab:
         completer.parser.load_command_table(completer.cmdtab)
         completer.argsfinder = ArgsFinder(completer.parser)
