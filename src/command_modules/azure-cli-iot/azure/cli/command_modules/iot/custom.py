@@ -629,7 +629,7 @@ def iot_device_import(client, hub_name, input_blob_container_uri, output_blob_co
     return client.iot_hub_resource.import_devices(resource_group_name, hub_name, input_blob_container_uri, output_blob_container_uri)
 
 
-def _get_single_device_connection_string(cmd,client, hub_name, device_id, resource_group_name, key_type):
+def _get_single_device_connection_string(cmd, client, hub_name, device_id, resource_group_name, key_type):
     device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
     device = device_client.get(device_id)
     if device is None:
