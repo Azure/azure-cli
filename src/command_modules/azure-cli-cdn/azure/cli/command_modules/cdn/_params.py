@@ -60,7 +60,7 @@ def load_arguments(self, _):
         c.argument('endpoint_name', name_arg_type, id_part='name', help='Name of the CDN endpoint.')
         c.argument('location', validator=get_default_location_from_resource_group)
         c.argument('origins', options_list='--origin', nargs='+', action=OriginType, validator=validate_origin,
-                   help='Endpoint origin specified by the following space delimited 3 '
+                   help='Endpoint origin specified by the following space-delimited 3 '
                         'tuple: `www.example.com http_port https_port`. The HTTP and HTTPs'
                         'ports are optional and will default to 80 and 443 respectively.')
         c.argument('is_http_allowed', arg_type=get_three_state_flag(invert=True), options_list='--no-http',

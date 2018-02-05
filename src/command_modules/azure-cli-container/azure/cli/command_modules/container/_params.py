@@ -17,7 +17,7 @@ IP_ADDRESS_TYPES = ['Public']
 
 
 def _environment_variables_type(value):
-    """Space separated values in 'key=value' format."""
+    """Space-separated values in 'key=value' format."""
     try:
         env_name, env_value = value.split('=', 1)
     except ValueError:
@@ -43,7 +43,7 @@ def load_arguments(self, _):
         c.argument('ports', type=int, nargs='+', default=[80], help='The ports to open')
         c.argument('restart_policy', arg_type=get_enum_type(ContainerGroupRestartPolicy), help='Restart policy for all containers within the container group')
         c.argument('command_line', help='The command line to run when the container is started, e.g. \'/bin/bash -c myscript.sh\'')
-        c.argument('environment_variables', nargs='+', options_list=['--environment-variables', '-e'], type=_environment_variables_type, help='A list of environment variable for the container. Space separated values in \'key=value\' format.')
+        c.argument('environment_variables', nargs='+', options_list=['--environment-variables', '-e'], type=_environment_variables_type, help='A list of environment variable for the container. Space-separated values in \'key=value\' format.')
 
     with self.argument_context('container create', arg_group='Image Registry') as c:
         c.argument('registry_login_server', help='The container image registry login server')

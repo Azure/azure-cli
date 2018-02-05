@@ -141,7 +141,7 @@ def init_args(root):
                           default='https://github.com/Azure/azure-cli.git')
     cli_build_parser.add_argument('-t', '--type', dest='build_types', required=True, nargs='+',
                                   choices=BUILD_TYPES + ['*'],
-                                  help="Space separated list of the artifacts to build. Use '*' for all.")
+                                  help="Space-separated list of the artifacts to build. Use '*' for all.")
     cli_build_parser.add_argument('-c', '--cli-version', dest='cli_version', required=True,
                                   help="The version of the build. (ignored for 'pypi' type)")
     homebrew_args = cli_build_parser.add_argument_group('Homebrew Specific Arguments')
