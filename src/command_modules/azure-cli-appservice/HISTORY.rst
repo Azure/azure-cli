@@ -4,6 +4,7 @@ Release History
 ===============
 0.1.26
 ++++++
+* appservice: support default app service plan through `az configure --defaults appserviceplan=my-asp`
 * minor changes
 
 0.1.25

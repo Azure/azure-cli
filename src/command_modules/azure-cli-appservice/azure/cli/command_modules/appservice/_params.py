@@ -56,7 +56,8 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=sku_arg_type)
 
     with self.argument_context('appservice plan') as c:
-        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), id_part='name')
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), configured_default='appserviceplan',
+                   id_part='name')
         c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.argument('admin_site_name', help='The name of the admin web app.')
 
@@ -72,7 +73,7 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='name of the new webapp')
         c.argument('startup_file', help="Linux only. The web's startup file")
         c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|5.6\". Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
-        c.argument('plan', options_list=['--plan', '-p'], completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+        c.argument('plan', options_list=['--plan', '-p'], completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), configured_default='appserviceplan',
                    help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
 
     with self.argument_context('webapp show') as c:
@@ -251,7 +252,7 @@ def load_arguments(self, _):
     with self.argument_context('functionapp config hostname') as c:
         c.argument('webapp_name', arg_type=name_arg_type, id_part='name', help='name of the function app')
     with self.argument_context('functionapp create') as c:
-        c.argument('plan', options_list=['--plan', '-p'], completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+        c.argument('plan', options_list=['--plan', '-p'], completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), configured_default='appserviceplan',
                    help="name or resource id of the function app service plan. Use 'appservice plan create' to get one")
         c.argument('new_app_name', options_list=['--name', '-n'], help='name of the new function app')
         c.argument('storage_account', options_list=['--storage-account', '-s'],
