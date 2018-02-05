@@ -293,9 +293,9 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
     else:
         # Windows - get os and data volume encryption state from the vm model
         if (encryption_status['osDiskEncryptionSettings'] and
-            encryption_status['osDiskEncryptionSettings'].enabled and
-            encryption_status['osDiskEncryptionSettings'].disk_encryption_key and
-            encryption_status['osDiskEncryptionSettings'].disk_encryption_key.secret_url):
+                encryption_status['osDiskEncryptionSettings'].enabled and
+                encryption_status['osDiskEncryptionSettings'].disk_encryption_key and
+                encryption_status['osDiskEncryptionSettings'].disk_encryption_key.secret_url):
             encryption_status['osDisk'] = _STATUS_ENCRYPTED
         else:
             encryption_status['osDisk'] = 'Unknown'
