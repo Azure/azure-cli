@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.1.17
+++++++
+* Change iot dps access policy CRUD commands and linked-hub CRUD commands to be long running operations
+* Fix bug 5213 - Some DPS tests won't re-record
+
 0.1.16
 ++++++
 * Added support for device provisioning service
