@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.26
 ++++++
+* vm encryption: avoid the crash when vm encryption setting might not be fully initialized
 * msi: output principal id on enabling system assigned identity
 * vm boot-diagnostic: fix the broken get log command
 
