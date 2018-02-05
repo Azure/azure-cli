@@ -7,9 +7,14 @@
 
 from codecs import open
 from setuptools import setup
+try:
+    from azure_bdist_wheel import cmdclass
+except ImportError:
+    from distutils import log as logger
+    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    cmdclass = {}
 
-VERSION = '2.0.3+dev'
-
+VERSION = "2.0.24"
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
@@ -25,9 +30,9 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-multiapi-storage==0.1.0',
-    'azure-mgmt-storage==1.0.0rc1',
-    'azure-cli-core',
+    'azure-multiapi-storage==0.1.7',
+    'azure-mgmt-storage==1.5.0',
+    'azure-cli-core'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -45,13 +50,13 @@ setup(
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
-    namespace_packages=[
+    packages=[
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-    ],
-    packages=[
         'azure.cli.command_modules.storage',
+        'azure.cli.command_modules.storage.operations'
     ],
     install_requires=DEPENDENCIES,
+    cmdclass=cmdclass
 )

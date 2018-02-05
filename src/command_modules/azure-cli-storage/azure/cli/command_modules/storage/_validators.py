@@ -3,20 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import argparse
-import os
-import re
-from datetime import datetime, timedelta
+# pylint: disable=protected-access
 
-from azure.cli.core.util import CLIError
-from azure.cli.core._profile import CLOUD
-from azure.cli.core._config import az_config
-from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
+from azure.cli.core.profiles import ResourceType, get_sdk
 
-from ._factory import get_storage_data_service_client
-from .util import glob_files_locally
+from azure.cli.command_modules.storage._client_factory import get_storage_data_service_client
+from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
+from azure.cli.command_modules.storage.sdkutil import get_table_data_type
+from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
@@ -24,61 +20,58 @@ storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
 # Utilities
 
-def _query_account_key(account_name):
-    scf = get_mgmt_service_client(ResourceType.MGMT_STORAGE)
+
+# pylint: disable=inconsistent-return-statements
+def _query_account_key(cli_ctx, account_name):
+    """Query the storage account key. This is used when the customer doesn't offer account key but name."""
+    scf = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_STORAGE)
     acc = next((x for x in scf.storage_accounts.list() if x.name == account_name), None)
     if acc:
-        from azure.cli.core.commands.arm import parse_resource_id
+        from msrestazure.tools import parse_resource_id
         rg = parse_resource_id(acc.id)['resource_group']
-        return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
+
+        t_storage_account_keys, t_storage_account_list_keys_results = get_sdk(
+            cli_ctx,
+            ResourceType.MGMT_STORAGE,
+            'models.storage_account_keys#StorageAccountKeys',
+            'models.storage_account_list_keys_result#StorageAccountListKeysResult')
+
+        if t_storage_account_keys:
+            return scf.storage_accounts.list_keys(rg, account_name).key1
+        elif t_storage_account_list_keys_results:
+            return scf.storage_accounts.list_keys(rg, account_name).keys[0].value  # pylint: disable=no-member
     else:
         raise ValueError("Storage account '{}' not found.".format(account_name))
 
 
-def _create_short_lived_blob_sas(account_name, account_key, container, blob):
-    SharedAccessSignature, BlobPermissions = \
-        get_sdk(ResourceType.DATA_STORAGE,
-                'sharedaccesssignature#SharedAccessSignature',
-                'blob.models#BlobPermissions')
-    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
-    sas = SharedAccessSignature(account_name, account_key)
-    return sas.generate_blob(container, blob, permission=BlobPermissions(read=True), expiry=expiry,
-                             protocol='https')
-
-
-def _create_short_lived_file_sas(account_name, account_key, share, directory_name, file_name):
-    SharedAccessSignature, BlobPermissions = \
-        get_sdk(ResourceType.DATA_STORAGE,
-                'sharedaccesssignature#SharedAccessSignature',
-                'blob.models#BlobPermissions')
-    # if dir is empty string change it to None
-    directory_name = directory_name if directory_name else None
-    expiry = (datetime.utcnow() + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')
-    sas = SharedAccessSignature(account_name, account_key)
-    return sas.generate_file(share, directory_name=directory_name, file_name=file_name,
-                             permission=BlobPermissions(read=True), expiry=expiry, protocol='https')
-
-
 # region PARAMETER VALIDATORS
 
-def validate_accept(namespace):
-    TablePayloadFormat = get_sdk(ResourceType.DATA_STORAGE, 'table#TablePayloadFormat')
+def validate_table_payload_format(cmd, namespace):
+    t_table_payload = get_table_data_type(cmd.cli_ctx, 'table', 'TablePayloadFormat')
     if namespace.accept:
         formats = {
-            'none': TablePayloadFormat.JSON_NO_METADATA,
-            'minimal': TablePayloadFormat.JSON_MINIMAL_METADATA,
-            'full': TablePayloadFormat.JSON_FULL_METADATA
+            'none': t_table_payload.JSON_NO_METADATA,
+            'minimal': t_table_payload.JSON_MINIMAL_METADATA,
+            'full': t_table_payload.JSON_FULL_METADATA
         }
         namespace.accept = formats[namespace.accept.lower()]
 
 
-def validate_client_parameters(namespace):
-    """ Retrieves storage connection parameters from environment variables and parses out
-    connection string into account name and key """
+def validate_bypass(namespace):
+    if namespace.bypass:
+        namespace.bypass = ', '.join(namespace.bypass) if isinstance(namespace.bypass, list) else namespace.bypass
+
+
+def validate_client_parameters(cmd, namespace):
+    """ Retrieves storage connection parameters from environment variables and parses out connection string into
+    account name and key """
     n = namespace
 
+    def get_config_value(section, key, default):
+        return cmd.cli_ctx.config.get(section, key, default)
+
     if not n.connection_string:
-        n.connection_string = az_config.get('storage', 'connection_string', None)
+        n.connection_string = get_config_value('storage', 'connection_string', None)
 
     # if connection string supplied or in environment variables, extract account key and name
     if n.connection_string:
@@ -88,11 +81,11 @@ def validate_client_parameters(namespace):
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
-        n.account_name = az_config.get('storage', 'account', None)
+        n.account_name = get_config_value('storage', 'account', None)
     if not n.account_key:
-        n.account_key = az_config.get('storage', 'key', None)
+        n.account_key = get_config_value('storage', 'key', None)
     if not n.sas_token:
-        n.sas_token = az_config.get('storage', 'sas_token', None)
+        n.sas_token = get_config_value('storage', 'sas_token', None)
 
     # strip the '?' from sas token. the portal and command line are returns sas token in different
     # forms
@@ -101,13 +94,14 @@ def validate_client_parameters(namespace):
 
     # if account name is specified but no key, attempt to query
     if n.account_name and not n.account_key and not n.sas_token:
-        n.account_key = _query_account_key(n.account_name)
+        n.account_key = _query_account_key(cmd.cli_ctx, n.account_name)
 
 
-def process_blob_source_uri(namespace):
+def process_blob_source_uri(cmd, namespace):
     """
     Validate the parameters referenced to a blob source and create the source URI from them.
     """
+    from .util import create_short_lived_blob_sas
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
         '\n\t   --source-uri' \
@@ -136,7 +130,7 @@ def process_blob_source_uri(namespace):
             # simplest scenario--no further processing necessary
             return
 
-    validate_client_parameters(namespace)  # must run first to resolve storage account
+    validate_client_parameters(cmd, namespace)  # must run first to resolve storage account
 
     # determine if the copy will happen in the same storage account
     if not source_account_name and source_account_key:
@@ -154,7 +148,7 @@ def process_blob_source_uri(namespace):
             # the source account is different from destination account but the key is missing
             # try to query one.
             try:
-                source_account_key = _query_account_key(source_account_name)
+                source_account_key = _query_account_key(cmd.cli_ctx, source_account_name)
             except ValueError:
                 raise ValueError('Source storage account {} not found.'.format(source_account_name))
     # else: both source account name and key are given by user
@@ -163,7 +157,7 @@ def process_blob_source_uri(namespace):
         raise ValueError(usage_string.format('Storage account name not found'))
 
     if not sas:
-        sas = _create_short_lived_blob_sas(source_account_name, source_account_key, container, blob)
+        sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
 
     query_params = []
     if sas:
@@ -172,7 +166,7 @@ def process_blob_source_uri(namespace):
         query_params.append('snapshot={}'.format(snapshot))
 
     uri = 'https://{}.blob.{}/{}/{}{}{}'.format(source_account_name,
-                                                CLOUD.suffixes.storage_endpoint,
+                                                cmd.cli_ctx.cloud.suffixes.storage_endpoint,
                                                 container,
                                                 blob,
                                                 '?' if query_params else '',
@@ -181,12 +175,13 @@ def process_blob_source_uri(namespace):
     namespace.copy_source = uri
 
 
-def validate_source_uri(namespace):  # pylint: disable=too-many-statements
+def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
+    from .util import create_short_lived_blob_sas, create_short_lived_file_sas
     usage_string = \
         'Invalid usage: {}. Supply only one of the following argument sets to specify source:' \
         '\n\t   --source-uri' \
-        '\n\tOR --source-container --source-blob [--source-account-name & sas] [--source-snapshot]'\
-        '\n\tOR --source-container --source-blob [--source-account-name & key] [--source-snapshot]'\
+        '\n\tOR --source-container --source-blob [--source-account-name & sas] [--source-snapshot]' \
+        '\n\tOR --source-container --source-blob [--source-account-name & key] [--source-snapshot]' \
         '\n\tOR --source-share --source-path' \
         '\n\tOR --source-share --source-path [--source-account-name & sas]' \
         '\n\tOR --source-share --source-path [--source-account-name & key]'
@@ -228,7 +223,7 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
         raise ValueError(usage_string.format('Ambiguous parameters, both blob and file sources are '
                                              'specified'))
 
-    validate_client_parameters(namespace)  # must run first to resolve storage account
+    validate_client_parameters(cmd, namespace)  # must run first to resolve storage account
 
     # determine if the copy will happen in the same storage account
     same_account = False
@@ -249,7 +244,7 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
             # the source account is different from destination account but the key is missing
             # try to query one.
             try:
-                source_account_key = _query_account_key(source_account_name)
+                source_account_key = _query_account_key(cmd.cli_ctx, source_account_name)
             except ValueError:
                 raise ValueError('Source storage account {} not found.'.format(source_account_name))
     # else: both source account name and key are given by user
@@ -261,12 +256,13 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
         # generate a sas token even in the same account when the source and destination are not the
         # same kind.
         if valid_file_source and (ns.get('container_name', None) or not same_account):
+            import os
             dir_name, file_name = os.path.split(path) if path else (None, '')
-            sas = _create_short_lived_file_sas(source_account_name, source_account_key, share,
-                                               dir_name, file_name)
+            sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
+                                              dir_name, file_name)
         elif valid_blob_source and (ns.get('share_name', None) or not same_account):
-            sas = _create_short_lived_blob_sas(source_account_name, source_account_key, container,
-                                               blob)
+            sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container,
+                                              blob)
 
     query_params = []
     if sas:
@@ -278,10 +274,10 @@ def validate_source_uri(namespace):  # pylint: disable=too-many-statements
         source_account_name,
         'blob' if valid_blob_source else 'file',
         container if valid_blob_source else share,
-        blob if valid_blob_source else path,
+        encode_for_url(blob if valid_blob_source else path),
         '?' if query_params else '',
         '&'.join(query_params),
-        CLOUD.suffixes.storage_endpoint)
+        cmd.cli_ctx.cloud.suffixes.storage_endpoint)
 
     namespace.copy_source = uri
 
@@ -291,23 +287,21 @@ def validate_blob_type(namespace):
         namespace.blob_type = 'page' if namespace.file_path.endswith('.vhd') else 'block'
 
 
-def get_content_setting_validator(settings_class, update):
+def get_content_setting_validator(settings_class, update, guess_from_file=None):
     def _class_name(class_type):
         return class_type.__module__ + "." + class_type.__class__.__name__
 
-    def validator(namespace):
-        BaseBlobService, FileService, \
-            BlobContentSettings, FileContentSettings = get_sdk(
-                ResourceType.DATA_STORAGE,
-                'blob.baseblobservice#BaseBlobService',
-                'file#FileService',
-                'blob.models#ContentSettings',
-                'file.models#ContentSettings')
+    def validator(cmd, namespace):
+        t_base_blob_service, t_file_service, t_blob_content_settings, t_file_content_settings = cmd.get_models(
+            'blob.baseblobservice#BaseBlobService',
+            'file#FileService',
+            'blob.models#ContentSettings',
+            'file.models#ContentSettings')
 
         # must run certain validators first for an update
         if update:
-            validate_client_parameters(namespace)
-        if update and _class_name(settings_class) == _class_name(FileContentSettings):
+            validate_client_parameters(cmd, namespace)
+        if update and _class_name(settings_class) == _class_name(t_file_content_settings):
             get_file_path_validator()(namespace)
         ns = vars(namespace)
 
@@ -317,8 +311,9 @@ def get_content_setting_validator(settings_class, update):
             key = ns.get('account_key')
             cs = ns.get('connection_string')
             sas = ns.get('sas_token')
-            if _class_name(settings_class) == _class_name(BlobContentSettings):
-                client = get_storage_data_service_client(BaseBlobService,
+            if _class_name(settings_class) == _class_name(t_blob_content_settings):
+                client = get_storage_data_service_client(cmd.cli_ctx,
+                                                         t_base_blob_service,
                                                          account,
                                                          key,
                                                          cs,
@@ -326,13 +321,13 @@ def get_content_setting_validator(settings_class, update):
                 container = ns.get('container_name')
                 blob = ns.get('blob_name')
                 lease_id = ns.get('lease_id')
-                props = client.get_blob_properties(container, blob, lease_id=lease_id).properties.content_settings  # pylint: disable=line-too-long
-            elif _class_name(settings_class) == _class_name(FileContentSettings):
-                client = get_storage_data_service_client(FileService, account, key, cs, sas)  # pylint: disable=redefined-variable-type
+                props = client.get_blob_properties(container, blob, lease_id=lease_id).properties.content_settings
+            elif _class_name(settings_class) == _class_name(t_file_content_settings):
+                client = get_storage_data_service_client(cmd.cli_ctx, t_file_service, account, key, cs, sas)
                 share = ns.get('share_name')
                 directory = ns.get('directory_name')
                 filename = ns.get('file_name')
-                props = client.get_file_properties(share, directory, filename).properties.content_settings  # pylint: disable=line-too-long
+                props = client.get_file_properties(share, directory, filename).properties.content_settings
 
         # create new properties
         new_props = settings_class(
@@ -347,15 +342,17 @@ def get_content_setting_validator(settings_class, update):
         # if update, fill in any None values with existing
         if update:
             new_props.content_type = new_props.content_type or props.content_type
-            new_props.content_disposition = new_props.content_disposition \
-                or props.content_disposition
+            new_props.content_disposition = new_props.content_disposition or props.content_disposition
             new_props.content_encoding = new_props.content_encoding or props.content_encoding
             new_props.content_language = new_props.content_language or props.content_language
             new_props.content_md5 = new_props.content_md5 or props.content_md5
             new_props.cache_control = new_props.cache_control or props.cache_control
+        else:
+            if guess_from_file:
+                new_props = guess_content_type(ns[guess_from_file], new_props, settings_class)
 
         ns['content_settings'] = new_props
-        namespace = argparse.Namespace(**ns)
+
     return validator
 
 
@@ -364,23 +361,49 @@ def validate_custom_domain(namespace):
         raise ValueError('usage error: --custom-domain DOMAIN [--use-subdomain]')
 
 
-def validate_encryption(namespace):
-    ''' Builds up the encryption object for storage account operations based on the
-    list of services passed in. '''
-    if namespace.encryption:
-        Encryption, EncryptionServices, \
-            EncryptionService = get_sdk(ResourceType.MGMT_STORAGE,
-                                        'Encryption',
-                                        'EncryptionServices',
-                                        'EncryptionService',
-                                        mod='models')
-        services = {service: EncryptionService(True) for service in namespace.encryption}
-        namespace.encryption = Encryption(EncryptionServices(**services))
+def validate_encryption_services(cmd, namespace):
+    """
+    Builds up the encryption services object for storage account operations based on the list of services passed in.
+    """
+    if namespace.encryption_services:
+        t_encryption_services, t_encryption_service = get_sdk(cmd.cli_ctx, ResourceType.MGMT_STORAGE,
+                                                              'EncryptionServices', 'EncryptionService', mod='models')
+        services = {service: t_encryption_service(True) for service in namespace.encryption_services}
+
+        namespace.encryption_services = t_encryption_services(**services)
+
+
+def validate_encryption_source(cmd, namespace):
+    ns = vars(namespace)
+    if namespace.encryption_key_source:
+        allowed_options = ['Microsoft.Storage', 'Microsoft.Keyvault']
+        if namespace.encryption_key_source not in allowed_options:
+            raise ValueError('--encryption-key-source allows to values: {}'.format(', '.join(allowed_options)))
+
+    key_name = ns.pop('encryption_key_name', None)
+    key_version = ns.pop('encryption_key_version', None)
+    key_vault_uri = ns.pop('encryption_key_vault', None)
+
+    if namespace.encryption_key_source == 'Microsoft.Keyvault' and not (key_name and key_version and key_vault_uri):
+        raise ValueError('--encryption-key-name, --encryption-key-vault, and --encryption-key-version are required '
+                         'when --encryption-key-source=Microsoft.Keyvault is specified.')
+
+    if key_name or key_version or key_vault_uri:
+        if namespace.encryption_key_source != 'Microsoft.Keyvault':
+            raise ValueError('--encryption-key-name, --encryption-key-vault, and --encryption-key-version are not '
+                             'applicable when --encryption-key-source=Microsoft.Keyvault is not specified.')
+        KeyVaultProperties = get_sdk(cmd.cli_ctx, ResourceType.MGMT_STORAGE, 'KeyVaultProperties',
+                                     mod='models')
+        if not KeyVaultProperties:
+            return
+
+        kv_prop = KeyVaultProperties(key_name, key_version, key_vault_uri)
+        namespace.encryption_key_vault_properties = kv_prop
 
 
 def validate_entity(namespace):
-    ''' Converts a list of key value pairs into a dictionary. Ensures that required
-    RowKey and PartitionKey are converted to the correct case and included. '''
+    """ Converts a list of key value pairs into a dictionary. Ensures that required
+    RowKey and PartitionKey are converted to the correct case and included. """
     values = dict(x.split('=', 1) for x in namespace.entity)
     keys = values.keys()
     for key in keys:
@@ -397,6 +420,7 @@ def validate_entity(namespace):
     missing_keys = '{}PartitionKey'.format(missing_keys) \
         if 'PartitionKey' not in keys else missing_keys
     if missing_keys:
+        import argparse
         raise argparse.ArgumentError(
             None, 'incorrect usage: entity requires: {}'.format(missing_keys))
 
@@ -411,6 +435,7 @@ def validate_entity(namespace):
                 return to_type(val)
             except ValueError:
                 return None
+
         return try_cast(int) or try_cast(float) or val
 
     # ensure numbers are converted from strings so querying will work correctly
@@ -421,7 +446,9 @@ def validate_entity(namespace):
 def get_file_path_validator(default_file_param=None):
     """ Creates a namespace validator that splits out 'path' into 'directory_name' and 'file_name'.
     Allows another path-type parameter to be named which can supply a default filename. """
+
     def validator(namespace):
+        import os
         if not hasattr(namespace, 'path'):
             return
 
@@ -434,17 +461,18 @@ def get_file_path_validator(default_file_param=None):
         namespace.directory_name = dir_name
         namespace.file_name = file_name
         del namespace.path
+
     return validator
 
 
-def validate_included_datasets(namespace):
+def validate_included_datasets(cmd, namespace):
     if namespace.include:
         include = namespace.include
         if set(include) - set('cms'):
             help_string = '(c)opy-info (m)etadata (s)napshots'
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
-        Include = get_sdk(ResourceType.DATA_STORAGE, 'blob#Include')
-        namespace.include = Include('s' in include, 'm' in include, False, 'c' in include)
+        t_blob_include = cmd.get_models('blob#Include')
+        namespace.include = t_blob_include('s' in include, 'm' in include, False, 'c' in include)
 
 
 def validate_key(namespace):
@@ -462,7 +490,6 @@ def get_permission_help_string(permission_class):
 
 
 def get_permission_validator(permission_class):
-
     allowed_values = [x.lower() for x in dir(permission_class) if not x.startswith('__')]
     allowed_string = ''.join(x[0] for x in allowed_values)
 
@@ -473,36 +500,37 @@ def get_permission_validator(permission_class):
                 raise ValueError(
                     'valid values are {} or a combination thereof.'.format(help_string))
             namespace.permission = permission_class(_str=namespace.permission)
+
     return validator
 
 
-def table_permission_validator(namespace):
+def table_permission_validator(cmd, namespace):
     """ A special case for table because the SDK associates the QUERY permission with 'r' """
-    TablePermissions = get_sdk(ResourceType.DATA_STORAGE, 'table#TablePermissions')
+    t_table_permissions = get_table_data_type(cmd.cli_ctx, 'table', 'TablePermissions')
     if namespace.permission:
         if set(namespace.permission) - set('raud'):
             help_string = '(r)ead/query (a)dd (u)pdate (d)elete'
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
-        namespace.permission = TablePermissions(_str=namespace.permission)
+        namespace.permission = t_table_permissions(_str=namespace.permission)
 
 
-def validate_public_access(namespace):
-    BaseBlobService = get_sdk(ResourceType.DATA_STORAGE, 'blob.baseblobservice#BaseBlobService')
-    from ._params import public_access_types
+def validate_container_public_access(cmd, namespace):
+    from .sdkutil import get_container_access_type
+    t_base_blob_svc = cmd.get_models('blob.baseblobservice#BaseBlobService')
 
     if namespace.public_access:
-        namespace.public_access = public_access_types[namespace.public_access.lower()]
+        namespace.public_access = get_container_access_type(cmd.cli_ctx, namespace.public_access.lower())
 
         if hasattr(namespace, 'signed_identifiers'):
             # must retrieve the existing ACL to simulate a patch operation because these calls
             # are needlessly conflated
             ns = vars(namespace)
-            validate_client_parameters(namespace)
+            validate_client_parameters(cmd, namespace)
             account = ns.get('account_name')
             key = ns.get('account_key')
             cs = ns.get('connection_string')
             sas = ns.get('sas_token')
-            client = get_storage_data_service_client(BaseBlobService, account, key, cs, sas)
+            client = get_storage_data_service_client(cmd.cli_ctx, t_base_blob_svc, account, key, cs, sas)
             container = ns.get('container_name')
             lease_id = ns.get('lease_id')
             ns['signed_identifiers'] = client.get_container_acl(container, lease_id=lease_id)
@@ -513,16 +541,14 @@ def validate_select(namespace):
         namespace.select = ','.join(namespace.select)
 
 
-def get_source_file_or_blob_service_client(namespace):
+def get_source_file_or_blob_service_client(cmd, namespace):
     """
     Create the second file service or blob service client for batch copy command, which is used to
     list the source files or blobs. If both the source account and source URI are omitted, it
     indicates that user want to copy files or blobs in the same storage account, therefore the
     destination client will be set None hence the command will use destination client.
     """
-    FileService, BlockBlobService = get_sdk(ResourceType.DATA_STORAGE,
-                                            'file#FileService',
-                                            'blob.blockblobservice#BlockBlobService')
+    t_file_svc, t_block_blob_svc = cmd.get_models('file#FileService', 'blob.blockblobservice#BlockBlobService')
     usage_string = 'invalid usage: supply only one of the following argument sets:' + \
                    '\n\t   --source-uri' + \
                    '\n\tOR --source-container' + \
@@ -571,26 +597,25 @@ def get_source_file_or_blob_service_client(namespace):
         if not (source_key or source_sas):
             # when either storage account key or SAS is given, try to fetch the key in the current
             # subscription
-            source_key = _query_account_key(source_account)
+            source_key = _query_account_key(cmd.cli_ctx, source_account)
 
         if source_container:
-            ns['source_client'] = BlockBlobService(account_name=source_account,
+            ns['source_client'] = t_block_blob_svc(account_name=source_account,
                                                    account_key=source_key,
                                                    sas_token=source_sas)
         elif source_share:
-            ns['source_client'] = FileService(account_name=source_account,
-                                              account_key=source_key,
-                                              sas_token=source_sas)
+            ns['source_client'] = t_file_svc(account_name=source_account,
+                                             account_key=source_key,
+                                             sas_token=source_sas)
         else:
             raise ValueError(usage_string)
 
     elif source_uri:
-        if source_sas or source_key or ('source_container' in ns) or ('source_share' in ns):
+        if source_sas or source_key or source_container or source_share:
             raise ValueError(usage_string)
 
         from .storage_url_helpers import StorageResourceIdentifier
-        identifier = StorageResourceIdentifier(source_uri)
-
+        identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, source_uri)
         nor_container_or_share = not identifier.container and not identifier.share
         if not identifier.is_url():
             raise ValueError('incorrect usage: --source-uri expects a URI')
@@ -598,27 +623,48 @@ def get_source_file_or_blob_service_client(namespace):
                 identifier.filename or nor_container_or_share:
             raise ValueError('incorrect usage: --source-uri has to be blob container or file share')
         elif identifier.container:
-            ns['source_client'] = BlockBlobService(account_name=identifier.account_name,
-                                                   sas_token=identifier.sas_token)
+            ns['source_container'] = identifier.container
+            if identifier.account_name != ns.get('account_name'):
+                ns['source_client'] = t_block_blob_svc(account_name=identifier.account_name,
+                                                       sas_token=identifier.sas_token)
         elif identifier.share:
-            ns['source_client'] = FileService(account_name=identifier.account_name,
-                                              sas_token=identifier.sas_token)
-
-# endregion
-
-# region COMMAND VALIDATORS
+            ns['source_share'] = identifier.share
+            if identifier.account_name != ns.get('account_name'):
+                ns['source_client'] = t_file_svc(account_name=identifier.account_name,
+                                                 sas_token=identifier.sas_token)
 
 
-def process_blob_download_batch_parameters(namespace):
+def add_progress_callback(cmd, namespace):
+    def _update_progress(current, total):
+        hook = cmd.cli_ctx.get_progress_controller(det=True)
+
+        if total:
+            hook.add(message='Alive', value=current, total_val=total)
+            if total == current:
+                hook.end()
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
+
+
+def process_blob_download_batch_parameters(namespace, cmd):
     """Process the parameters for storage blob download command"""
+    import os
 
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
         raise ValueError('incorrect usage: destination must be an existing directory')
 
     # 2. try to extract account name and container name from source string
+    process_blob_batch_source_parameters(cmd, namespace)
+
+
+def process_blob_batch_source_parameters(cmd, namespace):
+    """Process the parameters for storage blob download command"""
+
+    # try to extract account name and container name from source string
     from .storage_url_helpers import StorageResourceIdentifier
-    identifier = StorageResourceIdentifier(namespace.source)
+    identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, namespace.source)
 
     if not identifier.is_url():
         namespace.source_container_name = namespace.source
@@ -630,8 +676,9 @@ def process_blob_download_batch_parameters(namespace):
             namespace.account_name = identifier.account_name
 
 
-def process_blob_upload_batch_parameters(namespace):
+def process_blob_upload_batch_parameters(cmd, namespace):
     """Process the source and destination of storage blob upload command"""
+    import os
 
     # 1. quick check
     if not os.path.exists(namespace.source):
@@ -642,7 +689,7 @@ def process_blob_upload_batch_parameters(namespace):
 
     # 2. try to extract account name and container name from destination string
     from .storage_url_helpers import StorageResourceIdentifier
-    identifier = StorageResourceIdentifier(namespace.destination)
+    identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, namespace.destination)
 
     if not identifier.is_url():
         namespace.destination_container_name = namespace.destination
@@ -650,8 +697,24 @@ def process_blob_upload_batch_parameters(namespace):
         raise ValueError('incorrect usage: destination cannot be a blob url')
     else:
         namespace.destination_container_name = identifier.container
-        if not namespace.account_name:
+
+        if namespace.account_name:
+            if namespace.account_name != identifier.account_name:
+                raise ValueError(
+                    'The given storage account name is not consistent with the account name in the destination URI')
+        else:
             namespace.account_name = identifier.account_name
+
+        if not (namespace.account_key or namespace.sas_token or namespace.connection_string):
+            validate_client_parameters(cmd, namespace)
+
+        # it is possible the account name be overwritten by the connection string
+        if namespace.account_name != identifier.account_name:
+            raise ValueError(
+                'The given storage account name is not consistent with the account name in the destination URI')
+
+        if not (namespace.account_key or namespace.sas_token or namespace.connection_string):
+            raise ValueError('Missing storage account credential information.')
 
     # 3. collect the files to be uploaded
     namespace.source = os.path.realpath(namespace.source)
@@ -665,10 +728,11 @@ def process_blob_upload_batch_parameters(namespace):
             namespace.blob_type = 'page'
         elif any(vhd_files):
             # source files contain vhd files but not all of them
-            raise CLIError('''Fail to guess the required blob type. Type of the files to be
+            from knack.util import CLIError
+            raise CLIError("""Fail to guess the required blob type. Type of the files to be
             uploaded are not consistent. Default blob type for .vhd files is "page", while
             others are "block". You can solve this problem by either explicitly set the blob
-            type or ensure the pattern matches a correct set of files.''')
+            type or ensure the pattern matches a correct set of files.""")
         else:
             namespace.blob_type = 'block'
 
@@ -678,8 +742,9 @@ def process_blob_copy_batch_namespace(namespace):
         raise ValueError('incorrect usage: --recursive | --pattern PATTERN')
 
 
-def process_file_upload_batch_parameters(namespace):
+def process_file_upload_batch_parameters(cmd, namespace):
     """Process the parameters of storage file batch upload command"""
+    import os
 
     # 1. quick check
     if not os.path.exists(namespace.source):
@@ -690,7 +755,7 @@ def process_file_upload_batch_parameters(namespace):
 
     # 2. try to extract account name and container name from destination string
     from .storage_url_helpers import StorageResourceIdentifier
-    identifier = StorageResourceIdentifier(namespace.destination)
+    identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, namespace.destination)
     if identifier.is_url():
         if identifier.filename or identifier.directory:
             raise ValueError('incorrect usage: destination must be a file share url')
@@ -703,16 +768,21 @@ def process_file_upload_batch_parameters(namespace):
     namespace.source = os.path.realpath(namespace.source)
 
 
-def process_file_download_batch_parameters(namespace):
+def process_file_download_batch_parameters(cmd, namespace):
     """Process the parameters for storage file batch download command"""
+    import os
 
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
         raise ValueError('incorrect usage: destination must be an existing directory')
 
     # 2. try to extract account name and share name from source string
+    process_file_batch_source_parameters(cmd, namespace)
+
+
+def process_file_batch_source_parameters(cmd, namespace):
     from .storage_url_helpers import StorageResourceIdentifier
-    identifier = StorageResourceIdentifier(namespace.source)
+    identifier = StorageResourceIdentifier(cmd.cli_ctx.cloud, namespace.source)
     if identifier.is_url():
         if identifier.filename or identifier.directory:
             raise ValueError('incorrect usage: source should be either share URL or name')
@@ -724,6 +794,7 @@ def process_file_download_batch_parameters(namespace):
 
 
 def process_file_download_namespace(namespace):
+    import os
 
     get_file_path_validator()(namespace)
 
@@ -733,21 +804,11 @@ def process_file_download_namespace(namespace):
             if dest else namespace.file_name
 
 
-def process_logging_update_namespace(namespace):
-    services = namespace.services
-    if set(services) - set('bqt'):
-        raise ValueError('--services: valid values are (b)lob (q)ueue '
-                         '(t)able or a combination thereof (ex: bt).')
-    log = namespace.log
-    if set(log) - set('rwd'):
-        raise ValueError('--log: valid values are (r)ead (w)rite (d)elete '
-                         'or a combination thereof (ex: rw).')
-
-
 def process_metric_update_namespace(namespace):
-    namespace.hour = namespace.hour == 'enable'
-    namespace.minute = namespace.minute == 'enable'
-    namespace.api = namespace.api == 'enable' if namespace.api else None
+    import argparse
+    namespace.hour = namespace.hour == 'true'
+    namespace.minute = namespace.minute == 'true'
+    namespace.api = namespace.api == 'true' if namespace.api else None
     if namespace.hour is None and namespace.minute is None:
         raise argparse.ArgumentError(
             None, 'incorrect usage: must specify --hour and/or --minute')
@@ -755,14 +816,36 @@ def process_metric_update_namespace(namespace):
         raise argparse.ArgumentError(
             None, 'incorrect usage: specify --api when hour or minute metrics are enabled')
 
-# endregion
 
-# region TYPES
+def validate_subnet(cmd, namespace):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    subnet = namespace.subnet
+    subnet_is_id = is_valid_resource_id(subnet)
+    vnet = namespace.vnet_name
+
+    if (subnet_is_id and not vnet) or (not subnet and not vnet):
+        return
+    elif subnet and not subnet_is_id and vnet:
+        namespace.subnet = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet,
+            child_type_1='subnets',
+            child_name_1=subnet)
+    else:
+        from knack.util import CLIError
+        raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
 
 
 def get_datetime_type(to_string):
     """ Validates UTC datetime. Examples of accepted forms:
     2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
+    from datetime import datetime
+
     def datetime_type(string):
         """ Validates UTC datetime. Examples of accepted forms:
         2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
@@ -772,16 +855,18 @@ def get_datetime_type(to_string):
             try:
                 if to_string:
                     return datetime.strptime(string, form).strftime(form)
-                else:
-                    return datetime.strptime(string, form)
+
+                return datetime.strptime(string, form)
             except ValueError:
                 continue
         raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))
+
     return datetime_type
 
 
 def ipv4_range_type(string):
-    ''' Validates an IPv4 address or address range. '''
+    """ Validates an IPv4 address or address range. """
+    import re
     ip_format = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
     if not re.match("^{}$".format(ip_format), string):
         if not re.match("^{}-{}$".format(ip_format, ip_format), string):
@@ -789,21 +874,82 @@ def ipv4_range_type(string):
     return string
 
 
-def resource_type_type(string):
-    ''' Validates that resource types string contains only a combination
-    of (s)ervice, (c)ontainer, (o)bject '''
-    ResourceTypes = get_sdk(ResourceType.DATA_STORAGE, 'models#ResourceTypes')
-    if set(string) - set("sco"):
-        raise ValueError
-    return ResourceTypes(_str=''.join(set(string)))
+def resource_type_type(loader):
+    """ Returns a function which validates that resource types string contains only a combination of service,
+    container, and object. Their shorthand representations are s, c, and o. """
+
+    def impl(string):
+        t_resources = loader.get_models('common.models#ResourceTypes')
+        if set(string) - set("sco"):
+            raise ValueError
+        return t_resources(_str=''.join(set(string)))
+
+    return impl
 
 
-def services_type(string):
-    ''' Validates that services string contains only a combination
-    of (b)lob, (q)ueue, (t)able, (f)ile '''
-    Services = get_sdk(ResourceType.DATA_STORAGE, 'models#Services')
-    if set(string) - set("bqtf"):
-        raise ValueError
-    return Services(_str=''.join(set(string)))
+def services_type(loader):
+    """ Returns a function which validates that services string contains only a combination of blob, queue, table,
+    and file. Their shorthand representations are b, q, t, and f. """
 
-# endregion
+    def impl(string):
+        t_services = loader.get_models('common.models#Services')
+        if set(string) - set("bqtf"):
+            raise ValueError
+        return t_services(_str=''.join(set(string)))
+
+    return impl
+
+
+def get_char_options_validator(types, property_name):
+    def _validator(namespace):
+        service_types = set(getattr(namespace, property_name, list()))
+
+        if not service_types:
+            raise ValueError('Missing options --{}.'.format(property_name.replace('_', '-')))
+
+        if service_types - set(types):
+            raise ValueError(
+                '--{}: only valid values are: {}.'.format(property_name.replace('_', '-'), ', '.join(types)))
+
+        setattr(namespace, property_name, service_types)
+
+    return _validator
+
+
+def page_blob_tier_validator(cmd, namespace):
+    if not namespace.tier:
+        return
+
+    if namespace.blob_type != 'page' and namespace.tier:
+        raise ValueError('Blob tier is only applicable to page blobs on premium storage accounts.')
+
+    try:
+        namespace.tier = getattr(cmd.get_models('blob.models#PremiumPageBlobTier'), namespace.tier)
+    except AttributeError:
+        from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names
+        raise ValueError('Unknown premium page blob tier name. Choose among {}'.format(', '.join(
+            get_blob_tier_names(cmd.cli_ctx, 'PremiumPageBlobTier'))))
+
+
+def block_blob_tier_validator(cmd, namespace):
+    if not namespace.tier:
+        return
+
+    if namespace.blob_type != 'block' and namespace.tier:
+        raise ValueError('Blob tier is only applicable to block blobs on standard storage accounts.')
+
+    try:
+        namespace.tier = getattr(cmd.get_models('blob.models#StandardBlobTier'), namespace.tier)
+    except AttributeError:
+        from azure.cli.command_modules.storage.sdkutil import get_blob_tier_names
+        raise ValueError('Unknown block blob tier name. Choose among {}'.format(', '.join(
+            get_blob_tier_names(cmd.cli_ctx, 'StandardBlobTier'))))
+
+
+def blob_tier_validator(cmd, namespace):
+    if namespace.blob_type == 'page':
+        page_blob_tier_validator(cmd, namespace)
+    elif namespace.blob_type == 'block':
+        block_blob_tier_validator(cmd, namespace)
+    else:
+        raise ValueError('Blob tier is only applicable to block or page blob.')

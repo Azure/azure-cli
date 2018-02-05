@@ -4,100 +4,185 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from azure.cli.core.commands import cli_command
-from azure.cli.command_modules.dla._client_factory import (cf_dla_account,
-                                                           cf_dla_account_firewall,
-                                                           cf_dla_account_adls,
-                                                           cf_dla_account_storage,
-                                                           cf_dla_job,
-                                                           cf_dla_catalog)
-adla_format_path = 'azure.mgmt.datalake.analytics.{}.operations.{}#{}.{}'
-adla_custom_format_path = 'azure.cli.command_modules.dla.custom#{}'
+from azure.cli.core.commands import CliCommandType
+from azure.cli.command_modules.dla._client_factory import (
+    cf_dla_account,
+    cf_dla_account_firewall,
+    cf_dla_account_adls,
+    cf_dla_account_storage,
+    cf_dla_job,
+    cf_dla_catalog,
+    cf_dla_job_pipeline,
+    cf_dla_job_recurrence,
+    cf_dla_account_compute_policy)
+from azure.cli.command_modules.dla._validators import process_dla_job_submit_namespace
 
-# account operations
-cli_command(__name__, 'dla account create', adla_custom_format_path.format('create_adla_account'), cf_dla_account)
-cli_command(__name__, 'dla account update', adla_custom_format_path.format('update_adla_account'), cf_dla_account)
-cli_command(__name__, 'dla account list', adla_custom_format_path.format('list_adla_account'), cf_dla_account)
-cli_command(__name__, 'dla account show', adla_format_path.format('account', 'account_operations', 'AccountOperations', 'get'), cf_dla_account)
-cli_command(__name__, 'dla account delete', adla_format_path.format('account', 'account_operations', 'AccountOperations', 'delete'), cf_dla_account)
 
-# account fire wall operations
-# TODO: implement
-cli_command(__name__, 'dla account firewall create', adla_custom_format_path.format('add_adla_firewall_rule'), cf_dla_account_firewall)
-cli_command(__name__, 'dla account firewall update', adla_format_path.format('account', 'firewall_rules_operations', 'FirewallRulesOperations', 'update'), cf_dla_account_firewall)
-cli_command(__name__, 'dla account firewall list', adla_format_path.format('account', 'firewall_rules_operations', 'FirewallRulesOperations', 'list_by_account'), cf_dla_account_firewall)
-cli_command(__name__, 'dla account firewall show', adla_format_path.format('account', 'firewall_rules_operations', 'FirewallRulesOperations', 'get'), cf_dla_account_firewall)
-cli_command(__name__, 'dla account firewall delete', adla_format_path.format('account', 'firewall_rules_operations', 'FirewallRulesOperations', 'delete'), cf_dla_account_firewall)
+# pylint: disable=too-many-statements
+def load_command_table(self, _):
 
-# job operations
-# todo: update to allow for inclusion of statistics/debug data in show
-# todo: add a polling command for jobs
-cli_command(__name__, 'dla job submit', adla_custom_format_path.format('submit_adla_job'), cf_dla_job)
-cli_command(__name__, 'dla job wait', adla_custom_format_path.format('wait_adla_job'), cf_dla_job)
-cli_command(__name__, 'dla job show', adla_format_path.format('job', 'job_operations', 'JobOperations', 'get'), cf_dla_job)
-cli_command(__name__, 'dla job cancel', adla_format_path.format('job', 'job_operations', 'JobOperations', 'cancel'), cf_dla_job)
-cli_command(__name__, 'dla job list', adla_custom_format_path.format('list_adla_jobs'), cf_dla_job)
+    adla_format_path = 'azure.mgmt.datalake.analytics.{}.operations.{}#{}.{{}}'
 
-# account data source operations
-cli_command(__name__, 'dla account blob-storage show', adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations', 'get'), cf_dla_account_storage)
-cli_command(__name__, 'dla account blob-storage add', adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations', 'add'), cf_dla_account_storage)
-cli_command(__name__, 'dla account blob-storage update', adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations', 'update'), cf_dla_account_storage)
-cli_command(__name__, 'dla account blob-storage delete', adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations', 'delete'), cf_dla_account_storage)
-cli_command(__name__, 'dla account blob-storage list', adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations', 'list_by_account'), cf_dla_account_storage)
+    dla_account_sdk = CliCommandType(
+        operations_tmpl=adla_format_path.format('account', 'account_operations', 'AccountOperations'),
+        client_factory=cf_dla_account)
 
-cli_command(__name__, 'dla account data-lake-store show', adla_format_path.format('account', 'data_lake_store_accounts_operations', 'DataLakeStoreAccountsOperations', 'get'), cf_dla_account_adls)
-cli_command(__name__, 'dla account data-lake-store list', adla_format_path.format('account', 'data_lake_store_accounts_operations', 'DataLakeStoreAccountsOperations', 'list_by_account'), cf_dla_account_adls)
-cli_command(__name__, 'dla account data-lake-store add', adla_format_path.format('account', 'data_lake_store_accounts_operations', 'DataLakeStoreAccountsOperations', 'add'), cf_dla_account_adls)
-cli_command(__name__, 'dla account data-lake-store delete', adla_format_path.format('account', 'data_lake_store_accounts_operations', 'DataLakeStoreAccountsOperations', 'delete'), cf_dla_account_adls)
+    dla_firewall_sdk = CliCommandType(
+        operations_tmpl=adla_format_path.format('account', 'firewall_rules_operations', 'FirewallRulesOperations'),
+        client_factory=cf_dla_account_firewall)
 
-# catalog operations
-# credential
-cli_command(__name__, 'dla catalog credential create', adla_custom_format_path.format('create_adla_catalog_credential'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog credential show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_credential'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog credential update', adla_custom_format_path.format('update_adla_catalog_credential'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog credential list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_credentials'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog credential delete', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'delete_credential'), cf_dla_catalog)
+    dla_job_sdk = CliCommandType(
+        operations_tmpl=adla_format_path.format('job', 'job_operations', 'JobOperations'),
+        client_factory=cf_dla_job)
 
-# database
-cli_command(__name__, 'dla catalog database show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_database'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog database list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_databases'), cf_dla_catalog)
+    dla_job_pipeline_sdk = CliCommandType(
+        operations_tmpl=adla_format_path.format('job', 'pipeline_operations', 'PipelineOperations'),
+        client_factory=cf_dla_job_pipeline)
 
-# schema
-cli_command(__name__, 'dla catalog schema show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_schema'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog schema list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_schemas'), cf_dla_catalog)
+    dla_job_recurrence_sdk = CliCommandType(
+        operations_tmpl=adla_format_path.format('job', 'recurrence_operations', 'RecurrenceOperations'),
+        client_factory=cf_dla_job_recurrence)
 
-# table
-cli_command(__name__, 'dla catalog table show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_table'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog table list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_tables'), cf_dla_catalog)
+    dla_storage_sdk = CliCommandType(
+        operations_tmpl=adla_format_path.format('account', 'storage_accounts_operations', 'StorageAccountsOperations'),
+        client_factory=cf_dla_account_storage)
 
-# assembly
-cli_command(__name__, 'dla catalog assembly show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_assembly'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog assembly list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_assemblies'), cf_dla_catalog)
+    dla_dls_sdk = CliCommandType(
+        operations_tmpl=adla_format_path.format('account', 'data_lake_store_accounts_operations', 'DataLakeStoreAccountsOperations'),
+        client_factory=cf_dla_account_adls
+    )
 
-# external data source
-cli_command(__name__, 'dla catalog external-data-source show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_external_data_source'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog external-data-source list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_external_data_sources'), cf_dla_catalog)
+    dla_catalog_sdk = CliCommandType(
+        operations_tmpl=adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations'),
+        client_factory=cf_dla_catalog
+    )
 
-# get procedure
-cli_command(__name__, 'dla catalog procedure show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_procedure'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog procedure list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_procedures'), cf_dla_catalog)
+    dla_compute_policy_sdk = CliCommandType(
+        operations_tmpl=adla_format_path.format('account', 'compute_policies_operations', 'ComputePoliciesOperations'),
+        client_factory=cf_dla_account_compute_policy
+    )
 
-# get table partition
-cli_command(__name__, 'dla catalog table-partition show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_table_partition'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog table-partition list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_table_partitions'), cf_dla_catalog)
+    # account operations
+    with self.command_group('dla account', dla_account_sdk, client_factory=cf_dla_account) as g:
+        g.custom_command('create', 'create_adla_account')
+        g.custom_command('update', 'update_adla_account')
+        g.custom_command('list', 'list_adla_account')
+        g.command('show', 'get')
+        g.command('delete', 'delete')
 
-# get table statistics
-cli_command(__name__, 'dla catalog table-stats show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_table_statistic'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog table-stats list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_table_statistics'), cf_dla_catalog)
+    # account fire wall operations
+    with self.command_group('dla account firewall', dla_firewall_sdk, client_factory=cf_dla_account_firewall) as g:
+        g.custom_command('create', 'add_adla_firewall_rule')
+        g.command('update', 'update')
+        g.command('list', 'list_by_account')
+        g.command('show', 'get')
+        g.command('delete', 'delete')
 
-# get table types
-cli_command(__name__, 'dla catalog table-type show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_table_type'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog table-type list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_table_types'), cf_dla_catalog)
+    # job operations
+    # todo: update to allow for inclusion of statistics/debug data in show
+    with self.command_group('dla job', dla_job_sdk, client_factory=cf_dla_job) as g:
+        g.custom_command('submit', 'submit_adla_job', validator=process_dla_job_submit_namespace)
+        g.custom_command('wait', 'wait_adla_job')
+        g.command('show', 'get')
+        g.command('cancel', 'cancel')
+        g.custom_command('list', 'list_adla_jobs')
 
-# get table valued functions
-cli_command(__name__, 'dla catalog tvf show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_table_valued_function'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog tvf list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_table_valued_functions'), cf_dla_catalog)
+    # job relationship operations
+    with self.command_group('dla job pipeline', dla_job_pipeline_sdk) as g:
+        g.command('show', 'get')
+        g.command('list', 'list')
 
-# get views
-cli_command(__name__, 'dla catalog view show', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'get_view'), cf_dla_catalog)
-cli_command(__name__, 'dla catalog view list', adla_format_path.format('catalog', 'catalog_operations', 'CatalogOperations', 'list_views'), cf_dla_catalog)
+    with self.command_group('dla job recurrence', dla_job_recurrence_sdk) as g:
+        g.command('show', 'get')
+        g.command('list', 'list')
+
+    # account data source operations
+    with self.command_group('dla account blob-storage', dla_storage_sdk, client_factory=cf_dla_account_storage) as g:
+        g.command('show', 'get')
+        g.custom_command('add', 'add_adla_blob_storage')
+        g.custom_command('update', 'update_adla_blob_storage')
+        g.command('delete', 'delete')
+        g.command('list', 'list_by_account')
+
+    with self.command_group('dla account data-lake-store', dla_dls_sdk) as g:
+        g.command('show', 'get')
+        g.command('list', 'list_by_account')
+        g.command('add', 'add')
+        g.command('delete', 'delete')
+
+    # catalog operations
+    # credential
+    with self.command_group('dla catalog credential', dla_catalog_sdk, client_factory=cf_dla_catalog) as g:
+        g.custom_command('create', 'create_adla_catalog_credential')
+        g.command('show', 'get_credential')
+        g.custom_command('update', 'update_adla_catalog_credential')
+        g.command('list', 'list_credentials')
+        g.command('delete', 'delete_credential')
+
+    # database
+    with self.command_group('dla catalog database', dla_catalog_sdk) as g:
+        g.command('show', 'get_database')
+        g.command('list', 'list_databases')
+
+    # schema
+    with self.command_group('dla catalog schema', dla_catalog_sdk) as g:
+        g.command('show', 'get_schema')
+        g.command('list', 'list_schemas')
+
+    # table
+    with self.command_group('dla catalog table', dla_catalog_sdk, client_factory=cf_dla_catalog) as g:
+        g.command('show', 'get_table')
+        g.custom_command('list', 'list_catalog_tables')
+
+    # assembly
+    with self.command_group('dla catalog assembly', dla_catalog_sdk) as g:
+        g.command('show', 'get_assembly')
+        g.command('list', 'list_assemblies')
+
+    # external data source
+    with self.command_group('dla catalog external-data-source', dla_catalog_sdk) as g:
+        g.command('show', 'get_external_data_source')
+        g.command('list', 'list_external_data_sources')
+
+    # get procedure
+    with self.command_group('dla catalog procedure', dla_catalog_sdk) as g:
+        g.command('show', 'get_procedure')
+        g.command('list', 'list_procedures')
+
+    # get table partition
+    with self.command_group('dla catalog table-partition', dla_catalog_sdk) as g:
+        g.command('show', 'get_table_partition')
+        g.command('list', 'list_table_partitions')
+
+    # get table statistics
+    with self.command_group('dla catalog table-stats', dla_catalog_sdk, client_factory=cf_dla_catalog) as g:
+        g.command('show', 'get_table_statistic')
+        g.custom_command('list', 'list_catalog_table_statistics')
+
+    # get table types
+    with self.command_group('dla catalog table-type', dla_catalog_sdk) as g:
+        g.command('show', 'get_table_type')
+        g.command('list', 'list_table_types')
+
+    # get table valued functions
+    with self.command_group('dla catalog tvf', dla_catalog_sdk, client_factory=cf_dla_catalog) as g:
+        g.command('show', 'get_table_valued_function')
+        g.custom_command('list', 'list_catalog_tvfs')
+
+    # get views
+    with self.command_group('dla catalog view', dla_catalog_sdk, client_factory=cf_dla_catalog) as g:
+        g.command('show', 'get_view')
+        g.custom_command('list', 'list_catalog_views')
+
+    # get packages
+    with self.command_group('dla catalog package', dla_catalog_sdk) as g:
+        g.command('show', 'get_package')
+        g.command('list', 'list_packages')
+
+    # compute policy
+    with self.command_group('dla account compute-policy', dla_compute_policy_sdk, client_factory=cf_dla_account_compute_policy) as g:
+        g.custom_command('create', 'create_adla_compute_policy')
+        g.custom_command('update', 'update_adla_compute_policy')
+        g.command('list', 'list_by_account')
+        g.command('show', 'get')
+        g.command('delete', 'delete')

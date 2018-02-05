@@ -3,29 +3,38 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ._util import (
-    get_sql_servers_operations,
-    get_sql_elastic_pools_operations
-)
+# pylint: disable=C0302
+from enum import Enum
+import re
 
+# url parse package has different names in Python 2 and 3. 'six' package works cross-version.
+from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error
+
+from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)
 from azure.cli.core.util import CLIError
+from azure.mgmt.sql.models.server_key import ServerKey
+from azure.mgmt.sql.models.encryption_protector import EncryptionProtector
+from azure.mgmt.sql.models.resource_identity import ResourceIdentity
 from azure.mgmt.sql.models.sql_management_client_enums import (
     BlobAuditingPolicyState,
     CreateMode,
     DatabaseEdition,
+    IdentityType,
     ReplicationRole,
     SecurityAlertPolicyState,
+    ServerKeyType,
     ServiceObjectiveName,
     StorageKeyType
 )
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
 
-# url parse package has different names in Python 2 and 3. 'six' package works cross-version.
-from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-error
+from ._util import (
+    get_sql_servers_operations
+)
 
 ###############################################
 #                Common funcs                 #
@@ -33,36 +42,168 @@ from six.moves.urllib.parse import (quote, urlparse)  # pylint: disable=import-e
 
 
 # Determines server location
-def get_server_location(server_name, resource_group_name):
-    server_client = get_sql_servers_operations(None)
+def _get_server_location(cli_ctx, server_name, resource_group_name):
+    server_client = get_sql_servers_operations(cli_ctx, None)
     # pylint: disable=no-member
     return server_client.get(
         server_name=server_name,
         resource_group_name=resource_group_name).location
 
 
+_DEFAULT_SERVER_VERSION = "12.0"
+
+
 ###############################################
 #                sql db                       #
 ###############################################
 
+# pylint: disable=too-few-public-methods
+class ClientType(Enum):
+    ado_net = 'ado.net'
+    sqlcmd = 'sqlcmd'
+    jdbc = 'jdbc'
+    php_pdo = 'php_pdo'
+    php = 'php'
+    odbc = 'odbc'
+
+
+class ClientAuthenticationType(Enum):
+    sql_password = 'SqlPassword'
+    active_directory_password = 'ADPassword'
+    active_directory_integrated = 'ADIntegrated'
+
+
+def _get_server_dns_suffx(cli_ctx):
+    # Allow dns suffix to be overridden by environment variable for testing purposes
+    from os import getenv
+    return getenv('_AZURE_CLI_SQL_DNS_SUFFIX', default=cli_ctx.cloud.suffixes.sql_server_hostname)
+
+
+def db_show_conn_str(
+        cmd,
+        client_provider,
+        database_name='<databasename>',
+        server_name='<servername>',
+        auth_type=ClientAuthenticationType.sql_password.value):
+
+    server_suffix = _get_server_dns_suffx(cmd.cli_ctx)
+
+    conn_str_props = {
+        'server': server_name,
+        'server_fqdn': '{}{}'.format(server_name, server_suffix),
+        'server_suffix': server_suffix,
+        'db': database_name
+    }
+
+    formats = {
+        ClientType.ado_net.value: {
+            ClientAuthenticationType.sql_password.value:
+                'Server=tcp:{server_fqdn},1433;Database={db};User ID=<username>;'
+                'Password=<password>;Encrypt=true;Connection Timeout=30;',
+            ClientAuthenticationType.active_directory_password.value:
+                'Server=tcp:{server_fqdn},1433;Database={db};User ID=<username>;'
+                'Password=<password>;Encrypt=true;Connection Timeout=30;'
+                'Authentication="Active Directory Password"',
+            ClientAuthenticationType.active_directory_integrated.value:
+                'Server=tcp:{server_fqdn},1433;Database={db};Encrypt=true;'
+                'Connection Timeout=30;Authentication="Active Directory Integrated"'
+        },
+        ClientType.sqlcmd.value: {
+            ClientAuthenticationType.sql_password.value:
+                'sqlcmd -S tcp:{server_fqdn},1433 -d {db} -U <username> -P <password> -N -l 30',
+            ClientAuthenticationType.active_directory_password.value:
+                'sqlcmd -S tcp:{server_fqdn},1433 -d {db} -U <username> -P <password> -G -N -l 30',
+            ClientAuthenticationType.active_directory_integrated.value:
+                'sqlcmd -S tcp:{server_fqdn},1433 -d {db} -G -N -l 30',
+        },
+        ClientType.jdbc.value: {
+            ClientAuthenticationType.sql_password.value:
+                'jdbc:sqlserver://{server_fqdn}:1433;database={db};user=<username>@{server};'
+                'password=<password>;encrypt=true;trustServerCertificate=false;'
+                'hostNameInCertificate=*{server_suffix};loginTimeout=30',
+            ClientAuthenticationType.active_directory_password.value:
+                'jdbc:sqlserver://{server_fqdn}:1433;database={db};user=<username>;'
+                'password=<password>;encrypt=true;trustServerCertificate=false;'
+                'hostNameInCertificate=*{server_suffix};loginTimeout=30;'
+                'authentication=ActiveDirectoryPassword',
+            ClientAuthenticationType.active_directory_integrated.value:
+                'jdbc:sqlserver://{server_fqdn}:1433;database={db};'
+                'encrypt=true;trustServerCertificate=false;'
+                'hostNameInCertificate=*{server_suffix};loginTimeout=30;'
+                'authentication=ActiveDirectoryIntegrated',
+        },
+        ClientType.php_pdo.value: {
+            # pylint: disable=line-too-long
+            ClientAuthenticationType.sql_password.value:
+                '$conn = new PDO("sqlsrv:server = tcp:{server_fqdn},1433; Database = {db}; LoginTimeout = 30; Encrypt = 1; TrustServerCertificate = 0;", "<username>", "<password>");',
+            ClientAuthenticationType.active_directory_password.value:
+                CLIError('PHP Data Object (PDO) driver only supports SQL Password authentication.'),
+            ClientAuthenticationType.active_directory_integrated.value:
+                CLIError('PHP Data Object (PDO) driver only supports SQL Password authentication.'),
+        },
+        ClientType.php.value: {
+            # pylint: disable=line-too-long
+            ClientAuthenticationType.sql_password.value:
+                '$connectionOptions = array("UID"=>"<username>@{server}", "PWD"=>"<password>", "Database"=>{db}, "LoginTimeout" => 30, "Encrypt" => 1, "TrustServerCertificate" => 0); $serverName = "tcp:{server_fqdn},1433"; $conn = sqlsrv_connect($serverName, $connectionOptions);',
+            ClientAuthenticationType.active_directory_password.value:
+                CLIError('PHP sqlsrv driver only supports SQL Password authentication.'),
+            ClientAuthenticationType.active_directory_integrated.value:
+                CLIError('PHP sqlsrv driver only supports SQL Password authentication.'),
+        },
+        ClientType.odbc.value: {
+            ClientAuthenticationType.sql_password.value:
+                'Driver={{ODBC Driver 13 for SQL Server}};Server=tcp:{server_fqdn},1433;'
+                'Database={db};Uid=<username>@{server};Pwd=<password>;Encrypt=yes;'
+                'TrustServerCertificate=no;',
+            ClientAuthenticationType.active_directory_password.value:
+                'Driver={{ODBC Driver 13 for SQL Server}};Server=tcp:{server_fqdn},1433;'
+                'Database={db};Uid=<username>@{server};Pwd=<password>;Encrypt=yes;'
+                'TrustServerCertificate=no;Authentication=ActiveDirectoryPassword',
+            ClientAuthenticationType.active_directory_integrated.value:
+                'Driver={{ODBC Driver 13 for SQL Server}};Server=tcp:{server_fqdn},1433;'
+                'Database={db};Encrypt=yes;TrustServerCertificate=no;'
+                'Authentication=ActiveDirectoryIntegrated',
+        }
+    }
+
+    f = formats[client_provider][auth_type]
+
+    if isinstance(f, Exception):
+        # Error
+        raise f
+
+    # Success
+    return f.format(**conn_str_props)
+
 
 # Helper class to bundle up database identity properties
 class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
-    def __init__(self, database_name, server_name, resource_group_name):
+    def __init__(self, cli_ctx, database_name, server_name, resource_group_name):
         self.database_name = database_name
         self.server_name = server_name
         self.resource_group_name = resource_group_name
+        self.cli_ctx = cli_ctx
+
+    def id(self):
+        return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(
+            quote(get_subscription_id(self.cli_ctx)),
+            quote(self.resource_group_name),
+            quote(self.server_name),
+            quote(self.database_name))
 
 
 # Creates a database or datawarehouse. Wrapper function which uses the server location so that
 # the user doesn't need to specify location.
 def _db_dw_create(
+        cli_ctx,
         client,
         db_id,
+        raw,
         kwargs):
 
     # Determine server location
-    kwargs['location'] = get_server_location(
+    kwargs['location'] = _get_server_location(
+        cli_ctx,
         server_name=db_id.server_name,
         resource_group_name=db_id.resource_group_name)
 
@@ -71,16 +212,19 @@ def _db_dw_create(
         server_name=db_id.server_name,
         resource_group_name=db_id.resource_group_name,
         database_name=db_id.database_name,
+        raw=raw,
         parameters=kwargs)
 
 
 # Creates a database. Wrapper function which uses the server location so that the user doesn't
 # need to specify location.
 def db_create(
+        cmd,
         client,
         database_name,
         server_name,
         resource_group_name,
+        raw=False,
         **kwargs):
 
     # Verify edition
@@ -90,42 +234,43 @@ def db_create(
                        ' `az sql dw create`.')
 
     return _db_dw_create(
+        cmd.cli_ctx,
         client,
-        DatabaseIdentity(database_name, server_name, resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
+        raw,
         kwargs)
 
 
 # Common code for special db create modes.
 def _db_create_special(
+        cli_ctx,
         client,
         source_db,
         dest_db,
+        raw,
         kwargs):
 
     # Determine server location
-    kwargs['location'] = get_server_location(
+    kwargs['location'] = _get_server_location(
+        cli_ctx,
         server_name=dest_db.server_name,
         resource_group_name=dest_db.resource_group_name)
 
     # Set create mode properties
-    subscription_id = get_subscription_id()
-    kwargs['source_database_id'] = (
-        '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'
-        .format(quote(subscription_id),
-                quote(source_db.resource_group_name),
-                quote(source_db.server_name),
-                quote(source_db.database_name)))
+    kwargs['source_database_id'] = source_db.id()
 
     # Create
     return client.create_or_update(
         server_name=dest_db.server_name,
         resource_group_name=dest_db.resource_group_name,
         database_name=dest_db.database_name,
+        raw=raw,
         parameters=kwargs)
 
 
 # Copies a database. Wrapper function to make create mode more convenient.
-def db_copy(  # pylint: disable=too-many-arguments
+def db_copy(
+        cmd,
         client,
         database_name,
         server_name,
@@ -133,6 +278,7 @@ def db_copy(  # pylint: disable=too-many-arguments
         dest_name,
         dest_server_name=None,
         dest_resource_group_name=None,
+        raw=False,
         **kwargs):
 
     # Determine optional values
@@ -143,14 +289,17 @@ def db_copy(  # pylint: disable=too-many-arguments
     kwargs['create_mode'] = 'Copy'
 
     return _db_create_special(
+        cmd.cli_ctx,
         client,
-        DatabaseIdentity(database_name, server_name, resource_group_name),
-        DatabaseIdentity(dest_name, dest_server_name, dest_resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, dest_name, dest_server_name, dest_resource_group_name),
+        raw,
         kwargs)
 
 
 # Copies a replica. Wrapper function to make create mode more convenient.
-def db_create_replica(  # pylint: disable=too-many-arguments
+def db_create_replica(
+        cmd,
         client,
         database_name,
         server_name,
@@ -158,6 +307,7 @@ def db_create_replica(  # pylint: disable=too-many-arguments
         # Replica must have the same database name as the source db
         partner_server_name,
         partner_resource_group_name=None,
+        raw=False,
         **kwargs):
 
     # Determine optional values
@@ -168,37 +318,51 @@ def db_create_replica(  # pylint: disable=too-many-arguments
 
     # Replica must have the same database name as the source db
     return _db_create_special(
+        cmd.cli_ctx,
         client,
-        DatabaseIdentity(database_name, server_name, resource_group_name),
-        DatabaseIdentity(database_name, partner_server_name, partner_resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, database_name, partner_server_name, partner_resource_group_name),
+        raw,
         kwargs)
 
 
-# Creates a database from a database point in time backup.
+# Creates a database from a database point in time backup or deleted database backup.
 # Wrapper function to make create mode more convenient.
-def db_restore(  # pylint: disable=too-many-arguments
+def db_restore(
+        cmd,
         client,
         database_name,
         server_name,
         resource_group_name,
-        restore_point_in_time,
         dest_name,
+        restore_point_in_time=None,
+        source_database_deletion_date=None,
+        raw=False,
         **kwargs):
 
+    if not (restore_point_in_time or source_database_deletion_date):
+        raise CLIError('Either --time or --deleted-time must be specified.')
+
     # Set create mode properties
-    kwargs['create_mode'] = 'PointInTimeRestore'
+    is_deleted = source_database_deletion_date is not None
+
     kwargs['restore_point_in_time'] = restore_point_in_time
+    kwargs['source_database_deletion_date'] = source_database_deletion_date
+    kwargs['create_mode'] = 'Restore' if is_deleted else 'PointInTimeRestore'
 
     return _db_create_special(
+        cmd.cli_ctx,
         client,
-        DatabaseIdentity(database_name, server_name, resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         # Cross-server restore is not supported. So dest server/group must be the same as source.
-        DatabaseIdentity(dest_name, server_name, resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, dest_name, server_name, resource_group_name),
+        raw,
         kwargs)
 
 
 # Fails over a database. Wrapper function which uses the server location so that the user doesn't
 # need to specify replication link id.
+# pylint: disable=inconsistent-return-statements
 def db_failover(
         client,
         database_name,
@@ -207,12 +371,12 @@ def db_failover(
         allow_data_loss=False):
 
     # List replication links
-    links = list(client.list_replication_links(
+    links = list(client.list_by_database(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name))
 
-    if len(links) == 0:
+    if not links:
         raise CLIError('The specified database has no replication links.')
 
     # If a replica is primary, then it has 1 or more links (to its secondaries).
@@ -224,9 +388,9 @@ def db_failover(
 
     # Choose which failover method to use
     if allow_data_loss:
-        failover_func = client.failover_replication_link_allow_data_loss
+        failover_func = client.failover_allow_data_loss
     else:
-        failover_func = client.failover_replication_link
+        failover_func = client.failover
 
     # Execute failover from the primary to this database
     return failover_func(
@@ -236,7 +400,53 @@ def db_failover(
         link_id=primary_link.name)
 
 
-def db_delete_replica_link(  # pylint: disable=too-many-arguments
+class DatabaseCapabilitiesAdditionalDetails(Enum):  # pylint: disable=too-few-public-methods
+    max_size = 'max-size'
+
+
+def db_list_capabilities(
+        client,
+        location,
+        edition=None,
+        service_objective=None,
+        show_details=None):
+
+    # Fixup parameters
+    if not show_details:
+        show_details = []
+
+    # Get capabilities tree from server
+    capabilities = client.list_by_location(location)
+
+    # Get subtree related to databases
+    editions = next(sv for sv in capabilities.supported_server_versions
+                    if sv.name == _DEFAULT_SERVER_VERSION).supported_editions
+
+    # Filter by edition
+    if edition:
+        editions = [e for e in editions if e.name.lower() == edition.lower()]
+
+    # Filter by service objective
+    if service_objective:
+        for e in editions:
+            e.supported_service_level_objectives = [
+                slo for slo in e.supported_service_level_objectives
+                if slo.name.lower() == service_objective.lower()]
+
+    # Remove editions with no service objectives (due to filters)
+    editions = [e for e in editions if e.supported_service_level_objectives]
+
+    # Optionally hide supported max sizes
+    if DatabaseCapabilitiesAdditionalDetails.max_size.value not in show_details:
+        for e in editions:
+            for slo in e.supported_service_level_objectives:
+                slo.supported_max_sizes = []
+
+    return editions
+
+
+# pylint: disable=inconsistent-return-statements
+def db_delete_replica_link(
         client,
         database_name,
         server_name,
@@ -254,7 +464,7 @@ def db_delete_replica_link(  # pylint: disable=too-many-arguments
     partner_resource_group_name = partner_resource_group_name or resource_group_name
 
     # Find the replication link
-    links = list(client.list_replication_links(
+    links = list(client.list_by_database(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name))
@@ -266,14 +476,14 @@ def db_delete_replica_link(  # pylint: disable=too-many-arguments
         # No link exists, nothing to be done
         return
 
-    return client.delete_replication_link(
+    return client.delete(
         database_name=database_name,
         server_name=server_name,
         resource_group_name=resource_group_name,
         link_id=link.name)
 
 
-def db_export(  # pylint: disable=too-many-arguments
+def db_export(
         client,
         database_name,
         server_name,
@@ -295,7 +505,7 @@ def db_export(  # pylint: disable=too-many-arguments
         parameters=kwargs)
 
 
-def db_import(  # pylint: disable=too-many-arguments
+def db_import(
         client,
         database_name,
         server_name,
@@ -337,17 +547,14 @@ def db_list(
 
     if elastic_pool_name:
         # List all databases in the elastic pool
-        pool_client = get_sql_elastic_pools_operations(None)
-        return pool_client.list_databases(
+        return client.list_by_elastic_pool(
             server_name=server_name,
             resource_group_name=resource_group_name,
             elastic_pool_name=elastic_pool_name,
             filter=filter)
-    else:
+
         # List all databases in the server
-        return client.list_by_server(
-            resource_group_name=resource_group_name,
-            server_name=server_name)
+    return client.list_by_server(resource_group_name=resource_group_name, server_name=server_name)
 
 
 # Update database. Custom update function to apply parameters to instance.
@@ -400,7 +607,7 @@ def db_update(
 
 
 #####
-#           sql server audit-policy & threat-policy
+#           sql db audit-policy & threat-policy
 #####
 
 
@@ -410,17 +617,17 @@ def db_update(
 # because if it was a command line parameter then the customer would need to specify storage
 # resource group just to update some unrelated property, which is annoying and makes no sense to
 # the customer.
-def _find_storage_account_resource_group(name):
+def _find_storage_account_resource_group(cli_ctx, name):
     storage_type = 'Microsoft.Storage/storageAccounts'
     classic_storage_type = 'Microsoft.ClassicStorage/storageAccounts'
 
     query = "name eq '{}' and (resourceType eq '{}' or resourceType eq '{}')".format(
         name, storage_type, classic_storage_type)
 
-    client = get_mgmt_service_client(ResourceManagementClient)
+    client = get_mgmt_service_client(cli_ctx, ResourceManagementClient)
     resources = list(client.resources.list(filter=query))
 
-    if len(resources) == 0:
+    if not resources:
         raise CLIError("No storage account with name '{}' was found.".format(name))
 
     if len(resources) > 1:
@@ -443,11 +650,12 @@ def _get_storage_account_name(storage_endpoint):
 
 # Gets storage account key by querying storage ARM API.
 def _get_storage_endpoint(
+        cli_ctx,
         storage_account,
         resource_group_name):
 
     # Get storage account
-    client = get_mgmt_service_client(StorageManagementClient)
+    client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
     account = client.storage_accounts.get_properties(
         resource_group_name=resource_group_name,
         account_name=storage_account)
@@ -464,12 +672,13 @@ def _get_storage_endpoint(
 
 # Gets storage account key by querying storage ARM API.
 def _get_storage_key(
+        cli_ctx,
         storage_account,
         resource_group_name,
         use_secondary_key):
 
     # Get storage keys
-    client = get_mgmt_service_client(StorageManagementClient)
+    client = get_mgmt_service_client(cli_ctx, StorageManagementClient)
     keys = client.storage_accounts.list_keys(
         resource_group_name=resource_group_name,
         account_name=storage_account)
@@ -480,7 +689,8 @@ def _get_storage_key(
 
 
 # Common code for updating audit and threat detection policy
-def _db_security_policy_update(  # pylint: disable=too-many-arguments
+def _db_security_policy_update(
+        cli_ctx,
         instance,
         enabled,
         storage_account,
@@ -489,18 +699,18 @@ def _db_security_policy_update(  # pylint: disable=too-many-arguments
         use_secondary_key):
 
     # Validate storage endpoint arguments
-    if storage_endpoint is not None and storage_account is not None:
+    if storage_endpoint and storage_account:
         raise CLIError('--storage-endpoint and --storage-account cannot both be specified.')
 
     # Set storage endpoint
-    if storage_endpoint is not None:
+    if storage_endpoint:
         instance.storage_endpoint = storage_endpoint
-    if storage_account is not None:
-        storage_resource_group = _find_storage_account_resource_group(storage_account)
-        instance.storage_endpoint = _get_storage_endpoint(storage_account, storage_resource_group)
+    if storage_account:
+        storage_resource_group = _find_storage_account_resource_group(cli_ctx, storage_account)
+        instance.storage_endpoint = _get_storage_endpoint(cli_ctx, storage_account, storage_resource_group)
 
     # Set storage access key
-    if storage_account_access_key is not None:
+    if storage_account_access_key:
         # Access key is specified
         instance.storage_account_access_key = storage_account_access_key
     elif enabled:
@@ -512,18 +722,20 @@ def _db_security_policy_update(  # pylint: disable=too-many-arguments
         # This doesn't work if the user used generic update args, i.e. `--set state=Enabled`
         # instead of `--state Enabled`, since the generic update args are applied after this custom
         # function, but at least we tried.
-        if storage_account is None:
+        if not storage_account:
             storage_account = _get_storage_account_name(instance.storage_endpoint)
-            storage_resource_group = _find_storage_account_resource_group(storage_account)
+            storage_resource_group = _find_storage_account_resource_group(cli_ctx, storage_account)
 
         instance.storage_account_access_key = _get_storage_key(
+            cli_ctx,
             storage_account,
             storage_resource_group,
             use_secondary_key)
 
 
 # Update audit policy. Custom update function to apply parameters to instance.
-def db_audit_policy_update(  # pylint: disable=too-many-arguments
+def db_audit_policy_update(
+        cmd,
         instance,
         state=None,
         storage_account=None,
@@ -533,13 +745,13 @@ def db_audit_policy_update(  # pylint: disable=too-many-arguments
         retention_days=None):
 
     # Apply state
-    if state is not None:
-        # pylint: disable=unsubscriptable-object
+    if state:
         instance.state = BlobAuditingPolicyState[state.lower()]
     enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()
 
     # Set storage-related properties
     _db_security_policy_update(
+        cmd.cli_ctx,
         instance,
         enabled,
         storage_account,
@@ -548,17 +760,18 @@ def db_audit_policy_update(  # pylint: disable=too-many-arguments
         instance.is_storage_secondary_key_in_use)
 
     # Set other properties
-    if audit_actions_and_groups is not None:
+    if audit_actions_and_groups:
         instance.audit_actions_and_groups = audit_actions_and_groups
 
-    if retention_days is not None:
+    if retention_days:
         instance.retention_days = retention_days
 
     return instance
 
 
 # Update threat detection policy. Custom update function to apply parameters to instance.
-def db_threat_detection_policy_update(  # pylint: disable=too-many-arguments
+def db_threat_detection_policy_update(
+        cmd,
         instance,
         state=None,
         storage_account=None,
@@ -570,13 +783,13 @@ def db_threat_detection_policy_update(  # pylint: disable=too-many-arguments
         email_account_admins=None):
 
     # Apply state
-    if state is not None:
-        # pylint: disable=unsubscriptable-object
+    if state:
         instance.state = SecurityAlertPolicyState[state.lower()]
     enabled = instance.state.value.lower() == SecurityAlertPolicyState.enabled.value.lower()
 
     # Set storage-related properties
     _db_security_policy_update(
+        cmd.cli_ctx,
         instance,
         enabled,
         storage_account,
@@ -585,16 +798,16 @@ def db_threat_detection_policy_update(  # pylint: disable=too-many-arguments
         False)
 
     # Set other properties
-    if retention_days is not None:
+    if retention_days:
         instance.retention_days = retention_days
 
-    if email_addresses is not None:
+    if email_addresses:
         instance.email_addresses = ";".join(email_addresses)
 
-    if disabled_alerts is not None:
+    if disabled_alerts:
         instance.disabled_alerts = ";".join(disabled_alerts)
 
-    if email_account_admins is not None:
+    if email_account_admins:
         instance.email_account_admins = email_account_admins
 
     return instance
@@ -608,10 +821,12 @@ def db_threat_detection_policy_update(  # pylint: disable=too-many-arguments
 # Creates a datawarehouse. Wrapper function which uses the server location so that the user doesn't
 # need to specify location.
 def dw_create(
+        cmd,
         client,
         database_name,
         server_name,
         resource_group_name,
+        raw=False,
         **kwargs):
 
     # Set edition
@@ -619,8 +834,10 @@ def dw_create(
 
     # Create
     return _db_dw_create(
+        cmd.cli_ctx,
         client,
-        DatabaseIdentity(database_name, server_name, resource_group_name),
+        DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
+        raw,
         kwargs)
 
 
@@ -663,6 +880,7 @@ def dw_update(
 # Creates an elastic pool. Wrapper function which uses the server location so that the user doesn't
 # need to specify location.
 def elastic_pool_create(
+        cmd,
         client,
         server_name,
         resource_group_name,
@@ -670,7 +888,8 @@ def elastic_pool_create(
         **kwargs):
 
     # Determine server location
-    kwargs['location'] = get_server_location(
+    kwargs['location'] = _get_server_location(
+        cmd.cli_ctx,
         server_name=server_name,
         resource_group_name=resource_group_name)
 
@@ -699,19 +918,153 @@ def elastic_pool_update(
     return instance
 
 
+class ElasticPoolCapabilitiesAdditionalDetails(Enum):  # pylint: disable=too-few-public-methods
+    max_size = 'max-size'
+    db_min_dtu = 'db-min-dtu'
+    db_max_dtu = 'db-max-dtu'
+    db_max_size = 'db-max-size'
+
+
+def elastic_pool_list_capabilities(
+        client,
+        location,
+        edition=None,
+        dtu=None,
+        show_details=None):
+
+    # Fixup parameters
+    if not show_details:
+        show_details = []
+    if dtu:
+        dtu = int(dtu)
+
+    # Get capabilities tree from server
+    capabilities = client.list_by_location(location)
+
+    # Get subtree related to elastic pools
+    editions = next(sv for sv in capabilities.supported_server_versions
+                    if sv.name == _DEFAULT_SERVER_VERSION).supported_elastic_pool_editions
+
+    # Filter by edition
+    if edition:
+        editions = [e for e in editions if e.name.lower() == edition.lower()]
+
+    # Filter by dtu
+    if dtu:
+        for e in editions:
+            e.supported_elastic_pool_dtus = [
+                d for d in e.supported_elastic_pool_dtus
+                if d.limit == dtu]
+
+    # Remove editions with no service objectives (due to filters)
+    editions = [e for e in editions if e.supported_elastic_pool_dtus]
+
+    for e in editions:
+        for d in e.supported_elastic_pool_dtus:
+            # Optionally hide supported max sizes
+            if ElasticPoolCapabilitiesAdditionalDetails.max_size.value not in show_details:
+                d.supported_max_sizes = []
+
+            # Optionally hide per database min & max dtus. min dtus are nested inside max dtus,
+            # so only hide max dtus if both min and max should be hidden.
+            if ElasticPoolCapabilitiesAdditionalDetails.db_min_dtu.value not in show_details:
+                if ElasticPoolCapabilitiesAdditionalDetails.db_max_dtu.value not in show_details:
+                    d.supported_per_database_max_dtus = []
+
+                for md in d.supported_per_database_max_dtus:
+                    md.supported_per_database_min_dtus = []
+
+            # Optionally hide supported per db max sizes
+            if ElasticPoolCapabilitiesAdditionalDetails.db_max_size.value not in show_details:
+                d.supported_per_database_max_sizes = []
+
+    return editions
+
+
 ###############################################
 #                sql server                   #
 ###############################################
+
+def server_create(
+        client,
+        resource_group_name,
+        server_name,
+        assign_identity=False,
+        **kwargs):
+
+    if assign_identity:
+        kwargs['identity'] = ResourceIdentity(type=IdentityType.system_assigned.value)
+
+    # Create
+    return client.create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        parameters=kwargs)
+
+
+# Lists servers in a resource group or subscription
+def server_list(
+        client,
+        resource_group_name=None):
+
+    if resource_group_name:
+        # List all servers in the resource group
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+
+    # List all servers in the subscription
+    return client.list()
 
 
 # Update server. Custom update function to apply parameters to instance.
 def server_update(
         instance,
-        administrator_login_password=None):
+        administrator_login_password=None,
+        assign_identity=False):
+
+    # Once assigned, the identity cannot be removed
+    if instance.identity is None and assign_identity:
+        instance.identity = ResourceIdentity(type=IdentityType.system_assigned.value)
 
     # Apply params to instance
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
+
+    return instance
+
+
+#####
+#           sql server ad-admin
+#####
+
+
+def server_ad_admin_set(
+        cmd,
+        client,
+        resource_group_name,
+        server_name,
+        **kwargs):
+
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    sub = profile.get_subscription()
+    kwargs['tenant_id'] = sub['tenantId']
+
+    return client.create_or_update(
+        server_name=server_name,
+        resource_group_name=resource_group_name,
+        properties=kwargs)
+
+
+# Update server AD admin. Custom update function to apply parameters to instance.
+def server_ad_admin_update(
+        instance,
+        login=None,
+        sid=None,
+        tenant_id=None):
+
+    # Apply params to instance
+    instance.login = login or instance.login
+    instance.sid = sid or instance.sid
+    instance.tenant_id = tenant_id or instance.tenant_id
 
     return instance
 
@@ -744,7 +1097,7 @@ def firewall_rule_allow_all_azure_ips(
 
 # Update firewall rule. Custom update function is required,
 # see https://github.com/Azure/azure-cli/issues/2264
-def firewall_rule_update(  # pylint: disable=too-many-arguments
+def firewall_rule_update(
         client,
         firewall_rule_name,
         server_name,
@@ -765,3 +1118,101 @@ def firewall_rule_update(  # pylint: disable=too-many-arguments
         resource_group_name=resource_group_name,
         start_ip_address=start_ip_address or instance.start_ip_address,
         end_ip_address=end_ip_address or instance.end_ip_address)
+
+
+#####
+#           sql server key
+#####
+
+
+def server_key_create(
+        client,
+        resource_group_name,
+        server_name,
+        kid=None):
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name,
+        parameters=ServerKey(
+            server_key_type=ServerKeyType.azure_key_vault.value,
+            uri=kid
+        )
+    )
+
+
+def server_key_get(
+        client,
+        resource_group_name,
+        server_name,
+        kid):
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name)
+
+
+def server_key_delete(
+        client,
+        resource_group_name,
+        server_name,
+        kid):
+
+    key_name = _get_server_key_name_from_uri(kid)
+
+    return client.delete(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        key_name=key_name)
+
+
+# The SQL server key API requires that the server key has a specific name
+# based on the vault, key and key version.
+def _get_server_key_name_from_uri(uri):
+
+    match = re.match(r'^https(.)+\.vault(.)+\/keys\/[^\/]+\/[0-9a-zA-Z]+$', uri)
+
+    if match is None:
+        raise CLIError('The provided uri is invalid. Please provide a valid Azure Key Vault key id.  For example: '
+                       '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+
+    vault = uri.split('.')[0].split('/')[-1]
+    key = uri.split('/')[-2]
+    version = uri.split('/')[-1]
+    return '{}_{}_{}'.format(vault, key, version)
+
+
+#####
+#           sql server encryption-protector
+#####
+
+
+def encryption_protector_update(
+        client,
+        resource_group_name,
+        server_name,
+        server_key_type,
+        kid=None):
+
+    if server_key_type == ServerKeyType.service_managed.value:
+        key_name = 'ServiceManaged'
+    else:
+        if kid is None:
+            raise CLIError('A uri must be provided if the server_key_type is AzureKeyVault.')
+        else:
+            key_name = _get_server_key_name_from_uri(kid)
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        parameters=EncryptionProtector(
+            server_key_type=server_key_type,
+            server_key_name=key_name
+        )
+    )

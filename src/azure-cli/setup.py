@@ -8,9 +8,14 @@
 from __future__ import print_function
 from codecs import open
 from setuptools import setup
+try:
+    from azure_bdist_wheel import cmdclass
+except ImportError:
+    from distutils import log as logger
+    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    cmdclass = {}
 
-VERSION = "2.0.3+dev"
-
+VERSION = "2.0.26"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -46,16 +51,27 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     'azure-cli-acr',
     'azure-cli-acs',
+    'azure-cli-advisor',
     'azure-cli-appservice',
     'azure-cli-batch',
+    'azure-cli-batchai',
+    'azure-cli-backup',
+    'azure-cli-billing',
+    'azure-cli-cdn',
     'azure-cli-cloud',
-    'azure-cli-component',
-    'azure-cli-configure',
+    'azure-cli-cognitiveservices',
     'azure-cli-container',
+    'azure-cli-configure',
+    'azure-cli-consumption',
     'azure-cli-core',
-    'azure-cli-documentdb',
+    'azure-cli-cosmosdb',
+    'azure-cli-dla',
+    'azure-cli-dls',
+    'azure-cli-eventgrid',
+    'azure-cli-extension',
     'azure-cli-feedback',
     'azure-cli-find',
+    'azure-cli-interactive',
     'azure-cli-iot',
     'azure-cli-keyvault',
     'azure-cli-lab',
@@ -63,12 +79,15 @@ DEPENDENCIES = [
     'azure-cli-network',
     'azure-cli-nspkg',
     'azure-cli-profile',
+    'azure-cli-rdbms',
     'azure-cli-redis',
+    'azure-cli-reservations',
     'azure-cli-resource',
     'azure-cli-role',
     'azure-cli-sql',
     'azure-cli-storage',
-    'azure-cli-vm'
+    'azure-cli-vm',
+    'azure-cli-servicefabric'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -92,12 +111,10 @@ setup(
         'az.completion.sh',
         'az.bat',
     ],
-    namespace_packages=[
+    packages=[
         'azure',
         'azure.cli',
     ],
-    packages=[
-        'azure.cli',
-    ],
-    install_requires=DEPENDENCIES
+    install_requires=DEPENDENCIES,
+    cmdclass=cmdclass
 )

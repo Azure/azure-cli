@@ -3,6 +3,64 @@
 Release History
 ===============
 
+0.1.16
+++++++
+* Added support for device provisioning service
+* Added deprecation messages in commands and command help.
+* Added IoT run once check to warn users about the availability of the IoT Extension.
+
+0.1.15
+++++++
+* Minor fixes.
+
+0.1.14
+++++++
+* Adds support for certificate authorities (CA) and certificate chains.
+* Minor fixes.
+
+0.1.13
+++++++
+* minor fixes
+
+0.1.12 (2017-09-22)
++++++++++++++++++++
+* minor fixes
+
+0.1.11 (2017-08-28)
++++++++++++++++++++
+* revisit of bug 3934 -- policy creation no longer clears existing policies.
+
+0.1.10 (2017-07-27)
++++++++++++++++++++
+* fix bug 3934 -- policy creation no longer clears existing policies.
+
+0.1.9 (2017-07-07)
+++++++++++++++++++
+* minor fixes
+
+0.1.8 (2017-06-21)
+++++++++++++++++++
+* No changes.
+
+0.1.7 (2017-06-13)
+++++++++++++++++++
+* Minor fixes.
+
+0.1.6 (2017-05-30)
++++++++++++++++++++++
+
+* Minor fixes.
+
+0.1.5 (2017-05-05)
++++++++++++++++++++++
+
+* Minor fixes.
+
+0.1.4 (2017-04-28)
++++++++++++++++++++++
+
+* New packaging system.
+
 0.1.3 (2017-04-17)
 +++++++++++++++++++++
 

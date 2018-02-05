@@ -3,61 +3,58 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import CliArgumentType, register_cli_argument
+from knack.util import CLIError
+from azure.cli.core.commands.parameters import (get_enum_type,
+                                                get_location_type,
+                                                resource_group_name_type)
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
+from azure.mgmt.containerinstance.models import (ContainerGroupRestartPolicy, OperatingSystemTypes)
+from ._validators import validate_volume_mount_path
 
 # pylint: disable=line-too-long
 
-target_name = CliArgumentType(
-    options_list=('--target-name',),
-    help='Name of the Azure Container Service cluster to deploy containers to.'
-)
+IP_ADDRESS_TYPES = ['Public']
 
-target_resource_group = CliArgumentType(
-    options_list=('--target-resource-group',),
-    help='Name of the Azure Container Service cluster\'s resource group.'
-)
 
-registry_name = CliArgumentType(
-    options_list=('--registry-name', '-r'),
-    help='Azure Container Registry name to which container images will be pushed after each build, and pulled from to deploy container instances. If you have an existing registry at myregistry-{accountname}.azureacr.io, then set this parameter value to myregistry. A new Azure Container Registry is created if this parameter value is omitted or does not exist.'
-)
+def _environment_variables_type(value):
+    """Space separated values in 'key=value' format."""
+    try:
+        env_name, env_value = value.split('=', 1)
+    except ValueError:
+        message = ("Incorrectly formatted environment settings. "
+                   "Argument values should be in the format a=b c=d")
+        raise CLIError(message)
+    return {'name': env_name, 'value': env_value}
 
-registry_resource_id = CliArgumentType(
-    options_list=('--registry-resource-id',),
-    help='Azure container registry resource id. Specifies an existing Azure container registry. e.g. /subscriptions/{subscriptionId}/resourcegroups/{resourceGroup}/providers/Microsoft.ContainerRegistry/registries/{registryName}'
-)
 
-remote_url = CliArgumentType(
-    options_list=('--remote-url', '-u'),
-    help='Remote url of the GitHub or VSTS source repository that will be built and deployed. Example: https://github.com/myaccount/myrepository.git. If omitted, a source repository will be searched for in the current working directory.'
-)
+def load_arguments(self, _):
+    with self.argument_context('container') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('name', options_list=['--name', '-n'], help="The name of the container group", id_part='name')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
 
-remote_branch = CliArgumentType(
-    options_list=('--remote-branch', '-b'),
-    help='Remote branch of the GitHub or VSTS source repository that will be built and deployed. If omitted refs/heads/master will be selected'
-)
+    with self.argument_context('container create') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+        c.argument('image', help='The container image name')
+        c.argument('cpu', type=int, help='The required number of CPU cores of the containers')
+        c.argument('memory', type=float, help='The required memory of the containers in GB')
+        c.argument('os_type', arg_type=get_enum_type(OperatingSystemTypes), help='The OS type of the containers')
+        c.argument('ip_address', arg_type=get_enum_type(IP_ADDRESS_TYPES), help='The IP address type of the container group')
+        c.argument('ports', type=int, nargs='+', default=[80], help='The ports to open')
+        c.argument('restart_policy', arg_type=get_enum_type(ContainerGroupRestartPolicy), help='Restart policy for all containers within the container group')
+        c.argument('command_line', help='The command line to run when the container is started, e.g. \'/bin/bash -c myscript.sh\'')
+        c.argument('environment_variables', nargs='+', options_list=['--environment-variables', '-e'], type=_environment_variables_type, help='A list of environment variable for the container. Space separated values in \'key=value\' format.')
 
-remote_access_token = CliArgumentType(
-    options_list=('--remote-access-token', '-t'),
-    help='GitHub personal access token (minimum permission is "repo"). Required if the source repository is in GitHub.'
-)
+    with self.argument_context('container create', arg_group='Image Registry') as c:
+        c.argument('registry_login_server', help='The container image registry login server')
+        c.argument('registry_username', help='The username to log in container image registry server')
+        c.argument('registry_password', help='The password to log in container image registry server')
 
-vsts_account_name = CliArgumentType(
-    options_list=('--vsts-account-name',),
-    help='VSTS account name to create the build and release definitions. If you have an existing VSTS account at myvstsaccount.visualstudio.com, then set this parameter value to myvstsaccount. A new VSTS account is created if parameter value is omitted or does not exist.'
-)
+    with self.argument_context('container create', arg_group='Azure File Volume') as c:
+        c.argument('azure_file_volume_share_name', help='The name of the Azure File share to be mounted as a volume')
+        c.argument('azure_file_volume_account_name', help='The name of the storage account that contains the Azure File share')
+        c.argument('azure_file_volume_account_key', help='The storage account access key used to access the Azure File share')
+        c.argument('azure_file_volume_mount_path', validator=validate_volume_mount_path, help='The path within the container where the volume should be mounted. Must not contain colon (:).')
 
-vsts_project_name = CliArgumentType(
-    options_list=('--vsts-project-name',),
-    help='VSTS project name to create the build and release definitions. A new VSTS project is created if omitted or does not exist.'
-)
-
-register_cli_argument('container', 'target_name', target_name)
-register_cli_argument('container', 'target_resource_group', target_resource_group)
-register_cli_argument('container', 'registry_name', registry_name)
-register_cli_argument('container', 'registry_resource_id', registry_resource_id)
-register_cli_argument('container', 'remote_url', remote_url)
-register_cli_argument('container', 'remote_branch', remote_branch)
-register_cli_argument('container', 'remote_access_token', remote_access_token)
-register_cli_argument('container', 'vsts_account_name', vsts_account_name)
-register_cli_argument('container', 'vsts_project_name', vsts_project_name)
+    with self.argument_context('container logs') as c:
+        c.argument('container_name', help='The container name to tail the logs')

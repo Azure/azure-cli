@@ -9,7 +9,6 @@ from collections import OrderedDict
 
 from six.moves.urllib.parse import unquote  # pylint: disable=import-error
 
-
 HEAD_PROPERTIES = {  # Convert response headers to properties.
     'Last-Modified': 'lastModified',
     'ocp-creation-time': 'creationTime',
@@ -53,8 +52,8 @@ def _account_key_table_format(result):
 
 def transform_response_headers(result):
     """Extract and format file property headers from ClientRawResponse object"""
-    properties = {HEAD_PROPERTIES[k]: v for k, v in result.headers.items() \
-        if k in HEAD_PROPERTIES}
+    properties = {HEAD_PROPERTIES[k]: v for k, v in result.headers.items()
+                  if k in HEAD_PROPERTIES}
     if properties.get('url'):
         properties['url'] = unquote(properties['url'])
     return properties

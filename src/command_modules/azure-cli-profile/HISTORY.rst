@@ -2,6 +2,68 @@
 
 Release History
 ===============
+2.0.18
+++++++
+* ensure 'get-access-token' work inside a VM with identity
+
+2.0.17
+++++++
+* Update for CLI core changes.
+
+2.0.16
+++++++
+* support login with user assigned identities
+
+2.0.15
+++++++
+* minor fixes
+
+2.0.14 (2017-10-09)
++++++++++++++++++++
+* minor fixes
+
+2.0.13 (2017-09-22)
++++++++++++++++++++
+* minor fixes
+
+2.0.12 (2017-09-11)
++++++++++++++++++++
+* minor fixes
+
+2.0.11 (2017-08-28)
++++++++++++++++++++
+* login: expose `--msi` and `--msi-port` to login using Virtual machine's identity
+
+2.0.10 (2017-08-11)
++++++++++++++++++++
+* account list: add `--refresh` to sycn up the latest subscriptions from server
+
+2.0.9 (2017-07-27)
+++++++++++++++++++
+support login inside a VM with a managed identity
+
+2.0.8 (2017-07-07)
+++++++++++++++++++
+account show: support output in SDK auth file format
+
+2.0.7 (2017-06-21)
+++++++++++++++++++
+* No changes.
+
+2.0.6 (2017-06-13)
+++++++++++++++++++
+* Minor fixes.
+
+2.0.5 (2017-05-30)
+++++++++++++++++++
+* Output deprecating information on using '--expanded-view'
+* Add get-access-token command to provide raw AAD token
+* Support login with a user account with no associated subscriptions
+
+2.0.4 (2017-04-28)
+++++++++++++++++++
+* Support login when there are no subscriptions found (#2560)
+* Support short param name in az account set --subscription (#2980)
 
 2.0.3 (2017-04-17)
 ++++++++++++++++++

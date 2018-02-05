@@ -3,6 +3,69 @@
 Release History
 ===============
 
+0.0.16
+++++++
+* Performance fixes.
+
+0.0.15
+++++++
+* Update helpfile
+  
+0.0.14
+++++++
+* Update for CLI core changes.
+
+0.0.13
+++++++
+* Minor fixes.
+
+0.0.12
+++++++
+* minor fixes
+
+0.0.11 (2017-09-22)
++++++++++++++++++++
+* minor fixes
+
+0.0.10 (2017-08-28)
++++++++++++++++++++
+* minor fixes
+
+0.0.9 (2017-07-27)
+++++++++++++++++++
+* minor fixes
+
+0.0.8 (2017-07-07)
+++++++++++++++++++
+* minor fixes
+
+0.0.7 (2017-06-21)
+++++++++++++++++++
+* No changes.
+
+0.0.6 (2017-06-13)
+++++++++++++++++++
+* Minor fixes.
+
+0.0.5 (2017-05-30)
++++++++++++++++++++++
+
+* Adding support for claiming any vm in the lab through `az lab vm claim`
+* Adding support for claiming existing vm in the lab through `az lab vm claim`
+* Adding table output formatter for `az lab vm list` & `az lab vm show`
+
+0.0.4 (2017-05-05)
++++++++++++++++++++++
+
+* Adding table output formatter for az lab arm-template & az lab artifact-source
+
+0.0.3 (2017-04-28)
++++++++++++++++++++++
+
+* Adding create, show, delete & list commands for environment in the lab.
+* Adding show & list commands to view ARM templates in the lab.
+* Adding --environment flag in `az lab vm list` to filter VMs by environment in the lab.
+
 0.0.2 (2017-04-17)
 +++++++++++++++++++++
 

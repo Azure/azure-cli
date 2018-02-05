@@ -7,8 +7,14 @@
 
 from codecs import open
 from setuptools import setup
+try:
+    from azure_bdist_wheel import cmdclass
+except ImportError:
+    from distutils import log as logger
+    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    cmdclass = {}
 
-VERSION = "0.1.0+dev"
+VERSION = "0.1.0"
 
 CLASSIFIERS = [
     'Development Status :: 3 - Alpha',
@@ -27,7 +33,8 @@ DEPENDENCIES = [
     'azure-cli',
     'jmespath',
     'mock',
-    'vcrpy==1.10.3'
+    'vcrpy>=1.10.3',
+    'azure-devtools>=0.5.0'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -46,12 +53,11 @@ setup(
     url='https://github.com/Azure/azure-cli',
     zip_safe=False,
     classifiers=CLASSIFIERS,
-    namespace_packages=[
+    packages=[
         'azure',
         'azure.cli',
-    ],
-    packages=[
         'azure.cli.testsdk'
     ],
-    install_requires=DEPENDENCIES
+    install_requires=DEPENDENCIES,
+    cmdclass=cmdclass
 )

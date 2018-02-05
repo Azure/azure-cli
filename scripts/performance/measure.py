@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import sys
-from subprocess import check_output, STDOUT
+from subprocess import check_output, STDOUT, CalledProcessError
 
 def mean(data):
     """Return the sample arithmetic mean of data."""
@@ -29,20 +29,32 @@ def pstdev(data):
     return (ss/n) ** 0.5
 
 
-real = []
-user = []
-syst = []
-loop = 100
+def scenario(command, loop=10):
+    real = []
+    user = []
+    syst = []
 
-for i in range(loop):
-    lines = check_output(['time -p az'], shell=True, stderr=STDOUT).split('\n')
-    real_time = float(lines[-4].split()[1])
-    real.append(float(lines[-4].split()[1]))
-    user.append(float(lines[-3].split()[1]))
-    syst.append(float(lines[-2].split()[1]))
-    sys.stdout.write('Loop {} => {} \n'.format(i, real_time))
-    sys.stdout.flush()
+    test_command = 'time -p ' + command
+    for i in range(loop):
+        try:
+            lines = check_output([test_command], shell=True, stderr=STDOUT).split('\n')
+        except CalledProcessError as e:
+            lines = e.output.split('\n')
+        real_time = float(lines[-4].split()[1])
+        real.append(float(lines[-4].split()[1]))
+        user.append(float(lines[-3].split()[1]))
+        syst.append(float(lines[-2].split()[1]))
+        sys.stdout.write('Loop {} => {} \n'.format(i, real_time))
+        sys.stdout.flush()
 
-print('Real: mean => {} \t pstdev => {}'.format(mean(real), pstdev(real)))
-print('User: mean => {} \t pstdev => {}'.format(mean(user), pstdev(user)))
-print('Syst: mean => {} \t pstdev => {}'.format(mean(syst), pstdev(syst)))
+    print('Command: {}'.format(command))
+    print('Real: mean => {} \t pstdev => {}'.format(mean(real), pstdev(real)))
+    print('User: mean => {} \t pstdev => {}'.format(mean(user), pstdev(user)))
+    print('Syst: mean => {} \t pstdev => {}'.format(mean(syst), pstdev(syst)))
+    print('')
+
+scenario('az')
+scenario('az cl')
+scenario('az cloud')
+scenario('az cloud list')
+scenario('az cloud show --this-does-not-exist')

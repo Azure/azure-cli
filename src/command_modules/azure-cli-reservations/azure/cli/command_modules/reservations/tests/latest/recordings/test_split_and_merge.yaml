@@ -1,0 +1,155 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [reservations reservation show]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.14393-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azurereservationapi/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.21]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/1b98862a-6ae2-4c20-ade6-dd55322994b4?api-version=2017-11-01
+  response:
+    body: {string: '{"sku":{"name":"Standard_DS1"},"id":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/1b98862a-6ae2-4c20-ade6-dd55322994b4","type":"Microsoft.Capacity/reservationOrders/reservations","name":"86d9870a-bf1e-4635-94c8-b0f08932bc3a/1b98862a-6ae2-4c20-ade6-dd55322994b4","etag":2,"kind":"Microsoft.Compute","location":"japaneast","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":5,"provisioningState":"Succeeded","expiryDate":"2018-11-02","displayName":"hyo_TestYong","effectiveDateTime":"2017-11-06T18:10:32.3498846Z","lastUpdatedDateTime":"2017-11-06T18:10:32.3498846Z","mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/211e6c2c-32ee-4f6f-b101-620888e5be39","/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/d1c424c4-f30f-403a-a900-e9f5f36bb57c"]}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1004']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 06 Nov 2017 18:11:32 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"quantities": [2, 3], "reservationId": "/providers/Microsoft.Capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/1b98862a-6ae2-4c20-ade6-dd55322994b4"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [reservations reservation split]
+      Connection: [keep-alive]
+      Content-Length: ['193']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.14393-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azurereservationapi/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.21]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/split?api-version=2017-11-01
+  response:
+    body: {string: '[{"sku":{"name":"Standard_DS1"},"id":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/770a14fc-e075-4583-afe3-af486bce2cea","type":"Microsoft.Capacity/reservationOrders/reservations","name":"86d9870a-bf1e-4635-94c8-b0f08932bc3a/770a14fc-e075-4583-afe3-af486bce2cea","etag":2,"kind":"Microsoft.Compute","location":"japaneast","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":2,"provisioningState":"Succeeded","expiryDate":"2018-11-02","displayName":"hyo_TestYong","effectiveDateTime":"2017-11-06T18:11:34.2984722Z","lastUpdatedDateTime":"2017-11-06T18:11:37.5953464Z","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/1b98862a-6ae2-4c20-ade6-dd55322994b4"}}},{"sku":{"name":"Standard_DS1"},"id":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/3bc6c3ec-5678-4838-aabb-513ddef65bfc","type":"Microsoft.Capacity/reservationOrders/reservations","name":"86d9870a-bf1e-4635-94c8-b0f08932bc3a/3bc6c3ec-5678-4838-aabb-513ddef65bfc","etag":2,"kind":"Microsoft.Compute","location":"japaneast","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":3,"provisioningState":"Succeeded","expiryDate":"2018-11-02","displayName":"hyo_TestYong","effectiveDateTime":"2017-11-06T18:11:34.2984722Z","lastUpdatedDateTime":"2017-11-06T18:11:37.5953464Z","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/1b98862a-6ae2-4c20-ade6-dd55322994b4"}}},{"sku":{"name":"Standard_DS1"},"id":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/1b98862a-6ae2-4c20-ade6-dd55322994b4","type":"Microsoft.Capacity/reservationOrders/reservations","name":"86d9870a-bf1e-4635-94c8-b0f08932bc3a/1b98862a-6ae2-4c20-ade6-dd55322994b4","etag":5,"kind":"Microsoft.Compute","location":"japaneast","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":5,"provisioningState":"Cancelled","expiryDate":"2018-11-02","displayName":"hyo_TestYong","effectiveDateTime":"2017-11-06T18:11:34.2984722Z","extendedStatusInfo":{"statusCode":"Split","message":"This
+        reservation was split and is no longer active."},"lastUpdatedDateTime":"2017-11-06T18:11:37.5953464Z","splitProperties":{"splitDestinations":["/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/770a14fc-e075-4583-afe3-af486bce2cea","/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/3bc6c3ec-5678-4838-aabb-513ddef65bfc"]},"mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/211e6c2c-32ee-4f6f-b101-620888e5be39","/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/d1c424c4-f30f-403a-a900-e9f5f36bb57c"]}}}]'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3160']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 06 Nov 2017 18:11:36 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/providers/Microsoft.Capacity/reservationorders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/split/operationresults/1b98862a-6ae2-4c20-ade6-dd55322994b4_3?api-version=2017-11-01']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-tenant-writes: ['1198']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [reservations reservation split]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.14393-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azurereservationapi/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.21]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationorders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/split/operationresults/1b98862a-6ae2-4c20-ade6-dd55322994b4_3?api-version=2017-11-01
+  response:
+    body: {string: '[{"sku":{"name":"Standard_DS1"},"id":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/770a14fc-e075-4583-afe3-af486bce2cea","type":"Microsoft.Capacity/reservationOrders/reservations","name":"86d9870a-bf1e-4635-94c8-b0f08932bc3a/770a14fc-e075-4583-afe3-af486bce2cea","etag":2,"kind":"Microsoft.Compute","location":"japaneast","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":2,"provisioningState":"Succeeded","expiryDate":"2018-11-02","displayName":"hyo_TestYong","effectiveDateTime":"2017-11-06T18:11:34.2984722Z","lastUpdatedDateTime":"2017-11-06T18:11:37.5953464Z","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/1b98862a-6ae2-4c20-ade6-dd55322994b4"}}},{"sku":{"name":"Standard_DS1"},"id":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/3bc6c3ec-5678-4838-aabb-513ddef65bfc","type":"Microsoft.Capacity/reservationOrders/reservations","name":"86d9870a-bf1e-4635-94c8-b0f08932bc3a/3bc6c3ec-5678-4838-aabb-513ddef65bfc","etag":2,"kind":"Microsoft.Compute","location":"japaneast","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":3,"provisioningState":"Succeeded","expiryDate":"2018-11-02","displayName":"hyo_TestYong","effectiveDateTime":"2017-11-06T18:11:34.2984722Z","lastUpdatedDateTime":"2017-11-06T18:11:37.5953464Z","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/1b98862a-6ae2-4c20-ade6-dd55322994b4"}}},{"sku":{"name":"Standard_DS1"},"id":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/1b98862a-6ae2-4c20-ade6-dd55322994b4","type":"Microsoft.Capacity/reservationOrders/reservations","name":"86d9870a-bf1e-4635-94c8-b0f08932bc3a/1b98862a-6ae2-4c20-ade6-dd55322994b4","etag":5,"kind":"Microsoft.Compute","location":"japaneast","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":5,"provisioningState":"Cancelled","expiryDate":"2018-11-02","displayName":"hyo_TestYong","effectiveDateTime":"2017-11-06T18:11:34.2984722Z","extendedStatusInfo":{"statusCode":"Split","message":"This
+        reservation was split and is no longer active."},"lastUpdatedDateTime":"2017-11-06T18:11:37.5953464Z","splitProperties":{"splitDestinations":["/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/770a14fc-e075-4583-afe3-af486bce2cea","/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/3bc6c3ec-5678-4838-aabb-513ddef65bfc"]},"mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/211e6c2c-32ee-4f6f-b101-620888e5be39","/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/d1c424c4-f30f-403a-a900-e9f5f36bb57c"]}}}]'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3160']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 06 Nov 2017 18:11:49 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"properties": {"sources": ["/providers/Microsoft.Capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/770a14fc-e075-4583-afe3-af486bce2cea",
+      "/providers/Microsoft.Capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/3bc6c3ec-5678-4838-aabb-513ddef65bfc"]}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [reservations reservation merge]
+      Connection: [keep-alive]
+      Content-Length: ['305']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.14393-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azurereservationapi/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.21]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/merge?api-version=2017-11-01
+  response:
+    body: {string: '[{"sku":{"name":"Standard_DS1"},"id":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/770a14fc-e075-4583-afe3-af486bce2cea","type":"Microsoft.Capacity/reservationOrders/reservations","name":"86d9870a-bf1e-4635-94c8-b0f08932bc3a/770a14fc-e075-4583-afe3-af486bce2cea","etag":5,"kind":"Microsoft.Compute","location":"japaneast","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":2,"provisioningState":"Cancelled","expiryDate":"2018-11-02","displayName":"hyo_TestYong","effectiveDateTime":"2017-11-06T18:11:55.4522619Z","extendedStatusInfo":{"statusCode":"Merged","message":"This
+        reservation was merged and is no longer active."},"lastUpdatedDateTime":"2017-11-06T18:11:55.4522619Z","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/1b98862a-6ae2-4c20-ade6-dd55322994b4"},"mergeProperties":{"mergeDestination":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/a5748744-7432-477d-bc3c-b5f734be5f8d"}}},{"sku":{"name":"Standard_DS1"},"id":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/3bc6c3ec-5678-4838-aabb-513ddef65bfc","type":"Microsoft.Capacity/reservationOrders/reservations","name":"86d9870a-bf1e-4635-94c8-b0f08932bc3a/3bc6c3ec-5678-4838-aabb-513ddef65bfc","etag":4,"kind":"Microsoft.Compute","location":"japaneast","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":3,"provisioningState":"Cancelled","expiryDate":"2018-11-02","displayName":"hyo_TestYong","effectiveDateTime":"2017-11-06T18:11:55.4522619Z","extendedStatusInfo":{"statusCode":"Merged","message":"This
+        reservation was merged and is no longer active."},"lastUpdatedDateTime":"2017-11-06T18:11:55.4522619Z","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/1b98862a-6ae2-4c20-ade6-dd55322994b4"},"mergeProperties":{"mergeDestination":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/a5748744-7432-477d-bc3c-b5f734be5f8d"}}},{"sku":{"name":"Standard_DS1"},"id":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/a5748744-7432-477d-bc3c-b5f734be5f8d","type":"Microsoft.Capacity/reservationOrders/reservations","name":"86d9870a-bf1e-4635-94c8-b0f08932bc3a/a5748744-7432-477d-bc3c-b5f734be5f8d","etag":2,"kind":"Microsoft.Compute","location":"japaneast","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":5,"provisioningState":"Succeeded","expiryDate":"2018-11-02","displayName":"hyo_TestYong","effectiveDateTime":"2017-11-06T18:11:55.4522619Z","lastUpdatedDateTime":"2017-11-06T18:11:55.4522619Z","mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/770a14fc-e075-4583-afe3-af486bce2cea","/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/3bc6c3ec-5678-4838-aabb-513ddef65bfc"]}}}]'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3308']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 06 Nov 2017 18:11:56 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/providers/Microsoft.Capacity/reservationorders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/merge/operationresults/770a14fc-e075-4583-afe3-af486bce2cea_3?api-version=2017-11-01']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-tenant-writes: ['1199']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [reservations reservation merge]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.4 (Windows-10-10.0.14393-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.16 azurereservationapi/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.21]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Capacity/reservationorders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/merge/operationresults/770a14fc-e075-4583-afe3-af486bce2cea_3?api-version=2017-11-01
+  response:
+    body: {string: '[{"sku":{"name":"Standard_DS1"},"id":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/770a14fc-e075-4583-afe3-af486bce2cea","type":"Microsoft.Capacity/reservationOrders/reservations","name":"86d9870a-bf1e-4635-94c8-b0f08932bc3a/770a14fc-e075-4583-afe3-af486bce2cea","etag":5,"kind":"Microsoft.Compute","location":"japaneast","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":2,"provisioningState":"Cancelled","expiryDate":"2018-11-02","displayName":"hyo_TestYong","effectiveDateTime":"2017-11-06T18:11:55.4522619Z","extendedStatusInfo":{"statusCode":"Merged","message":"This
+        reservation was merged and is no longer active."},"lastUpdatedDateTime":"2017-11-06T18:11:55.4522619Z","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/1b98862a-6ae2-4c20-ade6-dd55322994b4"},"mergeProperties":{"mergeDestination":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/a5748744-7432-477d-bc3c-b5f734be5f8d"}}},{"sku":{"name":"Standard_DS1"},"id":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/3bc6c3ec-5678-4838-aabb-513ddef65bfc","type":"Microsoft.Capacity/reservationOrders/reservations","name":"86d9870a-bf1e-4635-94c8-b0f08932bc3a/3bc6c3ec-5678-4838-aabb-513ddef65bfc","etag":4,"kind":"Microsoft.Compute","location":"japaneast","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":3,"provisioningState":"Cancelled","expiryDate":"2018-11-02","displayName":"hyo_TestYong","effectiveDateTime":"2017-11-06T18:11:55.4522619Z","extendedStatusInfo":{"statusCode":"Merged","message":"This
+        reservation was merged and is no longer active."},"lastUpdatedDateTime":"2017-11-06T18:11:55.4522619Z","splitProperties":{"splitSource":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/1b98862a-6ae2-4c20-ade6-dd55322994b4"},"mergeProperties":{"mergeDestination":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/a5748744-7432-477d-bc3c-b5f734be5f8d"}}},{"sku":{"name":"Standard_DS1"},"id":"/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/a5748744-7432-477d-bc3c-b5f734be5f8d","type":"Microsoft.Capacity/reservationOrders/reservations","name":"86d9870a-bf1e-4635-94c8-b0f08932bc3a/a5748744-7432-477d-bc3c-b5f734be5f8d","etag":2,"kind":"Microsoft.Compute","location":"japaneast","properties":{"appliedScopes":["/subscriptions/00000000-0000-0000-0000-000000000000"],"appliedScopeType":"Single","quantity":5,"provisioningState":"Succeeded","expiryDate":"2018-11-02","displayName":"hyo_TestYong","effectiveDateTime":"2017-11-06T18:11:55.4522619Z","lastUpdatedDateTime":"2017-11-06T18:11:55.4522619Z","mergeProperties":{"mergeSources":["/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/770a14fc-e075-4583-afe3-af486bce2cea","/providers/microsoft.capacity/reservationOrders/86d9870a-bf1e-4635-94c8-b0f08932bc3a/reservations/3bc6c3ec-5678-4838-aabb-513ddef65bfc"]}}}]'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3308']
+      content-type: [application/json; charset=utf-8]
+      date: ['Mon, 06 Nov 2017 18:12:08 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+version: 1

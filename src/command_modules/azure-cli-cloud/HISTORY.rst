@@ -3,6 +3,52 @@
 Release History
 ===============
 
+2.0.12
+++++++
+* Performance fixes.
+
+2.0.11
+++++++
+* Bug fix: Do not require endpoints to be specified when setting --profile for a cloud.
+
+2.0.10
+++++++
+* `az cloud register` & `az cloud update`: Prevent users from registering clouds that have missing required endpoints
+
+2.0.9
++++++
+* minor fixes
+
+2.0.8 (2017-09-22)
+++++++++++++++++++
+* minor fixes
+
+2.0.7 (2017-07-27)
+++++++++++++++++++
+* Change api version of cloud metadata endpoint to YYYY-MM-DD format.
+* Gallery endpoint isn't required
+
+2.0.6 (2017-07-07)
+++++++++++++++++++
+* Support for registering cloud just with ARM resource manager endpoint
+
+2.0.5 (2017-06-21)
+++++++++++++++++++
+* Provide an option for 'az cloud set' to select the profile while selecting current cloud
+* Expose 'endpoint_vm_image_alias_doc'
+
+2.0.4 (2017-06-13)
+++++++++++++++++++
+* Minor fixes.
+
+2.0.3 (2017-05-30)
+++++++++++++++++++
+* Minor fixes.
+
+2.0.2 (2017-04-28)
+++++++++++++++++++
+* New packaging system.
+
 2.0.1 (2017-04-17)
 ++++++++++++++++++
 * Add profile switching params and profile listing command

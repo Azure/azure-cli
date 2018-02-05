@@ -9,17 +9,11 @@ import binascii
 from datetime import datetime
 import re
 
-from azure.mgmt.keyvault import KeyVaultManagementClient
-from azure.mgmt.keyvault.models.key_vault_management_client_enums import \
-    (KeyPermissions, SecretPermissions, CertificatePermissions)
+from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.arm import parse_resource_id
 from azure.cli.core.commands.validators import validate_tags
-from azure.cli.core.util import CLIError
 
-from azure.keyvault.generated.models.key_vault_client_enums \
-    import JsonWebKeyOperation
 
 secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
 secret_binary_encoding_values = ['base64', 'hex']
@@ -29,19 +23,23 @@ def _extract_version(item_id):
     return item_id.split('/')[-1]
 
 
-def _get_resource_group_from_vault_name(vault_name):
+def _get_resource_group_from_vault_name(cli_ctx, vault_name):
     """
     Fetch resource group from vault name
     :param str vault_name: name of the key vault
     :return: resource group name or None
     :rtype: str
     """
-    client = get_mgmt_service_client(KeyVaultManagementClient).vaults
+    from azure.mgmt.keyvault import KeyVaultManagementClient
+    from msrestazure.tools import parse_resource_id
+
+    client = get_mgmt_service_client(cli_ctx, KeyVaultManagementClient).vaults
     for vault in client.list():
         id_comps = parse_resource_id(vault.id)
         if id_comps['name'] == vault_name:
             return id_comps['resource_group']
     return None
+
 
 # COMMAND NAMESPACE VALIDATORS
 
@@ -51,7 +49,6 @@ def process_certificate_cancel_namespace(namespace):
 
 
 def process_secret_set_namespace(namespace):
-
     validate_tags(namespace)
 
     content = namespace.value
@@ -82,7 +79,7 @@ def process_secret_set_namespace(namespace):
                 try:
                     encoded = base64.encodebytes(content)
                 except AttributeError:
-                    encoded = base64.encodestring(content) # pylint: disable=deprecated-method
+                    encoded = base64.encodestring(content)  # pylint: disable=deprecated-method
                 encoded_str = encoded.decode('utf-8')
                 decoded = base64.b64decode(encoded_str)
         elif encoding == 'hex':
@@ -101,18 +98,18 @@ def process_secret_set_namespace(namespace):
     namespace.tags = tags
     namespace.value = content
 
+
 # PARAMETER NAMESPACE VALIDATORS
 
 
 def get_attribute_validator(name, attribute_class, create=False):
-
     def validator(ns):
         ns_dict = ns.__dict__
         enabled = not ns_dict.pop('disabled') if create else ns_dict.pop('enabled')
         attributes = attribute_class(
             enabled,
-            ns_dict.pop('not_before'),
-            ns_dict.pop('expires'))
+            ns_dict.pop('not_before', None),
+            ns_dict.pop('expires', None))
         setattr(ns, '{}_attributes'.format(name), attributes)
 
     return validator
@@ -128,13 +125,6 @@ def validate_key_import_source(ns):
         raise ValueError('--byok-file cannot be used with --pem-password')
     if pem_password and not pem_file:
         raise ValueError('--pem-password must be used with --pem-file')
-
-
-def validate_key_ops(ns):
-    allowed = [x.value.lower() for x in JsonWebKeyOperation]
-    for p in ns.key_ops or []:
-        if p not in allowed:
-            raise ValueError("unrecognized key operation '{}'".format(p))
 
 
 def validate_key_type(ns):
@@ -159,22 +149,6 @@ def validate_policy_permissions(ns):
             'specify at least one: --key-permissions, --secret-permissions, '
             '--certificate-permissions')
 
-    key_allowed = [x.value for x in KeyPermissions]
-    secret_allowed = [x.value for x in SecretPermissions]
-    cert_allowed = [x.value for x in CertificatePermissions]
-
-    for p in key_perms or []:
-        if p not in key_allowed:
-            raise ValueError("unrecognized key permission '{}'".format(p))
-
-    for p in secret_perms or []:
-        if p not in secret_allowed:
-            raise ValueError("unrecognized secret permission '{}'".format(p))
-
-    for p in cert_perms or []:
-        if p not in cert_allowed:
-            raise ValueError("unrecognized cert permission '{}'".format(p))
-
 
 def validate_principal(ns):
     num_set = sum(1 for p in [ns.object_id, ns.spn, ns.upn] if p)
@@ -183,16 +157,15 @@ def validate_principal(ns):
             None, 'specify exactly one: --object-id, --spn, --upn')
 
 
-def validate_resource_group_name(ns):
+def validate_resource_group_name(cmd, ns):
     if not ns.resource_group_name:
         vault_name = ns.vault_name
-        group_name = _get_resource_group_from_vault_name(vault_name)
+        group_name = _get_resource_group_from_vault_name(cmd.cli_ctx, vault_name)
         if group_name:
             ns.resource_group_name = group_name
         else:
-            raise CLIError(
-                "The Resource 'Microsoft.KeyVault/vaults/{}'".format(vault_name) + \
-                " not found within subscription")
+            msg = "The Resource 'Microsoft.KeyVault/vaults/{}' not found within subscription."
+            raise CLIError(msg.format(vault_name))
 
 
 def validate_x509_certificate_chain(ns):
@@ -206,6 +179,7 @@ def validate_x509_certificate_chain(ns):
         return cert_list
 
     ns.x509_certificates = _load_certificate_as_bytes(ns.x509_certificates)
+
 
 # ARGUMENT TYPES
 
@@ -226,12 +200,16 @@ def datetime_type(string):
     for form in accepted_date_formats:
         try:
             return datetime.strptime(string, form)
-        except ValueError: # checks next format
+        except ValueError:  # checks next format
             pass
     raise ValueError("Input '{}' not valid. Valid example: 2000-12-31T12:59:59Z".format(string))
 
 
-def vault_base_url_type(name):
-    from azure.cli.core._profile import CLOUD
-    suffix = CLOUD.suffixes.keyvault_dns
-    return 'https://{}{}'.format(name, suffix)
+def get_vault_base_url_type(cli_ctx):
+
+    suffix = cli_ctx.cloud.suffixes.keyvault_dns
+
+    def vault_base_url_type(name):
+        return 'https://{}{}'.format(name, suffix)
+
+    return vault_base_url_type

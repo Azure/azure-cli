@@ -1,7 +1,7 @@
-Microsoft Azure CLI 2.0 - Preview
-==================================
+Microsoft Azure CLI 2.0
+=======================
 
-A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0 - Preview*, our next generation multi-platform command line experience for Azure.
+A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0*, our next generation multi-platform command line experience for Azure.
 
 Usage
 =====
@@ -29,12 +29,12 @@ For usage and help content, pass in the ``-h`` parameter, for example:
 Highlights
 ===========
 
-Here are a few features and concepts that can help you get the most out of the Azure CLI 2.0 Preview
+Here are a few features and concepts that can help you get the most out of the Azure CLI 2.0
 
 The following examples are showing using the ``--output table`` format, you can change your default using the ``$ az configure`` command.
 
 Tab Completion
-^^^^^^^^^^^^^^
+++++++++++++++
 
 We support tab-completion for groups, commands, and some parameters
 
@@ -48,7 +48,7 @@ We support tab-completion for groups, commands, and some parameters
    $ az vm show -g WebPropertiesRG -n Bizlogic
 
 Querying
-^^^^^^^^
+++++++++
 
 You can use the ``--query`` parameter and the JMESPath query syntax to customize your output.
 
@@ -63,7 +63,7 @@ You can use the ``--query`` parameter and the JMESPath query syntax to customize
    dcos-master-39DB807E-0  Linux
 
 Creating a new Linux VM
-^^^^^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++++++
 The following block creates a new resource group in the 'westus' region, then creates a new Ubuntu VM.  We automatically provide a series of smart defaults, such as setting up SSH with your  ``~/.ssh/id_rsa.pub`` key.  For more details, try ``az vm create -h``.
 
 .. code-block:: console
@@ -89,7 +89,7 @@ The following block creates a new resource group in the 'westus' region, then cr
    jasonsha@MyVM:~$
 
 More Samples and Snippets
-^^^^^^^^^^^^^^^^^^^^^^^^^
++++++++++++++++++++++++++
 For more usage examples, take a look at our `GitHub samples repo <http://github.com/Azure/azure-cli-samples>`__.
 
 Reporting issues and feedback

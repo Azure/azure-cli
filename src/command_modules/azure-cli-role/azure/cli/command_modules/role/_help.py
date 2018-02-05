@@ -3,47 +3,137 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.help_files import helps  # pylint: disable=unused-import
+from knack.help_files import helps  # pylint: disable=unused-import
 
-# pylint: disable=line-too-long
 
 helps['ad sp create-for-rbac'] = """
-            examples:
-                - name: Create with a default role assignment.
-                  text: az ad sp create-for-rbac
-                - name: Create using a custom name, and with a default assiggment.
-                  text: az ad sp create-for-rbac -n "http://MyApp"
-                - name: Create without a default assignment.
-                  text: az ad sp create-for-rbac --skip-assignment
-                - name: Create with customized assignments
-                  text: az ad sp create-for-rbac -n "http://MyApp" --role contributor --scopes /subscriptions/11111111-2222-3333-4444-555555555555/resourceGroups/MyResourceGroup /subscriptions/11111111-2222-3333-4444-666666666666/resourceGroups/MyAnotherResourceGroup
-                - name: Create using self-signed certificte
-                  text: az ad sp create-for-rbac --create-cert
-                - name: Login with a service principal.
-                  text: az login --service-principal -u <name> -p <password> --tenant <tenant>
-                - name: Login with self-signed certificate
-                  text: az login --service-principal -u <name> -p <certificate file path> --tenant <tenant>
-                - name: Reset credentials on expiration.
-                  text: az ad sp reset-credentials --name <name>
-                - name: Create extra role assignments in future.
-                  text: az role assignment create --assignee <name> --role Contributor
-                - name: Revoke the service principal when done with it.
-                  text: az ad app delete --id <name>
-            """
+    type: command
+    short-summary: Create a service principal and configure its access to Azure resources.
+    parameters:
+        - name: --name -n
+          short-summary: Name or app URI to associate the RBAC with. If not present, a name will be generated.
+        - name: --password -p
+          short-summary: The password used to log in.
+          long-summary: If not present and `--cert` is not specified, a random password will be generated.
+        - name: --cert
+          short-summary: Certificate to use for credentials.
+          long-summary: When used with `--keyvault,` indicates the name of the cert to use or create.
+            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{file}` to
+            load from a file. Do not include private key info.
+        - name: --create-cert
+          short-summary: Create a self-signed certificate to use for the credential.
+          long-summary: Use with `--keyvault` to create the certificate in Key Vault. Otherwise, a
+            certificate will be created locally.
+        - name: --keyvault
+          short-summary: Name or ID of a KeyVault to use for creating or retrieving certificates.
+        - name: --years
+          short-summary: 'Number of years for which the credentials will be valid. Default: 1 year'
+        - name: --scopes
+          short-summary: >
+            Space-separated list of scopes the service principal's role assignment applies to.
+            Defaults to the root of the current subscription.
+        - name: --role
+          short-summary: Role of the service principal.
+    examples:
+        - name: Create with a default role assignment.
+          text: >
+            az ad sp create-for-rbac
+        - name: Create using a custom name, and with a default assignment.
+          text: >
+            az ad sp create-for-rbac -n "MyApp"
+        - name: Create without a default assignment.
+          text: >
+            az ad sp create-for-rbac --skip-assignment
+        - name: Create with customized contributor assignments.
+          text: |
+            az ad sp create-for-rbac -n "MyApp" --role contributor \\
+                --scopes /subscriptions/{SubID}/resourceGroups/{ResourceGroup1} \\
+                /subscriptions/{SubID}/resourceGroups/{ResourceGroup2}
+        - name: Create using a self-signed certificte.
+          text: az ad sp create-for-rbac --create-cert
+        - name: Create using a self-signed certificate, and store it within KeyVault.
+          text: az ad sp create-for-rbac --keyvault MyVault --cert CertName --create-cert
+        - name: Create using existing certificate in KeyVault.
+          text: az ad sp create-for-rbac --keyvault MyVault --cert CertName
+    """
 
+helps['ad sp reset-credentials'] = """
+    type: command
+    short-summary: Reset a service principal credential.
+    long-summary: Use upon expiration of the service principal's credentials, or in the event that login credentials are lost.
+    parameters:
+        - name: --name -n
+          short-summary: Name or app URI for the credential.
+        - name: --password -p
+          short-summary: The password used to log in.
+          long-summary: If not present and `--cert` is not specified, a random password will be generated.
+        - name: --cert
+          short-summary: Certificate to use for credentials.
+          long-summary: When using `--keyvault,` indicates the name of the cert to use or create.
+            Otherwise, supply a PEM or DER formatted public certificate string. Use `@{file}` to
+            load from a file. Do not include private key info.
+        - name: --create-cert
+          short-summary: Create a self-signed certificate to use for the credential.
+          long-summary: Use with `--keyvault` to create the certificate in Key Vault. Otherwise, a
+            certificate will be created locally.
+        - name: --keyvault
+          short-summary: Name or ID of a KeyVault to use for creating or retrieving certificates.
+        - name: --years
+          short-summary: 'Number of years for which the credentials will be valid. Default: 1 year'
+"""
+helps['ad sp delete'] = """
+    type: command
+    short-summary: Delete a service principal and its role assignments.
+"""
+helps['ad sp create'] = """
+    type: command
+    short-summary: Create a service principal.
+"""
+helps['ad sp list'] = """
+    type: command
+    short-summary: List service principals.
+"""
+helps['ad sp show'] = """
+    type: command
+    short-summary: Get the details of a service principal.
+"""
+helps['ad app delete'] = """
+    type: command
+    short-summary: Delete an application.
+"""
+helps['ad app create'] = """
+    type: command
+    short-summary: Create an application.
+"""
+helps['ad app list'] = """
+    type: command
+    short-summary: List applications.
+"""
+helps['ad app show'] = """
+    type: command
+    short-summary: Get the details of an application.
+"""
+helps['ad app update'] = """
+    type: command
+    short-summary: Update an application.
+"""
+helps['ad user list'] = """
+    type: command
+    short-summary: List Azure Active Directory users.
+"""
 helps['role'] = """
     type: group
-    short-summary: Use role assignments to manage access to your Azure resources.
+    short-summary: Manage user roles for access control with Azure Active Directory and service principals.
 """
 helps['role assignment'] = """
     type: group
-    short-summary: Manage role assignments
+    short-summary: Manage role assignments.
 """
 helps['role assignment create'] = """
     type: command
-    short-summary: Create a new role assignment.
+    short-summary: Create a new role assignment for a user, group, or service principal.
     examples:
-        - name: Create role assignment for a specified user, group, or service principal.
+        - name: Create role assignment for an assignee.
           text: az role assignment create --assignee sp_name --role a_role
 """
 helps['role assignment delete'] = """
@@ -53,6 +143,7 @@ helps['role assignment delete'] = """
 helps['role assignment list'] = """
     type: command
     short-summary: List role assignments.
+    long-summary: By default, only assignments scoped to subscription will be displayed. To view assignments scoped by resource or group, use `--all`.
 """
 helps['role definition'] = """
     type: group
@@ -65,13 +156,13 @@ helps['role definition create'] = """
     parameters:
         - name: --role-definition
           type: string
-          short-summary: 'JSON formatted string or a path to a file with such content'
+          short-summary: Description of a role as JSON, or a path to a file containing a JSON description.
     examples:
-        - name: Create a role with following definition content
+        - name: Create a role with read-only access to storage and network resources, and the ability to start or restart VMs.
           text: |
-                {
+                az role definition create --role-definition '{
                     "Name": "Contoso On-call",
-                    "Description": "Can monitor compute, network and storage, and restart virtual machines",
+                    "Description": "Perform VM actions and read storage and network information."
                     "Actions": [
                         "Microsoft.Compute/*/read",
                         "Microsoft.Compute/virtualMachines/start/action",
@@ -85,7 +176,10 @@ helps['role definition create'] = """
                         "Microsoft.Support/*"
                     ],
                     "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
-                }
+                }'
+        - name: Create a role from a file containing a JSON description.
+          text: >
+            az role definition create --role-definition @ad-role.json
 """
 
 helps['role definition delete'] = """
@@ -99,35 +193,34 @@ helps['role definition list'] = """
 helps['role definition update'] = """
     type: command
     short-summary: Update a role definition.
+    parameters:
+        - name: --role-definition
+          type: string
+          short-summary: Description of a role as JSON, or a path to a file containing a JSON description.
+    examples:
+        - name: Create a role with read-only access to storage and network resources, and the ability to start or restart VMs.
+          text: |
+                az role definition create --role-definition '{
+                    "Name": "Contoso On-call",
+                    "Description": "Perform VM actions and read storage and network information."
+                    "Actions": [
+                        "Microsoft.Compute/*/read",
+                        "Microsoft.Compute/virtualMachines/start/action",
+                        "Microsoft.Compute/virtualMachines/restart/action",
+                        "Microsoft.Network/*/read",
+                        "Microsoft.Storage/*/read",
+                        "Microsoft.Authorization/*/read",
+                        "Microsoft.Resources/subscriptions/resourceGroups/read",
+                        "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
+                        "Microsoft.Insights/alertRules/*",
+                        "Microsoft.Support/*"
+                    ],
+                    "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
+                }'
+        - name: Create a role from a file containing a JSON description.
+          text: >
+            az role definition create --role-definition ad-role.json
 """
-helps['role definition create'] = """
-            type: command
-            parameters:
-                - name: --role-definition
-                  type: string
-                  short-summary: 'JSON formatted string or a path to a file with such content'
-            examples:
-                - name: Create a role with following definition content
-                  text: |
-                        {
-                            "Name": "Contoso On-call",
-                            "Description": "Can monitor compute, network and storage, and restart virtual machines",
-                            "Actions": [
-                                "Microsoft.Compute/*/read",
-                                "Microsoft.Compute/virtualMachines/start/action",
-                                "Microsoft.Compute/virtualMachines/restart/action",
-                                "Microsoft.Network/*/read",
-                                "Microsoft.Storage/*/read",
-                                "Microsoft.Authorization/*/read",
-                                "Microsoft.Resources/subscriptions/resourceGroups/read",
-                                "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
-                                "Microsoft.Insights/alertRules/*",
-                                "Microsoft.Support/*"
-                            ],
-                            "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
-                        }
-
-            """
 helps['ad'] = """
     type: group
     short-summary: Synchronize on-premises directories and manage Azure Active Directory resources.
@@ -139,6 +232,10 @@ helps['ad app'] = """
 helps['ad group'] = """
     type: group
     short-summary: Manage Azure Active Directory groups.
+"""
+helps['ad group member'] = """
+    type: group
+    short-summary: Manage Azure Active Directory group members.
 """
 helps['ad sp'] = """
     type: group

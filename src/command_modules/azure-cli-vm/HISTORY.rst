@@ -3,6 +3,168 @@
 Release History
 ===============
 
+2.0.25
+++++++
+* vm image: support accept market terms to use vm images
+* vm/vmss create: ensure commands can run under proxy with unsigned certificates.
+* vmss:(PREVIEW) support low priority
+* `vm/vmss create` - `--admin-password` updated to type secureString.
+
+2.0.24
+++++++
+* vmss:(PREVIEW) cross zone support
+* vmss:(BREAKING CHANGE)single zone scale-set will default to "Standard" load balancer instead of "Basic"
+* vm/vmss: use right term of "userAssignedIdentity" for EMSI
+* vm: (PREVIEW) support os disk swap
+* vm: support use image from other subscriptions
+
+2.0.23
+++++++
+* vmss: ensure app-gateway has a name when defaults to it for large scalesets
+
+2.0.22
+++++++
+* VM/VMSS: (Preview) support user assigned identity
+
+2.0.21
+++++++
+* Minor fixes
+
+2.0.20
+++++++
+* Minor fixes
+
+2.0.19
+++++++
+* show zone information on `az vm list-skus -otable`
+* Update the storage multiapi package reference
+
+2.0.18
+++++++
+* `vmss create`: fix a bug that blocks using Basic tier of VM sizes
+* `vm/vmss create`: expose `plan` arguments for using custom images with billing informations 
+* vm : support `vm secret add/remove/list`
+* vm : `vm format-secret` is copied to `vm secret format`. The old one will be removed in future
+* Minor fixes.
+
+2.0.17
+++++++
+* `vm encryption enable`: expose '--encrypt-format'
+* `vmss create`: expose '--accelerated-networking'
+
+2.0.16 (2017-10-09)
++++++++++++++++++++
+* `vm show`: fix a bug when using '-d' crashes on missing private ip addresses
+* `vmss create`: (PREVIEW) support rolling upgrade
+* `vm encryption enable`: allow updating encryption settings by rerunning the command
+* `vm create`: expose --os-disk-size-gb
+* `vmss create`: expose --license-type for windows os
+
+2.0.15 (2017-09-22)
++++++++++++++++++++
+* `vm/vmss/disk create`: support availability zone
+* `vmss create`: Fixed issue where supplying `--app-gateway ID` would fail.
+* `vm create`: Added `--asgs` support.
+* `vm run-command`: support to run commands on remote VMs
+* `vmss encryption`: (PREVIEW) support vmss disk encryptions
+* `vm perform-maintenance`: support to perform maintenance on a vm
+
+2.0.14 (2017-09-11)
++++++++++++++++++++
+* msi: don't assign access unless `--scope` is provided
+* msi: use the same extension naming as portal does
+* msi: remove the useless `subscription` from the `vm/vmss create` commands output
+* `vm/vmss create`: fix a bug that the storage sku is not applied on data disks coming with an image
+* `vm format-secret`: Fix issue where `--secrets` would not accept newline separated IDs.
+
+2.0.13 (2017-08-28)
++++++++++++++++++++
+* `vmss get-instance-view`: Fix issue where extra, erroneous information was displayed when using `--instance-id *`
+* `vmss create`: Added support for `--lb-sku`
+* `vm/vmss create`: remove human names from the admin name blacklist
+* `vm/vmss create`: fix issue where the command would throw an error if unable to extract plan information from an image. 
+* `vmss create`: fix a crash when create a scaleset with an internal LB
+* `vm availability-set create`: Fix issue where --no-wait argument did not work.
+
+2.0.12 (2017-08-11)
++++++++++++++++++++
+* availability-set: expose fault domain count on convert
+* vm: expose 'az vm list-skus' command
+* vm/vmss: support to assign identity w/o creating role assignments
+* vm: apply storage sku on attaching data disks
+* vm: remove default os-disk name and storage SKU when using managed disks.
+
+2.0.11 (2017-07-27)
++++++++++++++++++++
+* vmss: support configuring nsg
+* vmss: fix a bug that dns server is not configured right.
+* vm/vmss: support managed service identity
+* `vmss create`: Fix issue where creating with existing load balancer required `--backend-pool-name`.
+* `vm image create`: make datadisk's lun start with 0
+
+2.0.10 (2017-07-07)
++++++++++++++++++++
+* vm/vmss: use newer api-version of "2017-03-30"
+* BC: 'sku.managed' is removed from 'az vm availability-set show' (use sku.name instead)
+* `vmss create`: add arguments `--app-gateway-capacity` and `--app-gateway-sku`.
+* `vm/vmss create`: if --admin-password is specified for Linux images, automatically will change from SSH authentication
+  to password without needing `--authentication-type password` explicitly.
+* `vm/vmss create`: added information statements that can be shown using --debug
+* `vm/vmss create`: added client-side validation where certain parameters were previously just ignored.
+* `vmss create`: support public ip per instance, instance custom domain name, custom dns servers
+
+
+2.0.9 (2017-06-21)
+++++++++++++++++++
+* vm/vmss: lower thread number used for 'vm image list --all' to avoid exceeding the OS opened file limits  
+* diagnostics: Fix a typo in default Linux Diagnostic extension config
+* vmss create: fix failure when running with --use-unmanaged-disk
+
+2.0.8 (2017-06-13)
+++++++++++++++++++
+* vm: support attaching data disks on vm create (#3644)
+* Improve table output for vm/vmss commands: get-instance-view, list, show, list-usage, etc
+* support configuring disk caching on attaching a managed disk (#3513)
+* Support attaching existing data disks on vm create
+* VM/VMSS: fixed an issue with name generation that resulted in the create commands not being idempotent.
+
+2.0.7 (2017-05-09)
+++++++++++++++++++
+* diagnostics: Fix incorrect Linux diagnostics default config with update for LAD v.3.0 extension
+* disk: support cross subscription blob import
+* disk: add --no-wait flag to disk create, update, and delete.
+* disk: add `az disk wait` command.
+* BC: disk: add confirmation prompt to `az disk delete`.
+* vm: support license type on create
+* BC: vm open-port: command always returns the NSG. Previously it returned the NIC or Subnet.
+* vm: fix "vm extension list" crash if the VM has no extensions
+* vmss: update arg description for 'vmss delete-instances --instance-ids'
+* vmss: hide arg 'vmss show --ids', which is not supposed to work because of 'instance-id' arg
+* BC: vmss list-instance-connection-info: include instance IDs in the output
+* vm/vmss diagnostics: provide protected settings samples, handle extension major version upgrade, etc.
+* disk/snapshot/image: expose '--tags' in the create command
+* vmss: provides default for '--app-gateway-subnet-address-prefix' when creating a new vnet
+* vm: support configuring disk caching on attaching a managed disk
+
+2.0.6 (2017-05-09)
+++++++++++++++++++
+* Minor fixes.
+
+2.0.5 (2017-05-05)
+++++++++++++++++++
+* avail-set: make UD&FD domain counts optional
+
+note: VM commands in sovereign clouds
+Please avoid managed disk related features, including the following:
+1.       az disk/snapshot/image
+2.       az vm/vmss disk
+3.       Inside "az vm/vmss create", use "—use-unmanaged-disk" to avoid managed disk
+Other commands should work
+
+2.0.4 (2017-04-28)
+++++++++++++++++++
+* vm/vmss: improve the warning text when generates ssh key pairs
+
 2.0.3 (2017-04-17)
 ++++++++++++++++++
 * vm/vmss: support create from a market place image which requires plan info(#1209)

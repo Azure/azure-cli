@@ -3,68 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint: disable=too-many-arguments
-
-from collections import OrderedDict
-import json
 
 from enum import Enum
 
 from azure.cli.core.util import b64encode
-from azure.cli.core.profiles import get_api_version, supported_api_version, ResourceType
-
-
-class ArmTemplateBuilder(object):
-
-    def __init__(self):
-        template = OrderedDict()
-        template['$schema'] = \
-            'https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#'
-        template['contentVersion'] = '1.0.0.0'
-        template['parameters'] = {}
-        template['variables'] = {}
-        template['resources'] = []
-        template['outputs'] = {}
-        self.template = template
-
-    def add_resource(self, resource):
-        self.template['resources'].append(resource)
-
-    def add_variable(self, key, value):
-        self.template['variables'][key] = value
-
-    def add_parameter(self, key, value):
-        self.template['parameters'][key] = value
-
-    def add_id_output(self, key, provider, property_type, property_name):
-        new_output = {
-            key: {
-                'type': 'string',
-                'value': "[resourceId('{}/{}', '{}')]".format(
-                    provider, property_type, property_name)
-            }
-        }
-        self.template['outputs'].update(new_output)
-
-    def add_output(self, key, property_name, provider=None, property_type=None,
-                   output_type='string', path=None):
-
-        if provider and property_type:
-            value = "[reference(resourceId('{provider}/{type}', '{property}'),providers('{provider}', '{type}').apiVersions[0])".format(  # pylint: disable=line-too-long
-                provider=provider, type=property_type, property=property_name)
-        else:
-            value = "[reference('{}')".format(property_name)
-        value = '{}.{}]'.format(value, path) if path else '{}]'.format(value)
-        new_output = {
-            key: {
-                'type': output_type,
-                'value': value
-            }
-        }
-        self.template['outputs'].update(new_output)
-
-    def build(self):
-        return json.loads(json.dumps(self.template))
+from azure.cli.core.profiles import ResourceType
+from azure.cli.core.commands.arm import ArmTemplateBuilder
 
 
 # pylint: disable=too-few-public-methods
@@ -78,7 +22,6 @@ class StorageProfile(Enum):
 
 
 def build_deployment_resource(name, template, dependencies=None):
-    from azure.cli.core.util import random_string
     dependencies = dependencies or []
     deployment = {
         'name': name,
@@ -117,7 +60,7 @@ def build_output_deployment_resource(key, property_name, property_provider, prop
     return deployment
 
 
-def build_storage_account_resource(name, location, tags, sku):
+def build_storage_account_resource(_, name, location, tags, sku):
     storage_account = {
         'type': 'Microsoft.Storage/storageAccounts',
         'name': name,
@@ -130,15 +73,14 @@ def build_storage_account_resource(name, location, tags, sku):
     return storage_account
 
 
-def build_public_ip_resource(name, location, tags, address_allocation, dns_name=None):
-
+def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_name, sku, zone):
     public_ip_properties = {'publicIPAllocationMethod': address_allocation}
 
     if dns_name:
         public_ip_properties['dnsSettings'] = {'domainNameLabel': dns_name}
 
     public_ip = {
-        'apiVersion': '2015-06-15',
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_NETWORK),
         'type': 'Microsoft.Network/publicIPAddresses',
         'name': name,
         'location': location,
@@ -146,11 +88,19 @@ def build_public_ip_resource(name, location, tags, address_allocation, dns_name=
         'dependsOn': [],
         'properties': public_ip_properties
     }
+
+    # when multiple zones are provided(through a x-zone scale set), we don't propagate to PIP becasue it doesn't
+    # support x-zone; rather we will rely on the Standard LB to work with such scale sets
+    if zone and len(zone) == 1:
+        public_ip['zones'] = zone
+
+    if sku and cmd.supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
+        public_ip['sku'] = {'name': sku}
     return public_ip
 
 
-def build_nic_resource(name, location, tags, vm_name, subnet_id, private_ip_address=None,
-                       nsg_id=None, public_ip_id=None):
+def build_nic_resource(_, name, location, tags, vm_name, subnet_id, private_ip_address=None,
+                       nsg_id=None, public_ip_id=None, application_security_groups=None):
 
     private_ip_allocation = 'Static' if private_ip_address else 'Dynamic'
     ip_config_properties = {
@@ -176,8 +126,14 @@ def build_nic_resource(name, location, tags, vm_name, subnet_id, private_ip_addr
     if nsg_id:
         nic_properties['networkSecurityGroup'] = {'id': nsg_id}
 
+    api_version = '2015-06-15'
+    if application_security_groups:
+        asg_ids = [{'id': x.id} for x in application_security_groups]
+        nic_properties['ipConfigurations'][0]['properties']['applicationSecurityGroups'] = asg_ids
+        api_version = '2017-09-01'
+
     nic = {
-        'apiVersion': '2015-06-15',
+        'apiVersion': api_version,
         'type': 'Microsoft.Network/networkInterfaces',
         'name': name,
         'location': location,
@@ -188,7 +144,7 @@ def build_nic_resource(name, location, tags, vm_name, subnet_id, private_ip_addr
     return nic
 
 
-def build_nsg_resource(name, location, tags, nsg_rule_type):
+def build_nsg_resource(_, name, location, tags, nsg_rule_type):
 
     rule_name = 'rdp' if nsg_rule_type == 'rdp' else 'default-allow-ssh'
     rule_dest_port = '3389' if nsg_rule_type == 'rdp' else '22'
@@ -223,7 +179,7 @@ def build_nsg_resource(name, location, tags, nsg_rule_type):
     return nsg
 
 
-def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None,
+def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None,
                         subnet_prefix=None, dns_servers=None):
     vnet = {
         'name': name,
@@ -250,14 +206,64 @@ def build_vnet_resource(name, location, tags, vnet_prefix=None, subnet=None,
     return vnet
 
 
+def build_msi_role_assignment(cmd, vm_vmss_name, vm_vmss_resource_id, role_definition_id,
+                              role_assignment_guid, identity_scope, is_vm=True):
+    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.authorization import AuthorizationManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    result = parse_resource_id(identity_scope)
+    if result.get('type'):  # is a resource id?
+        name = '{}/Microsoft.Authorization/{}'.format(result['name'], role_assignment_guid)
+        assignment_type = '{}/{}/providers/roleAssignments'.format(result['namespace'], result['type'])
+    else:
+        name = role_assignment_guid
+        assignment_type = 'Microsoft.Authorization/roleAssignments'
+
+    # pylint: disable=line-too-long
+    msi_rp_api_version = '2015-08-31-PREVIEW'
+    authorization_api_version = get_mgmt_service_client(cmd.cli_ctx, AuthorizationManagementClient).api_version
+    return {
+        'name': name,
+        'type': assignment_type,
+        'apiVersion': authorization_api_version,
+        'dependsOn': [
+            'Microsoft.Compute/{}/{}'.format('virtualMachines' if is_vm else 'virtualMachineScaleSets', vm_vmss_name)
+        ],
+        'properties': {
+            'roleDefinitionId': role_definition_id,
+            'principalId': "[reference('{}/providers/Microsoft.ManagedIdentity/Identities/default', '{}').principalId]".format(
+                vm_vmss_resource_id, msi_rp_api_version),
+            'scope': identity_scope
+        }
+    }
+
+
+def build_vm_msi_extension(cmd, vm_name, location, role_assignment_guid, port, is_linux, extension_version):
+    ext_type_name = 'ManagedIdentityExtensionFor' + ('Linux' if is_linux else 'Windows')
+    return {
+        'type': 'Microsoft.Compute/virtualMachines/extensions',
+        'name': vm_name + '/' + ext_type_name,
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_extensions'),
+        'location': location,
+        'dependsOn': [role_assignment_guid or 'Microsoft.Compute/virtualMachines/' + vm_name],
+        'properties': {
+            'publisher': "Microsoft.ManagedIdentity",
+            'type': ext_type_name,
+            'typeHandlerVersion': extension_version,
+            'autoUpgradeMinorVersion': True,
+            'settings': {'port': port}
+        }
+    }
+
+
 def build_vm_resource(  # pylint: disable=too-many-locals
-        name, location, tags, size, storage_profile, nics, admin_username,
+        cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
         os_caching=None, data_caching=None, storage_sku=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
-        attach_os_disk=None, data_disk_sizes_gb=None, image_data_disks=None,
-        custom_data=None, secrets=None):
+        attach_os_disk=None, os_disk_size_gb=None, attach_data_disks=None, data_disk_sizes_gb=None,
+        image_data_disks=None, custom_data=None, secrets=None, license_type=None, zone=None):
 
     def _build_os_profile():
 
@@ -267,7 +273,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         }
 
         if admin_password:
-            os_profile['adminPassword'] = admin_password
+            os_profile['adminPassword'] = "[parameters('adminPassword')]"
 
         if custom_data:
             os_profile['customData'] = b64encode(custom_data)
@@ -361,8 +367,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals
             }
         }
         profile = storage_profiles[storage_profile.name]
+        if os_disk_size_gb:
+            profile['osDisk']['diskSizeGb'] = os_disk_size_gb
         return _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
-                                 data_caching, storage_sku)
+                                 data_caching, storage_sku, attach_data_disks=attach_data_disks)
 
     vm_properties = {
         'hardwareProfile': {'vmSize': size},
@@ -377,9 +385,11 @@ def build_vm_resource(  # pylint: disable=too-many-locals
     if not attach_os_disk:
         vm_properties['osProfile'] = _build_os_profile()
 
-    vm_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
+    if license_type:
+        vm_properties['licenseType'] = license_type
+
     vm = {
-        'apiVersion': vm_api_version,
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
         'type': 'Microsoft.Compute/virtualMachines',
         'name': name,
         'location': location,
@@ -387,19 +397,27 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         'dependsOn': [],
         'properties': vm_properties,
     }
+    if zone:
+        vm['zones'] = zone
     return vm
 
 
 def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
-                      data_caching, storage_sku):
-    if data_disk_sizes_gb is not None:
-        profile['dataDisks'] = []
+                      data_caching, storage_sku, attach_data_disks=None):
+    lun = 0
+    if image_data_disks:
+        profile['dataDisks'] = profile.get('dataDisks') or []
         for image_data_disk in image_data_disks or []:
             profile['dataDisks'].append({
                 'lun': image_data_disk.lun,
                 'createOption': "fromImage",
-                'caching': data_caching
+                'caching': data_caching,
+                'managedDisk': {'storageAccountType': storage_sku}
             })
+            lun = lun + 1
+
+    if data_disk_sizes_gb:
+        profile['dataDisks'] = profile.get('dataDisks') or []
         lun = max([d.lun for d in image_data_disks]) + 1 if image_data_disks else 0
         for size in data_disk_sizes_gb:
             profile['dataDisks'].append({
@@ -410,6 +428,24 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                 'managedDisk': {'storageAccountType': storage_sku}
             })
             lun = lun + 1
+
+    if attach_data_disks:
+        profile['dataDisks'] = profile.get('dataDisks') or []
+        from msrestazure.tools import is_valid_resource_id
+        for d in attach_data_disks:
+            disk_entry = {
+                'lun': lun,
+                'createOption': 'attach',
+                'caching': data_caching,
+            }
+            if is_valid_resource_id(d):
+                disk_entry['managedDisk'] = {'id': d}
+            else:
+                disk_entry['vhd'] = {'uri': d}
+                disk_entry['name'] = d.split('/')[-1].split('.')[0]
+            profile['dataDisks'].append(disk_entry)
+            lun += 1
+
     return profile
 
 
@@ -440,10 +476,9 @@ def _build_frontend_ip_config(name, public_ip_id=None, private_ip_address=None,
     return frontend_ip_config
 
 
-def build_application_gateway_resource(name, location, tags, backend_pool_name, backend_port,
-                                       frontend_ip_name, public_ip_id,
-                                       subnet_id, gateway_subnet_id,
-                                       private_ip_address, private_ip_allocation):
+def build_application_gateway_resource(_, name, location, tags, backend_pool_name, backend_port, frontend_ip_name,
+                                       public_ip_id, subnet_id, gateway_subnet_id,
+                                       private_ip_address, private_ip_allocation, sku, capacity):
     frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
                                                    private_ip_address, private_ip_allocation,
                                                    subnet_id)
@@ -503,9 +538,9 @@ def build_application_gateway_resource(name, location, tags, backend_pool_name, 
             }
         ],
         'sku': {
-            'name': 'Standard_Large',
-            'tier': 'Standard',
-            'capacity': '10'
+            'name': sku,
+            'tier': sku.split('_')[0],
+            'capacity': capacity
         },
         'requestRoutingRules': [
             {
@@ -532,9 +567,9 @@ def build_application_gateway_resource(name, location, tags, backend_pool_name, 
     return ag
 
 
-def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_pool_name,
+def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, nat_pool_name,
                                  backend_port, frontend_ip_name, public_ip_id, subnet_id,
-                                 private_ip_address, private_ip_allocation):
+                                 private_ip_address, private_ip_allocation, sku):
     lb_id = "resourceId('Microsoft.Network/loadBalancers', '{}')".format(name)
 
     frontend_ip_config = _build_frontend_ip_config(frontend_ip_name, public_ip_id,
@@ -564,20 +599,39 @@ def build_load_balancer_resource(name, location, tags, backend_pool_name, nat_po
         ],
         'frontendIPConfigurations': [frontend_ip_config]
     }
-
     lb = {
         'type': 'Microsoft.Network/loadBalancers',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2015-06-15',
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_NETWORK),
         'dependsOn': [],
         'properties': lb_properties
     }
+    if sku and cmd.supported_api_version(ResourceType.MGMT_NETWORK, min_api='2017-08-01'):
+        lb['sku'] = {'name': sku}
+        # LB rule is the way to enable SNAT so outbound connections are possible
+        if sku.lower() == 'standard':
+            lb_properties['loadBalancingRules'] = [{
+                "name": "LBRule",
+                "properties": {
+                    "frontendIPConfiguration": {
+                        'id': "[concat({}, '/frontendIPConfigurations/', '{}')]".format(lb_id, frontend_ip_name)
+                    },
+                    "backendAddressPool": {
+                        "id": "[concat({}, '/backendAddressPools/', '{}')]".format(lb_id, backend_pool_name)
+                    },
+                    "protocol": "tcp",
+                    "frontendPort": 80,
+                    "backendPort": 80,
+                    "enableFloatingIP": False,
+                    "idleTimeoutInMinutes": 5,
+                }
+            }]
     return lb
 
 
-def build_vmss_storage_account_pool_resource(loop_name, location, tags, storage_sku):
+def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, storage_sku):
 
     storage_resource = {
         'type': 'Microsoft.Storage/storageAccounts',
@@ -596,17 +650,17 @@ def build_vmss_storage_account_pool_resource(loop_name, location, tags, storage_
     return storage_resource
 
 
-# pylint: disable=too-many-locals
-def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
+# pylint: disable=too-many-locals, too-many-branches, too-many-statements
+def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
-                        admin_username, authentication_type,
-                        storage_profile, os_disk_name,
-                        os_caching, data_caching, storage_sku, data_disk_sizes_gb,
-                        image_data_disks, os_type,
+                        public_ip_per_vm, vm_domain_name, dns_servers, nsg, accelerated_networking,
+                        admin_username, authentication_type, storage_profile, os_disk_name,
+                        os_caching, data_caching, storage_sku, data_disk_sizes_gb, image_data_disks, os_type,
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
-                        backend_address_pool_id=None, inbound_nat_pool_id=None,
-                        single_placement_group=None, custom_data=None, secrets=None):
+                        backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
+                        single_placement_group=None, custom_data=None, secrets=None, license_type=None,
+                        zones=None, priority=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -615,6 +669,18 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             'subnet': {'id': subnet_id}
         }
     }
+
+    if public_ip_per_vm:
+        ip_configuration['properties']['publicipaddressconfiguration'] = {
+            'name': 'instancepublicip',
+            'properties': {
+                'idleTimeoutInMinutes': 10,
+            }
+        }
+        if vm_domain_name:
+            ip_configuration['properties']['publicipaddressconfiguration']['properties']['dnsSettings'] = {
+                'domainNameLabel': vm_domain_name
+            }
 
     if backend_address_pool_id:
         key = 'loadBalancerBackendAddressPools' if 'loadBalancers' in backend_address_pool_id \
@@ -674,8 +740,8 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
         'computerNamePrefix': naming_prefix,
         'adminUsername': admin_username
     }
-    if authentication_type == 'password':
-        os_profile['adminPassword'] = admin_password
+    if authentication_type == 'password' and admin_password:
+        os_profile['adminPassword'] = "[parameters('adminPassword')]"
     else:
         os_profile['linuxConfiguration'] = {
             'disablePasswordAuthentication': True,
@@ -698,6 +764,24 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
     if single_placement_group is None:  # this should never happen, but just in case
         raise ValueError('single_placement_group was not set by validators')
     # Build VMSS
+    nic_config = {
+        'name': nic_name,
+        'properties': {
+            'primary': 'true',
+            'ipConfigurations': [ip_configuration]
+        }
+    }
+
+    if cmd.supported_api_version(min_api='2017-03-30', operation_group='virtual_machine_scale_sets'):
+        if dns_servers:
+            nic_config['properties']['dnsSettings'] = {'dnsServers': dns_servers}
+
+        if accelerated_networking:
+            nic_config['properties']['enableAcceleratedNetworking'] = True
+
+    if nsg:
+        nic_config['properties']['networkSecurityGroup'] = {'id': nsg}
+
     vmss_properties = {
         'overprovision': overprovision,
         'upgradePolicy': {
@@ -707,53 +791,61 @@ def build_vmss_resource(name, naming_prefix, location, tags, overprovision, upgr
             'storageProfile': storage_properties,
             'osProfile': os_profile,
             'networkProfile': {
-                'networkInterfaceConfigurations': [{
-                    'name': nic_name,
-                    'properties': {
-                        'primary': 'true',
-                        'ipConfigurations': [ip_configuration]
-                    }
-                }]
+                'networkInterfaceConfigurations': [nic_config]
             }
         }
     }
 
-    if supported_api_version(ResourceType.MGMT_COMPUTE, min_api='2016-04-30-preview'):
+    if license_type:
+        vmss_properties['virtualMachineProfile']['licenseType'] = license_type
+
+    if health_probe and cmd.supported_api_version(min_api='2017-03-30', operation_group='virtual_machine_scale_sets'):
+        vmss_properties['virtualMachineProfile']['networkProfile']['healthProbe'] = {'id': health_probe}
+
+    if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='virtual_machine_scale_sets'):
         vmss_properties['singlePlacementGroup'] = single_placement_group
 
-    vmss_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
+    if priority and cmd.supported_api_version(min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
+        vmss_properties['virtualMachineProfile']['priority'] = priority
+
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': vmss_api_version,
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
         'dependsOn': [],
         'sku': {
             'name': vm_sku,
-            'tier': 'Standard',
             'capacity': instance_count
         },
         'properties': vmss_properties
     }
+    if zones:
+        vmss['zones'] = zones
     return vmss
 
 
-def build_av_set_resource(name, location, tags,
+def build_av_set_resource(cmd, name, location, tags,
                           platform_update_domain_count, platform_fault_domain_count, unmanaged):
-    av_set_api_version = get_api_version(ResourceType.MGMT_COMPUTE)
     av_set = {
         'type': 'Microsoft.Compute/availabilitySets',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': av_set_api_version,
-        'sku': {
-            'name': 'Classic' if unmanaged else 'Aligned'
-        },
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='availability_sets'),
         "properties": {
-            'platformUpdateDomainCount': platform_update_domain_count,
             'platformFaultDomainCount': platform_fault_domain_count,
         }
     }
+
+    if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='availability_sets'):
+        av_set['sku'] = {
+            'name': 'Classic' if unmanaged else 'Aligned'
+        }
+
+    # server defaults the UD to 5 unless set otherwise
+    if platform_update_domain_count is not None:
+        av_set['properties']['platformUpdateDomainCount'] = platform_update_domain_count
+
     return av_set

@@ -7,9 +7,15 @@
 
 from codecs import open
 from setuptools import setup
+try:
+    from azure_bdist_wheel import cmdclass
+except ImportError:
+    from distutils import log as logger
+    logger.warn("Wheel is not available, disabling bdist_wheel hook")
+    cmdclass = {}
 
-VERSION = '2.0.3+dev'
 
+VERSION = "2.0.25"
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',
@@ -25,14 +31,16 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-compute==1.0.0rc1',
-    'azure-mgmt-keyvault==0.30.0',
-    'azure-keyvault==0.1.0',
-    'azure-mgmt-network==1.0.0rc1',
-    'azure-mgmt-resource==1.0.0rc1',
-    'azure-multiapi-storage==0.1.0',
-    'azure-cli-core',
-    'paramiko'
+    'azure-mgmt-msi==0.1.0',
+    'azure-mgmt-authorization==0.30.0',
+    'azure-mgmt-compute==3.1.0rc3',
+    'azure-mgmt-keyvault==0.40.0',
+    'azure-keyvault==0.3.7',
+    'azure-mgmt-network==1.7.0',
+    'azure-mgmt-resource==1.2.1',
+    'azure-multiapi-storage==0.1.7',
+    'azure-mgmt-marketplaceordering==0.1.0',
+    'azure-cli-core'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -50,13 +58,12 @@ setup(
     author_email='azpycli@microsoft.com',
     url='https://github.com/Azure/azure-cli',
     classifiers=CLASSIFIERS,
-    namespace_packages=[
+    packages=[
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-    ],
-    packages=[
         'azure.cli.command_modules.vm',
     ],
     install_requires=DEPENDENCIES,
+    cmdclass=cmdclass
 )

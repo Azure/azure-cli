@@ -1,31 +1,30 @@
-#!/usr/bin/python 
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-#The MIT License (MIT)
+# The MIT License (MIT)
 
-#Copyright (c) 2016 Blockstack
+# Copyright (c) 2016 Blockstack
 
-#Permission is hereby granted, free of charge, to any person obtaining a copy
-#of this software and associated documentation files (the "Software"), to deal
-#in the Software without restriction, including without limitation the rights
-#to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#copies of the Software, and to permit persons to whom the Software is
-#furnished to do so, subject to the following conditions:
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 
-#The above copyright notice and this permission notice shall be included in all
-#copies or substantial portions of the Software.
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
 
-#THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-#SOFTWARE.
-#pylint: skip-file
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+# pylint: skip-file
 
 """
 Known limitations:
@@ -33,7 +32,7 @@ Known limitations:
     * PTR records must have a non-empty name
     * currently only supports the following:
     '$ORIGIN', '$TTL', 'SOA', 'NS', 'A', 'AAAA', 'CNAME', 'MX', 'PTR',
-    'TXT', 'SRV', 'SPF', 'URI'
+    'TXT', 'SRV', 'SPF', 'URI', 'CAA'
 """
 
 import copy
@@ -43,13 +42,14 @@ import argparse
 from collections import OrderedDict
 import re
 
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError
+from knack.log import get_logger
+from knack.util import CLIError
 
 from azure.cli.command_modules.network.zone_file.configs import SUPPORTED_RECORDS
 from azure.cli.command_modules.network.zone_file.exceptions import InvalidLineException
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
+
 semicolon_regex = re.compile(r'(?:"[^"]*")*[^\\](;.*)')
 date_regex_dict = {
     'w': {'regex': re.compile(r'(\d*w)'), 'scale': 86400 * 7},
@@ -58,6 +58,7 @@ date_regex_dict = {
     'm': {'regex': re.compile(r'(\d*m)'), 'scale': 60},
     's': {'regex': re.compile(r'(\d*s)'), 'scale': 1}
 }
+
 
 class ZonefileLineParser(argparse.ArgumentParser):
     def error(self, message):
@@ -120,6 +121,7 @@ def _make_parser():
     _make_record_parser(parsers, 'NS', [('ttl', str, '?'), ('DELIM', str), ('host', str)])
     _make_record_parser(parsers, 'A', [('ttl', str, '?'), ('DELIM', str), ('ip', str)])
     _make_record_parser(parsers, 'AAAA', [('ttl', str, '?'), ('DELIM', str), ('ip', str)])
+    _make_record_parser(parsers, 'CAA', [('ttl', str, '?'), ('DELIM', str), ('flags', int), ('tag', str), ('value', str)])
     _make_record_parser(parsers, 'CNAME', [('ttl', str, '?'), ('DELIM', str), ('alias', str)])
     _make_record_parser(parsers, 'MX', [('ttl', str, '?'), ('DELIM', str), ('preference', str), ('host', str)])
     _make_record_parser(parsers, 'TXT', [('ttl', str), ('DELIM', str), ('txt', str, '+')])
@@ -183,7 +185,7 @@ def _tokenize_line(line, quote_strings=False, infer_name=True):
                         tokbuf += '"'
                     quote = True
             else:
-                #append the escaped quote
+                # append the escaped quote
                 tokbuf += '\\"'
                 escape = False
         else:
@@ -206,7 +208,6 @@ def _find_comment_index(line):
     Finds the index of a ; denoting a comment.
     Ignores escaped semicolons and semicolons inside quotes
     """
-    ret = []
     escape = False
     quote = False
     for i, char in enumerate(line):
@@ -262,7 +263,7 @@ def _remove_comments(text):
     lines = text.split("\n")
     for line in lines:
         if not line:
-            continue 
+            continue
 
         index = _find_comment_index(line)
         if index != -1:
@@ -277,7 +278,7 @@ def _flatten(text):
     """
     Flatten the text:
     * make sure each record is on one line.
-    * remove parenthesis 
+    * remove parenthesis
     * remove Windows line endings
     """
     lines = text.split('\n')
@@ -285,9 +286,9 @@ def _flatten(text):
 
     # tokens: sequence of non-whitespace separated by '' where a newline was
     tokens = []
-    for l in (x  for x in lines if len(x) > 0):
-        l = l.replace('\t', ' ')
-        tokens += _tokenize_line(l, quote_strings=True, infer_name=False)
+    for line in (x for x in lines if len(x) > 0):
+        line = line.replace('\t', ' ')
+        tokens += _tokenize_line(line, quote_strings=True, infer_name=False)
         tokens.append(SENTINEL)
 
     # find (...) and turn it into a single line ("capture" it)
@@ -316,7 +317,7 @@ def _flatten(text):
         if capturing and tok.endswith(")"):
             # end grouping.  next end-of-line will turn this sequence into a flat line
             tok = tok.rstrip(")")
-            capturing = False 
+            capturing = False
 
         if tok != SENTINEL:
             captured.append(tok)
@@ -345,7 +346,7 @@ def _remove_class(text):
 
 def _add_record_names(text):
     """
-    Go through each line of the text and ensure that 
+    Go through each line of the text and ensure that
     a name is defined.  Use previous record name if there is none.
     """
     global SUPPORTED_RECORDS
@@ -371,7 +372,6 @@ def _add_record_names(text):
 
 
 def _parse_record(parser, record_token):
-
     global SUPPORTED_RECORDS
 
     # match parser to record type
@@ -385,9 +385,9 @@ def _parse_record(parser, record_token):
             break
 
     if not record_type:
-        from azure.cli.core.util import CLIError
+        from knack.util import CLIError
         raise CLIError('Unable to determine record type: {}'.format(' '.join(record_token)))
-            
+
     # move the record type to the front of the token list so it will conform to argparse
     if record_type != parser.prog:
         raise IncorrectParserException
@@ -395,8 +395,8 @@ def _parse_record(parser, record_token):
     try:
         rr, unmatched = parser.parse_known_args(record_token)
         assert len(unmatched) == 0, "Unmatched fields: %s" % unmatched
-    except (SystemExit, AssertionError, InvalidLineException) as ex:
-        # invalid argument 
+    except (SystemExit, AssertionError, InvalidLineException):
+        # invalid argument
         raise InvalidLineException(' '.join(record_token))
 
     record = rr.__dict__
@@ -445,7 +445,6 @@ def _convert_to_seconds(value):
 
 
 def _expand_with_origin(record, properties, origin):
-
     if not isinstance(properties, list):
         properties = [properties]
 
@@ -455,7 +454,6 @@ def _expand_with_origin(record, properties, origin):
 
 
 def _post_process_ttl(zone):
-
     for name in zone:
         for record_type in zone[name]:
             records = zone[name][record_type]
@@ -464,18 +462,19 @@ def _post_process_ttl(zone):
                 for record in records:
                     if record['ttl'] != ttl:
                         logger.warning('Using lowest TTL {} for the record set. Ignoring value {}'
-                            .format(ttl, record['ttl']))
+                                       .format(ttl, record['ttl']))
                     record['ttl'] = ttl
 
 
 def _pre_process_txt_records(text):
-    """ This looks only for the cases of multiple text records not surrounded by quotes. 
+    """ This looks only for the cases of multiple text records not surrounded by quotes.
     This must be done after flattening but before any tokenization occurs, as this strips out
     the quotes. """
     lines = text.split('\n')
     for line in lines:
         pass
     return text
+
 
 def _post_process_txt_record(record, current_ttl):
     if not isinstance(record['txt'], list):
@@ -491,7 +490,7 @@ def _post_process_txt_record(record, current_ttl):
     record['txt'].append(long_text)
     final_str = ''.join(record['txt'])
     final_len = len(final_str)
-    assert(original_len == final_len)
+    assert (original_len == final_len)
 
 
 def _post_check_names(zone):
@@ -503,7 +502,8 @@ def _post_check_names(zone):
             if record_type == 'soa':
                 origin = name
                 break
-        if origin: break
+        if origin:
+            break
     bad_names = [x for x in zone if origin not in x]
     if bad_names:
         raise CLIError("Record names '{}' are not part of the domain.".format(bad_names))
@@ -600,7 +600,7 @@ def parse_zone_file(text, zone_name, ignore_invalid=False):
             if record_type == 'cname':
                 if record_type in zone_obj[record_name]:
                     logger.warning("CNAME record already exists for '{}'. Ignoring '{}'."
-                        .format(record_name, record['alias']))
+                                   .format(record_name, record['alias']))
                     continue
                 zone_obj[record_name][record_type] = record
                 continue

@@ -3,6 +3,104 @@
 Release History
 ===============
 
+2.0.22
+++++++
+* `deployment create/validate`: Fix bug where warning was incorrectly displayed when a template 'type' field contained
+                                uppercase values.
+
+2.0.21
+++++++
+* Helpfile changes
+
+2.0.20
+++++++
+* Update for CLI core changes.
+
+2.0.19
+++++++
+* `resource show`: expose `--include-response-body` to show the response body in the output
+
+2.0.18
+++++++
+* --resource parameter, resource-level locks now support resource-ids.
+
+2.0.17
+++++++
+* `group export`: Fixed incompatibility with most recent version of msrest dependency.
+* `az policy assignment create`: policy assignment create command to work with built in policy definitions and policy set definitions.
+
+2.0.16 (2017-10-09)
++++++++++++++++++++
+* group: permit --resource-group/-g options for resource group name.
+* `account lock`: lock commands to work specifically with subscription level locks
+* `group lock`: lock commands to work specifically with group level locks
+* `resource lock`: lock command to work specifically with resource level locks
+
+2.0.15 (2017-09-22)
++++++++++++++++++++
+* policy: support to show built-in policy definition.
+* policy: support mode parameter for creating policy definitions.
+* policy: add policy set definition commands.
+* policy: add sku and policysetdefinition parameters when creating policy assignment
+* managedapp definition: support to create managedapp definition using create-ui-definition and main-template.
+* BREAKING CHANGE: managedapp: Update to latest ARM package, which includes changing resource type from appliances to applications and applianceDefinitions to applicationDefinitions.
+* resource invoke-action: supports ability to invoke any action onto resource, also supports user-specified url to post.
+
+2.0.14 (2017-09-11)
++++++++++++++++++++
+* Allows passing in resource policy parameter definitions in 'policy definition create', and 'policy definition update'. 
+* Allows passing in parameter values for 'policy assignment create'.
+* In all cases params can be provided either via json or file.
+* Incremented API version.
+* Support '--ids' parameter to refer to locks
+* Various lock command bug fixes
+
+2.0.12 (2017-08-11)
++++++++++++++++++++
+* minor fixes
+
+2.0.13 (2017-08-28)
++++++++++++++++++++
+* `group deployment create`: Fixes issue where templates which lacked "parameters" or "resources" failed to deploy.
+
+2.0.11 (2017-07-27)
++++++++++++++++++++
+* minor fixes
+
+2.0.10 (2017-07-07)
++++++++++++++++++++
+* `group deployment create`: Improve prompting for missing parameters. Improve parsing of `--parameters KEY=VALUE` syntax.
+
+2.0.9 (2017-06-21)
+++++++++++++++++++
+* `group deployment create`: Fixes issue where some parameter files were no longer recognized using @<file> syntax.
+* `resource\managedapp` commands: Support `--ids` argument.
+
+
+2.0.8 (2017-06-13)
+++++++++++++++++++
+* Fix up some parsing and error messages. (#3584)
+* Fix --resource-type parsing for the lock command to accept <resource-namespace>/<resource-type>
+* Add parameter checking for template link templates (#3629)
+* Add support for specifying deployment parameters using KEY=VALUE syntax.
+
+2.0.7 (2017-05-30)
+++++++++++++++++++
+* Minor fixes.
+
+2.0.6 (2017-05-09)
+++++++++++++++++++
+* Change ARM api-version default to latest, update ARM SDK (#3256)
+
+2.0.5 (2017-05-05)
+++++++++++++++++++
+* Add managedapp and managedapp definition commands (#2985)
+
+2.0.4 (2017-04-28)
+++++++++++++++++++
+* Support 'provider operation' commands (#2908)
+* Support generic resource create (#2606)
+
 2.0.3 (2017-04-17)
 ++++++++++++++++++
 

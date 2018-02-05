@@ -2,10 +2,132 @@
 
 Release History
 ===============
+0.1.25
+++++++
+* fix broken webapp log tail/download
+* relieve the 'kind' check on webapp/functionapp
+
+0.1.24
+++++++
+* `webapp config ssl upload`: fix a bug where the hosting_environment_profile was null
+* `webapp browse`: adding support for browse to handle custom domain URL
+* `webapp log tail`: fixing a bug where support for slots was not working
+
+0.1.23
+++++++
+* Minor fixes.
+
+0.1.22
+++++++
+* Minor fixes.
+* `webapp config ssl upload`: fix a bug where the hosting_environment_profile was null
+
+0.1.21
+++++++
+* `webapp config ssl upload`: fix a bug in the cert name generation
+* `webapp/functionapp`: ensure list/show display correct set of apps
+* webapp: set WEBSITE_NODE_DEFAULT_VERSION in case where runtime is not set
+
+0.1.20
+++++++
+* webapp: add deployment source config-zip support for webapps and functions apps
+* webapp: use azure-mgmt-web 0.34.1
+* webapp: add --docker-container-logging
+* webapp: removing the 'storage' option from --web-server-logging since this is not working
+* `deployment user set`: logged more informative error messages.
+* functionapp: add support for creating Linux function apps
+* appservice: fix list-locations
+
+0.1.19
+++++++
+* webapp: fix a bug that downloaded log file might be invalid
+
+0.1.18 (2017-10-09)
++++++++++++++++++++
+* webapp: added generic update with new command: 'az webapp update'
+* webapp: updating tests/code for sdk update
+
+0.1.17 (2017-09-22)
++++++++++++++++++++
+* webapp: able to update and show authentication settings using "az webapp auth update/show"
+
+0.1.16 (2017-09-11)
++++++++++++++++++++
+* webapp: able to create a webapp in a resource group other than the service plan's
+
+0.1.15 (2017-08-31)
++++++++++++++++++++
+* minor fixes
+
+0.1.14 (2017-08-28)
++++++++++++++++++++
+Breaking Change:webapp: fix inconsistencies in the output of "az webapp config appsettings delete/set"
+webapp: add a new alias of '-i' for "az webapp config container set --docker-custom-image-name"
+webapp: expose 'az webapp log show'
+webapp: expose new arguments from 'az webapp delete' to retain app service plan, metrics or dns registration. 
+webapp: detect a slot setting correctly 
+webapp: add param --docker-container-logging that goes through the same logic as --web-server-logging
+webapp: add premium v2 sku
+webapp: add new container setting WEBSITES_ENABLE_APP_SERVICE_STORAGE
+
+0.1.13 (2017-08-15)
++++++++++++++++++++
+webapp: fix an exception when create a new git based linux webapp
+
+0.1.12 (2017-08-11)
++++++++++++++++++++
+* minor fixes
+
+0.1.11 (2017-07-27)
++++++++++++++++++++
+* webapp: Add generate container CI URL for Web App
+* webapp: fix the bug that listing linux webapp returns nothing
+* webapp: setting runtime is mandatory for linux
+* webapp: use only linux-fx-version instead of CUSTOM_DOCKER_IMAGE_NAME
+
+0.1.10 (2017-07-07)
++++++++++++++++++++
+* webapp: support to retrieve creds from acr
+
+0.1.9 (2017-06-21)
+++++++++++++++++++
+* BC: webapp: remove all commands under 'az appservice web'
+
+0.1.8 (2017-06-13)
+++++++++++++++++++
+* webapp: mask docker registry passwords from 'webapp appsettings/container' commands' output (#3656)
+* webapp: ensure default browser is used on osx and w/o error on launching (#3623)
+* webapp: improve the help of 'az webapp log tail/download' (#3624)
+* webapp: expose traffic-routing command to configure static routing (#3566)
+
+0.1.7 (2017-05-30)
+++++++++++++++++++++
+* webapp: add reliability fixes in configuring source control (#3245)
+* BC: az webapp config update: Remove unsupported --node-version argument for Windows webapps. Instead use "az webapp config appsettings set" with the WEBSITE_NODE_DEFAULT_VERSION key.
+
+0.1.6 (2017-05-09)
+++++++++++++++++++++
+* webapp: fix broken log tail commands
+
+0.1.5 (2017-05-05)
+++++++++++++++++++++
+* functionapp: add full functionapp supports, including create, show, list, delete, hostname, ssl, etc
+* Adding Team Services (vsts) as a continuous delivery option to "appservice web source-control config"
+* Create "az webapp" to replace "az appservice web" (for backward compat, "az appservice web" will stay for 2 releases)
+* Expose arguments to configure deployment and "runtime stacks" on webapp create
+* Expose "webapp list-runtimes"
+* support configure connection strings (#2647)
+* support slot swap with preview
+
+0.1.4 (2017-04-28)
+++++++++++++++++++++
+
+* Rename arg of '-n/--name' to '--hostname', and wire up default webapp name (#2946, #2947, #2949)
+* Polish errors from appservice commands (#2948)
+* New packaging system.
 
 0.1.3 (2017-04-17)
 ++++++++++++++++++++
-
 * Use the app service plan's resource group for cert operations (#2750)
 
 0.1.2 (2017-04-03)

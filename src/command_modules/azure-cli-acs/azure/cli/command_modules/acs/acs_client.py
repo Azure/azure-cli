@@ -3,17 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os.path
 import socket
 import threading
 from time import sleep
+from os.path import expanduser, join, isfile
+import os
 
 import paramiko
+import paramiko.agent
 from sshtunnel import SSHTunnelForwarder
 from scp import SCPClient
 
-from azure.cli.core.util import CLIError
-from azure.cli.core.prompting import prompt_pass
+from knack.prompting import prompt_pass
+from knack.util import CLIError
 
 
 def _load_key(key_filename):
@@ -21,25 +23,54 @@ def _load_key(key_filename):
     try:
         pkey = paramiko.RSAKey.from_private_key_file(key_filename, None)
     except paramiko.PasswordRequiredException:
-        key_pass = prompt_pass('Password:')
+        key_pass = prompt_pass('Password for private key:')
         pkey = paramiko.RSAKey.from_private_key_file(key_filename, key_pass)
     if pkey is None:
         raise CLIError('failed to load key: {}'.format(key_filename))
     return pkey
 
 
-def SecureCopy(user, host, src, dest,  # pylint: disable=too-many-arguments
-               key_filename=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
+def _load_keys(key_filename=None, allow_agent=True):
+    keys = []
+    default_key_path = join(expanduser("~"), '.ssh', 'id_rsa')
+    if key_filename is not None:
+        key = _load_key(key_filename)
+        keys.append(key)
+
+    if allow_agent:
+        agent = paramiko.agent.Agent()
+        for key in agent.get_keys():
+            keys.append(key)
+
+    if not keys and isfile(default_key_path):
+        key = _load_key(default_key_path)
+        keys.append(key)
+
+    if not keys:
+        raise CLIError('No keys available in ssh agent or no key in {}. '
+                       'Do you need to add keys to your ssh agent via '
+                       'ssh-add or specify a --ssh-key-file?'.format(default_key_path))
+
+    return keys
+
+
+def secure_copy(user, host, src, dest, key_filename=None, allow_agent=True):
+    keys = _load_keys(key_filename, allow_agent)
+    pkey = keys[0]
     ssh = paramiko.SSHClient()
+    proxy = None
+    ssh_config_file = os.path.expanduser("~/.ssh/config")
+    if os.path.isfile(ssh_config_file):
+        conf = paramiko.SSHConfig()
+        with open(ssh_config_file) as f:
+            conf.parse(f)
+        host_config = conf.lookup(host)
+        if 'proxycommand' in host_config:
+            proxy = paramiko.ProxyCommand(host_config['proxycommand'])
     ssh.load_system_host_keys()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-    pkey = _load_key(key_filename)
-
-    ssh.connect(host, username=user, pkey=pkey)
-
+    ssh.connect(host, username=user, pkey=pkey, sock=proxy)
     scp = SCPClient(ssh.get_transport())
-
     scp.get(src, dest)
     scp.close()
 
@@ -61,8 +92,8 @@ class ACSClient(object):
         if self.tunnel_server is not None:
             self.tunnel_server.close_tunnel()
 
-    def connect(self, host, username, port=2200,  # pylint: disable=too-many-arguments
-                key_filename=os.path.join(os.path.expanduser("~"), '.ssh', 'id_rsa')):
+    def connect(self, host, username, port=2200,
+                key_filename=None):
         """
         Creates a connection to the remote server.
 
@@ -91,7 +122,9 @@ class ACSClient(object):
             self.client = paramiko.SSHClient()
             self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            pkey = _load_key(key_filename)
+            pkey = None
+            if key_filename is not None:
+                pkey = _load_key(key_filename)
             self.client.connect(
                 hostname=host,
                 port=port,
@@ -107,17 +140,17 @@ class ACSClient(object):
 
         :param command: Command to run on the remote host
         :type command: String
-        :param background: True if command should be run in the foreground,
-        false to run it in a separate thread
+        :param background: True to run it in a separate thread,
+               False should be run in the foreground
         :type command: Boolean
         """
         if background:
             t = threading.Thread(target=ACSClient._run_cmd, args=(self, command))
             t.daemon = True
             t.start()
-            return
-        else:
-            return self._run_cmd(command)
+            return None
+
+        return self._run_cmd(command)
 
     def _run_cmd(self, command):
         """
@@ -186,7 +219,7 @@ class ACSClient(object):
         """
         Gets a random, available local port
         """
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # pylint: disable=no-member
         s.bind(('', 0))
         s.listen(1)
         port = s.getsockname()[1]

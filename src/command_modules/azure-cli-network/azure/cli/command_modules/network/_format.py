@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-# pylint:disable=line-too-long
 
 from collections import OrderedDict
+
 
 def transform_dns_record_set_output(result):
     from azure.mgmt.dns.models import RecordSetPaged
@@ -14,6 +14,7 @@ def transform_dns_record_set_output(result):
         for prop in [x for x in dir(item) if 'record' in x]:
             if not getattr(item, prop):
                 delattr(item, prop)
+
     if isinstance(result, RecordSetPaged):
         result = list(result)
         for item in result:
@@ -40,6 +41,7 @@ def transform_dns_record_set_table_output(result):
             table_row['Metadata'] = ' '
         table_output.append(table_row)
     return table_output
+
 
 def transform_dns_zone_table_output(result):
     is_list = isinstance(result, list)
@@ -84,7 +86,6 @@ def transform_vpn_connection_list(result):
 
 
 def transform_vpn_connection(result):
-
     if result:
         properties_to_strip = \
             ['virtual_network_gateway1', 'virtual_network_gateway2', 'local_network_gateway2', 'peer']
@@ -94,14 +95,9 @@ def transform_vpn_connection(result):
                 delattr(result, prop)
             else:
                 null_props = [key for key in prop_val.__dict__ if not prop_val.__dict__[key]]
-                for prop in null_props:
-                    delattr(prop_val, prop)
+                for null_prop in null_props:
+                    delattr(prop_val, null_prop)
     return result
-
-def transform_vpn_connection_create_output(result):
-    from azure.cli.core.commands import DeploymentOutputLongRunningOperation
-    result = DeploymentOutputLongRunningOperation('Starting network vpn-connection create')(result)
-    return result['resource']
 
 
 def transform_vnet_create_output(result):
@@ -125,4 +121,76 @@ def transform_nsg_create_output(result):
 
 
 def transform_vnet_gateway_create_output(result):
-    return {'vnetGateway': result.result()}
+    result = {'vnetGateway': result.result()} if result else result
+    return result
+
+
+def transform_geographic_hierachy_table_output(result):
+    transformed = []
+
+    def _extract_values(obj):
+        obj = obj if isinstance(obj, list) else [obj]
+        for item in obj:
+            item_obj = OrderedDict()
+            item_obj['code'] = item['code']
+            item_obj['name'] = item['name']
+            transformed.append(item_obj)
+            _extract_values(item['regions'])
+
+    _extract_values(result['geographicHierarchy'])
+    return transformed
+
+
+def transform_service_community_table_output(result):
+    transformed = []
+    for item in result:
+        service_name = item['serviceName']
+        for community in item['bgpCommunities']:
+            item_obj = OrderedDict()
+            item_obj['serviceName'] = service_name
+            item_obj['communityValue'] = community['communityValue']
+            item_obj['supportedRegion'] = community['serviceSupportedRegion']
+            transformed.append(item_obj)
+    return transformed
+
+
+def transform_waf_rule_sets_table_output(result):
+    transformed = []
+    for item in result:
+        rule_set_name = item['name']
+        for group in item['ruleGroups']:
+            rule_group_name = group['ruleGroupName']
+            if group['rules']:
+                for rule in group['rules']:
+                    item_obj = OrderedDict()
+                    item_obj['ruleSet'] = rule_set_name
+                    item_obj['ruleGroup'] = rule_group_name
+                    item_obj['ruleId'] = rule['ruleId']
+                    item_obj['description'] = rule['description']
+                    transformed.append(item_obj)
+            else:
+                item_obj = OrderedDict()
+                item_obj['ruleSet'] = rule_set_name
+                item_obj['ruleGroup'] = rule_group_name
+                transformed.append(item_obj)
+    return transformed
+
+
+def transform_network_usage_list(result):
+    result = list(result)
+    for item in result:
+        item.current_value = str(item.current_value)
+        item.limit = str(item.limit)
+        item.local_name = item.name.localized_value
+    return result
+
+
+def transform_network_usage_table(result):
+    transformed = []
+    for item in result:
+        transformed.append(OrderedDict([
+            ('Name', item['localName']),
+            ('CurrentValue', item['currentValue']),
+            ('Limit', item['limit'])
+        ]))
+    return transformed

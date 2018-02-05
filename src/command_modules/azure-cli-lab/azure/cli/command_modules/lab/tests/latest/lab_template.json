@@ -1,0 +1,80 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "defaultValue": "cliautomationlab"
+    },
+    "regionId": {
+      "type": "string",
+      "defaultValue": "westus"
+    },
+    "artifactsources_privaterepo431_name": {
+      "defaultValue": "cliautomationlab/privaterepo431",
+      "type": "String"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2016-05-15",
+      "name": "[parameters('name')]",
+      "type": "Microsoft.DevTestLab/labs",
+      "location": "[parameters('regionId')]",
+      "properties": {
+        "labStorageType": "Premium"
+      },
+      "resources": [
+        {
+          "apiVersion": "2016-05-15",
+          "name": "LabVmsShutdown",
+          "location": "[parameters('regionId')]",
+          "type": "schedules",
+          "dependsOn": [
+            "[resourceId('Microsoft.DevTestLab/labs', parameters('name'))]"
+          ],
+          "properties": {
+            "status": "Enabled",
+            "timeZoneId": "Pacific Standard Time",
+            "dailyRecurrence": {
+              "time": "1900"
+            },
+            "taskType": "LabVmsShutdownTask",
+            "notificationSettings": {
+              "status": "Disabled",
+              "timeInMinutes": 15
+            }
+          }
+        },
+        {
+          "apiVersion": "2016-05-15",
+          "name": "[concat('Dtl', parameters('name'))]",
+          "type": "virtualNetworks",
+          "location": "[parameters('regionId')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.DevTestLab/labs', parameters('name'))]"
+          ]
+        },
+        {
+          "apiVersion": "2016-05-15",
+          "name": "[parameters('artifactsources_privaterepo431_name')]",
+          "properties": {
+            "displayName": "azure-devtestlabdemo",
+            "uri": "https://github.com/vishrutshah/azure-devtestlabsdemo.git",
+            "folderPath": "/Artifacts",
+            "armTemplateFolderPath": "Templates",
+            "sourceType": "GitHub",
+            "securityToken": "token",
+            "uniqueIdentifier": "fbfc4a86-e247-4cb5-a37d-6145da8fdc77",
+            "branchRef": "master",
+            "status": "Enabled"
+          },
+          "dependsOn": [
+            "[resourceId('microsoft.devtestlab/labs', parameters('name'))]"
+          ],
+          "type": "microsoft.devtestlab/labs/artifactsources"
+        }
+      ]
+    }
+  ]
+}

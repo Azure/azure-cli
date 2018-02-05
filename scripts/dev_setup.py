@@ -26,11 +26,17 @@ def exec_command(command):
 print('Running dev setup...')
 print('Root directory \'{}\'\n'.format(root_dir))
 
+# install private whls if there are any
+privates_dir = os.path.join(root_dir, 'privates')
+if os.path.isdir(privates_dir) and os.listdir(privates_dir):
+    whl_list = ' '.join([os.path.join(privates_dir, f) for f in os.listdir(privates_dir)])
+    exec_command('pip install {}'.format(whl_list))
+
 # install general requirements
 exec_command('pip install -r requirements.txt')
 
 # install automation package
-exec_command('pip install -e ./scripts')
+exec_command('pip install -e ./tools')
 
 # command modules have dependency on azure-cli-core so install this first
 exec_command('pip install -e src/azure-cli-nspkg')
@@ -41,4 +47,8 @@ exec_command('python -m automation.setup.install_modules')
 exec_command('pip install -e src/azure-cli')
 exec_command('pip install -e src/azure-cli-testsdk')
 
+# Ensure that the site package's azure/__init__.py has the old style namespace
+# package declaration by installing the old namespace package
+exec_command('pip install --force-reinstall azure-nspkg==1.0.0')
+exec_command('pip install --force-reinstall azure-mgmt-nspkg==1.0.0')
 print('Finished dev setup.')

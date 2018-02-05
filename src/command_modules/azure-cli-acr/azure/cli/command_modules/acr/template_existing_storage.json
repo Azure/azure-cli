@@ -5,46 +5,40 @@
         "registryName": {
             "type": "string",
             "metadata": {
-                "description": "Name of the container registry"
+                "description": "The name of the container registry."
             }
         },
         "registryLocation": {
             "type": "string",
             "metadata": {
-                "description": "Location of the container registry"
+                "description": "The location of the container registry. This cannot be changed after the resource is created."
             }
         },
         "registrySku": {
             "type": "string",
-            "defaultValue": "Basic",
+            "defaultValue": "Classic",
             "metadata": {
-                "description": "Sku of the container registry"
+                "description": "The SKU of the container registry."
             }
         },
         "registryApiVersion": {
             "type": "string",
-            "defaultValue": "2017-03-01",
+            "defaultValue": "2017-10-01",
             "metadata": {
-                "description": "Api version of the container registry"
+                "description": "The API version of the container registry."
             }
         },
-        "storageAccountName": {
+        "storageAccountId": {
             "type": "string",
             "metadata": {
-                "description": "Name of the storage account"
-            }
-        },
-        "storageAccountResourceGroup": {
-            "type": "string",
-            "metadata": {
-                "description": "Resource group of the storage account"
+                "description": "The resource ID of the storage account used by the container registry."
             }
         },
         "adminUserEnabled": {
             "type": "bool",
             "defaultValue": false,
             "metadata": {
-                "description": "Enable admin user"
+                "description": "The value that indicates whether the admin user is enabled."
             }
         }
     },
@@ -60,8 +54,7 @@
             "properties": {
                 "adminUserEnabled": "[parameters('adminUserEnabled')]",
                 "storageAccount": {
-                    "name": "[parameters('storageAccountName')]",
-                    "accessKey": "[listKeys(resourceId(parameters('storageAccountResourceGroup'), 'Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2016-12-01').keys[0].value]"
+                    "id": "[parameters('storageAccountId')]"
                 }
             }
         }

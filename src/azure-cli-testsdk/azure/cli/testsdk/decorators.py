@@ -3,12 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
 import unittest
-from .const import ENV_LIVE_TEST
 
 
-def live_only():
-    return unittest.skipUnless(
-        os.environ.get(ENV_LIVE_TEST, False),
-        'This is a live only test. A live test will bypass all vcrpy components.')
+def api_version_constraint(resource_type, **kwargs):
+    from azure.cli.core.profiles import supported_api_version
+    from azure.cli.testsdk import TestCli
+    cli_ctx = TestCli()
+    return unittest.skipUnless(supported_api_version(cli_ctx, resource_type, **kwargs),
+                               "Test not supported by current profile.")

@@ -24,17 +24,6 @@ AZURE_CLI_PREFIX = 'Context.Default.AzureCLI.'
 decorators.is_diagnostics_mode = telemetry_core.in_diagnostic_mode
 
 
-def _user_agrees_to_telemetry(func):
-    @wraps(func)
-    def _wrapper(*args, **kwargs):
-        if not _get_azure_cli_config().getboolean('core', 'collect_telemetry', fallback=True):
-            return
-        else:
-            return func(*args, **kwargs)
-
-    return _wrapper
-
-
 class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     start_time = None
     end_time = None
@@ -48,6 +37,8 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     result_summary = None
     payload_properties = None
     exceptions = []
+    module_correlation = None
+    extension_name = 'None'
 
     def add_exception(self, exception, fault_type, description=None, message=''):
         details = {
@@ -134,7 +125,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.set_custom_properties(result, 'Source', source)
         self.set_custom_properties(result,
                                    'ClientRequestId',
-                                   lambda: self.application.session['headers'][
+                                   lambda: self.application.data['headers'][
                                        'x-ms-client-request-id'])
         self.set_custom_properties(result, 'CoreVersion', _get_core_version)
         self.set_custom_properties(result, 'InstallationId', _get_installation_id)
@@ -142,17 +133,17 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.set_custom_properties(result, 'UserAzureId', _get_user_azure_id)
         self.set_custom_properties(result, 'UserAzureSubscriptionId', _get_azure_subscription_id)
         self.set_custom_properties(result, 'DefaultOutputType',
-                                   lambda: _get_azure_cli_config().get('core', 'output',
-                                                                       fallback='unknown'))
+                                   lambda: _get_config().get('core', 'output', fallback='unknown'))
         self.set_custom_properties(result, 'EnvironmentVariables', _get_env_string)
         self.set_custom_properties(result, 'Locale',
-                                   lambda: '{},{}'.format(locale.getdefaultlocale()[0],
-                                                          locale.getdefaultlocale()[1]))
+                                   lambda: '{},{}'.format(locale.getdefaultlocale()[0], locale.getdefaultlocale()[1]))
         self.set_custom_properties(result, 'StartTime', str(self.start_time))
         self.set_custom_properties(result, 'EndTime', str(self.end_time))
         self.set_custom_properties(result, 'OutputType', self.output_type)
-        self.set_custom_properties(result, 'Parameters', self.parameters)
+        self.set_custom_properties(result, 'Parameters', ','.join(self.parameters or []))
         self.set_custom_properties(result, 'PythonVersion', platform.python_version())
+        self.set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
+        self.set_custom_properties(result, 'ExtensionName', self.extension_name)
 
         return result
 
@@ -192,7 +183,17 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
 _session = TelemetrySession()
 
 
+def _user_agrees_to_telemetry(func):
+    @wraps(func)
+    def _wrapper(*args, **kwargs):
+        if not _get_config().getboolean('core', 'collect_telemetry', fallback=True):
+            return None
+        return func(*args, **kwargs)
+
+    return _wrapper
+
 # public api
+
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def start():
@@ -254,19 +255,24 @@ def set_application(application, arg_complete_env_name):
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
-def set_command_details(command, output_type=None, parameters=None):
+def set_command_details(command, output_type=None, parameters=None, extension_name=None):
     _session.command = command
     _session.output_type = output_type
     _session.parameters = parameters
+    _session.extension_name = extension_name or 'None'
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_module_correlation_data(correlation_data):
+    _session.module_correlation = correlation_data[:512]
 
 
 # definitions
 
 @decorators.call_once
 @decorators.suppress_all_exceptions(fallback_return={})
-def _get_azure_cli_config():
-    from azure.cli.core._config import az_config
-    return az_config
+def _get_config():
+    return _session.application.config
 
 
 # internal utility functions
@@ -286,7 +292,7 @@ def _get_installation_id():
 @decorators.suppress_all_exceptions(fallback_return=None)
 def _get_profile():
     from azure.cli.core._profile import Profile
-    return Profile()
+    return Profile(cli_ctx=_session.application)
 
 
 @decorators.suppress_all_exceptions(fallback_return='')
@@ -322,7 +328,7 @@ def _get_env_string():
 
 @decorators.suppress_all_exceptions(fallback_return=None)
 def _get_azure_subscription_id():
-    return _get_profile().get_login_credentials()[1]
+    return _get_profile().get_subscription_id()
 
 
 def _get_shell_type():
@@ -334,8 +340,7 @@ def _get_shell_type():
         return 'ksh'
     elif 'WINDIR' in os.environ:
         return 'cmd'
-    else:
-        return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
+    return _remove_cmd_chars(_remove_symbols(os.environ.get('SHELL')))
 
 
 @decorators.suppress_all_exceptions(fallback_return='')

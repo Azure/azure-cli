@@ -4,112 +4,172 @@
 # --------------------------------------------------------------------------------------------
 
 import argparse
+from collections import OrderedDict
+import json
 import re
 from six import string_types
 
-from azure.cli.core.commands import (CliCommand,
-                                     get_op_handler,
-                                     command_table as main_command_table,
-                                     command_module_map as main_command_module_map)
-from azure.cli.core.commands._introspection import extract_args_from_signature
+from knack.arguments import CLICommandArgument, ignore_type
+from knack.introspection import extract_args_from_signature
+from knack.log import get_logger
+from knack.util import todict, CLIError
+
+from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
+from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.application import APPLICATION, IterateValue
-import azure.cli.core.azlogging as azlogging
-from azure.cli.core.util import CLIError, todict, shell_safe_json_parse
+from azure.cli.core.commands.validators import IterateValue
+from azure.cli.core.util import shell_safe_json_parse
 from azure.cli.core.profiles import ResourceType
 
-logger = azlogging.get_az_logger(__name__)
-
-regex = re.compile(
-    '/subscriptions/(?P<subscription>[^/]*)(/resource[gG]roups/(?P<resource_group>[^/]*))?'
-    '/providers/(?P<namespace>[^/]*)/(?P<type>[^/]*)/(?P<name>[^/]*)'
-    '((/providers/(?P<child_namespace>[^/]*))?/(?P<child_type>[^/]*)/(?P<child_name>[^/]*))?'
-    '(/(?P<grandchild_type>[^/]*)/(?P<grandchild_name>[^/]*))?')
+logger = get_logger(__name__)
 
 
-def resource_id(**kwargs):
-    '''Create a valid resource id string from the given parts
-    The method accepts the following keyword arguments:
-        - subscription      Subscription id
-        - resource_group    Name of resource group
-        - namespace         Namespace for the resource provider (i.e. Microsoft.Compute)
-        - type              Type of the resource (i.e. virtualMachines)
-        - name              Name of the resource (or parent if child_name is also specified)
-        - child_type        Type of the child resource
-        - child_name        Name of the child resource
-        - grandchild_type   Type of the grandchild resource
-        - grandchild_name   Name of the grandchild resource
-    '''
-    rid = '/subscriptions/{subscription}'.format(**kwargs)
+class ArmTemplateBuilder(object):
+
+    def __init__(self):
+        template = OrderedDict()
+        template['$schema'] = \
+            'https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#'
+        template['contentVersion'] = '1.0.0.0'
+        template['parameters'] = {}
+        template['variables'] = {}
+        template['resources'] = []
+        template['outputs'] = {}
+        self.template = template
+        self.parameters = OrderedDict()
+
+    def add_resource(self, resource):
+        self.template['resources'].append(resource)
+
+    def add_variable(self, key, value):
+        self.template['variables'][key] = value
+
+    def add_parameter(self, key, value):
+        self.template['parameters'][key] = value
+
+    def add_secure_parameter(self, key, value, description=None):
+        param = {
+            "type": "securestring",
+            "metadata": {
+                "description": description or 'Secure {}'.format(key)
+            }
+        }
+        self.template['parameters'][key] = param
+        self.parameters[key] = {'value': value}
+
+    def add_id_output(self, key, provider, property_type, property_name):
+        new_output = {
+            key: {
+                'type': 'string',
+                'value': "[resourceId('{}/{}', '{}')]".format(
+                    provider, property_type, property_name)
+            }
+        }
+        self.template['outputs'].update(new_output)
+
+    def add_output(self, key, property_name, provider=None, property_type=None,
+                   output_type='string', path=None):
+
+        if provider and property_type:
+            value = "[reference(resourceId('{provider}/{type}', '{property}'),providers('{provider}', '{type}').apiVersions[0])".format(  # pylint: disable=line-too-long
+                provider=provider, type=property_type, property=property_name)
+        else:
+            value = "[reference('{}')".format(property_name)
+        value = '{}.{}]'.format(value, path) if path else '{}]'.format(value)
+        new_output = {
+            key: {
+                'type': output_type,
+                'value': value
+            }
+        }
+        self.template['outputs'].update(new_output)
+
+    def build(self):
+        return json.loads(json.dumps(self.template))
+
+    def build_parameters(self):
+        return json.loads(json.dumps(self.parameters))
+
+
+def handle_long_running_operation_exception(ex):
+    import azure.cli.core.telemetry as telemetry
+
+    telemetry.set_exception(
+        ex,
+        fault_type='failed-long-running-operation',
+        summary='Unexpected client exception in {}.'.format(LongRunningOperation.__name__))
+
+    message = getattr(ex, 'message', ex)
+    error_message = 'Deployment failed.'
+
     try:
-        rid = '/'.join((rid, 'resourceGroups/{resource_group}'.format(**kwargs)))
-        rid = '/'.join((rid, 'providers/{namespace}'.format(**kwargs)))
-        rid = '/'.join((rid, '{type}/{name}'.format(**kwargs)))
-        rid = '/'.join((rid, '{child_type}/{child_name}'.format(**kwargs)))
-        rid = '/'.join((rid, '{grandchild_type}/{grandchild_name}'.format(**kwargs)))
-    except KeyError:
+        correlation_id = ex.response.headers['x-ms-correlation-request-id']
+        error_message = '{} Correlation ID: {}.'.format(error_message, correlation_id)
+    except:  # pylint: disable=bare-except
         pass
-    return rid
 
-
-def parse_resource_id(rid):
-    '''Build a dictionary with the following key/value pairs (if found)
-
-        - subscription      Subscription id
-        - resource_group    Name of resource group
-        - namespace         Namespace for the resource provider (i.e. Microsoft.Compute)
-        - type              Type of the resource (i.e. virtualMachines)
-        - name              Name of the resource (or parent if child_name is also specified)
-        - child_type        Type of the child resource
-        - child_name        Name of the child resource
-        - grandchild_type   Type of the grandchild resource
-        - grandchild_name   Name of the grandchild resource
-    '''
-    m = regex.match(rid)
-    if m:
-        result = m.groupdict()
-    else:
-        result = dict(name=rid)
-
-    return {key: value for key, value in result.items() if value is not None}
-
-
-def is_valid_resource_id(rid, exception_type=None):
-    is_valid = False
     try:
-        is_valid = rid and resource_id(**parse_resource_id(rid)).lower() == rid.lower()
-    except KeyError:
-        pass
-    if not is_valid and exception_type:
-        raise exception_type()
-    return is_valid
+        inner_message = json.loads(ex.response.text)['error']['details'][0]['message']
+        error_message = '{} {}'.format(error_message, inner_message)
+    except:  # pylint: disable=bare-except
+        error_message = '{} {}'.format(error_message, message)
+
+    cli_error = CLIError(error_message)
+    # capture response for downstream commands (webapp) to dig out more details
+    setattr(cli_error, 'response', getattr(ex, 'response', None))
+    raise cli_error
+
+
+def deployment_validate_table_format(result):
+
+    if result.get('error', None):
+        error_result = OrderedDict()
+        error_result['result'] = result['error']['code']
+        try:
+            tracking_id = re.match(r".*(\w{8}-\w{4}-\w{4}-\w{4}-\w{12})", str(result['error']['message'])).group(1)
+            error_result['trackingId'] = tracking_id
+        except:  # pylint: disable=bare-except
+            pass
+        try:
+            error_result['message'] = result['error']['details'][0]['message']
+        except:  # pylint: disable=bare-except
+            error_result['message'] = result['error']['message']
+        return error_result
+    elif result.get('properties', None):
+        success_result = OrderedDict()
+        success_result['result'] = result['properties']['provisioningState']
+        success_result['correlationId'] = result['properties']['correlationId']
+        return success_result
+    return result
 
 
 class ResourceId(str):
 
     def __new__(cls, val):
+        from msrestazure.tools import is_valid_resource_id
         if not is_valid_resource_id(val):
             raise ValueError()
         return str.__new__(cls, val)
 
 
-def resource_exists(resource_group, name, namespace, type, **_):  # pylint: disable=redefined-builtin
-    '''Checks if the given resource exists.
-    '''
-    from azure.mgmt.resource import ResourceManagementClient
-
+def resource_exists(cli_ctx, resource_group, name, namespace, type, **_):  # pylint: disable=redefined-builtin
+    ''' Checks if the given resource exists. '''
     odata_filter = "resourceGroup eq '{}' and name eq '{}'" \
         " and resourceType eq '{}/{}'".format(resource_group, name, namespace, type)
-    client = get_mgmt_service_client(ResourceType.MGMT_RESOURCE_RESOURCES).resources
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resources
     existing = len(list(client.list(filter=odata_filter))) == 1
     return existing
 
 
-def add_id_parameters(command_table):
+def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
+
+    command_table = kwargs.get('cmd_tbl')
+
+    if not command_table:
+        return
 
     def split_action(arguments):
         class SplitAction(argparse.Action):  # pylint: disable=too-few-public-methods
-
             def __call__(self, parser, namespace, values, option_string=None):
                 ''' The SplitAction will take the given ID parameter and spread the parsed
                 parts of the id into the individual backing fields.
@@ -117,31 +177,38 @@ def add_id_parameters(command_table):
                 Since the id value is expected to be of type `IterateValue`, all the backing
                 (dest) fields will also be of type `IterateValue`
                 '''
+                from msrestazure.tools import parse_resource_id
                 try:
                     for value in [values] if isinstance(values, str) else values:
                         parts = parse_resource_id(value)
-                        for arg in [arg for arg in arguments.values() if arg.id_part]:
-                            existing_values = getattr(namespace, arg.name, None)
-                            if existing_values is None:
-                                existing_values = IterateValue()
-                                existing_values.append(parts[arg.id_part])
-                            else:
-                                if isinstance(existing_values, str):
-                                    if not getattr(arg.type, 'configured_default_applied', None):
-                                        logger.warning(
-                                            "Property '%s=%s' being overriden by value '%s' from IDs parameter.",  # pylint: disable=line-too-long
-                                            arg.name, existing_values, parts[arg.id_part]
-                                        )
-                                    existing_values = IterateValue()
-                                existing_values.append(parts[arg.id_part])
-                            setattr(namespace, arg.name, existing_values)
+                        for arg in [arg for arg in arguments.values() if arg.type.settings.get('id_part')]:
+                            self.set_argument_value(namespace, arg, parts)
                 except Exception as ex:
                     raise ValueError(ex)
+
+            @staticmethod
+            def set_argument_value(namespace, arg, parts):
+                existing_values = getattr(namespace, arg.name, None)
+                if existing_values is None:
+                    existing_values = IterateValue()
+                    existing_values.append(parts[arg.type.settings['id_part']])
+                else:
+                    if isinstance(existing_values, str):
+                        if not getattr(arg.type, 'configured_default_applied', None):
+                            logger.warning(
+                                "Property '%s=%s' being overriden by value '%s' from IDs parameter.",
+                                arg.name, existing_values, parts[arg.type.settings['id_part']]
+                            )
+                        existing_values = IterateValue()
+                    existing_values.append(parts[arg.type.settings['id_part']])
+                setattr(namespace, arg.name, existing_values)
 
         return SplitAction
 
     def command_loaded_handler(command):
-        if 'name' not in [arg.id_part for arg in command.arguments.values() if arg.id_part]:
+        id_parts = [arg.type.settings['id_part'] for arg in command.arguments.values()
+                    if arg.type.settings.get('id_part')]
+        if 'name' not in id_parts and 'resource_name' not in id_parts:
             # Only commands with a resource name are candidates for an id parameter
             return
         if command.name.split()[-1] == 'create':
@@ -151,7 +218,7 @@ def add_id_parameters(command_table):
 
         required_arguments = []
         optional_arguments = []
-        for arg in [argument for argument in command.arguments.values() if argument.id_part]:
+        for arg in [argument for argument in command.arguments.values() if argument.type.settings.get('id_part')]:
             if arg.options.get('required', False):
                 required_arguments.append(arg)
             else:
@@ -168,7 +235,7 @@ def add_id_parameters(command_table):
 
         group_name = 'Resource Id'
         for key, arg in command.arguments.items():
-            if command.arguments[key].id_part:
+            if command.arguments[key].type.settings.get('id_part'):
                 command.arguments[key].arg_group = group_name
 
         command.add_argument('ids',
@@ -187,10 +254,6 @@ def add_id_parameters(command_table):
         command_loaded_handler(command)
 
 
-APPLICATION.register(APPLICATION.COMMAND_TABLE_PARAMS_LOADED, add_id_parameters)
-
-APPLICATION.register(APPLICATION.COMMAND_TABLE_LOADED, add_id_parameters)
-
 add_usage = '--add property.listProperty <key=value, string or JSON string>'
 set_usage = '--set property1.property2=<value>'
 remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
@@ -207,32 +270,52 @@ def _get_child(parent, collection_name, item_name, collection_key):
         return result
 
 
-# pylint: disable=too-many-arguments
-def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=None,
-                               setter_arg_name='parameters', table_transformer=None,
-                               child_collection_prop_name=None, child_collection_key='name',
-                               child_arg_name='item_name', custom_function_op=None,
-                               no_wait_param=None, transform=None):
+def _get_operations_tmpl(cmd):
+    operations_tmpl = cmd.command_kwargs.get('operations_tmpl',
+                                             cmd.command_kwargs.get('command_type').settings['operations_tmpl'])
+    if not operations_tmpl:
+        raise CLIError("command authoring error: cmd '{}' does not have an operations_tmpl.".format(cmd.name))
+    return operations_tmpl
+
+
+def _get_client_factory(_, kwargs):
+    command_type = kwargs.get('command_type', None)
+    factory = kwargs.get('client_factory', None)
+    if not factory and command_type:
+        factory = command_type.settings.get('client_factory', None)
+    return factory
+
+
+# pylint: disable=too-many-statements
+def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_name='parameters',
+                                child_collection_prop_name=None, child_collection_key='name',
+                                child_arg_name='item_name', custom_function_op=None, **kwargs):
+    if not isinstance(context, AzCommandsLoader):
+        raise TypeError("'context' expected type '{}'. Got: '{}'".format(AzCommandsLoader.__name__, type(context)))
     if not isinstance(getter_op, string_types):
-        raise ValueError("Getter operation must be a string. Got '{}'".format(getter_op))
+        raise TypeError("Getter operation must be a string. Got '{}'".format(getter_op))
     if not isinstance(setter_op, string_types):
-        raise ValueError("Setter operation must be a string. Got '{}'".format(setter_op))
+        raise TypeError("Setter operation must be a string. Got '{}'".format(setter_op))
     if custom_function_op and not isinstance(custom_function_op, string_types):
-        raise ValueError("Custom function operation must be a string. Got '{}'".format(
+        raise TypeError("Custom function operation must be a string. Got '{}'".format(
             custom_function_op))
 
     def get_arguments_loader():
-        return dict(extract_args_from_signature(get_op_handler(getter_op)))
+        return dict(extract_args_from_signature(context.get_op_handler(getter_op), excluded_params=EXCLUDED_PARAMS))
 
     def set_arguments_loader():
-        return dict(extract_args_from_signature(get_op_handler(setter_op),
-                                                no_wait_param=no_wait_param))
+        return dict(extract_args_from_signature(context.get_op_handler(setter_op), excluded_params=EXCLUDED_PARAMS))
 
     def function_arguments_loader():
-        return dict(extract_args_from_signature(get_op_handler(custom_function_op))) \
-            if custom_function_op else {}
+        if not custom_function_op:
+            return {}
 
-    def arguments_loader():
+        custom_op = context.get_op_handler(custom_function_op)
+        context._apply_doc_string(custom_op, kwargs)  # pylint: disable=protected-access
+        return dict(extract_args_from_signature(custom_op, excluded_params=EXCLUDED_PARAMS))
+
+    def generic_update_arguments_loader():
+
         arguments = {}
         arguments.update(set_arguments_loader())
         arguments.update(get_arguments_loader())
@@ -241,26 +324,67 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
         arguments.pop('parent', None)
         arguments.pop('expand', None)  # possibly inherited from the getter
         arguments.pop(setter_arg_name, None)
-        return arguments
+
+        # Add the generic update parameters
+        class OrderedArgsAction(argparse.Action):  # pylint:disable=too-few-public-methods
+
+            def __call__(self, parser, namespace, values, option_string=None):
+                if not getattr(namespace, 'ordered_arguments', None):
+                    setattr(namespace, 'ordered_arguments', [])
+                namespace.ordered_arguments.append((option_string, values))
+
+        group_name = 'Generic Update'
+        arguments['properties_to_set'] = CLICommandArgument(
+            'properties_to_set', options_list=['--set'], nargs='+',
+            action=OrderedArgsAction, default=[],
+            help='Update an object by specifying a property path and value to set.  Example: {}'.format(set_usage),
+            metavar='KEY=VALUE', arg_group=group_name
+        )
+        arguments['properties_to_add'] = CLICommandArgument(
+            'properties_to_add', options_list=['--add'], nargs='+',
+            action=OrderedArgsAction, default=[],
+            help='Add an object to a list of objects by specifying a path and '
+                 'key value pairs.  Example: {}'.format(add_usage),
+            metavar='LIST KEY=VALUE', arg_group=group_name
+        )
+        arguments['properties_to_remove'] = CLICommandArgument(
+            'properties_to_remove', options_list=['--remove'], nargs='+',
+            action=OrderedArgsAction, default=[],
+            help='Remove a property or an element from a list.  Example: {}'.format(remove_usage),
+            metavar='LIST INDEX', arg_group=group_name
+        )
+        arguments['cmd'] = CLICommandArgument('cmd', arg_type=ignore_type)
+        return [(k, v) for k, v in arguments.items()]
+
+    def _extract_handler_and_args(args, commmand_kwargs, op):
+        factory = _get_client_factory(name, commmand_kwargs)
+        client = None
+        if factory:
+            try:
+                client = factory(context.cli_ctx)
+            except TypeError:
+                client = factory(context.cli_ctx, None)
+
+        client_arg_name = 'client' if op.startswith(('azure.cli', 'azext')) else 'self'
+        op_handler = context.get_op_handler(op)
+        exclude = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
+        raw_args = dict(extract_args_from_signature(op_handler, excluded_params=exclude))
+        op_args = {key: val for key, val in args.items() if key in raw_args}
+        if client_arg_name in raw_args:
+            op_args[client_arg_name] = client
+        return op_handler, op_args
 
     def handler(args):  # pylint: disable=too-many-branches,too-many-statements
-        from msrestazure.azure_operation import AzureOperationPoller
-
+        cmd = args.get('cmd')
         ordered_arguments = args.pop('ordered_arguments', [])
         for item in ['properties_to_add', 'properties_to_set', 'properties_to_remove']:
             if args[item]:
                 raise CLIError("Unexpected '{}' was not empty.".format(item))
             del args[item]
 
-        try:
-            client = factory() if factory else None
-        except TypeError:
-            client = factory(None) if factory else None
-
-        getterargs = {key: val for key, val in args.items() if key in get_arguments_loader()}
-        getter = get_op_handler(getter_op)
+        getter, getterargs = _extract_handler_and_args(args, cmd.command_kwargs, getter_op)
         if child_collection_prop_name:
-            parent = getter(client, **getterargs) if client else getter(**getterargs)
+            parent = getter(**getterargs)
             instance = _get_child(
                 parent,
                 child_collection_prop_name,
@@ -269,19 +393,18 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
             )
         else:
             parent = None
-            instance = getter(client, **getterargs) if client else getter(**getterargs)
+            instance = getter(**getterargs)
 
         # pass instance to the custom_function, if provided
         if custom_function_op:
-            custom_function = get_op_handler(custom_function_op)
-            custom_func_args = {k: v for k, v in args.items() if k in function_arguments_loader()}
+            custom_function, custom_func_args = _extract_handler_and_args(args, cmd.command_kwargs, custom_function_op)
             if child_collection_prop_name:
-                parent = custom_function(instance, parent, **custom_func_args)
+                parent = custom_function(instance=instance, parent=parent, **custom_func_args)
             else:
-                instance = custom_function(instance, **custom_func_args)
+                instance = custom_function(instance=instance, **custom_func_args)
 
         # apply generic updates after custom updates
-        setterargs = {key: val for key, val in args.items() if key in set_arguments_loader()}
+        setter, setterargs = _extract_handler_and_args(args, cmd.command_kwargs, setter_op)
 
         for arg in ordered_arguments:
             arg_type, arg_values = arg
@@ -304,14 +427,17 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
 
         # Done... update the instance!
         setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
-        setter = get_op_handler(setter_op)
+        no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+        if no_wait_param:
+            setterargs[no_wait_param] = args[no_wait_param]
+        result = setter(**setterargs)
 
-        opres = setter(client, **setterargs) if client else setter(**setterargs)
-
-        if setterargs.get(no_wait_param, None):
+        if no_wait_param and setterargs.get(no_wait_param, None):
             return None
 
-        result = opres.result() if isinstance(opres, AzureOperationPoller) else opres
+        if _is_poller(result):
+            result = LongRunningOperation(cmd.cli_ctx, 'Starting {}'.format(cmd.name))(result)
+
         if child_collection_prop_name:
             result = _get_child(
                 result,
@@ -320,50 +446,57 @@ def cli_generic_update_command(module_name, name, getter_op, setter_op, factory=
                 child_collection_key
             )
 
-        # apply results transform if specified
-        if transform:
-            return transform(result)
-
         return result
 
-    class OrderedArgsAction(argparse.Action):  # pylint:disable=too-few-public-methods
-
-        def __call__(self, parser, namespace, values, option_string=None):
-            if not getattr(namespace, 'ordered_arguments', None):
-                setattr(namespace, 'ordered_arguments', [])
-            namespace.ordered_arguments.append((option_string, values))
-
-    cmd = CliCommand(name, handler, table_transformer=table_transformer,
-                     arguments_loader=arguments_loader)
-    group_name = 'Generic Update'
-    cmd.add_argument('properties_to_set', '--set', nargs='+', action=OrderedArgsAction, default=[],
-                     help='Update an object by specifying a property path and value to set.'
-                     '  Example: {}'.format(set_usage),
-                     metavar='KEY=VALUE', arg_group=group_name)
-    cmd.add_argument('properties_to_add', '--add', nargs='+', action=OrderedArgsAction, default=[],
-                     help='Add an object to a list of objects by specifying a path and key'
-                     ' value pairs.  Example: {}'.format(add_usage),
-                     metavar='LIST KEY=VALUE', arg_group=group_name)
-    cmd.add_argument('properties_to_remove', '--remove', nargs='+', action=OrderedArgsAction,
-                     default=[], help='Remove a property or an element from a list.  Example: '
-                     '{}'.format(remove_usage), metavar='LIST INDEX',
-                     arg_group=group_name)
-    main_command_table[name] = cmd
-    main_command_module_map[name] = module_name
+    context._cli_command(name, handler=handler, argument_loader=generic_update_arguments_loader, **kwargs)  # pylint: disable=protected-access
 
 
-def cli_generic_wait_command(module_name, name, getter_op, factory=None):
+def _cli_generic_wait_command(context, name, getter_op, **kwargs):
 
     if not isinstance(getter_op, string_types):
         raise ValueError("Getter operation must be a string. Got '{}'".format(type(getter_op)))
 
-    def get_arguments_loader():
-        return dict(extract_args_from_signature(get_op_handler(getter_op)))
+    factory = _get_client_factory(name, kwargs)
 
-    def arguments_loader():
-        arguments = {}
-        arguments.update(get_arguments_loader())
-        return arguments
+    def generic_wait_arguments_loader():
+
+        getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
+                                                       excluded_params=EXCLUDED_PARAMS))
+        cmd_args = getter_args.copy()
+
+        group_name = 'Wait Condition'
+        cmd_args['timeout'] = CLICommandArgument(
+            'timeout', options_list=['--timeout'], default=3600, arg_group=group_name, type=int,
+            help='maximum wait in seconds'
+        )
+        cmd_args['interval'] = CLICommandArgument(
+            'interval', options_list=['--interval'], default=30, arg_group=group_name, type=int,
+            help='polling interval in seconds'
+        )
+        cmd_args['deleted'] = CLICommandArgument(
+            'deleted', options_list=['--deleted'], action='store_true', arg_group=group_name,
+            help='wait until deleted'
+        )
+        cmd_args['created'] = CLICommandArgument(
+            'created', options_list=['--created'], action='store_true', arg_group=group_name,
+            help="wait until created with 'provisioningState' at 'Succeeded'"
+        )
+        cmd_args['updated'] = CLICommandArgument(
+            'updated', options_list=['--updated'], action='store_true', arg_group=group_name,
+            help="wait until updated with provisioningState at 'Succeeded'"
+        )
+        cmd_args['exists'] = CLICommandArgument(
+            'exists', options_list=['--exists'], action='store_true', arg_group=group_name,
+            help="wait until the resource exists"
+        )
+        cmd_args['custom'] = CLICommandArgument(
+            'custom', options_list=['--custom'], arg_group=group_name,
+            help="Wait until the condition satisfies a custom JMESPath query. E.g. "
+                 "provisioningState!='InProgress', "
+                 "instanceView.statuses[?code=='PowerState/running']"
+        )
+        cmd_args['cmd'] = CLICommandArgument('cmd', arg_type=ignore_type)
+        return [(k, v) for k, v in cmd_args.items()]
 
     def get_provisioning_state(instance):
         provisioning_state = getattr(instance, 'provisioning_state', None)
@@ -377,15 +510,22 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None):
     def handler(args):
         from msrest.exceptions import ClientException
         import time
+
+        cmd = args.get('cmd')
+
+        operations_tmpl = _get_operations_tmpl(cmd)
+        getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
+                                                       excluded_params=EXCLUDED_PARAMS))
+
+        client_arg_name = 'client' if operations_tmpl.startswith(('azure.cli', 'azext')) else 'self'
         try:
-            client = factory() if factory else None
+            client = factory(context.cli_ctx) if factory else None
         except TypeError:
-            client = factory(None) if factory else None
+            client = factory(context.cli_ctx, None) if factory else None
+        if client and (client_arg_name in getter_args or client_arg_name == 'self'):
+            args[client_arg_name] = client
 
-        getterargs = {key: val for key, val in args.items()
-                      if key in get_arguments_loader()}
-
-        getter = get_op_handler(getter_op)
+        getter = context.get_op_handler(getter_op)
 
         timeout = args.pop('timeout')
         interval = args.pop('interval')
@@ -397,55 +537,45 @@ def cli_generic_wait_command(module_name, name, getter_op, factory=None):
         if not any([wait_for_created, wait_for_updated, wait_for_deleted,
                     wait_for_exists, custom_condition]):
             raise CLIError(
-                "incorrect usage: --created | --updated | --deleted | --exists | --custom JMESPATH")  # pylint: disable=line-too-long
+                "incorrect usage: --created | --updated | --deleted | --exists | --custom JMESPATH")
 
+        progress_indicator = context.cli_ctx.get_progress_controller()
+        progress_indicator.begin()
         for _ in range(0, timeout, interval):
             try:
-                instance = getter(client, **getterargs) if client else getter(**getterargs)
+                progress_indicator.add(message='Waiting')
+                instance = getter(**args)
                 if wait_for_exists:
-                    return
+                    progress_indicator.end()
+                    return None
                 provisioning_state = get_provisioning_state(instance)
                 # until we have any needs to wait for 'Failed', let us bail out on this
                 if provisioning_state == 'Failed':
+                    progress_indicator.stop()
                     raise CLIError('The operation failed')
-                if wait_for_created or wait_for_updated:
-                    if provisioning_state == 'Succeeded':
-                        return
-                if custom_condition and bool(verify_property(instance, custom_condition)):
-                    return
+                if ((wait_for_created or wait_for_updated) and provisioning_state == 'Succeeded') or \
+                        custom_condition and bool(verify_property(instance, custom_condition)):
+                    progress_indicator.end()
+                    return None
             except ClientException as ex:
+                progress_indicator.stop()
                 if getattr(ex, 'status_code', None) == 404:
                     if wait_for_deleted:
-                        return
+                        return None
                     if not any([wait_for_created, wait_for_exists, custom_condition]):
                         raise
                 else:
                     raise
+            except Exception as ex:  # pylint: disable=broad-except
+                progress_indicator.stop()
+                raise
 
             time.sleep(interval)
 
+        progress_indicator.end()
         return CLIError('Wait operation timed-out after {} seconds'.format(timeout))
 
-    cmd = CliCommand(name, handler, arguments_loader=arguments_loader)
-    group_name = 'Wait Condition'
-    cmd.add_argument('timeout', '--timeout', default=3600, arg_group=group_name, type=int,
-                     help='maximum wait in seconds')
-    cmd.add_argument('interval', '--interval', default=30, arg_group=group_name, type=int,
-                     help='polling interval in seconds')
-    cmd.add_argument('deleted', '--deleted', action='store_true', arg_group=group_name,
-                     help='wait till deleted')
-    cmd.add_argument('created', '--created', action='store_true', arg_group=group_name,
-                     help="wait till created with 'provisioningState' at 'Succeeded'")
-    cmd.add_argument('updated', '--updated', action='store_true', arg_group=group_name,
-                     help="wait till updated with provisioningState at 'Succeeded'")
-    cmd.add_argument('exists', '--exists', action='store_true', arg_group=group_name,
-                     help="wait till the resource exists")
-    cmd.add_argument('custom', '--custom', arg_group=group_name,
-                     help=("Wait until the condition satisfies a custom JMESPath query. E.g. "
-                           "provisioningState!='InProgress', "
-                           "instanceView.statuses[?code=='PowerState/running']"))
-    main_command_table[name] = cmd
-    main_command_module_map[name] = module_name
+    context._cli_command(name, handler=handler, argument_loader=generic_wait_arguments_loader, **kwargs)  # pylint: disable=protected-access
 
 
 def verify_property(instance, condition):
@@ -467,7 +597,7 @@ def _split_key_value_pair(expression):
         value = []
         brackets = False
         chars = list(expression)
-        while len(chars) > 0:
+        while chars:
             c = chars.pop(0)
             if c == '=' and not brackets:
                 # keys done the rest is value
@@ -483,15 +613,12 @@ def _split_key_value_pair(expression):
                 # normal character
                 key += c
 
-        key = ''.join(key)  # pylint: disable=redefined-variable-type
-        value = ''.join(value)  # pylint: disable=redefined-variable-type
-        return key, value
+        return ''.join(key), ''.join(value)
 
     equals_count = expression.count('=')
     if equals_count == 1:
         return expression.split('=', 1)
-    else:
-        return _find_split()
+    return _find_split()
 
 
 def set_properties(instance, expression):
@@ -520,7 +647,7 @@ def set_properties(instance, expression):
         elif isinstance(instance, dict):
             instance[name] = value
         elif isinstance(instance, list):
-            show_options(instance, name, key.split('.'))
+            throw_and_show_options(instance, name, key.split('.'))
         else:
             # must be a property name
             name = make_snake_case(name)
@@ -531,7 +658,7 @@ def set_properties(instance, expression):
     except IndexError:
         raise CLIError('index {} doesn\'t exist on {}'.format(index_value, name))
     except (AttributeError, KeyError, TypeError):
-        show_options(instance, name, key.split('.'))
+        throw_and_show_options(instance, name, key.split('.'))
 
 
 def add_properties(instance, argument_values):
@@ -602,7 +729,7 @@ def remove_properties(instance, argument_values):
                            .format(list_index, list_attribute_path[-1]))
 
 
-def show_options(instance, part, path):
+def throw_and_show_options(instance, part, path):
     options = instance.__dict__ if hasattr(instance, '__dict__') else instance
     parent = '.'.join(path[:-1]).replace('.[', '[')
     error_message = "Couldn't find '{}' in '{}'.".format(part, parent)
@@ -658,53 +785,122 @@ def _get_name_path(path):
 
 
 def _update_instance(instance, part, path):
-    try:  # pylint: disable=too-many-nested-blocks
+    try:
         index = index_or_filter_regex.match(part)
-        if index:
-            # indexing on anything but a list is not allowed
-            if not isinstance(instance, list):
-                show_options(instance, part, path)
+        if index and not isinstance(instance, list):
+            throw_and_show_options(instance, part, path)
 
-            if '=' in index.group(1):
-                key, value = index.group(1).split('=', 1)
-                try:
-                    value = shell_safe_json_parse(value)
-                except:  # pylint: disable=bare-except
-                    pass
-                matches = []
-                for x in instance:
-                    if isinstance(x, dict) and x.get(key, None) == value:
+        if index and '=' in index.group(1):
+            key, value = index.group(1).split('=', 1)
+            try:
+                value = shell_safe_json_parse(value)
+            except:  # pylint: disable=bare-except
+                pass
+            matches = []
+            for x in instance:
+                if isinstance(x, dict) and x.get(key, None) == value:
+                    matches.append(x)
+                elif not isinstance(x, dict):
+                    key = make_snake_case(key)
+                    if hasattr(x, key) and getattr(x, key, None) == value:
                         matches.append(x)
-                    elif not isinstance(x, dict):
-                        key = make_snake_case(key)
-                        if hasattr(x, key) and getattr(x, key, None) == value:
-                            matches.append(x)
-                if len(matches) == 1:
-                    instance = matches[0]
-                elif len(matches) > 1:
-                    raise CLIError("non-unique key '{}' found multiple matches on {}. "
-                                   "Key must be unique.".format(
-                                       key, path[-2]))
-                else:
-                    raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(
-                        value, key, path[-2]))
+
+            if len(matches) == 1:
+                return matches[0]
+            elif len(matches) > 1:
+                raise CLIError("non-unique key '{}' found multiple matches on {}. Key must be unique."
+                               .format(key, path[-2]))
             else:
-                try:
-                    index_value = int(index.group(1))
-                    instance = instance[index_value]
-                except IndexError:
-                    raise CLIError('index {} doesn\'t exist on {}'.format(
-                        index_value, path[-2]))
-        elif isinstance(instance, dict):
-            instance = instance[part]
-        else:
-            instance = getattr(instance, make_snake_case(part))
+                raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(value, key, path[-2]))
+
+        if index:
+            try:
+                index_value = int(index.group(1))
+                return instance[index_value]
+            except IndexError:
+                raise CLIError('index {} doesn\'t exist on {}'.format(index_value, path[-2]))
+
+        if isinstance(instance, dict):
+            return instance[part]
+
+        return getattr(instance, make_snake_case(part))
     except (AttributeError, KeyError):
-        show_options(instance, part, path)
-    return instance
+        throw_and_show_options(instance, part, path)
 
 
 def _find_property(instance, path):
     for part in path:
         instance = _update_instance(instance, part, path)
     return instance
+
+
+def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
+    import time
+    from azure.mgmt.authorization import AuthorizationManagementClient
+    from azure.mgmt.authorization.models import RoleAssignmentProperties
+    from msrestazure.azure_exceptions import CloudError
+
+    # get
+    resource = getter()
+    resource = setter(resource)
+
+    # create role assignment:
+    if identity_scope:
+        principal_id = resource.identity.principal_id
+
+        identity_role_id = resolve_role_id(cli_ctx, identity_role, identity_scope)
+        assignments_client = get_mgmt_service_client(cli_ctx, AuthorizationManagementClient).role_assignments
+        properties = RoleAssignmentProperties(identity_role_id, principal_id)
+
+        logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
+        retry_times = 36
+        assignment_id = _gen_guid()
+        for l in range(0, retry_times):
+            try:
+                assignments_client.create(identity_scope, assignment_id, properties)
+                break
+            except CloudError as ex:
+                if 'role assignment already exists' in ex.message:
+                    logger.info('Role assignment already exists')
+                    break
+                elif l < retry_times and ' does not exist in the directory ' in ex.message:
+                    time.sleep(5)
+                    logger.warning('Retrying role assignment creation: %s/%s', l + 1,
+                                   retry_times)
+                    continue
+                else:
+                    raise
+    return resource
+
+
+def resolve_role_id(cli_ctx, role, scope):
+    import uuid
+    from azure.mgmt.authorization import AuthorizationManagementClient
+    client = get_mgmt_service_client(cli_ctx, AuthorizationManagementClient).role_definitions
+
+    role_id = None
+    if re.match(r'/subscriptions/[^/]+/providers/Microsoft.Authorization/roleDefinitions/',
+                role, re.I):
+        role_id = role
+    else:
+        try:
+            uuid.UUID(role)
+            role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
+                client.config.subscription_id, role)
+        except ValueError:
+            pass
+        if not role_id:  # retrieve role id
+            role_defs = list(client.list(scope, "roleName eq '{}'".format(role)))
+            if not role_defs:
+                raise CLIError("Role '{}' doesn't exist.".format(role))
+            elif len(role_defs) > 1:
+                ids = [r.id for r in role_defs]
+                err = "More than one role matches the given name '{}'. Please pick an id from '{}'"
+                raise CLIError(err.format(role, ids))
+            role_id = role_defs[0].id
+    return role_id
+
+
+def _gen_guid():
+    import uuid
+    return uuid.uuid4()

@@ -2,23 +2,24 @@
 
 [![Python](https://img.shields.io/pypi/pyversions/azure-cli.svg?maxAge=2592000)](https://pypi.python.org/pypi/azure-cli)
 [![Travis](https://travis-ci.org/Azure/azure-cli.svg?branch=master)](https://travis-ci.org/Azure/azure-cli)
+[![Slack](https://azureclislackin.azurewebsites.net/badge.svg)](https://azurecli.slack.com)
 
 A great cloud needs great tools; we're excited to introduce *Azure CLI 2.0*, our next generation multi-platform command line experience for Azure.
 
+Take a test run now from Azure Cloud Shell!
+
+[![](https://shell.azure.com/images/launchcloudshell.png "Launch Azure Cloud Shell")](https://shell.azure.com)
+
 ## Installation
 
-```bash
-$ curl -L https://aka.ms/InstallAzureCli | bash
-```
-
-Please refer to the [install guide](https://docs.microsoft.com/en-us/cli/azure/install-az-cli2) for detailed install instructions.
+Please refer to the [install guide](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) for detailed install instructions.
 
 A list of common install issues and their resolutions are available at [install troubleshooting](https://github.com/Azure/azure-cli/blob/master/doc/install_troubleshooting.md).
 
 ### Developer Installation (see below)
 
 - [Docker](#docker)
-- [Nightly Builds](#nightly-builds)
+- [Edge Builds](#edge-builds)
 - [Developer Setup](#developer-setup)
 
 ## Usage
@@ -40,7 +41,7 @@ $ az vm create -h
 
 ### Highlights
 
-Here are a few features and concepts that can help you get the most out of the Azure CLI 2.0 Preview
+Here are a few features and concepts that can help you get the most out of the Azure CLI 2.0
 
 ![Azure CLI 2.0 Highlight Reel](doc/assets/AzBlogAnimation4.gif)
 
@@ -107,47 +108,45 @@ For more usage examples, take a look at our [GitHub samples repo](http://github.
 
 If you encounter any bugs with the tool please file an issue in the [Issues](https://github.com/Azure/azure-cli/issues) section of our GitHub repo.
 
-To provide feedback from the command line, try the `az feedback` command!
+To provide feedback from the command line, try the `az feedback` command.
 
 ## Developer Installation
 
 ### Docker
 
-**This install does not support the component feature.**
-
-We maintain a Docker image preconfigured with the Azure CLI.  Run the latest automated Docker build with the command below.
-
-```bash
-$ docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:latest
-```
-
-All command modules are included in this version as the image is built directly from the Git repository.  
-You can also get a specific version of Azure CLI 2.0 via Docker.
+We maintain a Docker image preconfigured with the Azure CLI.  
+See our [Docker tags](https://hub.docker.com/r/microsoft/azure-cli/tags/) for available versions.
 
 ```bash
-$ docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:<version>
+$ docker run -v ${HOME}:/root -it microsoft/azure-cli:<version>
 ```
 
-See our [Docker tags](https://hub.docker.com/r/azuresdk/azure-cli-python/tags/) for available versions.
+For automated builds triggered by pushes to this repo, see [azuresdk/azure-cli-python](https://hub.docker.com/r/azuresdk/azure-cli-python/tags).  
+For example:
+```bash
+docker run -v ${HOME}:/root -it azuresdk/azure-cli-python:dev
+```
 
-### Nightly Builds
+### Edge Builds
 
-Install nightly builds with pip in a virtual environment.
+If you want to get the latest build from the master branch, you can use our "edge" builds feed. Here's an example of 
+installing edge dev builds with pip in a virtual environment.
 
 ```bash
-$ pip install --pre azure-cli --extra-index-url https://azureclinightly.blob.core.windows.net/packages
+$ virtualenv env
+$ . env/bin/activate
+$ pip install --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge
 ```
 
-- Builds happen at 21:00:00 PDT each night. They are published shortly afterwards.
-- Whilst all command modules are built each night, not all are included on install.
-- Install additional components with:  
-    ```
-    $ export AZURE_COMPONENT_PACKAGE_INDEX_URL=https://azureclinightly.blob.core.windows.net/packages
-    ```  
-    ```
-    $ az component update --add <component_name> --private
-    ```
-- To view the list of installed packages, run ``az component list``
+To upgrade your current edge build pass the `--upgrade` option. The `--no-cache-dir` option is also recommended since
+the feed is frequently updated.
+
+```bash
+$ pip install --upgrade --pre azure-cli --extra-index-url https://azurecliprod.blob.core.windows.net/edge --no-cache-dir
+```
+
+The edge build is generated for each push to the `master` branch as a part of the Travis CI build. The version of the edge build follows 
+
 
 ## Developer Setup
 If you would like to setup a development environment and contribute to the CLI, see 

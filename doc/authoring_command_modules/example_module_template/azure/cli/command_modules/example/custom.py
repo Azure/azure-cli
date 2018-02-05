@@ -3,16 +3,19 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import azure.cli.core.azlogging as azlogging
+from knack.log import get_logger
+from knack.util import CLIError
 
 
-logger = azlogging.get_az_logger(__name__)
+logger = get_logger(__name__)
 
 
-def example_custom(example_param=None):
-    result = {'example_param': example_param}
-    return result
+def create_example(cmd, example_name, resource_group_name, location=None):
+    from azure.mgmt.example.models import Example
+    from azure.cli.command_modules.example._client_factory import cf_example
+    client = cf_example(cmd.cli_ctx)
 
+    # TODO: Your custom logic here
 
-def example_custom_two():
-    return ['hello', 'world']
+    example = Example(location=location)
+    return client.create_or_update(example_name, resource_group_name, example)

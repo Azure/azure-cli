@@ -3,157 +3,119 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import print_function
-import datetime
-import unittest
-import os.path
-import inspect
+import os
 import subprocess
 import json
 import shlex
-import tempfile
-import shutil
-import six
-import vcr
+import logging
+import inspect
+import unittest
+
+from azure_devtools.scenario_tests import (IntegrationTestBase, ReplayableTest, SubscriptionRecordingProcessor,
+                                           OAuthRequestResponsesFilter, GeneralNameReplacer, LargeRequestBodyProcessor,
+                                           LargeResponseBodyProcessor, LargeResponseBodyReplacer, RequestUrlNormalizer,
+                                           live_only, DeploymentNameReplacer, patch_time_sleep_api, create_random_name)
+
+from azure_devtools.scenario_tests.const import MOCKED_SUBSCRIPTION_ID, ENV_SKIP_ASSERT
 
 from .patches import (patch_load_cached_subscriptions, patch_main_exception_handler,
-                      patch_retrieve_token_for_user, patch_long_run_operation_delay)
+                      patch_retrieve_token_for_user, patch_long_run_operation_delay,
+                      patch_progress_controller)
 from .exceptions import CliExecutionError
-from .const import (ENV_LIVE_TEST, ENV_SKIP_ASSERT, ENV_TEST_DIAGNOSE, MOCKED_SUBSCRIPTION_ID)
-from .recording_processors import (SubscriptionRecordingProcessor, OAuthRequestResponsesFilter,
-                                   GeneralNameReplacer, LargeRequestBodyProcessor,
-                                   LargeResponseBodyProcessor, LargeResponseBodyReplacer)
-from .utilities import create_random_name
-from .decorators import live_only
+from .utilities import find_recording_dir
+
+logger = logging.getLogger('azure.cli.testsdk')
 
 
-class IntegrationTestBase(unittest.TestCase):
-    def __init__(self, method_name):
-        super(IntegrationTestBase, self).__init__(method_name)
-        self.diagnose = os.environ.get(ENV_TEST_DIAGNOSE, None) == 'True'
+class CheckerMixin(object):
 
-    def cmd(self, command, checks=None, expect_failure=False):
-        if self.diagnose:
-            begin = datetime.datetime.now()
-            print('\nExecuting command: {}'.format(command))
+    def _apply_kwargs(self, val):
+        try:
+            return val.format(**self.kwargs)
+        except Exception:  # pylint: disable=broad-except
+            return val
 
-        result = execute(command, expect_failure=expect_failure)
+    def check(self, query, expected_results):
+        from azure.cli.testsdk.checkers import JMESPathCheck
+        query = self._apply_kwargs(query)
+        expected_results = self._apply_kwargs(expected_results)
+        return JMESPathCheck(query, expected_results)
 
-        if self.diagnose:
-            duration = datetime.datetime.now() - begin
-            print('\nCommand accomplished in {} s. Exit code {}.\n{}'.format(
-                duration.total_seconds(), result.exit_code, result.output))
+    def exists(self, query):
+        from azure.cli.testsdk.checkers import JMESPathCheckExists
+        query = self._apply_kwargs(query)
+        return JMESPathCheckExists(query)
 
-        return result.assert_with_checks(checks)
+    def greater_than(self, query, expected_results):
+        from azure.cli.testsdk.checkers import JMESPathCheckGreaterThan
+        query = self._apply_kwargs(query)
+        expected_results = self._apply_kwargs(expected_results)
+        return JMESPathCheckGreaterThan(query, expected_results)
 
-    def create_random_name(self, prefix, length):  # for override pylint: disable=no-self-use
-        return create_random_name(prefix, length)
+    def check_pattern(self, query, expected_results):
+        from azure.cli.testsdk.checkers import JMESPathPatternCheck
+        query = self._apply_kwargs(query)
+        expected_results = self._apply_kwargs(expected_results)
+        return JMESPathPatternCheck(query, expected_results)
 
-    def create_temp_file(self, size_kb, full_random=False):
-        """
-        Create a temporary file for testing. The test harness will delete the file during tearing
-        down.
-        """
-        _, path = tempfile.mkstemp()
-        self.addCleanup(lambda: os.remove(path))
-
-        with open(path, mode='r+b') as f:
-            if full_random:
-                chunk = os.urandom(1024)
-            else:
-                chunk = bytearray([0] * 1024)
-            for _ in range(size_kb):
-                f.write(chunk)
-
-        return path
-
-    def create_temp_dir(self):
-        """
-        Create a temporary directory for testing. The test harness will delete the directory during
-        tearing down.
-        """
-        temp_dir = tempfile.mkdtemp()
-        self.addCleanup(lambda: shutil.rmtree(temp_dir, ignore_errors=True))
-
-        return temp_dir
-
-    @classmethod
-    def set_env(cls, key, val):
-        os.environ[key] = val
-
-    @classmethod
-    def pop_env(cls, key):
-        return os.environ.pop(key, None)
+    def is_empty(self):  # pylint: disable=no-self-use
+        from azure.cli.testsdk.checkers import NoneCheck
+        return NoneCheck()
 
 
-@live_only()
-class LiveTest(IntegrationTestBase):
-    pass
-
-
-class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-attributes
-    FILTER_HEADERS = [
-        'authorization',
-        'client-request-id',
-        'x-ms-client-request-id',
-        'x-ms-correlation-request-id',
-        'x-ms-ratelimit-remaining-subscription-reads',
-        'x-ms-request-id',
-        'x-ms-routing-request-id',
-        'x-ms-gateway-service-instanceid',
-        'x-ms-ratelimit-remaining-tenant-reads',
-        'x-ms-served-by',
-    ]
-
-    def __init__(self, method_name):
-        super(ScenarioTest, self).__init__(method_name)
+class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
+    def __init__(self, method_name, config_file=None, recording_name=None,
+                 recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None):
+        from azure.cli.testsdk import TestCli
+        self.cli_ctx = TestCli()
         self.name_replacer = GeneralNameReplacer()
-        self.recording_processors = [SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
-                                     OAuthRequestResponsesFilter(),
-                                     LargeRequestBodyProcessor(),
-                                     LargeResponseBodyProcessor(),
-                                     self.name_replacer]
-        self.replay_processors = [LargeResponseBodyReplacer()]
+        self.kwargs = {}
 
-        test_file_path = inspect.getfile(self.__class__)
-        recordings_dir = os.path.join(os.path.dirname(test_file_path), 'recordings')
-        live_test = os.environ.get(ENV_LIVE_TEST, None) == 'True'
+        default_recording_processors = [
+            SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
+            OAuthRequestResponsesFilter(),
+            LargeRequestBodyProcessor(),
+            LargeResponseBodyProcessor(),
+            DeploymentNameReplacer(),
+            RequestUrlNormalizer(),
+            self.name_replacer
+        ]
 
-        self.vcr = vcr.VCR(
-            cassette_library_dir=recordings_dir,
-            before_record_request=self._process_request_recording,
-            before_record_response=self._process_response_recording,
-            decode_compressed_response=True,
-            record_mode='once' if not live_test else 'all',
-            filter_headers=self.FILTER_HEADERS
+        default_replay_processors = [
+            LargeResponseBodyReplacer(),
+            DeploymentNameReplacer(),
+            RequestUrlNormalizer(),
+        ]
+
+        default_recording_patches = [patch_main_exception_handler]
+
+        default_replay_patches = [
+            patch_main_exception_handler,
+            patch_time_sleep_api,
+            patch_long_run_operation_delay,
+            patch_load_cached_subscriptions,
+            patch_retrieve_token_for_user,
+            patch_progress_controller,
+        ]
+
+        def _merge_lists(base, patches):
+            merged = list(base)
+            if patches and not isinstance(patches, list):
+                patches = [patches]
+            if patches:
+                merged = list(set(merged).union(set(patches)))
+            return merged
+
+        super(ScenarioTest, self).__init__(
+            method_name,
+            config_file=config_file,
+            recording_processors=_merge_lists(default_recording_processors, recording_processors),
+            replay_processors=_merge_lists(default_replay_processors, replay_processors),
+            recording_patches=_merge_lists(default_recording_patches, recording_patches),
+            replay_patches=_merge_lists(default_replay_patches, replay_patches),
+            recording_dir=find_recording_dir(inspect.getfile(self.__class__)),
+            recording_name=recording_name
         )
-
-        self.recording_file = os.path.join(recordings_dir, '{}.yaml'.format(method_name))
-        if live_test and os.path.exists(self.recording_file):
-            os.remove(self.recording_file)
-
-        self.in_recording = live_test or not os.path.exists(self.recording_file)
-        self.test_resources_count = 0
-        self.original_env = os.environ.copy()
-
-    def setUp(self):
-        super(ScenarioTest, self).setUp()
-
-        # set up cassette
-        cm = self.vcr.use_cassette(self.recording_file)
-        self.cassette = cm.__enter__()
-        self.addCleanup(cm.__exit__)
-
-        # set up mock patches
-        patch_main_exception_handler(self)
-
-        if not self.in_recording:
-            patch_long_run_operation_delay(self)
-            patch_load_cached_subscriptions(self)
-            patch_retrieve_token_for_user(self)
-
-    def tearDown(self):
-        os.environ = self.original_env
 
     def create_random_name(self, prefix, length):
         self.test_resources_count += 1
@@ -163,69 +125,76 @@ class ScenarioTest(IntegrationTestBase):  # pylint: disable=too-many-instance-at
             name = create_random_name(prefix, length)
             self.name_replacer.register_name_pair(name, moniker)
             return name
+
+        return moniker
+
+    def cmd(self, command, checks=None, expect_failure=False):
+        try:
+            command = command.format(**self.kwargs)
+        except KeyError:
+            pass
+        return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
+
+    def get_subscription_id(self):
+        if self.in_recording or self.is_live:
+            subscription_id = self.cmd('account list --query "[?isDefault].id" -o tsv').output.strip()
         else:
-            return moniker
-
-    def _process_request_recording(self, request):
-        if self.in_recording:
-            for processor in self.recording_processors:
-                request = processor.process_request(request)
-                if not request:
-                    break
-        else:
-            for processor in self.replay_processors:
-                request = processor.process_request(request)
-                if not request:
-                    break
-
-        return request
-
-    def _process_response_recording(self, response):
-        if self.in_recording:
-            # make header name lower case and filter unwanted headers
-            headers = {}
-            for key in response['headers']:
-                if key.lower() not in self.FILTER_HEADERS:
-                    headers[key.lower()] = response['headers'][key]
-            response['headers'] = headers
-
-            body = response['body']['string']
-            if body and not isinstance(body, six.string_types):
-                response['body']['string'] = body.decode('utf-8')
-
-            for processor in self.recording_processors:
-                response = processor.process_response(response)
-                if not response:
-                    break
-        else:
-            for processor in self.replay_processors:
-                response = processor.process_response(response)
-                if not response:
-                    break
-
-        return response
+            subscription_id = MOCKED_SUBSCRIPTION_ID
+        return subscription_id
 
 
-class ExecutionResult(object):  # pylint: disable=too-few-public-methods
-    def __init__(self, command, expect_failure=False, in_process=True):
+@live_only()
+class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
+
+    def __init__(self, method_name):
+        super(LiveScenarioTest, self).__init__(method_name)
+        from azure.cli.testsdk import TestCli
+        self.cli_ctx = TestCli()
+        self.kwargs = {}
+
+    def cmd(self, command, checks=None, expect_failure=False):
+        try:
+            command = command.format(**self.kwargs)
+        except KeyError:
+            pass
+        return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
+
+    def get_subscription_id(self):
+        return self.cmd('account list --query "[?isDefault].id" -o tsv').output.strip()
+
+
+class ExecutionResult(object):
+    def __init__(self, cli_ctx, command, expect_failure=False, in_process=True):
+        self.output = ''
+        self.applog = ''
+
         if in_process:
-            self._in_process_execute(command)
+            self._in_process_execute(cli_ctx, command, expect_failure=expect_failure)
         else:
             self._out_of_process_execute(command)
 
         if expect_failure and self.exit_code == 0:
-            raise AssertionError('The command is expected to fail but it doesn\'.')
+            logger.error('Command "%s" => %d. (It did not fail as expected) Output: %s. %s', command,
+                         self.exit_code, self.output, ('Logging ' + self.applog) if self.applog else '')
+            raise AssertionError('The command did not fail as it was expected.')
         elif not expect_failure and self.exit_code != 0:
+            logger.error('Command "%s" => %d. Output: %s. %s', command, self.exit_code, self.output,
+                         ('Logging ' + self.applog) if self.applog else '')
             raise AssertionError('The command failed. Exit code: {}'.format(self.exit_code))
+
+        logger.info('Command "%s" => %d. Output: %s. %s', command, self.exit_code, self.output,
+                    ('Logging ' + self.applog) if self.applog else '')
 
         self.json_value = None
         self.skip_assert = os.environ.get(ENV_SKIP_ASSERT, None) == 'True'
 
-    def assert_with_checks(self, checks):
-        if not checks:
-            checks = []
-        elif not isinstance(checks, list):
-            checks = [checks]
+    def assert_with_checks(self, *args):
+        checks = []
+        for each in args:
+            if isinstance(each, list):
+                checks.extend(each)
+            elif callable(each):
+                checks.append(each)
 
         if not self.skip_assert:
             for c in checks:
@@ -242,34 +211,40 @@ class ExecutionResult(object):  # pylint: disable=too-few-public-methods
 
         return self.json_value
 
-    def _in_process_execute(self, command):
-        # from azure.cli import  as cli_main
-        from azure.cli.main import main as cli_main
+    def _in_process_execute(self, cli_ctx, command, expect_failure=False):
         from six import StringIO
         from vcr.errors import CannotOverwriteExistingCassetteException
 
         if command.startswith('az '):
             command = command[3:]
 
-        output_buffer = StringIO()
+        stdout_buf = StringIO()
+        logging_buf = StringIO()
         try:
             # issue: stderr cannot be redirect in this form, as a result some failure information
             # is lost when command fails.
-            self.exit_code = cli_main(shlex.split(command), file=output_buffer) or 0
-            self.output = output_buffer.getvalue()
+            self.exit_code = cli_ctx.invoke(shlex.split(command), out_file=stdout_buf) or 0
+            self.output = stdout_buf.getvalue()
+            self.applog = logging_buf.getvalue()
+
         except CannotOverwriteExistingCassetteException as ex:
             raise AssertionError(ex)
         except CliExecutionError as ex:
-            if ex.exception:
+            if expect_failure:
+                self.exit_code = 1
+                self.output = stdout_buf.getvalue()
+                self.applog = logging_buf.getvalue()
+            elif ex.exception:
                 raise ex.exception
             else:
                 raise ex
         except Exception as ex:  # pylint: disable=broad-except
             self.exit_code = 1
-            self.output = output_buffer.getvalue()
+            self.output = stdout_buf.getvalue()
             self.process_error = ex
         finally:
-            output_buffer.close()
+            stdout_buf.close()
+            logging_buf.close()
 
     def _out_of_process_execute(self, command):
         try:

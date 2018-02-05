@@ -3,6 +3,81 @@
 Release History
 ===============
 
+2.0.17
+++++++
+* Minor fixes.
+
+2.0.16
+++++++
+* Update for CLI core changes.
+
+2.0.15
+++++++
+* Minor fixes.
+
+2.0.14
+++++++
+* Minor fixes.
+
+2.0.13
+++++++
+* minor fixes
+
+2.0.12 (2017-10-09)
++++++++++++++++++++
+* Fixed Key Vault authentication issue when using ADFS on Azure Stack. https://github.com/Azure/azure-cli/issues/4448
+
+2.0.11 (2017-09-22)
++++++++++++++++++++
+* Update azure-keyvault SDK to 0.3.6
+
+2.0.10 (2017-09-11)
++++++++++++++++++++
+* `keyvault set-policy`: Fix issue where permissions were case sensitive.
+
+2.0.9 (2017-08-31)
+++++++++++++++++++
+* `keyvault secret download`: Fix bug when trying to automatically resolve secret encoding.
+
+2.0.8 (2017-07-07)
+++++++++++++++++++
+* minor fixes
+
+2.0.7 (2017-06-21)
+++++++++++++++++++
+
+* Adding commands for KeyVault recovery features
+* az keyvault purge, recover, list-deleted
+* az keyvault secret backup, restore, purge, recover, list-deleted
+* az keyvault certificate purge, recover, list-deleted
+* az keyvault key purge, recover, list-deleted
+
+2.0.6 (2017-06-13)
+++++++++++++++++++
+* Minor fixes.
+
+
+2.0.5 (2017-05-30)
+++++++++++++++++++++
+
+* [Role] Service Principal KeyVault integration (#3133)
+* Update KeyVault dataplane to 0.3.2. (#3307)
+* [KeyVault] Update data plane SDK to 0.3.0 (#3251)
+
+2.0.3 (2017-05-05)
+++++++++++++++++++++
+
+* Minor fixes.
+
+2.0.2 (2017-04-28)
+++++++++++++++++++++
+
+* New packaging system.
+* BC:`az keyvault certificate download` change -e from string or binary to PEM or DER to better represent the options
+* BC: Remove --expires and --not-before from `keyvault certificate create` as these parameters are not supported by the service.
+* Adds the --validity parameter to `keyvault certificate create` to selectively override the value in --policy
+* Fixes issue in `keyvault certificate get-default-policy` where 'expires' and 'not_before' were exposed but 'validity_in_months' was not.
+
 2.0.1 (2017-04-17)
 ++++++++++++++++++++
 
