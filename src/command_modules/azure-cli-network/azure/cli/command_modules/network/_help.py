@@ -14,7 +14,7 @@ helps['network'] = """
 
 helps['network list-usages'] = """
     type: command
-    short-summary: List the number of network resources you are using against your subscription quota within a region.
+    short-summary: List the number of network resources in a region that are used against a subscription quota.
 """
 
 helps['network dns'] = """
@@ -671,7 +671,7 @@ helps['network dns record-set list'] = """
 
 helps['network asg'] = """
     type: group
-    short-summary: Manage application security groups.
+    short-summary: Manage application security groups (ASG).
     long-summary: You can configure network security as a natural extension of an application's structure, ASG allows
      you to group virtual machines and define network security policies based on those groups. You can specify an
       application security group as the source and destination in a NSG security rule. For more information
@@ -688,10 +688,6 @@ helps['network asg create'] = """
     parameters:
         - name: --name -n
           short-summary: Name of the new application security group resource.
-    examples:
-        - name: Create a typical ASG
-          text: >
-            az network asg create -g MyGroup -n MyAppSecGroup
 """
 
 helps['network asg delete'] = """
@@ -1211,20 +1207,12 @@ helps['network nic show-effective-route-table'] = """
     type: command
     short-summary: Show all route tables applied to a network interface.
     long-summary: To learn more about how to troubleshoot using effective route tables visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-routes-troubleshoot-portal#using-effective-routes-to-troubleshoot-vm-traffic-flow
-    examples:
-        - name: Show effective routes applied to a network interface
-          text: >
-            az network nic show-effective-route-table -n MyNic -g MyResourceGroup
 """
 
 helps['network nic list-effective-nsg'] = """
     type: command
     short-summary: List all effective network security groups applied to a network interface.
     long-summary: To learn more about how to troubleshoot using effective security rules visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-nsg-troubleshoot-portal
-    examples:
-        - name: List the effective network security groups associated with a nic
-          text: >
-            az network nic list-effective-nsg -n MyNic -g MyResourceGroup
 """
 
 helps['network nic create'] = """
@@ -1252,8 +1240,9 @@ helps['network nic delete'] = """
 helps['network nic list'] = """
     type: command
     short-summary: List network interfaces.
-    long-summary: |
-        Does not list network interfaces attached to VMs in VM scale sets. Use 'az vmss nic list' or 'az vmss nic list-vm-nics' to display that information.  To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
+    long-summary: >
+        Does not list network interfaces attached to VMs in VM scale sets. Use 'az vmss nic list' or 'az vmss nic list-vm-nics' to display that information.  
+        To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
     examples:
         - name: List all NICs by internal DNS suffix.
           text: >
@@ -1364,10 +1353,10 @@ helps['network nic ip-config inbound-nat-rule remove'] = """
 helps['network nsg'] = """
     type: group
     short-summary: Manage Azure Network Security Groups (NSGs).
-    long-summary: You can control network traffic to resources in a virtual network using a network security
-     group. A network security group contains a list of security rules that allow or deny inbound or outbound
-      network traffic based on source or destination IP addresses, Application Security Groups, ports, and
-       protocols. For more information visit docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-nsg
+    long-summary: >
+      Network traffic to resources in Azure are controlled by NSGs. An NSG contains a list of security rules that
+      determine allowed inbound and outbound traffic based on IP, Application Security Groups, ports, and protocols.
+      For more information visit docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-nsg
 """
 
 helps['network nsg rule'] = """
@@ -1418,7 +1407,7 @@ helps['network nsg rule create'] = """
                     --source-address-prefixes 208.130.28/24 --source-port-ranges 80
                     --destination-address-prefixes '*' --destination-port-ranges 80 8080 --access Deny
                     --protocol Tcp --description "Deny from specific IP address ranges on 80 and 8080."
-        - name: Create a security rule using service tags. aka.ms/servicetags
+        - name: Create a security rule using service tags.  For details, please see https://aka.ms/servicetags.
           text: >
             az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithTags --priority 400 --source-address-prefixes VirtualNetwork --destination-address-prefixes Storage --destination-port-ranges * --direction Outbound --access Allow --protocol Tcp --description "Allow VirtualNetwork to Storage."
         - name: Create a security rule using application security groups. aka.ms/applicationsecuritygroups
@@ -1479,10 +1468,6 @@ helps['network public-ip delete'] = """
     type: command
     short-summary: Delete a public IP address.
     long-summary: To learn more about how to delete a public IP address visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-public-ip-address#view-change-settings-for-or-delete-a-public-ip-address
-    examples:
-        - name: Delete a network interface
-          text: >
-            az network public-ip delete -n MyNic -g MyResourceGroup
 """
 
 helps['network public-ip list'] = """
@@ -1766,10 +1751,6 @@ helps['network vnet delete'] = """
     type: command
     short-summary: Delete a virtual network.
     long-summary: To learn more about deleting a virtual network, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-network#delete-vnet
-    examples:
-        - name: Delete a virtual network
-          text: >
-            az network vnet delete -n myVNet -g MyResourceGroup
 """
 
 helps['network vnet list'] = """
@@ -1786,10 +1767,6 @@ helps['network vnet show'] = """
     type: command
     short-summary: Get the details of a virtual network.
     long-summary: To learn more about virtual networks and settings, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-network#a-name--view-vnetaview-virtual-networks-and-settings
-    examples:
-        - name: Typical usage
-          text: >
-            az network vnet show -n myVNet -g MyResourceGroup
 """
 
 helps['network vnet update'] = """
@@ -1830,27 +1807,18 @@ helps['network vnet subnet delete'] = """
     type: command
     short-summary: Delete a subnet.
     long-summary: To learn more about deleting a virtual network visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-subnet#delete-subnet
-    examples:
-        - name: Delete a subnet
-          text: az network vnet subnet delete -n mySubnet -g MyResourceGroup
 """
 
 helps['network vnet subnet list'] = """
     type: command
     short-summary: List subnets.
     long-summary: To learn more about subnets in Azure, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-subnet
-    examples:
-        - name: Typical usage
-          text: az network vnet subnet list -n myVNet -g myResourceGroup
 """
 
 helps['network vnet subnet show'] = """
     type: command
     short-summary: Show details of a subnet.
     long-summary: To learn more about subnets, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-subnet
-    examples:
-        - name: Show subnets associated to a specific virtual network
-          text: az network vnet subnet show -n mySubnet --vnet-name myVNet -g myResourceGroup
 """
 
 helps['network vnet subnet update'] = """
@@ -1873,7 +1841,7 @@ helps['network vnet list-endpoint-services'] = """
     examples:
         - name: List the endpoint services available for use in the West US
           text: >
-            az network vnet list-endpoint-services -l westus
+            az network vnet list-endpoint-services -l westus -o table
 """
 # endregion
 
@@ -1887,7 +1855,7 @@ helps['network vnet peering'] = """
 helps['network vnet peering create'] = """
     type: command
     short-summary: Create a peering.
-    long-summary: To learn more about VNet Peering about how to create a peering, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering#before-you-begin
+    long-summary: To learn more, see https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-peering#before-you-begin.
     examples:
         - name: Create a virtual network peering between virtual networks in the same region
           text: >
@@ -2141,15 +2109,12 @@ helps['network vnet-gateway root-cert delete'] = """
 helps['network watcher'] = """
     type: group
     short-summary: Manage the Azure Network Watcher.
-    long-summary: Network Watcher enables you to monitor and diagnose conditions at a network scenario level. To learn more, visit https://docs.microsoft.com/en-us/azure/network-watcher/
+    long-summary: Network Watcher assists with monitoring and diagnosing conditions at a network scenario level. To learn more, see https://docs.microsoft.com/en-us/azure/network-watcher/.
 """
 
 helps['network watcher list'] = """
     type: command
     short-summary: List Network Watchers.
-    examples:
-        - name: List all Network Watchers in a subscription.
-          text: az network watcher list
 """
 
 helps['network watcher configure'] = """
@@ -2194,7 +2159,7 @@ helps['network watcher troubleshooting start'] = """
 helps['network watcher troubleshooting show'] = """
     type: command
     short-summary: Get the results of the last troubleshooting operation.
-    long-summary: For more information on configuring troubleshooting, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-troubleshoot-manage-cli
+    long-summary: For more information on troubleshooting, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-troubleshoot-manage-cli
     examples:
         - name: Show the results or status of a troubleshooting operation
           text: az network watcher troubleshooting show  --resource resourcename --resource-group resourcegroupname --resource-type vnetGateway
@@ -2222,8 +2187,8 @@ helps['network watcher test-ip-flow'] = """
 
 helps['network watcher test-connectivity'] = """
     type: command
-    short-summary: (Preview) Test if a connection can be established between a Virtual Machine and a given endpoint.
-    long-summary:  |
+    short-summary: (PREVIEW) Test if a connection can be established between a Virtual Machine and a given endpoint.
+    long-summary: >
                 To register for this feature refer to instructions at https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-connectivity-cli
                 For additional examples, refer to https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-connectivity-cli
     parameters:
@@ -2240,7 +2205,7 @@ helps['network watcher test-connectivity'] = """
         - name: --dest-address
           short-summary: The IP address or URI at which to receive traffic.
     examples:
-        - name: This example checks connectivity to a destination virtual machine over port 80.
+        - name: Checks connectivity to a destination virtual machine over port 80.
           text: az network watcher test-connectivity -g ContosoRG --source-resource MultiTierApp0 --dest-resource Database0 --dest-port 80
 """
 
@@ -2249,7 +2214,7 @@ helps['network watcher show-next-hop'] = """
     short-summary: Get information on the 'next hop' for a VM.
     long-summary: Requires that Network Watcher is enabled for the region in which the VM is located.  For more information about show-next-hop, refer to https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-check-next-hop-cli
     examples:
-        - name: Use show-next-hop to get the next hop from a VM to a given destination IP address
+        - name: Get the next hop from a VM's assigned IP address to a destination at 10.1.0.4.
           text: az network watcher show-next-hop -g resourcegroupName --vm vmNameorID --source-ip 10.0.0.4 --dest-ip 10.1.0.4
 """
 
@@ -2258,7 +2223,7 @@ helps['network watcher show-security-group-view'] = """
     short-summary: Get detailed security information on a VM for the currently configured network security group.
     long-summary: For more information about using show-security-group view, refer to https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-security-group-view-cli
     examples:
-        - name: Use show-security-group-view to get the network security group information for the specified VM.
+        - name: Get the network security group information for the specified VM.
           text: az network watcher show-security-group-view -g resourcgroupname --vm vmname
 """
 
@@ -2274,7 +2239,7 @@ helps['network watcher show-topology'] = """
           long-summary: Topology information is only shown for resources within the target
             resource group that are within the specified region.
     examples:
-        - name: Use show-topology to get the topology of resources within a resource group.
+        - name: Get the topology of resources within a resource group.
           text: az network watcher show-topology -g resourcegroupname
 """
 
@@ -2312,49 +2277,37 @@ helps['network watcher packet-capture create'] = """
           short-summary: JSON encoded list of packet filters. Use `@<file path>` to load from file.
     examples:
         - name: Create a packet capture session on a VM
-          text: az network watcher packet-capture create -g {resoureceurceGroupName} -n packetCaptureName --vm {vmName} --storage-account gwteststorage123abc
+          text: az network watcher packet-capture create -g MyRg -n packetCaptureName --vm MyVm --storage-account gwteststorage123abc
         - name: Create a packet capture session on a VM with optional filters
-          text: az network watcher packet-capture create -g {resoureceurceGroupName} -n packetCaptureName --vm {vmName} --storage-account gwteststorage123abc --filters "[{\"protocol\":\"TCP\", \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", \"remotePort\":\"20\"},{\"protocol\":\"TCP\", \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", \"remotePort\":\"80\"},{\"protocol\":\"TCP\", \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", \"remotePort\":\"443\"},{\"protocol\":\"UDP\"}]"
+          text: az network watcher packet-capture create -g MyRg -n packetCaptureName --vm MyVm --storage-account gwteststorage123abc --filters "[{\"protocol\":\"TCP\", \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", \"remotePort\":\"20\"},{\"protocol\":\"TCP\", \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", \"remotePort\":\"80\"},{\"protocol\":\"TCP\", \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", \"remotePort\":\"443\"},{\"protocol\":\"UDP\"}]"
 """
 
 helps['network watcher packet-capture delete'] = """
     type: command
     long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
     examples:
-        - name: Delete a packet capture session. Note that this only deletes the session and not the capture file.
+        - name: Delete a packet capture session.
           text: az network watcher packet-capture delete -n packetCaptureName --location westcentralus
 """
 
 helps['network watcher packet-capture list'] = """
     type: command
     long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
-    examples:
-        - name: List all packet capture sessions within a resource group.
-          text: az network watcher packet-capture list --locationshow- myresourcegroup
 """
 
 helps['network watcher packet-capture show'] = """
     type: command
     long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
-    examples:
-        - name: Show a packet capture session.
-          text: az network watcher packet-capture show --location myresourcegroup -n mypacketcapture
 """
 
 helps['network watcher packet-capture show-status'] = """
     type: command
     long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
-    examples:
-        - name: Show the status of a packet capture session.
-          text: az network watcher packet-capture show-status --location myresourcegroup -n mypacketcapture
 """
 
 helps['network watcher packet-capture stop'] = """
     type: command
     long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
-    examples:
-        - name: Stop a running packet capture session.
-          text: az network watcher packet-capture stop --location myresourcegroup -n mypacketcapture
 """
 
 
@@ -2388,9 +2341,6 @@ helps['network watcher flow-log show'] = """
     type: command
     short-summary: Get the flow log configuration for a network security group.
     long-summary: For more information about configuring flow logs, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-nsg-flow-logging-cli
-    examples:
-        - name: Show NSG flow logs
-          text: az network watcher flow-log show -g myGroup --nsg nsgName
 """
 
 # endregion
