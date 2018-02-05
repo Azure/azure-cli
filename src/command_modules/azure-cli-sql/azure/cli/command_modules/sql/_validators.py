@@ -18,16 +18,14 @@ def validate_sku(cmd, namespace):
 
     if namespace.tier:
         if not namespace.sku:
-            raise CLIError('Temporary error: tier specified without sku')
-        namespace.sku.tier = tier
-
-    print(namespace.sku)
+            raise CLIError('Error: tier specified without sku')
+        namespace.sku.tier = namespace.tier
 
 
 def validate_create_db(cmd, namespace):
     from msrestazure.tools import resource_id, is_valid_resource_id
 
-    if not is_valid_resource_id(namespace.elastic_pool_id):
+    if namespace.elastic_pool_id and not is_valid_resource_id(namespace.elastic_pool_id):
         namespace.elastic_pool_id = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
             resource_group=namespace.resource_group_name,
