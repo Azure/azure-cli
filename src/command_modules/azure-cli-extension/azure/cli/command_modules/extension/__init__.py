@@ -59,8 +59,7 @@ class ExtensionCommandsLoader(AzCommandsLoader):
             # Help, because it is suppressed.
             # Extra URLs of package indexes to use. This should point to a repository compliant
             # with PEP 503 (the simple repository API) or a local directory laid out in the same format.
-            # Similar to the equivalent flag in pip install. But, the python indexes
-            # specified using --extra-index-url have higher precedence than https://pypi.python.org/simple
+            # Similar to the equivalent flag in pip install.
             c.argument('extra_index_urls', options_list=['--extra-index-url'], nargs='+',
                        help=argparse.SUPPRESS)
 
