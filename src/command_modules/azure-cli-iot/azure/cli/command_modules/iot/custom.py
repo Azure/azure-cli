@@ -411,7 +411,7 @@ def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=No
         return {'connectionString': conn_str}
 
 
-def _get_single_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type):
+def _get_single_hub_connection_string(cmd, client, hub_name, resource_group_name, policy_name, key_type):
     access_policy = iot_hub_policy_get(client, hub_name, policy_name, resource_group_name)
     server_suffix = _get_device_dns_suffix(cmd.cli_ctx)
     conn_str_template = 'HostName={}{};SharedAccessKeyName={};SharedAccessKey={}'
@@ -629,7 +629,7 @@ def iot_device_import(client, hub_name, input_blob_container_uri, output_blob_co
     return client.iot_hub_resource.import_devices(resource_group_name, hub_name, input_blob_container_uri, output_blob_container_uri)
 
 
-def _get_single_device_connection_string(client, hub_name, device_id, resource_group_name, key_type):
+def _get_single_device_connection_string(cmd,client, hub_name, device_id, resource_group_name, key_type):
     device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
     device = device_client.get(device_id)
     if device is None:
@@ -653,7 +653,7 @@ def _get_device_dns_suffix(cli_ctx):
     return getenv('_AZURE_CLI_IOT_DNS_SUFFIX', default=get_active_cloud(cli_ctx).suffixes.iot_device_hostname)
 
 
-def _get_device_client(client, resource_group_name, hub_name, device_id):
+def _get_device_client(cmd, client, resource_group_name, hub_name, device_id):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     server_suffix = _get_device_dns_suffix(cmd.cli_ctx)
     base_url = '{0}{1}'.format(hub_name, server_suffix)
