@@ -49,7 +49,6 @@ def aks_upgrades_table_format(result):
 
 def aks_versions_table_format(result):
     """Format get-versions results as a summary for display with "-o table"."""
-    from distutils.version import StrictVersion
     from jmespath import compile as compile_jmes, Options
 
     parsed = compile_jmes("""orchestrators[].{
@@ -58,7 +57,12 @@ def aks_versions_table_format(result):
     }""")
     # use ordered dicts so headers are predictable
     results = parsed.search(result, Options(dict_cls=OrderedDict, custom_functions=_custom_functions()))
-    return sorted(results, key=lambda x: StrictVersion(x.get('kubernetesVersion')), reverse=True)
+    return sorted(results, key=lambda x: version_to_tuple(x.get('kubernetesVersion')), reverse=True)
+
+
+def version_to_tuple(v):
+    """Quick-and-dirty sort function to handle simple semantic versions like 1.7.12 or 1.8.7."""
+    return tuple(map(int, (v.split('.'))))
 
 
 def _custom_functions():
@@ -70,10 +74,8 @@ def _custom_functions():
         @functions.signature({'types': ['array']})
         def _func_sort_versions(self, s):  # pylint: disable=no-self-use
             """Custom JMESPath `sort_versions` function that sorts an array of strings as software versions."""
-            from distutils.version import StrictVersion
-
             try:
-                return sorted(s, key=StrictVersion)
+                return sorted(s, key=version_to_tuple)
             except (TypeError, ValueError):  # if it wasn't sortable, return the input so the pipeline continues
                 return s
 
