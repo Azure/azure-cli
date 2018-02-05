@@ -60,7 +60,7 @@ class KeyType(Enum):
 # This is a work around to simplify the permission parameter for access policy creation, and also align with the other
 # command modules.
 # The original AccessRights enum is a combination of below four basic access rights.
-# In order to avoid asking for comma & space separated string from user, a space separated list is supported for
+# In order to avoid asking for comma- & space-separated strings from the user, a space-separated list is supported for
 # assigning multiple permissions.
 # The underlying IoT SDK should handle this. However it isn't right now. Remove this after it is fixed in IoT SDK.
 class SimpleAccessRights(Enum):

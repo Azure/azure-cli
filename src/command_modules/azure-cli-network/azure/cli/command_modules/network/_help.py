@@ -518,11 +518,11 @@ helps['network application-gateway waf-config set'] = """
           populator-commands:
           - az network application-gateway waf-config list-rule-sets
         - name: --disabled-rule-groups
-          short-summary: Space separated list of rule groups to disable. To disable individual rules, use `--disabled-rules`.
+          short-summary: Space-separated list of rule groups to disable. To disable individual rules, use `--disabled-rules`.
           populator-commands:
           - az network application-gateway waf-config list-rule-sets
         - name: --disabled-rules
-          short-summary: Space separated list of rule IDs to disable.
+          short-summary: Space-separated list of rule IDs to disable.
           populator-commands:
           - az network application-gateway waf-config list-rule-sets
     examples:
@@ -1576,7 +1576,7 @@ helps['network route-filter rule create'] = """
     short-summary: Create a rule in a route filter.
     parameters:
         - name: --communities
-          short-summary: Space separated list of border gateway protocol (BGP) community values to filter on.
+          short-summary: Space-separated list of border gateway protocol (BGP) community values to filter on.
           populator-commands:
             - az network route-filter rule list-service-communities
 """
@@ -1655,7 +1655,7 @@ helps['network traffic-manager endpoint create'] = """
     short-summary: Create an endpoint.
     parameters:
         - name: --geo-mapping
-          short-summary: Space separated list of country/region codes mapped to this endpoint when using the 'Geographic' routing method.
+          short-summary: Space-separated list of country/region codes mapped to this endpoint when using the 'Geographic' routing method.
           populator-commands:
           - az network traffic-manager endpoint show-geographic-hierarchy
 """
@@ -1743,7 +1743,7 @@ helps['network vnet subnet create'] = """
     short-summary: Create a subnet and associate an existing NSG and route table.
     parameters:
         - name: --service-endpoints
-          short-summary: Space separated list of services allowed private access to this subnet.
+          short-summary: Space-separated list of services allowed private access to this subnet.
           populator-commands:
             - az network vnet list-endpoint-services
     examples:
@@ -1773,7 +1773,7 @@ helps['network vnet subnet update'] = """
     short-summary: Update a subnet.
     parameters:
         - name: --service-endpoints
-          short-summary: Space separated list of services allowed private access to this subnet.
+          short-summary: Space-separated list of services allowed private access to this subnet.
           populator-commands:
             - az network vnet list-endpoint-services
 """
@@ -2053,7 +2053,7 @@ helps['network watcher configure'] = """
         - name: --enabled
           short-summary: Enabled status of Network Watch in the specified regions.
         - name: --locations -l
-          short-summary: Space separated list of locations to configure.
+          short-summary: Space-separated list of locations to configure.
         - name: --resource-group -g
           short-summary: Name of resource group. Required when enabling new regions.
           long-summary: When a previously disabled region is enabled to use Network Watcher, a

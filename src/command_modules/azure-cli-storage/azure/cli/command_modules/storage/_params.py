@@ -663,7 +663,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('property_resolver')
         c.argument('entity', options_list=('--entity', '-e'), validator=validate_entity, nargs='+')
         c.argument('select', nargs='+', validator=validate_select,
-                   help='Space separated list of properties to return for each entity.')
+                   help='Space-separated list of properties to return for each entity.')
 
     with self.argument_context('storage entity insert') as c:
         c.argument('if_exists', arg_type=get_enum_type(['fail', 'merge', 'replace']))

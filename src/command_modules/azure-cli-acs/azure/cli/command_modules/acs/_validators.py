@@ -59,7 +59,7 @@ def validate_ssh_key(namespace):
 
 
 def validate_list_of_integers(string):
-    # extract comma separated list of integers
+    # extract comma-separated list of integers
     return list(map(int, string.split(',')))
 
 

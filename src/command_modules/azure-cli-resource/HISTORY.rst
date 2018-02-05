@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.23
+++++++
+* Minor fixes.
+
 2.0.22
 ++++++
 * `deployment create/validate`: Fix bug where warning was incorrectly displayed when a template 'type' field contained
@@ -48,7 +52,7 @@ Release History
 
 2.0.14 (2017-09-11)
 +++++++++++++++++++
-* Allows passing in resource policy parameter definitions in 'policy definition create', and 'policy definition update'. 
+* Allows passing in resource policy parameter definitions in 'policy definition create', and 'policy definition update'.
 * Allows passing in parameter values for 'policy assignment create'.
 * In all cases params can be provided either via json or file.
 * Incremented API version.
