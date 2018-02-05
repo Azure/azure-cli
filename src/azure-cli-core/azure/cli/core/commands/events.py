@@ -1,0 +1,1 @@
+EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE = 'CommandInvoker.OnPreCommandTableTruncate'
