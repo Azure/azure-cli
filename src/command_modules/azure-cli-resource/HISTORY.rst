@@ -2,9 +2,9 @@
 
 Release History
 ===============
-
 2.0.23
 ++++++
+* feature: bring back 'feature show' command
 * Minor fixes.
 
 2.0.22
