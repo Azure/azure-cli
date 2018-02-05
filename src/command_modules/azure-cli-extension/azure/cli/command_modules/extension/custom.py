@@ -140,15 +140,7 @@ def _add_whl_ext(source, ext_sha256=None, extra_index_urls=None):  # pylint: dis
     pip_args = ['install', '--target', extension_path, ext_file]
 
     if extra_index_urls:
-        # We prefer the user given python index over PyPi, so that
-        # a user's packages are not mistaken for some other same name packages on PyPi
-        pip_args = pip_args + ['--index-url', extra_index_urls[0]]
-        pip_args = pip_args + ['--extra-index-url']
-        for extra_index_url in extra_index_urls[1:]:
-            pip_args = pip_args + [extra_index_url]
-
-        # Adding the PyPi in the end.
-        pip_args = pip_args + ["https://pypi.python.org/simple"]
+        pip_args = pip_args + ['--extra-index-url'] + extra_index_urls
 
     logger.debug('Executing pip with args: %s', pip_args)
     with HomebrewPipPatch():
