@@ -2038,7 +2038,7 @@ helps['network vnet-gateway root-cert delete'] = """
 # region Network Watcher
 helps['network watcher'] = """
     type: group
-    short-summary: (PREVIEW) Manage the Azure Network Watcher.
+    short-summary: Manage the Azure Network Watcher.
 """
 
 helps['network watcher list'] = """
@@ -2062,7 +2062,7 @@ helps['network watcher configure'] = """
 
 helps['network watcher troubleshooting'] = """
     type: group
-    short-summary: (PREVIEW) Manage Network Watcher troubleshooting sessions.
+    short-summary: Manage Network Watcher troubleshooting sessions.
 """
 
 helps['network watcher troubleshooting start'] = """
@@ -2142,7 +2142,7 @@ helps['network watcher show-topology'] = """
 
 helps['network watcher packet-capture'] = """
     type: group
-    short-summary: (PREVIEW) Manage packet capture sessions on VMs.
+    short-summary: Manage packet capture sessions on VMs.
     long-summary: |
         These commands require that both Azure Network Watcher is enabled for the
         VM's region and that AzureNetworkWatcherExtension is enabled on the VM.
@@ -2176,7 +2176,7 @@ helps['network watcher packet-capture create'] = """
 
 helps['network watcher flow-log'] = """
     type: group
-    short-summary: (PREVIEW) Manage network security group flow logging.
+    short-summary: Manage network security group flow logging.
 """
 
 helps['network watcher flow-log configure'] = """
