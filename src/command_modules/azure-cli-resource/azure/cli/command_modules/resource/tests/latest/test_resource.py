@@ -400,6 +400,9 @@ class FeatureScenarioTest(ScenarioTest):
         self.cmd('feature list --namespace Microsoft.Network',
                  checks=self.check("length([?name=='Microsoft.Network/SkipPseudoVipGeneration'])", 1))
 
+        # Once a feature goes GA , it will be removed from the feature list. Once that happens, use other ones to test
+        self.cmd('feature show --namespace Microsoft.Network -n AllowLBPreview')
+
 
 class PolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
