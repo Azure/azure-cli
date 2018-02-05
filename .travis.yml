@@ -23,7 +23,7 @@ jobs:
       python: 3.6
     - stage: verify
       env: PURPOSE='Automation'
-      script: ./scripts/ci/test_automation.sh
+      script: travis_wait 60 ./scripts/ci/test_automation.sh
       python: 3.6
     - stage: verify
       env: PURPOSE='Automation'
