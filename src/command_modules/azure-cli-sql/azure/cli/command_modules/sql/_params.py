@@ -135,16 +135,29 @@ def _configure_db_create_params(
     arg_ctx.expand('parameters', Database)
 
     # sku & tier parameters are processed in validate_sku function
+    sku_arg_group = 'Performance Level'
     arg_ctx.extra('sku',
                   options_list=['--sku', '--service-objective'],
-                  required=False)
+                  arg_group=sku_arg_group,
+                  required=False,
+                  help='The name of the sku.')
     arg_ctx.extra('tier',
                   options_list=['--tier', '--edition'],
+                  arg_group=sku_arg_group,
                   help='The edition of the database.')
+    # arg_ctx.extra('family',
+    #               options_list=['--family'],
+    #               arg_group=sku_arg_group,
+    #               help='The hardware family of the database.')
+    # arg_ctx.extra('capacity',
+    #               options_list=['--capacity'],
+    #               arg_group=sku_arg_group,
+    #               help='The integer scale size of the database.')
 
     # elastic-pool-id is processed in validate_create_db
     arg_ctx.argument('elastic_pool_id',
                      options_list=['--elastic-pool'],
+                     arg_group=sku_arg_group,
                      help='The elastic pool name or resource id.')
 
     # The following params are always ignored because their values are filled in by wrapper

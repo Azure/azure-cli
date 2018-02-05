@@ -5,12 +5,13 @@
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
 from azure.mgmt.sql.models.sku import Sku
+from msrestazure.tools import resource_id, is_valid_resource_id
 
 # Important note: if cmd validator exists, then individual param validators will not b
 # executed. See C:\git\azure-cli\env\lib\site-packages\knack\invocation.py `def _validation`
 
 
-def validate_sku(cmd, namespace):
+def _validate_sku(cmd, namespace):
     from azure.cli.core.util import CLIError
 
     if namespace.sku:
@@ -22,9 +23,10 @@ def validate_sku(cmd, namespace):
         namespace.sku.tier = namespace.tier
 
 
-def validate_create_db(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
-
+def _validate_elastic_pool_id(cmd, namespace):
+    # If elastic_pool_id is specified but it is not a valid resource id,
+    # then assume that user specified elastic pool name which we need to
+    # convert to elastic pool id.
     if namespace.elastic_pool_id and not is_valid_resource_id(namespace.elastic_pool_id):
         namespace.elastic_pool_id = resource_id(
             subscription=get_subscription_id(cmd.cli_ctx),
@@ -35,7 +37,10 @@ def validate_create_db(cmd, namespace):
             child_type_1='elasticPools',
             child_name_1=namespace.elastic_pool_id)
 
-    validate_sku(cmd, namespace)
+
+def validate_create_db(cmd, namespace):
+    _validate_elastic_pool_id(cmd, namespace)
+    _validate_sku(cmd, namespace)
 
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
