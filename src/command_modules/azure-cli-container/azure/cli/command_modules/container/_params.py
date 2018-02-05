@@ -5,7 +5,6 @@
 
 from knack.util import CLIError
 from azure.cli.core.commands.parameters import (get_enum_type,
-                                                get_three_state_flag,
                                                 get_location_type,
                                                 resource_group_name_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
