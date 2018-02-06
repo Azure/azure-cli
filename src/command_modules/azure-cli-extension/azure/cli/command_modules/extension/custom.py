@@ -142,8 +142,10 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=N
     if pip_proxy:
         pip_args = pip_args + ['--proxy', pip_proxy]
     if pip_extra_index_urls:
+        index_accum = []
         for extra_index_url in pip_extra_index_urls:
-            pip_args = pip_args + ['--extra-index-url', extra_index_url]
+            index_accum = index_accum + ['--extra-index-url', extra_index_url]
+        pip_args = pip_args + index_accum
 
     logger.debug('Executing pip with args: %s', pip_args)
     with HomebrewPipPatch():
