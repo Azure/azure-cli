@@ -311,7 +311,7 @@ def load_arguments(self, _):
 
     with self.argument_context('sql db update') as c:
         c.argument('sku',
-                   options_list=['--sku', '--service-objective']
+                   options_list=['--sku', '--service-objective'],
                    help='The name of the new service objective. If this is a standalone db service'
                    ' objective and the db is currently in an elastic pool, then the db is removed from'
                    ' the pool.')
