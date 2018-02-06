@@ -15,33 +15,38 @@ class AzureContainerServiceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     def test_acs_create_default_service(self, resource_group, resource_group_location):
-        ssh_pubkey_file = self.generate_ssh_keys().replace('\\', '\\\\')
-        acs_name = self.create_random_name('cliacstest', 16)
-        dns_prefix = self.create_random_name('cliacsdns', 16)
+        # kwargs for string formatting
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': self.create_random_name('cliacstest', 16),
+            'dns_prefix': self.create_random_name('cliacsdns', 16),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'location': resource_group_location
+        })
 
         # create
-        create_cmd = 'acs create -g {} -n {} --dns-prefix {} --ssh-key-value {} -l {}'
-        self.cmd(create_cmd.format(resource_group, acs_name, dns_prefix, ssh_pubkey_file, resource_group_location),
-                 checks=[self.check('properties.outputs.masterFQDN.value',
-                                       '{}mgmt.{}.cloudapp.azure.com'.format(dns_prefix, resource_group_location)),
-                         self.check('properties.outputs.agentFQDN.value',
-                                       '{}agent.{}.cloudapp.azure.com'.format(dns_prefix, resource_group_location))])
+        create_cmd = 'acs create -g {resource_group} -n {name} --dns-prefix {dns_prefix} ' \
+                     '--ssh-key-value {ssh_key_value} -l {location}'
+        self.cmd(create_cmd, checks=[
+            self.check('properties.outputs.masterFQDN.value', '{dns_prefix}mgmt.{location}.cloudapp.azure.com'),
+            self.check('properties.outputs.agentFQDN.value', '{dns_prefix}agent.{location}.cloudapp.azure.com')
+        ])
 
         # show
-        self.cmd('acs show -g {} -n {}'.format(resource_group, acs_name), checks=[
+        self.cmd('acs show -g {resource_group} -n {name}', checks=[
             self.check('agentPoolProfiles[0].count', 3),
             self.check('agentPoolProfiles[0].vmSize', 'Standard_D2_v2'),
-            self.check('masterProfile.dnsPrefix', dns_prefix + 'mgmt'),
+            self.check('masterProfile.dnsPrefix', '{dns_prefix}mgmt'),
             self.check('orchestratorProfile.orchestratorType', 'DCOS'),
-            self.check('name', acs_name),
+            self.check('name', '{name}'),
         ])
 
         # scale-up
-        self.cmd('acs scale -g {} -n {} --new-agent-count 5'.format(resource_group, acs_name),
+        self.cmd('acs scale -g {resource_group} -n {name} --new-agent-count 5',
                  checks=self.check('agentPoolProfiles[0].count', 5))
 
         # show again
-        self.cmd('acs show -g {} -n {}'.format(resource_group, acs_name),
+        self.cmd('acs show -g {resource_group} -n {name}',
                  checks=self.check('agentPoolProfiles[0].count', 5))
 
     @classmethod
@@ -53,6 +58,7 @@ class AzureContainerServiceScenarioTest(ScenarioTest):
 
         return pathname
 
+
 class AzureContainerServiceKubernetesScenarioTest(ScenarioTest):
 
     # the length is set to avoid following error:
@@ -61,13 +67,20 @@ class AzureContainerServiceKubernetesScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
     def test_acs_create_kubernetes(self, resource_group, sp_name, sp_password):
-        acs_name = self.create_random_name('acs', 14)
-        ssh_pubkey_file = self.generate_ssh_keys().replace('\\', '\\\\')
-        cmd = 'acs create -g {} -n {} --orchestrator-type Kubernetes --service-principal {} ' \
-              '--client-secret {} --ssh-key-value {}'
-        self.cmd(cmd.format(resource_group, acs_name, sp_name, sp_password, ssh_pubkey_file),
-                 checks=[self.check('properties.provisioningState', 'Succeeded')])
+        # kwargs for string formatting
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': self.create_random_name('acs', 14),
+            'ssh_key_value': self.generate_ssh_keys().replace('\\', '\\\\'),
+            'service_principal': sp_name,
+            'client_secret': sp_password
+        })
 
+        cmd = 'acs create -g {resource_group} -n {name} --orchestrator-type Kubernetes ' \
+              '--service-principal {service_principal} --client-secret {client_secret} --ssh-key-value {ssh_key_value}'
+        self.cmd(cmd, checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
 
     @classmethod
     def generate_ssh_keys(cls):

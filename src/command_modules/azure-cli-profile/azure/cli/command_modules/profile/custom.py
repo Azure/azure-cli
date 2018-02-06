@@ -103,7 +103,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
     interactive = False
 
-    profile = Profile(cli_ctx=cmd.cli_ctx)
+    profile = Profile(cli_ctx=cmd.cli_ctx, async_persist=False)
 
     if in_cloud_console():
         console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
@@ -125,7 +125,6 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
         interactive = True
 
     try:
-        profile = Profile(cli_ctx=cmd.cli_ctx)
         subscriptions = profile.find_subscriptions_on_login(
             interactive,
             username,

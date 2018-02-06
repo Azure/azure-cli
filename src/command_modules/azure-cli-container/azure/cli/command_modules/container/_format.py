@@ -44,11 +44,6 @@ def _format_ip_address(container_group):
     return None
 
 
-def transform_log_output(result):
-    '''Print log. '''
-    print(result)
-
-
 def transform_container_group(result):
     """Transform a container group to table output. """
     return OrderedDict([('Name', result['name']),

@@ -105,16 +105,13 @@ def get_credential_types(cli_ctx):
 
 class Profile(object):
 
-    def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True, cli_ctx=None):
+    def __init__(self, storage=None, auth_ctx_factory=None, async_persist=True, cli_ctx=None):
         from azure.cli.core import get_default_cli
 
         self.cli_ctx = cli_ctx or get_default_cli()
         self._storage = storage or ACCOUNT
         self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
-        if use_global_creds_cache:
-            self._creds_cache = CredsCache(self.cli_ctx, _AUTH_CTX_FACTORY, async_persist=True)
-        else:
-            self._creds_cache = CredsCache(self.auth_ctx_factory, async_persist=False)
+        self._creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
         self._msi_creds = None
@@ -275,29 +272,39 @@ class Profile(object):
         for s in consolidated:
             s[_SUBSCRIPTION_NAME] = "{}@{}".format(base_name, msi_port)
         # key-off subscription name to allow accounts with same id(but under different identities)
-        self._set_subscriptions(consolidated, key_name=_SUBSCRIPTION_NAME)
+        self._set_subscriptions(consolidated, secondary_key_name=_SUBSCRIPTION_NAME)
         return deepcopy(consolidated)
 
-    def _set_subscriptions(self, new_subscriptions, merge=True, key_name=_SUBSCRIPTION_ID):
+    def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
+
+        def _get_key_name(account, secondary_key_name):
+            return (account[_SUBSCRIPTION_ID] if secondary_key_name is None
+                    else '{}-{}'.format(account[_SUBSCRIPTION_ID], account[secondary_key_name]))
+
+        def _match_account(account, subscription_id, secondary_key_name, secondary_key_val):
+            return (account[_SUBSCRIPTION_ID] == subscription_id and
+                    (secondary_key_val is None or account[secondary_key_name] == secondary_key_val))
+
         existing_ones = self.load_cached_subscriptions(all_clouds=True)
         active_one = next((x for x in existing_ones if x.get(_IS_DEFAULT_SUBSCRIPTION)), None)
-        active_subscription_id = active_one[key_name] if active_one else None
+        active_subscription_id = active_one[_SUBSCRIPTION_ID] if active_one else None
+        active_secondary_key_val = active_one[secondary_key_name] if (active_one and secondary_key_name) else None
         active_cloud = self.cli_ctx.cloud
         default_sub_id = None
 
         # merge with existing ones
         if merge:
-            dic = collections.OrderedDict((x[key_name], x) for x in existing_ones)
+            dic = collections.OrderedDict((_get_key_name(x, secondary_key_name), x) for x in existing_ones)
         else:
             dic = collections.OrderedDict()
 
-        dic.update((x[key_name], x) for x in new_subscriptions)
+        dic.update((_get_key_name(x, secondary_key_name), x) for x in new_subscriptions)
         subscriptions = list(dic.values())
         if subscriptions:
             if active_one:
                 new_active_one = next(
-                    (x for x in new_subscriptions if x[key_name] == active_subscription_id),
-                    None)
+                    (x for x in new_subscriptions if _match_account(x, active_subscription_id, secondary_key_name,
+                                                                    active_secondary_key_val)), None)
 
                 for s in subscriptions:
                     s[_IS_DEFAULT_SUBSCRIPTION] = False
