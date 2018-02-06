@@ -2,9 +2,6 @@
 
 Release History
 ===============
-0.0.10
-++++++
-A bug fix in the --extra-index-url argument in az extension add and update commands.
 
 0.0.9
 ++++++
