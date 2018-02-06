@@ -173,7 +173,7 @@ def _create_azure_file_volume_mount(azure_file_volume, azure_file_volume_mount_p
 # pylint: disable=inconsistent-return-statements
 def _create_ip_address(ip_address, ports, dns_name_label):
     """Create IP address. """
-    if ip_address and ip_address.lower() == 'public':
+    if (ip_address and ip_address.lower() == 'public') or dns_name_label:
         return IpAddress(ports=[Port(protocol=ContainerGroupNetworkProtocol.tcp, port=p) for p in ports], dns_name_label=dns_name_label)
 
 
