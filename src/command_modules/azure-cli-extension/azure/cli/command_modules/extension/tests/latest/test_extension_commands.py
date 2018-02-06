@@ -190,9 +190,9 @@ class TestExtensionCommands(unittest.TestCase):
         Tests extension addition while specifying --extra-index-url parameter.
         :return:
         """
-        test_index = 'https://testpypi.python.org/simple'
+        extra_index_urls = ['https://testpypi.python.org/simple', 'https://pypi.python.org/simple']
 
-        add_extension(source=MY_EXT_SOURCE, extra_index_urls=[test_index])
+        add_extension(source=MY_EXT_SOURCE, pip_extra_index_urls=extra_index_urls)
         actual = list_extensions()
         self.assertEqual(len(actual), 1)
         ext = show_extension(MY_EXT_NAME)
@@ -206,14 +206,15 @@ class TestExtensionCommands(unittest.TestCase):
         Tests extension update while specifying --extra-index-url parameter.
         :return:
         """
-        test_index = 'https://testpypi.python.org/simple'
-        add_extension(source=MY_EXT_SOURCE, extra_index_urls=[test_index])
+        extra_index_urls = ['https://testpypi.python.org/simple', 'https://pypi.python.org/simple']
+
+        add_extension(source=MY_EXT_SOURCE, pip_extra_index_urls=extra_index_urls)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
         newer_extension = _get_test_data_file('myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl')
         computed_extension_sha256 = _compute_file_hash(newer_extension)
         with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=(newer_extension, computed_extension_sha256)):
-            update_extension(MY_EXT_NAME, extra_index_urls=[test_index])
+            update_extension(MY_EXT_NAME, pip_extra_index_urls=extra_index_urls)
         ext = show_extension(MY_EXT_NAME)
         self.assertEqual(ext[OUT_KEY_VERSION], '0.0.4+dev')
 

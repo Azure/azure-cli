@@ -60,7 +60,7 @@ class ExtensionCommandsLoader(AzCommandsLoader):
             # Extra URLs of package indexes to use. This should point to a repository compliant
             # with PEP 503 (the simple repository API) or a local directory laid out in the same format.
             # Similar to the equivalent flag in pip install.
-            c.argument('extra_index_urls', options_list=['--extra-index-url'], nargs='+',
+            c.argument('pip_extra_index_urls', options_list=['--pip-extra-index-urls'], nargs='+',
                        help=argparse.SUPPRESS)
 
         with self.argument_context('extension add') as c:
