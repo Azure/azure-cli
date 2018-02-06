@@ -2,9 +2,9 @@
 
 Release History
 ===============
-
 2.0.27
 ++++++
+* auth: key on both subscription id and name on msi login
 * Minor fixes
 
 2.0.26

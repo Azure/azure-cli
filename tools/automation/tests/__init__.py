@@ -54,7 +54,7 @@ def setup_arguments(parser):
     parser.add_argument('--module', dest='modules', nargs='+',
                         help='The modules of which the test to be run. Accept short names, except azure-cli, '
                              'azure-cli-core and azure-cli-nspkg. The modules list can also be set through environment '
-                             'variable AZURE_CLI_TEST_MODULES. The value should be a string of space separated module '
+                             'variable AZURE_CLI_TEST_MODULES. The value should be a string of space-separated module '
                              'names. The environment variable will be overwritten by command line parameters.')
     parser.add_argument('--parallel', action='store_true',
                         help='Run the tests in parallel. This will affect the test output file.')
