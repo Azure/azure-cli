@@ -56,7 +56,10 @@ class IoTDpsTest(ScenarioTest):
         new_right = 'EnrollmentWrite'
 
         # Create access policy
-        self.cmd('az iot dps access-policy create -g {} --dps-name {} -n {} -r {}'.format(group_name, dps_name, policy_name, right))
+        self.cmd('az iot dps access-policy create -g {} --dps-name {} -n {} -r {}'.format(group_name, dps_name, policy_name, right), checks=[
+            self.check('keyName', policy_name),
+            self.check('rights', right)
+        ])
 
         # List access policy
         self.cmd('az iot dps access-policy list -g {} --dps-name {}'.format(group_name, dps_name), checks=[
@@ -72,7 +75,11 @@ class IoTDpsTest(ScenarioTest):
         ])
 
         # Create update policy
-        self.cmd('az iot dps access-policy update -g {} --dps-name {} -n {} -r {}'.format(group_name, dps_name, policy_name, new_right))
+        self.cmd('az iot dps access-policy update -g {} --dps-name {} -n {} -r {}'.format(group_name, dps_name, policy_name, new_right),
+                 checks=[
+                     self.check('keyName', policy_name),
+                     self.check('rights', new_right)
+        ])
 
         # Delete policy
         self.cmd('az iot dps access-policy delete -g {} --dps-name {} -n {}'.format(group_name, dps_name, policy_name))

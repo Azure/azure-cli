@@ -5,8 +5,9 @@ Release History
 
 0.1.17
 ++++++
-* Change iot dps access policy CRUD commands and linked-hub CRUD commands to be long running operations
-* Fix bug 5213 - Some DPS tests won't re-record
+* iot dps access policy: Certain commands are now long-running operations.
+* iot dps linked-hub: Certain commands are now long-running operations.
+* iot hub create: Allow specifying numbers of partitions during creation.
 
 0.1.16
 ++++++

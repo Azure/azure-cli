@@ -18,11 +18,12 @@ class IoTHubTest(ScenarioTest):
         location = resource_group_location
 
         # Test 'az iot hub create'
-        self.cmd('iot hub create -n {0} -g {1} --sku S1'.format(hub, rg),
+        self.cmd('iot hub create -n {0} -g {1} --sku S1 --partition-count 4'.format(hub, rg),
                  checks=[self.check('resourceGroup', rg),
                          self.check('location', location),
                          self.check('name', hub),
-                         self.check('sku.name', 'S1')])
+                         self.check('sku.name', 'S1'),
+                         self.check('properties.eventHubEndpoints.events.partitionCount', '4')])
 
         # Test 'az iot hub show-connection-string'
         conn_str_pattern = r'^HostName={0}\.azure-devices\.net;SharedAccessKeyName=iothubowner;SharedAccessKey='.format(
