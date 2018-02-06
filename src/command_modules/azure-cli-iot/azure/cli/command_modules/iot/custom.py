@@ -403,11 +403,11 @@ def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=No
             raise CLIError("No IoT Hub found.")
 
         def conn_str_getter(h):
-            return _get_single_hub_connection_string(client, h.name, h.resourcegroup, policy_name, key_type)
+            return _get_single_hub_connection_string(cmd, client, h.name, h.resourcegroup, policy_name, key_type)
         return [{'name': h.name, 'connectionString': conn_str_getter(h)} for h in hubs]
     else:
         resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-        conn_str = _get_single_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type)
+        conn_str = _get_single_hub_connection_string(cmd, client, hub_name, resource_group_name, policy_name, key_type)
         return {'connectionString': conn_str}
 
 
