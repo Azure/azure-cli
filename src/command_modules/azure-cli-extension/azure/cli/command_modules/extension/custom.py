@@ -140,7 +140,7 @@ def _add_whl_ext(source, ext_sha256=None, extra_index_urls=None, pip_proxy=None)
     pip_args = ['install', '--target', extension_path, ext_file]
 
     if pip_proxy:
-        pip_args = ['--proxy', pip_proxy] + pip_args
+        pip_args = pip_args + ['--proxy', pip_proxy]
     if extra_index_urls:
         pip_args = pip_args + ['--extra-index-url'] + extra_index_urls
 

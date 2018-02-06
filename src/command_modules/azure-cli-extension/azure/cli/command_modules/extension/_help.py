@@ -53,4 +53,9 @@ helps['extension remove'] = """
 helps['extension update'] = """
     type: command
     short-summary: Update an extension.
+    examples:
+    - name: Update an extension by name
+      text: az extension update --name anextension
+    - name: Update an extension by name and use pip proxy for dependencies
+      text: az extension update --name anextension --pip-proxy https://user:pass@proxy.server:8080
 """

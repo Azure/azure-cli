@@ -114,7 +114,6 @@ class TestExtensionCommands(unittest.TestCase):
             pip_cmd = args[0][0]
             proxy_index = pip_cmd.index(proxy_param)
             assert pip_cmd[proxy_index + 1] == proxy_endpoint
-            assert pip_cmd[proxy_index + 2] == 'install'
 
     def test_add_extension_verify_no_pip_proxy(self):
         extension_name = MY_EXT_NAME
@@ -194,7 +193,25 @@ class TestExtensionCommands(unittest.TestCase):
             pip_cmd = args[0][0]
             proxy_index = pip_cmd.index(proxy_param)
             assert pip_cmd[proxy_index + 1] == proxy_endpoint
-            assert pip_cmd[proxy_index + 2] == 'install'
+
+    def test_update_extension_verify_no_pip_proxy(self):
+        add_extension(source=MY_EXT_SOURCE)
+        ext = show_extension(MY_EXT_NAME)
+        self.assertEqual(ext[OUT_KEY_VERSION], '0.0.3+dev')
+        newer_extension = _get_test_data_file('myfirstcliextension-0.0.4+dev-py2.py3-none-any.whl')
+        computed_extension_sha256 = _compute_file_hash(newer_extension)
+
+        with mock.patch('azure.cli.command_modules.extension.custom.resolve_from_index', return_value=(MY_EXT_SOURCE, computed_extension_sha256)), \
+                mock.patch('azure.cli.command_modules.extension.custom.shutil'), \
+                mock.patch('azure.cli.command_modules.extension.custom.is_valid_sha256sum', return_value=(True, computed_extension_sha256)), \
+                mock.patch('azure.cli.command_modules.extension.custom.extension_exists', return_value=None), \
+                mock.patch('azure.cli.command_modules.extension.custom.check_output') as check_output:
+
+            update_extension(MY_EXT_NAME)
+            args = check_output.call_args
+            pip_cmd = args[0][0]
+            if '--proxy' in pip_cmd:
+                raise AssertionError("proxy parameter in check_output args although no proxy specified")
 
     def test_update_extension_not_found(self):
         with self.assertRaises(CLIError) as err:
