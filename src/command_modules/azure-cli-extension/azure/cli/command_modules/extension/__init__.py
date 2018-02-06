@@ -55,6 +55,8 @@ class ExtensionCommandsLoader(AzCommandsLoader):
             c.argument('extension_name', options_list=['--name', '-n'], help='Name of extension', completer=extension_name_completion_list)
             # This is a hidden parameter for now
             c.argument('index_url', options_list=['--index'], help=argparse.SUPPRESS)
+            c.argument('pip_proxy', options_list=['--pip-proxy', '-pp'],
+                       help='Proxy for pip to use for extension dependencies in the form of [user:passwd@]proxy.server:port')
 
         with self.argument_context('extension add') as c:
             c.argument('extension_name', completer=extension_name_from_index_completion_list)
