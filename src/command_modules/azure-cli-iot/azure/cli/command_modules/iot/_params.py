@@ -140,6 +140,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                         'Note that only one free IoT hub instance is allowed in each '
                         'subscription. Exception will be thrown if free instances exceed one.')
         c.argument('unit', help='Units in your IoT Hub.', type=int)
+        c.argument('partition_count', help='The number of partitions for device-to-cloud messages.', type=int)
 
     with self.argument_context('iot hub show-connection-string') as c:
         c.argument('policy_name', help='Shared access policy to use.')

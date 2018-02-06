@@ -32,7 +32,6 @@ DEPENDENCIES = [
     'requests',
     'six>=1.10.0',
     'tabulate>=0.7.7',
-    'pytest',
     'colorama>=0.3.7'
 ]
 

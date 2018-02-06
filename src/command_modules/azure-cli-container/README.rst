@@ -9,6 +9,7 @@ Commands to manage Azure container instances
         az container: Manage Azure Container Instances.
 
     Commands:
+        attach: Attach local standard output and error streams to a container in a container group.
         create: Create a container group.
         delete: Delete a container group.
         list  : List container groups.
@@ -167,6 +168,33 @@ Commands to list Azure container groups by resource group
         az container list: List container groups.
 
     Arguments
+        --resource-group -g: Name of resource group. You can configure the default group using `az
+                            configure --defaults group=<name>`.
+
+    Global Arguments
+        --debug            : Increase logging verbosity to show all debug logs.
+        --help -h          : Show this help message and exit.
+        --output -o        : Output format.  Allowed values: json, jsonc, table, tsv.  Default: json.
+        --query            : JMESPath query string. See http://jmespath.org/ for more information and
+                            examples.
+        --verbose          : Increase logging verbosity. Use --debug for full debug logs.
+
+Commands to attach to a container in a container group
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+::
+
+    Command
+        az container attach: Attach local standard output and error streams to a container in a
+        container group.
+
+    Arguments
+        --container-name   : The container to attach to. If omitted, the first container in the
+                            container group will be chosen.
+
+    Resource Id Arguments
+        --ids              : One or more resource IDs (space delimited). If provided, no other 'Resource
+                            Id' arguments should be specified.
+        --name -n          : The name of the container group.
         --resource-group -g: Name of resource group. You can configure the default group using `az
                             configure --defaults group=<name>`.
 
