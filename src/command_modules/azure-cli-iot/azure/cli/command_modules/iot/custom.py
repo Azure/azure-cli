@@ -352,18 +352,15 @@ def iot_hub_certificate_verify(client, hub_name, certificate_name, certificate_p
     return client.certificates.verify(resource_group_name, hub_name, certificate_name, etag, certificate)
 
 
-def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None, sku=IotHubSku.f1.value, unit=1, partition_count=None):
+def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None, sku=IotHubSku.f1.value, unit=1, partition_count=2):
     cli_ctx = cmd.cli_ctx
     _check_name_availability(client.iot_hub_resource, hub_name)
     location = _ensure_location(cli_ctx, resource_group_name, location)
     sku = IotHubSkuInfo(name=sku, capacity=unit)
 
-    properties = None
-    if partition_count:
-        event_hub_dic = {}
-        event_hub_dic['events'] = EventHubProperties(1, partition_count)
-        properties = IotHubProperties(None, None, event_hub_dic)
-
+    event_hub_dic = {}
+    event_hub_dic['events'] = EventHubProperties(1, partition_count)
+    properties = IotHubProperties(None, None, event_hub_dic)
     hub_description = IotHubDescription(location, client.iot_hub_resource.config.subscription_id, resource_group_name,
                                         sku, None, None, properties)
     return client.iot_hub_resource.create_or_update(resource_group_name, hub_name, hub_description)
