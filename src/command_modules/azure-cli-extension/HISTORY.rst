@@ -2,9 +2,10 @@
 
 Release History
 ===============
+
 0.0.9
 ++++++
-Added support for --extra-index-url argument to az extension add and update commands.
+Added support for --pip-extra-index-urls argument to az extension add and update commands.
 
 0.0.8
 ++++++

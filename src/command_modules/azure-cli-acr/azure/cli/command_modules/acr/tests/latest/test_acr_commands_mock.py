@@ -29,7 +29,7 @@ from azure.cli.command_modules.acr._docker_utils import (
 from azure.cli.testsdk import TestCli
 
 
-class AcrCommandsTests(unittest.TestCase):
+class AcrMockCommandsTests(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acr.repository.get_access_credentials', autospec=True)
     @mock.patch('requests.get', autospec=True)
