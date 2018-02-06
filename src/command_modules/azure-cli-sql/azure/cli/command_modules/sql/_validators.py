@@ -4,7 +4,10 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError
-from azure.mgmt.sql.models.sku import Sku
+from azure.mgmt.sql.models import (
+    DatabaseEdition,
+    Sku
+)
 from msrestazure.tools import resource_id, is_valid_resource_id
 
 # Important note: if cmd validator exists, then individual param validators will not b
@@ -38,9 +41,15 @@ def _validate_elastic_pool_id(cmd, namespace):
             child_name_1=namespace.elastic_pool_id)
 
 
+def _validate_db_edition(cmd, namespace):
+    if namespace.tier and namespace.tier.lower() == DatabaseEdition.data_warehouse.value.lower():
+        raise CLIError('Azure SQL Data Warehouse can be created with the command `az sql dw create`.')
+
+
 def validate_create_db(cmd, namespace):
     _validate_elastic_pool_id(cmd, namespace)
     _validate_sku(cmd, namespace)
+    _validate_db_edition(cmd, namespace)
 
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.

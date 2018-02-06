@@ -230,12 +230,6 @@ def db_create(
         raw=False,
         **kwargs):
 
-    # Verify edition
-    edition = kwargs.get('edition')  # kwags['edition'] throws KeyError if not in dictionary
-    if edition and edition.lower() == DatabaseEdition.data_warehouse.value.lower():
-        raise CLIError('Azure SQL Data Warehouse can be created with the command'
-                       ' `az sql dw create`.')
-
     return _db_dw_create(
         cmd.cli_ctx,
         client,
