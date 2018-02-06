@@ -588,25 +588,20 @@ def db_update(
         instance,
         elastic_pool_id=None,
         max_size_bytes=None,
-        requested_service_objective_name=None):
+        sku=None):
 
     # Verify edition
-    if instance.edition.lower() == DatabaseEdition.data_warehouse.value.lower():
+    if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
                        ' `az sql dw update`.')
-
-    # Null out edition. The service will choose correct edition based on service objective and
-    # elastic pool.
-    instance.edition = None
 
     # Verify that elastic_pool_name and requested_service_objective_name param values are not
     # totally inconsistent. If elastic pool and service objective name are both specified, and
     # they are inconsistent (i.e. service objective is not 'ElasticPool'), then the service
     # actually ignores the value of service objective name (!!). We are trying to protect the CLI
     # user from this unintuitive behavior.
-    if (elastic_pool_id and
-            requested_service_objective_name and
-            requested_service_objective_name != ServiceObjectiveName.elastic_pool.value):
+    if (elastic_pool_id and sku and
+            sku != ServiceObjectiveName.elastic_pool.value):
         raise CLIError('If elastic pool is specified, service objective must be'
                        ' unspecified or equal \'{}\'.'.format(
                            ServiceObjectiveName.elastic_pool.value))
@@ -617,14 +612,12 @@ def db_update(
     # 'S1', etc), in which case the pool being null/empty is meaningful - it means remove from
     # pool.
     instance.elastic_pool_id = elastic_pool_id
-    instance.requested_service_objective_name = requested_service_objective_name
 
-    # Null out requested_service_objective_id, because if requested_service_objective_id is
-    # specified then requested_service_objective_name is ignored.
-    instance.requested_service_objective_id = None
-
-    # Null out edition so that edition gets chosen automatically by choice of SLO/pool
-    instance.edition = None
+    # Set sku. The service will choose correct edition based on sku name and elastic pool.
+    if sku:
+        instance.sku = Sku(sku)
+    else:
+        instance.sku = None
 
     # Set other properties
     instance.max_size_bytes = max_size_bytes or instance.max_size_bytes
