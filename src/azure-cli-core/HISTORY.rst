@@ -5,6 +5,7 @@ Release History
 2.0.27
 ++++++
 * auth: key on both subscription id and name on msi login
+* Add events module in core for EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 * Minor fixes
 
 2.0.26
