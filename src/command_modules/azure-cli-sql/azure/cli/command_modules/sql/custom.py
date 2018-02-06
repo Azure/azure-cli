@@ -15,9 +15,12 @@ from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)
 from azure.cli.core.util import CLIError
-from azure.mgmt.sql.models.server_key import ServerKey
-from azure.mgmt.sql.models.encryption_protector import EncryptionProtector
-from azure.mgmt.sql.models.resource_identity import ResourceIdentity
+from azure.mgmt.sql.models import (
+    EncryptionProtector,
+    ResourceIdentity,
+    ServerKey,
+    Sku
+)
 from azure.mgmt.sql.models.sql_management_client_enums import (
     BlobAuditingPolicyState,
     CreateMode,

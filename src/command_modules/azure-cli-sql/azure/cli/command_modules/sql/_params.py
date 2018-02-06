@@ -22,6 +22,7 @@ from azure.mgmt.sql.models import (
 from azure.mgmt.sql.models.sql_management_client_enums import (
     AuthenticationType,
     BlobAuditingPolicyState,
+    CatalogCollationType,
     CreateMode,
     DatabaseLicenseType,
     ElasticPoolLicenseType,
@@ -165,12 +166,10 @@ def _configure_db_create_params(
     # be not exposed for now.
     arg_ctx.ignore('read_scale')
 
-    # TODO: Determine what to do with this
-    arg_ctx.ignore('catalog_collation')
-
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
         arg_ctx.ignore('sample_name')
+        arg_ctx.ignore('catalog_collation')
 
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
@@ -232,6 +231,8 @@ def load_arguments(self, _):
         creation_arg_group = 'Creation'
 
         c.argument('collation', arg_group=creation_arg_group)
+        c.argument('catalog_collation', arg_group=creation_arg_group,
+                   arg_type=get_enum_type(CatalogCollationType))
         c.argument('sample_name', arg_group=creation_arg_group)
 
         c.argument('license_type', arg_type=get_enum_type(DatabaseLicenseType))
