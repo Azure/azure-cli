@@ -46,7 +46,7 @@ def load_arguments(self, _):
         c.argument('parent_resource_path', resource_parent_type, arg_group='Resource Id')
         c.argument('tag', tag_type)
         c.argument('tags', tags_type)
-        c.argument('resource_ids', nargs='+', options_list=['--ids'], help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.', arg_group='Resource Id')
+        c.argument('resource_ids', nargs='+', options_list=['--ids'], help='One or more resource IDs (space-delimited). If provided, no other "Resource Id" arguments should be specified.', arg_group='Resource Id')
         c.argument('include_response_body', arg_type=get_three_state_flag(), help='Use if the default command output doesn\'t capture all of the property data.')
 
     with self.argument_context('resource list') as c:
@@ -161,7 +161,7 @@ def load_arguments(self, _):
         c.argument('resource_provider_namespace', resource_namespace_type)
         c.argument('resource_type', arg_type=resource_type_type, completer=get_resource_types_completion_list)
         c.argument('resource_name', options_list=['--resource', '--resource-name'], help='Name or ID of the resource being locked. If an ID is given, other resource arguments should not be given.')
-        c.argument('ids', nargs='+', options_list=('--ids'), help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')
+        c.argument('ids', nargs='+', options_list=('--ids'), help='One or more resource IDs (space-delimited). If provided, no other "Resource Id" arguments should be specified.')
         c.argument('resource_group', resource_group_name_type, validator=validate_lock_parameters)
 
     with self.argument_context('resource lock') as c:
@@ -185,7 +185,7 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('lock_name', options_list=('--name', '-n'), help='Name of the lock')
             c.argument('level', options_list=('--lock-type', '-t'), arg_type=get_enum_type([LockLevel.can_not_delete, LockLevel.read_only]))
-            c.argument('ids', nargs='+', options_list=('--ids'), help='One or more resource IDs (space delimited). If provided, no other "Resource Id" arguments should be specified.')
+            c.argument('ids', nargs='+', options_list=('--ids'), help='One or more resource IDs (space-delimited). If provided, no other "Resource Id" arguments should be specified.')
             c.argument('notes', help='Notes about this lock.')
 
     with self.argument_context('managedapp') as c:
@@ -205,6 +205,6 @@ def load_arguments(self, _):
 
     with self.argument_context('managedapp definition create') as c:
         c.argument('lock_level', arg_type=get_enum_type(ApplicationLockLevel))
-        c.argument('authorizations', options_list=('--authorizations', '-a'), nargs='+', help="space separated authorization pairs in a format of <principalId>:<roleDefinitionId>")
+        c.argument('authorizations', options_list=('--authorizations', '-a'), nargs='+', help="space-separated authorization pairs in a format of <principalId>:<roleDefinitionId>")
         c.argument('createUiDefinition', options_list=('--create-ui-definition', '-c'), help='JSON formatted string or a path to a file with such content', type=file_type)
         c.argument('mainTemplate', options_list=('--main-template', '-t'), help='JSON formatted string or a path to a file with such content', type=file_type)

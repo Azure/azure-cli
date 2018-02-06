@@ -701,7 +701,7 @@ class AzureBatchDataPlaneCommand(object):
                     # This will fail for 2D arrays - though Batch doesn't have any yet
                     inner_type = details['type'][1:-1]
                     if inner_type in pformat.BASIC_TYPES:
-                        options['help'] += " Space separated values."
+                        options['help'] += " Space-separated values."
                         self._resolve_conflict(
                             param_attr, param_attr, path, options,
                             details['type'], required_attrs, conflict_names)
