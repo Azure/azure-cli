@@ -135,7 +135,7 @@ helps['monitor metrics list'] = """
     parameters:
         - name: --aggregation
           type: string
-          short-summary: The list of aggregation types (space separated) to retrieve.
+          short-summary: The list of aggregation types (space-separated) to retrieve.
         - name: --interval
           type: string
           short-summary: The interval of the metric query. In ISO 8601 duration format, eg "PT1M"
@@ -157,7 +157,7 @@ helps['monitor metrics list'] = """
           short-summary: Returns the metadata values instead of metric data
         - name: --dimension
           type: string
-          short-summary: The list of dimensions (space separated) the metrics are queried into.
+          short-summary: The list of dimensions (space-separated) the metrics are queried into.
     examples:
         - name: List a VM's CPU usage for the past hour
           text: >
@@ -308,7 +308,7 @@ helps['monitor action-group update'] = """
             Webhook: --add-action https://www.contoso.com/alert
             Multiple actions can be specified by using more than one `--add-action` argument.
         - name: --remove-action -r
-          short-summary: Remove receivers from the action group. Accept space separated list of receiver names.
+          short-summary: Remove receivers from the action group. Accept space-separated list of receiver names.
 """
 
 helps['monitor activity-log alert'] = """
@@ -350,11 +350,11 @@ helps['monitor activity-log alert create'] = """
             'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties.'.
         - name: --action-group -a
           short-summary: >
-            Add an action group. Accepts space separated action group identifiers. The identifier can be the action group's name
+            Add an action group. Accepts space-separated action group identifiers. The identifier can be the action group's name
             or its resource ID.
         - name: --webhook-properties -w
           short-summary: >
-            Space separated webhook properties in 'key[=value]' format. These properties are associated with the action groups
+            Space-separated webhook properties in 'key[=value]' format. These properties are associated with the action groups
             added in this command.
           long-summary: >
             For any webhook receiver in these action group, this data is appended to the webhook payload. To attach different webhook
@@ -416,7 +416,7 @@ helps['monitor activity-log alert action-group add'] = """
           short-summary: Remove all the existing action groups before add new conditions.
         - name: --webhook-properties -w
           short-summary: >
-            Space separated webhook properties in 'key[=value]' format. These properties will be associated with
+            Space-separated webhook properties in 'key[=value]' format. These properties will be associated with
             the action groups added in this command.
           long-summary: >
             For any webhook receiver in these action group, these data are appended to the webhook payload.

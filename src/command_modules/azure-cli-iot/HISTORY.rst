@@ -8,6 +8,7 @@ Release History
 * iot dps access policy: Certain commands are now long-running operations.
 * iot dps linked-hub: Certain commands are now long-running operations.
 * iot hub create: Allow specifying numbers of partitions during creation.
+* Minor fixes.
 
 0.1.16
 ++++++

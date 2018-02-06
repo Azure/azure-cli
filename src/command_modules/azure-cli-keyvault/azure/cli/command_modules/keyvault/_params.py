@@ -70,9 +70,9 @@ def load_arguments(self, _):
         c.argument('object_id', validator=validate_principal)
 
     with self.argument_context('keyvault set-policy', arg_group='Permission') as c:
-        c.argument('key_permissions', arg_type=get_enum_type(KeyPermissions), metavar='PERM', nargs='*', help='Space separated list of key permissions to assign.', validator=validate_policy_permissions)
-        c.argument('secret_permissions', arg_type=get_enum_type(SecretPermissions), metavar='PERM', nargs='*', help='Space separated list of secret permissions to assign.')
-        c.argument('certificate_permissions', arg_type=get_enum_type(CertificatePermissions), metavar='PERM', nargs='*', help='Space separated list of certificate permissions to assign.')
+        c.argument('key_permissions', arg_type=get_enum_type(KeyPermissions), metavar='PERM', nargs='*', help='Space-separated list of key permissions to assign.', validator=validate_policy_permissions)
+        c.argument('secret_permissions', arg_type=get_enum_type(SecretPermissions), metavar='PERM', nargs='*', help='Space-separated list of secret permissions to assign.')
+        c.argument('certificate_permissions', arg_type=get_enum_type(CertificatePermissions), metavar='PERM', nargs='*', help='Space-separated list of certificate permissions to assign.')
     # endregion
 
     # region Shared
@@ -84,7 +84,7 @@ def load_arguments(self, _):
 
     # region keys
     with self.argument_context('keyvault key') as c:
-        c.argument('key_ops', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*', help='Space separated list of permitted JSON web key operations.')
+        c.argument('key_ops', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*', help='Space-separated list of permitted JSON web key operations.')
         c.argument('key_version', options_list=['--version', '-v'], help='The key version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('key'))
 
     for scope in ['keyvault key create', 'keyvault key import']:

@@ -242,7 +242,7 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                              '--ids',
                              metavar='RESOURCE_ID',
                              dest=argparse.SUPPRESS,
-                             help="One or more resource IDs (space delimited). If provided, "
+                             help="One or more resource IDs (space-delimited). If provided, "
                                   "no other 'Resource Id' arguments should be specified.",
                              action=split_action(command.arguments),
                              nargs='+',
