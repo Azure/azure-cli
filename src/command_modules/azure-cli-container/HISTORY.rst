@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.1.18
+++++++
+* Add '--follow' option to 'az container logs' for streaming logs
+* Add 'az container attach' command that attaches local standard output and error streams to a container in a container group.
+
 0.1.17
 ++++++
 * Minor fixes
