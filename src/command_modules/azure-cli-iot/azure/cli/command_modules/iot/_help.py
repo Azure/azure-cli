@@ -79,7 +79,7 @@ helps['iot dps update'] = """
     examples:
         - name: Update Allocation Policy to 'GeoLatency' of an Azure IoT Hub device provisioning service 'MyDps'
           text: >
-            az iot dps delete --name MyDps --resource-group MyResourceGroup --set properties.allocationPolicy="GeoLatency"
+            az iot dps update --name MyDps --resource-group MyResourceGroup --set properties.allocationPolicy="GeoLatency"
 """
 
 helps['iot dps access-policy'] = """
@@ -368,9 +368,10 @@ helps['iot hub create'] = """
         - name: Create an IoT Hub with the free pricing tier F1, in the region of the resource group.
           text: >
             az iot hub create --resource-group MyResourceGroup --name MyIotHub
-        - name: Create an IoT Hub with the standard pricing tier S1, in the 'westus' region.
+        - name: Create an IoT Hub with the standard pricing tier S1 and 4 partitions, in the 'westus' region.
           text: >
             az iot hub create --resource-group MyResourceGroup --name MyIotHub --sku S1 --location westus
+            --partition-count 4
 """
 
 helps['iot hub show'] = """
