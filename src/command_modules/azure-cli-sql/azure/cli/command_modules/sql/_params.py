@@ -9,24 +9,29 @@ from enum import Enum
 from knack.arguments import CLIArgumentType, ignore_type
 
 from azure.cli.core.commands import patch_arg_make_required, patch_arg_make_optional
-from azure.mgmt.sql.models.database import Database
-from azure.mgmt.sql.models.elastic_pool import ElasticPool
-from azure.mgmt.sql.models.import_extension_request \
-    import ImportExtensionRequest
-from azure.mgmt.sql.models.export_request import ExportRequest
-from azure.mgmt.sql.models.sku import Sku
-from azure.mgmt.sql.models.server import Server
-from azure.mgmt.sql.models.server_azure_ad_administrator import ServerAzureADAdministrator
+from azure.mgmt.sql.models import (
+    Database,
+    ElasticPool,
+    ElasticPoolPerDatabaseSettings,
+    ImportExtensionRequest,
+    ExportRequest,
+    Sku,
+    Server,
+    ServerAzureADAdministrator
+)
 from azure.mgmt.sql.models.sql_management_client_enums import (
     AuthenticationType,
     BlobAuditingPolicyState,
     CreateMode,
+    DatabaseLicenseType,
+    ElasticPoolLicenseType,
     SecurityAlertPolicyState,
     SecurityAlertPolicyEmailAccountAdmins,
     ServerConnectionType,
     ServerKeyType,
     StorageKeyType,
-    TransparentDataEncryptionStatus)
+    TransparentDataEncryptionStatus
+)
 
 from azure.cli.core.commands.parameters import (get_three_state_flag, get_enum_type,
                                                 get_resource_name_completion_list,
@@ -225,6 +230,8 @@ def load_arguments(self, _):
 
         c.argument('collation', arg_group=creation_arg_group)
         c.argument('sample_name', arg_group=creation_arg_group)
+
+        c.argument('license_type', arg_type=get_enum_type(DatabaseLicenseType))
 
     with self.argument_context('sql db create') as c:
         _configure_db_create_params(c, Engine.db, CreateMode.default)
@@ -564,8 +571,11 @@ def load_arguments(self, _):
                    help='The max storage size of the elastic pool. If no unit is specified, defaults'
                    ' to megabytes (MB).')
 
+        c.argument('license_type', arg_type=get_enum_type(ElasticPoolLicenseType))
+
     with self.argument_context('sql elastic-pool create') as c:
         c.expand('parameters', ElasticPool)
+        c.expand('per_database_settings', ElasticPoolPerDatabaseSettings)
         # We have a wrapper function that determines server location so user doesn't need to specify
         # it as param.
         c.ignore('location')
