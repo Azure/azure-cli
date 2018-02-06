@@ -72,7 +72,7 @@ def load_arguments(self, _):
 
     for scope in ['mysql server-logs', 'postgres server-logs']:
         with self.argument_context(scope) as c:
-            c.argument('file_name', options_list=['--name', '-n'], nargs='+', help='Space separated list of log filenames on the server to download.')
+            c.argument('file_name', options_list=['--name', '-n'], nargs='+', help='Space-separated list of log filenames on the server to download.')
             c.argument('max_file_size', type=int, help='The file size limitation to filter files.')
             c.argument('file_last_written', type=int, help='Integer in hours to indicate file last modify time, default value is 72.')
             c.argument('filename_contains', help='The pattern that file name should match.')
