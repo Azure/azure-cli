@@ -199,6 +199,9 @@ def _configure_db_create_params(
         # Edition is always 'DataWarehouse'
         arg_ctx.ignore('tier')
 
+        # License types do not yet exist for DataWarehouse
+        arg_ctx.ignore('license_type')
+
 
 # pylint: disable=too-many-statements
 def load_arguments(self, _):
@@ -514,7 +517,7 @@ def load_arguments(self, _):
         c.argument('max_size_bytes', options_list=['--max-size'],
                    type=SizeWithUnitConverter('B', result_type=int),
                    help='The max storage size of the data warehouse. If no unit is specified, defaults'
-                   'to bytes (B).')
+                   ' to bytes (B).')
 
         c.argument('sku',
                    help='The sku of the data warehouse.')
