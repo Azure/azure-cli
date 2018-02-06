@@ -586,7 +586,7 @@ def db_list(
 # Update database. Custom update function to apply parameters to instance.
 def db_update(
         instance,
-        elastic_pool_name=None,
+        elastic_pool_id=None,
         max_size_bytes=None,
         requested_service_objective_name=None):
 
@@ -604,7 +604,7 @@ def db_update(
     # they are inconsistent (i.e. service objective is not 'ElasticPool'), then the service
     # actually ignores the value of service objective name (!!). We are trying to protect the CLI
     # user from this unintuitive behavior.
-    if (elastic_pool_name and
+    if (elastic_pool_id and
             requested_service_objective_name and
             requested_service_objective_name != ServiceObjectiveName.elastic_pool.value):
         raise CLIError('If elastic pool is specified, service objective must be'
@@ -616,7 +616,7 @@ def db_update(
     # except if pool is null/empty and service objective is a standalone SLO value (e.g. 'S0',
     # 'S1', etc), in which case the pool being null/empty is meaningful - it means remove from
     # pool.
-    instance.elastic_pool_name = elastic_pool_name
+    instance.elastic_pool_id = elastic_pool_id
     instance.requested_service_objective_name = requested_service_objective_name
 
     # Null out requested_service_objective_id, because if requested_service_objective_id is

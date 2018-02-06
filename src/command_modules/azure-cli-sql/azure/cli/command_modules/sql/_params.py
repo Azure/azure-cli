@@ -140,28 +140,20 @@ def _configure_db_create_params(
                   options_list=['--sku', '--service-objective'],
                   arg_group=sku_arg_group,
                   required=False,
-                  help='The name of the sku.')
+                  help='The name of the sku for the new database.')
     arg_ctx.extra('tier',
                   options_list=['--tier', '--edition'],
                   arg_group=sku_arg_group,
-                  help='The edition of the database.')
-    # arg_ctx.extra('family',
-    #               options_list=['--family'],
-    #               arg_group=sku_arg_group,
-    #               help='The hardware family of the database.')
-    # arg_ctx.extra('capacity',
-    #               options_list=['--capacity'],
-    #               arg_group=sku_arg_group,
-    #               help='The integer scale size of the database.')
+                  help='The edition for the new database.')
 
-    # elastic-pool-id is processed in validate_create_db
+    # elastic_pool_id is processed in validate_create_db
     arg_ctx.argument('elastic_pool_id',
                      options_list=['--elastic-pool'],
                      arg_group=sku_arg_group,
-                     help='The elastic pool name or resource id.')
+                     help='The name or resource id of the elastic pool to create the database in.')
 
     # The following params are always ignored because their values are filled in by wrapper
-    # functions.
+    # functions in custom.py
     arg_ctx.ignore('location', 'create_mode', 'source_database_id')
 
     # Read scale is only applicable to sql db (not dw). However it is a preview feature and will
@@ -173,7 +165,7 @@ def _configure_db_create_params(
 
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
-        arg_ctx.ignore('sample_name', 'zone_redundant')
+        arg_ctx.ignore('sample_name')
 
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
@@ -197,7 +189,7 @@ def _configure_db_create_params(
 
     if engine == Engine.dw:
         # Elastic pool is only for SQL DB.
-        arg_ctx.ignore('elastic_pool_name')
+        arg_ctx.ignore('elastic_pool_id')
 
         # Edition is always 'DataWarehouse'
         arg_ctx.ignore('tier')
@@ -222,8 +214,6 @@ def load_arguments(self, _):
                    # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
                    id_part='child_name_1')
 
-        c.argument('elastic_pool_name', options_list=['--elastic-pool'])
-        c.argument('requested_service_objective_name', options_list=['--service-objective'])
         c.argument('max_size_bytes', options_list=['--max-size'],
                    type=SizeWithUnitConverter('B', result_type=int),
                    help='The max storage size of the database. Only the following'
@@ -231,14 +221,16 @@ def load_arguments(self, _):
                    ' each edition): 100MB, 500MB, 1GB, 5GB, 10GB, 20GB,'
                    ' 30GB, 150GB, 200GB, 500GB. If no unit is specified, defaults to bytes (B).')
 
+        creation_arg_group = 'Creation'
+
+        c.argument('collation', arg_group=creation_arg_group)
+        c.argument('sample_name', arg_group=creation_arg_group)
+
     with self.argument_context('sql db create') as c:
         _configure_db_create_params(c, Engine.db, CreateMode.default)
 
     with self.argument_context('sql db copy') as c:
         _configure_db_create_params(c, Engine.db, CreateMode.copy)
-
-        c.argument('elastic_pool_name',
-                   help='Name of the elastic pool to create the new database in.')
 
         c.argument('dest_name',
                    help='Name of the database that will be created as the copy destination.')
@@ -252,10 +244,6 @@ def load_arguments(self, _):
                    options_list=['--dest-server'],
                    help='Name of the server to create the copy in.'
                    ' If unspecified, defaults to the origin server.')
-
-        c.argument('requested_service_objective_name',
-                   options_list=['--service-objective'],
-                   help='Name of the service objective for the new database.')
 
     with self.argument_context('sql db rename') as c:
         c.argument('new_name',
@@ -283,13 +271,6 @@ def load_arguments(self, _):
                    ' Must match the deleted time of a deleted database in the same server.'
                    ' Either --time or --deleted-time (or both) must be specified.')
 
-        c.argument('tier',
-                   help='The edition for the new database.')
-        c.argument('elastic_pool_name',
-                   help='Name of the elastic pool to create the new database in.')
-        c.argument('requested_service_objective_name',
-                   help='Name of service objective for the new database.')
-
     with self.argument_context('sql db show') as c:
         # Service tier advisors and transparent data encryption are not included in the first batch
         # of GA commands.
@@ -297,6 +278,7 @@ def load_arguments(self, _):
 
     with self.argument_context('sql db list') as c:
         c.argument('elastic_pool_name',
+                   options_list=['--elastic-pool'],
                    help='If specified, lists only the databases in this elastic pool')
 
     with self.argument_context('sql db list-editions') as c:
@@ -311,19 +293,23 @@ def load_arguments(self, _):
         # We could used get_enum_type here, but that will validate the inputs which means there
         # will be no way to query for new editions/service objectives that are made available after
         # this version of CLI is released.
-        c.argument('tier',
+        c.argument('edition',
+                   options_list=['--edition', '--tier'],
                    arg_group=search_arg_group,
                    help='Edition to search for. If unspecified, all editions are shown.')
         c.argument('service_objective',
+                   options_list=['--service-objective', '--sku'],
                    arg_group=search_arg_group,
                    help='Service objective to search for. If unspecified, all editions are shown.')
 
     with self.argument_context('sql db update') as c:
-        c.argument('requested_service_objective_name',
+        c.argument('sku',
                    help='The name of the new service objective. If this is a standalone db service'
                    ' objective and the db is currently in an elastic pool, then the db is removed from'
                    ' the pool.')
-        c.argument('elastic_pool_name', help='The name of the elastic pool to move the database into.')
+        c.argument('elastic_pool_id',
+                   options_list=['--elastic-pool'],
+                   help='The name or resource id of the elastic pool to move the database into.')
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
     with self.argument_context('sql db export') as c:
@@ -382,14 +368,6 @@ def load_arguments(self, _):
     #####
     with self.argument_context('sql db replica create') as c:
         _configure_db_create_params(c, Engine.db, CreateMode.secondary)
-
-        c.argument('elastic_pool_name',
-                   options_list=['--elastic-pool'],
-                   help='Name of elastic pool to create the new replica in.')
-
-        c.argument('requested_service_objective_name',
-                   options_list=['--service-objective'],
-                   help='Name of service objective for the new replica.')
 
         c.argument('partner_resource_group_name',
                    options_list=['--partner-resource-group'],
@@ -530,12 +508,10 @@ def load_arguments(self, _):
                    help='The max storage size of the data warehouse. If no unit is specified, defaults'
                    'to bytes (B).')
 
-        c.argument('requested_service_objective_name',
-                   options_list=['--service-objective'],
-                   help='The service objective of the data warehouse.')
+        c.argument('sku',
+                   help='The sku of the data warehouse.')
 
         c.argument('collation',
-                   options_list=['--collation'],
                    help='The collation of the data warehouse.')
 
     with self.argument_context('sql dw create') as c:
@@ -582,7 +558,8 @@ def load_arguments(self, _):
         # --storage was the original param name, which is consistent with the underlying REST API.
         # --max-size is an alias which is consistent with the `sql elastic-pool list-editions
         # --show-details max-size` parameter value and also matches `sql db --max-size` parameter name.
-        c.argument('storage_mb', options_list=['--storage', '--max-size'],
+        c.argument('storage_mb',
+                   options_list=['--storage', '--max-size'],
                    type=SizeWithUnitConverter('MB', result_type=int),
                    help='The max storage size of the elastic pool. If no unit is specified, defaults'
                    ' to megabytes (MB).')
