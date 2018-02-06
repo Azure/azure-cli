@@ -6,6 +6,7 @@ Release History
 0.1.2
 +++++
 * Minor fixes.
+* Fix az monitor log-profiles create command
 
 0.1.1
 +++++
