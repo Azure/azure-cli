@@ -10,7 +10,7 @@ from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer
 class TestMonitorDiagnosticSettings(ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer(location='southcentralus')
-    def test_monitor_diagnostic_settings(self, resource_group, storage_account):
+    def test_monitor_diagnostic_settings_scenario(self, resource_group, storage_account):
         nsg_name = self.create_random_name(prefix='nsg', length=16)
         self.cmd('network nsg create -n {} -g {}'.format(nsg_name, resource_group))
 

@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os.path
+import os
 import glob
 
 from automation.utilities.const import COMMAND_MODULE_PREFIX
@@ -21,6 +21,11 @@ def get_repo_root():
 def get_all_module_paths():
     """List all core and command modules"""
     return list(get_core_modules_paths()) + list(get_command_modules_paths(include_prefix=True))
+
+
+def get_config_dir():
+    """ Returns the users Azure directory. """
+    return os.getenv('AZURE_CONFIG_DIR', None) or os.path.expanduser(os.path.join('~', '.azure'))
 
 
 def get_command_modules_paths(include_prefix=False):
@@ -42,6 +47,8 @@ def get_core_modules_paths_with_tests(profile):
         for name, path in get_core_modules_paths():
             for root, dirs, files in os.walk(path):
                 if os.path.basename(root) == 'tests':
+                    if name == 'azure-cli-core':
+                        name = 'core'
                     yield name, path, root
 
 
@@ -123,13 +130,13 @@ def filter_user_selected_modules(user_input_modules):
         return list((name, module) for name, module in existing_modules)
 
 
-def filter_user_selected_modules_with_tests(user_input_modules, profile):
+def filter_user_selected_modules_with_tests(user_input_modules=None, profile=None):
     import itertools
 
     existing_modules = list(itertools.chain(get_core_modules_paths_with_tests(profile),
                                             get_command_modules_paths_with_tests(profile)))
 
-    if user_input_modules:
+    if user_input_modules is not None:
         selected_modules = set(user_input_modules)
         extra = selected_modules - set([name for name, _, _ in existing_modules])
         if any(extra):

@@ -12,7 +12,7 @@ helps['configure'] = """
     parameters:
         - name: --defaults -d
           short-summary: >
-            Space separated 'name=value' pairs for common argument defaults.
+            Space-separated 'name=value' pairs for common argument defaults.
     examples:
         - name: Set default resource group, webapp and VM names.
           text: az configure --defaults group=myRG web=myweb vm=myvm

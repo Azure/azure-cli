@@ -44,7 +44,7 @@ def load_arguments(self, _):
 
     with self.argument_context('batch account create') as c:
         c.argument('location', get_location_type(self.cli_ctx), help='The region in which to create the account.')
-        c.argument('tags', tags_type, help="Space separated tags in 'key[=value]' format.")
+        c.argument('tags', tags_type, help="Space-separated tags in 'key[=value]' format.")
         c.argument('storage_account', help='The storage account name or resource ID to be used for auto storage.', validator=storage_account_id)
         c.argument('keyvault', help='The KeyVault name or resource ID to be used for an account with a pool allocation mode of \'User Subscription\'.', validator=keyvault_id)
         c.ignore('keyvault_url')
@@ -103,7 +103,7 @@ def load_arguments(self, _):
         c.argument('start_task_max_task_retry_count', arg_group='Pool: Start Task',
                    help='The maximum number of times the task may be retried.')
         c.argument('start_task_environment_settings', nargs='+', type=environment_setting_format, arg_group='Pool: Start Task',
-                   help='A list of environment variable settings for the start task. Space separated values in \'key=value\' format.')
+                   help='A list of environment variable settings for the start task. Space-separated values in \'key=value\' format.')
 
     with self.argument_context('batch job list') as c:
         c.argument('filter', help=' An OData $filter clause.', arg_group='Pre-condition and Query')
@@ -132,12 +132,12 @@ def load_arguments(self, _):
 
     with self.argument_context('batch task create') as c:
         c.argument('json_file', type=file_type, help='The file containing the task(s) to create in JSON format, if this parameter is specified, all other parameters are ignored.', validator=validate_json_file, completer=FilesCompleter())
-        c.argument('application_package_references', nargs='+', help='The space separated list of IDs specifying the application packages to be installed. Space separated application IDs with optional version in \'id[#version]\' format.', type=application_package_reference_format)
+        c.argument('application_package_references', nargs='+', help='The space-separated list of IDs specifying the application packages to be installed. Space-separated application IDs with optional version in \'id[#version]\' format.', type=application_package_reference_format)
         c.argument('job_id', help='The ID of the job containing the task.')
         c.argument('task_id', help='The ID of the task.')
         c.argument('command_line', help='The command line of the task. The command line does not run under a shell, and therefore cannot take advantage of shell features such as environment variable expansion. If you want to take advantage of such features, you should invoke the shell in the command line, for example using "cmd /c MyCommand" in Windows or "/bin/sh -c MyCommand" in Linux.')
-        c.argument('environment_settings', nargs='+', help='A list of environment variable settings for the task. Space separated values in \'key=value\' format.', type=environment_setting_format)
-        c.argument('resource_files', nargs='+', help='A list of files that the Batch service will download to the compute node before running the command line. Space separated resource references in filename=blobsource format.', type=resource_file_format)
+        c.argument('environment_settings', nargs='+', help='A list of environment variable settings for the task. Space-separated values in \'key=value\' format.', type=environment_setting_format)
+        c.argument('resource_files', nargs='+', help='A list of files that the Batch service will download to the compute node before running the command line. Space-separated resource references in filename=blobsource format.', type=resource_file_format)
 
     for item in ['batch certificate delete', 'batch certificate create', 'batch pool resize', 'batch pool reset', 'batch job list', 'batch task create']:
         with self.argument_context(item) as c:
