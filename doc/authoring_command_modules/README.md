@@ -155,7 +155,7 @@ Testing
 Run all tests in a module:
 
 ```
-azdev tests --modules <modules> [--live] [--series] [--discover]
+azdev test --modules <modules> [--live] [--series] [--discover]
 ```
 
 Run an individual test:
