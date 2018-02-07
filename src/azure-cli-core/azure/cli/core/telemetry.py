@@ -39,6 +39,8 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     exceptions = []
     module_correlation = None
     extension_name = 'None'
+    feedback = None
+    extension_management_detail = None
 
     def add_exception(self, exception, fault_type, description=None, message=''):
         details = {
@@ -144,6 +146,8 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.set_custom_properties(result, 'PythonVersion', platform.python_version())
         self.set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
         self.set_custom_properties(result, 'ExtensionName', self.extension_name)
+        self.set_custom_properties(result, 'Feedback', self.feedback)
+        self.set_custom_properties(result, 'ExtensionManagement', self.extension_management_detail)
 
         return result
 
@@ -191,6 +195,7 @@ def _user_agrees_to_telemetry(func):
         return func(*args, **kwargs)
 
     return _wrapper
+
 
 # public api
 
@@ -252,6 +257,18 @@ def set_user_fault(summary=None):
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def set_application(application, arg_complete_env_name):
     _session.application, _session.arg_complete_env_name = application, arg_complete_env_name
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_feedback(feedback):
+    """ This method is used for modules in which user feedback is collected. The data can be an arbitrary string but it
+    will be truncated at 512 characters to avoid abusing the telemetry."""
+    _session.feedback = feedback[:512]
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_extension_management_detail(content):
+    _session.extension_management_detail = content[:512]
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
