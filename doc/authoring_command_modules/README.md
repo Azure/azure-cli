@@ -155,23 +155,21 @@ Testing
 Run all tests in a module:
 
 ```
-run_tests --module <module> [--live] [--parallel]
+azdev tests --modules <modules> [--live] [--series] [--discover]
 ```
 
 Run an individual test:
 
 ```
-run_tests --module <module> --test <file>.<class>[.<test>]
+azdev test --tests TEST [TEST ...] [--live] [--series] [--discover]
 ```
-For example `run_tests --module mymod --test test_myfoo.MyFooTests.test_myfoo`
+For example `azdev test --tests test_myfoo`
 
 
 Style Checks
 ------------
 
 ```
-check_style --module <module> [--pylint] [--pep8]
-OR
 azdev style --module <module> [--pylint] [--pep8]
 ```
 
