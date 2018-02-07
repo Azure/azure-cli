@@ -2240,18 +2240,24 @@ def set_vmss_diagnostics_extension(
 # region VirtualMachineScaleSets Disks (Managed)
 def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_gb=None, instance_id=None, lun=None,
                                      caching=None, existing_disk=None):
-    DiskCreateOptionTypes, VirtualMachineScaleSetDataDisk = cmd.get_models(
-        'DiskCreateOptionTypes', 'VirtualMachineScaleSetDataDisk')
-    DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
-        'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
+    DiskCreateOptionTypes, ManagedDiskParameters = cmd.get_models(
+        'DiskCreateOptionTypes', 'ManagedDiskParameters')
+    if existing_disk is None:
+        DataDisk = cmd.get_models('VirtualMachineScaleSetDataDisk')
+    else:
+        DataDisk = cmd.get_models('DataDisk')
     def _init_data_disk(storage_profile, lun, existing_disk=None):
         data_disks = storage_profile.data_disks or []
         if lun is None:
             luns = [d.lun for d in data_disks]
             lun = max(luns) + 1 if luns else 0
-        option = DiskCreateOptionTypes.attach if existing_disk else DiskCreateOptionTypes.empty
-        data_disk = VirtualMachineScaleSetDataDisk(lun, option, disk_size_gb=size_gb, caching=caching,
-                                                   managed_disk=existing_disk)
+        if existing_disk is None:
+            data_disk = DataDisk(lun, DiskCreateOptionTypes.empty,
+                                 disk_size_gb=size_gb, caching=caching)
+        else:
+            data_disk = DataDisk(lun, DiskCreateOptionTypes.attach,
+                                 managed_disk=ManagedDiskParameters(id=existing_disk), caching=caching)
+
         data_disks.append(data_disk)
         storage_profile.data_disks = data_disks
 
