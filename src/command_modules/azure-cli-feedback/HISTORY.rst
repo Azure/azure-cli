@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.1.0
++++++
+* Switch AI upstream feed
+* Introduce extension management property to telemetry data.
+
 2.0.8
 +++++
 * Minor fixes.

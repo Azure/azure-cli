@@ -20,6 +20,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions,
                                       get_extension, ext_compat_with_cli,
                                       WheelExtension, ExtensionNotInstalledException)
+from azure.cli.core.telemetry import set_extension_management_detail
 
 from ._homebrew_patch import HomebrewPipPatch
 from ._index import get_index_extensions
@@ -177,11 +178,15 @@ def add_extension(source=None, extension_name=None, index_url=None, yes=None, pi
             raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
     _add_whl_ext(source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls)
 
+    if extension_name:
+        set_extension_management_detail(extension_name)
+
 
 def remove_extension(extension_name):
     try:
         get_extension(extension_name)
         shutil.rmtree(get_extension_path(extension_name))
+        set_extension_management_detail(extension_name)
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 
