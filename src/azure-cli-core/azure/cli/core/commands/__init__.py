@@ -349,8 +349,13 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
 
     def _validate_arg_level(self, ns, **_):  # pylint: disable=no-self-use
+        from msrest.exceptions import ValidationError
         for validator in getattr(ns, '_argument_validators', []):
-            validator(**self._build_kwargs(validator, ns))
+            try:
+                validator(**self._build_kwargs(validator, ns))
+            except ValidationError:
+                logger.debug('Validation error in %s.', str(validator))
+                raise
         try:
             delattr(ns, '_argument_validators')
         except AttributeError:
