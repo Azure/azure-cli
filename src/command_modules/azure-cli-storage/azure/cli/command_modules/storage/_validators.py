@@ -652,7 +652,7 @@ def process_blob_download_batch_parameters(namespace, cmd):
     import os
 
     # 1. quick check
-    if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
+    if not os.path.isdir(namespace.destination):
         raise ValueError('incorrect usage: destination must be an existing directory')
 
     # 2. try to extract account name and container name from source string
@@ -773,7 +773,7 @@ def process_file_download_batch_parameters(cmd, namespace):
     import os
 
     # 1. quick check
-    if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
+    if not os.path.isdir(namespace.destination):
         raise ValueError('incorrect usage: destination must be an existing directory')
 
     # 2. try to extract account name and share name from source string

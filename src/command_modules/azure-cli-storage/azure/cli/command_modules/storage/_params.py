@@ -72,6 +72,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
                    validator=validate_metadata)
         c.argument('timeout', help='Request timeout in seconds. Applies to each call to the service.', type=int)
+        c.argument('num_results', type=int)
 
     with self.argument_context('storage', arg_group='Precondition') as c:
         c.argument('if_modified_since', help='Alter only if modified since supplied UTC datetime (Y-m-d\'T\'H:M\'Z\')',
@@ -188,7 +189,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage blob list') as c:
         c.argument('include', validator=validate_included_datasets)
         c.argument('num_results', type=int)
-        c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745
 
     with self.argument_context('storage blob generate-sas') as c:
         from .completers import get_storage_acl_name_completion_list
@@ -357,9 +357,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('storage container lease') as c:
         c.argument('container_name', container_name_type)
 
-    with self.argument_context('storage container list') as c:
-        c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745
-
     with self.argument_context('storage container policy') as c:
         from .completers import get_storage_acl_name_completion_list
         t_container_permissions = self.get_sdk('blob.models#ContainerPermissions')
@@ -398,9 +395,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage share') as c:
         c.argument('share_name', share_name_type, options_list=('--name', '-n'))
-
-    with self.argument_context('storage share list') as c:
-        c.ignore('marker')  # https://github.com/Azure/azure-cli/issues/3745
 
     with self.argument_context('storage share exists') as c:
         c.ignore('directory_name', 'file_name')

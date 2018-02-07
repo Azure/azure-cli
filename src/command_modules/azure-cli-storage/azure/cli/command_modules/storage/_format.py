@@ -134,16 +134,14 @@ def transform_file_directory_result(cli_ctx):
     list.
     """
     def transformer(result):
+        from ._transformers import transform_storage_list_output
+        result_list = transform_storage_list_output(result)
         t_file, t_dir = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'File', 'Directory', mod='file.models')
-        return_list = []
-        for each in result:
+        for each in result_list:
             if isinstance(each, t_file):
                 delattr(each, 'content')
                 setattr(each, 'type', 'file')
             elif isinstance(each, t_dir):
                 setattr(each, 'type', 'dir')
-
-            return_list.append(each)
-
-        return return_list
+        return result_list
     return transformer
