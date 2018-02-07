@@ -283,7 +283,7 @@ class AzCliCommandInvoker(CommandInvoker):
             params = self._filter_params(expanded_arg)
 
             command_source = self.commands_loader.command_table[command].command_source
-            telemetry.set_command_details(self.data['command'], self.data['output'],
+            telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
                                           [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
                                            (p.startswith('-') and len(p) > 1)],
                                           extension_name=command_source.extension_name if command_source else None)
