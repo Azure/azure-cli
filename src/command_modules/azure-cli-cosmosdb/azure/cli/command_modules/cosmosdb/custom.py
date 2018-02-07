@@ -9,7 +9,6 @@ from knack.util import CLIError
 from azure.mgmt.cosmosdb.models import (
     ConsistencyPolicy,
     DatabaseAccountCreateUpdateParameters,
-    DatabaseAccountPatchParameters,
     Location
 )
 from azure.mgmt.cosmosdb.models.cosmos_db_enums import DatabaseAccountKind
