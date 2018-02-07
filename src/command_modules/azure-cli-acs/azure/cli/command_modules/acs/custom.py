@@ -41,7 +41,6 @@ from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
-from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import shell_safe_json_parse, truncate_text
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
@@ -58,9 +57,10 @@ from azure.mgmt.containerservice.models import ContainerServiceSshPublicKey
 from azure.mgmt.containerservice.models import ContainerServiceStorageProfileTypes
 from azure.mgmt.containerservice.models import ManagedCluster
 
+from ._client_factory import cf_container_services
+from ._client_factory import cf_resource_groups
 from ._client_factory import get_auth_management_client
 from ._client_factory import get_graph_rbac_management_client
-from ._client_factory import cf_container_services
 
 logger = get_logger(__name__)
 
@@ -82,10 +82,6 @@ def which(binary):
             return bin_path
 
     return None
-
-
-def _resource_client_factory(cli_ctx):
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
 def wait_then_open(url):
@@ -326,7 +322,7 @@ def k8s_install_connector(cmd, client, name, resource_group_name, connector_name
     except OSError:
         raise CLIError(helm_not_installed)
     # Validate if the RG exists
-    groups = _resource_client_factory(cmd.cli_ctx).resource_groups
+    groups = cf_resource_groups(cmd.cli_ctx)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rgkaci = groups.get(resource_group_name)
     # Auto assign the location
@@ -708,7 +704,7 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
-    groups = _resource_client_factory(cmd.cli_ctx).resource_groups
+    groups = cf_resource_groups(cmd.cli_ctx)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rg = groups.get(resource_group_name)
     if location is None:
@@ -1272,7 +1268,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
-    groups = _resource_client_factory(cmd.cli_ctx).resource_groups
+    groups = cf_resource_groups(cmd.cli_ctx)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rg = groups.get(resource_group_name)
     if location is None:
@@ -1323,6 +1319,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             else:
                 raise ex
     raise retry_exception
+
+
+def aks_get_versions(cmd, client, location):
+    return client.list_orchestrators(location, resource_type='managedClusters')
 
 
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
