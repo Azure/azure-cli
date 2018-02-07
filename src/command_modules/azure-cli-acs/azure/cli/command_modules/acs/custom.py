@@ -307,6 +307,8 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None):
                  os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as ex:
         raise CLIError('Connection error while attempting to download client ({})'.format(ex))
+    logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
+                   os.path.dirname(install_location), os.path.basename(install_location))
 
 
 def k8s_install_connector(cmd, client, name, resource_group_name, connector_name,
