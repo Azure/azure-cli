@@ -155,16 +155,23 @@ Testing
 Run all tests in a module:
 
 ```
-azdev test --modules <modules> [--live] [--series] [--discover]
+azdev test --modules <modules> [--live] [--series] [--discover] [--dest-file FILENAME]
 ```
 
 Run an individual test:
 
 ```
-azdev test --tests TEST [TEST ...] [--live] [--series] [--discover]
+azdev test --tests TEST [TEST ...] [--live] [--series] [--discover] [--dest-file FILENAME]
 ```
 For example `azdev test --tests test_myfoo`
 
+The list of failed tests are displayed at the end of a run and dumped to the file specified with `--dest-file` or `test_failures.txt` if nothing is provided. This allows for conveniently replaying failed tests:
+
+```
+azdev test --src-file test_failures.txt [--live] [--series] [--discover]
+```
+
+Relying on the default filename, the list of failed tests should grow shorter as you fix the cause of the failures until there are no more failing tests.
 
 Style Checks
 ------------
