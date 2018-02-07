@@ -1191,7 +1191,7 @@ helps['vm remove-identity'] = """
 
 helps['vm run-command'] = """
     type: group
-    short-summary: (PREVIEW) Manage run commands on a Virtual Machine
+    short-summary: Manage run commands on a Virtual Machine
 """
 
 helps['vm run-command invoke'] = """
