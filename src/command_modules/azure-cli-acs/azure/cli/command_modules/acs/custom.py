@@ -920,28 +920,22 @@ def _handle_merge(existing, addition, key):
                 existing[key].append(i)
 
 
-def merge_kubernetes_configurations(existing_file, addition_file):
+def load_kubernetes_configuration(filename):
     try:
-        with open(existing_file) as stream:
-            existing = yaml.safe_load(stream)
+        with open(filename) as stream:
+            return yaml.safe_load(stream)
     except (IOError, OSError) as ex:
         if getattr(ex, 'errno', 0) == errno.ENOENT:
-            raise CLIError('{} does not exist'.format(existing_file))
+            raise CLIError('{} does not exist'.format(filename))
         else:
             raise
-    except yaml.parser.ParserError as ex:
-        raise CLIError('Error parsing {} ({})'.format(existing_file, str(ex)))
+    except (yaml.parser.ParserError, UnicodeDecodeError) as ex:
+        raise CLIError('Error parsing {} ({})'.format(filename, str(ex)))
 
-    try:
-        with open(addition_file) as stream:
-            addition = yaml.safe_load(stream)
-    except (IOError, OSError) as ex:
-        if getattr(ex, 'errno', 0) == errno.ENOENT:
-            raise CLIError('{} does not exist'.format(existing_file))
-        else:
-            raise
-    except yaml.parser.ParserError as ex:
-        raise CLIError('Error parsing {} ({})'.format(addition_file, str(ex)))
+
+def merge_kubernetes_configurations(existing_file, addition_file):
+    existing = load_kubernetes_configuration(existing_file)
+    addition = load_kubernetes_configuration(addition_file)
 
     if addition is None:
         raise CLIError('failed to load additional configuration from {}'.format(addition_file))
