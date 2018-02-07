@@ -13,7 +13,8 @@ from azure.cli.core.commands.parameters import (
     file_type, get_enum_type, get_resource_name_completion_list, name_type, tags_type)
 from azure.cli.core.commands.validators import validate_file_or_dict
 
-from ._completers import get_vm_size_completion_list
+from ._completers import (
+    get_vm_size_completion_list, get_k8s_versions_completion_list, get_k8s_upgrades_completion_list)
 from ._validators import (
     validate_create_parameters, validate_k8s_client_version, validate_k8s_version, validate_linux_host_name,
     validate_list_of_integers, validate_ssh_key, validate_connector_name)
@@ -149,6 +150,7 @@ def load_arguments(self, _):
 
     with self.argument_context('aks create') as c:
         c.argument('name', validator=validate_linux_host_name)
+        c.argument('kubernetes_version', completer=get_k8s_versions_completion_list)
         c.argument('admin_username', options_list=['--admin-username', '-u'], default='azureuser')
         c.argument('dns_name_prefix', options_list=['--dns-name-prefix', '-p'])
         c.argument('generate_ssh_keys', action='store_true', validator=validate_create_parameters)
@@ -179,6 +181,9 @@ def load_arguments(self, _):
         c.argument('graceful', action='store_true',
                    help='Mention if you want to drain/uncordon your aci-connector to move your applications')
         c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
+
+    with self.argument_context('aks upgrade') as c:
+        c.argument('kubernetes_version', completer=get_k8s_upgrades_completion_list)
 
 
 def _get_default_install_location(exe_name):
