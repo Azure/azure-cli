@@ -2238,17 +2238,20 @@ def set_vmss_diagnostics_extension(
 
 
 # region VirtualMachineScaleSets Disks (Managed)
-def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_gb, instance_id=None, lun=None,
-                                     caching=None):
+def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_gb=None, instance_id=None, lun=None,
+                                     caching=None, existing_disk=None):
     DiskCreateOptionTypes, VirtualMachineScaleSetDataDisk = cmd.get_models(
         'DiskCreateOptionTypes', 'VirtualMachineScaleSetDataDisk')
-
-    def _init_data_disk(storage_profile, lun):
+    DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
+        'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
+    def _init_data_disk(storage_profile, lun, existing_disk=None):
         data_disks = storage_profile.data_disks or []
         if lun is None:
             luns = [d.lun for d in data_disks]
             lun = max(luns) + 1 if luns else 0
-        data_disk = VirtualMachineScaleSetDataDisk(lun, DiskCreateOptionTypes.empty, disk_size_gb=size_gb, caching=caching)
+        option = DiskCreateOptionTypes.attach if existing_disk else DiskCreateOptionTypes.empty
+        data_disk = VirtualMachineScaleSetDataDisk(lun, option, disk_size_gb=size_gb, caching=caching,
+                                                   managed_disk=existing_disk)
         data_disks.append(data_disk)
         storage_profile.data_disks = data_disks
 
@@ -2260,7 +2263,7 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
         return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
     else:
         vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
-        _init_data_disk(vmss_vm.storage_profile, lun)
+        _init_data_disk(vmss_vm.storage_profile, lun, existing_disk)
         return client.virtual_machine_scale_set_vms.update(resource_group_name, vmss_name, instance_id, vmss_vm)
 
 
