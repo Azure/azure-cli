@@ -58,4 +58,3 @@ class CdnCustomDomainScenarioTest(ScenarioTest):
             self.cmd('cdn custom-domain enable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
         with self.assertRaises(ErrorResponseException):
             self.cmd('cdn custom-domain disable-https -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
- 
