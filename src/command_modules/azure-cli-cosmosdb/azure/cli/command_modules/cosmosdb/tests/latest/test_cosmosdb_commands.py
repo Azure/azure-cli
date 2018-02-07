@@ -26,14 +26,13 @@ class CosmosDBTests(ScenarioTest):
             self.check('enableAutomaticFailover', False),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'Session')
         ])
-        
+
         self.cmd('az cosmosdb update -n {acc} -g {rg} --tags testKey=testValue')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableAutomaticFailover', False),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'Session')
         ]).get_output_in_json()
         assert account['tags']['testKey'] == "testValue"
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_update_database_account(self, resource_group):
@@ -47,7 +46,7 @@ class CosmosDBTests(ScenarioTest):
             JMESPathCheck('kind', 'MongoDB'),
             self.check('ipRangeFilter', "10.10.10.10"),
         ])
-        
+
         self.cmd('az cosmosdb update -n {acc} -g {rg} --capabilities EnableAggregationPipeline')
         account = self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             JMESPathCheck('kind', 'MongoDB'),
@@ -58,7 +57,6 @@ class CosmosDBTests(ScenarioTest):
 
         connection_strings = self.cmd('az cosmosdb list-connection-strings -n {acc} -g {rg}').get_output_in_json()
         assert len(connection_strings['connectionStrings']) == 1
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_delete_database_account(self, resource_group):
@@ -71,7 +69,6 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb delete -n {acc} -g {rg}')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', expect_failure=True)
 
-        
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_check_name_exists_database_account(self, resource_group):
 
@@ -80,11 +77,10 @@ class CosmosDBTests(ScenarioTest):
         })
 
         result = self.cmd('az cosmosdb check-name-exists -n {acc}').get_output_in_json()
-        assert result == False
+        assert not result
         self.cmd('az cosmosdb create -n {acc} -g {rg}')
         result = self.cmd('az cosmosdb check-name-exists -n {acc}').get_output_in_json()
-        assert result == True
-
+        assert result
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_keys_database_account(self, resource_group):
@@ -94,13 +90,13 @@ class CosmosDBTests(ScenarioTest):
         })
 
         self.cmd('az cosmosdb create -n {acc} -g {rg}')
-        
+
         original_keys = self.cmd('az cosmosdb list-keys -n {acc} -g {rg}').get_output_in_json()
         assert 'primaryMasterKey' in original_keys
         assert 'primaryReadonlyMasterKey' in original_keys
         assert 'secondaryMasterKey' in original_keys
         assert 'secondaryReadonlyMasterKey' in original_keys
-        
+
         self.cmd('az cosmosdb regenerate-key -n {acc} -g {rg} --key-kind primary')
         self.cmd('az cosmosdb regenerate-key -n {acc} -g {rg} --key-kind primaryReadonly')
         self.cmd('az cosmosdb regenerate-key -n {acc} -g {rg} --key-kind secondary')
@@ -114,10 +110,9 @@ class CosmosDBTests(ScenarioTest):
 
         original_keys = self.cmd('az cosmosdb list-read-only-keys -n {acc} -g {rg}').get_output_in_json()
         assert 'primaryReadonlyMasterKey' in original_keys
-        assert 'secondaryReadonlyMasterKey' in original_keys        
+        assert 'secondaryReadonlyMasterKey' in original_keys
         assert 'primaryMasterKey' not in original_keys
         assert 'secondaryMasterKey' not in original_keys
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_list_database_accounts(self, resource_group):
@@ -132,7 +127,6 @@ class CosmosDBTests(ScenarioTest):
         accounts_list = self.cmd('az cosmosdb list -g {rg}').get_output_in_json()
         assert next(acc for acc in accounts_list if acc['name'] == self.kwargs['acc1'])
         assert next(acc for acc in accounts_list if acc['name'] == self.kwargs['acc2'])
-
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_locations_database_accounts(self, resource_group):
@@ -153,7 +147,7 @@ class CosmosDBTests(ScenarioTest):
         assert account1['writeLocations'][0]['locationName'] == "East US"
         assert account1['readLocations'][0]['locationName'] == "West US" or account1['readLocations'][1]['locationName'] == "West US"
         assert account1['readLocations'][0]['failoverPriority'] == 1 or account1['readLocations'][1]['failoverPriority'] == 1
-        
+
         self.cmd('az cosmosdb failover-priority-change -n {acc} -g {rg} --failover-policies {read_location}=0 {write_location}=1')
         account2 = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
         assert len(account2['writeLocations']) == 1
