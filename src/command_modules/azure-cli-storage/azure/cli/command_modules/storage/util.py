@@ -24,7 +24,7 @@ def collect_blobs(blob_service, container, pattern=None):
         except NameError:
             blob_name = blob.name
 
-        if _match_path(pattern, blob_name):
+        if not pattern or _match_path(blob_name, pattern):
             results.append(blob_name)
 
     return results
@@ -75,11 +75,8 @@ def glob_files_locally(folder_path, pattern):
     len_folder_path = len(folder_path) + 1
     for root, _, files in walk(folder_path):
         for f in files:
-            from fnmatch import fnmatch
             full_path = os.path.join(root, f)
-            if pattern and fnmatch(full_path, pattern):
-                yield (full_path, full_path[len_folder_path:])
-            elif not pattern:
+            if not pattern or _match_path(full_path, pattern):
                 yield (full_path, full_path[len_folder_path:])
 
 
@@ -94,8 +91,7 @@ def glob_files_remotely(cmd, client, share_name, pattern):
         current_dir = queue.pop()
         for f in client.list_directories_and_files(share_name, current_dir):
             if isinstance(f, t_file):
-                from fnmatch import fnmatch
-                if (pattern and fnmatch(os.path.join(current_dir, f.name), pattern)) or (not pattern):
+                if not pattern or _match_path(os.path.join(current_dir, f.name), pattern):
                     yield current_dir, f.name
             elif isinstance(f, t_dir):
                 queue.appendleft(os.path.join(current_dir, f.name))
@@ -172,10 +168,9 @@ def _pattern_has_wildcards(p):
     return not p or p.find('*') != -1 or p.find('?') != -1 or p.find('[') != -1
 
 
-def _match_path(pattern, *args):
+def _match_path(path, pattern):
     from fnmatch import fnmatch
-    import os
-    return fnmatch(os.path.join(*args), pattern) if pattern else True
+    return fnmatch(path, pattern)
 
 
 def guess_content_type(file_path, original, settings_class):
