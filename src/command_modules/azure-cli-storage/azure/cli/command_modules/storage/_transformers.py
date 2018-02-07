@@ -102,17 +102,7 @@ def create_boolean_result_output_transformer(property_name):
 
 
 def transform_storage_list_output(result):
-    if isinstance(result, dict):
-        next_marker = result['next_marker']
-        result = result['generator']
-    else:
-        next_marker = result.next_marker
-
-    def set_marker(item):
-        item.next_marker = next_marker
-        return item
-
-    return [set_marker(item) for item in result]
+    return list(result)
 
 
 def transform_url(result):

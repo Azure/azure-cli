@@ -4,12 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 
-def list_share_directories(cmd, client, share_name, directory_name=None, num_results=None, marker=None, timeout=None):
+def list_share_directories(cmd, client, share_name, directory_name=None, timeout=None):
     t_dir_properties = cmd.get_models('file.models#DirectoryProperties')
 
-    generator = client.list_directories_and_files(share_name, directory_name, num_results=num_results,
-                                                  marker=marker, timeout=timeout)
-    return {
-        'generator': (f for f in generator if isinstance(f.properties, t_dir_properties)),
-        'next_marker': generator.next_marker
-    }
+    generator = client.list_directories_and_files(share_name, directory_name, timeout=timeout)
+    return list(f for f in generator if isinstance(f.properties, t_dir_properties))

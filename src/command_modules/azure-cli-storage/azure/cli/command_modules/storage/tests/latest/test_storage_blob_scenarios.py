@@ -279,44 +279,6 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage container exists -n {}', account_info, c) \
             .assert_with_checks(JMESPathCheck('exists', False))
 
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_blob_list_paging(self, resource_group, storage_account):
-        account_info = self.get_account_info(resource_group, storage_account)
-        container1 = self.create_container(account_info)
-        container2 = self.create_container(account_info)
-
-        # container list paging
-        result1 = self.storage_cmd('storage container list --num-results 1', account_info).get_output_in_json()[0]
-        result2 = self.storage_cmd('storage container list --num-results 1 --marker {}',
-                                   account_info, result1["nextMarker"]).get_output_in_json()[0]
-
-        # verify paging results
-        self.assertIn(result1["name"], [container1, container2])
-        self.assertIn(result2["name"], [container1, container2])
-        self.assertTrue(result1["name"] != result2["name"])
-        self.assertTrue(not result2["nextMarker"])
-
-        local_file = self.create_temp_file(1)
-        blob_name1 = self.create_random_name(prefix='blob', length=24)
-        blob_name2 = self.create_random_name(prefix='blob', length=24)
-
-        # blob list paging
-        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block', account_info,
-                         container1, local_file, blob_name1)
-        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block', account_info,
-                         container1, local_file, blob_name2)
-        result1 = self.storage_cmd('storage blob list --num-results 1 -c {}', account_info,
-                                   container1).get_output_in_json()[0]
-        result2 = self.storage_cmd('storage blob list --num-results 1 -c {} --marker {}', account_info,
-                                   container1, result1["nextMarker"]).get_output_in_json()[0]
-
-        # verify paging results
-        self.assertIn(result1["name"], [blob_name1, blob_name2])
-        self.assertIn(result2["name"], [blob_name1, blob_name2])
-        self.assertTrue(result1["name"] != result2["name"])
-        self.assertTrue(not result2["nextMarker"])
-
 
 if __name__ == '__main__':
     unittest.main()

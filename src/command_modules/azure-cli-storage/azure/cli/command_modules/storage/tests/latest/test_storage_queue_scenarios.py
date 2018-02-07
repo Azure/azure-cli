@@ -7,11 +7,10 @@ import time
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint,
                                JMESPathCheck, JMESPathCheckExists, NoneCheck)
 from azure.cli.core.profiles import ResourceType
-from .storage_test_util import StorageScenarioMixin
 
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
-class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
+class StorageQueueScenarioTests(ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(sku='Standard_RAGRS')
     def test_storage_queue_general_scenario(self, resource_group, storage_account):
@@ -115,27 +114,6 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
         # check status of the queue
         queue_status = self.cmd('storage queue stats').get_output_in_json()
         self.assertIn(queue_status['geoReplication']['status'], ('live', 'unavailable'))
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_queue_list_paging(self, resource_group, storage_account):
-        account_info = self.get_account_info(resource_group, storage_account)
-
-        queue1 = self.create_random_name('queue', 24)
-        queue2 = self.create_random_name('queue', 24)
-
-        self.storage_cmd('storage queue create -n {}', account_info, queue1)
-        self.storage_cmd('storage queue create -n {}', account_info, queue2)
-
-        result1 = self.storage_cmd('storage queue list --num-results 1', account_info).get_output_in_json()[0]
-        result2 = self.storage_cmd('storage queue list --num-results 1 --marker {}', account_info,
-                                   result1["nextMarker"]).get_output_in_json()[0]
-
-        # verify paging results
-        self.assertIn(result1["name"], [queue1, queue2])
-        self.assertIn(result2["name"], [queue1, queue2])
-        self.assertTrue(result1["name"] != result2["name"])
-        self.assertTrue(not result2["nextMarker"])
 
     def get_account_key(self, group, name):
         return self.cmd('storage account keys list -n {} -g {} --query "[0].value" -otsv'
