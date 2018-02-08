@@ -27,12 +27,35 @@ def load_arguments(self, _):
         c.argument('enable_non_ssl_port', action='store_true')
         c.argument('shard_count', type=int)
 
+    with self.argument_context('redis import') as c:
+        c.argument('files', help='SAS url for blobs that needs to be imported', nargs='+')
+        c.argument('format', options_list=['--file-format'], help='Format of the blob (Example: rdb)')
+
     with self.argument_context('redis import-method') as c:
-        c.argument('files', nargs='+')
+        c.argument('files', help='SAS url for blobs that needs to be imported', nargs='+')
+        c.argument('file-format', help='Format of the blob (Example: rdb)')
+
+    with self.argument_context('redis export') as c:
+        c.argument('container', help='SAS url for container where data needs to be exported to')
+        c.argument('prefix', help='Prefix to use for exported files')
+        c.argument('file-format', help='Format of the blob (Example: rdb)')
 
     with self.argument_context('redis patch-schedule set') as c:
-        c.argument('schedule_entries', type=ScheduleEntryList)
+        c.argument('schedule_entries', help="List of Patch schedule entries. Example Value:[{\"dayOfWeek\":\"Monday\",\"startHourUtc\":\"00\",\"maintenanceWindow\":\"PT5H\"}]", type=ScheduleEntryList)
 
     with self.argument_context('redis create') as c:
         c.argument('name', arg_type=name_type, completer=None)
         c.argument('tenant_settings', type=JsonString)
+
+    with self.argument_context('redis patch-schedule set') as c:
+        c.argument('schedule_entries', type=ScheduleEntryList)
+
+    with self.argument_context('redis firewall-rules') as c:
+        c.argument('cache_name', options_list=['--name', '-n'], help='The name of the Redis cache')
+
+    with self.argument_context('redis linked-server') as c:
+        c.argument('name', help='Name of the primary redis cache')
+        c.argument('resource_group_name', help='Resource group name of the primary redis cache')
+        c.argument('linked_server_name', help='Name of the linked redis cache')
+        c.argument('secondary_cache_name', help='Name of the redis cache to be linked as Secondary')
+        c.argument('secondary_cache_resource_group', help='Resource group name of the redis cache to be linked as Secondary')
