@@ -155,23 +155,28 @@ Testing
 Run all tests in a module:
 
 ```
-run_tests --module <module> [--live] [--parallel]
+azdev test --modules <modules> [--live] [--series] [--discover] [--dest-file FILENAME]
 ```
 
 Run an individual test:
 
 ```
-run_tests --module <module> --test <file>.<class>[.<test>]
+azdev test --tests TEST [TEST ...] [--live] [--series] [--discover] [--dest-file FILENAME]
 ```
-For example `run_tests --module mymod --test test_myfoo.MyFooTests.test_myfoo`
+For example `azdev test --tests test_myfoo`
 
+The list of failed tests are displayed at the end of a run and dumped to the file specified with `--dest-file` or `test_failures.txt` if nothing is provided. This allows for conveniently replaying failed tests:
+
+```
+azdev test --src-file test_failures.txt [--live] [--series] [--discover]
+```
+
+Relying on the default filename, the list of failed tests should grow shorter as you fix the cause of the failures until there are no more failing tests.
 
 Style Checks
 ------------
 
 ```
-check_style --module <module> [--pylint] [--pep8]
-OR
 azdev style --module <module> [--pylint] [--pep8]
 ```
 
