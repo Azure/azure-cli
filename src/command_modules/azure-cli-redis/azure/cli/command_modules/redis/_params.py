@@ -33,7 +33,7 @@ def load_arguments(self, _):
 
     with self.argument_context('redis import-method') as c:
         c.argument('files', help='SAS url for blobs that needs to be imported', nargs='+')
-        c.argument('format', options_list=['--file-format'], help='Format of the blob (Example: rdb)')
+        c.argument('file-format', help='Format of the blob (Example: rdb)')
 
     with self.argument_context('redis export') as c:
         c.argument('container', help='SAS url for container where data needs to be exported to')
