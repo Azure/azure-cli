@@ -29,6 +29,8 @@ logger = logging.getLogger('azure.cli.testsdk')
 class CheckerMixin(object):
 
     def _apply_kwargs(self, val):
+        #return val.format(**self.kwargs)
+        # TODO: detect when .format was used but brackets remain...
         try:
             return val.format(**self.kwargs)
         except Exception:  # pylint: disable=broad-except
