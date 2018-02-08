@@ -13,7 +13,7 @@ def get_nose_runner(parallel=True, process_timeout=600, process_restart=True):
     def _run_nose(test_folders):
         import nose
         import os.path
-        arguments = [__file__, '-v', '-c', os.path.join(get_repo_root(), 'nose.cfg')]
+        arguments = ['nosetests', __file__, '-v', '-c', os.path.join(get_repo_root(), 'nose.cfg')]
         if parallel:
             arguments += ['--processes=-1', '--process-timeout={}'.format(process_timeout)]
             if process_restart:
