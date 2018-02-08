@@ -13,7 +13,7 @@ from knack.parser import CLICommandParser
 from knack.util import CLIError
 
 import azure.cli.core.telemetry as telemetry
-
+from azure.cli.core.extension import get_extension
 
 logger = get_logger(__name__)
 
@@ -109,9 +109,17 @@ class AzCliCommandParser(CLICommandParser):
         self.exit(2)
 
     def format_help(self):
+        extension_version = None
+        try:
+            if self.command_source:
+                extension_version = get_extension(self.command_source.extension_name).version
+        except Exception:  # pylint: disable=broad-except
+            pass
+
         telemetry.set_command_details(
             command=self.prog[3:],
-            extension_name=self.command_source.extension_name if self.command_source else None)
+            extension_name=self.command_source.extension_name if self.command_source else None,
+            extension_version=extension_version)
         telemetry.set_success(summary='show help')
         super(AzCliCommandParser, self).format_help()
 

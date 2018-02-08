@@ -20,6 +20,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core import EXCLUDED_PARAMS
+from azure.cli.core.extension import get_extension
 import azure.cli.core.telemetry as telemetry
 
 logger = get_logger(__name__)
@@ -189,7 +190,7 @@ class AzCliCommand(CLICommand):
 # pylint: disable=too-few-public-methods
 class AzCliCommandInvoker(CommandInvoker):
 
-    # pylint: disable=too-many-statements
+    # pylint: disable=too-many-statements,too-many-locals
     def execute(self, args):
         import knack.events as events
         from knack.util import CommandResultItem, todict
@@ -283,10 +284,19 @@ class AzCliCommandInvoker(CommandInvoker):
             params = self._filter_params(expanded_arg)
 
             command_source = self.commands_loader.command_table[command].command_source
+
+            extension_version = None
+            try:
+                if command_source:
+                    extension_version = get_extension(command_source.extension_name).version
+            except Exception:  # pylint: disable=broad-except
+                pass
+
             telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
                                           [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
                                            (p.startswith('-') and len(p) > 1)],
-                                          extension_name=command_source.extension_name if command_source else None)
+                                          extension_name=command_source.extension_name if command_source else None,
+                                          extension_version=extension_version)
             if command_source:
                 self.data['command_extension_name'] = command_source.extension_name
 
