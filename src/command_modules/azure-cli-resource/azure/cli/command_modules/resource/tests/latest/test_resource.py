@@ -765,9 +765,9 @@ class InvokeActionTest(ScenarioTest):
         self.cmd('resource invoke-action --action generalize --ids {vm_id}')
         self.cmd('resource invoke-action --action deallocate --ids {vm_id}')
 
-        request_body = '{\\"vhdPrefix\\":\\"myPrefix\\",\\"destinationContainerName\\":\\"container\\",\\"overwriteVhds\\":\\"true\\"}'
+        self.kwargs['request_body'] = '{\\"vhdPrefix\\":\\"myPrefix\\",\\"destinationContainerName\\":\\"container\\",\\"overwriteVhds\\":\\"true\\"}'
 
-        self.cmd('resource invoke-action --action capture --ids {} --request-body {}'.format(self.kwargs['vm_id'], request_body))
+        self.cmd('resource invoke-action --action capture --ids {vm_id} --request-body {request_body}')
 
 
 if __name__ == '__main__':
