@@ -2239,13 +2239,14 @@ def set_vmss_diagnostics_extension(
 
 # region VirtualMachineScaleSets Disks (Managed)
 def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_gb=None, instance_id=None, lun=None,
-                                     caching=None, existing_disk=None):
+                                     caching=None, disk=None):
     DiskCreateOptionTypes, ManagedDiskParameters = cmd.get_models(
         'DiskCreateOptionTypes', 'ManagedDiskParameters')
-    if existing_disk is None:
+    if disk is None:
         DataDisk = cmd.get_models('VirtualMachineScaleSetDataDisk')
     else:
         DataDisk = cmd.get_models('DataDisk')
+
     def _init_data_disk(storage_profile, lun, existing_disk=None):
         data_disks = storage_profile.data_disks or []
         if lun is None:
@@ -2267,22 +2268,31 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
         # pylint: disable=no-member
         _init_data_disk(vmss.virtual_machine_profile.storage_profile, lun)
         return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+
+    vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
+    _init_data_disk(vmss_vm.storage_profile, lun, disk)
+    return client.virtual_machine_scale_set_vms.update(resource_group_name, vmss_name, instance_id, vmss_vm)
+
+
+def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=None):
+    client = _compute_client_factory(cmd.cli_ctx)
+    if instance_id is None:
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        # pylint: disable=no-member
+        data_disks = vmss.virtual_machine_profile.storage_profile.data_disks
     else:
         vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
-        _init_data_disk(vmss_vm.storage_profile, lun, existing_disk)
-        return client.virtual_machine_scale_set_vms.update(resource_group_name, vmss_name, instance_id, vmss_vm)
+        data_disks = vmss_vm.storage_profile.data_disks
 
-
-def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun):
-    client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-    # pylint: disable=no-member
-    data_disks = vmss.virtual_machine_profile.storage_profile.data_disks
     leftovers = [d for d in data_disks if d.lun != lun]
     if len(data_disks) == len(leftovers):
         raise CLIError("Could not find the data disk with lun '{}'".format(lun))
-    vmss.virtual_machine_profile.storage_profile.data_disks = leftovers
-    return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+
+    if instance_id is None:
+        vmss.virtual_machine_profile.storage_profile.data_disks = leftovers
+        return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+    vmss_vm.storage_profile.data_disks = leftovers
+    return client.virtual_machine_scale_set_vms.update(resource_group_name, vmss_name, instance_id, vmss_vm)
 # endregion
 
 

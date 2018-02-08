@@ -334,6 +334,16 @@ helps['vmss disk'] = """
     short-summary: Manage data disks of a VMSS.
 """
 
+helps['vmss disk attach'] = """
+    type: command
+    short-summary: Attach manage data disks to a scale set or its instance.
+"""
+
+helps['vmss disk detach'] = """
+    type: command
+    short-summary: Detach manage data disks from a scale set or its instance.
+"""
+
 helps['vmss nic'] = """
     type: group
     short-summary: Manage network interfaces of a VMSS.
