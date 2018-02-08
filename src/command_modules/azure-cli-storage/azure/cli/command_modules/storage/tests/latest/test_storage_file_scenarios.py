@@ -102,61 +102,6 @@ class StorageFileShareScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage share delete -n {}', account_info, s1) \
             .assert_with_checks(JMESPathCheck('deleted', True))
 
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_file_list_paging(self, resource_group, storage_account):
-        account_info = self.get_account_info(resource_group, storage_account)
-        share1 = self.create_share(account_info)
-        share2 = self.create_share(account_info)
-
-        # share list paging
-        result1 = self.storage_cmd('storage share list --num-results 1', account_info).get_output_in_json()[0]
-        result2 = self.storage_cmd('storage share list --num-results 1 --marker {}',
-                                   account_info, result1["nextMarker"]).get_output_in_json()[0]
-
-        # verify paging results
-        self.assertIn(result1["name"], [share1, share2])
-        self.assertIn(result2["name"], [share1, share2])
-        self.assertTrue(result1["name"] != result2["name"])
-        self.assertTrue(not result2["nextMarker"])
-
-        local_file = self.create_temp_file(1)
-        file_name1 = self.create_random_name(prefix='file', length=24) + '.txt'
-        file_name2 = self.create_random_name(prefix='file', length=24) + '.txt'
-
-        # file list paging
-        self.storage_cmd('storage file upload -p "{}" --share-name {} --source "{}"', account_info,
-                         file_name1, share1, local_file)
-        self.storage_cmd('storage file upload -p "{}" --share-name {} --source "{}"', account_info,
-                         file_name2, share1, local_file)
-        result1 = self.storage_cmd('storage file list --num-results 1 -s {} --exclude-dir', account_info,
-                                   share1).get_output_in_json()[0]
-        result2 = self.storage_cmd('storage file list --num-results 1 -s {} --marker {}', account_info,
-                                   share1, result1["nextMarker"]).get_output_in_json()[0]
-
-        # verify paging results
-        self.assertIn(result1["name"], [file_name1, file_name2])
-        self.assertIn(result2["name"], [file_name1, file_name2])
-        self.assertTrue(result1["name"] != result2["name"])
-        self.assertTrue(not result2["nextMarker"])
-
-        dir_name1 = self.create_random_name(prefix='dir', length=24)
-        dir_name2 = self.create_random_name(prefix='dir', length=24)
-
-        # directory list paging
-        self.storage_cmd('storage directory create -n {} --share-name {}', account_info, dir_name1, share2)
-        self.storage_cmd('storage directory create -n {} --share-name {}', account_info, dir_name2, share2)
-        result1 = self.storage_cmd('storage directory list --num-results 1 -s {}', account_info,
-                                   share2).get_output_in_json()[0]
-        result2 = self.storage_cmd('storage directory list --num-results 1 -s {} --marker {}', account_info,
-                                   share2, result1["nextMarker"]).get_output_in_json()[0]
-
-        # verify paging results
-        self.assertIn(result1["name"], [dir_name1, dir_name2])
-        self.assertIn(result2["name"], [dir_name1, dir_name2])
-        self.assertTrue(result1["name"] != result2["name"])
-        self.assertTrue(not result2["nextMarker"])
-
     def validate_directory_scenario(self, account_info, share):
         directory = self.create_random_name('dir', 16)
         self.storage_cmd('storage directory create --share-name {} --name {} --fail-on-exist',

@@ -482,7 +482,7 @@ helps['storage file list'] = """
     parameters:
         - name: --exclude-dir
           type: bool
-          short-summary: List only files in the given share. If the --num-results parameter is also used, this may cause the output to have less results than expected.
+          short-summary: List only files in the given share.
 """
 
 helps['storage file copy'] = """
