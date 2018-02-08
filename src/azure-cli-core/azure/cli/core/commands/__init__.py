@@ -190,7 +190,7 @@ class AzCliCommand(CLICommand):
 # pylint: disable=too-few-public-methods
 class AzCliCommandInvoker(CommandInvoker):
 
-    # pylint: disable=too-many-statements
+    # pylint: disable=too-many-statements,too-many-locals
     def execute(self, args):
         import knack.events as events
         from knack.util import CommandResultItem, todict
@@ -289,7 +289,7 @@ class AzCliCommandInvoker(CommandInvoker):
             try:
                 if command_source:
                     extension_version = get_extension(command_source.extension_name).version
-            except Exception:
+            except Exception:  # pylint: disable=broad-except
                 pass
 
             telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],

@@ -113,7 +113,7 @@ class AzCliCommandParser(CLICommandParser):
         try:
             if self.command_source:
                 extension_version = get_extension(self.command_source.extension_name).version
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             pass
 
         telemetry.set_command_details(
