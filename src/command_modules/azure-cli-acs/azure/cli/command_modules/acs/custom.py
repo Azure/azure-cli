@@ -41,7 +41,6 @@ from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
-from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import shell_safe_json_parse, truncate_text
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
@@ -58,9 +57,10 @@ from azure.mgmt.containerservice.models import ContainerServiceSshPublicKey
 from azure.mgmt.containerservice.models import ContainerServiceStorageProfileTypes
 from azure.mgmt.containerservice.models import ManagedCluster
 
+from ._client_factory import cf_container_services
+from ._client_factory import cf_resource_groups
 from ._client_factory import get_auth_management_client
 from ._client_factory import get_graph_rbac_management_client
-from ._client_factory import cf_container_services
 
 logger = get_logger(__name__)
 
@@ -82,10 +82,6 @@ def which(binary):
             return bin_path
 
     return None
-
-
-def _resource_client_factory(cli_ctx):
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
 
 
 def wait_then_open(url):
@@ -311,6 +307,8 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None):
                  os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
     except IOError as ex:
         raise CLIError('Connection error while attempting to download client ({})'.format(ex))
+    logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
+                   os.path.dirname(install_location), os.path.basename(install_location))
 
 
 def k8s_install_connector(cmd, client, name, resource_group_name, connector_name,
@@ -326,7 +324,7 @@ def k8s_install_connector(cmd, client, name, resource_group_name, connector_name
     except OSError:
         raise CLIError(helm_not_installed)
     # Validate if the RG exists
-    groups = _resource_client_factory(cmd.cli_ctx).resource_groups
+    groups = cf_resource_groups(cmd.cli_ctx)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rgkaci = groups.get(resource_group_name)
     # Auto assign the location
@@ -708,7 +706,7 @@ def acs_create(cmd, client, resource_group_name, deployment_name, name, ssh_key_
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
-    groups = _resource_client_factory(cmd.cli_ctx).resource_groups
+    groups = cf_resource_groups(cmd.cli_ctx)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rg = groups.get(resource_group_name)
     if location is None:
@@ -924,28 +922,22 @@ def _handle_merge(existing, addition, key):
                 existing[key].append(i)
 
 
-def merge_kubernetes_configurations(existing_file, addition_file):
+def load_kubernetes_configuration(filename):
     try:
-        with open(existing_file) as stream:
-            existing = yaml.safe_load(stream)
+        with open(filename) as stream:
+            return yaml.safe_load(stream)
     except (IOError, OSError) as ex:
         if getattr(ex, 'errno', 0) == errno.ENOENT:
-            raise CLIError('{} does not exist'.format(existing_file))
+            raise CLIError('{} does not exist'.format(filename))
         else:
             raise
-    except yaml.parser.ParserError as ex:
-        raise CLIError('Error parsing {} ({})'.format(existing_file, str(ex)))
+    except (yaml.parser.ParserError, UnicodeDecodeError) as ex:
+        raise CLIError('Error parsing {} ({})'.format(filename, str(ex)))
 
-    try:
-        with open(addition_file) as stream:
-            addition = yaml.safe_load(stream)
-    except (IOError, OSError) as ex:
-        if getattr(ex, 'errno', 0) == errno.ENOENT:
-            raise CLIError('{} does not exist'.format(existing_file))
-        else:
-            raise
-    except yaml.parser.ParserError as ex:
-        raise CLIError('Error parsing {} ({})'.format(addition_file, str(ex)))
+
+def merge_kubernetes_configurations(existing_file, addition_file):
+    existing = load_kubernetes_configuration(existing_file)
+    addition = load_kubernetes_configuration(addition_file)
 
     if addition is None:
         raise CLIError('failed to load additional configuration from {}'.format(addition_file))
@@ -1236,8 +1228,8 @@ def aks_browse(cmd, client, resource_group_name, name, disable_browser=False):
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not find dashboard pod: {}'.format(err))
     if dashboard_pod:
-        # remove the "pods/" prefix from the name
-        dashboard_pod = str(dashboard_pod)[5:].strip()
+        # remove any "pods/" or "pod/" prefix from the name
+        dashboard_pod = str(dashboard_pod).split('/')[-1].strip()
     else:
         raise CLIError("Couldn't find the Kubernetes dashboard pod.")
     # launch kubectl port-forward locally to access the remote dashboard
@@ -1253,8 +1245,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
                dns_name_prefix=None,
                location=None,
                admin_username="azureuser",
-               kubernetes_version="1.7.7",
-               node_vm_size="Standard_D1_v2",
+               kubernetes_version='',
+               node_vm_size="Standard_DS1_v2",
                node_osdisk_size=0,
                node_count=3,
                service_principal=None, client_secret=None,
@@ -1272,7 +1264,7 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     if not dns_name_prefix:
         dns_name_prefix = _get_default_dns_prefix(name, resource_group_name, subscription_id)
 
-    groups = _resource_client_factory(cmd.cli_ctx).resource_groups
+    groups = cf_resource_groups(cmd.cli_ctx)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rg = groups.get(resource_group_name)
     if location is None:
@@ -1323,6 +1315,10 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
             else:
                 raise ex
     raise retry_exception
+
+
+def aks_get_versions(cmd, client, location):
+    return client.list_orchestrators(location, resource_type='managedClusters')
 
 
 def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,

@@ -5,6 +5,18 @@
 
 from __future__ import print_function
 
+import sys
+
+
+def display(txt):
+    """ Output to stderr """
+    print(txt, file=sys.stderr)
+
+
+def output(txt):
+    """ Output to stdout """
+    print(txt, file=sys.stdout)
+
 
 def get_print_format(records):
     """Find the best format to display the given list of records in table format"""

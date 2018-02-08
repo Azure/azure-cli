@@ -12,11 +12,12 @@ import mock
 from azure.cli.testsdk import TestCli
 
 from azure.mgmt.authorization.models import RoleDefinition, RoleDefinitionProperties
-from azure.graphrbac.models import Application, ServicePrincipal, GraphErrorException
+from azure.graphrbac.models import Application, ServicePrincipal, GraphErrorException, ApplicationUpdateParameters
 from azure.cli.command_modules.role.custom import (create_role_definition,
                                                    update_role_definition,
                                                    create_service_principal_for_rbac,
                                                    reset_service_principal_credential,
+                                                   update_application,
                                                    _try_x509_pem)
 
 from knack.util import CLIError
@@ -302,6 +303,17 @@ class TestRoleMocked(unittest.TestCase):
         graph_client_mock.return_value = faked_graph_client
 
         faked_graph_client.applications.create.side_effect = GraphErrorException(_test_deserializer, None)
+
+    def test_update_application_to_be_single_tenant(self):
+        graph_app_client = mock.MagicMock()
+        app_mock = mock.MagicMock()
+        test_object_id = '11111111-2222-3333-4444-555555555555'
+        app_mock.object_id = test_object_id
+        graph_app_client.list.return_value = [app_mock]
+
+        update_application(graph_app_client, 'http://any-client', available_to_other_tenants=True)
+        graph_app_client.patch.assert_called_with(test_object_id,
+                                                  ApplicationUpdateParameters(available_to_other_tenants=True))
 
 
 class FakedError(object):  # pylint: disable=too-few-public-methods

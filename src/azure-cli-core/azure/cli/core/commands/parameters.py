@@ -212,7 +212,7 @@ quote_text = 'Use {} to clear existing tags.'.format(quotes)
 
 tags_type = CLIArgumentType(
     validator=validate_tags,
-    help="space separated tags in 'key[=value]' format. {}".format(quote_text),
+    help="space-separated tags in 'key[=value]' format. {}".format(quote_text),
     nargs='*'
 )
 
@@ -232,7 +232,7 @@ no_wait_type = CLIArgumentType(
 zones_type = CLIArgumentType(
     options_list=['--zones', '-z'],
     nargs='+',
-    help='Space separated list of availability zones into which to provision the resource.',
+    help='Space-separated list of availability zones into which to provision the resource.',
     choices=['1', '2', '3']
 )
 

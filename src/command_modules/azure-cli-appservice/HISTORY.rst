@@ -2,6 +2,11 @@
 
 Release History
 ===============
+0.1.26
+++++++
+* webapp backup/restore: Fix issue where restore command fails because of a null reference
+* appservice: support default app service plan through `az configure --defaults appserviceplan=my-asp`
+
 0.1.25
 ++++++
 * fix broken webapp log tail/download

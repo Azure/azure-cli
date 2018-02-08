@@ -1,6 +1,18 @@
-FROM azureclidev.azurecr.io/azurecli-a01-droid:python3.6-latest
+FROM python:3.6-jessie
+
+LABEL a01.product="azurecli"
+LABEL a01.index.schema="v2"
+
+RUN rm /usr/bin/python && ln /usr/local/bin/python3.6 /usr/bin/python
 
 COPY build /tmp/build
+COPY docker_app /app
 
-RUN find /tmp/build -name '*.whl' | xargs pip install
+RUN pip install -r /app/requirements.txt && \
+    find /tmp/build -name '*.whl' | xargs pip install && \
+    rm -rf /tmp/build && \
+    python /app/collect_tests.py > /app/test_index && \
+    rm /app/collect_tests.py && \
+    rm /app/requirements.txt && \
+    rm -rf ~/.cache/pip
 

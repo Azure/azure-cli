@@ -7,7 +7,8 @@ import os.path
 
 from knack.help_files import helps
 
-SERVICE_PRINCIPAL_CACHE = os.path.join('$HOME', '.azure', 'acsServicePrincipal.json')
+ACS_SERVICE_PRINCIPAL_CACHE = os.path.join('$HOME', '.azure', 'acsServicePrincipal.json')
+AKS_SERVICE_PRINCIPAL_CACHE = os.path.join('$HOME', '.azure', 'aksServicePrincipal.json')
 
 
 # ACS command help
@@ -64,7 +65,7 @@ helps['acs create'] = """
                 }}]'
         - name: Create a DCOS cluster with agent-profiles specified from a file.
           text: az acs create -g MyResourceGroup -n MyContainerService --agent-profiles MyAgentProfiles.json
-""".format(sp_cache=SERVICE_PRINCIPAL_CACHE)
+""".format(sp_cache=ACS_SERVICE_PRINCIPAL_CACHE)
 
 helps['acs dcos'] = """
     type: group
@@ -144,7 +145,7 @@ helps['aks create'] = """
         - name: --service-principal
           type: string
           short-summary: Service principal used for authentication to Azure APIs.
-          long-summary:  If not specified, a new service principal with the contributor role is created and cached at
+          long-summary:  If not specified, a new service principal is created and cached at
                          {sp_cache} to be used by subsequent `az aks` commands.
         - name: --client-secret
           type: string
@@ -166,7 +167,9 @@ helps['aks create'] = """
           short-summary: Size in GB of the OS disk for each node in the node pool.
         - name: --kubernetes-version -k
           type: string
-          short-summary: Version of Kubernetes to use for creating the cluster, such as "1.7.7" or "1.8.2".
+          short-summary: Version of Kubernetes to use for creating the cluster, such as "1.7.12" or "1.8.7".
+          populator-commands:
+          - "`az aks get-versions`"
         - name: --ssh-key-value
           type: string
           short-summary: Public key path or key contents to install on node VMs for SSH access. For example,
@@ -178,10 +181,10 @@ helps['aks create'] = """
         - name: Create a Kubernetes cluster with an existing SSH public key.
           text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
         - name: Create a Kubernetes cluster with a specific version.
-          text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.8.1
+          text: az aks create -g MyResourceGroup -n MyManagedCluster --kubernetes-version 1.8.7
         - name: Create a Kubernetes cluster with a larger node pool.
           text: az aks create -g MyResourceGroup -n MyManagedCluster --node-count 7
-""".format(sp_cache=SERVICE_PRINCIPAL_CACHE)
+""".format(sp_cache=AKS_SERVICE_PRINCIPAL_CACHE)
 
 helps['aks delete'] = """
     type: command
@@ -200,9 +203,15 @@ helps['aks get-credentials'] = """
           short-summary: Kubernetes configuration file to update. Use "-" to print YAML to stdout instead.
 """
 
+helps['aks get-upgrades'] = """
+    type: command
+    short-summary: Get the upgrade versions available for a managed Kubernetes cluster.
+"""
+
 helps['aks get-versions'] = """
     type: command
-    short-summary: Get versions available to upgrade a managed Kubernetes cluster.
+    short-summary: Get the versions available for creating a managed Kubernetes cluster.
+    long-summary: 'Deprecation notice: the previous behavior of this command is now in `az aks get-upgrades`.'
 """
 
 helps['aks install-cli'] = """
@@ -212,7 +221,7 @@ helps['aks install-cli'] = """
 
 helps['aks install-connector'] = """
     type: command
-    short-summary: Install the Azure Container Instances (ACI) Connector on a managed Kubernetes cluster.
+    short-summary: Install the ACI Connector on a managed Kubernetes cluster.
     parameters:
         - name: --chart-url
           type: string
@@ -226,7 +235,7 @@ helps['aks install-connector'] = """
         - name: --service-principal
           type: string
           short-summary: Service principal used for authentication to Azure APIs.
-          long-summary:  If not specified, a new service principal with the contributor role is created and cached at
+          long-summary:  If not specified, a new service principal is created and cached at
                          {sp_cache} to be used by subsequent `az aks` commands.
         - name: --client-secret
           type: string
@@ -253,7 +262,7 @@ helps['aks install-connector'] = """
           text: |-
             az aks install-connector --name MyManagedCluster --resource-group MyResourceGroup \\
               --connector-name MyConnector --chart-url <CustomURL>
-""".format(sp_cache=SERVICE_PRINCIPAL_CACHE)
+""".format(sp_cache=AKS_SERVICE_PRINCIPAL_CACHE)
 
 helps['aks list'] = """
     type: command
@@ -301,9 +310,9 @@ helps['aks upgrade'] = """
     parameters:
         - name: --kubernetes-version -k
           type: string
-          short-summary: Version of Kubernetes to upgrade the cluster to, such as "1.7.7" or "1.8.2".
+          short-summary: Version of Kubernetes to upgrade the cluster to, such as "1.7.12" or "1.8.7".
           populator-commands:
-          - "`az aks get-versions`"
+          - "`az aks get-upgrades`"
 """
 
 helps['aks wait'] = """

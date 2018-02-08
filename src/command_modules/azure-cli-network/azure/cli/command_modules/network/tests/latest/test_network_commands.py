@@ -11,7 +11,8 @@ import unittest
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint, live_only
+from azure.cli.testsdk import (
+    ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint, live_only)
 
 from knack.util import CLIError
 
@@ -281,35 +282,6 @@ class NetworkAppGatewayPrivateIpScenarioTest20170601(ScenarioTest):
             self.check('policyName', policy_name),
             self.check('policyType', 'Predefined')
         ])
-
-
-@api_version_constraint(ResourceType.MGMT_NETWORK, max_api='2017-03-01')
-class NetworkAppGatewayPrivateIpScenarioTest20170301(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_ag_private_ip')
-    def test_network_app_gateway_with_private_ip(self, resource_group):
-
-        self.kwargs.update({
-            'private_ip': '10.0.0.15',
-            'pass': 'password',
-            'path': os.path.join(TEST_DIR, 'TestCert.pfx')
-        })
-
-        self.cmd('network application-gateway create -g {rg} -n ag3 --subnet subnet1 --private-ip-address {private_ip} --cert-file "{path}" --cert-password {pass} --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n ag3 --exists')
-        self.cmd('network application-gateway show -g {rg} -n ag3', checks=[
-            self.check('frontendIpConfigurations[0].privateIpAddress', self.kwargs['private_ip']),
-            self.check('frontendIpConfigurations[0].privateIpAllocationMethod', 'Static')
-        ])
-        self.kwargs['path'] = os.path.join(TEST_DIR, 'TestCert2.pfx')
-        self.cmd('network application-gateway ssl-cert update -g {rg} --gateway-name ag3 -n ag3SslCert --cert-file "{path}" --cert-password {pass}')
-        self.cmd('network application-gateway wait -g {rg} -n ag3 --updated')
-        self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 --disabled-ssl-protocols tlsv1_0 tlsv1_1 --no-wait')
-        self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3',
-                 checks=self.check('disabledSslProtocols.length(@)', 2))
-        self.cmd('network application-gateway ssl-policy set -g {rg} --gateway-name ag3 --clear --no-wait')
-        self.cmd('network application-gateway ssl-policy show -g {rg} --gateway-name ag3',
-                 checks=self.is_empty())
 
 
 @api_version_constraint(ResourceType.MGMT_NETWORK, min_api='2017-06-01')
@@ -2042,70 +2014,80 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
 
 
-# TODO: Troubleshoot VNET gateway issue and re-enable...
-# class NetworkWatcherScenarioTest(ScenarioTest):
-#    import mock
+class NetworkWatcherScenarioTest(ScenarioTest):
+    import mock
 
-#    def _mock_thread_count():
-#        return 1
+    def _mock_thread_count():
+        return 1
 
-#    @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
-#    @ResourceGroupPreparer(name_prefix='cli_test_network_watcher', location='westcentralus')
-#    @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
-#    def test_network_watcher(self, resource_group, storage_account):
+    def enable_large_payload(self, size=8192):
+        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+        large_resp_body = next((r for r in self.recording_processors if isinstance(
+            r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = size   # pylint: disable=protected-access
 
-#        self.kwargs.update({
-#            'loc': 'westcentralus',
-#            'vm': 'vm1',
-#            'nsg': 'msg1',
-#            'capture': 'capture1'
-#        })
+    def _network_watcher_configure(self):
+        self.cmd('network watcher configure -g {rg} --locations westus westus2 westcentralus --enabled')
+        self.cmd('network watcher configure --locations westus westus2 --tags foo=doo')
+        self.cmd('network watcher configure -l westus2 --enabled false')
+        self.cmd('network watcher list')
 
-#        self.cmd('network watcher configure -g {rg} --locations westus westus2 westcentralus --enabled')
-#        self.cmd('network watcher configure --locations westus westus2 --tags foo=doo')
-#        self.cmd('network watcher configure -l westus2 --enabled false')
-#        self.cmd('network watcher list')
+    def _network_watcher_vm(self):
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg}')
+        self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
+        self.cmd('network watcher show-topology -g {rg}')
+        self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction inbound --local 10.0.0.4:22 --protocol tcp --remote 100.1.2.3:*')
+        self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction outbound --local 10.0.0.4:* --protocol tcp --remote 100.1.2.3:80')
+        self.cmd('network watcher show-security-group-view -g {rg} --vm {vm}')
+        self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 123.4.5.6 --dest-ip 10.0.0.6')
+        self.cmd('network watcher test-connectivity -g {rg} --source-resource {vm} --dest-address www.microsoft.com --dest-port 80')
 
-#        # set up resource to troubleshoot
-#        self.cmd('storage container create -n troubleshooting --account-name {sa}')
-#        sa = self.cmd('storage account show -g {rg} -n {sa}').get_output_in_json()
-#        self.kwargs['storage_path'] = sa['primaryEndpoints']['blob'] + 'troubleshooting'
-#        self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name GatewaySubnet')
-#        self.cmd('network public-ip create -g {rg} -n vgw1-pip')
-#        self.cmd('network vnet-gateway create -g {rg} -n vgw1 --vnet vnet1 --public-ip-address vgw1-pip --no-wait')
+    def _network_watcher_flow_log(self):
+        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --enabled --retention 5 --storage-account {sa}')
+        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --retention 0')
+        self.cmd('network watcher flow-log show -g {rg} --nsg {nsg}')
 
-#        # create VM with NetworkWatcher extension
-#        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!)')
-#        self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
+    def _network_watcher_packet_capture(self):
+        self.cmd('network watcher packet-capture create -g {rg} --vm {vm} -n {capture} --file-path capture/capture.cap')
+        self.cmd('network watcher packet-capture show -l {loc} -n {capture}')
+        self.cmd('network watcher packet-capture stop -l {loc} -n {capture}')
+        self.cmd('network watcher packet-capture show-status -l {loc} -n {capture}')
+        self.cmd('network watcher packet-capture list -l {loc}')
+        self.cmd('network watcher packet-capture delete -l {loc} -n {capture}')
+        self.cmd('network watcher packet-capture list -l {loc}')
 
-#        self.cmd('network watcher show-topology -g {rg}')
+    def _network_watcher_troubleshooting(self):
+        # set up resource to troubleshoot
+        self.cmd('storage container create -n troubleshooting --account-name {sa}')
+        sa = self.cmd('storage account show -g {rg} -n {sa}').get_output_in_json()
+        self.kwargs['storage_path'] = sa['primaryEndpoints']['blob'] + 'troubleshooting'
+        self.cmd('network vnet create -g {rg} -n vnet1 --subnet-name GatewaySubnet')
+        self.cmd('network public-ip create -g {rg} -n vgw1-pip')
+        self.cmd('network vnet-gateway create -g {rg} -n vgw1 --vnet vnet1 --public-ip-address vgw1-pip --no-wait')
 
-#        self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction inbound --local 10.0.0.4:22 --protocol tcp --remote 100.1.2.3:*')
-#        self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction outbound --local 10.0.0.4:* --protocol tcp --remote 100.1.2.3:80')
+        # test troubleshooting
+        self.cmd('network vnet-gateway wait -g {rg} -n vgw1 --created')
+        self.cmd('network watcher troubleshooting start --resource vgw1 -t vnetGateway -g {rg} --storage-account {sa} --storage-path {storage_path}')
+        self.cmd('network watcher troubleshooting show --resource vgw1 -t vnetGateway -g {rg}')
 
-#        self.cmd('network watcher show-security-group-view -g {rg} --vm {vm}')
+    @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
+    @ResourceGroupPreparer(name_prefix='cli_test_network_watcher', location='westcentralus')
+    @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
+    def test_network_watcher(self, resource_group, storage_account):
 
-#        self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 123.4.5.6 --dest-ip 10.0.0.6')
-
-#        self.cmd('network watcher test-connectivity -g {rg} --source-resource {vm} --dest-address www.microsoft.com --dest-port 80')
-
-#        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --enabled --retention 5 --storage-account {sa}')
-#        self.cmd('network watcher flow-log configure -g {rg} --nsg {nsg} --retention 0')
-#        self.cmd('network watcher flow-log show -g {rg} --nsg {nsg}')
-
-#        # test packet capture
-#        self.cmd('network watcher packet-capture create -g {rg} --vm {vm} -n {capture} --file-path capture/capture.cap')
-#        self.cmd('network watcher packet-capture show -l {loc} -n {capture}')
-#        self.cmd('network watcher packet-capture stop -l {loc} -n {capture}')
-#        self.cmd('network watcher packet-capture show-status -l {loc} -n {capture}')
-#        self.cmd('network watcher packet-capture list -l {loc}')
-#        self.cmd('network watcher packet-capture delete -l {loc} -n {capture}')
-#        self.cmd('network watcher packet-capture list -l {loc}')
-
-#        # test troubleshooting
-#        self.cmd('network vnet-gateway wait -g {rg} -n vgw1 --created')
-#        self.cmd('network watcher troubleshooting start --resource vgw1 -t vnetGateway -g {rg} --storage-account {sa} --storage-path {storage_path}')
-#        self.cmd('network watcher troubleshooting show --resource vgw1 -t vnetGateway -g {rg}')
+        self.enable_large_payload()
+        self.kwargs.update({
+            'loc': 'westcentralus',
+            'vm': 'vm1',
+            'nsg': 'nsg1',
+            'capture': 'capture1'
+        })
+        self._network_watcher_configure()
+        self._network_watcher_vm()
+        self._network_watcher_flow_log()
+        self._network_watcher_packet_capture()
+        self._network_watcher_troubleshooting()
 
 
 if __name__ == '__main__':

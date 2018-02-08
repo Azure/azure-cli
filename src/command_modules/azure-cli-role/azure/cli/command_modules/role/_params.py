@@ -24,8 +24,8 @@ def load_arguments(self, _):
         c.argument('display_name', help='the display name of the application')
         c.argument('homepage', help='the url where users can sign in and use your app.')
         c.argument('identifier', options_list=['--id'], help='identifier uri, application id, or object id')
-        c.argument('identifier_uris', nargs='+', help='space separated unique URIs that Azure AD can use for this app.')
-        c.argument('reply_urls', nargs='+', help='space separated URIs to which Azure AD will redirect in response to an OAuth 2.0 request. The value does not need to be a physical endpoint, but must be a valid URI.')
+        c.argument('identifier_uris', nargs='+', help='space-separated unique URIs that Azure AD can use for this app.')
+        c.argument('reply_urls', nargs='+', help='space-separated URIs to which Azure AD will redirect in response to an OAuth 2.0 request. The value does not need to be a physical endpoint, but must be a valid URI.')
         c.argument('start_date', help="Date or datetime at which credentials become valid(e.g. '2017-01-01T01:00:00+00:00' or '2017-01-01'). Default value is current time")
         c.argument('end_date', help="Date or datetime after which credentials expire(e.g. '2017-12-31T11:59:59+00:00' or '2017-12-31'). Default value is one year after current time")
         c.argument('available_to_other_tenants', help='the application can be used from any Azure AD tenants', arg_type=get_three_state_flag())
@@ -33,6 +33,7 @@ def load_arguments(self, _):
         # TODO: Update these with **enum_choice_list(...) when SDK supports proper enums
         c.argument('key_type', help='the type of the key credentials associated with the application', arg_type=get_enum_type(['AsymmetricX509Cert', 'Password', 'Symmetric'], default='AsymmetricX509Cert'))
         c.argument('key_usage', help='the usage of the key credentials associated with the application.', arg_type=get_enum_type(['Sign', 'Verify'], default='Verify'))
+        c.argument('password', help="app password, aka 'client secret'")
 
     with self.argument_context('ad sp') as c:
         c.argument('identifier', options_list=['--id'], help='service principal name, or object id')
@@ -101,7 +102,7 @@ def load_arguments(self, _):
         c.argument('include_inherited', action='store_true', help='include assignments applied on parent scopes')
         c.argument('assignee', help='represent a user, group, or service principal. supported format: object id, user sign-in name, or service principal name')
         c.argument('assignee_object_id', help="assignee's graph object id, such as the 'principal id' from a managed service identity. Use this instead of '--assignee' to bypass graph permission issues")
-        c.argument('ids', nargs='+', help='space separated role assignment ids')
+        c.argument('ids', nargs='+', help='space-separated role assignment ids')
         c.argument('include_classic_administrators', arg_type=get_three_state_flag(), help='list default role assignments for subscription classic administrators, aka co-admins')
 
     with self.argument_context('role definition') as c:

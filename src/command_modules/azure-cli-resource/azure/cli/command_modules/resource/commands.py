@@ -170,7 +170,7 @@ def load_command_table(self, _):
         g.custom_command('operation show', 'show_provider_operations')
 
     # Resource feature commands
-    with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, min_api='2017-05-10') as g:
+    with self.command_group('feature', resource_feature_sdk, client_factory=cf_features) as g:
         feature_table_transform = '{Name:name, RegistrationState:properties.state}'
         g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
         g.command('show', 'get', exception_handler=empty_on_404, table_transformer=feature_table_transform)
