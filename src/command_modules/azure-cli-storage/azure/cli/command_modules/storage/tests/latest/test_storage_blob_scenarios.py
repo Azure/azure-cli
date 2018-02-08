@@ -89,7 +89,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
              JMESPathCheck('properties.contentLength', file_size_kb * 1024)])
 
         self.storage_cmd('storage blob service-properties show', account_info) \
-            .assert_with_checks(JMESPathCheck('hourMetrics.enabled', False))
+            .assert_with_checks(JMESPathCheck('hourMetrics.enabled', True))
 
         if not skip_download:
             downloaded = os.path.join(local_dir, 'test.file')

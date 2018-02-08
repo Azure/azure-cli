@@ -5,8 +5,7 @@ Release History
 
 2.0.25
 ++++++
-* Adding soft-delete for blobs.
-* Minor fixes.
+* Added `storage blob service-properties delete-policy` and `storage blob undelete` commands to enable soft-delete.
 
 2.0.24
 ++++++
