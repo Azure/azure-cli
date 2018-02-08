@@ -21,7 +21,7 @@ class RedisCacheTests(ScenarioTest):
             'name2': self.create_random_name(prefix='redis', length=24),
             'size2': 'C0',
             'settings': "{\\\"hello\\\":1}",
-            'schedule_entries': "[{\"dayOfWeek\":\"Monday\",\"startHourUtc\":\"00\",\"maintenanceWindow\":\"PT5H\"}]"
+            'schedule_entries': "[{\\\"dayOfWeek\\\":\\\"Monday\\\",\\\"startHourUtc\\\":\\\"00\\\",\\\"maintenanceWindow\\\":\\\"PT5H\\\"}]"
         }
 
         self.cmd('az redis create -n {name} -g {rg} -l {loc} --sku {sku} --vm-size {size}')
@@ -34,7 +34,6 @@ class RedisCacheTests(ScenarioTest):
         self.cmd('az redis list -g {rg}')
         self.cmd('az redis list-all')
         self.cmd('az redis list-keys -n {name} -g {rg}')
-        self.cmd('az redis patch-schedule show -n {name} -g {rg}')
         self.cmd('az redis patch-schedule set -n {name} -g {rg} --schedule-entries {schedule_entries}')
         self.cmd('az redis firewall-rules list -n {name} -g {rg}')
         self.cmd('az redis linked-server list -n {name} -g {rg}')
