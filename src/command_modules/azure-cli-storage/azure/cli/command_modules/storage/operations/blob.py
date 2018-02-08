@@ -36,6 +36,7 @@ def set_delete_policy(client, enable=None, days_retained=None):
         policy.days = days_retained
 
     if policy.enabled and not policy.days:
+        from knack.util import CLIError
         raise CLIError("must specify days-retained")
 
     client.set_blob_service_properties(delete_retention_policy=policy)

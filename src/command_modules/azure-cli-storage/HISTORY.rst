@@ -5,6 +5,7 @@ Release History
 
 2.0.25
 ++++++
+* Adding soft-delete for blobs.
 * Minor fixes.
 
 2.0.24
