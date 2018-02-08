@@ -5,7 +5,7 @@
 
 from knack.log import get_logger
 from knack.util import CLIError
-
+from azure.cli.command_modules.redis._client_factory import cf_redis
 
 logger = get_logger(__name__)
 
@@ -30,37 +30,13 @@ def wrong_vmsize_argument_exception_handler(ex):
 def cli_redis_export(cmd, client, resource_group_name, name, prefix, container, file_format=None):
     from azure.mgmt.redis.models import ExportRDBParameters
     parameters = ExportRDBParameters(prefix, container, file_format)
-    return client.export(resource_group_name, name, parameters)
+    return client.export_data(resource_group_name, name, parameters)
 
 
 # pylint: disable=unused-argument
-def cli_redis_import_method(cmd, client, resource_group_name, name, file_format, files):
-    from azure.mgmt.redis.models import ImportRDBParameters
-    parameters = ImportRDBParameters(files, file_format)
-    return client.import_method(resource_group_name, name, files, parameters)
-
-
-# pylint: disable=unused-argument
-def cli_redis_update_settings(cmd, client, resource_group_name, name, redis_configuration):
-    from azure.mgmt.redis.models import RedisUpdateParameters
-    logger.warning('This command is getting deprecated. Please use "redis update" command')
-
-    existing = client.get(resource_group_name, name)
-    existing.redis_configuration.update(redis_configuration)
-
-    # Due to swagger/mgmt SDK quirkiness, we have to manually copy over
-    # the resource retrieved to a create_parameters object
-    update_params = RedisUpdateParameters(
-        existing.redis_configuration,
-        existing.enable_non_ssl_port,
-        existing.tenant_settings,
-        existing.shard_count,
-        existing.subnet_id,
-        existing.static_ip,
-        existing.sku,
-        existing.tags
-    )
-    return client.update(resource_group_name, name, parameters=update_params)
+def cli_redis_import_method(cmd, client, resource_group_name, name, files, file_format=None):
+    logger.warning('This command is getting deprecated. Please use "redis import" command')
+    return client.import_data(resource_group_name, name, files, file_format)
 
 
 # pylint: disable=unused-argument
@@ -73,13 +49,12 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
         instance.sku.family = vm_size[0]
         instance.sku.capacity = vm_size[1:]
 
+    # pylint: disable=too-many-function-args
     update_params = RedisUpdateParameters(
         instance.redis_configuration,
         instance.enable_non_ssl_port,
         instance.tenant_settings,
         instance.shard_count,
-        instance.subnet_id,
-        instance.static_ip,
         instance.sku,
         instance.tags
     )
@@ -90,7 +65,7 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
 def cli_redis_create(cmd, client,
                      resource_group_name, name, location, sku, vm_size, tags=None,
                      redis_configuration=None, enable_non_ssl_port=None, tenant_settings=None,
-                     shard_count=None, subnet_id=None, static_ip=None):
+                     shard_count=None, subnet_id=None, static_ip=None, zones=None):
     # pylint:disable=line-too-long
     """Create new Redis Cache instance
     :param resource_group_name: Name of resource group
@@ -104,18 +79,32 @@ def cli_redis_create(cmd, client,
     :param shard_count: The number of shards to be created on a Premium Cluster Cache.
     :param subnet_id: The full resource ID of a subnet in a virtual network to deploy the redis cache in. Example format /subscriptions/{subid}/resourceGroups/{resourceGroupName}/Microsoft.{Network|ClassicNetwork}/VirtualNetworks/vnet1/subnets/subnet1
     :param static_ip: Required when deploying a redis cache inside an existing Azure Virtual Network.
+    :param zones: A list of availability zones denoting where the resource.
     """
     from azure.mgmt.redis.models import RedisCreateParameters, Sku
     params = RedisCreateParameters(
-        location,
         Sku(sku, vm_size[0], vm_size[1:]),
-        tags,
+        location,
         redis_configuration,
         enable_non_ssl_port,
         tenant_settings,
         shard_count,
         subnet_id,
-        static_ip)
+        static_ip,
+        zones,
+        tags)
     return client.create(resource_group_name, name, params)
+
+
+# pylint: disable=unused-argument
+def cli_redis_create_server_link(cmd, client, resource_group_name, name, secondary_cache_name,
+                                 secondary_cache_resource_group):
+
+    redis_client = cf_redis(cmd.cli_ctx)
+    secondary_cache = redis_client.get(secondary_cache_resource_group, secondary_cache_name)
+
+    from azure.mgmt.redis.models import RedisLinkedServerCreateParameters
+    params = RedisLinkedServerCreateParameters(secondary_cache.id, secondary_cache.location, 'Secondary')
+    return client.create(resource_group_name, name, secondary_cache_name, params)
 
 # endregion
