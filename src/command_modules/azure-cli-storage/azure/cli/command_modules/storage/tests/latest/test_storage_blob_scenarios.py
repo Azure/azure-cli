@@ -279,7 +279,6 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage container exists -n {}', account_info, c) \
             .assert_with_checks(JMESPathCheck('exists', False))
 
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-07-29')
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_soft_delete(self, resource_group, storage_account):
