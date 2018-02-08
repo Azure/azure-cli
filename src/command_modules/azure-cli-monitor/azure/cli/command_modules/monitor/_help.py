@@ -201,10 +201,37 @@ helps['monitor log-profiles'] = """
             type: group
             short-summary: Manage log profiles.
             """
+helps['monitor log-profiles create'] = """
+            type: command
+            short-summary: Create a log profile.
+            parameters:
+                - name: --name -n
+                  short-summary: The name of the log profile.
+                - name: --location -l
+                  short-summary:
+                - name: --locations
+                  short-summary: Space-separated list of regions for which Activity Log events should be stored.
+                - name: --categories
+                  short-summary: Space-separated categories of the logs. These categories are created as is convenient
+                                 to the user. Some values are Write, Delete, and/or Action.
+                - name: --storage-account-id
+                  short-summary: The resource id of the storage account to which you would like to send the Activity
+                                 Log.
+                - name: --service-bus-rule-id
+                  short-summary: The service bus rule ID of the service bus namespace in which you would like to have
+                                 Event Hubs created for streaming the Activity Log. The rule ID is of the format
+                                 '{service bus resource ID}/authorizationrules/{key name}'.
+                - name: --days
+                  short-summary: The number of days for the retention in days. A value of 0 will retain the events
+                                 indefinitely
+                - name: --enabled
+                  short-summary: Whether the retention policy is enabled.
+            """
 helps['monitor log-profiles update'] = """
             type: command
             short-summary: Update a log profile.
             """
+
 helps['monitor diagnostic-settings'] = """
             type: group
             short-summary: Manage service diagnostic settings.
