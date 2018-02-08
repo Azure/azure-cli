@@ -87,7 +87,7 @@ def _validate_whl_extension(ext_file):
     _validate_whl_cli_compat(azext_metadata)
 
 
-def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None):  # pylint: disable=too-many-statements
+def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None):  # pylint: disable=too-many-statements
     if not source.endswith('.whl'):
         raise ValueError('Unknown extension type. Only Python wheels are supported.')
     url_parse_result = urlparse(source)
@@ -140,6 +140,8 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None):  # pylint:
     extension_path = get_extension_path(extension_name)
     pip_args = ['install', '--target', extension_path, ext_file]
 
+    if pip_proxy:
+        pip_args = pip_args + ['--proxy', pip_proxy]
     if pip_extra_index_urls:
         for extra_index_url in pip_extra_index_urls:
             pip_args = pip_args + ['--extra-index-url', extra_index_url]
@@ -166,7 +168,8 @@ def is_valid_sha256sum(a_file, expected_sum):
     return expected_sum == computed_hash, computed_hash
 
 
-def add_extension(source=None, extension_name=None, index_url=None, yes=None, pip_extra_index_urls=None):  # pylint: disable=unused-argument
+def add_extension(source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
+                  pip_extra_index_urls=None, pip_proxy=None):
     ext_sha256 = None
     if extension_name:
         if extension_exists(extension_name):
@@ -176,7 +179,7 @@ def add_extension(source=None, extension_name=None, index_url=None, yes=None, pi
         except NoExtensionCandidatesError as err:
             logger.debug(err)
             raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
-    _add_whl_ext(source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls)
+    _add_whl_ext(source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
 
     if extension_name:
         set_extension_management_detail(extension_name)
@@ -207,7 +210,7 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(extension_name, index_url=None, pip_extra_index_urls=None):
+def update_extension(extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
     try:
         ext = get_extension(extension_name)
         cur_version = ext.get_version()
@@ -225,7 +228,8 @@ def update_extension(extension_name, index_url=None, pip_extra_index_urls=None):
         shutil.rmtree(extension_path)
         # Install newer version
         try:
-            _add_whl_ext(download_url, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls)
+            _add_whl_ext(download_url, ext_sha256=ext_sha256,
+                         pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
             logger.debug('Deleting backup of old extension at %s', backup_dir)
             shutil.rmtree(backup_dir)
         except Exception as err:
