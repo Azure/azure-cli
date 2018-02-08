@@ -16,27 +16,16 @@ from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, 
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 
 
-def list_share_files(cmd, client, share_name, directory_name=None, timeout=None, exclude_dir=False, num_results=None,
-                     marker=None, snapshot=None):
-    file_list_args = {
-        "share_name": share_name,
-        "directory_name": directory_name,
-        "timeout": timeout,
-        "num_results": num_results,
-        "marker": marker
-    }
+def list_share_files(cmd, client, share_name, directory_name=None, timeout=None, exclude_dir=False, snapshot=None):
     if cmd.supported_api_version(min_api='2017-04-17'):
-        file_list_args["snapshot"] = snapshot
-
-    generator = client.list_directories_and_files(**file_list_args)
+        generator = client.list_directories_and_files(share_name, directory_name, timeout=timeout, snapshot=snapshot)
+    else:
+        generator = client.list_directories_and_files(share_name, directory_name, timeout=timeout)
 
     if exclude_dir:
         t_file_properties = cmd.get_models('file.models#FileProperties')
 
-        return {
-            'generator': (f for f in generator if isinstance(f.properties, t_file_properties)),
-            'next_marker': generator.next_marker
-        }
+        return list(f for f in generator if isinstance(f.properties, t_file_properties))
 
     return generator
 

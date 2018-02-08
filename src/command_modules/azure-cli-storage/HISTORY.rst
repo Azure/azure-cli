@@ -5,7 +5,6 @@ Release History
 
 2.0.25
 ++++++
-* Adding paging support for storage list commands.
 * Minor fixes.
 
 2.0.24

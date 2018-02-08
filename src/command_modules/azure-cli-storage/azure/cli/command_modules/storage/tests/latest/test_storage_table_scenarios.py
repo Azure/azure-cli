@@ -45,27 +45,6 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
         table_status = self.storage_cmd('storage table stats', account_info).get_output_in_json()
         self.assertIn(table_status['geoReplication']['status'], ('live', 'unavailable'))
 
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    def test_storage_table_list_paging(self, resource_group, storage_account):
-        account_info = self.get_account_info(resource_group, storage_account)
-
-        table1 = self.create_random_name('table', 24)
-        table2 = self.create_random_name('table', 24)
-
-        self.storage_cmd('storage table create -n {}', account_info, table1)
-        self.storage_cmd('storage table create -n {}', account_info, table2)
-
-        result1 = self.storage_cmd('storage table list --num-results 1', account_info).get_output_in_json()[0]
-        result2 = self.storage_cmd('storage table list --num-results 1 --marker {}', account_info,
-                                   result1["nextMarker"]).get_output_in_json()[0]
-
-        # verify paging results
-        self.assertIn(result1["name"], [table1, table2])
-        self.assertIn(result2["name"], [table1, table2])
-        self.assertTrue(result1["name"] != result2["name"])
-        self.assertTrue(not result2["nextMarker"])
-
     def verify_entity_operations(self, account_info, table_name):
         self.storage_cmd(
             'storage entity insert -t {} -e rowkey=001 partitionkey=001 name=test value=something',
