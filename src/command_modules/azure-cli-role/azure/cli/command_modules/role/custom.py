@@ -6,6 +6,7 @@
 from __future__ import print_function
 
 import datetime
+import json
 import re
 import os
 import uuid
@@ -205,6 +206,126 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
             logger.info("Failed to resolve graph object information per error '%s'", ex)
 
     return results
+
+
+def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
+    from azure.mgmt.monitor import MonitorManagementClient
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    client = get_mgmt_service_client(cmd.cli_ctx, MonitorManagementClient)
+
+    # validate times
+    DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+    try:
+        end_time = datetime.datetime.strptime(end_time, DATE_TIME_FORMAT) if end_time else datetime.datetime.utcnow()
+    except ValueError:
+        raise ValueError("Input '{}' is not valid datetime. Valid example: 2000-12-31T12:59:59Z".format(end_time))
+
+    try:
+        start_time = datetime.datetime.strptime(start_time, DATE_TIME_FORMAT) if start_time else end_time - datetime.timedelta(hours=1)
+        if start_time >= end_time:
+            raise ValueError("Start time cannot be later than end time.")
+    except ValueError:
+        raise ValueError("Input '{}' is not valid datetime. Valid example: 2000-12-31T12:59:59Z".format(start_time))
+
+    formatter = "resourceProvider eq Microsoft.Authorization and eventTimestamp ge {} and eventTimestamp le {}"
+    odata_filters = formatter.format(start_time.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                                     end_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
+
+    activity_log = list(client.activity_logs.list(filter=odata_filters))
+    start_events, end_events, offline_events, result = {}, {}, [], []
+
+    for l in activity_log:
+        if l.http_request:
+            if l.status.value == 'Started':
+                start_events[l.operation_id] = l
+            else:
+                end_events[l.operation_id] = l
+        elif l.event_name and l.event_name.value.lower() == 'classicadministrators':
+            offline_events.append(l)
+
+    role_defs = {d.id: d.properties.role_name for d in list_role_definitions(cmd)}
+
+    for op_id in start_events:
+        e = end_events.get(op_id, None)
+        if e:
+            entry = {}
+            op_name = e.operation_name and e.operation_name.value
+            if op_name.startswith('Microsoft.Authorization/roleAssignments') and e.status.value == 'Succeeded':
+                s, payload = start_events[op_id], None
+                entry = {
+                    'timestamp': e.event_timestamp,
+                    'caller': s.caller,
+                    'principal_id': None,
+                    'principal_name': None,
+                    'scope': None,
+                    'scope_name': None,
+                    'scope_type': None,
+                    'role_definition_id': None,
+                    'role_name': None
+                }
+                if s.http_request:
+                    if s.http_request.method == 'PUT':
+                        payload = s.properties and s.properties.get('requestbody')
+                        entry['action'] = 'Granted'
+                        entry['scope'] = e.authorization.scope
+                    elif s.http_request.method == 'DELETE':
+                        payload = e.properties and e.properties.get('responseBody')
+                        entry['action'] = 'Revoked'
+                if payload:
+                    try:
+                        payload = json.loads(payload)
+                    except:
+                        pass
+                    if payload:
+                        payload = payload['properties']
+                        entry['principal_id'] = payload['principalId']  # TODO: fill in principal names, case insensitive
+                        if not entry['scope']:
+                            entry['scope'] = payload['scope']
+                        if entry['scope']:
+                            index = entry['scope'].lower().find('/providers/microsoft.authorization')
+                            if index != -1:
+                                entry['scope'] = entry['scope'][:index]
+                            parts = list(filter(None, entry['scope'].split('/')))
+                            entry['name'] = parts[-1]
+                            if len(parts) < 3:
+                                entry['type'] = 'Subscription'
+                            elif len(parts) < 5:
+                                entry['type'] = 'Resource group'
+                            else:
+                                entry['type'] = 'Resource'
+
+                        entry['role_definition_id'] = payload['roleDefinitionId']
+                        entry['role_name'] = role_defs[payload['roleDefinitionId']]
+                result.append(entry)
+
+    principal_ids = [x['principal_id'] for x in result if x['principal_id']]
+    if principal_ids:
+        graph_client = _graph_client_factory(cmd.cli_ctx)
+        stubs = _get_object_stubs(graph_client, principal_ids)
+        principal_dics = {i.object_id: _get_displayable_name(i) for i in stubs}
+        if principal_dics:
+            for e in result:
+                e['principal_name'] = principal_dics.get(e['principal_id'], None)
+
+    offline_events = [x for x in offline_events if (x.status and x.status.value == 'Succeeded' and x.operation_name and
+                                                    x.operation_name.value.startswith('Microsoft.Authorization/ClassicAdministrators'))]
+    for e in offline_events:
+        entry = {
+            'timestamp': e.event_timestamp,
+            'caller': 'Subscription Admin',
+            'role_definition_id': None,
+            'principal_id': None,
+            'principal_type': 'User',
+            'scope': '/subscriptions/' + client.config.subscription_id,
+            'scope_type': 'Subscription',
+            'scope_name': client.config.subscription_id,
+        }
+        if e.properties:
+            entry['principal_name'] = e.properties.get('adminEmail')  # TODO test this out
+            entry['role_name'] = e.properties.get('adminType')
+        result.append(entry)
+
+    return result
 
 
 def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
@@ -721,7 +842,6 @@ def create_service_principal_for_rbac(
                     raise
 
     if show_auth_for_sdk:
-        import json
         from azure.cli.core._profile import Profile
         profile = Profile(cli_ctx=cmd.cli_ctx)
         result = profile.get_sp_auth_info(scopes[0].split('/')[2] if scopes else None,
