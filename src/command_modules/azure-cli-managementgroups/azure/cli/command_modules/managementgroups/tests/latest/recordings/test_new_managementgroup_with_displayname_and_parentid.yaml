@@ -1,0 +1,296 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F6b2064b9-34bd-46e6-9092-52f2dd5f7fc0%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/6b2064b9-34bd-46e6-9092-52f2dd5f7fc0/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 08 Feb 2018 23:13:51 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzAFtbqW8o_Ztc4z4xEnCJIzi1IPXpP_9qMmAswhvao3kzKpE0-jikO6uXNg7jZhTViSTbrNknhPuZosmwxkRL-4xxE28VI8dqjklTZRZ8iK4IBWBH5rP4C3b32-Vs501IeqFZAOXW1ExcwKkcBzxfmQenVdbmGuKtTpsxfnNhNKAgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: grant_type=client_credentials&client_id=98eaff87-4e5d-4e48-8dad-4bd2df8bd01a&resource=https%3A%2F%2Fmanagement.core.windows.net%2F&client_secret=ManangementGroupServicePrincipal%40123
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['183']
+      User-Agent: [python-requests/2.18.4]
+      content-type: [application/x-www-form-urlencoded]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: POST
+    uri: https://login.windows-ppe.net/6b2064b9-34bd-46e6-9092-52f2dd5f7fc0/oauth2/token
+  response:
+    body: {string: '{"token_type":"Bearer","expires_in":"3600","ext_expires_in":"262800","expires_on":"1518135232","not_before":"1518131332","resource":"https://management.core.windows.net/","access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImFGSTdlVlZwVl8yOFNZblJsMWRiTmI4UVZMQSIsImtpZCI6ImFGSTdlVlZwVl8yOFNZblJsMWRiTmI4UVZMQSJ9.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLXBwZS5uZXQvNmIyMDY0YjktMzRiZC00NmU2LTkwOTItNTJmMmRkNWY3ZmMwLyIsImlhdCI6MTUxODEzMTMzMiwibmJmIjoxNTE4MTMxMzMyLCJleHAiOjE1MTgxMzUyMzIsImFpbyI6IjQyUmdZRENiWGJkblFvL0JXb3VxS2Y5dkwvNHlIUUE9IiwiYXBwaWQiOiI5OGVhZmY4Ny00ZTVkLTRlNDgtOGRhZC00YmQyZGY4YmQwMWEiLCJhcHBpZGFjciI6IjEiLCJlX2V4cCI6MjYyODAwLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLXBwZS5uZXQvNmIyMDY0YjktMzRiZC00NmU2LTkwOTItNTJmMmRkNWY3ZmMwLyIsIm9pZCI6IjhiOGYyNDY0LTZhZDAtNDMyNy1iOWRhLTVjYzhhYzJjNjUwZCIsInN1YiI6IjhiOGYyNDY0LTZhZDAtNDMyNy1iOWRhLTVjYzhhYzJjNjUwZCIsInRpZCI6IjZiMjA2NGI5LTM0YmQtNDZlNi05MDkyLTUyZjJkZDVmN2ZjMCIsInV0aSI6InhtVkJPOUtvVUVLLU81WXpmVVlBQUEiLCJ2ZXIiOiIxLjAifQ.Ho8XQkX0Db6V1bA5ybnSKGGI9NQlXGqx1Xh-Vu0zGv4VvK2S9QUpk521AtIgsYb-CZ9QIC1Tex9lZf6xu6Vt-15j-PW6rkO-QZ9AWL97sGFJKG7lgZXCTl1R1VIXiF-DVQQ9023J3nbvo1flyx4h8JsJ6O5oCcbYQQFKnZfkQNkxFWCNVxm957bCqsYbd0MeHsrmZY7rQ3sHwL_auvQQc-FOVb-iPspPd3wBkU8z_e638LADEvNjWfuGEH4PXYQeXilOekOl-dzsZ2F-kKCoxmqxiVf-H-LiY3fPg11ch3rfs5cJABVV4_WmEp42aTp2MdpnMxu7aXsnTnW4CoT6Bg"}'}
+    headers:
+      cache-control: ['no-cache, no-store']
+      content-length: ['1387']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 08 Feb 2018 23:13:52 GMT']
+      expires: ['-1']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [stsservicecookie=estsppe; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-clitelem: ['1,0,0,,']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [managementgroups group new]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.26
+          msrest_azure/0.4.21 resourcemanagementclient/1.3.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: POST
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management/register?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]}],"registrationState":"Registered"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1033']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 08 Feb 2018 23:13:52 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F6b2064b9-34bd-46e6-9092-52f2dd5f7fc0%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/6b2064b9-34bd-46e6-9092-52f2dd5f7fc0/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 08 Feb 2018 23:14:03 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzzNBlqIyZUreHYtcNUMIts8OsOJ0gC513hXsSnaon17CLnSPygLbBBCe2z6isKQFIgyXb6TEk8XFyew-D8toCqiQwzdbytGr-9BE7OyOs3-Waw2cQTPBXUJTAFHxcyAgIYaWmZ2HvGIr3f5zVaOlg7K9RZZorbKWHFSQDyLJlqPMgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: grant_type=client_credentials&client_id=98eaff87-4e5d-4e48-8dad-4bd2df8bd01a&resource=https%3A%2F%2Fmanagement.core.windows.net%2F&client_secret=ManangementGroupServicePrincipal%40123
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['183']
+      User-Agent: [python-requests/2.18.4]
+      content-type: [application/x-www-form-urlencoded]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: POST
+    uri: https://login.windows-ppe.net/6b2064b9-34bd-46e6-9092-52f2dd5f7fc0/oauth2/token
+  response:
+    body: {string: '{"token_type":"Bearer","expires_in":"3600","ext_expires_in":"262800","expires_on":"1518135243","not_before":"1518131343","resource":"https://management.core.windows.net/","access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImFGSTdlVlZwVl8yOFNZblJsMWRiTmI4UVZMQSIsImtpZCI6ImFGSTdlVlZwVl8yOFNZblJsMWRiTmI4UVZMQSJ9.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLXBwZS5uZXQvNmIyMDY0YjktMzRiZC00NmU2LTkwOTItNTJmMmRkNWY3ZmMwLyIsImlhdCI6MTUxODEzMTM0MywibmJmIjoxNTE4MTMxMzQzLCJleHAiOjE1MTgxMzUyNDMsImFpbyI6IjQyUmdZSmc4bjNuTjl0eENzU0pad2NuaDg2MzBBUT09IiwiYXBwaWQiOiI5OGVhZmY4Ny00ZTVkLTRlNDgtOGRhZC00YmQyZGY4YmQwMWEiLCJhcHBpZGFjciI6IjEiLCJlX2V4cCI6MjYyODAwLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLXBwZS5uZXQvNmIyMDY0YjktMzRiZC00NmU2LTkwOTItNTJmMmRkNWY3ZmMwLyIsIm9pZCI6IjhiOGYyNDY0LTZhZDAtNDMyNy1iOWRhLTVjYzhhYzJjNjUwZCIsInN1YiI6IjhiOGYyNDY0LTZhZDAtNDMyNy1iOWRhLTVjYzhhYzJjNjUwZCIsInRpZCI6IjZiMjA2NGI5LTM0YmQtNDZlNi05MDkyLTUyZjJkZDVmN2ZjMCIsInV0aSI6IlZiWmFlb21yTEVtZ1FzbWxuemtBQUEiLCJ2ZXIiOiIxLjAifQ.cwHdKORhrzEMDano6B9xMkw4ChWkzHUTpAT_v_klHxE_dV_x5fA5DZtd2NBT4rdmmAIdb0Nl5ANcEw8WAJboBVDPxvCLCK1Zf97wwdHInEV8gAVgGxyKQUmmw7mG9DD8o_m84QWcwskcOvX8IjydSK9MGeDg_kxzigcYhDRpL7VufdHi3yP93xQcj3coN4v5vAXa3ES5duOr6QL9K7VAQJWfBqBH6ICkROQjRf6EnFNceNM1rJImR1TG2L6lofQnrGMP4j7SX-YFBba9eF1AkqeEQs_o_pRRJTThXJOZNpTZ0YnuP14m8y3ZLSaVKi80p3gSOvJLBUc6NYO3cDV9Sg"}'}
+    headers:
+      cache-control: ['no-cache, no-store']
+      content-length: ['1387']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 08 Feb 2018 23:14:03 GMT']
+      expires: ['-1']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [stsservicecookie=estsppe; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-clitelem: ['1,0,0,,']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [managementgroups group new]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.26
+          msrest_azure/0.4.21 resourcemanagementclient/1.3.0rc1 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://api-dogfood.resources.windows-int.net/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Management","namespace":"Microsoft.Management","authorization":{"applicationId":"f2c304cf-8e7e-4c3f-8164-16299ad9d272","roleDefinitionId":"c1cf3708-588a-4647-be7f-f400bbe214cf"},"resourceTypes":[{"resourceType":"resources","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"managementGroups","locations":[],"apiVersions":["2018-01-01-preview","2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]},{"resourceType":"getEntities","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"checkNameAvailability","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"operationResults","locations":[],"apiVersions":["2018-01-01-preview"]},{"resourceType":"operations","locations":[],"apiVersions":["2017-11-01-preview","2017-08-31-preview","2017-06-30-preview","2017-05-31-preview"]}],"registrationState":"Registered"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1033']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 08 Feb 2018 23:14:03 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      User-Agent: [python-requests/2.18.4]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: GET
+    uri: https://login.windows.net/common/discovery/instance?authorization_endpoint=https%3A%2F%2Flogin.windows-ppe.net%2F6b2064b9-34bd-46e6-9092-52f2dd5f7fc0%2Foauth2%2Fauthorize&api-version=1.0
+  response:
+    body: {string: '{"tenant_discovery_endpoint":"https://login.windows-ppe.net/6b2064b9-34bd-46e6-9092-52f2dd5f7fc0/.well-known/openid-configuration"}'}
+    headers:
+      access-control-allow-methods: ['GET, OPTIONS']
+      access-control-allow-origin: ['*']
+      cache-control: [private]
+      content-length: ['131']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 08 Feb 2018 23:14:04 GMT']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [esctx=AQABAAAAAABHh4kmS_aKT5XrjzxRAtHzK3bbDBKuUrnwMAUt36ufF92BPFFSshIfgM8qrlwM4vBFqq7HF_GZhFJeYLTCpmkzbDoM4jVdfrlflvR1srHTRWjYRfAiMYTxfLgQeIdAEVAcFnZGDodGYJG5Z_gvQlZy1EOJ6MgGRYe6J8jkmbg1DIMPOQ2y7PjYXaLXhM65EMMgAA;
+          domain=.login.windows.net; path=/; secure; HttpOnly, x-ms-gateway-slice=corp;
+          path=/; secure; HttpOnly, stsservicecookie=ests; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: grant_type=client_credentials&client_id=98eaff87-4e5d-4e48-8dad-4bd2df8bd01a&resource=https%3A%2F%2Fmanagement.core.windows.net%2F&client_secret=ManangementGroupServicePrincipal%40123
+    headers:
+      Accept: ['*/*']
+      Accept-Charset: [utf-8]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Length: ['183']
+      User-Agent: [python-requests/2.18.4]
+      content-type: [application/x-www-form-urlencoded]
+      return-client-request-id: ['true']
+      x-client-CPU: [x64]
+      x-client-OS: [win32]
+      x-client-SKU: [Python]
+      x-client-Ver: [0.5.0]
+    method: POST
+    uri: https://login.windows-ppe.net/6b2064b9-34bd-46e6-9092-52f2dd5f7fc0/oauth2/token
+  response:
+    body: {string: '{"token_type":"Bearer","expires_in":"3599","ext_expires_in":"262800","expires_on":"1518135245","not_before":"1518131345","resource":"https://management.core.windows.net/","access_token":"eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6ImFGSTdlVlZwVl8yOFNZblJsMWRiTmI4UVZMQSIsImtpZCI6ImFGSTdlVlZwVl8yOFNZblJsMWRiTmI4UVZMQSJ9.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLXBwZS5uZXQvNmIyMDY0YjktMzRiZC00NmU2LTkwOTItNTJmMmRkNWY3ZmMwLyIsImlhdCI6MTUxODEzMTM0NSwibmJmIjoxNTE4MTMxMzQ1LCJleHAiOjE1MTgxMzUyNDUsImFpbyI6IjQyUmdZQkRxcVRYL1hpemxFTHY3Y25xWmVmOFpBQT09IiwiYXBwaWQiOiI5OGVhZmY4Ny00ZTVkLTRlNDgtOGRhZC00YmQyZGY4YmQwMWEiLCJhcHBpZGFjciI6IjEiLCJlX2V4cCI6MjYyODAwLCJpZHAiOiJodHRwczovL3N0cy53aW5kb3dzLXBwZS5uZXQvNmIyMDY0YjktMzRiZC00NmU2LTkwOTItNTJmMmRkNWY3ZmMwLyIsIm9pZCI6IjhiOGYyNDY0LTZhZDAtNDMyNy1iOWRhLTVjYzhhYzJjNjUwZCIsInN1YiI6IjhiOGYyNDY0LTZhZDAtNDMyNy1iOWRhLTVjYzhhYzJjNjUwZCIsInRpZCI6IjZiMjA2NGI5LTM0YmQtNDZlNi05MDkyLTUyZjJkZDVmN2ZjMCIsInV0aSI6ImxWWFpNMFJLV1VDMnBOUjRCVU1BQUEiLCJ2ZXIiOiIxLjAifQ.LXi6MN9aeIjF0fT60PwI9sfrmAF_cxIg8XItnnootMeh6sxca0C_I7ks3CoDqKuzZTP0TRZ_I3GG7l8AN6d01ObLUwF4Zgt9HM5gTeNQyBUiFtbV0zoB6qBi3K6MhyolEnntHQNsYV6bwyQC6VHoGK4UdYbANzev_v4SnkK6rsO8mJpQniOoLUdGKSj-E7Jww_Cua7N2Depcar7OqhF5u1C3XON_FEohMdouk8L5SOcYgq-vug5igSqAH1Ketw7VDv8IXyelX8SVMJdDeXFYG5gx586flOckmoHfw6jEYNlfKpKkt34tHWfq_m7mO26KEHVX4xw8ZRvxJWy-pCfdLw"}'}
+    headers:
+      cache-control: ['no-cache, no-store']
+      content-length: ['1387']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 08 Feb 2018 23:14:04 GMT']
+      expires: ['-1']
+      p3p: [CP="DSP CUR OTPi IND OTRi ONL FIN"]
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      set-cookie: [stsservicecookie=estsppe; path=/; secure; HttpOnly]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-clitelem: ['1,0,0,,']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"displayName": "TestCliGroupChild2Display", "parentId": "/providers/Microsoft.Management/managementGroups/testcligroup"}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Cache-Control: [no-cache]
+      CommandName: [managementgroups group new]
+      Connection: [keep-alive]
+      Content-Length: ['121']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.26
+          msrest_azure/0.4.21 azure-mgmt-resource/2017-11-01-preview Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://api-dogfood.resources.windows-int.net/providers/Microsoft.Management/managementGroups/testcligroupchild2?api-version=2017-11-01-preview
+  response:
+    body: {string: '{"id":"/providers/Microsoft.Management/managementGroups/testcligroupchild2","type":"/providers/Microsoft.Management/managementGroups","name":"testcligroupchild2","properties":{"tenantId":"6b2064b9-34bd-46e6-9092-52f2dd5f7fc0","displayName":"TestCliGroupChild2Display","details":{"version":6,"updatedTime":"2018-02-08T23:14:07.5446931Z","updatedBy":"8b8f2464-6ad0-4327-b9da-5cc8ac2c650d","parent":{"parentId":"/providers/Microsoft.Management/managementGroups/testcligroup","displayName":"testcligroup"}}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['504']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 08 Feb 2018 23:14:10 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      request-id: [fea7a53e-356a-4a44-be0c-b09b7ba5542b]
+      server: [Microsoft-IIS/8.5]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: ['Accept-Encoding,Accept-Encoding']
+      x-aspnet-version: [4.0.30319]
+      x-ba-restapi: [1.0.3.510]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-tenant-writes: ['1198']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+version: 1
