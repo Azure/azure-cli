@@ -1215,6 +1215,35 @@ def _get_server_key_name_from_uri(uri):
 
 
 #####
+#           sql server dns-alias
+#####
+
+
+def server_dns_alias_set(
+        cmd,
+        client,
+        resource_group_name,
+        server_name,
+        dns_alias_name,
+        original_server_name,
+        original_subscription_id=None,
+        original_resource_group_name=None):
+
+    # Build the old alias id
+    old_alias_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/dnsAliases/{}".format(
+        quote(original_subscription_id or get_subscription_id(cmd.cli_ctx)),
+        quote(original_resource_group_name or resource_group_name),
+        quote(original_server_name),
+        quote(dns_alias_name))
+
+    return client.acquire(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        dns_alias_name=dns_alias_name,
+        old_server_dns_alias_id=old_alias_id
+    )
+
+#####
 #           sql server encryption-protector
 #####
 
