@@ -2240,12 +2240,6 @@ def set_vmss_diagnostics_extension(
 # region VirtualMachineScaleSets Disks (Managed)
 def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_gb=None, instance_id=None, lun=None,
                                      caching=None, disk=None):
-    DiskCreateOptionTypes, ManagedDiskParameters = cmd.get_models(
-        'DiskCreateOptionTypes', 'ManagedDiskParameters')
-    if disk is None:
-        DataDisk = cmd.get_models('VirtualMachineScaleSetDataDisk')
-    else:
-        DataDisk = cmd.get_models('DataDisk')
 
     def _init_data_disk(storage_profile, lun, existing_disk=None):
         data_disks = storage_profile.data_disks or []
@@ -2261,6 +2255,13 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
 
         data_disks.append(data_disk)
         storage_profile.data_disks = data_disks
+
+    DiskCreateOptionTypes, ManagedDiskParameters = cmd.get_models(
+        'DiskCreateOptionTypes', 'ManagedDiskParameters')
+    if disk is None:
+        DataDisk = cmd.get_models('VirtualMachineScaleSetDataDisk')
+    else:
+        DataDisk = cmd.get_models('DataDisk')
 
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is None:
