@@ -468,11 +468,11 @@ def get_file_path_validator(default_file_param=None):
 def validate_included_datasets(cmd, namespace):
     if namespace.include:
         include = namespace.include
-        if set(include) - set('cms'):
-            help_string = '(c)opy-info (m)etadata (s)napshots'
+        if set(include) - set('cmsd'):
+            help_string = '(c)opy-info (m)etadata (s)napshots (d)eleted'
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
         t_blob_include = cmd.get_models('blob#Include')
-        namespace.include = t_blob_include('s' in include, 'm' in include, False, 'c' in include)
+        namespace.include = t_blob_include('s' in include, 'm' in include, False, 'c' in include, 'd' in include)
 
 
 def validate_key(namespace):
