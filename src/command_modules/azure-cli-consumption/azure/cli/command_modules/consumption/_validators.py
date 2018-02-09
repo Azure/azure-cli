@@ -29,6 +29,14 @@ def validate_both_start_end_dates(namespace):
     if (namespace.start_date and not namespace.end_date) or (namespace.end_date and not namespace.start_date):
         raise CLIError("usage error: Both --start-date and --end-date need to be supplied or neither.")
 
+def validate_usage_bp_inputs(namespace):
+    """Validates the existence of both start and end dates in the parameter or neither"""
+    if (namespace.start_date and not namespace.end_date) or (namespace.end_date and not namespace.start_date):
+        raise CLIError("usage error: Both --start-date and --end-date need to be supplied or neither.")		
+
+    if not namespace.billing_period_name:
+        raise CLIError("usage error: Billing Period name --billing-period-name needs to be supplied")		
+
 
 def validate_reservations_summaries(namespace):
     """lowercase the data grain for comparison"""
@@ -40,7 +48,6 @@ def validate_reservations_summaries(namespace):
     if data_grain == 'daily' and (not namespace.start_date or not namespace.end_date):
         raise CLIError("usage error: Both --start-date and --end-date need to be supplied for daily grain.")
 
-
 def validate_reservations_details(namespace):
     """Validates reservation order id """
     if not namespace.reservationorderid:
@@ -49,3 +56,8 @@ def validate_reservations_details(namespace):
         raise CLIError("usage error: --start-date needs to be supplied for reservation details.")
     if not namespace.end_date:
         raise CLIError("usage error:--end-date needs to be supplied for reservation details.")
+
+def validate_pricesheet(namespace):
+    if not namespace.billing_period_name:
+        raise CLIError("usage error: billing period name needs to be supplied.")
+	

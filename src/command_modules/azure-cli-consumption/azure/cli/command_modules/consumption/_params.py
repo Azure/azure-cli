@@ -14,7 +14,15 @@ def load_arguments(self, _):
         c.argument('include_meter_details', options_list=['--include-meter-details', '-m'], action='store_true', help='include meter details in the usages')
         c.argument('start_date', options_list=['--start-date', '-s'], type=get_datetime_type(), help='start date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
         c.argument('end_date', options_list=['--end-date', '-e'], type=get_datetime_type(), help='end date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
+        
+    with self.argument_context('consumption usage billing period list') as c:
+        c.argument('top', options_list=['--top', '-t'], type=int, help='maximum number of items to return. Accepted range for this value is 1 - 1000')
+        c.argument('include_additional_properties', options_list=['--include-additional-properties', '-a'], action='store_true', help='include additional properties in the usages')
+        c.argument('include_meter_details', options_list=['--include-meter-details', '-m'], action='store_true', help='include meter details in the usages')
+        c.argument('start_date', options_list=['--start-date', '-s'], type=get_datetime_type(), help='start date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
+        c.argument('end_date', options_list=['--end-date', '-e'], type=get_datetime_type(), help='end date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
         c.argument('billing_period_name', options_list=['--billing-period-name', '-p'], help='name of a specific billing period to get the usage details that associate with')
+    		
     with self.argument_context('consumption reservations summaries list') as rs:
         rs.argument('reservationorderid', options_list=['--reservation-order-id', '-r'], help='Reservation order id')
         rs.argument('reservationid', options_list=['--reservation-id', '-i'], help='Reservation id')
@@ -26,3 +34,12 @@ def load_arguments(self, _):
         rd.argument('reservationid', options_list=['--reservation-id', '-i'], help='Reservation id')
         rd.argument('start_date', options_list=['--start-date', '-s'], type=get_datetime_type(), help='start date (in UTC Y-m-d) of the reservation summaries. Only needed for daily grain and both start date and end date need to be supplied or neither')
         rd.argument('end_date', options_list=['--end-date', '-e'], type=get_datetime_type(), help='end date (in UTC Y-m-d) of the reservation summaries. Only needed for daily grain and both start date and end date need to be supplied or neither')
+		
+    with self.argument_context('consumption pricesheet get') as cps:
+        cps.argument('include_additional_properties', options_list=['--include-additional-properties', '-a'], action='store_true', help='include additional properties in pricesheet')
+        cps.argument('include_meter_details', options_list=['--include-meter-details', '-m'], action='store_true', help='include meter details in the price sheet')
+		
+    with self.argument_context('consumption pricesheet billing period get') as cps:
+        cps.argument('billing_period_name', options_list=['--billing-period-name', '-p'], help='name of a specific billing period to get the price sheet')
+        cps.argument('include_additional_properties', options_list=['--include-additional-properties', '-a'], action='store_true', help='include additional properties in pricesheet')
+        cps.argument('include_meter_details', options_list=['--include-meter-details', '-m'], action='store_true', help='include meter details in the price sheet')

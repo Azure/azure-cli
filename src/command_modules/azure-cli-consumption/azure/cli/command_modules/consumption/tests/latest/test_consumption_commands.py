@@ -55,6 +55,45 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         self.assertTrue(reservationdetails['usageDate'])
         self.assertTrue(reservationdetails['usedHours'])
 
+    def _validate_pricesheet(self, pricesheet, includeMeterDetails=False):
+        self.assertIsNotNone(pricesheet)
+        self.assertEqual(pricesheet['type'], 'Microsoft.Consumption/pricesheets')
+        self.assertTrue(pricesheet['id'] and pricesheet['name'])
+        self.assertIsNotNone(pricesheet['billingPeriodId'])
+        self.assertIsNotNone(pricesheet['currencyCode'])
+        self.assertIsNotNone(pricesheet['meterId'])
+		self.assertIsNotNone(pricesheet['unitOfMeasure'])
+        self.assertTrue(pricesheet['unitPrice'] and pricesheet['includedQuantity'] and pricesheet['partNumber'])
+        if includeMeterDetails:
+            self.assertIsNotNone(pricesheet['meterDetails'])
+            self.assertIsNotNone(pricesheet['meterDetails']['meterName'])
+        else:
+            self.assertIsNone(pricesheet['meterDetails'])
+
+    def test_pricesheet_billing_period(self):
+        self.kwargs.update({
+            'billing_period': '201710'
+        })
+
+        pricesheet = self.cmd('consumption pricesheet get -p {billing_period}').get_output_in_json()
+        self.assertTrue(pricesheet)        
+        self._validate_pricesheet(pricesheet.pricesheets[0], False)
+		
+    def test_pricesheet_billing_period_include_meter_details(self):
+        self.kwargs.update({
+            'billing_period': '201710'
+        })
+
+        pricesheet = self.cmd('consumption pricesheet get -p {billing_period} -m').get_output_in_json()
+        self.assertTrue(pricesheet)        
+        self._validate_pricesheet(pricesheet.pricesheets[0], True)
+
+    def test_pricesheet_no_billing_period(self):
+        
+        pricesheet = self.cmd('consumption pricesheet get').get_output_in_json()
+        self.assertTrue(pricesheet)        
+        self._validate_pricesheet(pricesheet.pricesheets[0], False)
+		
     def test_list_usages_billing_period(self):
         self.kwargs.update({
             'billing_period': '201710'
@@ -127,3 +166,5 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         reservations_details_list = self.cmd('consumption reservations details list -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -i f37f4b70-52ba-4344-a8bd-28abfd21d640 -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
         self.assertTrue(reservations_details_list)
         self._validate_reservation_details(reservations_details_list[0])
+		
+		
