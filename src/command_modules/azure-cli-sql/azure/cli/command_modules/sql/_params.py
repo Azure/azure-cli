@@ -655,6 +655,17 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(ServerConnectionType))
 
     #####
+    #           sql server dns-alias
+    #####
+    with self.argument_context('sql server dns-alias') as c:
+        c.argument('server_name', arg_type=server_param_type)
+        c.argument('dns_alias_name', options_list=('--name', '-n'))
+        c.argument('original_server_name', options_list=('--original-server'),
+                   help='The name of the server to which alias is currently pointing')
+        c.argument('original_resource_group_name', options_list=('--original-resource-group'))
+        c.argument('original_subscription_id', options_list=('--original-subscription-id'))
+
+    #####
     #           sql server firewall-rule
     #####
     with self.argument_context('sql server firewall-rule') as c:
