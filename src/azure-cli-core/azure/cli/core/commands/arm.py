@@ -357,6 +357,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         return [(k, v) for k, v in arguments.items()]
 
     def _extract_handler_and_args(args, commmand_kwargs, op):
+        from azure.cli.core.commands.client_factory import resolve_client_arg_name
         factory = _get_client_factory(name, commmand_kwargs)
         client = None
         if factory:
@@ -365,7 +366,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             except TypeError:
                 client = factory(context.cli_ctx, None)
 
-        client_arg_name = 'client' if op.startswith(('azure.cli', 'azext')) else 'self'
+        client_arg_name = resolve_client_arg_name(op, kwargs)
         op_handler = context.get_op_handler(op)
         exclude = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
         raw_args = dict(extract_args_from_signature(op_handler, excluded_params=exclude))
@@ -508,6 +509,7 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         return provisioning_state
 
     def handler(args):
+        from azure.cli.core.commands.client_factory import resolve_client_arg_name
         from msrest.exceptions import ClientException
         import time
 
@@ -516,8 +518,7 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         operations_tmpl = _get_operations_tmpl(cmd)
         getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
                                                        excluded_params=EXCLUDED_PARAMS))
-
-        client_arg_name = 'client' if operations_tmpl.startswith(('azure.cli', 'azext')) else 'self'
+        client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)
         try:
             client = factory(context.cli_ctx) if factory else None
         except TypeError:

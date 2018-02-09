@@ -18,6 +18,18 @@ UA_AGENT = "AZURECLI/{}".format(core_version)
 ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
 
+def resolve_client_arg_name(operation, kwargs):
+    if 'client_arg_name' in kwargs:
+        logger.info("Keyword 'client_arg_name' is deprecated and should be removed.")
+        return kwargs['client_arg_name']
+    client_arg_name = 'self'
+    path, operation = operation.split('#', 1)
+    path_comps = path.split('.')
+    if path_comps[-1] == 'custom':
+        client_arg_name = 'client'
+    return client_arg_name
+
+
 def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=None, api_version=None,
                             **kwargs):
     sdk_profile = None
