@@ -5,6 +5,7 @@
 
 from azure.cli.core.util import CLIError
 
+
 def managementgroups_exception_handler(ex):
     from azure.mgmt.resource.managementgroups.models import ErrorResponseException
     if isinstance(ex, ErrorResponseException):

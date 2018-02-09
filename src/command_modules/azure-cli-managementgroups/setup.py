@@ -59,6 +59,4 @@ setup(
         'azure.cli.command_modules.managementgroups',
     ],
     install_requires=DEPENDENCIES,
-    cmdclass=cmdclass
-)
-
+    cmdclass=cmdclass)

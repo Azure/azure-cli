@@ -51,10 +51,10 @@ helps['managementgroups group get'] = """
              az managementgroups group get --group-name <group_name>
         - name: Get a management group with children in the first level of hierarchy.
           text: >
-             az managementgroups group get --group-name <group_name> -e 
+             az managementgroups group get --group-name <group_name> -e
         - name: Get a management group with children in all levels of hierarchy.
           text: >
-             az managementgroups group get --group-name <group_name> -e -r 
+             az managementgroups group get --group-name <group_name> -e -r
 """
 
 helps['managementgroups group new'] = """
@@ -77,7 +77,7 @@ helps['managementgroups group new'] = """
              az managementgroups group new --group-name <group_name>
         - name: Add a new management group with a specific display name.
           text: >
-             az managementgroups group new --group-name <group_name> --display-name <display_name> 
+             az managementgroups group new --group-name <group_name> --display-name <display_name>
         - name: Add a new management group with a specific parent id.
           text: >
              az managementgroups group new --group-name <group_name> --parent-id <parent_id>
@@ -103,7 +103,7 @@ helps['managementgroups group update'] = """
     examples:
         - name: Update an existing management group with a specific display name.
           text: >
-             az managementgroups group update --group-name <group_name> --display-name <display_name> 
+             az managementgroups group update --group-name <group_name> --display-name <display_name>
         - name: Update an existing management group with a specific parent id.
           text: >
              az managementgroups group update --group-name <group_name> --parent-id <parent_id>
@@ -123,7 +123,7 @@ helps['managementgroups group remove'] = """
     examples:
         - name: Remove an existing management group
           text: >
-             az managementgroups group remove --group-name <group_name> 
+             az managementgroups group remove --group-name <group_name>
 """
 
 helps['managementgroups subscription new'] = """
@@ -159,6 +159,3 @@ helps['managementgroups subscription remove'] = """
           text: >
              az managementgroups group remove --group-name <group_name> --subscription-id <subscription_id>
 """
-
-
-

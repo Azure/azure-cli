@@ -5,17 +5,23 @@
 
 from azure.cli.core import AzCommandsLoader
 import azure.cli.command_modules.reservations._help  # pylint: disable=unused-import
-from ._client_factory import management_groups_client_factory, management_group_subscriptions_client_factory
+from ._client_factory import management_groups_client_factory
 from ._exception_handler import managementgroups_exception_handler
+
 
 class ManagementGroupsCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        managementgroups_customs = CliCommandType(operations_tmpl='azure.cli.command_modules.managementgroups.custom#{}',
-                                        client_factory=management_groups_client_factory,
-                                        exception_handler=managementgroups_exception_handler)
-        super(ManagementGroupsCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=managementgroups_customs)
+        managementgroups_customs = CliCommandType(
+            operations_tmpl='azure.cli.command_modules.managementgroups.custom#{}',
+            client_factory=management_groups_client_factory,
+            exception_handler=managementgroups_exception_handler)
+        super(
+            ManagementGroupsCommandsLoader,
+            self).__init__(
+                cli_ctx=cli_ctx,
+                custom_command_type=managementgroups_customs)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.managementgroups.commands import load_command_table
@@ -26,6 +32,5 @@ class ManagementGroupsCommandsLoader(AzCommandsLoader):
         from azure.cli.command_modules.managementgroups._params import load_arguments
         load_arguments(self, command)
 
+
 COMMAND_LOADER_CLS = ManagementGroupsCommandsLoader
-
-
