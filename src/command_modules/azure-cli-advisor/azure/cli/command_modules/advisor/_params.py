@@ -5,7 +5,9 @@
 
 from knack.arguments import CLIArgumentType
 
-from azure.cli.core.commands.parameters import get_enum_type
+from azure.cli.core.commands.parameters import \
+    (get_enum_type,
+     get_resource_name_completion_list)
 
 from ._validators import \
     (validate_include_or_exclude,
@@ -18,20 +20,24 @@ def load_arguments(self, _):
                                    help='One or more resource IDs (space delimited). If provided, no other '
                                         '"Resource Id" arguments should be specified.')
 
+    name_arg_type = CLIArgumentType(options_list=['--name', '-n'], id_part='name',
+                                    help='The name of the recommendation as output by the list command.',
+                                    completer=get_resource_name_completion_list('Microsoft.Advisor/recommendations'))
+
     with self.argument_context('advisor recommendation list') as c:
         c.argument('ids', ids_arg_type, validator=validate_ids_or_resource_group)
         c.argument('category', options_list=['--category', '-c'], help='Name of recommendation category.',
                    arg_type=get_enum_type(['Cost', 'HighAvailability', 'Performance', 'Security']))
-        c.argument('refresh', options_list=['--refresh', '-e'], action='store_true',
+        c.argument('refresh', options_list=['--refresh', '-r'], action='store_true',
                    help='Generate new recommendations.')
 
     with self.argument_context('advisor recommendation disable') as c:
-        c.argument('ids', ids_arg_type)
+        c.argument('recommendation_name', name_arg_type)
         c.argument('days', options_list=['--days', '-d'], type=int,
                    help='Number of days to disable. If not specified, the recommendation is disabled forever.')
 
     with self.argument_context('advisor recommendation enable') as c:
-        c.argument('ids', ids_arg_type)
+        c.argument('recommendation_name', name_arg_type)
 
     with self.argument_context('advisor configuration update') as c:
         c.argument('low_cpu_threshold', options_list=['--low-cpu-threshold', '-l'],

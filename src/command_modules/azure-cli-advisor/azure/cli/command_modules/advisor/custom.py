@@ -10,82 +10,133 @@ from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.advisor.models import ConfigData, ConfigDataProperties
 
 
-def cli_advisor_list_recommendations(client, ids=None, resource_group_name=None, category=None, refresh=None):
+def cli_advisor_list_recommendations(client, ids=None, resource_group_name=None,
+                                     category=None, refresh=None):
     if refresh:
         generate_recommendations(client)
     scope = build_filter_string(ids, resource_group_name, category)
     return client.list(scope)
 
 
-def cli_advisor_disable_recommendations(client, ids, days=None):
-    suppressions = []
-    suppressionName = str(uuid.uuid4())
-    for id_arg in ids:
-        result = parse_recommendation_uri(id_arg)
-        resourceUri = result['resourceUri']
-        recommendationId = result['recommendationId']
-        ttl = '{}:00:00:00'.format(days) if days else ''
-        client.create(
-            resource_uri=resourceUri,
-            recommendation_id=recommendationId,
-            name=suppressionName,
-            ttl=ttl
-        )
-        suppressions.append(client.get(
-            resource_uri=resourceUri,
-            recommendation_id=recommendationId,
-            name=suppressionName
-        ))
+def cli_advisor_disable_recommendations(client, resource_group_name=None,
+                                        recommendation_name=None, days=None):
+    if recommendation_name:
+        recs = cli_advisor_list_recommendations(
+                    client=client.recommendations,
+                    resource_group_name=resource_group_name)
+        rec = next(r for r in recs if r.name == recommendation_name)
+        suppressions.append(
+            create_suppression(
+                client.suppressions,
+                rec.id,
+                days))
+
+#    if ids:
+#        for id_arg in ids:
+#            suppressions.append(create_suppression(client.suppressions, id_arg, days))
+
     return suppressions
 
 
-def cli_advisor_enable_recommendations(client, ids):
+def cli_advisor_enable_recommendations(client, ids=None, resource_group_name=None, recommendation_name=None):
     enabledRecs = []
     allSups = list(client.suppressions.list())
-    for id_arg in ids:
-        result = parse_recommendation_uri(id_arg)
-        resourceUri = result['resourceUri']
-        recommendationId = result['recommendationId']
+
+    if recommendation_name:
         recs = cli_advisor_list_recommendations(
-            client=client.recommendations,
-            ids=[resourceUri]
-        )
-        rec = next(x for x in recs if x.name == recommendationId)
-        matches = [x for x in allSups if x.suppression_id in rec.suppression_ids]
-        for match in matches:
-            client.suppressions.delete(
-                resource_uri=resourceUri,
-                recommendation_id=recommendationId,
-                name=match.name
+                    client=client.recommendations,
+                    resource_group_name=resource_group_name)
+        enabledRecs.append(
+            remove_suppressions(
+                client.suppressions,
+                recommendations=recs,
+                recommendation_name=recommendation_name,
+                suppressions=allSups))
+
+    if ids:
+        for id_arg in ids:
+            result = parse_recommendation_uri(id_arg)
+            resourceUri = result['resourceUri']
+            recommendationId = result['recommendationId']
+            recs = cli_advisor_list_recommendations(
+                client=client.recommendations,
+                ids=[resourceUri]
             )
-        rec.suppression_ids = None
-        enabledRecs.append(rec)
+            enabledRecs.append(
+                remove_suppressions(
+                    client.suppressions,
+                    recommendations=recs,
+                    recommendation_name=recommendationId,
+                    suppressions=allSups))
+
     return enabledRecs
 
 
-def cli_advisor_list_configurations(client, resource_group_name=None):
+def cli_advisor_list_configurations(client):
+    return client.list_by_subscription().value
+
+
+def cli_advisor_show_configuration(client, resource_group_name=None):
+    # check for null and zero value
     if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list_by_subscription()
+        return client.list_by_resource_group(resource_group_name).value[0]
+    return client.list_by_subscription().value[0]
 
 
-def cli_advisor_update_configurations(client, resource_group_name=None,
-                                      low_cpu_threshold=None, exclude=None, include=None):
-
-    cfg = ConfigData()
-    cfg.properties = ConfigDataProperties()
-
-    cfg.properties.low_cpu_threshold = low_cpu_threshold
-    cfg.properties.exclude = exclude
-    if include:
-        cfg.properties.exclude = False
-
+def _cli_advisor_set_configuration(client, resource_group_name=None, parameters=None):
     if resource_group_name:
         return client.create_in_resource_group(
-            config_contract=cfg,
+            config_contract=parameters,
             resource_group=resource_group_name)
 
-    return client.create_in_subscription(cfg)
+    return client.create_in_subscription(parameters)
+
+
+def cli_advisor_update_configurations(instance, resource_group_name=None,
+                                      low_cpu_threshold=None, exclude=None, include=None):
+
+    instance.properties.low_cpu_threshold = low_cpu_threshold
+    instance.properties.exclude = exclude
+    if include:
+        instance.properties.exclude = False
+
+    return instance
+
+
+def create_suppression(client, recommendation_uri, days=None):
+    suppressionName = str(uuid.uuid4())
+    ttl = '{}:00:00:00'.format(days) if days else ''
+
+    result = parse_recommendation_uri(recommendation_uri)
+    resourceUri = result['resourceUri']
+    recommendationId = result['recommendationId']
+
+    client.create(
+        resource_uri=resourceUri,
+        recommendation_id=recommendationId,
+        name=suppressionName,
+        ttl=ttl
+    )
+
+    return client.get(
+        resource_uri=resourceUri,
+        recommendation_id=recommendationId,
+        name=suppressionName
+    )
+
+
+def remove_suppressions(client, recommendations, recommendation_name, suppressions):
+    rec = next(x for x in recommendations if x.name == recommendation_name)
+
+    matches = [x for x in suppressions if x.suppression_id in rec.suppression_ids]
+    for match in matches:
+        client.delete(
+            resource_uri=parse_recommendation_uri(rec.id)['resourceUri'],
+            recommendation_id=recommendation_name,
+            name=match.name
+        )
+    rec.suppression_ids = None
+    return rec
 
 
 def build_filter_string(ids=None, resource_group_name=None, category=None):
