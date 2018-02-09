@@ -117,7 +117,8 @@ class TestStorageValidators(unittest.TestCase):
     def test_services_type(self):
         input = "ttfqbqtf"
         actual = str(services_type(self.loader)(input))
-        if supported_api_version(self.cli, ResourceType.DATA_STORAGE, max_api='2016-05-31'):
+        if supported_api_version(self.cli, ResourceType.DATA_STORAGE, max_api='2016-05-31') or \
+           supported_api_version(self.cli, ResourceType.DATA_STORAGE, min_api='2017-07-29'):
             expected = "bqtf"
         else:
             expected = "bqf"
