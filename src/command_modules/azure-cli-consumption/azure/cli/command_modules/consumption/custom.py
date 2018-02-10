@@ -7,6 +7,7 @@
 
 from azure.cli.command_modules.consumption._client_factory import cf_consumption
 
+
 def cli_consumption_list_usage(client, top=None, include_additional_properties=False, include_meter_details=False, start_date=None, end_date=None):
     """List all usage details of the subscription"""
     if include_additional_properties and include_meter_details:
@@ -29,6 +30,7 @@ def cli_consumption_list_usage(client, top=None, include_additional_properties=F
         pages = client.list(expand=expand, filter=filter_expression, top=top)
         return list(pages.advance_page())
     return list(client.list(expand=expand, filter=filter_expression))
+
 
 def cli_consumption_list_usage_by_billing_period(client, billing_period_name=None, top=None, include_additional_properties=False, include_meter_details=False, start_date=None, end_date=None):
     """List all usage details of the subscription"""
@@ -53,7 +55,7 @@ def cli_consumption_list_usage_by_billing_period(client, billing_period_name=Non
         return list(pages.advance_page())
     return list(client.list_by_billing_period(billing_period_name, expand=expand, filter=filter_expression))
 
-####### reservation summaries methods######
+
 def cli_consumption_list_reservations_summaries(client, grain, reservationorderid, start_date=None, end_date=None):
     """List all the reservation summaries """
     filter_from = None
@@ -67,6 +69,7 @@ def cli_consumption_list_reservations_summaries(client, grain, reservationorderi
 
     return list(client.list_by_reservation_order(reservationorderid, grain=grain))
 
+
 def cli_consumption_list_reservations_summaries_reservation_id(client, grain, reservationorderid, reservationid=None, start_date=None, end_date=None):
     """List all the reservation summaries """
     filter_from = None
@@ -79,9 +82,8 @@ def cli_consumption_list_reservations_summaries_reservation_id(client, grain, re
         return list(client.list_by_reservation_order_and_reservation(reservationorderid, reservationid, grain=grain, filter=filter_expression))
 
     return list(client.list_by_reservation_order_and_reservation(reservationorderid, reservationid, grain=grain))
-####### reservation summaries methods ends ######
 
-####### reservation details methods ######
+
 def cli_consumption_list_reservations_details(client, reservationorderid, start_date, end_date):
     """List all the reservation details """
     filter_from = None
@@ -102,8 +104,8 @@ def cli_consumption_list_reservations_details_by_reservation_id(client, reservat
     filter_to = "properties/UsageDate le {}".format(end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
     filter_expression = "{} and {}".format(filter_from, filter_to)
     return list(client.list_by_reservation_order_and_reservation(reservationorderid, reservationid, filter=filter_expression))
-####### reservation details methods ends######
-####### price sheet get methods ######
+
+
 def cli_consumption_list_pricesheet_get(client, include_additional_properties=False, include_meter_details=False):
     """get the pricesheet of the subscription"""
     if include_additional_properties and include_meter_details:
@@ -116,7 +118,8 @@ def cli_consumption_list_pricesheet_get(client, include_additional_properties=Fa
         expand_properties = None
 
     return client.get(expand=expand_properties)
-	
+
+
 def cli_consumption_list_pricesheet_by_billing_period_get(client, billing_period_name, include_additional_properties=False, include_meter_details=False):
     """get the pricesheet of the subscription"""
     if include_additional_properties and include_meter_details:
@@ -129,5 +132,3 @@ def cli_consumption_list_pricesheet_by_billing_period_get(client, billing_period
         expand_properties = None
 
     return client.get_by_billing_period(billing_period_name,expand=expand_properties)
-
-####### price sheet get methods ends######

@@ -19,6 +19,7 @@ from ._validators import validate_reservations_details
 from ._validators import validate_pricesheet
 from ._validators import validate_usage_bp_inputs
 
+
 def load_command_table(self, _):
     with self.command_group('consumption usage') as g:
         g.custom_command('list', 'cli_consumption_list_usage', transform=transform_usage_list_output,
@@ -26,7 +27,6 @@ def load_command_table(self, _):
 
         g.custom_command('billing period list', 'cli_consumption_list_usage_by_billing_period', transform=transform_usage_list_output,
                          exception_handler=consumption_exception_handler, validator=validate_usage_bp_inputs, client_factory=usage_details_mgmt_client_factory)
-
 
     with self.command_group('consumption reservations summaries') as s:
         s.custom_command('list', 'cli_consumption_list_reservations_summaries', transform=transform_reservation_summaries_list_output,
@@ -48,5 +48,3 @@ def load_command_table(self, _):
 
         p.custom_command('billing period get', 'cli_consumption_list_pricesheet_by_billing_period_get', transform=transform_pricesheet_get_output,
                          exception_handler=consumption_exception_handler, validator=validate_pricesheet, client_factory=pricesheet_mgmt_client_factory)
-						 
-						 
