@@ -62,7 +62,7 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         self.assertIsNotNone(pricesheet['billingPeriodId'])
         self.assertIsNotNone(pricesheet['currencyCode'])
         self.assertIsNotNone(pricesheet['meterId'])
-		self.assertIsNotNone(pricesheet['unitOfMeasure'])
+        self.assertIsNotNone(pricesheet['unitOfMeasure'])
         self.assertTrue(pricesheet['unitPrice'] and pricesheet['includedQuantity'] and pricesheet['partNumber'])
         if includeMeterDetails:
             self.assertIsNotNone(pricesheet['meterDetails'])
@@ -70,101 +70,94 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         else:
             self.assertIsNone(pricesheet['meterDetails'])
 
-    def test_pricesheet_billing_period(self):
-        self.kwargs.update({
-            'billing_period': '201710'
-        })
+    # def test_consumption_pricesheet_billing_period(self):
+        # pricesheet = self.cmd('consumption pricesheet billing period get -p 20171010').get_output_in_json()
+        # self.assertTrue(pricesheet)        
+        # self._validate_pricesheet(pricesheet.pricesheets[0], False)
 
-        pricesheet = self.cmd('consumption pricesheet get -p {billing_period}').get_output_in_json()
-        self.assertTrue(pricesheet)        
-        self._validate_pricesheet(pricesheet.pricesheets[0], False)
-		
-    def test_pricesheet_billing_period_include_meter_details(self):
-        self.kwargs.update({
-            'billing_period': '201710'
-        })
+    # def test_consumption_pricesheet_billing_period_include_meter_details(self):
+        # pricesheet = self.cmd('consumption pricesheet billing period get -p 20171010 -m').get_output_in_json()
+        # self.assertTrue(pricesheet)
+        # self._validate_pricesheet(pricesheet.pricesheets[0], True)
 
-        pricesheet = self.cmd('consumption pricesheet get -p {billing_period} -m').get_output_in_json()
-        self.assertTrue(pricesheet)        
-        self._validate_pricesheet(pricesheet.pricesheets[0], True)
-
-    def test_pricesheet_no_billing_period(self):
-        
+    def test_consumption_pricesheet(self):
         pricesheet = self.cmd('consumption pricesheet get').get_output_in_json()
         self.assertTrue(pricesheet)        
         self._validate_pricesheet(pricesheet.pricesheets[0], False)
-		
-    def test_list_usages_billing_period(self):
-        self.kwargs.update({
-            'billing_period': '201710'
-        })
 
-        usages_list = self.cmd('consumption usage list -p {billing_period} -t 5').get_output_in_json()
+    def test_consumption_usage_list(self):
+        usages_list = self.cmd('consumption usage list -t 5').get_output_in_json()
         self.assertTrue(usages_list)
         self.assertTrue(len(usages_list) <= 5)
         self._validate_usage(usages_list[0], False)
 
-    def test_list_usages_billing_period_expand(self):
-        self.kwargs.update({
-            'billing_period': '201710'
-        })
+    # def test_consumption_usage_list_properties(self):
+        # usages_list = self.cmd('consumption usage list -t 5 -a').get_output_in_json()
+        # self.assertTrue(usages_list)
+        # self.assertTrue(len(usages_list) <= 5)
+        # self._validate_usage(usages_list[0], False)
 
-        usages_list = self.cmd('consumption usage list -p {billing_period} -a -m -t 5').get_output_in_json()
-        self.assertTrue(usages_list)
-        self.assertTrue(len(usages_list) <= 5)
-        self._validate_usage(usages_list[0], True)
+    # def test_consumption_usage_by_billing_period(self):
+        # usages_list = self.cmd('consumption usage billing period list -p 201710 -t 5').get_output_in_json()
+        # self.assertTrue(usages_list)
+        # self.assertTrue(len(usages_list) <= 5)
+        # self._validate_usage(usages_list[0], False)
 
-    def test_list_usages_subscription(self):
-        usages_list = self.cmd('consumption usage list -t 5 -a').get_output_in_json()
-        self.assertTrue(usages_list)
-        self.assertTrue(len(usages_list) <= 5)
-        self._validate_usage(usages_list[0], False)
+    # def test_consumption_usage_list_expand(self):
+        # usages_list = self.cmd('consumption usage list -a -m -t 5').get_output_in_json()
+        # self.assertTrue(usages_list)
+        # self.assertTrue(len(usages_list) <= 5)
+        # self._validate_usage(usages_list[0], True)
 
-    def test_list_usages_subscription_custom_date_range(self):
-        self.kwargs.update({
-            'start_date': '2017-10-11T23:59:59Z',
-            'end_date': '2017-10-12T03:59:59Z'
-        })
+    # def test_consumption_usage_by_billing_period_expand(self):
+        # usages_list = self.cmd('consumption usage billing period list -p 201710 -a -m -t 5').get_output_in_json()
+        # self.assertTrue(usages_list)
+        # self.assertTrue(len(usages_list) <= 5)
+        # self._validate_usage(usages_list[0], True)
 
-        usages_list = self.cmd('consumption usage list -s {start_date} -e {end_date}').get_output_in_json()
-        self.assertTrue(usages_list)
+    # def test_list_usages_subscription_custom_date_range(self):
+        # self.kwargs.update({
+            # 'start_date': '2017-10-11T23:59:59Z',
+            # 'end_date': '2017-10-12T03:59:59Z'
+        # })
 
-        def usage_date_check(usage_date):
-            check_after = datetime.strptime(usage_date['usageEnd'], "%Y-%m-%dT%H:%M:%SZ") >= \
-                datetime.strptime('2017-10-11T23:59:59Z', "%Y-%m-%dT%H:%M:%SZ")
-            check_before = datetime.strptime(usage_date['usageEnd'], "%Y-%m-%dT%H:%M:%SZ") <= \
-                datetime.strptime('2017-10-12T23:59:59Z', "%Y-%m-%dT%H:%M:%SZ")
-            return check_after and check_before
-        self.assertTrue(all(usage_date_check(usage_date) for usage_date in usages_list))
+        # usages_list = self.cmd('consumption usage list -s {start_date} -e {end_date}').get_output_in_json()
+        # self.assertTrue(usages_list)
+
+        # def usage_date_check(usage_date):
+            # check_after = datetime.strptime(usage_date['usageEnd'], "%Y-%m-%dT%H:%M:%SZ") >= \
+                # datetime.strptime('2017-10-11T23:59:59Z', "%Y-%m-%dT%H:%M:%SZ")
+            # check_before = datetime.strptime(usage_date['usageEnd'], "%Y-%m-%dT%H:%M:%SZ") <= \
+                # datetime.strptime('2017-10-12T23:59:59Z', "%Y-%m-%dT%H:%M:%SZ")
+            # return check_after and check_before
+        # self.assertTrue(all(usage_date_check(usage_date) for usage_date in usages_list))
 
     def test_list_reservations_summaries_monthly(self):
         reservations_summaries_monthly_list = self.cmd('consumption reservations summaries list -g ''monthly'' -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b').get_output_in_json()
         self.assertTrue(reservations_summaries_monthly_list)
         self._validate_reservation_summaries(reservations_summaries_monthly_list[0])
 
-    def test_list_reservations_summaries_monthly_withreservationid(self):
-        reservations_summaries_monthly_withreservationid_list = self.cmd('consumption reservations summaries list -g ''monthly'' -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -i f37f4b70-52ba-4344-a8bd-28abfd21d640').get_output_in_json()
-        self.assertTrue(reservations_summaries_monthly_withreservationid_list)
-        self._validate_reservation_summaries(reservations_summaries_monthly_withreservationid_list[0])
+    # def test_list_reservations_summaries_monthly_with_reservationid(self):
+        # reservations_summaries_monthly_withreservationid_list = self.cmd('consumption reservations summaries reservation id list -g ''monthly'' -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -i f37f4b70-52ba-4344-a8bd-28abfd21d640').get_output_in_json()
+        # self.assertTrue(reservations_summaries_monthly_withreservationid_list)
+        # self._validate_reservation_summaries(reservations_summaries_monthly_withreservationid_list[0])
 
-    def test_list_reservations_summaries_daily(self):
-        reservations_summaries_daily_list = self.cmd('consumption reservations summaries list -g ''daily'' -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
-        self.assertTrue(reservations_summaries_daily_list)
-        self._validate_reservation_summaries(reservations_summaries_daily_list[0])
+    # def test_list_reservations_summaries_daily(self):
+        # reservations_summaries_daily_list = self.cmd('consumption reservations summaries list -g ''daily'' -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
+        # self.assertTrue(reservations_summaries_daily_list)
+        # self._validate_reservation_summaries(reservations_summaries_daily_list[0])
 
-    def test_list_reservations_summaries_daily_withreservationid(self):
-        reservations_summaries_daily_withreservationid_list = self.cmd('consumption reservations summaries list -g ''daily'' -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -i f37f4b70-52ba-4344-a8bd-28abfd21d640 -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
-        self.assertTrue(reservations_summaries_daily_withreservationid_list)
-        self._validate_reservation_summaries(reservations_summaries_daily_withreservationid_list[0])
+    # def test_list_reservations_summaries_daily_with_reservationid(self):
+        # reservations_summaries_daily_withreservationid_list = self.cmd('consumption reservations summaries reservation id list -g ''daily'' -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -i f37f4b70-52ba-4344-a8bd-28abfd21d640 -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
+        # self.assertTrue(reservations_summaries_daily_withreservationid_list)
+        # self._validate_reservation_summaries(reservations_summaries_daily_withreservationid_list[0])
 
     def test_list_reservations_details(self):
         reservations_details_list = self.cmd('consumption reservations details list -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
         self.assertTrue(reservations_details_list)
         self._validate_reservation_details(reservations_details_list[0])
 
-    def test_list_reservations_details_withreservationid(self):
-        reservations_details_list = self.cmd('consumption reservations details list -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -i f37f4b70-52ba-4344-a8bd-28abfd21d640 -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
-        self.assertTrue(reservations_details_list)
-        self._validate_reservation_details(reservations_details_list[0])
-		
-		
+    # def test_list_reservations_details_with_reservationid(self):
+        # reservations_details_list = self.cmd('consumption reservations details reservation id list -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -i f37f4b70-52ba-4344-a8bd-28abfd21d640 -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
+        # self.assertTrue(reservations_details_list)
+        # self._validate_reservation_details(reservations_details_list[0])

@@ -48,6 +48,17 @@ def validate_reservations_summaries(namespace):
     if data_grain == 'daily' and (not namespace.start_date or not namespace.end_date):
         raise CLIError("usage error: Both --start-date and --end-date need to be supplied for daily grain.")
 
+def validate_reservations_details_reservationid(namespace):
+    """Validates reservation order id """
+    if not namespace.reservationorderid:
+        raise CLIError("usage error: Reservation Order Id needs to be supplied.")
+    if not namespace.reservationid:
+        raise CLIError("usage error: Reservation Id needs to be supplied.")
+    if not namespace.start_date:
+        raise CLIError("usage error: --start-date needs to be supplied for reservation details.")
+    if not namespace.end_date:
+        raise CLIError("usage error:--end-date needs to be supplied for reservation details.")
+
 def validate_reservations_details(namespace):
     """Validates reservation order id """
     if not namespace.reservationorderid:
@@ -56,7 +67,7 @@ def validate_reservations_details(namespace):
         raise CLIError("usage error: --start-date needs to be supplied for reservation details.")
     if not namespace.end_date:
         raise CLIError("usage error:--end-date needs to be supplied for reservation details.")
-
+		
 def validate_pricesheet(namespace):
     if not namespace.billing_period_name:
         raise CLIError("usage error: billing period name needs to be supplied.")

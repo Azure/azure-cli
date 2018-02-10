@@ -17,12 +17,31 @@ helps['consumption reservations'] = """
 
 helps['consumption reservations summaries'] = """
     type: group
-    short-summary: Manage reservations summaries for daily or monthly.
+    short-summary: List reservations summaries.
+"""
+helps['consumption reservations summaries list'] = """
+    type: command
+    short-summary: List reservations summaries for daily or monthly by reservation order Id.
+"""
+
+helps['consumption reservations summaries reservation id list'] = """
+    type: command
+    short-summary: List reservations summaries for daily or monthly by reservation order Id and reservation Id.
 """
 
 helps['consumption reservations details'] = """
     type: group
-    short-summary: Manage reservations details.
+    short-summary: List reservations details.
+"""
+
+helps['consumption reservations details list'] = """
+    type: command
+    short-summary: List reservations details by reservation order id
+"""
+
+helps['consumption reservations details reservation id list'] = """
+    type: command
+    short-summary: List reservations details by reservation order id and reservation id.
 """
 
 helps['consumption usage'] = """
