@@ -92,7 +92,7 @@ def cli_consumption_list_reservations_details(client, reservationorderid, start_
     filter_from = "properties/UsageDate ge {}".format(start_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
     filter_to = "properties/UsageDate le {}".format(end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
     filter_expression = "{} and {}".format(filter_from, filter_to)
-    return list(client.list_by_reservation_order(reservationorderid, filter=filter_expression)) 
+    return list(client.list_by_reservation_order(reservationorderid, filter=filter_expression))
 
 
 def cli_consumption_list_reservations_details_by_reservation_id(client, reservationorderid, start_date, end_date, reservationid=None):
@@ -131,4 +131,4 @@ def cli_consumption_list_pricesheet_by_billing_period_get(client, billing_period
     else:
         expand_properties = None
 
-    return client.get_by_billing_period(billing_period_name,expand=expand_properties)
+    return client.get_by_billing_period(billing_period_name, expand=expand_properties)
