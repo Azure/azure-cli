@@ -29,10 +29,11 @@ def validate_both_start_end_dates(namespace):
     if (namespace.start_date and not namespace.end_date) or (namespace.end_date and not namespace.start_date):
         raise CLIError("usage error: Both --start-date and --end-date need to be supplied or neither.")
 
+
 def validate_usage_bp_inputs(namespace):
     """Validates the existence of both start and end dates in the parameter or neither"""
     if (namespace.start_date and not namespace.end_date) or (namespace.end_date and not namespace.start_date):
-        raise CLIError("usage error: Both --start-date and --end-date need to be supplied or neither.")	
+        raise CLIError("usage error: Both --start-date and --end-date need to be supplied or neither.")
 
     if not namespace.billing_period_name:
         raise CLIError("usage error: Billing Period name --billing-period-name needs to be supplied")
