@@ -208,36 +208,38 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     return results
 
 
-# verify or apply reasonable defaults 
-def _get_time_range_filter(start_time=None, end_time=None):
-    DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
-    try:
-        end_time = datetime.datetime.strptime(end_time, DATE_TIME_FORMAT) if end_time else datetime.datetime.utcnow()
-    except ValueError:
-        raise CLIError("Input '{}' is not valid datetime. Valid example: 2000-12-31T12:59:59Z".format(end_time))
-
-    try:
-        start_time = datetime.datetime.strptime(start_time, DATE_TIME_FORMAT) if start_time else end_time - datetime.timedelta(hours=1)
-        if start_time >= end_time:
-            raise CLIError("Start time cannot be later than end time.")
-    except ValueError:
-        raise CLIError("Input '{}' is not valid datetime. Valid example: 2000-12-31T12:59:59Z".format(start_time))
-    
-    return 'eventTimestamp ge {} and eventTimestamp le {}'.format(start_time.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                                                                  end_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
-
-
-def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
+# verify or apply reasonable defaults
+def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
     from azure.mgmt.monitor import MonitorManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    client = get_mgmt_service_client(cmd.cli_ctx, MonitorManagementClient)
+    client = get_mgmt_service_client(cli_ctx, MonitorManagementClient)
+    DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+    if end_time:
+        try:
+            end_time = datetime.datetime.strptime(end_time, DATE_TIME_FORMAT)
+        except ValueError:
+            raise CLIError("Input '{}' is not valid datetime. Valid example: 2000-12-31T12:59:59Z".format(end_time))
+    else:
+        end_time = datetime.datetime.utcnow()
+
+    if start_time:
+        try:
+            start_time = datetime.datetime.strptime(start_time, DATE_TIME_FORMAT)
+            if start_time >= end_time:
+                raise CLIError("Start time cannot be later than end time.")
+        except ValueError:
+            raise CLIError("Input '{}' is not valid datetime. Valid example: 2000-12-31T12:59:59Z".format(start_time))
+    else:
+        start_time = end_time - datetime.timedelta(hours=1)
+
+    time_filter = 'eventTimestamp ge {} and eventTimestamp le {}'.format(start_time.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                                                                         end_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
 
     # set time range filter
-    odata_filters = 'resourceProvider eq Microsoft.Authorization and {}'.format(
-        _get_time_range_filter(start_time, end_time))
+    odata_filters = 'resourceProvider eq Microsoft.Authorization and {}'.format(time_filter)
 
     activity_log = list(client.activity_logs.list(filter=odata_filters))
-    start_events, end_events, offline_events, result = {}, {}, [], []
+    start_events, end_events, offline_events = {}, {}, []
 
     for l in activity_log:
         if l.http_request:
@@ -247,62 +249,64 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
                 end_events[l.operation_id] = l
         elif l.event_name and l.event_name.value.lower() == 'classicadministrators':
             offline_events.append(l)
+    return start_events, end_events, offline_events, client
 
+
+def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
+    # pylint: disable=too-many-nested-blocks, too-many-statements
+    result = []
+    start_events, end_events, offline_events, client = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
     role_defs = {d.id: [d.properties.role_name, d.id.split('/')[-1]] for d in list_role_definitions(cmd)}
 
     for op_id in start_events:
         e = end_events.get(op_id, None)
-        if e:
-            entry = {}
-            op = e.operation_name and e.operation_name.value
-            if (op.lower().startswith('microsoft.authorization/roleassignments') and e.status.value == 'Succeeded'):
-                s, payload = start_events[op_id], None
-                entry = {
-                    'timestamp': e.event_timestamp,
-                    'caller': s.caller,
-                    'principalId': None,
-                    'principalName': None,
-                    'scope': None,
-                    'scopeName': None,
-                    'scopeType': None,
-                    'roleDefinitionId': None,
-                    'roleName': None
-                }
-                if s.http_request:
-                    if s.http_request.method == 'PUT':
-                        # 'requestbody' has a wrong camel-case. Should be 'requestBody'
-                        payload = s.properties and s.properties.get('requestbody')
-                        entry['action'] = 'Granted'
-                        entry['scope'] = e.authorization.scope
-                    elif s.http_request.method == 'DELETE':
-                        payload = e.properties and e.properties.get('responseBody')
-                        entry['action'] = 'Revoked'
-                if payload:
-                    try:
-                        payload = json.loads(payload)
-                    except:
-                        pass
-                    if payload:
-                        payload = payload['properties']
-                        entry['principalId'] = payload['principalId']
-                        if not entry['scope']:
-                            entry['scope'] = payload['scope']
-                        if entry['scope']:
-                            index = entry['scope'].lower().find('/providers/microsoft.authorization')
-                            if index != -1:
-                                entry['scope'] = entry['scope'][:index]
-                            parts = list(filter(None, entry['scope'].split('/')))
-                            entry['scopeName'] = parts[-1]
-                            if len(parts) < 3:
-                                entry['scopeType'] = 'Subscription'
-                            elif len(parts) < 5:
-                                entry['scopeType'] = 'Resource group'
-                            else:
-                                entry['scopeType'] = 'Resource'
+        if not e:
+            continue
 
-                        entry['roleDefinitionId'] = role_defs[payload['roleDefinitionId']][1]
-                        entry['roleName'] = role_defs[payload['roleDefinitionId']][0]
-                result.append(entry)
+        entry = {}
+        op = e.operation_name and e.operation_name.value
+        if (op.lower().startswith('microsoft.authorization/roleassignments') and e.status.value == 'Succeeded'):
+            s, payload = start_events[op_id], None
+            entry = dict.fromkeys(
+                ['principalId', 'principalName', 'scope', 'scopeName', 'scopeType', 'roleDefinitionId', 'roleName'],
+                None)
+            entry['timestamp'], entry['caller'] = e.event_timestamp, s.caller
+
+            if s.http_request:
+                if s.http_request.method == 'PUT':
+                    # 'requestbody' has a wrong camel-case. Should be 'requestBody'
+                    payload = s.properties and s.properties.get('requestbody')
+                    entry['action'] = 'Granted'
+                    entry['scope'] = e.authorization.scope
+                elif s.http_request.method == 'DELETE':
+                    payload = e.properties and e.properties.get('responseBody')
+                    entry['action'] = 'Revoked'
+            if payload:
+                try:
+                    payload = json.loads(payload)
+                except ValueError:
+                    pass
+                if payload:
+                    payload = payload['properties']
+                    entry['principalId'] = payload['principalId']
+                    if not entry['scope']:
+                        entry['scope'] = payload['scope']
+                    if entry['scope']:
+                        index = entry['scope'].lower().find('/providers/microsoft.authorization')
+                        if index != -1:
+                            entry['scope'] = entry['scope'][:index]
+                        parts = list(filter(None, entry['scope'].split('/')))
+                        entry['scopeName'] = parts[-1]
+                        if len(parts) < 3:
+                            entry['scopeType'] = 'Subscription'
+                        elif len(parts) < 5:
+                            entry['scopeType'] = 'Resource group'
+                        else:
+                            entry['scopeType'] = 'Resource'
+
+                    entry['roleDefinitionId'] = role_defs[payload['roleDefinitionId']][1]
+                    entry['roleName'] = role_defs[payload['roleDefinitionId']][0]
+            result.append(entry)
 
     principal_ids = [x['principalId'] for x in result if x['principalId']]
     if principal_ids:
@@ -314,7 +318,8 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
                 e['principalName'] = principal_dics.get(e['principalId'], None)
 
     offline_events = [x for x in offline_events if (x.status and x.status.value == 'Succeeded' and x.operation_name and
-                                                    x.operation_name.value.lower().startswith('microsoft.authorization/classicadministrators'))]
+                                                    x.operation_name.value.lower().startswith(
+                                                        'microsoft.authorization/classicadministrators'))]
     for e in offline_events:
         entry = {
             'timestamp': e.event_timestamp,

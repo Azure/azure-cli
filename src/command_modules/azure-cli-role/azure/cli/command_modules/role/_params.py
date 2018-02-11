@@ -105,8 +105,7 @@ def load_arguments(self, _):
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
         c.argument('include_classic_administrators', arg_type=get_three_state_flag(), help='list default role assignments for subscription classic administrators, aka co-admins')
 
-    time_help = ('The {} of the query. In ISO format with explicit indication of '
-                 'timezone: 1970-01-01T00:00:00Z, 1970-01-01T00:00:00-0500. Defaults to {}')
+    time_help = ('The {} of the query in the format of %Y-%m-%dT%H:%M:%SZ, e.g. 2000-12-31T12:59:59Z. Defaults to {}')
     with self.argument_context('role assignment list-changelogs') as c:
         c.argument('start_time', help=time_help.format('start time', '1 Hour prior to the current time'))
         c.argument('end_time', help=time_help.format('end time', 'the current time'))
