@@ -107,7 +107,7 @@ class IotHubDeviceClient(object):
     def __init__(
             self, credentials, subscription_id, api_version='2016-11-14', accept_language='en-US', long_running_operation_retry_timeout=30, generate_client_request_id=True, base_url=None, filepath=None):
 
-        self.config = IotHubDeviceClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath)
+        self.config = IotHubDeviceClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath, cli_ctx=None)
         self._client = ServiceClient(self.config.credentials, self.config)
 
         client_models = {k: v for k, v in models.__dict__.items() if isinstance(v, type)}
