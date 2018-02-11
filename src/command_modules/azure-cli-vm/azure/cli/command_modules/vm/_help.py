@@ -807,6 +807,11 @@ helps['vm image show'] = """
             az vm image show -l westus -f CentOS -p OpenLogic --s 7.3 --version {latest}
 """
 
+helps['vm image accept-term'] = """
+    type: command
+    short-summary: Accept Azure Marketplace term so that the image can be used to create VMs
+"""
+
 helps['vm nic'] = """
     type: group
     short-summary: Manage network interfaces. See also `az network nic`.
@@ -1186,7 +1191,7 @@ helps['vm remove-identity'] = """
 
 helps['vm run-command'] = """
     type: group
-    short-summary: (PREVIEW) Manage run commands on a Virtual Machine
+    short-summary: Manage run commands on a Virtual Machine
 """
 
 helps['vm run-command invoke'] = """

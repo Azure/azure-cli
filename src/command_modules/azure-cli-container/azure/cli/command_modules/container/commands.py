@@ -5,7 +5,7 @@
 
 from azure.cli.core.util import empty_on_404
 from ._client_factory import cf_container_groups, cf_container_logs
-from ._format import transform_log_output, transform_container_group_list, transform_container_group
+from ._format import transform_container_group_list, transform_container_group
 
 
 def load_command_table(self, _):
@@ -15,4 +15,5 @@ def load_command_table(self, _):
         g.custom_command('show', 'get_container', exception_handler=empty_on_404,
                          table_transformer=transform_container_group)
         g.custom_command('delete', 'delete_container', confirmation=True)
-        g.custom_command('logs', 'container_logs', client_factory=cf_container_logs, transform=transform_log_output)
+        g.custom_command('logs', 'container_logs', client_factory=cf_container_logs)
+        g.custom_command('attach', 'attach_to_container')

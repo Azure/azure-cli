@@ -51,7 +51,7 @@ def load_command_table(self, _):
     # region Command Types
     network_ag_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.application_gateways_operations#ApplicationGatewaysOperations.{}',
-        client_factory=cf_load_balancers
+        client_factory=cf_application_gateways
     )
 
     network_util = CliCommandType(
@@ -286,7 +286,7 @@ def load_command_table(self, _):
     # endregion
 
     # region ApplicationSecurityGroups
-    with self.command_group('network asg', network_asg_sdk, min_api='2017-09-01') as g:
+    with self.command_group('network asg', network_asg_sdk, client_factory=cf_application_security_groups, min_api='2017-09-01') as g:
         g.custom_command('create', 'create_asg')
         g.command('show', 'get')
         g.command('list', 'list_all')
@@ -477,7 +477,7 @@ def load_command_table(self, _):
     # endregion
 
     # region NetworkWatchers
-    with self.command_group('network watcher', network_watcher_sdk, min_api='2016-09-01') as g:
+    with self.command_group('network watcher', network_watcher_sdk, client_factory=cf_network_watcher, min_api='2016-09-01') as g:
         g.custom_command('configure', 'configure_network_watcher')
         g.command('list', 'list_all')
         g.custom_command('test-ip-flow', 'check_nw_ip_flow', client_factory=cf_network_watcher)
@@ -622,6 +622,14 @@ def load_command_table(self, _):
     with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk) as g:
         g.custom_command('generate', 'generate_vpn_client')
         g.command('show-url', 'get_vpn_profile_package_url', min_api='2017-08-01')
+
+    with self.command_group('network vnet-gateway revoked-cert', network_vgw_sdk) as g:
+        g.custom_command('create', 'create_vnet_gateway_revoked_cert')
+        g.custom_command('delete', 'delete_vnet_gateway_revoked_cert')
+
+    with self.command_group('network vnet-gateway root-cert', network_vgw_sdk) as g:
+        g.custom_command('create', 'create_vnet_gateway_root_cert')
+        g.custom_command('delete', 'delete_vnet_gateway_root_cert')
 
     # endregion
 

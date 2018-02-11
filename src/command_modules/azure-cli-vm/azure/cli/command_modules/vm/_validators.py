@@ -6,7 +6,6 @@
 # pylint:disable=too-many-lines
 
 import os
-import re
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -19,7 +18,7 @@ from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
 
 from ._client_factory import _compute_client_factory
-
+from ._actions import _get_latest_image_version
 logger = get_logger(__name__)
 
 
@@ -173,6 +172,7 @@ def _parse_image_argument(cmd, namespace):
         namespace and returns the type for subsequent processing. """
     from msrestazure.tools import is_valid_resource_id
     from msrestazure.azure_exceptions import CloudError
+    import re
 
     # 1 - easy check for URI
     if namespace.image.lower().endswith('.vhd'):
@@ -227,16 +227,8 @@ def _get_image_plan_info_if_exists(cmd, namespace):
     try:
         compute_client = _compute_client_factory(cmd.cli_ctx)
         if namespace.os_version.lower() == 'latest':
-            top_one = compute_client.virtual_machine_images.list(namespace.location,
-                                                                 namespace.os_publisher,
-                                                                 namespace.os_offer,
-                                                                 namespace.os_sku,
-                                                                 top=1,
-                                                                 orderby='name desc')
-            if not top_one:
-                raise CLIError("Can't resolve the vesion of '{}'".format(namespace.image))
-
-            image_version = top_one[0].name
+            image_version = _get_latest_image_version(cmd.cli_ctx, namespace.location, namespace.os_publisher,
+                                                      namespace.os_offer, namespace.os_sku)
         else:
             image_version = namespace.os_version
 
@@ -693,6 +685,7 @@ def _validate_vm_vmss_create_auth(namespace):
 
 
 def _validate_admin_username(username, os_type):
+    import re
     if not username:
         raise CLIError("admin user name can not be empty")
     is_linux = (os_type.lower() == 'linux')
@@ -718,6 +711,7 @@ def _validate_admin_username(username, os_type):
 
 
 def _validate_admin_password(password, os_type):
+    import re
     is_linux = (os_type.lower() == 'linux')
     max_length = 72 if is_linux else 123
     min_length = 12
@@ -789,6 +783,7 @@ def _validate_vm_vmss_msi(cmd, namespace, from_set_command=False):
 
 
 def _resolve_role_id(cli_ctx, role, scope):
+    import re
     import uuid
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.authorization import AuthorizationManagementClient

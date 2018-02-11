@@ -17,7 +17,7 @@ IP_ADDRESS_TYPES = ['Public']
 
 
 def _environment_variables_type(value):
-    """Space separated values in 'key=value' format."""
+    """Space-separated values in 'key=value' format."""
     try:
         env_name, env_value = value.split('=', 1)
     except ValueError:
@@ -41,9 +41,10 @@ def load_arguments(self, _):
         c.argument('os_type', arg_type=get_enum_type(OperatingSystemTypes), help='The OS type of the containers')
         c.argument('ip_address', arg_type=get_enum_type(IP_ADDRESS_TYPES), help='The IP address type of the container group')
         c.argument('ports', type=int, nargs='+', default=[80], help='The ports to open')
+        c.argument('dns_name_label', help='The dns name label for container group with public IP')
         c.argument('restart_policy', arg_type=get_enum_type(ContainerGroupRestartPolicy), help='Restart policy for all containers within the container group')
         c.argument('command_line', help='The command line to run when the container is started, e.g. \'/bin/bash -c myscript.sh\'')
-        c.argument('environment_variables', nargs='+', options_list=['--environment-variables', '-e'], type=_environment_variables_type, help='A list of environment variable for the container. Space separated values in \'key=value\' format.')
+        c.argument('environment_variables', nargs='+', options_list=['--environment-variables', '-e'], type=_environment_variables_type, help='A list of environment variable for the container. Space-separated values in \'key=value\' format.')
 
     with self.argument_context('container create', arg_group='Image Registry') as c:
         c.argument('registry_login_server', help='The container image registry login server')
@@ -57,4 +58,8 @@ def load_arguments(self, _):
         c.argument('azure_file_volume_mount_path', validator=validate_volume_mount_path, help='The path within the container where the volume should be mounted. Must not contain colon (:).')
 
     with self.argument_context('container logs') as c:
-        c.argument('container_name', help='The container name to tail the logs')
+        c.argument('container_name', help='The container name to tail the logs. If omitted, the first container in the container group will be chosen')
+        c.argument('follow', help='Indicate to stream the tailing logs', action='store_true')
+
+    with self.argument_context('container attach') as c:
+        c.argument('container_name', help='The container to attach to. If omitted, the first container in the container group will be chosen')

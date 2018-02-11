@@ -179,10 +179,17 @@ def load_arguments(self, _):
         c.argument('usage_name', options_list=['--usage', '-u'])
 
     with self.argument_context('sql db') as c:
+        c.argument('server_name',
+                   arg_type=server_param_type,
+                   # Allow --ids command line argument. id_part=name is 1st name in uri
+                   id_part='name')
+
         c.argument('database_name',
                    options_list=['--name', '-n'],
-                   help='Name of the Azure SQL Database.')
-        c.argument('server_name', arg_type=server_param_type)
+                   help='Name of the Azure SQL Database.',
+                   # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
+                   id_part='child_name_1')
+
         c.argument('elastic_pool_name', options_list=['--elastic-pool'])
         c.argument('requested_service_objective_name', options_list=['--service-objective'])
         c.argument('max_size_bytes', options_list=['--max-size'],
@@ -223,24 +230,9 @@ def load_arguments(self, _):
                    options_list=['--service-objective'],
                    help='Name of the service objective for the new database.')
 
-    with self.argument_context('sql db create-replica') as c:
-        _configure_db_create_params(c, Engine.db, CreateMode.online_secondary)
-
-        c.argument('elastic_pool_name',
-                   help='Name of the elastic pool to create the new database in.')
-
-        c.argument('requested_service_objective_name',
-                   options_list=['--service-objective'],
-                   help='Name of the service objective for the new secondary database.')
-
-        c.argument('secondary_resource_group_name',
-                   options_list=['--secondary-resource-group'],
-                   help='Name of the resource group to create the new secondary database in.'
-                   ' If unspecified, defaults to the origin resource group.')
-
-        c.argument('secondary_server_name',
-                   options_list=['--secondary-server'],
-                   help='Name of the server to create the new secondary database in.')
+    with self.argument_context('sql db rename') as c:
+        c.argument('new_name',
+                   help='The new name that the database will be renamed to.')
 
     with self.argument_context('sql db restore') as c:
         _configure_db_create_params(c, Engine.db, CreateMode.point_in_time_restore)
@@ -496,10 +488,15 @@ def load_arguments(self, _):
     #                sql dw                       #
     ###############################################
     with self.argument_context('sql dw') as c:
-        c.argument('database_name', options_list=['--name', '-n'],
-                   help='Name of the data warehouse.')
+        c.argument('server_name',
+                   arg_type=server_param_type,
+                   # Allow --ids command line argument. id_part=name is 1st name in uri
+                   id_part='name')
 
-        c.argument('server_name', arg_type=server_param_type)
+        c.argument('database_name', options_list=['--name', '-n'],
+                   help='Name of the data warehouse.',
+                   # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
+                   id_part='child_name_1')
 
         c.argument('max_size_bytes', options_list=['--max-size'],
                    type=SizeWithUnitConverter('B', result_type=int),
@@ -535,10 +532,16 @@ def load_arguments(self, _):
         # This line to be removed when zone redundancy is fully supported in production.
         c.ignore('zone_redundant')
 
+        c.argument('server_name',
+                   arg_type=server_param_type,
+                   # Allow --ids command line argument. id_part=name is 1st name in uri
+                   id_part='name')
+
         c.argument('elastic_pool_name',
                    options_list=['--name', '-n'],
-                   help='The name of the elastic pool.')
-        c.argument('server_name', arg_type=server_param_type)
+                   help='The name of the elastic pool.',
+                   # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
+                   id_part='child_name_1')
 
         # --db-dtu-max and --db-dtu-min were the original param names, which is consistent with the
         # underlying REST API.
@@ -594,7 +597,9 @@ def load_arguments(self, _):
     #                sql server                   #
     ###############################################
     with self.argument_context('sql server') as c:
-        c.argument('server_name', options_list=['--name', '-n'])
+        c.argument('server_name', options_list=['--name', '-n'],
+                   # Allow --ids command line argument. id_part=name is 1st name in uri
+                   id_part='name')
         c.argument('administrator_login', options_list=['--admin-user', '-u'])
         c.argument('administrator_login_password', options_list=['--admin-password', '-p'])
 
@@ -650,16 +655,32 @@ def load_arguments(self, _):
                    arg_type=get_enum_type(ServerConnectionType))
 
     #####
+    #           sql server dns-alias
+    #####
+    with self.argument_context('sql server dns-alias') as c:
+        c.argument('server_name', arg_type=server_param_type)
+        c.argument('dns_alias_name', options_list=('--name', '-n'))
+        c.argument('original_server_name', options_list=('--original-server'),
+                   help='The name of the server to which alias is currently pointing')
+        c.argument('original_resource_group_name', options_list=('--original-resource-group'))
+        c.argument('original_subscription_id', options_list=('--original-subscription-id'))
+
+    #####
     #           sql server firewall-rule
     #####
     with self.argument_context('sql server firewall-rule') as c:
         # Help text needs to be specified because 'sql server firewall-rule update' is a custom
         # command.
-        c.argument('server_name', arg_type=server_param_type)
+        c.argument('server_name',
+                   arg_type=server_param_type,
+                   # Allow --ids command line argument. id_part=name is 1st name in uri
+                   id_part='name')
 
         c.argument('firewall_rule_name',
                    options_list=['--name', '-n'],
-                   help='The name of the firewall rule.')
+                   help='The name of the firewall rule.',
+                   # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
+                   id_part='child_name_1')
 
         c.argument('start_ip_address',
                    options_list=['--start-ip-address'],

@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
-
 
 def create_acl_policy(cmd, client, container_name, policy_name, start=None, expiry=None, permission=None, **kwargs):
     """Create a stored access policy on the containing object"""
@@ -32,6 +30,7 @@ def list_acl_policies(cmd, client, container_name, **kwargs):
 def set_acl_policy(cmd, client, container_name, policy_name, start=None, expiry=None, permission=None, **kwargs):
     """Set a stored access policy on a containing object"""
     if not (start or expiry or permission):
+        from knack.util import CLIError
         raise CLIError('Must specify at least one property when updating an access policy.')
 
     acl = _get_acl(cmd, client, container_name, **kwargs)
@@ -44,6 +43,7 @@ def set_acl_policy(cmd, client, container_name, policy_name, start=None, expiry=
             kwargs['public_access'] = getattr(acl, 'public_access')
 
     except KeyError:
+        from knack.util import CLIError
         raise CLIError('ACL does not contain {}'.format(policy_name))
     return _set_acl(cmd, client, container_name, acl, **kwargs)
 
@@ -85,6 +85,7 @@ def _get_acl(cmd, client, container_name, **kwargs):
 
 
 def _set_acl(cmd, client, container_name, acl, **kwargs):
+    from knack.util import CLIError
     try:
         method_name = 'set_{}_acl'.format(_get_service_container_type(cmd, client))
         method = getattr(client, method_name)

@@ -23,11 +23,11 @@ jobs:
       python: 3.6
     - stage: verify
       env: PURPOSE='Automation'
-      script: ./scripts/ci/test_automation.sh
+      script: travis_wait 30 ./scripts/ci/test_automation.sh
       python: 3.6
     - stage: verify
       env: PURPOSE='Automation'
-      script: ./scripts/ci/test_automation.sh
+      script: travis_wait 30 ./scripts/ci/test_automation.sh
       python: 2.7
     - stage: verify
       script: ./scripts/ci/test_static.sh
@@ -41,6 +41,10 @@ jobs:
       script: ./scripts/ci/test_integration.sh
       env: PURPOSE='Integration'
       python: 2.7
+    - stage: verify
+      script: ./scripts/ci/test_perf.sh
+      env: PURPOSE='Module Load Performance'
+      python: 3.6
     - stage: publish
       script: ./scripts/ci/publish.sh
       python: 3.6

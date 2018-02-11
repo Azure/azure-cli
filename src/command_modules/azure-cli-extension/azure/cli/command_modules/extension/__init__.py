@@ -55,6 +55,12 @@ class ExtensionCommandsLoader(AzCommandsLoader):
             c.argument('extension_name', options_list=['--name', '-n'], help='Name of extension', completer=extension_name_completion_list)
             # This is a hidden parameter for now
             c.argument('index_url', options_list=['--index'], help=argparse.SUPPRESS)
+            c.argument('pip_proxy', options_list=['--pip-proxy'],
+                       help='Proxy for pip to use for extension dependencies in the form of [user:passwd@]proxy.server:port',
+                       arg_group='Experimental Pip')
+
+            c.argument('pip_extra_index_urls', options_list=['--pip-extra-index-urls'], nargs='+',
+                       help='Space-separated list of extra URLs of package indexes to use. This should point to a repository compliant with PEP 503 (the simple repository API) or a local directory laid out in the same format.', arg_group='Experimental Pip')
 
         with self.argument_context('extension add') as c:
             c.argument('extension_name', completer=extension_name_from_index_completion_list)

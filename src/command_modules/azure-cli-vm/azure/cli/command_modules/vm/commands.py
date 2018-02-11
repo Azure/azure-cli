@@ -21,10 +21,9 @@ from azure.cli.command_modules.vm._validators import (
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
     process_vm_secret_namespace, process_msi_namespace, process_remove_identity_namespace)
 
-from azure.cli.core.commands import DeploymentOutputLongRunningOperation
+from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.commands import CliCommandType
 
 
 # pylint: disable=line-too-long, too-many-statements
@@ -227,11 +226,12 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_vm_extension_images')
 
     with self.command_group('vm image', compute_vm_image_sdk) as g:
-        g.command('show', 'get', exception_handler=empty_on_404)
         g.command('list-offers', 'list_offers')
         g.command('list-publishers', 'list_publishers')
         g.command('list-skus', 'list_skus')
         g.custom_command('list', 'list_vm_images')
+        g.custom_command('accept-terms', 'accept_market_ordering_terms')
+        g.custom_command('show', 'show_vm_image', exception_handler=empty_on_404)
 
     with self.command_group('vm nic', compute_vm_sdk) as g:
         g.custom_command('add', 'add_vm_nic')
@@ -261,7 +261,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_user')
         g.custom_command('reset-ssh', 'reset_linux_ssh')
 
-    with self.command_group('vmss', compute_vmss_sdk) as g:
+    with self.command_group('vmss', compute_vmss_sdk, operation_group='virtual_machine_scale_sets') as g:
         g.custom_command('assign-identity', 'assign_vmss_identity', validator=process_assign_identity_namespace)
         g.custom_command('remove-identity', 'remove_vmss_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
         g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), no_wait_param='no_wait', table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace)

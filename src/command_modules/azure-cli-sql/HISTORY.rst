@@ -3,6 +3,15 @@
 Release History
 ===============
 
+2.0.21
+++++++
+* Added az sql server dns-alias commands.
+
+2.0.20
+++++++
+* Added az sql db rename
+* Support `--ids` argument for db, dw, server, elastic-pool, and server firewall-rule commands.
+
 2.0.19
 ++++++
 * Updated helpfile

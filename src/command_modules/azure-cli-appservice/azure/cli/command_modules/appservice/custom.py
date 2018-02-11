@@ -40,15 +40,8 @@ logger = get_logger(__name__)
 
 # pylint:disable=no-member,too-many-lines,too-many-locals
 
-
-def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
-                                setting_properties, slot=None, client=None):
-    client = client or web_client_factory(cli_ctx)
-    operation = getattr(client.web_apps, operation_name if slot is None else operation_name + '_slot')
-    if slot is None:
-        return operation(resource_group_name, name, str, setting_properties)
-
-    return operation(resource_group_name, name, slot, str, setting_properties)
+# region "Common routines shared with quick-start extensions."
+# Please maintain compatibility in both interfaces and functionalities"
 
 
 def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_file=None,
@@ -116,6 +109,96 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     return webapp
 
 
+def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
+    if not settings and not slot_settings:
+        raise CLIError('Usage Error: --settings |--slot-settings')
+
+    settings = settings or []
+    slot_settings = slot_settings or []
+
+    app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
+                                           'list_application_settings', slot)
+    for name_value in settings + slot_settings:
+        # split at the first '=', appsetting should not have '=' in the name
+        settings_name, value = name_value.split('=', 1)
+        app_settings.properties[settings_name] = value
+    client = web_client_factory(cmd.cli_ctx)
+
+    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                         'update_application_settings',
+                                         app_settings.properties, slot, client)
+
+    app_settings_slot_cfg_names = []
+    if slot_settings:
+        new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
+        slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
+        slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
+        slot_cfg_names.app_setting_names += new_slot_setting_names
+        app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
+        client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+
+    return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
+
+
+def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
+    user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
+    scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
+    zip_url = scm_url + '/api/zipdeploy'
+
+    import urllib3
+    authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
+    headers = authorization
+    headers['content-type'] = 'application/octet-stream'
+
+    import requests
+    import os
+    # Read file content
+    with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
+        zip_content = fs.read()
+        r = requests.post(zip_url, data=zip_content, headers=headers)
+        if r.status_code != 200:
+            raise CLIError("Zip deployment {} failed with status code '{}' and reason '{}'".format(
+                zip_url, r.status_code, r.text))
+
+    # on successful deployment navigate to the app, display the latest deployment json response
+    response = requests.get(scm_url + '/api/deployments/latest', headers=authorization)
+    return response.json()
+
+
+def get_sku_name(tier):
+    tier = tier.upper()
+    if tier == 'F1':
+        return 'FREE'
+    elif tier == 'D1':
+        return 'SHARED'
+    elif tier in ['B1', 'B2', 'B3']:
+        return 'BASIC'
+    elif tier in ['S1', 'S2', 'S3']:
+        return 'STANDARD'
+    elif tier in ['P1', 'P2', 'P3']:
+        return 'PREMIUM'
+    elif tier in ['P1V2', 'P2V2', 'P3V2']:
+        return 'PREMIUMV2'
+    else:
+        raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
+
+
+# deprecated, do not use
+def _get_sku_name(tier):
+    return get_sku_name(tier)
+# endregion
+
+
+def _generic_settings_operation(cli_ctx, resource_group_name, name, operation_name,
+                                setting_properties, slot=None, client=None):
+    client = client or web_client_factory(cli_ctx)
+    operation = getattr(client.web_apps, operation_name if slot is None else operation_name + '_slot')
+    if slot is None:
+        return operation(resource_group_name, name, str, setting_properties)
+
+    return operation(resource_group_name, name, slot, str, setting_properties)
+
+
 def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
     webapp = app_instance
     if not app_instance:  # when the routine is invoked as a help method, not through commands
@@ -132,22 +215,21 @@ def update_webapp(instance, client_affinity_enabled=None):
 
 
 def list_webapp(cmd, resource_group_name=None):
-    from ._validators import WEB_APP_TYPES
-    return _list_app(cmd.cli_ctx, WEB_APP_TYPES, resource_group_name)
+    result = _list_app(cmd.cli_ctx, resource_group_name)
+    return [r for r in result if 'function' not in r.kind]
 
 
 def list_function_app(cmd, resource_group_name=None):
-    from ._validators import FUNCTION_APP_TYPES
-    return _list_app(cmd.cli_ctx, FUNCTION_APP_TYPES, resource_group_name)
+    result = _list_app(cmd.cli_ctx, resource_group_name)
+    return [r for r in result if 'function' in r.kind]
 
 
-def _list_app(cli_ctx, app_types, resource_group_name=None):
+def _list_app(cli_ctx, resource_group_name=None):
     client = web_client_factory(cli_ctx)
     if resource_group_name:
         result = list(client.web_apps.list_by_resource_group(resource_group_name))
     else:
         result = list(client.web_apps.list())
-    result = [x for x in result if x.kind in app_types]
     for webapp in result:
         _rename_server_farm_props(webapp)
     return result
@@ -338,37 +420,6 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
             setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
-
-
-def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
-    if not settings and not slot_settings:
-        raise CLIError('Usage Error: --settings |--slot-settings')
-
-    settings = settings or []
-    slot_settings = slot_settings or []
-
-    app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
-                                           'list_application_settings', slot)
-    for name_value in settings + slot_settings:
-        # split at the first '=', appsetting should not have '=' in the name
-        settings_name, value = name_value.split('=', 1)
-        app_settings.properties[settings_name] = value
-    client = web_client_factory(cmd.cli_ctx)
-
-    result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
-                                         'update_application_settings',
-                                         app_settings.properties, slot, client)
-
-    app_settings_slot_cfg_names = []
-    if slot_settings:
-        new_slot_setting_names = [n.split('=', 1)[0] for n in slot_settings]
-        slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
-        slot_cfg_names.app_setting_names = slot_cfg_names.app_setting_names or []
-        slot_cfg_names.app_setting_names += new_slot_setting_names
-        app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
-        client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
-
-    return _build_app_settings_output(result.properties, app_settings_slot_cfg_names)
 
 
 def delete_app_settings(cmd, resource_group_name, name, setting_names, slot=None):
@@ -756,7 +807,7 @@ def list_app_service_plans(cmd, resource_group_name=None):
 
 
 def _linux_sku_check(sku):
-    tier = _get_sku_name(sku)
+    tier = get_sku_name(sku)
     if tier in ['BASIC', 'STANDARD']:
         return
     format_string = 'usage error: {0} is not a valid sku for linux plan, please use one of the following: {1}'
@@ -772,7 +823,7 @@ def create_app_service_plan(cmd, resource_group_name, name, is_linux, sku='B1', 
     if is_linux:
         _linux_sku_check(sku)
     # the api is odd on parameter naming, have to live with it for now
-    sku_def = SkuDescription(tier=_get_sku_name(sku), name=sku, capacity=number_of_workers)
+    sku_def = SkuDescription(tier=get_sku_name(sku), name=sku, capacity=number_of_workers)
     plan_def = AppServicePlan(location, app_service_plan_name=name,
                               sku=sku_def, reserved=(is_linux or None))
     return client.app_service_plans.create_or_update(resource_group_name, name, plan_def)
@@ -783,7 +834,7 @@ def update_app_service_plan(instance, sku=None, number_of_workers=None,
     sku_def = instance.sku
     if sku is not None:
         sku = _normalize_sku(sku)
-        sku_def.tier = _get_sku_name(sku)
+        sku_def.tier = get_sku_name(sku)
         sku_def.name = sku
 
     if number_of_workers is not None:
@@ -883,8 +934,6 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
                    target_name=None, overwrite=None, ignore_hostname_conflict=None, slot=None):
     client = web_client_factory(cmd.cli_ctx)
     storage_blob_name = backup_name
-    webapp_info = client.web_apps.get(resource_group_name, webapp_name)
-    app_service_plan = webapp_info.server_farm_id.split('/')[-1]
     if not storage_blob_name.lower().endswith('.zip'):
         storage_blob_name += '.zip'
     location = _get_location_from_webapp(client, resource_group_name, webapp_name)
@@ -892,8 +941,7 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
     restore_request = RestoreRequest(location, storage_account_url=storage_account_url,
                                      blob_name=storage_blob_name, overwrite=overwrite,
                                      site_name=target_name, databases=db_setting,
-                                     ignore_conflicting_host_names=ignore_hostname_conflict,
-                                     app_service_plan=app_service_plan)
+                                     ignore_conflicting_host_names=ignore_hostname_conflict)
     if slot:
         return client.web_apps.restore_slot(resource_group_name, webapp_name, 0, restore_request, slot)
 
@@ -935,24 +983,6 @@ def _normalize_sku(sku):
     elif sku == 'SHARED':
         return 'D1'
     return sku
-
-
-def _get_sku_name(tier):
-    tier = tier.upper()
-    if tier == 'F1':
-        return 'FREE'
-    elif tier == 'D1':
-        return 'SHARED'
-    elif tier in ['B1', 'B2', 'B3']:
-        return 'BASIC'
-    elif tier in ['S1', 'S2', 'S3']:
-        return 'STANDARD'
-    elif tier in ['P1', 'P2', 'P3']:
-        return 'PREMIUM'
-    elif tier in ['P1V2', 'P2V2', 'P3V2']:
-        return 'PREMIUMV2'
-    else:
-        raise CLIError("Invalid sku(pricing tier), please refer to command help for valid values")
 
 
 def _get_location_from_resource_group(cli_ctx, resource_group_name):
@@ -1219,7 +1249,7 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
     if provider:
         streaming_url += ('/' + provider.lstrip('/'))
 
-    user, password = _get_site_credential(resource_group_name, name, slot)
+    user, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
     t = threading.Thread(target=_get_log, args=(streaming_url, user, password))
     t.daemon = True
     t.start()
@@ -1231,13 +1261,13 @@ def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
 def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     url = scm_url.rstrip('/') + '/dump'
-    user_name, password = _get_site_credential(resource_group_name, name, slot)
+    user_name, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
     _get_log(url, user_name, password, log_file)
     logger.warning('Downloaded logs to %s', log_file)
 
 
-def _get_site_credential(resource_group_name, name, slot=None):
-    creds = _generic_site_operation(resource_group_name, name, 'list_publishing_credentials', slot)
+def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
+    creds = _generic_site_operation(cli_ctx, resource_group_name, name, 'list_publishing_credentials', slot)
     creds = creds.result()
     return (creds.publishing_user_name, creds.publishing_password)
 
@@ -1527,7 +1557,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
-    _set_remote_or_local_git(functionapp, resource_group_name, name, deployment_source_url,
+    _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
                              deployment_source_branch, deployment_local_git)
 
     return functionapp
@@ -1597,30 +1627,5 @@ def list_consumption_locations(cmd):
 
 def list_locations(cmd, sku, linux_workers_enabled=None):
     client = web_client_factory(cmd.cli_ctx)
-    full_sku = _get_sku_name(sku)
+    full_sku = get_sku_name(sku)
     return client.list_geo_regions(full_sku, linux_workers_enabled)
-
-
-def enable_zip_deploy(resource_group_name, name, src, slot=None):
-    user_name, password = _get_site_credential(resource_group_name, name, slot)
-    scm_url = _get_scm_url(resource_group_name, name, slot)
-    zip_url = scm_url + '/api/zipdeploy'
-
-    import urllib3
-    authorization = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
-    headers = authorization
-    headers['content-type'] = 'application/octet-stream'
-
-    import requests
-    import os
-    # Read file content
-    with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
-        zip_content = fs.read()
-        r = requests.post(zip_url, data=zip_content, headers=headers)
-        if r.status_code != 200:
-            raise CLIError("Zip deployment {} failed with status code '{}' and reason '{}'".format(
-                zip_url, r.status_code, r.text))
-
-    # on successful deployment navigate to the app, display the latest deployment json response
-    response = requests.get(scm_url + '/api/deployments/latest', headers=authorization)
-    return response.json()

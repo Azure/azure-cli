@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.12
+++++++
+* Performance fixes.
+
 2.0.11
 ++++++
 * Bug fix: Do not require endpoints to be specified when setting --profile for a cloud.

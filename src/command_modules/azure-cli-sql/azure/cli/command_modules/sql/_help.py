@@ -42,6 +42,10 @@ helps['sql db list-editions'] = """
         - name: Show available max database sizes for P1 service objective
           text: az sql db list-editions -l westus --service-objective P1 --show-details max-size
     """
+helps['sql db rename'] = """
+    type: command
+    short-summary: Rename a database.
+    """
 helps['sql db show'] = """
     type: command
     short-summary: Get the details for a database.
@@ -295,6 +299,14 @@ helps['sql server conn-policy show'] = """
 helps['sql server conn-policy update'] = """
     type: command
     short-summary: Updates a server's secure connection policy.
+    """
+helps['sql server dns-alias'] = """
+    type: group
+    short-summary: Manage a server's DNS aliases.
+    """
+helps['sql server dns-alias set'] = """
+    type: command
+    short-summary: Sets a server to which DNS alias should point
     """
 helps['sql server firewall-rule'] = """
     type: group

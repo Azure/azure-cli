@@ -407,6 +407,16 @@ helps['feature'] = """
     short-summary: Manage resource provider features.
 """
 
+helps['feature list'] = """
+    type: command
+    short-summary: List preview features.
+"""
+
+helps['feature register'] = """
+    type: command
+    short-summary: register a preview feature.
+"""
+
 helps['group'] = """
     type: group
     short-summary: Manage resource groups and template deployments.

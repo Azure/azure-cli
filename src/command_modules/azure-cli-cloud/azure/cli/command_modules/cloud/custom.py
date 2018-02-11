@@ -6,8 +6,6 @@
 # pylint: disable=unused-argument
 from knack.util import CLIError, to_snake_case
 
-from msrestazure.azure_cloud import _populate_from_metadata_endpoint, MetadataEndpointError
-
 from azure.cli.core.cloud import (Cloud,
                                   get_clouds,
                                   get_cloud,
@@ -36,6 +34,8 @@ def show_cloud(cmd, cloud_name=None):
 
 
 def _build_cloud(cli_ctx, cloud_name, cloud_config=None, cloud_args=None):
+    from msrestazure.azure_cloud import _populate_from_metadata_endpoint, MetadataEndpointError
+
     if cloud_config:
         # Using JSON format so convert the keys to snake case
         for key in cloud_config:

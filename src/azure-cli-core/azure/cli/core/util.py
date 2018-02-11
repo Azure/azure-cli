@@ -219,3 +219,11 @@ def get_arg_list(op):
     except AttributeError:
         sig = inspect.getargspec(op)  # pylint: disable=deprecated-method
         return sig.args
+
+
+DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
+
+
+def should_disable_connection_verify():
+    import os
+    return bool(os.environ.get(DISABLE_VERIFY_VARIABLE_NAME))
