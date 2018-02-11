@@ -3,10 +3,6 @@
 Release History
 ===============
 
-0.1.17
-++++++
-* Added support for iot hub connection endpoint for Azure China
-
 
 0.1.16
 ++++++
