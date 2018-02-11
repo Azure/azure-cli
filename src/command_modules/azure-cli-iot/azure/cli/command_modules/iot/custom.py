@@ -493,7 +493,7 @@ def iot_hub_job_get(client, hub_name, job_id, resource_group_name=None):
 
 
 def iot_hub_job_cancel(client, hub_name, job_id, resource_group_name=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, '')
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, '')
     return device_client.cancel_job(job_id)
 
 
@@ -510,7 +510,7 @@ def iot_hub_get_stats(client, hub_name, resource_group_name=None):
 def iot_device_create(client, hub_name, device_id, resource_group_name=None, x509=False, primary_thumbprint=None,
                       secondary_thumbprint=None, valid_days=None, output_dir=None):
     _validate_x509_parameters(x509, primary_thumbprint, secondary_thumbprint, valid_days, output_dir)
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     device = DeviceDescription(device_id=device_id)
 
     if x509 is True:
@@ -542,22 +542,22 @@ def _construct_x509_auth(device_id, primary_thumbprint, secondary_thumbprint, va
 
 
 def iot_device_get(client, hub_name, device_id, resource_group_name=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     return device_client.get(device_id)
 
 
 def iot_device_update(client, hub_name, device_id, parameters, resource_group_name=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     return device_client.create_or_update(device_id, parameters)
 
 
 def iot_device_list(client, hub_name, resource_group_name=None, top=20):
-    device_client = _get_device_client(client, resource_group_name, hub_name, '')
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, '')
     return device_client.list(top)
 
 
 def iot_device_delete(client, hub_name, device_id, resource_group_name=None, etag='*'):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     return device_client.delete(device_id, etag)
 
 
@@ -580,13 +580,13 @@ def iot_device_show_connection_string(client, hub_name, device_id=None, resource
 
 def iot_device_send_message(client, hub_name, device_id, resource_group_name=None, data='Ping from Azure CLI',
                             message_id=None, correlation_id=None, user_id=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     return device_client.send_message(device_id, data, message_id, correlation_id, user_id)
 
 
 # pylint: disable=inconsistent-return-statements
 def iot_device_receive_message(client, hub_name, device_id, resource_group_name=None, lock_timeout=60):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     result = device_client.receive_message(device_id, lock_timeout, raw=True)
     if result is not None and result.response.status_code == 200:
         return {
@@ -605,17 +605,17 @@ def iot_device_receive_message(client, hub_name, device_id, resource_group_name=
 
 
 def iot_device_complete_message(client, hub_name, device_id, lock_token, resource_group_name=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     return device_client.complete_or_reject_message(device_id, lock_token)
 
 
 def iot_device_reject_message(client, hub_name, device_id, lock_token, resource_group_name=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     return device_client.complete_or_reject_message(device_id, lock_token, '')
 
 
 def iot_device_abandon_message(client, hub_name, device_id, lock_token, resource_group_name=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     return device_client.abandon_message(device_id, lock_token)
 
 
@@ -630,7 +630,7 @@ def iot_device_import(client, hub_name, input_blob_container_uri, output_blob_co
 
 
 def _get_single_device_connection_string(cmd, client, hub_name, device_id, resource_group_name, key_type):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     device = device_client.get(device_id)
     if device is None:
         raise CLIError("Device {} not found.".format(device_id))
