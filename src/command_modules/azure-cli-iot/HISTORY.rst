@@ -1,7 +1,6 @@
 .. :changelog:
 
 Release History
-===============
 
 
 0.1.18
@@ -12,8 +11,8 @@ Release History
 ++++++
 * iot dps access policy create/update: Fixes issue where the command would occasionally return a 'not found' error on success. Added --no-wait support.
 * iot dps linked-hub create/update: Fixes issue where the command would occasionally return a 'not found' error on success. Added --no-wait support.
-* iot hub create: Allow specifying numbers of partitions during creation.
-Minor fixes.
+* iot hub create: Allow specifying numbers of partitions during creation. 
+* Minor fixes.
 
 0.1.16
 ++++++
