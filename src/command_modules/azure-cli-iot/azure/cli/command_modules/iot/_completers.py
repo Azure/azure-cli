@@ -13,4 +13,4 @@ from .custom import iot_device_list
 def get_device_id_completion_list(cmd, prefix, namespace):  # pylint: disable=unused-argument
     client = iot_hub_service_factory(cmd.cli_ctx)
     return [d.device_id for d in iot_device_list(cmd, client, namespace.hub_name, top=100)]\
-    if namespace.hub_name else []
+     if namespace.hub_name else []
