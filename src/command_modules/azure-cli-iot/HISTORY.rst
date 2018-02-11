@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.18
+++++++
+* Added support for iot hub connection endpoint for Azure China
+
 0.1.17
 ++++++
 * iot dps access policy create/update: Fixes issue where the command would occasionally return a 'not found' error on success. Added `--no-wait` support.
