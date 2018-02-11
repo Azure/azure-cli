@@ -562,7 +562,7 @@ def iot_device_delete(cmd, client, hub_name, device_id, resource_group_name=None
 
 
 # pylint: disable=inconsistent-return-statements
-def iot_device_show_connection_string(client, hub_name, device_id=None, resource_group_name=None, top=20,
+def iot_device_show_connection_string(cmd, client, hub_name, device_id=None, resource_group_name=None, top=20,
                                       key_type=KeyType.primary.value):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     if device_id is None:
@@ -571,10 +571,10 @@ def iot_device_show_connection_string(client, hub_name, device_id=None, resource
             raise CLIError("No devices found in IoT Hub {}.".format(hub_name))
 
         def conn_str_getter(d):
-            return _get_single_device_connection_string(client, hub_name, d.device_id, resource_group_name, key_type)
+            return _get_single_device_connection_string(cmd, client, hub_name, d.device_id, resource_group_name, key_type)
         return [{'deviceId': d.device_id, 'connectionString': conn_str_getter(d)} for d in devices]
     else:
-        conn_str = _get_single_device_connection_string(client, hub_name, device_id, resource_group_name, key_type)
+        conn_str = _get_single_device_connection_string(cmd, client, hub_name, device_id, resource_group_name, key_type)
         return {'connectionString': conn_str}
 
 
