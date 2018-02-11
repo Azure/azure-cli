@@ -566,7 +566,7 @@ def iot_device_show_connection_string(cmd, client, hub_name, device_id=None, res
                                       key_type=KeyType.primary.value):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     if device_id is None:
-        devices = iot_device_list(client, hub_name, resource_group_name, top)
+        devices = iot_device_list(cmd, client, hub_name, resource_group_name, top)
         if devices is None:
             raise CLIError("No devices found in IoT Hub {}.".format(hub_name))
 
