@@ -1,7 +1,7 @@
 .. :changelog:
 
 Release History
-
+===============
 
 0.1.18
 ++++++
