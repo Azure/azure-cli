@@ -6,7 +6,6 @@ Release History
 2.0.19
 ++++++
 * role assignments: expose "role assignment list-changelogs" for rbac audit 
-* Minor fixes.
 
 2.0.18
 ++++++
