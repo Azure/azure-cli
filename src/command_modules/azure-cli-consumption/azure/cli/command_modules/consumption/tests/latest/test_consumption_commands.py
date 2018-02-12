@@ -59,31 +59,27 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         self.assertIsNotNone(pricesheet)
         self.assertEqual(pricesheet['type'], 'Microsoft.Consumption/pricesheets')
         self.assertTrue(pricesheet['id'] and pricesheet['name'])
-        self.assertIsNotNone(pricesheet['billingPeriodId'])
-        self.assertIsNotNone(pricesheet['currencyCode'])
-        self.assertIsNotNone(pricesheet['meterId'])
-        self.assertIsNotNone(pricesheet['unitOfMeasure'])
-        self.assertTrue(pricesheet['unitPrice'] and pricesheet['includedQuantity'] and pricesheet['partNumber'])
+        self.assertIsNotNone(pricesheet['pricesheets'][0]['billingPeriodId'])
+        self.assertIsNotNone(pricesheet['pricesheets'][0]['currencyCode'])
+        self.assertIsNotNone(pricesheet['pricesheets'][0]['meterId'])
+        self.assertIsNotNone(pricesheet['pricesheets'][0]['unitOfMeasure'])
+        self.assertTrue(pricesheet['pricesheets'][0]['unitPrice'] and pricesheet['pricesheets'][0]['includedQuantity'] and pricesheet['pricesheets'][0]['partNumber'])
         if includeMeterDetails:
-            self.assertIsNotNone(pricesheet['meterDetails'])
-            self.assertIsNotNone(pricesheet['meterDetails']['meterName'])
+            self.assertIsNotNone(pricesheet['pricesheets'][0]['meterDetails'])
+            self.assertIsNotNone(pricesheet['pricesheets'][0]['meterDetails']['meterName'])
         else:
-            self.assertIsNone(pricesheet['meterDetails'])
+            self.assertIsNone(pricesheet['pricesheets'][0]['meterDetails'])
 
     def test_consumption_pricesheet_billing_period(self):
-        pricesheet = self.cmd('consumption pricesheet billing period get -p 20171010').get_output_in_json()
+        pricesheet = self.cmd('consumption pricesheet billing period get -p 20171001').get_output_in_json()
         self.assertTrue(pricesheet)
-        self._validate_pricesheet(pricesheet.pricesheets[0], False)
-
-    def test_consumption_pricesheet_billing_period_include_meter_details(self):
-        pricesheet = self.cmd('consumption pricesheet billing period get -p 20171010 -m').get_output_in_json()
-        self.assertTrue(pricesheet)
-        self._validate_pricesheet(pricesheet.pricesheets[0], True)
+        self._validate_pricesheet(pricesheet, False)
 
     def test_consumption_pricesheet(self):
         pricesheet = self.cmd('consumption pricesheet get').get_output_in_json()
+        print('print pricesheet')        
         self.assertTrue(pricesheet)
-        self._validate_pricesheet(pricesheet.pricesheets[0], False)
+        self._validate_pricesheet(pricesheet, False)
 
     def test_consumption_usage_list(self):
         usages_list = self.cmd('consumption usage list -t 5').get_output_in_json()
