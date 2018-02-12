@@ -208,7 +208,6 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     return results
 
 
-# verify or apply reasonable defaults
 def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
     from azure.mgmt.monitor import MonitorManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -252,6 +251,7 @@ def _get_assignment_events(cli_ctx, start_time=None, end_time=None):
     return start_events, end_events, offline_events, client
 
 
+# A custom command around 'monitoring' events to produce understandable output for RBAC audit, a common scenario.
 def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
     # pylint: disable=too-many-nested-blocks, too-many-statements
     result = []
@@ -332,7 +332,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
             'scopeName': client.config.subscription_id,
         }
         if e.properties:
-            entry['principalName'] = e.properties.get('adminEmail')  # TODO test this out
+            entry['principalName'] = e.properties.get('adminEmail')
             entry['roleName'] = e.properties.get('adminType')
         result.append(entry)
 
