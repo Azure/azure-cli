@@ -6,6 +6,7 @@ Release History
 2.0.21
 ++++++
 * Added az sql server dns-alias commands.
+* Added support for zone redundancy for databases and elastic pools. 
 
 2.0.20
 ++++++

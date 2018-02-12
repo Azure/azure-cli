@@ -1,0 +1,652 @@
+interactions:
+- request:
+    body: '{"location": "eastus2", "tags": {"use": "az-test"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group create]
+      Connection: [keep-alive]
+      Content-Length: ['51']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"eastus2","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['329']
+      content-type: [application/json; charset=utf-8]
+      date: ['Sat, 10 Feb 2018 00:16:24 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 201, message: Created}
+- request:
+    body: '{"location": "eastus2", "properties": {"administratorLogin": "admin123",
+      "administratorLoginPassword": "SecretPassword123"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql server create]
+      Connection: [keep-alive]
+      Content-Length: ['124']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2015-05-01-preview
+  response:
+    body: {string: '{"operation":"UpsertLogicalServer","startTime":"2018-02-10T00:16:28.61Z"}'}
+    headers:
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/eastus2/serverAzureAsyncOperation/9423736e-2094-47c6-9fca-cbb3ed31aa4a?api-version=2015-05-01-preview']
+      cache-control: [no-cache]
+      content-length: ['73']
+      content-type: [application/json; charset=utf-8]
+      date: ['Sat, 10 Feb 2018 00:16:30 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/eastus2/serverOperationResults/9423736e-2094-47c6-9fca-cbb3ed31aa4a?api-version=2015-05-01-preview']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql server create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/eastus2/serverAzureAsyncOperation/9423736e-2094-47c6-9fca-cbb3ed31aa4a?api-version=2015-05-01-preview
+  response:
+    body: {string: '{"name":"9423736e-2094-47c6-9fca-cbb3ed31aa4a","status":"InProgress","startTime":"2018-02-10T00:16:28.61Z"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['107']
+      content-type: [application/json; charset=utf-8]
+      date: ['Sat, 10 Feb 2018 00:16:31 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql server create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/eastus2/serverAzureAsyncOperation/9423736e-2094-47c6-9fca-cbb3ed31aa4a?api-version=2015-05-01-preview
+  response:
+    body: {string: '{"name":"9423736e-2094-47c6-9fca-cbb3ed31aa4a","status":"InProgress","startTime":"2018-02-10T00:16:28.61Z"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['107']
+      content-type: [application/json; charset=utf-8]
+      date: ['Sat, 10 Feb 2018 00:16:33 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql server create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/eastus2/serverAzureAsyncOperation/9423736e-2094-47c6-9fca-cbb3ed31aa4a?api-version=2015-05-01-preview
+  response:
+    body: {string: '{"name":"9423736e-2094-47c6-9fca-cbb3ed31aa4a","status":"InProgress","startTime":"2018-02-10T00:16:28.61Z"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['107']
+      content-type: [application/json; charset=utf-8]
+      date: ['Sat, 10 Feb 2018 00:16:55 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql server create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/locations/eastus2/serverAzureAsyncOperation/9423736e-2094-47c6-9fca-cbb3ed31aa4a?api-version=2015-05-01-preview
+  response:
+    body: {string: '{"name":"9423736e-2094-47c6-9fca-cbb3ed31aa4a","status":"Succeeded","startTime":"2018-02-10T00:16:28.61Z"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['106']
+      content-type: [application/json; charset=utf-8]
+      date: ['Sat, 10 Feb 2018 00:17:15 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql server create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2015-05-01-preview
+  response:
+    body: {string: '{"kind":"v12.0","properties":{"administratorLogin":"admin123","version":"12.0","state":"Ready","fullyQualifiedDomainName":"clitestserver000002.database.windows.net"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['581']
+      content-type: [application/json; charset=utf-8]
+      date: ['Sat, 10 Feb 2018 00:17:15 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2015-05-01-preview
+  response:
+    body: {string: '{"kind":"v12.0","properties":{"administratorLogin":"admin123","version":"12.0","state":"Ready","fullyQualifiedDomainName":"clitestserver000002.database.windows.net"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['581']
+      content-type: [application/json; charset=utf-8]
+      date: ['Sat, 10 Feb 2018 00:17:19 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"location": "eastus2", "properties": {"edition": "Premium", "zoneRedundant":
+      true}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool create]
+      Connection: [keep-alive]
+      Content-Length: ['84']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createZonedPool?api-version=2014-04-01
+  response:
+    body: {string: '{"operation":"CREATE","startTime":"\/Date(1518221843353+0000)\/"}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['65']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Sat, 10 Feb 2018 00:17:25 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createZonedPool/operationResults/ff3c72bc-fdef-4c81-916a-5cea12e3409d?api-version=2014-04-01-Preview']
+      preference-applied: [return-content]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createZonedPool/operationResults/ff3c72bc-fdef-4c81-916a-5cea12e3409d?api-version=2014-04-01-Preview
+  response:
+    body: {string: '{"operation":"CREATE","startTime":"\/Date(1518221843353)\/"}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['60']
+      content-type: [application/json]
+      dataserviceversion: [3.0;]
+      date: ['Sat, 10 Feb 2018 00:17:55 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createZonedPool/operationResults/ff3c72bc-fdef-4c81-916a-5cea12e3409d?api-version=2014-04-01-Preview']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createZonedPool/operationResults/ff3c72bc-fdef-4c81-916a-5cea12e3409d?api-version=2014-04-01-Preview
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createZonedPool","name":"createZonedPool","type":"Microsoft.Sql/servers/elasticPools","location":"East
+        US 2","kind":null,"properties":{"creationDate":"2018-02-10T00:17:23.48Z","edition":"Premium","state":"Ready","dtu":125,"databaseDtuMin":0,"databaseDtuMax":125,"storageMB":256000,"zoneRedundant":null}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['562']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Sat, 10 Feb 2018 00:18:25 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool show]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createZonedPool?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createZonedPool","name":"createZonedPool","type":"Microsoft.Sql/servers/elasticPools","location":"East
+        US 2","kind":null,"properties":{"creationDate":"2018-02-10T00:17:23.48Z","edition":"Premium","state":"Ready","dtu":125,"databaseDtuMin":0,"databaseDtuMax":125,"storageMB":256000,"zoneRedundant":true}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['562']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Sat, 10 Feb 2018 00:18:28 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2015-05-01-preview
+  response:
+    body: {string: '{"kind":"v12.0","properties":{"administratorLogin":"admin123","version":"12.0","state":"Ready","fullyQualifiedDomainName":"clitestserver000002.database.windows.net"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['581']
+      content-type: [application/json; charset=utf-8]
+      date: ['Sat, 10 Feb 2018 00:18:31 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"location": "eastus2", "properties": {"edition": "Premium", "zoneRedundant":
+      false}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool create]
+      Connection: [keep-alive]
+      Content-Length: ['85']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPool?api-version=2014-04-01
+  response:
+    body: {string: '{"operation":"CREATE","startTime":"\/Date(1518221913879+0000)\/"}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['65']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Sat, 10 Feb 2018 00:18:34 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPool/operationResults/9d640067-203f-4300-9078-26bb916a75a8?api-version=2014-04-01-Preview']
+      preference-applied: [return-content]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPool/operationResults/9d640067-203f-4300-9078-26bb916a75a8?api-version=2014-04-01-Preview
+  response:
+    body: {string: '{"operation":"CREATE","startTime":"\/Date(1518221913863)\/"}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['60']
+      content-type: [application/json]
+      dataserviceversion: [3.0;]
+      date: ['Sat, 10 Feb 2018 00:19:04 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPool/operationResults/9d640067-203f-4300-9078-26bb916a75a8?api-version=2014-04-01-Preview']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPool/operationResults/9d640067-203f-4300-9078-26bb916a75a8?api-version=2014-04-01-Preview
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPool","name":"createUnzonedPool","type":"Microsoft.Sql/servers/elasticPools","location":"East
+        US 2","kind":null,"properties":{"creationDate":"2018-02-10T00:18:33.99Z","edition":"Premium","state":"Ready","dtu":125,"databaseDtuMin":0,"databaseDtuMax":125,"storageMB":256000,"zoneRedundant":null}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['566']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Sat, 10 Feb 2018 00:19:36 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool show]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPool?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPool","name":"createUnzonedPool","type":"Microsoft.Sql/servers/elasticPools","location":"East
+        US 2","kind":null,"properties":{"creationDate":"2018-02-10T00:18:33.99Z","edition":"Premium","state":"Ready","dtu":125,"databaseDtuMin":0,"databaseDtuMax":125,"storageMB":256000,"zoneRedundant":false}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['567']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Sat, 10 Feb 2018 00:19:40 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002?api-version=2015-05-01-preview
+  response:
+    body: {string: '{"kind":"v12.0","properties":{"administratorLogin":"admin123","version":"12.0","state":"Ready","fullyQualifiedDomainName":"clitestserver000002.database.windows.net"},"location":"eastus2","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002","name":"clitestserver000002","type":"Microsoft.Sql/servers"}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['581']
+      content-type: [application/json; charset=utf-8]
+      date: ['Sat, 10 Feb 2018 00:19:43 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+    status: {code: 200, message: OK}
+- request:
+    body: '{"location": "eastus2", "properties": {"edition": "Premium"}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool create]
+      Connection: [keep-alive]
+      Content-Length: ['61']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPoolNoParam?api-version=2014-04-01
+  response:
+    body: {string: '{"operation":"CREATE","startTime":"\/Date(1518221985596+0000)\/"}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['65']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Sat, 10 Feb 2018 00:19:47 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPoolNoParam/operationResults/709305e6-10ab-4eea-8fd8-aa35c50bb279?api-version=2014-04-01-Preview']
+      preference-applied: [return-content]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPoolNoParam/operationResults/709305e6-10ab-4eea-8fd8-aa35c50bb279?api-version=2014-04-01-Preview
+  response:
+    body: {string: '{"operation":"CREATE","startTime":"\/Date(1518221985580)\/"}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['60']
+      content-type: [application/json]
+      dataserviceversion: [3.0;]
+      date: ['Sat, 10 Feb 2018 00:20:16 GMT']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPoolNoParam/operationResults/709305e6-10ab-4eea-8fd8-aa35c50bb279?api-version=2014-04-01-Preview']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+    status: {code: 202, message: Accepted}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool create]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPoolNoParam/operationResults/709305e6-10ab-4eea-8fd8-aa35c50bb279?api-version=2014-04-01-Preview
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPoolNoParam","name":"createUnzonedPoolNoParam","type":"Microsoft.Sql/servers/elasticPools","location":"East
+        US 2","kind":null,"properties":{"creationDate":"2018-02-10T00:19:45.707Z","edition":"Premium","state":"Ready","dtu":125,"databaseDtuMin":0,"databaseDtuMax":125,"storageMB":256000,"zoneRedundant":null}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['581']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Sat, 10 Feb 2018 00:20:47 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [sql elastic-pool show]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 azure-mgmt-sql/0.8.5 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPoolNoParam?api-version=2014-04-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Sql/servers/clitestserver000002/elasticPools/createUnzonedPoolNoParam","name":"createUnzonedPoolNoParam","type":"Microsoft.Sql/servers/elasticPools","location":"East
+        US 2","kind":null,"properties":{"creationDate":"2018-02-10T00:19:45.707Z","edition":"Premium","state":"Ready","dtu":125,"databaseDtuMin":0,"databaseDtuMax":125,"storageMB":256000,"zoneRedundant":false}}'}
+    headers:
+      cache-control: ['no-store, no-cache']
+      content-length: ['582']
+      content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
+      dataserviceversion: [3.0;]
+      date: ['Sat, 10 Feb 2018 00:20:50 GMT']
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [group delete]
+      Connection: [keep-alive]
+      Content-Length: ['0']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-2012ServerR2-6.3.9600-SP0) requests/2.18.4
+          msrest/0.4.26 msrest_azure/0.4.21 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.27]
+      accept-language: [en-US]
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+  response:
+    body: {string: ''}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['0']
+      date: ['Sat, 10 Feb 2018 00:20:54 GMT']
+      expires: ['-1']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdITlczRExLRFpNNzVUS09VQVVTRk1QS0FWUVFURTJKUVpNM3w4RTFGRkU2MTRBOEEzQURCLUVBU1RVUzIiLCJqb2JMb2NhdGlvbiI6ImVhc3R1czIifQ?api-version=2017-05-10']
+      pragma: [no-cache]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 202, message: Accepted}
+version: 1
