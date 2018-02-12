@@ -77,7 +77,6 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
 
     def test_consumption_pricesheet(self):
         pricesheet = self.cmd('consumption pricesheet get').get_output_in_json()
-        print('print pricesheet')        
         self.assertTrue(pricesheet)
         self._validate_pricesheet(pricesheet, False)
 
