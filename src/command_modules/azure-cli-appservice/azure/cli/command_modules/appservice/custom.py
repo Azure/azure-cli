@@ -167,11 +167,11 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
 
 def get_sku_name(tier):
     tier = tier.upper()
-    if tier == 'F1':
+    if tier == 'F1' or tier == "FREE":
         return 'FREE'
-    elif tier == 'D1':
+    elif tier == 'D1' or tier == "SHARED":
         return 'SHARED'
-    elif tier in ['B1', 'B2', 'B3']:
+    elif tier in ['B1', 'B2', 'B3', 'BASIC']:
         return 'BASIC'
     elif tier in ['S1', 'S2', 'S3']:
         return 'STANDARD'
