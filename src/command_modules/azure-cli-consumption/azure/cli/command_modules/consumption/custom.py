@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 
+
 def cli_consumption_list_usage(client, top=None, include_additional_properties=False, include_meter_details=False, start_date=None, end_date=None):
     if include_additional_properties and include_meter_details:
         expand = 'properties/additionalProperties,properties/meterDetails'
