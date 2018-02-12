@@ -7,7 +7,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._format import output_format
-from ._client_factory import cf_acr_registries, cf_acr_replications, cf_acr_webhooks
+from ._client_factory import cf_acr_registries, cf_acr_replications, cf_acr_webhooks, cf_acr_build
 
 
 def load_command_table(self, _):
@@ -40,6 +40,11 @@ def load_command_table(self, _):
         client_factory=cf_acr_replications
     )
 
+    acr_build_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.build#{}',    
+        client_factory=cf_acr_build
+    )
+
     with self.command_group('acr', acr_custom_util) as g:
         g.command('check-name', 'acr_check_name', table_transformer=None)
         g.command('list', 'acr_list')
@@ -54,6 +59,10 @@ def load_command_table(self, _):
                                  custom_func_name='acr_update_custom',
                                  custom_func_type=acr_custom_util,
                                  client_factory=cf_acr_registries)
+
+    with self.command_group('acr build', acr_build_util) as g:
+            g.command('show-logs', 'acr_show_logs')
+            g.command('queue', 'acr_queue')
 
     with self.command_group('acr credential', acr_cred_util) as g:
         g.command('show', 'acr_credential_show', exception_handler=empty_on_404)

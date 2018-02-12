@@ -11,6 +11,11 @@ helps['acr'] = """
     short-summary: Manage Azure Container Registries.
     """
 
+helps['acr build'] = """
+    type: group
+    short-summary: Manage builds for Azure Container Registries..
+    """    
+
 helps['acr credential'] = """
     type: group
     short-summary: Manage login credentials for Azure Container Registries.
