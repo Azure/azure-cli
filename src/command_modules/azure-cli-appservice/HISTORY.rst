@@ -6,6 +6,7 @@ Release History
 ++++++
 * webapp backup/restore: Fix issue where restore command fails because of a null reference
 * appservice: support default app service plan through `az configure --defaults appserviceplan=my-asp`
+* appservice: list-location: reports Free as an invalid SKU
 
 0.1.25
 ++++++
