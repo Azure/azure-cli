@@ -27,7 +27,6 @@ def validate_secret(string):
     if string:
         comps = string.split('=', 1)
         if len(comps) != 2:
-            import pdb; pdb.set_trace()
             raise CLIError("Secrets need to be specifed in key=value format.")
         result = {comps[0]: b64encode(comps[1].encode('ascii')).decode('ascii')}
     return result

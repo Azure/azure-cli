@@ -28,7 +28,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         env = 'KEY1=VALUE1 KEY2=FOO=BAR='
         restart_policy = 'Never'
         secrets = 'secret1=superawesomesecret secret2="nothing to see"'
-        secret_path= '/s'
+        secret_path = '/s'
 
         self.kwargs.update({
             'container_group_name': container_group_name,
