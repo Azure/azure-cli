@@ -1005,6 +1005,16 @@ def validate_vm_disk(cmd, namespace):
                                       namespace.resource_group_name, 'disks', 'Microsoft.Compute')
 
 
+def validate_vmss_disk(cmd, namespace):
+    if namespace.disk:
+        namespace.disk = _get_resource_id(cmd.cli_ctx, namespace.disk,
+                                          namespace.resource_group_name, 'disks', 'Microsoft.Compute')
+    if bool(namespace.disk) == bool(namespace.size_gb):
+        raise CLIError('usage error: --disk EXIST_DISK --instance-id ID | --size-gb GB')
+    elif bool(namespace.disk) != bool(namespace.instance_id):
+        raise CLIError('usage error: --disk EXIST_DISK --instance-id ID')
+
+
 def process_disk_or_snapshot_create_namespace(cmd, namespace):
     from msrestazure.azure_exceptions import CloudError
     validate_tags(namespace)
