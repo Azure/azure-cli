@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.27
+++++++
+* vmss instance update: support attach/detach disks on an individual instance
+
 2.0.26
 ++++++
 * vm encryption: avoid the crash when vm encryption setting might not be fully initialized

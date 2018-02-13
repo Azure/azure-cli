@@ -1357,6 +1357,34 @@ class VMSSCreateOptions(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.dataDisks[0].diskSizeGb', 1)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_options')
+    def test_vmss_update_instance_disks(self, resource_group):
+
+        self.kwargs.update({
+            'vmss': 'vmss1',
+            'caching': 'ReadWrite',
+            'update': 'automatic',
+            'ip': 'vrfpubip',
+            'disk': 'd1',
+            'instance_id': '1',
+            'sku': 'Standard_LRS'
+        })
+
+        self.cmd('vmss create --image Debian --admin-username clitest1 --admin-password testPassword0 -l westus -g {rg} -n {vmss}  --storage-sku {sku}')
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 1 --sku {sku}')
+        instances = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
+        self.kwargs['instance_id'] = instances[0]['instanceId']
+
+        self.cmd('vmss disk attach -g {rg} -n {vmss} --instance-id {instance_id} --disk {disk} --caching {caching}')
+        self.cmd("vmss list-instances -g {rg} -n {vmss} --query \"[?instanceId=='{instance_id}']\"", checks=[
+            self.check('length([0].storageProfile.dataDisks)', 1),
+            self.check('[0].storageProfile.dataDisks[0].caching', self.kwargs['caching'])
+        ])
+        self.cmd('vmss disk detach -g {rg} -n {vmss} --instance-id {instance_id} --lun 0')
+        self.cmd("vmss list-instances -g {rg} -n {vmss} --query \"[?instanceId=='{instance_id}']\"", checks=[
+            self.check('length([0].storageProfile.dataDisks)', 0)
+        ])
+
 
 class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
