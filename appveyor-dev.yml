@@ -63,7 +63,7 @@ on_success:
       {
           $folderPath = [System.IO.Path]::Combine("$env:TEMP\azure-cli-content", $folder)
           $subFolders = Get-ChildItem -Path $folderPath -Directory -Name
-          if ($subFolders -contains "$env:YML_OUTPUT_FOLDER" -and $subFolders -contains "$env:CONCEPTUAL_DOC_FOLDER")
+          if ($subFolders -contains "$env:YML_OUTPUT_FOLDER")
           {
               $docsRefAutogenFolder = [System.IO.Path]::Combine($folderPath, "$env:YML_OUTPUT_FOLDER")
               Get-ChildItem -Path $docsRefAutogenFolder | Remove-Item -Force -Recurse
