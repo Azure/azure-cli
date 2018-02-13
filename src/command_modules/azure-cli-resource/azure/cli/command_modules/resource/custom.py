@@ -476,8 +476,11 @@ def export_group_as_template(
     # On error, server still returns 200, with details in the error attribute
     if result.error:
         error = result.error
-        logger.warning(result.error.message)
-        for detail in error.details or []:
+        try:
+            logger.warning(error.message)
+        except AttributeError:
+            logger.warning(str(error))
+        for detail in getattr(error, 'details', None) or []:
             logger.error(detail.message)
 
 
