@@ -470,16 +470,15 @@ def export_group_as_template(
     options = ','.join(export_options) if export_options else None
 
     result = rcf.resource_groups.export_template(resource_group_name, ['*'], options=options)
+
+    print(json.dumps(result.template, indent=2))
     # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
     if result.error:
         error = result.error
-        if (hasattr(error, 'details') and error.details and
-                hasattr(error.details[0], 'message')):
-            error = error.details[0].message
-        raise CLIError(error)
-
-    print(json.dumps(result.template, indent=2))
+        logger.warning(result.error.message)
+        for detail in error.details or []:
+            logger.error(detail.message)
 
 
 def create_application(cmd, resource_group_name,

@@ -2,10 +2,13 @@
 
 Release History
 ===============
+2.0.24
+++++++
+* `group deployment export`: On failure, command will now output a partial template and any failures.
+
 2.0.23
 ++++++
 * feature: bring back 'feature show' command
-* Minor fixes.
 
 2.0.22
 ++++++
