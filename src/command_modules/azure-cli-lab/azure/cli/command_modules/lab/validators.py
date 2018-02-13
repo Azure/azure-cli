@@ -3,20 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
-import datetime
-import dateutil.parser
-from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import resource_id, is_valid_resource_id
 from knack.util import CLIError
 from knack.log import get_logger
-from azure.mgmt.devtestlabs.models.gallery_image_reference import GalleryImageReference
-from azure.mgmt.devtestlabs.models.network_interface_properties import NetworkInterfaceProperties
-from azure.mgmt.devtestlabs.models.shared_public_ip_address_configuration import \
-    SharedPublicIpAddressConfiguration
-from azure.mgmt.devtestlabs.models.inbound_nat_rule import InboundNatRule
-from azure.graphrbac import GraphRbacManagementClient
-from ._client_factory import (get_devtestlabs_management_client)
+
+from azure.cli.command_modules.lab._client_factory import get_devtestlabs_management_client
 
 logger = get_logger(__name__)
 
@@ -47,6 +37,7 @@ def validate_lab_vm_create(cmd, namespace):
 
 def validate_lab_vm_list(cmd, namespace):
     """ Validates parameters for lab vm list and updates namespace. """
+    from msrestazure.tools import resource_id, is_valid_resource_id
     collection = [namespace.filters, namespace.all, namespace.claimable]
     if _any(collection) and not _single(collection):
         raise CLIError("usage error: [--filters FILTER | [[--all | --claimable][--environment ENVIRONMENT]]")
@@ -94,6 +85,7 @@ def validate_user_name(namespace):
 
 
 def validate_template_id(cmd, namespace):
+    from msrestazure.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
     if not is_valid_resource_id(namespace.arm_template):
         if not namespace.artifact_source_name:
@@ -120,6 +112,7 @@ def validate_claim_vm(namespace):
 def _get_owner_object_id(cli_ctx):
     from azure.cli.core._profile import Profile
     from azure.graphrbac.models import GraphErrorException
+    from azure.graphrbac import GraphRbacManagementClient
     profile = Profile(cli_ctx=cli_ctx)
     cred, _, tenant_id = profile.get_login_credentials(
         resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
@@ -148,6 +141,8 @@ def _validate_expiration_date(namespace):
     """ Validates expiration date if provided. """
 
     if namespace.expiration_date:
+        import datetime
+        import dateutil.parser
         if datetime.datetime.utcnow().date() >= dateutil.parser.parse(namespace.expiration_date).date():
             raise CLIError("Expiration date '{}' must be in future.".format(namespace.expiration_date))
 
@@ -194,6 +189,7 @@ def _validate_network_parameters(cli_ctx, namespace, formula=None):
 # pylint: disable=no-member
 def _validate_ip_configuration(namespace, lab_vnet=None):
     """ Updates namespace with network_interface & disallow_public_ip_address """
+    from azure.mgmt.devtestlabs.models import NetworkInterfaceProperties, SharedPublicIpAddressConfiguration
 
     # case 1: User selecting "shared" ip configuration
     if namespace.ip_configuration == 'shared':
@@ -231,6 +227,7 @@ def _validate_ip_configuration(namespace, lab_vnet=None):
 
 
 def _inbound_rule_from_os(namespace):
+    from azure.mgmt.devtestlabs.models import InboundNatRule
     if namespace.os_type == 'Linux':
         return InboundNatRule(transport_protocol='Tcp', backend_port=22)
 
@@ -240,6 +237,7 @@ def _inbound_rule_from_os(namespace):
 # pylint: disable=no-member
 def _validate_image_argument(cli_ctx, namespace, formula=None):
     """ Update namespace for image based on image or formula """
+    from azure.mgmt.devtestlabs.models import GalleryImageReference
     if formula and formula.formula_content:
         if formula.formula_content.gallery_image_reference:
             gallery_image_reference = formula.formula_content.gallery_image_reference
@@ -268,6 +266,7 @@ def _validate_image_argument(cli_ctx, namespace, formula=None):
 # pylint: disable=no-member
 def _use_gallery_image(cli_ctx, namespace):
     """ Retrieve gallery image from lab and update namespace """
+    from azure.mgmt.devtestlabs.models import GalleryImageReference
     gallery_image_operation = get_devtestlabs_management_client(cli_ctx, None).gallery_images
     odata_filter = ODATA_NAME_FILTER.format(namespace.image)
     gallery_images = list(gallery_image_operation.list(namespace.resource_group_name,
@@ -294,6 +293,7 @@ def _use_gallery_image(cli_ctx, namespace):
 # pylint: disable=no-member
 def _use_custom_image(cli_ctx, namespace):
     """ Retrieve custom image from lab and update namespace """
+    from msrestazure.tools import is_valid_resource_id
     if is_valid_resource_id(namespace.image):
         namespace.custom_image_id = namespace.image
     else:
@@ -354,6 +354,7 @@ def _validate_other_parameters(namespace, formula=None):
 
 
 def validate_artifacts(cmd, namespace):
+    from msrestazure.tools import resource_id
     if namespace.artifacts:
         from azure.cli.core.commands.client_factory import get_subscription_id
         if hasattr(namespace, 'resource_group'):
@@ -388,6 +389,7 @@ def _update_artifacts(artifacts, lab_resource_id):
 
 
 def _update_artifact_id(artifact_id, lab_resource_id):
+    from msrestazure.tools import is_valid_resource_id
     if not is_valid_resource_id(artifact_id):
         return "{}{}".format(lab_resource_id, artifact_id)
     return artifact_id
@@ -447,6 +449,8 @@ def validate_authentication_type(namespace, formula=None):
 
 
 def validate_ssh_key(namespace):
+    import os
+
     string_or_file = (namespace.ssh_key or
                       os.path.join(os.path.expanduser('~'), '.ssh/id_rsa.pub'))
     content = string_or_file
@@ -473,6 +477,7 @@ def validate_ssh_key(namespace):
 
 
 def _generate_ssh_keys(private_key_filepath, public_key_filepath):
+    import os
     import paramiko
 
     ssh_dir, _ = os.path.split(private_key_filepath)
@@ -522,6 +527,7 @@ def _any(collection):
 
 
 def _get_current_user_object_id(graph_client):
+    from msrestazure.azure_exceptions import CloudError
     try:
         current_user = graph_client.objects.get_current_user()
         if current_user and current_user.object_id:  # pylint:disable=no-member

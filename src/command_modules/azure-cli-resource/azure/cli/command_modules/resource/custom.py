@@ -69,6 +69,8 @@ def _process_parameters(template_param_defs, parameter_lists):
                            .format(key, ', '.join(sorted(template_param_defs.keys()))))
 
         param_type = param.get('type', None)
+        if param_type:
+            param_type = param_type.lower()
         if param_type in ['object', 'array']:
             parameters[key] = {'value': shell_safe_json_parse(value)}
         elif param_type in ['string', 'securestring']:
@@ -468,16 +470,18 @@ def export_group_as_template(
     options = ','.join(export_options) if export_options else None
 
     result = rcf.resource_groups.export_template(resource_group_name, ['*'], options=options)
+
+    print(json.dumps(result.template, indent=2))
     # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
     if result.error:
         error = result.error
-        if (hasattr(error, 'details') and error.details and
-                hasattr(error.details[0], 'message')):
-            error = error.details[0].message
-        raise CLIError(error)
-
-    print(json.dumps(result.template, indent=2))
+        try:
+            logger.warning(error.message)
+        except AttributeError:
+            logger.warning(str(error))
+        for detail in getattr(error, 'details', None) or []:
+            logger.error(detail.message)
 
 
 def create_application(cmd, resource_group_name,
@@ -850,7 +854,7 @@ def show_provider_operations(cmd, resource_provider_namespace, api_version=None)
 def move_resource(cmd, ids, destination_group, destination_subscription_id=None):
     """Moves resources from one resource group to another(can be under different subscription)
 
-    :param ids: the space separated resource ids to be moved
+    :param ids: the space-separated resource ids to be moved
     :param destination_group: the destination resource group name
     :param destination_subscription_id: the destination subscription identifier
     """
@@ -892,7 +896,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                              resource_group_name=None, scope=None, sku=None,
                              not_scopes=None):
     """Creates a policy assignment
-    :param not_scopes: Space separated scopes where the policy assignment does not apply.
+    :param not_scopes: Space-separated scopes where the policy assignment does not apply.
     """
     if bool(policy) == bool(policy_set_definition):
         raise CLIError('usage error: --policy NAME_OR_ID | '

@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.26"
+__version__ = "2.0.28"
 
 import os
 import sys
@@ -218,6 +218,8 @@ class AzCommandsLoader(CLICommandsLoader):
         self.min_profile = min_profile
         self.max_profile = max_profile
         self.module_kwargs = kwargs
+        self.command_name = None
+        self.skip_applicability = False
         self._command_group_cls = command_group_cls or AzCommandGroup
         self._argument_context_cls = argument_context_cls or AzArgumentContext
 
@@ -269,10 +271,19 @@ class AzCommandsLoader(CLICommandsLoader):
             resource_type = command_type.settings.get('resource_type', None) if command_type else None
         return resource_type
 
-    def get_api_version(self, resource_type=None):
+    def get_api_version(self, resource_type=None, operation_group=None):
         from azure.cli.core.profiles import get_api_version
         resource_type = resource_type or self._get_resource_type()
-        return get_api_version(self.cli_ctx, resource_type)
+        version = get_api_version(self.cli_ctx, resource_type)
+        if isinstance(version, str):
+            return version
+        else:
+            version = getattr(version, operation_group, None)
+            if version:
+                return version
+            else:
+                from azure.cli.core.profiles._shared import APIVersionException
+                raise APIVersionException(operation_group, self.cli_ctx.cloud.profile)
 
     def supported_api_version(self, resource_type=None, min_api=None, max_api=None, operation_group=None):
         from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
@@ -283,11 +294,11 @@ class AzCommandsLoader(CLICommandsLoader):
             cli_ctx=self.cli_ctx,
             resource_type=resource_type or self._get_resource_type() or PROFILE_TYPE,
             min_api=min_api or self.min_profile,
-            max_api=max_api or self.max_profile)
+            max_api=max_api or self.max_profile,
+            operation_group=operation_group)
         if isinstance(api_support, bool):
             return api_support
         elif operation_group:
-            # must be the ApiVersions class. Should be refactored as part of #5195
             return getattr(api_support, operation_group)
         return api_support
 

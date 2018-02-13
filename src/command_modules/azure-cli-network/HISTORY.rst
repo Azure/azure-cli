@@ -3,6 +3,27 @@
 Release History
 ===============
 
+2.0.23
+++++++
+* `network public-ip create`: Fix `--tags` option.
+* `network lb create`: Fix `--tags` option.
+* `network local-gateway create`: Fix `--tags` option.
+* `network nic create`: Fix `--tags` option.
+* `network vnet-gateway create`: Fix `--tags` option.
+* `network vpn-connection create`: Fix `--tags` option.
+
+2.0.22
+++++++
+* `application-gateway create`: `--cert-password` protected using secureString.
+* `application-gateway update`: Fix issue where `--sku` erroneously applied a default value.
+* `vpn-connection create`: `--shared-key` and `--authorization-key` protected using secureString.
+* `asg create`: Fix missing client issue.
+* `dns zone export`: Fix issue with exported names. Add `--file-name/-f` parameter.
+                     Fix issue where long TXT records were incorrectly exported.
+                     Fix issue where quoted TXT records were incorrectly exported without escaped quotes.
+* `dns zone import`: Fix issue where certain records were imported twice.
+* Restored `vnet-gateway root-cert` and `vnet-gateway revoked-cert` commands.
+
 2.0.21
 ++++++
 * `vnet-gateway update`: Fix issue when trying to change to/from active-standby mode.

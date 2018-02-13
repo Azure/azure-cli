@@ -9,6 +9,7 @@ from automation.verify.default_modules import verify_default_modules
 import automation.verify.verify_packages
 import automation.verify.verify_commands
 import automation.verify.verify_dependencies
+import automation.verify.verify_module_load_times
 
 
 def verify_license(_):
@@ -45,7 +46,7 @@ def verify_license(_):
 
 
 def init_args(root):
-    parser = root.add_parser('verify')
+    parser = root.add_parser('verify', help='Verify product feature.')
     parser.set_defaults(func=lambda _: parser.print_help())
     sub_parser = parser.add_subparsers(title='sub commands')
 
@@ -62,3 +63,4 @@ def init_args(root):
     automation.verify.verify_packages.init(sub_parser)
     automation.verify.verify_commands.init(sub_parser)
     automation.verify.verify_dependencies.init(sub_parser)
+    automation.verify.verify_module_load_times.init(sub_parser)

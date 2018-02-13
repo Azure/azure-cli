@@ -38,7 +38,10 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     payload_properties = None
     exceptions = []
     module_correlation = None
-    extension_name = 'None'
+    extension_name = None
+    extension_version = None
+    feedback = None
+    extension_management_detail = None
 
     def add_exception(self, exception, fault_type, description=None, message=''):
         details = {
@@ -122,6 +125,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     def _get_azure_cli_properties(self):
         source = 'az' if self.arg_complete_env_name not in os.environ else 'completer'
         result = {}
+        ext_info = '{}@{}'.format(self.extension_name, self.extension_version) if self.extension_name else None
         self.set_custom_properties(result, 'Source', source)
         self.set_custom_properties(result,
                                    'ClientRequestId',
@@ -140,10 +144,12 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.set_custom_properties(result, 'StartTime', str(self.start_time))
         self.set_custom_properties(result, 'EndTime', str(self.end_time))
         self.set_custom_properties(result, 'OutputType', self.output_type)
-        self.set_custom_properties(result, 'Parameters', ','.join(self.parameters or []))
+        self.set_custom_properties(result, 'Params', ','.join(self.parameters or []))
         self.set_custom_properties(result, 'PythonVersion', platform.python_version())
         self.set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
-        self.set_custom_properties(result, 'ExtensionName', self.extension_name)
+        self.set_custom_properties(result, 'ExtensionName', ext_info)
+        self.set_custom_properties(result, 'Feedback', self.feedback)
+        self.set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
 
         return result
 
@@ -191,6 +197,7 @@ def _user_agrees_to_telemetry(func):
         return func(*args, **kwargs)
 
     return _wrapper
+
 
 # public api
 
@@ -255,11 +262,25 @@ def set_application(application, arg_complete_env_name):
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
-def set_command_details(command, output_type=None, parameters=None, extension_name=None):
+def set_feedback(feedback):
+    """ This method is used for modules in which user feedback is collected. The data can be an arbitrary string but it
+    will be truncated at 512 characters to avoid abusing the telemetry."""
+    _session.feedback = feedback[:512]
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_extension_management_detail(ext_name, ext_version):
+    content = '{}@{}'.format(ext_name, ext_version)
+    _session.extension_management_detail = content[:512]
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_command_details(command, output_type=None, parameters=None, extension_name=None, extension_version=None):
     _session.command = command
     _session.output_type = output_type
     _session.parameters = parameters
-    _session.extension_name = extension_name or 'None'
+    _session.extension_name = extension_name
+    _session.extension_version = extension_version
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)

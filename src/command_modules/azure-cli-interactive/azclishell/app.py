@@ -96,7 +96,7 @@ class AzInteractiveShell(object):
         from azclishell.color_styles import style_factory
 
         self.cli_ctx = cli_ctx
-        self.config = Configuration(cli_ctx.config)
+        self.config = Configuration(cli_ctx.config, style=style)
         self.config.set_style(style)
         self.styles = style or style_factory(self.config.get_style())
         self.lexer = lexer or get_az_lexer(self.config) if self.styles else None
@@ -631,7 +631,7 @@ class AzInteractiveShell(object):
                 self.config.set_feedback('yes')
                 self.user_feedback = False
 
-            azure_folder = self.config.config_dir
+            azure_folder = get_config_dir()
             if not os.path.exists(azure_folder):
                 os.makedirs(azure_folder)
             ACCOUNT.load(os.path.join(azure_folder, 'azureProfile.json'))

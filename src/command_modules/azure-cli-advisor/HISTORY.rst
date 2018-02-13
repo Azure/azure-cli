@@ -11,6 +11,10 @@ Release History
 * `advisor recommendation list` has a new --refresh parameter.
 * `advisor recommendation show` has been added.
 
+0.1.2
++++++
+* Minor fixes.
+
 0.1.1
 ++++++
 * Update for CLI core changes.

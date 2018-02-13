@@ -21,7 +21,7 @@ def get_api_version(cli_ctx, resource_type, as_sdk_profile=False):
     return _sdk_get_api_version(cli_ctx.cloud.profile, resource_type, as_sdk_profile)
 
 
-def supported_api_version(cli_ctx, resource_type, min_api=None, max_api=None):
+def supported_api_version(cli_ctx, resource_type, min_api=None, max_api=None, operation_group=None):
     """ Method to check if the current API version for a given resource_type is supported.
         If resource_type is set to None, the current profile version will be used as the basis of
         the comparison.
@@ -37,7 +37,11 @@ def supported_api_version(cli_ctx, resource_type, min_api=None, max_api=None):
     :rtype: bool or tuple[bool]
     """
     from azure.cli.core.profiles._shared import supported_api_version as _sdk_supported_api_version
-    return _sdk_supported_api_version(cli_ctx.cloud.profile, resource_type, min_api, max_api)
+    return _sdk_supported_api_version(cli_ctx.cloud.profile,
+                                      resource_type=resource_type,
+                                      min_api=min_api,
+                                      max_api=max_api,
+                                      operation_group=operation_group)
 
 
 def get_sdk(cli_ctx, resource_type, *attr_args, **kwargs):

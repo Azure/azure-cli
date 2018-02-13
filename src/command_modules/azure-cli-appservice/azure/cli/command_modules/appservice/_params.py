@@ -56,7 +56,9 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=sku_arg_type)
 
     with self.argument_context('appservice plan') as c:
-        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan', completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'), id_part='name')
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                   configured_default='appserviceplan', id_part='name')
         c.argument('number_of_workers', help='Number of workers to be allocated.', type=int, default=1)
         c.argument('admin_site_name', help='The name of the admin web app.')
 
@@ -72,7 +74,8 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help='name of the new webapp')
         c.argument('startup_file', help="Linux only. The web's startup file")
         c.argument('runtime', options_list=['--runtime', '-r'], help="canonicalized web runtime in the format of Framework|Version, e.g. \"PHP|5.6\". Use 'az webapp list-runtimes' for available list")  # TODO ADD completer
-        c.argument('plan', options_list=['--plan', '-p'], completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+        c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name or resource id of the app service plan. Use 'appservice plan create' to get one")
 
     with self.argument_context('webapp show') as c:
@@ -82,7 +85,7 @@ def load_arguments(self, _):
         c.argument('linux', action='store_true', help='list runtime stacks for linux based webapps')
 
     with self.argument_context('webapp traffic-routing') as c:
-        c.argument('distribution', options_list=['--distribution', '-d'], nargs='+', help='space separated slot routings in a format of <slot-name>=<percentage> e.g. staging=50. Unused traffic percentage will go to the Production slot')
+        c.argument('distribution', options_list=['--distribution', '-d'], nargs='+', help='space-separated slot routings in a format of <slot-name>=<percentage> e.g. staging=50. Unused traffic percentage will go to the Production slot')
 
     with self.argument_context('webapp update') as c:
         c.argument('client_affinity_enabled', help="Enables sending session affinity cookies.", arg_type=get_three_state_flag(return_label=True))
@@ -108,8 +111,8 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' config ssl') as c:
             c.argument('certificate_thumbprint', help='The ssl cert thumbprint')
         with self.argument_context(scope + ' config appsettings') as c:
-            c.argument('settings', nargs='+', help="space separated app settings in a format of <name>=<value>")
-            c.argument('setting_names', nargs='+', help="space separated app setting names")
+            c.argument('settings', nargs='+', help="space-separated app settings in a format of <name>=<value>")
+            c.argument('setting_names', nargs='+', help="space-separated app setting names")
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
         with self.argument_context(scope + ' deployment user') as c:
@@ -141,7 +144,7 @@ def load_arguments(self, _):
         c.argument('webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
     with self.argument_context('webapp config appsettings') as c:
-        c.argument('slot_settings', nargs='+', help="space separated slot app settings in a format of <name>=<value>")
+        c.argument('slot_settings', nargs='+', help="space-separated slot app settings in a format of <name>=<value>")
     with self.argument_context('webapp deployment container config') as c:
         c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment', arg_type=get_enum_type(['true', 'false']))
     with self.argument_context('webapp deployment slot') as c:
@@ -171,9 +174,9 @@ def load_arguments(self, _):
 
     for scope in ['appsettings', 'connection-string']:
         with self.argument_context('webapp config ' + scope) as c:
-            c.argument('settings', nargs='+', help="space separated {} in a format of <name>=<value>".format(scope))
-            c.argument('slot_settings', nargs='+', help="space separated slot {} in a format of <name>=<value>".format(scope))
-            c.argument('setting_names', nargs='+', help="space separated {} names".format(scope))
+            c.argument('settings', nargs='+', help="space-separated {} in a format of <name>=<value>".format(scope))
+            c.argument('slot_settings', nargs='+', help="space-separated slot {} in a format of <name>=<value>".format(scope))
+            c.argument('setting_names', nargs='+', help="space-separated {} names".format(scope))
 
     with self.argument_context('webapp config connection-string') as c:
         c.argument('connection_string_type', options_list=['--connection-string-type', '-t'], help='connection string type', arg_type=get_enum_type(ConnectionStringType))
@@ -226,24 +229,24 @@ def load_arguments(self, _):
         c.argument('token_store_enabled', options_list=['--token-store'], arg_type=get_three_state_flag(return_label=True))
         c.argument('action', arg_type=get_enum_type(AUTH_TYPES))
         c.argument('token_refresh_extension_hours', type=float, help="Hours, must be formattable into a float")
-        c.argument('allowed_external_redirect_urls', nargs='+', help="One or more urls (space delimited).")
+        c.argument('allowed_external_redirect_urls', nargs='+', help="One or more urls (space-delimited).")
         c.argument('client_id', options_list=['--aad-client-id'], arg_group='Azure Active Directory')
         c.argument('client_secret', options_list=['--aad-client-secret'], arg_group='Azure Active Directory')
-        c.argument('allowed_audiences', nargs='+', options_list=['--aad-allowed-token-audiences'], arg_group='Azure Active Directory', help="One or more token audiences (space delimited).")
+        c.argument('allowed_audiences', nargs='+', options_list=['--aad-allowed-token-audiences'], arg_group='Azure Active Directory', help="One or more token audiences (space-delimited).")
         c.argument('issuer', options_list=['--aad-token-issuer-url'],
                    help='This url can be found in the JSON output returned from your active directory endpoint using your tenantID. The endpoint can be queried from \'az cloud show\' at \"endpoints.activeDirectory\". '
                         'The tenantID can be found using \'az account show\'. Get the \"issuer\" from the JSON at <active directory endpoint>/<tenantId>/.well-known/openid-configuration.', arg_group='Azure Active Directory')
         c.argument('facebook_app_id', arg_group='Facebook')
         c.argument('facebook_app_secret', arg_group='Facebook')
-        c.argument('facebook_oauth_scopes', nargs='+', help="One or more facebook authentication scopes (space delimited).", arg_group='Facebook')
+        c.argument('facebook_oauth_scopes', nargs='+', help="One or more facebook authentication scopes (space-delimited).", arg_group='Facebook')
         c.argument('twitter_consumer_key', arg_group='Twitter')
         c.argument('twitter_consumer_secret', arg_group='Twitter')
         c.argument('google_client_id', arg_group='Google')
         c.argument('google_client_secret', arg_group='Google')
-        c.argument('google_oauth_scopes', nargs='+', help="One or more Google authentication scopes (space delimited).", arg_group='Google')
+        c.argument('google_oauth_scopes', nargs='+', help="One or more Google authentication scopes (space-delimited).", arg_group='Google')
         c.argument('microsoft_account_client_id', arg_group='Microsoft')
         c.argument('microsoft_account_client_secret', arg_group='Microsoft')
-        c.argument('microsoft_account_oauth_scopes', nargs='+', help="One or more Microsoft authentification scopes (space delimited).", arg_group='Microsoft')
+        c.argument('microsoft_account_oauth_scopes', nargs='+', help="One or more Microsoft authentification scopes (space-delimited).", arg_group='Microsoft')
 
     with self.argument_context('functionapp') as c:
         c.ignore('app_instance', 'slot')
@@ -251,7 +254,8 @@ def load_arguments(self, _):
     with self.argument_context('functionapp config hostname') as c:
         c.argument('webapp_name', arg_type=name_arg_type, id_part='name', help='name of the function app')
     with self.argument_context('functionapp create') as c:
-        c.argument('plan', options_list=['--plan', '-p'], completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+        c.argument('plan', options_list=['--plan', '-p'], configured_default='appserviceplan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    help="name or resource id of the function app service plan. Use 'appservice plan create' to get one")
         c.argument('new_app_name', options_list=['--name', '-n'], help='name of the new function app')
         c.argument('storage_account', options_list=['--storage-account', '-s'],

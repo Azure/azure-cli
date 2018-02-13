@@ -13,17 +13,12 @@ def patch_progress_controller(unit_test):
     def _mock_pass(*args, **kwargs):  # pylint: disable=unused-argument
         pass
 
-    def _mock_get_hook(_):
-        return _mock_pass
-
     mock_in_unit_test(
         unit_test, 'azure.cli.core.commands.progress.ProgressHook.update', _mock_pass)
     mock_in_unit_test(
         unit_test, 'azure.cli.core.commands.progress.ProgressHook.add', _mock_pass)
     mock_in_unit_test(
         unit_test, 'azure.cli.core.commands.progress.ProgressHook.end', _mock_pass)
-    mock_in_unit_test(
-        unit_test, 'azure.cli.command_modules.storage.operations.blob.get_update_progress_fn', _mock_get_hook)
 
 
 def patch_main_exception_handler(unit_test):

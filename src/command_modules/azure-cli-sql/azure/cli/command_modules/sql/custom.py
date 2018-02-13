@@ -326,6 +326,32 @@ def db_create_replica(
         kwargs)
 
 
+# Renames a database.
+def db_rename(
+        cmd,
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        new_name):
+
+    client.rename(
+        resource_group_name,
+        server_name,
+        database_name,
+        id=DatabaseIdentity(
+            cmd.cli_ctx,
+            new_name,
+            server_name,
+            resource_group_name
+        ).id())
+
+    return client.get(
+        resource_group_name,
+        server_name,
+        new_name)
+
+
 # Creates a database from a database point in time backup or deleted database backup.
 # Wrapper function to make create mode more convenient.
 def db_restore(
@@ -1187,6 +1213,35 @@ def _get_server_key_name_from_uri(uri):
     version = uri.split('/')[-1]
     return '{}_{}_{}'.format(vault, key, version)
 
+
+#####
+#           sql server dns-alias
+#####
+
+
+def server_dns_alias_set(
+        cmd,
+        client,
+        resource_group_name,
+        server_name,
+        dns_alias_name,
+        original_server_name,
+        original_subscription_id=None,
+        original_resource_group_name=None):
+
+    # Build the old alias id
+    old_alias_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/dnsAliases/{}".format(
+        quote(original_subscription_id or get_subscription_id(cmd.cli_ctx)),
+        quote(original_resource_group_name or resource_group_name),
+        quote(original_server_name),
+        quote(dns_alias_name))
+
+    return client.acquire(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        dns_alias_name=dns_alias_name,
+        old_server_dns_alias_id=old_alias_id
+    )
 
 #####
 #           sql server encryption-protector
