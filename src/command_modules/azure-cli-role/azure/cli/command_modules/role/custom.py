@@ -308,6 +308,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
                     entry['roleName'] = role_defs[payload['roleDefinitionId']][0]
             result.append(entry)
 
+    # Fill in logical user/sp names as guid principal-id not readable
     principal_ids = [x['principalId'] for x in result if x['principalId']]
     if principal_ids:
         graph_client = _graph_client_factory(cmd.cli_ctx)
