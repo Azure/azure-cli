@@ -118,37 +118,3 @@ class CdnScenarioMixin(object):
                              endpoint_name,
                              profile_name)
         return self.cmd(command, checks)
-
-    def custom_domain_create_cmd(self, group, endpoint_name, profile_name, name, host_name,
-                                 checks=None):
-        msg = 'cdn custom-domain create -g {} -n {} --endpoint-name {} ' \
-              '--profile-name {} --host-name {}'
-        command = msg.format(group,
-                             name,
-                             endpoint_name,
-                             profile_name,
-                             host_name)
-        return self.cmd(command, checks)
-
-    def custom_domain_list_cmd(self, group, endpoint_name, profile_name, checks=None):
-        msg = 'cdn custom-domain list -g {} --endpoint-name {} --profile-name {}'
-        command = msg.format(group,
-                             endpoint_name,
-                             profile_name)
-        return self.cmd(command, checks)
-
-    def custom_domain_show_cmd(self, group, endpoint_name, profile_name, name, checks=None):
-        msg = 'cdn custom-domain show -g {} -n {} --endpoint-name {} --profile-name {}'
-        command = msg.format(group,
-                             name,
-                             endpoint_name,
-                             profile_name)
-        return self.cmd(command, checks)
-
-    def custom_domain_delete_cmd(self, group, endpoint_name, profile_name, name, checks=None):
-        msg = 'cdn custom-domain delete -g {} -n {} --endpoint-name {} --profile-name {}'
-        command = msg.format(group,
-                             name,
-                             endpoint_name,
-                             profile_name)
-        return self.cmd(command, checks)

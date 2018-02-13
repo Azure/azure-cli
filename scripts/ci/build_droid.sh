@@ -27,6 +27,10 @@ $dp0/build.sh
 cp $dp0/a01/Dockerfile.py36 artifacts/
 
 #############################################
+# Move other scripts for docker
+cp -R $dp0/a01/* artifacts/
+
+#############################################
 # for travis repo slug, remove the suffix to reveal the owner
 # - the offical repo will generate image: azurecli-test-Azure
 # - the fork repo will generate image: azurecli-test-johnongithub
@@ -46,7 +50,7 @@ if [ $AZURECLIDEV_ACR_SP_USERNAME ] && [ $AZURECLIDEV_ACR_SP_PASSWORD ]; then
 fi
 
 title 'Build docker image'
-docker build --pull -t $image_name -f artifacts/Dockerfile.py36 artifacts
+docker build -t $image_name -f artifacts/Dockerfile.py36 artifacts
 
 title 'Push docker image'
 if [ "$1" == "push" ] || [ "$TRAVIS" == "true" ]; then

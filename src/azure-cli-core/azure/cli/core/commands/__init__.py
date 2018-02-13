@@ -20,6 +20,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 
 from azure.cli.core import EXCLUDED_PARAMS
+from azure.cli.core.extension import get_extension
 import azure.cli.core.telemetry as telemetry
 
 logger = get_logger(__name__)
@@ -189,16 +190,19 @@ class AzCliCommand(CLICommand):
 # pylint: disable=too-few-public-methods
 class AzCliCommandInvoker(CommandInvoker):
 
-    # pylint: disable=too-many-statements
+    # pylint: disable=too-many-statements,too-many-locals
     def execute(self, args):
         import knack.events as events
         from knack.util import CommandResultItem, todict
+        from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 
         # TODO: Can't simply be invoked as an event because args are transformed
         args = _pre_command_table_create(self.cli_ctx, args)
 
         self.cli_ctx.raise_event(events.EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
         self.commands_loader.load_command_table(args)
+        self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE,
+                                 load_cmd_tbl_func=self.commands_loader.load_command_table, args=args)
         command = self._rudimentary_get_command(args)
 
         try:
@@ -280,10 +284,19 @@ class AzCliCommandInvoker(CommandInvoker):
             params = self._filter_params(expanded_arg)
 
             command_source = self.commands_loader.command_table[command].command_source
-            telemetry.set_command_details(self.data['command'], self.data['output'],
+
+            extension_version = None
+            try:
+                if command_source:
+                    extension_version = get_extension(command_source.extension_name).version
+            except Exception:  # pylint: disable=broad-except
+                pass
+
+            telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
                                           [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
                                            (p.startswith('-') and len(p) > 1)],
-                                          extension_name=command_source.extension_name if command_source else None)
+                                          extension_name=command_source.extension_name if command_source else None,
+                                          extension_version=extension_version)
             if command_source:
                 self.data['command_extension_name'] = command_source.extension_name
 
@@ -346,8 +359,13 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
 
     def _validate_arg_level(self, ns, **_):  # pylint: disable=no-self-use
+        from msrest.exceptions import ValidationError
         for validator in getattr(ns, '_argument_validators', []):
-            validator(**self._build_kwargs(validator, ns))
+            try:
+                validator(**self._build_kwargs(validator, ns))
+            except ValidationError:
+                logger.debug('Validation error in %s.', str(validator))
+                raise
         try:
             delattr(ns, '_argument_validators')
         except AttributeError:

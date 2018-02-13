@@ -878,6 +878,126 @@ class SqlServerDwMgmtScenarioTest(ScenarioTest):
                  checks=[NoneCheck()])
 
 
+class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
+
+    # create 2 servers in the same resource group, and 1 server in a different resource group
+    @ResourceGroupPreparer(parameter_name="resource_group_1",
+                           parameter_name_for_location="resource_group_location_1")
+    @ResourceGroupPreparer(parameter_name="resource_group_2",
+                           parameter_name_for_location="resource_group_location_2")
+    @SqlServerPreparer(parameter_name="server_name_1",
+                       resource_group_parameter_name="resource_group_1")
+    @SqlServerPreparer(parameter_name="server_name_2",
+                       resource_group_parameter_name="resource_group_1")
+    @SqlServerPreparer(parameter_name="server_name_3",
+                       resource_group_parameter_name="resource_group_2")
+    def test_sql_server_dns_alias_mgmt(self,
+                                       resource_group_1, resource_group_location_1,
+                                       resource_group_2, resource_group_location_2,
+                                       server_name_1, server_name_2, server_name_3):
+        # helper class so that it's clear which servers are in which groups
+        class ServerInfo(object):  # pylint: disable=too-few-public-methods
+            def __init__(self, name, group, location):
+                self.name = name
+                self.group = group
+                self.location = location
+
+        s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
+        s2 = ServerInfo(server_name_2, resource_group_1, resource_group_location_1)
+        s3 = ServerInfo(server_name_3, resource_group_2, resource_group_location_2)
+
+        alias_name = 'alias1'
+
+        # verify setup
+        for s in (s1, s2, s3):
+            self.cmd('sql server show -g {} -n {}'
+                     .format(s.group, s.name),
+                     checks=[
+                         JMESPathCheck('name', s.name),
+                         JMESPathCheck('resourceGroup', s.group)])
+
+        # Create server dns alias
+        self.cmd('sql server dns-alias create -n {} -s {} -g {}'
+                 .format(alias_name, s1.name, s1.group),
+                 checks=[
+                     JMESPathCheck('name', alias_name),
+                     JMESPathCheck('resourceGroup', s1.group)
+                 ])
+
+        # Check that alias is created on a right server
+        self.cmd('sql server dns-alias list -s {} -g {}'
+                 .format(s1.name, s1.group),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', alias_name)
+                 ])
+
+        # Repoint alias to the server within the same resource group
+        self.cmd('sql server dns-alias set -n {} --original-server {} -s {} -g {}'
+                 .format(alias_name, s1.name, s2.name, s2.group),
+                 checks=[NoneCheck()])
+
+        # List the aliases on old server to check if alias is not pointing there
+        self.cmd('sql server dns-alias list -s {} -g {}'
+                 .format(s1.name, s1.group),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)
+                 ])
+
+        # Check if alias is pointing to new server
+        self.cmd('sql server dns-alias list -s {} -g {}'
+                 .format(s2.name, s2.group),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', alias_name)
+                 ])
+
+        # Repoint alias to the same server (to check that operation is idempotent)
+        self.cmd('sql server dns-alias set -n {} --original-server {} -s {} -g {}'
+                 .format(alias_name, s1.name, s2.name, s2.group),
+                 checks=[NoneCheck()])
+
+        # Check if alias is pointing to the right server
+        self.cmd('sql server dns-alias list -s {} -g {}'
+                 .format(s2.name, s2.group),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', alias_name)
+                 ])
+
+        # Repoint alias to the server within the same resource group
+        self.cmd('sql server dns-alias set -n {} --original-server {} --original-resource-group {} -s {} -g {}'
+                 .format(alias_name, s2.name, s2.group, s3.name, s3.group),
+                 checks=[NoneCheck()])
+
+        # List the aliases on old server to check if alias is not pointing there
+        self.cmd('sql server dns-alias list -s {} -g {}'
+                 .format(s2.name, s2.group),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)
+                 ])
+
+        # Check if alias is pointing to new server
+        self.cmd('sql server dns-alias list -s {} -g {}'
+                 .format(s3.name, s3.group),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', alias_name)
+                 ])
+
+        # Drop alias
+        self.cmd('sql server dns-alias delete -n {} -s {} -g {}'
+                 .format(alias_name, s3.name, s3.group),
+                 checks=[NoneCheck()])
+
+        # Verify that alias got dropped correctly
+        self.cmd('sql server dns-alias list -s {} -g {}'
+                 .format(s3.name, s3.group),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)
+                 ])
+
+
 class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",

@@ -88,6 +88,10 @@ def get_sql_server_connection_policies_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).server_connection_policies
 
 
+def get_sql_server_dns_aliases_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).server_dns_aliases
+
+
 def get_sql_server_keys_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).server_keys
 
