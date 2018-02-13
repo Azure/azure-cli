@@ -20,6 +20,8 @@ ENV_ADDITIONAL_USER_AGENT = 'AZURE_HTTP_USER_AGENT'
 
 
 def resolve_client_arg_name(operation, kwargs):
+    if not isinstance(operation, str):
+        raise CLIError("operation should be type 'str'. Got '{}'".format(type(operation)))
     if 'client_arg_name' in kwargs:
         logger.info("Keyword 'client_arg_name' is deprecated and should be removed.")
         return kwargs['client_arg_name']
@@ -27,9 +29,9 @@ def resolve_client_arg_name(operation, kwargs):
     path_comps = path.split('.')
     if path_comps[0] == 'azure':
         # for CLI command modules
-        # SDK method: azure.mgmt.foo...
+        # SDK method: azure.mgmt.foo... or azure.foo...
         # custom method: azure.cli.command_modules.foo...
-        client_arg_name = 'self' if path_comps[1] == 'mgmt' else 'client'
+        client_arg_name = 'client' if path_comps[1] == 'cli' else 'self'
     elif path_comps[0].startswith(EXTENSIONS_MOD_PREFIX):
         # for CLI extensions
         # SDK method: the operation takes the form '<class name>.<method_name>'
