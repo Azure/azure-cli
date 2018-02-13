@@ -10,6 +10,7 @@ from knack.util import CLIError
 
 from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
+from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.profiles import ResourceType, get_api_version, get_sdk
 
@@ -22,11 +23,21 @@ def resolve_client_arg_name(operation, kwargs):
     if 'client_arg_name' in kwargs:
         logger.info("Keyword 'client_arg_name' is deprecated and should be removed.")
         return kwargs['client_arg_name']
-    client_arg_name = 'self'
-    path, operation = operation.split('#', 1)
+    path, op_path = operation.split('#', 1)
     path_comps = path.split('.')
-    if path_comps[-1] == 'custom':
-        client_arg_name = 'client'
+    if path_comps[0] == 'azure':
+        # for CLI command modules
+        # SDK method: azure.mgmt.foo...
+        # custom method: azure.cli.command_modules.foo...
+        client_arg_name = 'self' if path_comps[1] == 'mgmt' else 'client'
+    elif path_comps[0].startswith(EXTENSIONS_MOD_PREFIX):
+        # for CLI extensions
+        # SDK method: the operation takes the form '<class name>.<method_name>'
+        # custom method: the operation takes the form '<method_name>'
+        op_comps = op_path.split('.')
+        client_arg_name = 'self' if len(op_comps) > 1 else 'client'
+    else:
+        raise ValueError('Unrecognized operation: {}'.format(operation))
     return client_arg_name
 
 
