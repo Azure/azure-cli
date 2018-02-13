@@ -224,7 +224,7 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
     or YYYY-MM-DD-profile-preview  formatted strings.
     """
     if not isinstance(resource_type, ResourceType) and resource_type != PROFILE_TYPE:
-        raise TypeError()
+        raise ValueError("'resource_type' is required.")
     if min_api is None and max_api is None:
         raise ValueError('At least a min or max version must be specified')
     api_version_obj = get_api_version(api_profile, resource_type, as_sdk_profile=True) \
