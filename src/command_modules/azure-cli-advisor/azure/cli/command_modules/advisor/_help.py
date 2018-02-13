@@ -22,7 +22,12 @@ helps['advisor recommendation'] = """
 
 helps['advisor configuration list'] = """
     type: command
-    short-summary: List Azure Advisor configuration.
+    short-summary: List Azure Advisor configuration for the entire subscription.
+"""
+
+helps['advisor configuration show'] = """
+    type: command
+    short-summary: Show Azure Advisor configuration for the given subscription or resource group.
 """
 
 helps['advisor configuration update'] = """

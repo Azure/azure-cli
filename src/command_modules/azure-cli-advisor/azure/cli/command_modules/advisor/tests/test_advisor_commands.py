@@ -7,7 +7,7 @@ import unittest
 
 from azure.cli.testsdk import LiveScenarioTest, ScenarioTest, ResourceGroupPreparer
 
-from azure.cli.command_modules.advisor.custom import build_filter_string, parse_operation_id, parse_recommendation_uri
+from azure.cli.command_modules.advisor.custom import _cli_advisor_build_filter_string, _cli_advisor_parse_operation_id, _cli_advisor_parse_recommendation_uri
 
 # pylint: disable=line-too-long
 
@@ -19,21 +19,21 @@ class AzureAdvisorUnitTest(unittest.TestCase):
         resource_group_name = 'r'
         category = 'cost'
 
-        self.assertEqual(build_filter_string(), None)
-        self.assertEqual(build_filter_string(ids=ids), "ResourceId eq 'a' or ResourceId eq 'b' or ResourceId eq 'c'")
-        self.assertEqual(build_filter_string(resource_group_name=resource_group_name), "ResourceGroup eq 'r'")
-        self.assertEqual(build_filter_string(category=category), "Category eq 'cost'")
-        self.assertEqual(build_filter_string(ids=ids, category=category), "(ResourceId eq 'a' or ResourceId eq 'b' or ResourceId eq 'c') and Category eq 'cost'")
-        self.assertEqual(build_filter_string(resource_group_name=resource_group_name, category=category), "(ResourceGroup eq 'r') and Category eq 'cost'")
+        self.assertEqual(_cli_advisor_build_filter_string(), None)
+        self.assertEqual(_cli_advisor_build_filter_string(ids=ids), "ResourceId eq 'a' or ResourceId eq 'b' or ResourceId eq 'c'")
+        self.assertEqual(_cli_advisor_build_filter_string(resource_group_name=resource_group_name), "ResourceGroup eq 'r'")
+        self.assertEqual(_cli_advisor_build_filter_string(category=category), "Category eq 'cost'")
+        self.assertEqual(_cli_advisor_build_filter_string(ids=ids, category=category), "(ResourceId eq 'a' or ResourceId eq 'b' or ResourceId eq 'c') and Category eq 'cost'")
+        self.assertEqual(_cli_advisor_build_filter_string(resource_group_name=resource_group_name, category=category), "(ResourceGroup eq 'r') and Category eq 'cost'")
 
-    def test_parse_operation_id(self):
+    def test__cli_advisor_parse_operation_id(self):
         location = 'https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Advisor/generateRecommendations/a9544ca5-5837-4cb4-94d6-bad2b6e76320?api-version=2017-04-19'
-        operation_id = parse_operation_id(location)
+        operation_id = _cli_advisor_parse_operation_id(location)
         self.assertEqual(operation_id, 'a9544ca5-5837-4cb4-94d6-bad2b6e76320')
 
-    def test_parse_recommendation_uri(self):
+    def test__cli_advisor_parse_recommendation_uri(self):
         recommendation_uri = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/foo/providers/Microsoft.Network/expressRouteCircuits/test/providers/Microsoft.Advisor/recommendations/c4deb869-ea38-f90d-331f-91770021d425'
-        result = parse_recommendation_uri(recommendation_uri)
+        result = _cli_advisor_parse_recommendation_uri(recommendation_uri)
         self.assertEqual(
             result['resourceUri'],
             '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/foo/providers/Microsoft.Network/expressRouteCircuits/test'
