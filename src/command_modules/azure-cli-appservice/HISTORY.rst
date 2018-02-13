@@ -4,7 +4,7 @@ Release History
 ===============
 0.1.27
 ++++++
-* appservice: list-location: reports Free as an invalid SKU
+* appservice: list-location: Fixes the bug where 'Free' was reported as an invalid SKU
 
 0.1.26
 ++++++
