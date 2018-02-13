@@ -1099,6 +1099,36 @@ def view_in_browser(cmd, resource_group_name, name, slot=None, logs=False):
         get_streaming_log(cmd, resource_group_name, name, provider=None, slot=slot)
 
 
+def view_appservice_samples_in_browser():
+    url = 'https://go.microsoft.com/fwlink/?linkid=864819'
+    _open_page_in_browser(url)
+
+
+def view_appservice_docs_in_browser():
+    url = 'https://go.microsoft.com/fwlink/?linkid=864822'
+    _open_page_in_browser(url)
+
+
+def view_webapp_samples_in_browser():
+    url = 'https://go.microsoft.com/fwlink/?linkid=864819'
+    _open_page_in_browser(url)
+
+
+def view_webapp_docs_in_browser():
+    url = 'https://go.microsoft.com/fwlink/?linkid=864822'
+    _open_page_in_browser(url)
+
+
+def view_functions_samples_in_browser():
+    url = 'https://go.microsoft.com/fwlink/?linkid=864823'
+    _open_page_in_browser(url)
+
+
+def view_functions_docs_in_browser():
+    url = 'https://go.microsoft.com/fwlink/?linkid=864821'
+    _open_page_in_browser(url)
+
+
 def _open_page_in_browser(url):
     import sys
     if sys.platform.lower() == 'darwin':

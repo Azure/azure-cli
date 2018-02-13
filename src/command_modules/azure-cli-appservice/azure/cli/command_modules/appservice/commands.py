@@ -78,6 +78,8 @@ def load_command_table(self, _):
         g.custom_command('list-runtimes', 'list_runtimes')
         g.custom_command('assign-identity', 'assign_identity')
         g.generic_update_command('update', custom_func_name='update_webapp', setter_arg_name='site_envelope')
+        g.custom_command('samples', 'samples_webapp', custom_func_name='view_webapp_samples_in_browser')
+        g.custom_command('docs', 'docs_webapp', custom_func_name='view_webapp_docs_in_browser')
 
     with self.command_group('webapp traffic-routing') as g:
         g.custom_command('set', 'set_traffic_routing')
@@ -168,6 +170,8 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_app_service_plan', setter_arg_name='app_service_plan')
     with self.command_group('appservice') as g:
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
+        g.custom_command('samples', 'samples_appservice', custom_func_name='view_appservice_samples_in_browser')
+        g.custom_command('docs', 'docs_appservice', custom_func_name='view_appservice_docs_in_browser')
 
     with self.command_group('functionapp') as g:
         g.custom_command('create', 'create_function')
@@ -179,6 +183,8 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('list-consumption-locations', 'list_consumption_locations')
         g.custom_command('assign-identity', 'assign_identity')
+        g.custom_command('samples', 'samples_functionapp', custom_func_name='view_functions_samples_in_browser')
+        g.custom_command('docs', 'docs_functionapp', custom_func_name='view_functions_docs_in_browser')
 
     with self.command_group('functionapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)

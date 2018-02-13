@@ -468,6 +468,36 @@ helps['webapp browse'] = """
     short-summary: Open a web app in a browser.
 """
 
+helps['webapp samples'] = """
+    type: command
+    short-summary: Open App service samples in a browser.
+"""
+
+helps['appservice samples'] = """
+    type: command
+    short-summary: Open App service samples in a browser.
+"""
+
+helps['functionapp samples'] = """
+    type: command
+    short-summary: Open Functions samples in a browser.
+"""
+
+helps['webapp docs'] = """
+    type: command
+    short-summary: Open App service documentation in a browser.
+"""
+
+helps['appservice docs'] = """
+    type: command
+    short-summary: Open App service documentation in a browser.
+"""
+
+helps['functionapp docs'] = """
+    type: command
+    short-summary: Open Functions documentation in a browser.
+"""
+
 helps['webapp create'] = """
     type: command
     short-summary: Create a web app.
