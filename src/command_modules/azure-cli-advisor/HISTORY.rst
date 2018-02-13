@@ -3,13 +3,13 @@
 Release History
 ===============
 
-2.0.0
+0.5.0
 ++++++
-* GA release.
 * BC: `advisor configuration get` has been renamed to `advisor configuration list`.
 * BC: `advisor configuration set` has been renamed to `advisor configuration update`.
 * BC: `advisor recommendation generate` has been removed.
 * `advisor recommendation list` has a new --refresh parameter.
+* `advisor recommendation show` has been added.
 
 0.1.1
 ++++++
