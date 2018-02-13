@@ -142,6 +142,11 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             subscription_id = MOCKED_SUBSCRIPTION_ID
         return subscription_id
 
+    def enable_large_payload(self, size_kb=1024):
+        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = size_kb
+
 
 @live_only()
 class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
