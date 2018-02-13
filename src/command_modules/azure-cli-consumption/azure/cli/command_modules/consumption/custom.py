@@ -98,7 +98,7 @@ def cli_consumption_list_reservations_details_by_reservation_id(client, reservat
     return list(client.list_by_reservation_order_and_reservation(reservationorderid, reservationid, filter=filter_expression))
 
 
-def cli_consumption_list_pricesheet_get(client, include_additional_properties=False, include_meter_details=False):
+def cli_consumption_list_pricesheet_get(client, top=None, include_additional_properties=False, include_meter_details=False):
     if include_additional_properties and include_meter_details:
         expand_properties = 'properties/additionalProperties,properties/meterDetails'
     elif include_additional_properties:
@@ -107,11 +107,12 @@ def cli_consumption_list_pricesheet_get(client, include_additional_properties=Fa
         expand_properties = 'properties/meterDetails'
     else:
         expand_properties = None
-
+    if top:
+        return client.get(expand=expand_properties, top=top)
     return client.get(expand=expand_properties)
 
 
-def cli_consumption_list_pricesheet_by_billing_period_get(client, billing_period_name, include_additional_properties=False, include_meter_details=False):
+def cli_consumption_list_pricesheet_by_billing_period_get(client, billing_period_name, top=None, include_additional_properties=False, include_meter_details=False):
     if include_additional_properties and include_meter_details:
         expand_properties = 'properties/additionalProperties,properties/meterDetails'
     elif include_additional_properties:
@@ -120,5 +121,6 @@ def cli_consumption_list_pricesheet_by_billing_period_get(client, billing_period
         expand_properties = 'properties/meterDetails'
     else:
         expand_properties = None
-
+    if top:
+        return client.get_by_billing_period(billing_period_name, expand=expand_properties, top=top)
     return client.get_by_billing_period(billing_period_name, expand=expand_properties)
