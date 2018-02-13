@@ -77,15 +77,12 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
             OAuthRequestResponsesFilter(),
-            LargeRequestBodyProcessor(),
-            LargeResponseBodyProcessor(),
             DeploymentNameReplacer(),
             RequestUrlNormalizer(),
             self.name_replacer
         ]
 
         default_replay_processors = [
-            LargeResponseBodyReplacer(),
             DeploymentNameReplacer(),
             RequestUrlNormalizer(),
         ]
@@ -142,10 +139,11 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             subscription_id = MOCKED_SUBSCRIPTION_ID
         return subscription_id
 
-    def enable_large_payload(self, size_kb=1024):
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = size_kb
+    def enable_payload_cap(self, size_kb=128):
+        self.recording_processors += [LargeRequestBodyProcessor(max_request_body=size_kb),
+                                      LargeResponseBodyProcessor(max_response_body=size_kb)]
+        self.replay_processors += [LargeResponseBodyReplacer()]
+
 
 
 @live_only()

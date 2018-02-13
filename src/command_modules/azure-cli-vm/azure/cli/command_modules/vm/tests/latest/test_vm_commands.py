@@ -197,7 +197,6 @@ class VMImageListSkusScenarioTest(ScenarioTest):
         self.assertTrue(result > 0)
 
     def test_list_skus_contains_zone_info(self):
-        self.enable_large_payload(size_kb=2048)
         # we pick eastus2 as it is one of 3 regions so far with zone support
         self.kwargs['loc'] = 'eastus2'
         result = self.cmd('vm list-skus -otable -l {loc} -otable')
