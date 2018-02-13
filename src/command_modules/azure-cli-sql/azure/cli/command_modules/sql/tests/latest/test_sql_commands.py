@@ -1940,6 +1940,7 @@ class SqlSubscriptionUsagesScenarioTest(ScenarioTest):
                      JMESPathCheck('name', 'SubscriptionFreeDatabaseDaysLeft'),
                      JMESPathCheckGreaterThan('limit', 0)])
 
+
 class SqlDatabaseZoneResilienceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     @SqlServerPreparer()
@@ -1953,37 +1954,37 @@ class SqlDatabaseZoneResilienceScenarioTest(ScenarioTest):
 
         # Test creating database with zone resilience set to true.  Expect zone resilient database created.
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --zone-redundant {}'
-            .format(rg, server, database_name, "Premium", True),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', database_name),
-                JMESPathCheck('location', loc_display),
-                JMESPathCheck('elasticPoolName', None),
-                JMESPathCheck('edition', 'Premium'),
-                JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
+                 .format(rg, server, database_name, "Premium", True),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('location', loc_display),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
 
         # Test creating database with zone resilience set to false.  Expect regular database created.
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --zone-redundant {}'
-            .format(rg, server, database_name_2, "Premium", False),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', database_name_2),
-                JMESPathCheck('location', loc_display),
-                JMESPathCheck('elasticPoolName', None),
-                JMESPathCheck('edition', 'Premium'),
-                JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
+                 .format(rg, server, database_name_2, "Premium", False),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_name_2),
+                     JMESPathCheck('location', loc_display),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
 
         # Test creating database with no zone resilience set.  Expect regular database created.
         self.cmd('sql db create -g {} --server {} --name {} --edition {}'
-            .format(rg, server, database_name_3, "Premium"),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', database_name_3),
-                JMESPathCheck('location', loc_display),
-                JMESPathCheck('elasticPoolName', None),
-                JMESPathCheck('status', 'Online'),
-                JMESPathCheck('edition', 'Premium'),
-                JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
+                 .format(rg, server, database_name_3, "Premium"),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_name_3),
+                     JMESPathCheck('location', loc_display),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('status', 'Online'),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
 
     @ResourceGroupPreparer()
     @SqlServerPreparer()
@@ -1998,87 +1999,88 @@ class SqlDatabaseZoneResilienceScenarioTest(ScenarioTest):
 
         # Test running update on regular database with zone resilience set to true.  Expect zone resilience to update to true.
         self.cmd('sql db create -g {} --server {} --name {} --edition {}'
-            .format(rg, server, database_name, "Premium"),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', database_name),
-                JMESPathCheck('location', loc_display),
-                JMESPathCheck('elasticPoolName', None),
-                JMESPathCheck('edition', 'Premium'),
-                JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
+                 .format(rg, server, database_name, "Premium"),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('location', loc_display),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
 
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --zone-redundant {}'
-			.format(rg, server, database_name, 'P1', True),
-			checks=[
-				JMESPathCheck('resourceGroup', rg),
-				JMESPathCheck('name', database_name),
-				JMESPathCheck('elasticPoolName', None),
-				JMESPathCheck('status', 'Online'),
-				JMESPathCheck('requestedServiceObjectiveName', 'P1'),
-				JMESPathCheck('zoneRedundant', True)]).get_output_in_json() 
+                 .format(rg, server, database_name, 'P1', True),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('status', 'Online'),
+                     JMESPathCheck('requestedServiceObjectiveName', 'P1'),
+                     JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
 
         # Test running update on zoned database with zone resilience set to false.  Expect zone resilience to update to false
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --zone-redundant {}'
-            .format(rg, server, database_name_2, "Premium", True),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', database_name_2),
-                JMESPathCheck('location', loc_display),
-                JMESPathCheck('elasticPoolName', None),
-                JMESPathCheck('edition', 'Premium'),
-                JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
+                 .format(rg, server, database_name_2, "Premium", True),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_name_2),
+                     JMESPathCheck('location', loc_display),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
 
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --zone-redundant {}'
-            .format(rg, server, database_name_2, 'P1', False),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', database_name_2),
-                JMESPathCheck('elasticPoolName', None),
-                JMESPathCheck('status', 'Online'),
-                JMESPathCheck('requestedServiceObjectiveName', 'P1'),
-                JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
+                 .format(rg, server, database_name_2, 'P1', False),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_name_2),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('status', 'Online'),
+                     JMESPathCheck('requestedServiceObjectiveName', 'P1'),
+                     JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
 
         # Test running update on regular database with no zone resilience set.  Expect zone resilience to stay false.
         self.cmd('sql db create -g {} --server {} --name {} --edition {}'
-            .format(rg, server, database_name_3, "Premium"),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', database_name_3),
-                JMESPathCheck('location', loc_display),
-                JMESPathCheck('elasticPoolName', None),
-                JMESPathCheck('edition', 'Premium'),
-                JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
+                 .format(rg, server, database_name_3, "Premium"),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_name_3),
+                     JMESPathCheck('location', loc_display),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
 
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {}'
-            .format(rg, server, database_name_3, 'P2'),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', database_name_3),
-                JMESPathCheck('elasticPoolName', None),
-                JMESPathCheck('status', 'Online'),
-                JMESPathCheck('requestedServiceObjectiveName', 'P2'),
-                JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
+                 .format(rg, server, database_name_3, 'P2'),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_name_3),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('status', 'Online'),
+                     JMESPathCheck('requestedServiceObjectiveName', 'P2'),
+                     JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
 
         # Test running update on zoned database with no zone resilience set.  Expect zone resilience to stay true.
         self.cmd('sql db create -g {} --server {} --name {} --edition {} --zone-redundant {}'
-            .format(rg, server, database_name_4, "Premium", True),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', database_name_4),
-                JMESPathCheck('location', loc_display),
-                JMESPathCheck('elasticPoolName', None),
-                JMESPathCheck('edition', 'Premium'),
-                JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
+                 .format(rg, server, database_name_4, "Premium", True),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_name_4),
+                     JMESPathCheck('location', loc_display),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
 
         self.cmd('sql db update -g {} -s {} -n {} --service-objective {}'
-            .format(rg, server, database_name_4, 'P2'),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', database_name_4),
-                JMESPathCheck('elasticPoolName', None),
-                JMESPathCheck('status', 'Online'),
-                JMESPathCheck('requestedServiceObjectiveName', 'P2'),
-                JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
+                 .format(rg, server, database_name_4, 'P2'),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', database_name_4),
+                     JMESPathCheck('elasticPoolName', None),
+                     JMESPathCheck('status', 'Online'),
+                     JMESPathCheck('requestedServiceObjectiveName', 'P2'),
+                     JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
+
 
 class SqlElasticPoolZoneResilienceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
@@ -2089,46 +2091,45 @@ class SqlElasticPoolZoneResilienceScenarioTest(ScenarioTest):
         pool_name_3 = "createUnzonedPoolNoParam"
 
         rg = resource_group
-        loc_display = "East US 2"
 
         # Test creating pool with zone resilience set to true.  Expect zone resilient pool created.
         self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --zone-redundant {}'
-            .format(rg, server, pool_name, "Premium", True))
+                 .format(rg, server, pool_name, "Premium", True))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
-            .format(rg, server, pool_name),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', pool_name),
-                JMESPathCheck('state', 'Ready'),
-                JMESPathCheck('edition', 'Premium'),
-                JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
+                 .format(rg, server, pool_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', pool_name),
+                     JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
 
         # Test creating pool with zone resilience set to false.  Expect regular pool created.
         self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --zone-redundant {}'
-            .format(rg, server, pool_name_2, "Premium", False))
+                 .format(rg, server, pool_name_2, "Premium", False))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
-            .format(rg, server, pool_name_2),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', pool_name_2),
-                JMESPathCheck('state', 'Ready'),
-                JMESPathCheck('edition', 'Premium'),
-                JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
+                 .format(rg, server, pool_name_2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', pool_name_2),
+                     JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
 
         # Test creating pool with no zone resilience set.  Expect regular pool created.
         self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {}'
-            .format(rg, server, pool_name_3, "Premium"))
+                 .format(rg, server, pool_name_3, "Premium"))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
-            .format(rg, server, pool_name_3),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', pool_name_3),
-                JMESPathCheck('state', 'Ready'),
-                JMESPathCheck('edition', 'Premium'),
-                JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
+                 .format(rg, server, pool_name_3),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', pool_name_3),
+                     JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
 
     @ResourceGroupPreparer()
     @SqlServerPreparer()
@@ -2139,102 +2140,99 @@ class SqlElasticPoolZoneResilienceScenarioTest(ScenarioTest):
         pool_name_4 = "updateNoParamForZonedPool"
 
         rg = resource_group
-        loc_display = "East US 2"
 
         # Test running update on regular pool with zone resilience set to true.  Expect zone resilience to update to true
         self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {}'
-            .format(rg, server, pool_name, "Premium"))
+                 .format(rg, server, pool_name, "Premium"))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
-            .format(rg, server, pool_name),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', pool_name),
-                JMESPathCheck('state', 'Ready'),
-                JMESPathCheck('edition', 'Premium'),
-                JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
+                 .format(rg, server, pool_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', pool_name),
+                     JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
 
         self.cmd('sql elastic-pool update -g {} -s {} -n {} --dtu {} --zone-redundant {}'
-            .format(rg, server, pool_name, 125, True))
+                 .format(rg, server, pool_name, 125, True))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
-            .format(rg, server, pool_name),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', pool_name),
-                JMESPathCheck('dtu', 125),
-                JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
+                 .format(rg, server, pool_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', pool_name),
+                     JMESPathCheck('dtu', 125),
+                     JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
 
         # Test running update on zoned pool with zone resilience set to false.  Expect zone resilience to update to false
         self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --zone-redundant {}'
-            .format(rg, server, pool_name_2, "Premium", True))
+                 .format(rg, server, pool_name_2, "Premium", True))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
-            .format(rg, server, pool_name_2),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', pool_name_2),
-                JMESPathCheck('state', 'Ready'),
-                JMESPathCheck('edition', 'Premium'),
-                JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
+                 .format(rg, server, pool_name_2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', pool_name_2),
+                     JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
 
         self.cmd('sql elastic-pool update -g {} -s {} -n {} --dtu {} --zone-redundant {}'
-            .format(rg, server, pool_name_2, 125, False))
+                 .format(rg, server, pool_name_2, 125, False))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
-            .format(rg, server, pool_name_2),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', pool_name_2),
-                JMESPathCheck('dtu', 125),
-                JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
+                 .format(rg, server, pool_name_2),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', pool_name_2),
+                     JMESPathCheck('dtu', 125),
+                     JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
 
         # Test running update on regular pool with no zone resilience set.  Expect zone resilience to stay false
         self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {}'
-            .format(rg, server, pool_name_3, "Premium"))
+                 .format(rg, server, pool_name_3, "Premium"))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
-            .format(rg, server, pool_name_3),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', pool_name_3),
-                JMESPathCheck('state', 'Ready'),
-                JMESPathCheck('edition', 'Premium'),
-                JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
+                 .format(rg, server, pool_name_3),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', pool_name_3),
+                     JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
 
         self.cmd('sql elastic-pool update -g {} -s {} -n {} --dtu {}'
-            .format(rg, server, pool_name_3, 250))
+                 .format(rg, server, pool_name_3, 250))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
-            .format(rg, server, pool_name_3),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', pool_name_3),
-                JMESPathCheck('dtu', 250),
-                JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
+                 .format(rg, server, pool_name_3),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', pool_name_3),
+                     JMESPathCheck('dtu', 250),
+                     JMESPathCheck('zoneRedundant', False)]).get_output_in_json()
 
         # Test running update on zoned pool with no zone resilience set.  Expect zone resilience to stay true
         self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --zone-redundant {}'
-            .format(rg, server, pool_name_4, "Premium", True))
+                 .format(rg, server, pool_name_4, "Premium", True))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
-            .format(rg, server, pool_name_4),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', pool_name_4),
-                JMESPathCheck('state', 'Ready'),
-                JMESPathCheck('edition', 'Premium'),
-                JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
+                 .format(rg, server, pool_name_4),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', pool_name_4),
+                     JMESPathCheck('state', 'Ready'),
+                     JMESPathCheck('edition', 'Premium'),
+                     JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
 
         self.cmd('sql elastic-pool update -g {} -s {} -n {} --dtu {}'
-            .format(rg, server, pool_name_4, 250, True))
+                 .format(rg, server, pool_name_4, 250, True))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
-            .format(rg, server, pool_name_4),
-            checks=[
-                JMESPathCheck('resourceGroup', rg),
-                JMESPathCheck('name', pool_name_4),
-                JMESPathCheck('dtu', 250),
-                JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
-
-        
+                 .format(rg, server, pool_name_4),
+                 checks=[
+                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('name', pool_name_4),
+                     JMESPathCheck('dtu', 250),
+                     JMESPathCheck('zoneRedundant', True)]).get_output_in_json()
