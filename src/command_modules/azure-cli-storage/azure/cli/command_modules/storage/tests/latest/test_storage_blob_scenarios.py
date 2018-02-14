@@ -51,6 +51,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_upload_midsize_file(self, resource_group, storage_account):
+        self.enable_payload_cap()
         self.verify_blob_upload_and_download(resource_group, storage_account, 4096, 'block', 0)
 
     def verify_blob_upload_and_download(self, group, account, file_size_kb, blob_type,
