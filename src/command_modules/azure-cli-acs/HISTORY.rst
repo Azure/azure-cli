@@ -5,7 +5,8 @@ Release History
 
 2.0.27
 ++++++
-* use the virtual-kubelet-for-aks helm chart for `aks install-connector` by default, and fix the service principal insufficient permission to create ACI container group issue
+* use the virtual-kubelet-for-aks helm chart for `aks install-connector` by default
+* fix the service principal insufficient permission to create ACI container group issue
 * add --aci-container-group, --location, --image-tag optional parameters for `aks install-connector`
 
 2.0.26

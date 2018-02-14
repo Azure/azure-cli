@@ -366,20 +366,18 @@ def _helm_install_aci_connector(image_tag, url_chart, connector_name, service_pr
     helm_release_name = connector_name.lower() + "-" + os_type.lower()
     logger.warning("Deploying the ACI connector for '%s' using Helm", os_type)
     try:
-        values = "image.tag={},env.nodeName={},env.nodeTaint={},env.nodeOsType={}".format(image_tag, node_name, node_taint, os_type)  # pylint: disable=line-too-long
+        values = ('env.nodeName={},env.nodeTaint={},env.nodeOsType={},image.tag={},' +
+                  'env.aciResourceGroup={},env.aciRegion={}').format(
+                      node_name, node_taint, os_type, image_tag, aci_resource_group, aci_region)
 
-        if service_principal is not None:
+        if service_principal:
             values += ",env.azureClientId=" + service_principal
-        if client_secret is not None:
+        if client_secret:
             values += ",env.azureClientKey=" + client_secret
-        if subscription_id is not None:
+        if subscription_id:
             values += ",env.azureSubscriptionId=" + subscription_id
-        if tenant_id is not None:
+        if tenant_id:
             values += ",env.azureTenantId=" + tenant_id
-        if aci_resource_group is not None:
-            values += ",env.aciResourceGroup=" + aci_resource_group
-        if aci_region is not None:
-            values += ",env.aciRegion=" + aci_region
 
         subprocess.call(["helm", "install", url_chart, "--name", helm_release_name, "--set", values])
     except subprocess.CalledProcessError as err:

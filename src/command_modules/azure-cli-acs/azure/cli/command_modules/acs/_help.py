@@ -236,7 +236,7 @@ helps['aks install-connector'] = """
           type: string
           short-summary: Service principal used for authentication to Azure APIs.
           long-summary:  If not specified, use the AKS service principal defined in the file
-                         /etc/kubernetes/azure.json on the node which runs the virutal kubelet pod.
+                         /etc/kubernetes/azure.json on the node which runs the virtual kubelet pod.
         - name: --client-secret
           type: string
           short-summary: Secret associated with the service principal. This argument is required if
