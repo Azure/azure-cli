@@ -8,16 +8,19 @@ from azure.cli.command_modules.consumption._transformers import transform_usage_
 from azure.cli.command_modules.consumption._transformers import transform_reservation_summaries_list_output
 from azure.cli.command_modules.consumption._transformers import transform_reservation_details_list_output
 from azure.cli.command_modules.consumption._transformers import transform_pricesheet_get_output
+from azure.cli.command_modules.consumption._transformers import transform_marketplace_get_output
 from azure.cli.command_modules.consumption._client_factory import usage_details_mgmt_client_factory
 from azure.cli.command_modules.consumption._client_factory import reservations_summaries_mgmt_client_factory
 from azure.cli.command_modules.consumption._client_factory import reservations_details_mgmt_client_factory
 from azure.cli.command_modules.consumption._client_factory import pricesheet_mgmt_client_factory
+from azure.cli.command_modules.consumption._client_factory import marketplace_mgmt_client_factory
 from ._exception_handler import consumption_exception_handler
 from ._validators import validate_both_start_end_dates
 from ._validators import validate_reservations_summaries
 from ._validators import validate_reservations_details
 from ._validators import validate_pricesheet
 from ._validators import validate_usage_bp_inputs
+from ._validators import validate_marketplace
 
 
 def load_command_table(self, _):
@@ -48,3 +51,10 @@ def load_command_table(self, _):
 
         p.custom_command('billing period get', 'cli_consumption_list_pricesheet_by_billing_period_get', transform=transform_pricesheet_get_output,
                          exception_handler=consumption_exception_handler, validator=validate_pricesheet, client_factory=pricesheet_mgmt_client_factory)
+
+    with self.command_group('consumption marketplace') as p:
+        p.custom_command('list', 'cli_consumption_list_marketplace', transform=transform_marketplace_get_output,
+                         exception_handler=consumption_exception_handler, validator=None, client_factory=marketplace_mgmt_client_factory)
+
+        p.custom_command('billing period list', 'cli_consumption_list_marketplace_by_billing_period', transform=transform_marketplace_get_output,
+                         exception_handler=consumption_exception_handler, validator=validate_marketplace, client_factory=marketplace_mgmt_client_factory)

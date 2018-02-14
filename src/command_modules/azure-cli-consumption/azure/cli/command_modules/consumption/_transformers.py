@@ -65,3 +65,11 @@ def pricesheet_get_output(result):
 
 def transform_pricesheet_get_output(result):
     return pricesheet_get_output(result)
+
+
+def marketplace_list_output(result):
+    return result
+
+
+def transform_marketplace_get_output(result):
+    return marketplace_list_output(result)

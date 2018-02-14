@@ -68,3 +68,18 @@ helps['consumption pricesheet billing period get'] = """
     type: command
     short-summary: Show the price sheet for Azure subscription within a current or specified billing period.
 """
+
+helps['consumption marketplace'] = """
+    type: group
+    short-summary: Inspect the marketplace by Azure subscription within current or specified billing period.
+"""
+
+helps['consumption marketplace get'] = """
+    type: command
+    short-summary: Show the marketplace for Azure subscription within a current billing period
+"""
+
+helps['consumption marketplace billing period get'] = """
+    type: command
+    short-summary: Show the marketplace for Azure subscription within specified billing period.
+"""

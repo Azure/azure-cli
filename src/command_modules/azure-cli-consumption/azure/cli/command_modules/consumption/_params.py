@@ -53,3 +53,20 @@ def load_arguments(self, _):
     with self.argument_context('consumption pricesheet billing period get') as cps:
         cps.argument('billing_period_name', options_list=['--billing-period-name', '-p'], help='name of a specific billing period to get the price sheet')
         cps.argument('include_meter_details', options_list=['--include-meter-details', '-m'], action='store_true', help='include meter details in the price sheet')
+
+    with self.argument_context('consumption marketplace get') as cmp:
+        cmp.argument('top', options_list=['--top', '-t'], type=int, help='maximum number of items to return. Accepted range for this value is 1 - 1000')
+        cmp.argument('usage_start', options_list=['--usage-start', '-s'], type=get_datetime_type(), help='start date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
+        cmp.argument('usage_end', options_list=['--usage-end', '-e'], type=get_datetime_type(), help='end date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
+        cmp.argument('resource_group', options_list=['--resource_group', '-grp'], type=int, help='resourse group')
+        cmp.argument('instance_name', options_list=['--instance-name', '-in'], type=int, help='instance name')
+        cmp.argument('instance_id', options_list=['--instance-id', '-id'], type=int, help='instance id')
+
+    with self.argument_context('consumption marketplace billing period get') as cmp:
+        cmp.argument('billing_period_name', options_list=['--billing-period-name', '-p'], help='name of a specific billing period to get the marketplace')
+        cmp.argument('top', options_list=['--top', '-t'], type=int, help='maximum number of items to return. Accepted range for this value is 1 - 1000')
+        cmp.argument('usage_start', options_list=['--usage-start', '-s'], type=get_datetime_type(), help='start date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
+        cmp.argument('usage_end', options_list=['--usage-end', '-e'], type=get_datetime_type(), help='end date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
+        cmp.argument('resource_group', options_list=['--resource_group', '-grp'], type=int, help='resourse group')
+        cmp.argument('instance_name', options_list=['--instance-name', '-in'], type=int, help='instance name')
+        cmp.argument('instance_id', options_list=['--instance-id', '-id'], type=int, help='instance id')
