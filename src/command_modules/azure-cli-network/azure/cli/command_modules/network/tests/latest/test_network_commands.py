@@ -637,7 +637,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         _create_peering('AzurePublicPeering', 10000, 100, '100.0.0.0/30', '101.0.0.0/30')
         _create_peering('AzurePrivatePeering', 10001, 101, '102.0.0.0/30', '103.0.0.0/30')
 
-        self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3', expect_failure=True)
+        self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3')
         self.cmd('network express-route peering show -g {rg} --circuit-name {er} -n MicrosoftPeering', checks=[
             self.check('microsoftPeeringConfig.advertisedPublicPrefixes[0]', '104.0.0.0/30'),
             self.check('microsoftPeeringConfig.customerAsn', 10000),
@@ -1787,7 +1787,7 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
 
 
-class NetworkWatcherScenarioTest(ScenarioTest):
+class NetworkWatcherScenarioTest(LiveScenarioTest):
     import mock
 
     def _mock_thread_count():
@@ -1844,6 +1844,25 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.cmd('network watcher troubleshooting start --resource vgw1 -t vnetGateway -g {rg} --storage-account {sa} --storage-path {storage_path}')
         self.cmd('network watcher troubleshooting show --resource vgw1 -t vnetGateway -g {rg}')
 
+    def _network_watcher_connection_monitor(self):
+        import time
+        self.kwargs.update({
+            'vm2': 'vm2',
+            'vm3': 'vm3',
+            'cm': 'cm1'
+        })
+        self.cmd('vm create -g {rg} -n {vm2} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm2}')
+        self.cmd('vm extension set -g {rg} --vm-name {vm2} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
+        self.cmd('vm create -g {rg} -n {vm3} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm3}')
+        self.cmd('vm extension set -g {rg} --vm-name {vm3} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
+        self.cmd('network watcher connection-monitor create -n {cm} --source-resource {vm2} -g {rg} --dest-resource {vm3} --dest-port 80')
+        self.cmd('network watcher connection-monitor list -l {loc}')
+        self.cmd('network watcher connection-monitor show -l {loc} -n {cm}')
+        self.cmd('network watcher connection-monitor stop -l {loc} -n {cm}')
+        self.cmd('network watcher connection-monitor start -l {loc} -n {cm}')
+        self.cmd('network watcher connection-monitor query -l {loc} -n {cm}')
+        self.cmd('network watcher connection-monitor delete -l {loc} -n {cm}')
+
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
     @ResourceGroupPreparer(name_prefix='cli_test_network_watcher', location='westcentralus')
     @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
@@ -1857,6 +1876,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
             'capture': 'capture1'
         })
         self._network_watcher_configure()
+        self._network_watcher_connection_monitor()
         self._network_watcher_vm()
         self._network_watcher_flow_log()
         self._network_watcher_packet_capture()
