@@ -66,11 +66,6 @@ class VMUsageScenarioTest(ScenarioTest):
 class VMImageListThruServiceScenarioTest(ScenarioTest):
 
     def test_vm_images_list_thru_services(self):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 4096
-
         result = self.cmd('vm image list -l westus --publisher Canonical --offer Ubuntu_Snappy_Core -o tsv --all').output
         assert result.index('15.04') >= 0
 
@@ -169,11 +164,6 @@ class VMImageListOffersScenarioTest(ScenarioTest):
 class VMImageListPublishersScenarioTest(ScenarioTest):
 
     def test_vm_image_list_publishers(self):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 4096
-
         self.kwargs.update({
             'loc': 'westus'
         })
@@ -786,11 +776,6 @@ class VMMachineExtensionImageScenarioTest(ScenarioTest):
 class VMExtensionImageSearchScenarioTest(ScenarioTest):
 
     def test_vm_extension_image_search(self):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 4096
-
         # pick this specific name, so the search will be under one publisher. This avoids
         # the parallel searching behavior that causes incomplete VCR recordings.
         self.kwargs.update({
@@ -1556,11 +1541,6 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_linux_secrets')
     def test_vmss_create_linux_secrets(self, resource_group):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 2048
-
         self.kwargs.update({
             'loc': 'westus',
             'vmss': 'vmss1-name',

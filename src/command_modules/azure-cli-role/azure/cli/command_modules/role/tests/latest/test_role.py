@@ -202,7 +202,6 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
         if self.run_under_service_principal():
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
-        self.enable_large_payload()
         user = self.create_random_name('testuser', 15)
         self.kwargs.update({
             'upn': user + '@azuresdkteam.onmicrosoft.com',
@@ -212,7 +211,7 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
         self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
         time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
 
-        guids = ['88DAAF5A-EA86-4A68-9D45-477538D41100', '88DAAF5A-EA86-4A68-9D45-477538D41101', '88DAAF5A-EA86-4A68-9D45-477538D41102']
+        guids = ['88DAAF5A-EA86-4A68-9D46-477538D41100', '88DAAF5A-EA86-4A68-9D46-477538D41101', '88DAAF5A-EA86-4A68-9D46-477538D41102']
         with self.get_guid_gen_patch(guids):
             try:
                 self.cmd('network nsg create -n {nsg} -g {rg}')
@@ -260,8 +259,6 @@ class RoleAssignmentListScenarioTest(RoleScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_assignments_for_coadmins')
     def test_assignments_for_co_admins(self, resource_group):
-        self.enable_large_payload()
-
         result = self.cmd('role assignment list --include-classic-administrator').get_output_in_json()
         self.assertTrue([x for x in result if x['properties']['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])
         self.cmd('role assignment list -g {}'.format(resource_group), checks=[

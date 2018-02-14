@@ -145,7 +145,6 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         self.replay_processors += [LargeResponseBodyReplacer()]
 
 
-
 @live_only()
 class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
 
