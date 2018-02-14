@@ -8,6 +8,7 @@
 import os
 import unittest
 
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.profiles import supported_api_version, ResourceType
 
@@ -1793,13 +1794,6 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
     def _mock_thread_count():
         return 1
 
-    def enable_large_payload(self, size=8192):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(
-            r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = size   # pylint: disable=protected-access
-
     def _network_watcher_configure(self):
         self.cmd('network watcher configure -g {rg} --locations westus westus2 westcentralus --enabled')
         self.cmd('network watcher configure --locations westus westus2 --tags foo=doo')
@@ -1866,9 +1860,9 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
     @mock.patch('azure.cli.command_modules.vm._actions._get_thread_count', _mock_thread_count)
     @ResourceGroupPreparer(name_prefix='cli_test_network_watcher', location='westcentralus')
     @StorageAccountPreparer(name_prefix='clitestnw', location='westcentralus')
+    @AllowLargeResponse()
     def test_network_watcher(self, resource_group, storage_account):
 
-        self.enable_large_payload()
         self.kwargs.update({
             'loc': 'westcentralus',
             'vm': 'vm1',
