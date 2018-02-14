@@ -170,6 +170,18 @@ class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
         if not self.dev_setting_sp_name:
             execute(self.cli_ctx, 'az ad sp delete --id {}'.format(self.result['appId']))
 
+# Function wise, enabling large payload recording has nothing to do with resource preparers 
+# We still base on it so that this decorator can chain with other preparers w/o too much hacks
+class LargeResponsePreparer(AbstractPreparer):
+    def __init__(self, size_kb=1024):
+        self.size_kb = size_kb
+        super(LargeResponsePreparer, self).__init__('nanana', 20)
+
+    def create_resource(self, _, **kwargs):
+        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
+        large_resp_body = next((r for r in self.test_class_instance.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
+        if large_resp_body:
+            large_resp_body._max_response_body = self.size_kb
 
 # Utility
 

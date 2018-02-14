@@ -19,7 +19,8 @@ from knack.util import CLIError
 
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint, StorageAccountPreparer)
+    ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
+    StorageAccountPreparer, LargeResponsePreparer)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -65,12 +66,8 @@ class VMUsageScenarioTest(ScenarioTest):
 
 class VMImageListThruServiceScenarioTest(ScenarioTest):
 
+    @LargeResponsePreparer()
     def test_vm_images_list_thru_services(self):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 4096
-
         result = self.cmd('vm image list -l westus --publisher Canonical --offer Ubuntu_Snappy_Core -o tsv --all').output
         assert result.index('15.04') >= 0
 
@@ -196,11 +193,8 @@ class VMImageListSkusScenarioTest(ScenarioTest):
         result = self.cmd("vm image list-skus --location {loc} -p {pub} --offer {offer} --query \"length([].id.contains(@, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/'))\"").get_output_in_json()
         self.assertTrue(result > 0)
 
+    @LargeResponsePreparer()
     def test_list_skus_contains_zone_info(self):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 2048
         # we pick eastus2 as it is one of 3 regions so far with zone support
         self.kwargs['loc'] = 'eastus2'
         result = self.cmd('vm list-skus -otable -l {loc} -otable')
@@ -2444,7 +2438,6 @@ class VMOsDiskSwap(ScenarioTest):
             self.check('storageProfile.osDisk.managedDisk.id', backup_disk_id),
             self.check('storageProfile.osDisk.name', self.kwargs['backupDisk'])
         ])
-        pass
 # endregion
 
 
