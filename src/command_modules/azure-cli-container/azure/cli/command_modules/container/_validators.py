@@ -3,8 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from knack.util import CLIError
 from base64 import b64encode
+from knack.util import CLIError
 
 
 def validate_volume_mount_path(ns):
