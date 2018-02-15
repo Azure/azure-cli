@@ -31,7 +31,7 @@ def _environment_variables_type(value):
 secrets_type = CLIArgumentType(
     validator=validate_secrets,
     help="space-separated secrets in 'key=value' format.",
-    nargs='*'
+    nargs='+'
 )
 
 
