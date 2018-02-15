@@ -30,8 +30,7 @@ def cli_consumption_list_usage(client, billing_period_name=None, top=None, inclu
         return list(client.list_by_billing_period(expand=expand, filter=filter_expression))
     elif not billing_period_name and top:
         return list(client.list(expand=expand, filter=filter_expression, top=top).advance_page())
-    else:
-        return list(client.list(expand=expand, filter=filter_expression, top=top).advance_page())
+    return list(client.list(expand=expand, filter=filter_expression, top=top).advance_page())
 
 
 def cli_consumption_list_reservations_summaries(client, grain, reservation_order_id, reservation_id=None, start_date=None, end_date=None):
@@ -44,8 +43,7 @@ def cli_consumption_list_reservations_summaries(client, grain, reservation_order
         filter_expression = "{} and {}".format(filter_from, filter_to)
         if reservation_id:
             return list(client.list_by_reservation_order_and_reservation(reservation_order_id, reservation_id, grain=grain, filter=filter_expression))
-        else:
-            return list(client.list_by_reservation_order(reservation_order_id, grain=grain, filter=filter_expression))
+        return list(client.list_by_reservation_order(reservation_order_id, grain=grain, filter=filter_expression))
 
     if reservation_id:
         return list(client.list_by_reservation_order_and_reservation(reservation_order_id, reservation_id, grain=grain))
@@ -59,7 +57,7 @@ def cli_consumption_list_reservations_details(client, reservation_order_id, star
     filter_from = "properties/UsageDate ge {}".format(start_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
     filter_to = "properties/UsageDate le {}".format(end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
     filter_expression = "{} and {}".format(filter_from, filter_to)
-    if(reservation_id):
+    if reservation_id:
         return list(client.list_by_reservation_order_and_reservation(reservation_order_id, reservation_id, filter=filter_expression))
     return list(client.list_by_reservation_order(reservation_order_id, filter=filter_expression))
 
@@ -70,6 +68,6 @@ def cli_consumption_list_pricesheet_show(client, billing_period_name=None, inclu
     else:
         expand_properties = None
 
-    if(billing_period_name):
+    if billing_period_name:
         return client.get_by_billing_period(billing_period_name, expand=expand_properties)
     return client.get(expand=expand_properties)
