@@ -51,6 +51,41 @@ def _restore_postgresql(cmd, client, resource_group_name, server_name, parameter
     _server_restore(cmd, client, resource_group_name, server_name, parameters, **kwargs)
     return client.create(resource_group_name, server_name, parameters)
 
+# need to replace source sever name with source server id, so customer server restore function
+# The parameter list should be the same as that in factory to use the ParametersContext
+# auguments and validators
+def _server_georestore(cmd, client, resource_group_name, server_name, parameters, **kwargs):
+    source_server = kwargs['source_server_id']
+
+    if not is_valid_resource_id(source_server):
+        if len(source_server.split('/')) == 1:
+            from azure.cli.core.commands.client_factory import get_subscription_id
+            from azure.mgmt.rdbms.mysql.operations.servers_operations import ServersOperations
+            provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
+            source_server = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
+                                        resource_group=resource_group_name,
+                                        namespace=provider,
+                                        type='servers',
+                                        name=source_server)
+        else:
+            raise ValueError('The provided source-server {} is invalid.'.format(source_server))
+
+    parameters.properties.source_server_id = source_server
+
+    id_parts = parse_resource_id(source_server)
+    try:
+        source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
+    except Exception as e:
+        raise ValueError('Unable to get source server: {}.'.format(str(e)))
+
+def _georestore_mysql(cmd, client, resource_group_name, server_name, parameters, **kwargs):
+    _server_georestore(cmd, client, resource_group_name, server_name, parameters, **kwargs)
+    return client.create_or_update(resource_group_name, server_name, parameters)
+
+def _georestore_postgresql(cmd, client, resource_group_name, server_name, parameters, **kwargs):
+    _server_georestore(cmd, client, resource_group_name, server_name, parameters, **kwargs)
+    return client.create(resource_group_name, server_name, parameters)
+
 def _server_update_custom_func(instance,
                                capacity=None,
                                storage_mb=None,
