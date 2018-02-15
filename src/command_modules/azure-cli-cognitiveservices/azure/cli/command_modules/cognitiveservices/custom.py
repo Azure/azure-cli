@@ -21,12 +21,12 @@ def list_resources(client, resource_group_name=None):
 def create(
         client, resource_group_name, account_name, sku_name, kind, location, tags=None, yes=None):
 
-    terms = 'Notice\nMicrosoft will use data you send to the Cognitive'\
-        'Services to improve Microsoft products and services.'\
-        'Where you send personal data to the Cognitive Services, you are responsible '\
+    terms = 'Notice\nMicrosoft will use data you send to Bing Search Services'\
+        ' or the Translator Speech API to improve Microsoft products and services.'\
+        'Where you send personal data to these Cognitive Services, you are responsible '\
         'for obtaining sufficient consent from the data subjects.'\
         'The General Privacy and Security Terms in the Online Services Terms '\
-        'do not apply to the Cognitive Services.'\
+        'do not apply to these Cognitive Services.'\
         'Please refer to the Microsoft Cognitive Services section in the Online '\
         'Services Terms'\
         ' (https://www.microsoft.com/en-us/Licensing/product-licensing/products.aspx)'\
