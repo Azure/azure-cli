@@ -29,12 +29,8 @@ from .sdk.models import (
     BuildArgument,
     SourceUploadDefinition
 )
-from ._utils import (
-    get_resource_group_name_by_registry_name
-)
-from azure.cli.core.commands import (
-    LongRunningOperation
-)
+from ._utils import get_resource_group_name_by_registry_name
+from azure.cli.core.commands import LongRunningOperation
 from knack.util import CLIError
 from knack.log import get_logger
 
@@ -42,8 +38,7 @@ logger = get_logger(__name__)
 
 
 class BlobInfo(object):
-    def __init__(self,
-                 blob_sas_url):
+    def __init__(self, blob_sas_url):
         match = _get_match(blob_sas_url)
         account_name = match.group('account_name')
         endpoint_suffix = match.group('endpoint_suffix')
@@ -93,10 +88,10 @@ def acr_build_show_logs(cmd,
                 blob_info.container_name, blob_info.blob_name)
 
 
-def _get_match(sasURL):
+def _get_match(sas_url):
     return re.search(
         (r"http(s)?://(?P<account_name>.*?)\.blob\.(?P<endpoint_suffix>.*?)/(?P<container_name>.*?)/"
-            r"(?P<blob_name>.*?)\?(?P<sas_token>.*)"), sasURL)
+            r"(?P<blob_name>.*?)\?(?P<sas_token>.*)"), sas_url)
 
 
 def _stream_logs(byte_size,
@@ -226,7 +221,7 @@ def acr_queue(cmd,
         docker_file_path = "Dockerfile"
 
     build_parameters = DockerBuildParameters(docker_file_path)
-    # context_path in tar build is alwasy the source code root folder
+    # context_path in tar build is always the source code root folder
     build_parameters.context_path = "."
 
     if source_location is None:
@@ -245,7 +240,7 @@ def acr_queue(cmd,
     is_push_enabled = True
     if image_name is None:
         is_push_enabled = False
-        print("'--tag' is not providied. Skip image push after build.")
+        print("'--tag' is not provided. Skip image push after build.")
     else:
         image_name = _check_image_name(image_name)
 
@@ -304,19 +299,19 @@ def _check_image_name(image_name):
     
     # referenc: https://github.com/docker/distribution/tree/master/reference
 
-    if image_name == "":
+    if not image_name:
         raise CLIError("'--tag' value should not be empty.")
     
     tokens = image_name.split(':')
     if(len(tokens) > 2):
-        raise CLIError("'--tag' value should be repository-name and optionally a tag in the 'repository-name:tag' format")
+        raise CLIError("'--tag' value should be repository and optionally a tag in the 'repository:tag' format")
 
-    # check repository-name    
-    repository_name = tokens[0]
-    if len(repository_name) > 255:
-        raise CLIError("The repository-name of '--tag' value should be no more than 255 characters.")
+    # check repository
+    repository = tokens[0]
+    if len(repository) > 255:
+        raise CLIError("The repository of '--tag' value should be no more than 255 characters.")
     else:
-        if re.match(r"^[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?(?:(?:/[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?)+)?$", repository_name) is None:
+        if re.match(r"^[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?(?:(?:/[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?)+)?$", repository) is None:
             raise CLIError("The '--tag' value is not valid. Please check https://docs.docker.com/engine/reference/commandline/tag/.")
 
     # check tag
@@ -333,6 +328,11 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
                                  "source_archive_{}.tar.gz".format(hash(os.times())))
 
     try:
+        logger.debug("Starting to acquire the access token to upload the source code.")
+
+        source_upload_location = client.get_source_upload_url(
+            resource_group_name=resource_group_name, registry_name=registry_name)
+
         logger.debug("Starting to archive the source code to '{}'.".format(tar_file_path))
 
         # TODO: Check if it works in windows
@@ -359,9 +359,6 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
 
         logger.debug("Starting to upload the archived source code from '{}'.".format(tar_file_path))
 
-        source_upload_location = client.get_source_upload_url(
-            resource_group_name=resource_group_name, registry_name=registry_name)
-
         blob_info = BlobInfo(source_upload_location.upload_url)
 
         BlockBlobService(account_name=blob_info.account_name, sas_token=blob_info.sas_token, endpoint_suffix=blob_info.endpoint_suffix).create_blob_from_path(
@@ -381,14 +378,15 @@ class IgnoreRule(object):
 
         self.rule = rule
         self.ignore = True
-        # ! make exceptions to exclusions
+        # ! makes exceptions to exclusions
         if rule.startswith('!'):
             self.ignore = False
             rule = rule[1:] # remove !
 
         tokens = rule.split('/')
         for index, token in enumerate(tokens):
-            if token == "**": # ** matches any number of directories 
+            # ** matches any number of directories 
+            if token == "**":
                 tokens[index] = ".*"
             else:
                 tokens[index] = token.replace("*", "[^/]*").replace("?", "[^/]")
@@ -399,18 +397,18 @@ class IgnoreRule(object):
 def _load_dockerignore_file(source_location):
 
     # reference: https://docs.docker.com/engine/reference/builder/#dockerignore-file
-    dokcer_ignore_file = os.path.join(source_location, ".dockerignore")
-    if not os.path.exists(dokcer_ignore_file):
+    docker_ignore_file = os.path.join(source_location, ".dockerignore")
+    if not os.path.exists(docker_ignore_file):
         return None
     
     ignore_list = []
 
     # The ignore rule at the end has higher priority
-    for line in reversed(open(dokcer_ignore_file).readlines()):
+    for line in reversed(open(docker_ignore_file).readlines()):
         rule = line.rstrip()
 
-        # skip comment
-        if rule.startswith('#'): 
+        # skip empty line and comment
+        if not rule or rule.startswith('#'): 
             continue
         
         # add ignore rule 

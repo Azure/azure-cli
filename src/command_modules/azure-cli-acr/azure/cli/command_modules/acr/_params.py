@@ -90,11 +90,10 @@ def load_arguments(self, _):
 
     with self.argument_context('acr build') as c:
         c.argument('build_id', help='The unique build identifier.')
-        c.argument('registry_name', options_list=['--name', '-n'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
         c.argument('image_name', options_list=['--tag', '-t'], help="The image name and optionally a tag in the 'name:tag' format.")
         c.argument('docker_file_path', options_list=['--file', '-f'], help="The relative path of the the docker file to the source code root folder (Default is 'Dockerfile').")
         c.argument('timeout', help='The build timeout in seconds.')
         c.argument('build_args', nargs='+', help='The space-separated build arguments in a format of <name>=<value>.')
         c.argument('secret_build_args', nargs='+', help='The space-separated secret build arguments in a format of <name>=<value>.')
-        c.argument('show_logs', nargs='?', required=False, const='true', default='true', help='Indicates whether showing logs after succesuflly queuing the build.', choices=['true', 'false'])        
+        c.argument('show_logs', nargs='?', required=False, const='true', default='true', help='Indicates whether showing logs after successfully queuing the build.', choices=['true', 'false'])        
         
