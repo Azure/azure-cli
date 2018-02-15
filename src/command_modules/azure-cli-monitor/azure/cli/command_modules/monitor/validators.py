@@ -3,6 +3,67 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.commands.validators import validate_tags, get_default_location_from_resource_group
+
+
+def process_autoscale_create_namespace(cmd, namespace):
+    from msrestazure.tools import parse_resource_id
+
+    validate_tags(namespace)
+    get_target_resource_validator('resource', True, True)(cmd, namespace)
+    if not namespace.resource_group_name:
+        namespace.resource_group_name = parse_resource_id(namespace.resource).get('resource_group', None)
+    get_default_location_from_resource_group(cmd, namespace)
+
+
+def validate_autoscale_recurrence(namespace):
+    from knack.util import CLIError
+    from azure.mgmt.monitor.models import Recurrence, RecurrentSchedule, RecurrenceFrequency
+
+    def _validate_weekly_recurrence(namespace):
+        # Construct days
+        valid_days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+        days = []
+        for partial in namespace.recurrence[1:]:
+            if len(partial) < 2:
+                raise CLIError('specifying fewer than 2 characters for day is ambiguous.')
+            try:
+                match = next(x for x in valid_days if x.lower().startswith(partial.lower()))
+            except StopIteration:
+                raise CLIError("No match for day '{}'.".format(partial))
+            days.append(match)
+            valid_days.remove(match)
+
+        # validate, but don't process start and end time
+        recurrence_obj = Recurrence(
+            frequency=RecurrenceFrequency.week,
+            schedule=RecurrentSchedule(
+                time_zone=namespace.timezone,
+                days=days,
+                hours=[],  # will be filled in during custom command
+                minutes=[]  # will be filled in during custom command
+            )
+        )
+        return recurrence_obj
+
+    valid_recurrence = {
+        'week': {
+            'usage': '-r week [DAY DAY ...]',
+            'validator': _validate_weekly_recurrence
+        }
+    }
+    if namespace.recurrence:
+        raw_values = namespace.recurrence
+        try:
+            delimiter = raw_values[0].lower()
+            usage = valid_recurrence[delimiter]['usage']
+            try:
+                namespace.recurrence = valid_recurrence[delimiter]['validator'](namespace)
+            except CLIError as ex:
+                raise CLIError('{} invalid usage: {}'.format(ex, usage))
+        except KeyError as ex:
+            raise CLIError('invalid usage: -r {{{}}} [ARG ARG ...]'.format(','.join(valid_recurrence)))
+
 
 def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False):
     def _validator(cmd, namespace):

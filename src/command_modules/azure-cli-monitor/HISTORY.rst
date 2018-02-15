@@ -3,9 +3,15 @@
 Release History
 ===============
 
+0.1.3
++++++
+* Deprecates the `monitor autoscale-settings` commands.
+* Adds the `monitor autoscale` command group.
+* Adds the `monitor autoscale schedule` command group.
+* Adds the `monitor autoscale rule` command group.
+
 0.1.2
 +++++
-* Minor fixes.
 * Fix az monitor log-profiles create command
 
 0.1.1

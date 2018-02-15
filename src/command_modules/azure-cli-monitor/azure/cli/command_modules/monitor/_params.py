@@ -7,13 +7,15 @@ from knack.arguments import CLIArgumentType
 
 from azure.cli.core.util import get_json_object
 
-from azure.cli.core.commands.parameters import get_location_type, tags_type, get_three_state_flag, get_enum_type
+from azure.cli.core.commands.parameters import (
+    get_location_type, tags_type, get_three_state_flag, get_enum_type, get_datetime_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
-from azure.cli.command_modules.monitor.operations.actions import (
-    AlertAddAction, AlertRemoveAction, ConditionAction, period_type)
+from azure.cli.command_modules.monitor.actions import (
+    AlertAddAction, AlertRemoveAction, ConditionAction, AutoscaleAddAction, AutoscaleRemoveAction,
+    AutoscaleScaleAction, AutoscaleConditionAction, period_type, timezone_offset_type, timezone_name_type)
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
-from azure.cli.command_modules.monitor.validators import process_webhook_prop
+from azure.cli.command_modules.monitor.validators import process_webhook_prop, validate_autoscale_recurrence
 
 
 # pylint: disable=line-too-long, too-many-statements
@@ -22,6 +24,10 @@ def load_arguments(self, _):
 
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
+
+    autoscale_name_type = CLIArgumentType(options_list=['--autoscale-name'], help='Name of the autoscale settings.', id_part='name')
+    autoscale_schedule_name_type = CLIArgumentType(options_list=['--schedule-name'], help='Name of the autoscale schedule.')
+    autoscale_rule_name_type = CLIArgumentType(options_list=['--rule-name'], help='Name of the autoscale rule.')
 
     with self.argument_context('monitor') as c:
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -55,7 +61,7 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor alert update', arg_group='Action') as c:
         c.argument('email_service_owners', arg_type=get_three_state_flag())
-        c.argument('add_actions', options_list=['--add-action', '-a'], nargs='+', action=AlertAddAction,)
+        c.argument('add_actions', options_list=['--add-action', '-a'], nargs='+', action=AlertAddAction)
         c.argument('remove_actions', options_list=['--remove-action', '-r'], nargs='+', action=AlertRemoveAction)
 
     with self.argument_context('monitor alert update', arg_group='Condition') as c:
@@ -94,6 +100,64 @@ def load_arguments(self, _):
     # endregion
 
     # region Autoscale
+    with self.argument_context('monitor autoscale') as c:
+        c.argument('autoscale_name', arg_type=autoscale_name_type, options_list=['--name', '-n'])
+        c.argument('autoscale_setting_name', arg_type=autoscale_name_type, options_list=['--name', '-n'])
+        c.argument('profile_name', arg_type=autoscale_schedule_name_type)
+        c.argument('rule_name', arg_type=autoscale_rule_name_type)
+        c.argument('enabled', arg_type=get_three_state_flag(), help='Autoscale settings enabled status.')
+
+    with self.argument_context('monitor autoscale', arg_group='Notification') as c:
+        c.argument('actions', options_list=['--action', '-a'], action=AutoscaleAddAction, nargs='+')
+        c.argument('add_actions', options_list=['--add-action', '-a'], action=AutoscaleAddAction, nargs='+')
+        c.argument('remove_actions', options_list=['--remove-action', '-r'], action=AutoscaleRemoveAction, nargs='+')
+        c.argument('email_administrator', arg_type=get_three_state_flag(), help='Send email to subscription administrator on scaling.')
+        c.argument('email_coadministrators', arg_type=get_three_state_flag(), help='Send email to subscription co-administrators on scaling.')
+
+    with self.argument_context('monitor autoscale create') as c:
+        c.resource_parameter('resource', arg_group='Target Resource')
+        c.argument('disabled', arg_type=get_three_state_flag(), help='Create the autoscale settings in a disabled state.')
+
+    with self.argument_context('monitor autoscale', arg_group='Instance Limit') as c:
+        c.argument('count', type=int, help='The numer of instances to use. If used with --min/max-count, the default number of instances to use.')
+        c.argument('min_count', type=int, help='The minimum number of instances.')
+        c.argument('max_count', type=int, help='The maximum number of instances.')
+
+    with self.argument_context('monitor autoscale schedule') as c:
+        c.argument('autoscale_name', arg_type=autoscale_name_type, id_part=None)
+        c.argument('profile_name', arg_type=autoscale_schedule_name_type, options_list=['--name', '-n'])
+        c.argument('copy_rules', help='Name of an existing schedule from which to copy the scaling rules for the new schedule.')
+
+    with self.argument_context('monitor autoscale schedule list-timezones') as c:
+        c.argument('search_query', options_list=['--search-query', '-q'], help='Query text to find.')
+        c.argument('offset', help='Filter results based on UTC hour offset.', type=timezone_offset_type)
+
+    with self.argument_context('monitor autoscale schedule', arg_group='Schedule') as c:
+        c.argument('timezone', type=timezone_name_type)
+        c.argument('start', arg_type=get_datetime_type(help='Start time.', timezone=False))
+        c.argument('end', arg_type=get_datetime_type(help='End time.', timezone=False))
+        c.argument('recurrence', options_list=['--recurrence', '-r'], nargs='+', validator=validate_autoscale_recurrence)
+
+    with self.argument_context('monitor autoscale rule') as c:
+        c.argument('autoscale_name', arg_type=autoscale_name_type, id_part=None)
+        c.argument('rule_name', arg_type=autoscale_rule_name_type, options_list=['--name', '-n'])
+        c.argument('scale', help='The direction and amount to scale.', action=AutoscaleScaleAction, nargs='+')
+        c.argument('condition', help='Condition on which to scale.', action=AutoscaleConditionAction, nargs='+')
+        c.argument('cooldown', type=int, help='The number of minutes that must elapse before another scaling event can occur.')
+
+    with self.argument_context('monitor autoscale rule remove') as c:
+        c.argument('index', nargs='+', help="Space-separated list of rule indices to remove, or '*' to clear all rules.")
+
+    with self.argument_context('monitor autoscale rule copy') as c:
+        c.argument('index', nargs='+', help="Space-separated list of rule indices to copy, or '*' to copy all rules.")
+        c.argument('source_profile', options_list=['--source-schedule'], help='Name of the profile to copy rules from.')
+        c.argument('dest_profile', options_list=['--dest-schedule'], help='Name of the profile to copy rules to.')
+
+    with self.argument_context('monitor autoscale rule add') as c:
+        c.resource_parameter('source', arg_group='Source', required=False)
+    # endregion
+
+    # region Autoscale (OLD)
     with self.argument_context('monitor autoscale-settings') as c:
         c.argument('name', options_list=['--azure-resource-name'])
         c.argument('autoscale_setting_name', options_list=['--name', '-n'])
@@ -171,7 +235,7 @@ def load_arguments(self, _):
 
     with self.argument_context('monitor action-group create') as c:
         from .validators import process_action_group_detail_for_creation
-        from .operations.actions import ActionGroupReceiverParameterAction
+        from .actions import ActionGroupReceiverParameterAction
         c.extra('receivers', options_list=['--action', '-a'], nargs='+', arg_group='Actions', action=ActionGroupReceiverParameterAction, validator=process_action_group_detail_for_creation)
         c.extra('short_name')
         c.extra('tags')
