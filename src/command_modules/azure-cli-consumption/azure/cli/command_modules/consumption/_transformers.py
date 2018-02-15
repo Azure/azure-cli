@@ -48,7 +48,7 @@ def transform_reservation_details_list_output(result):
     return [reservation_details_output(item) for item in result]
 
 
-def pricesheet_get_properties(result):
+def pricesheet_show_properties(result):
     result.unit_of_measure = str(result.unit_of_measure)
     result.included_quantity = str(result.included_quantity)
     result.unit_price = str(result.unit_price)
@@ -58,6 +58,7 @@ def pricesheet_get_properties(result):
     return result
 
 
-def transform_pricesheet_get_output(result):
-    result.pricesheets = [pricesheet_get_properties(item) for item in result.pricesheets]
+def transform_pricesheet_show_output(result):
+    result.pricesheets = [pricesheet_show_properties(item) for item in result.pricesheets]
     return result
+
