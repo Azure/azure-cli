@@ -111,3 +111,4 @@ def cli_consumption_list_pricesheet_by_billing_period_show(client, billing_perio
     else:
         expand_properties = None
     return client.get_by_billing_period(billing_period_name, expand=expand_properties)
+

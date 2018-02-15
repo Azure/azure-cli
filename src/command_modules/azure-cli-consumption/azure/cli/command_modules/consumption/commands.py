@@ -47,3 +47,4 @@ def load_command_table(self, _):
 
         p.custom_command('billing-period show', 'cli_consumption_list_pricesheet_by_billing_period_show', transform=transform_pricesheet_get_output,
                          exception_handler=consumption_exception_handler, validator=None, client_factory=pricesheet_mgmt_client_factory)
+
