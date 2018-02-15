@@ -62,7 +62,7 @@ def load_command_table(self, _):
 
     with self.command_group('acr build', acr_build_util) as g:
             g.command('show-logs', 'acr_build_show_logs')
-            g.command('queue', 'acr_build_queue')
+            g.command('', 'acr_queue') # TODO: it should be moved to acr command group once we can integrate the full sdk.
 
     with self.command_group('acr credential', acr_cred_util) as g:
         g.command('show', 'acr_credential_show', exception_handler=empty_on_404)

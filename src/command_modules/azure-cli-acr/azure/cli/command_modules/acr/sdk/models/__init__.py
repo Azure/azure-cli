@@ -10,6 +10,7 @@
 # --------------------------------------------------------------------------
 
 from .source_repository_properties import SourceRepositoryProperties
+from .platform_properties import PlatformProperties
 from .build_definition import BuildDefinition
 from .build_definition_filter import BuildDefinitionFilter
 from .build_base import BuildBase
@@ -22,7 +23,6 @@ from .build_definition_create_parameters import BuildDefinitionCreateParameters
 from .source_repository_update_parameters import SourceRepositoryUpdateParameters
 from .build_definition_update_parameters import BuildDefinitionUpdateParameters
 from .image_descriptor import ImageDescriptor
-from .platform_properties import PlatformProperties
 from .build import Build
 from .build_trigger import BuildTrigger
 from .build_update_parameters import BuildUpdateParameters
@@ -31,6 +31,7 @@ from .build_log_result import BuildLogResult
 from .build_argument import BuildArgument
 from .queue_build_parameters import QueueBuildParameters
 from .queue_build_request import QueueBuildRequest
+from .source_upload_definition import SourceUploadDefinition
 from .build_step import BuildStep
 from .build_step_update_parameters import BuildStepUpdateParameters
 from .resource import Resource
@@ -47,15 +48,16 @@ from .build_trigger_paged import BuildTriggerPaged
 from .container_registry_management_client_enums import (
     ProvisioningState,
     BuildDefinitionStatus,
-    SourceControlTypes,
+    SourceControlType,
+    OsType,
     BuildStatus,
     BuildType,
     TokenType,
-    OsTypes,
 )
 
 __all__ = [
     'SourceRepositoryProperties',
+    'PlatformProperties',
     'BuildDefinition',
     'BuildDefinitionFilter',
     'BuildBase',
@@ -68,7 +70,6 @@ __all__ = [
     'SourceRepositoryUpdateParameters',
     'BuildDefinitionUpdateParameters',
     'ImageDescriptor',
-    'PlatformProperties',
     'Build',
     'BuildTrigger',
     'BuildUpdateParameters',
@@ -77,6 +78,7 @@ __all__ = [
     'BuildArgument',
     'QueueBuildParameters',
     'QueueBuildRequest',
+    'SourceUploadDefinition',
     'BuildStep',
     'BuildStepUpdateParameters',
     'Resource',
@@ -92,9 +94,9 @@ __all__ = [
     'BuildTriggerPaged',
     'ProvisioningState',
     'BuildDefinitionStatus',
-    'SourceControlTypes',
+    'SourceControlType',
+    'OsType',
     'BuildStatus',
     'BuildType',
     'TokenType',
-    'OsTypes',
 ]

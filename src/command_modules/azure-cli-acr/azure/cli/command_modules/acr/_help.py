@@ -11,12 +11,8 @@ helps['acr'] = """
     short-summary: Manage Azure Container Registries.
     """
 
+# TODO: bindu update the help and samples after we finalize the commands.
 helps['acr build'] = """
-    type: group
-    short-summary: Manage builds for Azure Container Registries.
-    """
-
-helps['acr build queue'] = """
     type: command
     short-summary: Queues a new build based on the specified parameters.
     """

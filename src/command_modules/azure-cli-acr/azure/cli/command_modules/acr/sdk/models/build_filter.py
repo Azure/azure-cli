@@ -21,7 +21,7 @@ class BuildFilter(Model):
      'AutoBuild', 'QuickBuild'
     :type build_type: str or ~containerregistrybuild.models.BuildType
     :param status: The current status of the build. Possible values include:
-     'Queued', 'Started', 'Running', 'Succeeded', 'Failed', 'Cancelled'
+     'Queued', 'Started', 'Running', 'Succeeded', 'Failed', 'Canceled'
     :type status: str or ~containerregistrybuild.models.BuildStatus
     :param create_time: The create time for a build.
     :type create_time: datetime

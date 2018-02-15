@@ -13,29 +13,29 @@ from msrest.serialization import Model
 
 
 class ImageDescriptor(Model):
-    """Properties for a registry image.
+    """Properties for a docker image.
 
-    :param image_name: Name of the repository or image.
-    :type image_name: str
+    :param repository_name: Name of the repository.
+    :type repository_name: str
     :param tag: The tag name.
     :type tag: str
-    :param digest: The image digest.
+    :param digest: The image digest. Example: SHA256 based digest.
     :type digest: str
     """
 
     _validation = {
-        'image_name': {'required': True},
+        'repository_name': {'required': True},
         'digest': {'required': True},
     }
 
     _attribute_map = {
-        'image_name': {'key': 'imageName', 'type': 'str'},
+        'repository_name': {'key': 'repositoryName', 'type': 'str'},
         'tag': {'key': 'tag', 'type': 'str'},
         'digest': {'key': 'digest', 'type': 'str'},
     }
 
-    def __init__(self, image_name, digest, tag=None):
+    def __init__(self, repository_name, digest, tag=None):
         super(ImageDescriptor, self).__init__()
-        self.image_name = image_name
+        self.repository_name = repository_name
         self.tag = tag
         self.digest = digest

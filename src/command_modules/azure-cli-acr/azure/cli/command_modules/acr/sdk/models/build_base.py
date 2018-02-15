@@ -18,7 +18,7 @@ class BuildBase(Model):
     :param build_id: The unique identifier for the build.
     :type build_id: str
     :param status: The current status of the build. Possible values include:
-     'Queued', 'Started', 'Running', 'Succeeded', 'Failed', 'Cancelled'
+     'Queued', 'Started', 'Running', 'Succeeded', 'Failed', 'Canceled'
     :type status: str or ~containerregistrybuild.models.BuildStatus
     :param last_updated_time: The last updated time for the build.
     :type last_updated_time: datetime

@@ -26,7 +26,7 @@ class BuildArgument(Model):
     :param value: The value of the argument.
     :type value: str
     :param is_secret: Flag to indicate whether the argument represents a
-     secret and want to be removed from build logs.
+     secret and want to be removed from build logs. Default value: False .
     :type is_secret: bool
     """
 
@@ -45,7 +45,7 @@ class BuildArgument(Model):
 
     type = "DockerBuildArgument"
 
-    def __init__(self, name, value, is_secret=None):
+    def __init__(self, name, value, is_secret=False):
         super(BuildArgument, self).__init__()
         self.name = name
         self.value = value

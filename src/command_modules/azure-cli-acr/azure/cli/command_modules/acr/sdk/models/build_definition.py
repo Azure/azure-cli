@@ -47,6 +47,9 @@ class BuildDefinition(Resource):
      for the build definition.
     :type source_repository:
      ~containerregistrybuild.models.SourceRepositoryProperties
+    :param platform: The platform properties against which the build has to
+     happen.
+    :type platform: ~containerregistrybuild.models.PlatformProperties
     :param timeout: Build timeout in seconds.
     :type timeout: int
     :param is_base_image_triggers_enabled: The value of this property
@@ -75,16 +78,18 @@ class BuildDefinition(Resource):
         'alias': {'key': 'properties.alias', 'type': 'str'},
         'status': {'key': 'properties.status', 'type': 'str'},
         'source_repository': {'key': 'properties.sourceRepository', 'type': 'SourceRepositoryProperties'},
+        'platform': {'key': 'properties.platform', 'type': 'PlatformProperties'},
         'timeout': {'key': 'properties.timeout', 'type': 'int'},
         'is_base_image_triggers_enabled': {'key': 'properties.isBaseImageTriggersEnabled', 'type': 'bool'},
     }
 
-    def __init__(self, location, tags=None, alias=None, status=None, source_repository=None, timeout=None, is_base_image_triggers_enabled=False):
+    def __init__(self, location, tags=None, alias=None, status=None, source_repository=None, platform=None, timeout=None, is_base_image_triggers_enabled=False):
         super(BuildDefinition, self).__init__(location=location, tags=tags)
         self.provisioning_state = None
         self.creation_date = None
         self.alias = alias
         self.status = status
         self.source_repository = source_repository
+        self.platform = platform
         self.timeout = timeout
         self.is_base_image_triggers_enabled = is_base_image_triggers_enabled

@@ -31,6 +31,9 @@ class BuildDefinitionCreateParameters(Model):
     :param status: The current status of build definition. Possible values
      include: 'Disabled', 'Enabled'
     :type status: str or ~containerregistrybuild.models.BuildDefinitionStatus
+    :param platform: The platform properties against which the build has to
+     happen.
+    :type platform: ~containerregistrybuild.models.PlatformProperties
     :param timeout: Build timeout in seconds.
     :type timeout: int
     :param is_base_image_triggers_enabled: The value of this property
@@ -53,19 +56,21 @@ class BuildDefinitionCreateParameters(Model):
         'triggers': {'key': 'properties.triggers', 'type': '[BuildTriggerParameters]'},
         'alias': {'key': 'properties.alias', 'type': 'str'},
         'status': {'key': 'properties.status', 'type': 'str'},
+        'platform': {'key': 'properties.platform', 'type': 'PlatformProperties'},
         'timeout': {'key': 'properties.timeout', 'type': 'int'},
         'is_base_image_triggers_enabled': {'key': 'properties.isBaseImageTriggersEnabled', 'type': 'bool'},
         'location': {'key': 'location', 'type': 'str'},
         'tags': {'key': 'tags', 'type': '{str}'},
     }
 
-    def __init__(self, steps, source_repository=None, triggers=None, alias=None, status=None, timeout=None, is_base_image_triggers_enabled=False, location=None, tags=None):
+    def __init__(self, steps, source_repository=None, triggers=None, alias=None, status=None, platform=None, timeout=None, is_base_image_triggers_enabled=False, location=None, tags=None):
         super(BuildDefinitionCreateParameters, self).__init__()
         self.source_repository = source_repository
         self.steps = steps
         self.triggers = triggers
         self.alias = alias
         self.status = status
+        self.platform = platform
         self.timeout = timeout
         self.is_base_image_triggers_enabled = is_base_image_triggers_enabled
         self.location = location

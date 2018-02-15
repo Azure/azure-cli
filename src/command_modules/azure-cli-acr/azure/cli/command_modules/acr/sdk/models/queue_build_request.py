@@ -18,9 +18,11 @@ class QueueBuildRequest(Model):
     :param image_name: The fully qualified image name with the tag that the
      build tags it.
     :type image_name: str
-    :param source_location: The URL to the source that needs to be built. For
-     Docker build, it can be an URL to a tar or github repoistory as supported
-     by Docker.
+    :param source_location: The URL(absolute or relative) of the source that
+     needs to be built. For Docker build, it can be an URL to a tar or github
+     repoistory as supported by Docker.
+     If it is relative URL, the relative path should be obtained from calling
+     getSourceUploadUrl API.
     :type source_location: str
     :param build_arguments: The collection of build arguments to be used.
     :type build_arguments: list[~containerregistrybuild.models.BuildArgument]
@@ -40,7 +42,6 @@ class QueueBuildRequest(Model):
     """
 
     _validation = {
-        'image_name': {'required': True},
         'source_location': {'required': True},
         'build_parameters': {'required': True},
     }
@@ -55,7 +56,7 @@ class QueueBuildRequest(Model):
         'build_parameters': {'key': 'buildParameters', 'type': 'QueueBuildParameters'},
     }
 
-    def __init__(self, image_name, source_location, build_parameters, build_arguments=None, is_push_enabled=False, timeout=None, platform=None):
+    def __init__(self, source_location, build_parameters, image_name=None, build_arguments=None, is_push_enabled=False, timeout=None, platform=None):
         super(QueueBuildRequest, self).__init__()
         self.image_name = image_name
         self.source_location = source_location

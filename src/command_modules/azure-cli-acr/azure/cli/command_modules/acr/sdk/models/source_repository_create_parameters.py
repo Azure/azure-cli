@@ -18,7 +18,7 @@ class SourceRepositoryCreateParameters(Model):
     :param source_control_type: The type of source control service. Possible
      values include: 'Github', 'VisualStudioTeamService'
     :type source_control_type: str or
-     ~containerregistrybuild.models.SourceControlTypes
+     ~containerregistrybuild.models.SourceControlType
     :param repository_url: The type of source control service.
     :type repository_url: str
     :param source_control_auth_properties: The authorization properties for

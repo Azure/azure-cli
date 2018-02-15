@@ -243,7 +243,7 @@ class BuildDefinitionsOperations(object):
         request = self._client.get(url, query_parameters)
         response = self._client.send(request, header_parameters, stream=False, **operation_config)
 
-        if response.status_code not in [200, 404]:
+        if response.status_code not in [200]:
             exp = CloudError(response)
             exp.request_id = response.headers.get('x-ms-request-id')
             raise exp
@@ -526,7 +526,7 @@ class BuildDefinitionsOperations(object):
         response = self._client.send(
             request, header_parameters, body_content, stream=False, **operation_config)
 
-        if response.status_code not in [200, 201, 404]:
+        if response.status_code not in [200, 201]:
             exp = CloudError(response)
             exp.request_id = response.headers.get('x-ms-request-id')
             raise exp
@@ -598,7 +598,7 @@ class BuildDefinitionsOperations(object):
 
         def get_long_running_output(response):
 
-            if response.status_code not in [200, 201, 404]:
+            if response.status_code not in [200, 201]:
                 exp = CloudError(response)
                 exp.request_id = response.headers.get('x-ms-request-id')
                 raise exp
@@ -649,7 +649,7 @@ class BuildDefinitionsOperations(object):
         request = self._client.post(url, query_parameters)
         response = self._client.send(request, header_parameters, stream=False, **operation_config)
 
-        if response.status_code not in [200, 202, 404]:
+        if response.status_code not in [200, 202]:
             exp = CloudError(response)
             exp.request_id = response.headers.get('x-ms-request-id')
             raise exp
@@ -715,7 +715,7 @@ class BuildDefinitionsOperations(object):
 
         def get_long_running_output(response):
 
-            if response.status_code not in [200, 202, 404]:
+            if response.status_code not in [200, 202]:
                 exp = CloudError(response)
                 exp.request_id = response.headers.get('x-ms-request-id')
                 raise exp
@@ -770,7 +770,7 @@ class BuildDefinitionsOperations(object):
         response = self._client.send(
             request, header_parameters, body_content, stream=False, **operation_config)
 
-        if response.status_code not in [200, 202, 404]:
+        if response.status_code not in [200, 202]:
             exp = CloudError(response)
             exp.request_id = response.headers.get('x-ms-request-id')
             raise exp
@@ -840,7 +840,7 @@ class BuildDefinitionsOperations(object):
 
         def get_long_running_output(response):
 
-            if response.status_code not in [200, 202, 404]:
+            if response.status_code not in [200, 202]:
                 exp = CloudError(response)
                 exp.request_id = response.headers.get('x-ms-request-id')
                 raise exp

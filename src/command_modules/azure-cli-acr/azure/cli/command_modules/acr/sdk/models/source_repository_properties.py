@@ -18,7 +18,7 @@ class SourceRepositoryProperties(Model):
     :param source_control_type: The type of source control service. Possible
      values include: 'Github', 'VisualStudioTeamService'
     :type source_control_type: str or
-     ~containerregistrybuild.models.SourceControlTypes
+     ~containerregistrybuild.models.SourceControlType
     :param repository_url: The full URL to the source code respository
     :type repository_url: str
     :param is_commit_trigger_enabled: The value of this property indicates
