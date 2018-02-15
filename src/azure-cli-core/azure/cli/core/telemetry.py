@@ -303,8 +303,7 @@ def set_raw_command_name(command):
 
 
 def add_extension_events(extension_events):
-    for extension_event in extension_events:
-        _session.extension_events.append(extension_event)
+    _session.extension_events.extend(extension_events)
 
 
 # definitions
