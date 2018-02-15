@@ -20,6 +20,7 @@ import azure.cli.core.telemetry_upload as telemetry_core
 PRODUCT_NAME = 'azurecli'
 TELEMETRY_VERSION = '0.0.1.4'
 AZURE_CLI_PREFIX = 'Context.Default.AzureCLI.'
+EXTENSION_EVENT_NAME = '{}/extension/{}'
 
 decorators.is_diagnostics_mode = telemetry_core.in_diagnostic_mode
 
@@ -43,7 +44,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     feedback = None
     extension_management_detail = None
     raw_command = None
-    extension_events = []
+    events = []
 
     def add_exception(self, exception, fault_type, description=None, message=''):
         fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
@@ -64,7 +65,6 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
 
     @decorators.suppress_all_exceptions(raise_in_diagnostics=True, fallback_return=None)
     def generate_payload(self):
-        events = []
         base = self._get_base_properties()
         cli = self._get_azure_cli_properties()
 
@@ -72,23 +72,16 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         user_task.update(base)
         user_task.update(cli)
 
-        events.append({'name': '{}/command'.format(PRODUCT_NAME), 'properties': user_task})
-
-        for extension_event in self.extension_events:
-            if 'name' in extension_event and 'properties' in extension_event:
-                properties = extension_event['properties']
-                # Inject correlation ID into every extension event
-                properties.update({'Reserved.DataModel.CorrelationId': self.correlation_id})
-                events.append({'name': extension_event['name'], 'properties': properties})
+        self.events.append({'name': self.event_name, 'properties': user_task})
 
         for name, props in self.exceptions:
             props.update(base)
             props.update(cli)
             props.update({'Reserved.DataModel.CorrelationId': str(uuid.uuid4()),
                           'Reserved.EventId': str(uuid.uuid4())})
-            events.append({'name': name, 'properties': props})
+            self.events.append({'name': name, 'properties': props})
 
-        payload = json.dumps(events)
+        payload = json.dumps(self.events)
         return _remove_symbols(payload)
 
     def _get_base_properties(self):
@@ -301,9 +294,15 @@ def set_raw_command_name(command):
     # the raw command name user inputs
     _session.raw_command = command
 
-
-def add_extension_events(extension_events):
-    _session.extension_events.extend(extension_events)
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def add_extension_events(name, properties):
+    if name and properties:
+        # Inject correlation ID into the extension event
+        properties.update({'Reserved.DataModel.CorrelationId': _session.correlation_id})
+        _session.events.append({
+            'name': EXTENSION_EVENT_NAME.format(PRODUCT_NAME, name),
+            'properties': properties
+        })
 
 
 # definitions
