@@ -43,6 +43,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     feedback = None
     extension_management_detail = None
     raw_command = None
+    extension_events = []
 
     def add_exception(self, exception, fault_type, description=None, message=''):
         fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
@@ -72,6 +73,13 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         user_task.update(cli)
 
         events.append({'name': '{}/command'.format(PRODUCT_NAME), 'properties': user_task})
+
+        for extension_event in self.extension_events:
+            if 'name' in extension_event and 'properties' in extension_event:
+                properties = extension_event['properties']
+                # Inject correlation ID into every extension event
+                properties.update({'Reserved.DataModel.CorrelationId': self.correlation_id})
+                events.append({'name': extension_event['name'], 'properties': properties})
 
         for name, props in self.exceptions:
             props.update(base)
@@ -292,6 +300,11 @@ def set_module_correlation_data(correlation_data):
 def set_raw_command_name(command):
     # the raw command name user inputs
     _session.raw_command = command
+
+
+def add_extension_events(extension_events):
+    for extension_event in extension_events:
+        _session.extension_events.append(extension_event)
 
 
 # definitions
