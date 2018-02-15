@@ -16,6 +16,7 @@ from ._exception_handler import consumption_exception_handler
 from ._validators import validate_both_start_end_dates
 from ._validators import validate_reservations_summaries
 
+
 def load_command_table(self, _):
     with self.command_group('consumption usage') as g:
         g.custom_command('list', 'cli_consumption_list_usage', transform=transform_usage_list_output,
@@ -32,4 +33,3 @@ def load_command_table(self, _):
     with self.command_group('consumption pricesheet') as p:
         p.custom_command('show', 'cli_consumption_list_pricesheet_show', transform=transform_pricesheet_show_output,
                          exception_handler=consumption_exception_handler, validator=None, client_factory=pricesheet_mgmt_client_factory)
-

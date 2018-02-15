@@ -30,8 +30,7 @@ def cli_consumption_list_usage(client, billing_period_name=None, top=None, inclu
         return list(client.list_by_billing_period(expand=expand, filter=filter_expression))
     elif not billing_period_name and top:
         return list(client.list(expand=expand, filter=filter_expression, top=top).advance_page())
-    else: 
-        #not billing_period_name and not top:
+    else:
         return list(client.list(expand=expand, filter=filter_expression, top=top).advance_page())
 
 
@@ -74,4 +73,3 @@ def cli_consumption_list_pricesheet_show(client, billing_period_name=None, inclu
     if(billing_period_name):
         return client.get_by_billing_period(billing_period_name, expand=expand_properties)
     return client.get(expand=expand_properties)
-

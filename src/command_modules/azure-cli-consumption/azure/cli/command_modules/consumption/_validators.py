@@ -37,4 +37,3 @@ def validate_reservations_summaries(namespace):
         raise CLIError("usage error: --grain  can be either daily or monthly.")
     if data_grain == 'daily' and (not namespace.start_date or not namespace.end_date):
         raise CLIError("usage error: Both --start-date and --end-date need to be supplied for daily grain.")
-

@@ -53,4 +53,3 @@ helps['consumption pricesheet show'] = """
     type: command
     short-summary: Show the price sheet for Azure subscription within a current billing period or specified billing period
 """
-

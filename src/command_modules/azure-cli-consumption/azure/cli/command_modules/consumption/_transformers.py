@@ -61,4 +61,3 @@ def pricesheet_show_properties(result):
 def transform_pricesheet_show_output(result):
     result.pricesheets = [pricesheet_show_properties(item) for item in result.pricesheets]
     return result
-

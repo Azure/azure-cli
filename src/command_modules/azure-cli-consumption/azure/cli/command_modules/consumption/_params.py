@@ -28,4 +28,3 @@ def load_arguments(self, _):
     with self.argument_context('consumption pricesheet show') as cps:
         cps.argument('include_meter_details', options_list=['--include-meter-details', '-m'], action='store_true', help='include meter details in the price sheet')
         cps.argument('billing_period_name', options_list=['--billing-period-name', '-p'], help='name of a specific billing period to get the price sheet')
-
