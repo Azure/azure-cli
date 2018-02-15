@@ -313,62 +313,73 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None):
 
 def k8s_install_connector(cmd, client, name, resource_group_name, connector_name,
                           location=None, service_principal=None, client_secret=None,
-                          chart_url=None, os_type='Linux'):
+                          chart_url=None, os_type='Linux', image_tag=None, aci_resource_group=None):
     from subprocess import PIPE, Popen
     helm_not_installed = 'Helm not detected, please verify if it is installed.'
     node_prefix = 'virtual-kubelet-' + connector_name.lower()
     url_chart = chart_url
+    if image_tag is None:
+        image_tag = 'latest'
     # Check if Helm is installed locally
     try:
         Popen(["helm"], stdout=PIPE, stderr=PIPE)
     except OSError:
         raise CLIError(helm_not_installed)
+    # If SPN is specified, the secret should also be specified
+    if service_principal is not None and client_secret is None:
+        raise CLIError('--client-secret must be specified when --service-principal is specified')
     # Validate if the RG exists
     groups = cf_resource_groups(cmd.cli_ctx)
+    if aci_resource_group is None:
+        aci_resource_group = resource_group_name
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rgkaci = groups.get(resource_group_name)
+    rgkaci = groups.get(aci_resource_group)
     # Auto assign the location
     if location is None:
         location = rgkaci.location  # pylint:disable=no-member
+    # Validate the location upon the ACI avaiable regions
+    _validate_aci_location(location)
     # Get the credentials from a AKS instance
     _, browse_path = tempfile.mkstemp()
     aks_get_credentials(cmd, client, resource_group_name, name, admin=False, path=browse_path)
     subscription_id = _get_subscription_id(cmd.cli_ctx)
-    dns_name_prefix = _get_default_dns_prefix(connector_name, resource_group_name, subscription_id)
-    # Ensure that the SPN exists
-    principal_obj = _ensure_aks_service_principal(cmd.cli_ctx, service_principal, client_secret, subscription_id,
-                                                  dns_name_prefix, location, connector_name)
-    client_secret = principal_obj.get('client_secret')
-    service_principal = principal_obj.get('service_principal')
     # Get the TenantID
     profile = Profile(cli_ctx=cmd.cli_ctx)
     _, _, tenant_id = profile.get_login_credentials()
     # Check if we want the linux connector
     if os_type.lower() in ['linux', 'both']:
-        _helm_install_aci_connector(url_chart, connector_name, service_principal, client_secret,
+        _helm_install_aci_connector(image_tag, url_chart, connector_name, service_principal, client_secret,
                                     subscription_id, tenant_id, rgkaci.name, location,
                                     node_prefix + '-linux', 'Linux')
 
     # Check if we want the windows connector
     if os_type.lower() in ['windows', 'both']:
-        _helm_install_aci_connector(url_chart, connector_name, service_principal, client_secret,
+        _helm_install_aci_connector(image_tag, url_chart, connector_name, service_principal, client_secret,
                                     subscription_id, tenant_id, rgkaci.name, location,
                                     node_prefix + '-win', 'Windows')
 
 
-def _helm_install_aci_connector(url_chart, connector_name, service_principal, client_secret,
-                                subscription_id, tenant_id, aci_resource_group, aci_region,
-                                node_name, os_type):
-    image_tag = 'latest'
+def _helm_install_aci_connector(image_tag, url_chart, connector_name, service_principal,
+                                client_secret, subscription_id, tenant_id, aci_resource_group,
+                                aci_region, node_name, os_type):
     node_taint = 'azure.com/aci'
     helm_release_name = connector_name.lower() + "-" + os_type.lower()
     logger.warning("Deploying the ACI connector for '%s' using Helm", os_type)
     try:
-        subprocess.call(["helm", "install", url_chart, "--name", helm_release_name, "--set", "env.azureClientId=" +
-                         service_principal + ",env.azureClientKey=" + client_secret + ",env.azureSubscriptionId=" +
-                         subscription_id + ",env.azureTenantId=" + tenant_id + ",env.aciResourceGroup=" +
-                         aci_resource_group + ",env.aciRegion=" + aci_region + ",image.tag=" + image_tag +
-                         ",env.nodeName=" + node_name + ",env.nodeTaint=" + node_taint + ",env.nodeOsType=" + os_type])
+        values = ('env.nodeName={},env.nodeTaint={},env.nodeOsType={},image.tag={},' +
+                  'env.aciResourceGroup={},env.aciRegion={}').format(
+                      node_name, node_taint, os_type, image_tag, aci_resource_group, aci_region)
+
+        if service_principal:
+            values += ",env.azureClientId=" + service_principal
+        if client_secret:
+            values += ",env.azureClientKey=" + client_secret
+        if subscription_id:
+            values += ",env.azureSubscriptionId=" + subscription_id
+        if tenant_id:
+            values += ",env.azureTenantId=" + tenant_id
+
+        subprocess.call(["helm", "install", url_chart, "--name", helm_release_name, "--set", values])
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not deploy the ACI connector Chart: {}'.format(err))
 
@@ -407,7 +418,7 @@ def _undeploy_connector(graceful, node_name, helm_release_name):
 
         try:
             drain_node = subprocess.check_output(
-                ['kubectl', 'drain', node_name, '--force'],
+                ['kubectl', 'drain', node_name, '--force', '--delete-local-data'],
                 universal_newlines=True)
 
             if not drain_node:
@@ -415,6 +426,14 @@ def _undeploy_connector(graceful, node_name, helm_release_name):
                                ' are using the correct --os-type')
         except subprocess.CalledProcessError as err:
             raise CLIError('Could not find the node, make sure you' +
+                           ' are using the correct --os-type option: {}'.format(err))
+
+        try:
+            subprocess.check_output(
+                ['kubectl', 'delete', 'node', node_name],
+                universal_newlines=True)
+        except subprocess.CalledProcessError as err:
+            raise CLIError('Could not delete the node, make sure you' +
                            ' are using the correct --os-type option: {}'.format(err))
 
     logger.warning("Undeploying the '%s' using Helm", helm_release_name)
@@ -1502,3 +1521,19 @@ def _remove_nulls(managed_clusters):
             if getattr(managed_cluster.service_principal_profile, attr, None) is None:
                 delattr(managed_cluster.service_principal_profile, attr)
     return managed_clusters
+
+
+def _validate_aci_location(location):
+    """
+    Validate the Azure Container Instance location
+    """
+    aci_locations = [
+        "westus",
+        "eastus",
+        "westeurope",
+        "southeastasia",
+    ]
+    norm_location = location.replace(" ", "").lower()
+    if norm_location not in aci_locations:
+        raise CLIError('Azure Container Instance is not available at location "{}".'.format(location) +
+                       ' The available locations are "{}"'.format(','.join(aci_locations)))
