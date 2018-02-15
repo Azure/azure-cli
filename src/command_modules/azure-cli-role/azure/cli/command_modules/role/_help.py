@@ -223,7 +223,7 @@ helps['role definition update'] = """
 """
 helps['ad'] = """
     type: group
-    short-summary: Synchronize on-premises directories and manage Azure Active Directory resources.
+    short-summary: Manage Azure Active Directory Graph entities needed for Role Based Access Control
 """
 helps['ad app'] = """
     type: group

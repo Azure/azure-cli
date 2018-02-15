@@ -49,6 +49,7 @@ def create_container(client,
                      ports=None,
                      os_type='Linux',
                      ip_address=None,
+                     dns_name_label=None,
                      command_line=None,
                      environment_variables=None,
                      registry_login_server=None,
@@ -78,7 +79,7 @@ def create_container(client,
     azure_file_volume_mount = _create_azure_file_volume_mount(azure_file_volume=azure_file_volume,
                                                               azure_file_volume_mount_path=azure_file_volume_mount_path)
 
-    cgroup_ip_address = _create_ip_address(ip_address, ports)
+    cgroup_ip_address = _create_ip_address(ip_address, ports, dns_name_label)
 
     container = Container(name=name,
                           image=image,
@@ -170,10 +171,10 @@ def _create_azure_file_volume_mount(azure_file_volume, azure_file_volume_mount_p
 
 
 # pylint: disable=inconsistent-return-statements
-def _create_ip_address(ip_address, ports):
+def _create_ip_address(ip_address, ports, dns_name_label):
     """Create IP address. """
-    if ip_address and ip_address.lower() == 'public':
-        return IpAddress(ports=[Port(protocol=ContainerGroupNetworkProtocol.tcp, port=p) for p in ports])
+    if (ip_address and ip_address.lower() == 'public') or dns_name_label:
+        return IpAddress(ports=[Port(protocol=ContainerGroupNetworkProtocol.tcp, port=p) for p in ports], dns_name_label=dns_name_label)
 
 
 # pylint: disable=inconsistent-return-statements

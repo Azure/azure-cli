@@ -21,6 +21,8 @@ helps['container create'] = """
           text: az container create -g MyResourceGroup --name mywinapp --image winappimage:latest --os-type Windows --cpu 2 --memory 3.5
         - name: Create a container in a container group with public IP address and ports.
           text: az container create -g MyResourceGroup --name myalpine --image alpine:latest --ip-address public --ports 80 443
+        - name: Create a container in a container group with public IP address, ports and DNS name label.
+          text: az container create -g MyResourceGroup --name myalpine --image alpine:latest --ports 80 443 --dns-name-label contoso
         - name: Create a container in a container group that invokes a script upon start.
           text: az container create -g MyResourceGroup --name myalpine --image alpine:latest --command-line "/bin/sh -c '/path to/myscript.sh'"
         - name: Create a container in a container group that runs a command and stop the container afterwards.

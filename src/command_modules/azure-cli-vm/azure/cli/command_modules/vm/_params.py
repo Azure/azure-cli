@@ -18,7 +18,8 @@ from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
-    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_asg_names_or_ids)
+    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk,
+    validate_vmss_disk, validate_asg_names_or_ids)
 
 
 # pylint: disable=too-many-statements
@@ -300,6 +301,9 @@ def load_arguments(self, _):
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine instance size.')
         c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.')
         c.argument('vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
+        c.argument('disk', validator=validate_vmss_disk, help='existing disk name or ID to attach or detach from VM instances',
+                   min_api='2017-12-01', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+        c.argument('instance_id', help='Scale set VM instance id', min_api='2017-12-01')
 
     with self.argument_context('vmss encryption') as c:
         c.argument('vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))

@@ -5,7 +5,7 @@ Release History
 
 0.0.13
 ++++++
-* Minor fixes.
+* Add `cdn custom-domain enable/disable-https` commands.
 
 0.0.12
 ++++++
