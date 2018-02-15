@@ -70,6 +70,8 @@ def get_subscription_service_client(cli_ctx):
 def configure_common_settings(cli_ctx, client):
     client = _debug.change_ssl_cert_verification(client)
 
+    client.config.enable_http_logger = True
+
     client.config.add_user_agent(UA_AGENT)
     try:
         client.config.add_user_agent(os.environ[ENV_ADDITIONAL_USER_AGENT])
