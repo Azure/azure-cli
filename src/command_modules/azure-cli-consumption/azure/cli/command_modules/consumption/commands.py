@@ -16,35 +16,34 @@ from ._exception_handler import consumption_exception_handler
 from ._validators import validate_both_start_end_dates
 from ._validators import validate_reservations_summaries
 from ._validators import validate_reservations_details
-from ._validators import validate_pricesheet
 from ._validators import validate_usage_bp_inputs
-
+from ._validators import validate_reservations_summaries_with_reservation_id
 
 def load_command_table(self, _):
     with self.command_group('consumption usage') as g:
         g.custom_command('list', 'cli_consumption_list_usage', transform=transform_usage_list_output,
                          exception_handler=consumption_exception_handler, validator=validate_both_start_end_dates, client_factory=usage_details_mgmt_client_factory)
 
-        g.custom_command('billing period list', 'cli_consumption_list_usage_by_billing_period', transform=transform_usage_list_output,
+        g.custom_command('billing-period list', 'cli_consumption_list_usage_by_billing_period', transform=transform_usage_list_output,
                          exception_handler=consumption_exception_handler, validator=validate_usage_bp_inputs, client_factory=usage_details_mgmt_client_factory)
 
     with self.command_group('consumption reservations summaries') as s:
         s.custom_command('list', 'cli_consumption_list_reservations_summaries', transform=transform_reservation_summaries_list_output,
                          exception_handler=consumption_exception_handler, validator=validate_reservations_summaries, client_factory=reservations_summaries_mgmt_client_factory)
 
-        s.custom_command('reservation id list', 'cli_consumption_list_reservations_summaries_reservation_id', transform=transform_reservation_summaries_list_output,
-                         exception_handler=consumption_exception_handler, validator=validate_reservations_summaries, client_factory=reservations_summaries_mgmt_client_factory)
+        s.custom_command('reservation-id list', 'cli_consumption_list_reservations_summaries_reservation_id', transform=transform_reservation_summaries_list_output,
+                         exception_handler=consumption_exception_handler, validator=validate_reservations_summaries_with_reservation_id, client_factory=reservations_summaries_mgmt_client_factory)
 
     with self.command_group('consumption reservations details') as d:
         d.custom_command('list', 'cli_consumption_list_reservations_details', transform=transform_reservation_details_list_output,
-                         exception_handler=consumption_exception_handler, validator=validate_reservations_details, client_factory=reservations_details_mgmt_client_factory)
+                         exception_handler=consumption_exception_handler, validator=None, client_factory=reservations_details_mgmt_client_factory)
 
-        d.custom_command('reservation id list', 'cli_consumption_list_reservations_details_by_reservation_id', transform=transform_reservation_details_list_output,
+        d.custom_command('reservation-id list', 'cli_consumption_list_reservations_details_by_reservation_id', transform=transform_reservation_details_list_output,
                          exception_handler=consumption_exception_handler, validator=validate_reservations_details, client_factory=reservations_details_mgmt_client_factory)
 
     with self.command_group('consumption pricesheet') as p:
-        p.custom_command('get', 'cli_consumption_list_pricesheet_get', transform=transform_pricesheet_get_output,
+        p.custom_command('show', 'cli_consumption_list_pricesheet_show', transform=transform_pricesheet_get_output,
                          exception_handler=consumption_exception_handler, validator=None, client_factory=pricesheet_mgmt_client_factory)
 
-        p.custom_command('billing period get', 'cli_consumption_list_pricesheet_by_billing_period_get', transform=transform_pricesheet_get_output,
-                         exception_handler=consumption_exception_handler, validator=validate_pricesheet, client_factory=pricesheet_mgmt_client_factory)
+        p.custom_command('billing-period show', 'cli_consumption_list_pricesheet_by_billing_period_show', transform=transform_pricesheet_get_output,
+                         exception_handler=consumption_exception_handler, validator=None, client_factory=pricesheet_mgmt_client_factory)

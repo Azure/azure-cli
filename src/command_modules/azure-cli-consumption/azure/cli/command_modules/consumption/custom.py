@@ -52,7 +52,7 @@ def cli_consumption_list_usage_by_billing_period(client, billing_period_name=Non
     return list(client.list_by_billing_period(billing_period_name, expand=expand, filter=filter_expression))
 
 
-def cli_consumption_list_reservations_summaries(client, grain, reservationorderid, start_date=None, end_date=None):
+def cli_consumption_list_reservations_summaries(client, grain, reservation_order_id, start_date=None, end_date=None):
     filter_from = None
     filter_to = None
     filter_expression = None
@@ -60,12 +60,12 @@ def cli_consumption_list_reservations_summaries(client, grain, reservationorderi
         filter_from = "properties/UsageDate ge {}".format(start_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
         filter_to = "properties/UsageDate le {}".format(end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
         filter_expression = "{} and {}".format(filter_from, filter_to)
-        return list(client.list_by_reservation_order(reservationorderid, grain=grain, filter=filter_expression))
+        return list(client.list_by_reservation_order(reservation_order_id, grain=grain, filter=filter_expression))
 
-    return list(client.list_by_reservation_order(reservationorderid, grain=grain))
+    return list(client.list_by_reservation_order(reservation_order_id, grain=grain))
 
 
-def cli_consumption_list_reservations_summaries_reservation_id(client, grain, reservationorderid, reservationid=None, start_date=None, end_date=None):
+def cli_consumption_list_reservations_summaries_reservation_id(client, grain, reservation_order_id, reservation_id=None, start_date=None, end_date=None):
     filter_from = None
     filter_to = None
     filter_expression = None
@@ -73,32 +73,31 @@ def cli_consumption_list_reservations_summaries_reservation_id(client, grain, re
         filter_from = "properties/UsageDate ge {}".format(start_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
         filter_to = "properties/UsageDate le {}".format(end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
         filter_expression = "{} and {}".format(filter_from, filter_to)
-        return list(client.list_by_reservation_order_and_reservation(reservationorderid, reservationid, grain=grain, filter=filter_expression))
+        return list(client.list_by_reservation_order_and_reservation(reservation_order_id, reservation_id, grain=grain, filter=filter_expression))
 
-    return list(client.list_by_reservation_order_and_reservation(reservationorderid, reservationid, grain=grain))
+    return list(client.list_by_reservation_order_and_reservation(reservation_order_id, reservation_id, grain=grain))
 
 
-def cli_consumption_list_reservations_details(client, reservationorderid, start_date, end_date):
+def cli_consumption_list_reservations_details(client, reservation_order_id, start_date, end_date):
     filter_from = None
     filter_to = None
     filter_expression = None
     filter_from = "properties/UsageDate ge {}".format(start_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
     filter_to = "properties/UsageDate le {}".format(end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
     filter_expression = "{} and {}".format(filter_from, filter_to)
-    return list(client.list_by_reservation_order(reservationorderid, filter=filter_expression))
+    return list(client.list_by_reservation_order(reservation_order_id, filter=filter_expression))
 
 
-def cli_consumption_list_reservations_details_by_reservation_id(client, reservationorderid, start_date, end_date, reservationid=None):
+def cli_consumption_list_reservations_details_by_reservation_id(client, reservation_order_id, start_date, end_date, reservation_id=None):
     filter_from = None
     filter_to = None
     filter_expression = None
     filter_from = "properties/UsageDate ge {}".format(start_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
     filter_to = "properties/UsageDate le {}".format(end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
     filter_expression = "{} and {}".format(filter_from, filter_to)
-    return list(client.list_by_reservation_order_and_reservation(reservationorderid, reservationid, filter=filter_expression))
+    return list(client.list_by_reservation_order_and_reservation(reservation_order_id, reservation_id, filter=filter_expression))
 
-
-def cli_consumption_list_pricesheet_get(client, include_meter_details=False):
+def cli_consumption_list_pricesheet_show(client, include_meter_details=False):
     if include_meter_details:
         expand_properties = 'properties/meterDetails'
     else:
@@ -106,7 +105,7 @@ def cli_consumption_list_pricesheet_get(client, include_meter_details=False):
     return client.get(expand=expand_properties)
 
 
-def cli_consumption_list_pricesheet_by_billing_period_get(client, billing_period_name, include_meter_details=False):
+def cli_consumption_list_pricesheet_by_billing_period_show(client, billing_period_name, include_meter_details=False):
     if include_meter_details:
         expand_properties = 'properties/meterDetails'
     else:

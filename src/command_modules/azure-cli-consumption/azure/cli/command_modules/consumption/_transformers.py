@@ -58,10 +58,6 @@ def pricesheet_get_properties(result):
     return result
 
 
-def pricesheet_get_output(result):
+def transform_pricesheet_get_output(result):
     result.pricesheets = [pricesheet_get_properties(item) for item in result.pricesheets]
     return result
-
-
-def transform_pricesheet_get_output(result):
-    return pricesheet_get_output(result)
