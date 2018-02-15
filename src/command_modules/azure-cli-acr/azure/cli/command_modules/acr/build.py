@@ -335,10 +335,6 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
 
         logger.debug("Starting to archive the source code to '{}'.".format(tar_file_path))
 
-        # TODO: Check if it works in windows
-        if not source_location.endswith('/'):
-            source_location += '/'
-
         ignore_list = _load_dockerignore_file(source_location)
 
         def _filter_file(tarinfo):
@@ -355,7 +351,8 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
             return tarinfo
 
         with tarfile.open(tar_file_path, "w:gz") as tar:
-            tar.add(source_location, arcname=os.path.basename(source_location), filter=_filter_file)
+            # NOTE: Need to set arcname to empty string otherwise the child item name will have a prefix (eg, ../) which can block unpacking.
+            tar.add(source_location, arcname="", filter=_filter_file)
 
         logger.debug("Starting to upload the archived source code from '{}'.".format(tar_file_path))
 
