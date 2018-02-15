@@ -306,6 +306,7 @@ def _check_image_name(image_name):
         raise CLIError(
             "The repository of '--tag' value should be no more than 255 characters.")
     else:
+        # TODO: Consider move the validation to server side
         if re.match(r"^[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?(?:(?:/[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?)+)?$", repository) is None:
             raise CLIError(
                 "The '--tag' value is not valid. Please check https://docs.docker.com/engine/reference/commandline/tag/.")
