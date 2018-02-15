@@ -5,7 +5,6 @@ Release History
 
 2.0.28
 ++++++
-* Minor fixes
 * Expose telemetry to Azure CLI Extension
 
 2.0.27
