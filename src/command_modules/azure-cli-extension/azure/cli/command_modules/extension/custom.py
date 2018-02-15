@@ -168,6 +168,19 @@ def is_valid_sha256sum(a_file, expected_sum):
     return expected_sum == computed_hash, computed_hash
 
 
+def _augment_telemetry_with_ext_info(extension_name):
+    # The extension must be available before calling this otherwise we can't get the version from metadata
+    if not extension_name:
+        return
+    try:
+        ext = get_extension(extension_name)
+        ext_version = ext.version
+        set_extension_management_detail(extension_name, ext_version)
+    except Exception:  # nopa pylint: disable=broad-except
+        # Don't error on telemetry
+        pass
+
+
 def add_extension(source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
                   pip_extra_index_urls=None, pip_proxy=None):
     ext_sha256 = None
@@ -180,16 +193,16 @@ def add_extension(source=None, extension_name=None, index_url=None, yes=None,  #
             logger.debug(err)
             raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
     _add_whl_ext(source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
-
-    if extension_name:
-        set_extension_management_detail(extension_name)
+    _augment_telemetry_with_ext_info(extension_name)
 
 
 def remove_extension(extension_name):
     try:
+        # Get the extension and it will raise an error if it doesn't exist
         get_extension(extension_name)
+        # We call this just before we remove the extension so we can get the metadata before it is gone
+        _augment_telemetry_with_ext_info(extension_name)
         shutil.rmtree(get_extension_path(extension_name))
-        set_extension_management_detail(extension_name)
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
 
@@ -232,6 +245,8 @@ def update_extension(extension_name, index_url=None, pip_extra_index_urls=None, 
                          pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
             logger.debug('Deleting backup of old extension at %s', backup_dir)
             shutil.rmtree(backup_dir)
+            # This gets the metadata for the extension *after* the update
+            _augment_telemetry_with_ext_info(extension_name)
         except Exception as err:
             logger.error('An error occurred whilst updating.')
             logger.error(err)

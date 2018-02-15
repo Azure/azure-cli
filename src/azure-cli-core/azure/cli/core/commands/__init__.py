@@ -17,16 +17,25 @@ from knack.arguments import CLICommandArgument, ignore_type, ArgumentsContext
 from knack.commands import CLICommand, CommandGroup
 from knack.invocation import CommandInvoker
 from knack.log import get_logger
+from knack.parser import ARGPARSE_SUPPORTED_KWARGS
 from knack.util import CLIError
 
 from azure.cli.core import EXCLUDED_PARAMS
+from azure.cli.core.extension import get_extension
 import azure.cli.core.telemetry as telemetry
 
 logger = get_logger(__name__)
 
-CLI_COMMAND_KWARGS = ['transform', 'table_transformer', 'confirmation', 'exception_handler', 'min_api', 'max_api',
-                      'client_factory', 'operations_tmpl', 'no_wait_param', 'validator', 'resource_type',
-                      'client_arg_name', 'operation_group']
+CLI_COMMON_KWARGS = ['min_api', 'max_api', 'resource_type', 'operation_group',
+                     'custom_command_type', 'command_type']
+
+CLI_COMMAND_KWARGS = ['transform', 'table_transformer', 'confirmation', 'exception_handler',
+                      'client_factory', 'operations_tmpl', 'no_wait_param', 'validator',
+                      'client_arg_name', 'doc_string_source', 'deprecate_info'] + CLI_COMMON_KWARGS
+CLI_PARAM_KWARGS = \
+    ['id_part', 'completer', 'validator', 'options_list', 'configured_default', 'arg_group', 'arg_type'] \
+    + CLI_COMMON_KWARGS + ARGPARSE_SUPPORTED_KWARGS
+
 
 CONFIRM_PARAM_NAME = 'yes'
 
@@ -189,7 +198,7 @@ class AzCliCommand(CLICommand):
 # pylint: disable=too-few-public-methods
 class AzCliCommandInvoker(CommandInvoker):
 
-    # pylint: disable=too-many-statements
+    # pylint: disable=too-many-statements,too-many-locals
     def execute(self, args):
         import knack.events as events
         from knack.util import CommandResultItem, todict
@@ -283,10 +292,19 @@ class AzCliCommandInvoker(CommandInvoker):
             params = self._filter_params(expanded_arg)
 
             command_source = self.commands_loader.command_table[command].command_source
+
+            extension_version = None
+            try:
+                if command_source:
+                    extension_version = get_extension(command_source.extension_name).version
+            except Exception:  # pylint: disable=broad-except
+                pass
+
             telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
                                           [(p.split('=', 1)[0] if p.startswith('--') else p[:2]) for p in args if
                                            (p.startswith('-') and len(p) > 1)],
-                                          extension_name=command_source.extension_name if command_source else None)
+                                          extension_name=command_source.extension_name if command_source else None,
+                                          extension_version=extension_version)
             if command_source:
                 self.data['command_extension_name'] = command_source.extension_name
 
@@ -597,9 +615,12 @@ def _is_poller(obj):
     return False
 
 
-def _merge_kwargs(patch_kwargs, base_kwargs):
+def _merge_kwargs(patch_kwargs, base_kwargs, supported_kwargs=None):
     merged_kwargs = base_kwargs.copy()
     merged_kwargs.update(patch_kwargs)
+    unrecognized_kwargs = [x for x in merged_kwargs if x not in (supported_kwargs or CLI_COMMON_KWARGS)]
+    if unrecognized_kwargs:
+        raise TypeError('unrecognized kwargs: {}'.format(unrecognized_kwargs))
     return merged_kwargs
 
 
@@ -609,9 +630,6 @@ class CliCommandType(object):
     def __init__(self, overrides=None, **kwargs):
         if isinstance(overrides, str):
             raise ValueError("Overrides has to be a {} (cannot be a string)".format(CliCommandType.__name__))
-        unrecognized_kwargs = [x for x in kwargs if x not in CLI_COMMAND_KWARGS]
-        if unrecognized_kwargs:
-            raise TypeError('unrecognized kwargs: {}'.format(unrecognized_kwargs))
         self.settings = {}
         self.update(overrides, **kwargs)
 
@@ -651,7 +669,7 @@ class AzCommandGroup(CommandGroup):
 
     def _merge_kwargs(self, kwargs, base_kwargs=None):
         base = base_kwargs if base_kwargs is not None else getattr(self, 'group_kwargs')
-        return _merge_kwargs(kwargs, base)
+        return _merge_kwargs(kwargs, base, CLI_COMMAND_KWARGS)
 
     def _flatten_kwargs(self, kwargs, default_source_name):
         merged_kwargs = self._merge_kwargs(kwargs)
@@ -761,7 +779,7 @@ class AzCommandGroup(CommandGroup):
         from azure.cli.core.commands.arm import _cli_generic_update_command
 
         self._check_stale()
-        merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs)
+        merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs, CLI_COMMAND_KWARGS)
 
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         setter_op = self._resolve_operation(merged_kwargs, setter_name, setter_type)
@@ -783,9 +801,9 @@ class AzCommandGroup(CommandGroup):
     def generic_wait_command(self, name, getter_name='get', getter_type=None, **kwargs):
         from azure.cli.core.commands.arm import _cli_generic_update_command, _cli_generic_wait_command
         self._check_stale()
-        merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs)
+        merged_kwargs = _merge_kwargs(kwargs, self.group_kwargs, CLI_COMMAND_KWARGS)
         if getter_type:
-            merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs)
+            merged_kwargs = _merge_kwargs(getter_type.settings, merged_kwargs, CLI_COMMAND_KWARGS)
         getter_op = self._resolve_operation(merged_kwargs, getter_name, getter_type)
         _cli_generic_wait_command(
             self.command_loader,
@@ -816,7 +834,7 @@ class AzArgumentContext(ArgumentsContext):
     def __init__(self, command_loader, scope, **kwargs):
         super(AzArgumentContext, self).__init__(command_loader, scope)
         self.scope = scope  # this is called "command" in knack, but that is not an accurate name
-        self.group_kwargs = _merge_kwargs(kwargs, command_loader.module_kwargs)
+        self.group_kwargs = _merge_kwargs(kwargs, command_loader.module_kwargs, CLI_PARAM_KWARGS)
         self.is_stale = False
 
     def __enter__(self):
@@ -849,7 +867,7 @@ class AzArgumentContext(ArgumentsContext):
 
     def _merge_kwargs(self, kwargs, base_kwargs=None):
         base = base_kwargs if base_kwargs is not None else getattr(self, 'group_kwargs')
-        return _merge_kwargs(kwargs, base)
+        return _merge_kwargs(kwargs, base, CLI_PARAM_KWARGS)
 
     # pylint: disable=arguments-differ
     def argument(self, dest, arg_type=None, **kwargs):

@@ -20,6 +20,7 @@ from ._util import (
     get_sql_replication_links_operations,
     get_sql_restorable_dropped_databases_operations,
     get_sql_server_connection_policies_operations,
+    get_sql_server_dns_aliases_operations,
     get_sql_server_keys_operations,
     get_sql_servers_operations,
     get_sql_server_usages_operations,
@@ -230,3 +231,13 @@ def load_command_table(self, _):
     with self.command_group('sql server conn-policy', server_connection_policies_operations, client_factory=get_sql_server_connection_policies_operations) as c:
         c.command('show', 'get')
         c.generic_update_command('update')
+
+    server_dns_aliases_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.server_dns_aliases_operations#ServerDnsAliasesOperations.{}',
+        client_factory=get_sql_server_dns_aliases_operations)
+    with self.command_group('sql server dns-alias', server_dns_aliases_operations, client_factory=get_sql_server_dns_aliases_operations) as c:
+        c.command('show', 'get')
+        c.command('list', 'list_by_server')
+        c.command('create', 'create_or_update')
+        c.command('delete', 'delete')
+        c.custom_command('set', 'server_dns_alias_set')

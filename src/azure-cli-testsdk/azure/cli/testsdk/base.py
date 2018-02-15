@@ -31,8 +31,12 @@ class CheckerMixin(object):
     def _apply_kwargs(self, val):
         try:
             return val.format(**self.kwargs)
-        except Exception:  # pylint: disable=broad-except
+        except AttributeError:
             return val
+        except KeyError as ex:
+            # due to mis-spelled kwarg
+            raise KeyError("Key '{}' not found in kwargs. Check spelling and ensure it has been registered."
+                           .format(ex.args[0]))
 
     def check(self, query, expected_results):
         from azure.cli.testsdk.checkers import JMESPathCheck
@@ -128,10 +132,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         return moniker
 
     def cmd(self, command, checks=None, expect_failure=False):
-        try:
-            command = command.format(**self.kwargs)
-        except KeyError:
-            pass
+        command = self._apply_kwargs(command)
         return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
 
     def get_subscription_id(self):
@@ -152,10 +153,7 @@ class LiveScenarioTest(IntegrationTestBase, CheckerMixin, unittest.TestCase):
         self.kwargs = {}
 
     def cmd(self, command, checks=None, expect_failure=False):
-        try:
-            command = command.format(**self.kwargs)
-        except KeyError:
-            pass
+        command = self._apply_kwargs(command)
         return execute(self.cli_ctx, command, expect_failure=expect_failure).assert_with_checks(checks)
 
     def get_subscription_id(self):
