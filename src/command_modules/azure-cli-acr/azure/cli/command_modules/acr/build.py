@@ -37,31 +37,11 @@ from knack.log import get_logger
 logger = get_logger(__name__)
 
 
-class BlobInfo(object):
-    def __init__(self, blob_sas_url):
-        match = _get_match(blob_sas_url)
-        account_name = match.group('account_name')
-        endpoint_suffix = match.group('endpoint_suffix')
-        container_name = match.group('container_name')
-        blob_name = match.group('blob_name')
-        sas_token = match.group('sas_token')
-
-        if not account_name or not container_name or not blob_name or not sas_token:
-            raise CLIError("Failed to parse the sas url: '{!s}'."
-                           .format(blob_sas_url))
-
-        self.account_name = account_name
-        self.endpoint_suffix = endpoint_suffix
-        self.container_name = container_name
-        self.blob_name = blob_name
-        self.sas_token = sas_token
-
-
 def acr_build_show_logs(cmd,
-                  client,
-                  registry_name,
-                  build_id,
-                  resource_group_name=None):
+                        client,
+                        registry_name,
+                        build_id,
+                        resource_group_name=None):
 
     resource_group_name = get_resource_group_name_by_registry_name(
         cmd.cli_ctx, registry_name, resource_group_name)
@@ -70,22 +50,21 @@ def acr_build_show_logs(cmd,
     custom_headers = dict()
     custom_headers['logType'] = 'RawText'
     build_log_result = client.get_log_link(
-        build_id=build_id, resource_group_name=resource_group_name, 
+        build_id=build_id, resource_group_name=resource_group_name,
         registry_name=registry_name, custom_headers=custom_headers)
     log_file_sas = build_log_result.log_link
 
     if not log_file_sas:
         return 'No logs found.'
 
-    blob_info = BlobInfo(log_file_sas)
+    account_name, endpoint_suffix, container_name, blob_name, sas_token = _get_blob_info(log_file_sas)
 
     byte_size = 1024*4
     timeout_in_minutes = 10
     timeout_in_seconds = timeout_in_minutes * 60
 
-    _stream_logs(byte_size, timeout_in_seconds, 
-                AppendBlobService(account_name=blob_info.account_name, sas_token=blob_info.sas_token, endpoint_suffix=blob_info.endpoint_suffix),
-                blob_info.container_name, blob_info.blob_name)
+    _stream_logs(byte_size, timeout_in_seconds,
+                 AppendBlobService(account_name=account_name, sas_token=sas_token, endpoint_suffix=endpoint_suffix), container_name, blob_name)
 
 
 def _get_match(sas_url):
@@ -202,6 +181,21 @@ def _blob_is_not_complete(metadata):
     return True
 
 
+def _get_blob_info(blob_sas_url):
+    match = _get_match(blob_sas_url)
+    account_name = match.group('account_name')
+    endpoint_suffix = match.group('endpoint_suffix')
+    container_name = match.group('container_name')
+    blob_name = match.group('blob_name')
+    sas_token = match.group('sas_token')
+
+    if not account_name or not container_name or not blob_name or not sas_token:
+        raise CLIError("Failed to parse the sas url: '{!s}'."
+                       .format(blob_sas_url))
+
+    return account_name, endpoint_suffix, container_name, blob_name, sas_token
+
+
 def acr_queue(cmd,
               client,
               registry_name,
@@ -287,7 +281,6 @@ def _check_remote_source_code(source_location):
     if source_location.lower().startswith("git://"):
         return source_location
 
-
     response = requests.head(source_location)
     if response.status_code < 400:
         return source_location
@@ -296,31 +289,36 @@ def _check_remote_source_code(source_location):
 
 
 def _check_image_name(image_name):
-    
+
     # referenc: https://github.com/docker/distribution/tree/master/reference
 
     if not image_name:
         raise CLIError("'--tag' value should not be empty.")
-    
+
     tokens = image_name.split(':')
     if(len(tokens) > 2):
-        raise CLIError("'--tag' value should be repository and optionally a tag in the 'repository:tag' format")
+        raise CLIError(
+            "'--tag' value should be repository and optionally a tag in the 'repository:tag' format")
 
     # check repository
     repository = tokens[0]
     if len(repository) > 255:
-        raise CLIError("The repository of '--tag' value should be no more than 255 characters.")
+        raise CLIError(
+            "The repository of '--tag' value should be no more than 255 characters.")
     else:
         if re.match(r"^[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?(?:(?:/[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)?)+)?$", repository) is None:
-            raise CLIError("The '--tag' value is not valid. Please check https://docs.docker.com/engine/reference/commandline/tag/.")
+            raise CLIError(
+                "The '--tag' value is not valid. Please check https://docs.docker.com/engine/reference/commandline/tag/.")
 
     # check tag
     if len(tokens) == 2:
         tag = tokens[1]
         if re.match(r"^[\w][\w.-]{0,127}$", tag) is None:
-            raise CLIError("The '--tag' value is not valid. Please check https://docs.docker.com/engine/reference/commandline/tag/.")
-            
+            raise CLIError(
+                "The '--tag' value is not valid. Please check https://docs.docker.com/engine/reference/commandline/tag/.")
+
     return image_name
+
 
 def _upload_source_code(client, registry_name, resource_group_name, source_location):
 
@@ -328,12 +326,14 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
                                  "source_archive_{}.tar.gz".format(hash(os.times())))
 
     try:
-        logger.debug("Starting to acquire the access token to upload the source code.")
+        logger.debug(
+            "Starting to acquire the access token to upload the source code.")
 
         source_upload_location = client.get_source_upload_url(
             resource_group_name=resource_group_name, registry_name=registry_name)
 
-        logger.debug("Starting to archive the source code to '{}'.".format(tar_file_path))
+        logger.debug(
+            "Starting to archive the source code to '{}'.".format(tar_file_path))
 
         ignore_list = _load_dockerignore_file(source_location)
 
@@ -341,32 +341,37 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
 
             if ignore_list is None:
                 return tarinfo
-                                    
+
             for item in ignore_list:
-                if re.match(item.pattern, tarinfo.name): 
-                    logger.debug(".dockerignore: rule '{}' matches '{}'.".format(item.rule, tarinfo.name))
+                if re.match(item.pattern, tarinfo.name):
+                    logger.debug(".dockerignore: rule '{}' matches '{}'.".format(
+                        item.rule, tarinfo.name))
                     return None if item.ignore else tarinfo
 
-            logger.debug(".dockerignore: no rule for '{}'.".format(tarinfo.name))
+            logger.debug(
+                ".dockerignore: no rule for '{}'.".format(tarinfo.name))
             return tarinfo
 
         with tarfile.open(tar_file_path, "w:gz") as tar:
             # NOTE: Need to set arcname to empty string otherwise the child item name will have a prefix (eg, ../) which can block unpacking.
             tar.add(source_location, arcname="", filter=_filter_file)
 
-        logger.debug("Starting to upload the archived source code from '{}'.".format(tar_file_path))
+        logger.debug(
+            "Starting to upload the archived source code from '{}'.".format(tar_file_path))
 
-        blob_info = BlobInfo(source_upload_location.upload_url)
+        account_name, endpoint_suffix, container_name, blob_name, sas_token = _get_blob_info(
+            source_upload_location.upload_url)
 
-        BlockBlobService(account_name=blob_info.account_name, sas_token=blob_info.sas_token, endpoint_suffix=blob_info.endpoint_suffix).create_blob_from_path(
-            container_name=blob_info.container_name, blob_name=blob_info.blob_name, file_path=tar_file_path)
+        BlockBlobService(account_name=account_name, sas_token=sas_token, endpoint_suffix=endpoint_suffix).create_blob_from_path(
+            container_name=container_name, blob_name=blob_name, file_path=tar_file_path)
 
         return source_upload_location.relative_path
     except Exception as err:
         raise CLIError(err)
     finally:
         if os.path.exists(tar_file_path):
-            logger.debug("Starting to delete the archived source code from '{}'.".format(tar_file_path))
+            logger.debug(
+                "Starting to delete the archived source code from '{}'.".format(tar_file_path))
             os.remove(tar_file_path)
 
 
@@ -378,15 +383,16 @@ class IgnoreRule(object):
         # ! makes exceptions to exclusions
         if rule.startswith('!'):
             self.ignore = False
-            rule = rule[1:] # remove !
+            rule = rule[1:]  # remove !
 
         tokens = rule.split('/')
         for index, token in enumerate(tokens):
-            # ** matches any number of directories 
+            # ** matches any number of directories
             if token == "**":
                 tokens[index] = ".*"
             else:
-                tokens[index] = token.replace("*", "[^/]*").replace("?", "[^/]")
+                tokens[index] = token.replace(
+                    "*", "[^/]*").replace("?", "[^/]")
 
         self.pattern = "^{}$".format("/".join(tokens))
 
@@ -397,7 +403,7 @@ def _load_dockerignore_file(source_location):
     docker_ignore_file = os.path.join(source_location, ".dockerignore")
     if not os.path.exists(docker_ignore_file):
         return None
-    
+
     ignore_list = []
 
     # The ignore rule at the end has higher priority
@@ -405,11 +411,10 @@ def _load_dockerignore_file(source_location):
         rule = line.rstrip()
 
         # skip empty line and comment
-        if not rule or rule.startswith('#'): 
+        if not rule or rule.startswith('#'):
             continue
-        
-        # add ignore rule 
+
+        # add ignore rule
         ignore_list.append(IgnoreRule(rule))
 
     return ignore_list
-    
