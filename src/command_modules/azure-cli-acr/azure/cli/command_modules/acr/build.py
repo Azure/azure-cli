@@ -199,10 +199,10 @@ def _get_blob_info(blob_sas_url):
 def acr_queue(cmd,
               client,
               registry_name,
+              source_location,              
               image_name=None,
               docker_file_path=None,
               resource_group_name=None,
-              source_location=None,
               timeout=None,
               build_args=None,
               secret_build_args=None,
@@ -215,7 +215,7 @@ def acr_queue(cmd,
         docker_file_path = "Dockerfile"
 
     build_parameters = DockerBuildParameters(docker_file_path)
-    # context_path in tar build is always the source code root folder
+    # context_path in quick build is always the source code root folder
     build_parameters.context_path = "."
 
     if source_location is None:
@@ -277,16 +277,25 @@ def acr_queue(cmd,
 
 def _check_remote_source_code(source_location):
 
-    # NOTE: acr_build doesn't support git repo url
-    if source_location.lower().startswith("git://"):
+    lower_source_location = source_location.lower()
+
+    # git 
+    if lower_source_location.startswith("git@") or lower_source_location.startswith("git://"):
         return source_location
 
-    response = requests.head(source_location)
-    if response.status_code < 400:
-        return source_location
-    else:
-        raise CLIError("'{}' doesn't exist.".format(source_location))
+    # http
+    if lower_source_location.startswith("https://") or lower_source_location.startswith("http://") or lower_source_location.startswith("github.com/"): 
+        if re.search(r"\.git(?:#.+)?$", lower_source_location):
+            # git url must contain ".git"
+            return source_location
+        elif not lower_source_location.startswith("github.com/"):
+            # Others are tarball
+            if requests.head(source_location).status_code < 400:
+                return source_location
+            else:
+                raise CLIError("'{}' doesn't exist.".format(source_location))
 
+    raise CLIError("'{}' is not a valid remote url for git or tarball.".format(source_location))
 
 def _check_image_name(image_name):
 

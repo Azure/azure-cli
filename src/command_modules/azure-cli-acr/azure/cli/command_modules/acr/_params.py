@@ -90,7 +90,8 @@ def load_arguments(self, _):
 
     with self.argument_context('acr build') as c:
         c.argument('build_id', help='The unique build identifier.')
-        c.argument('image_name', options_list=['--tag', '-t'], help="The image name and optionally a tag in the 'name:tag' format.")
+        c.argument('image_name', options_list=['--tag', '-t'], help="The image repository and optionally a tag in the 'repository:tag' format.")
+        c.argument('source_location', options_list=['--context', '-c'], help="The local source code directory path (eg, './src') or the url to a git repository (eg, 'https://github.com/docker/rootfs.git') or a remote tarball (eg, 'http://server/context.tar.gz').")
         c.argument('docker_file_path', options_list=['--file', '-f'], help="The relative path of the the docker file to the source code root folder (Default is 'Dockerfile').")
         c.argument('timeout', help='The build timeout in seconds.')
         c.argument('build_args', nargs='+', help='The space-separated build arguments in a format of <name>=<value>.')
