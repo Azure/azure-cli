@@ -30,7 +30,7 @@ from azure.mgmt.resource.locks.models import ManagementLockObject
 from azure.mgmt.resource.links.models import ResourceLinkProperties
 
 from azure.cli.core.parser import IncorrectUsageError
-from azure.cli.core.util import get_file_json, shell_safe_json_parse
+from azure.cli.core.util import get_file_json, shell_safe_json_parse, no_wait_params
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType, get_sdk
 
@@ -245,8 +245,8 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=t
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     if validate_only:
-        return smc.deployments.validate(resource_group_name, deployment_name, properties, raw=no_wait)
-    return smc.deployments.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
+        return smc.deployments.validate(resource_group_name, deployment_name, properties, **no_wait_params(no_wait))
+    return smc.deployments.create_or_update(resource_group_name, deployment_name, properties, **no_wait_params(no_wait))
 
 
 def _list_resources_odata_filter_builder(resource_group_name=None, resource_provider_namespace=None,

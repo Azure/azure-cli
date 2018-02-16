@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
+from azure.cli.core.util import no_wait_params
+
 from ._util import (
     get_sql_server_azure_ad_administrators_operations,
     get_sql_capabilities_operations,
@@ -66,28 +68,28 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations.databases_operations#DatabasesOperations.{}',
         client_factory=get_sql_databases_operations)
     with self.command_group('sql db', database_operations, client_factory=get_sql_databases_operations) as g:
-        g.custom_command('create', 'db_create', no_wait_param='raw')
-        g.custom_command('copy', 'db_copy', no_wait_param='raw')
-        g.custom_command('restore', 'db_restore', no_wait_param='raw')
+        g.custom_command('create', 'db_create', no_wait_param='no_wait')
+        g.custom_command('copy', 'db_copy', no_wait_param='no_wait')
+        g.custom_command('restore', 'db_restore', no_wait_param='no_wait')
         g.custom_command('rename', 'db_rename')
         g.command('show', 'get')
         g.custom_command('list', 'db_list')
         g.command('delete', 'delete', confirmation=True)
-        g.generic_update_command('update', custom_func_name='db_update', no_wait_param='raw')
+        g.generic_update_command('update', custom_func_name='db_update', no_wait_param=no_wait_params)
         g.custom_command('import', 'db_import')
         g.custom_command('export', 'db_export')
 
     with self.command_group('sql db replica', database_operations, client_factory=get_sql_databases_operations) as g:
-        g.custom_command('create', 'db_create_replica', no_wait_param='raw')
+        g.custom_command('create', 'db_create_replica', no_wait_param='no_wait')
 
     with self.command_group('sql dw', database_operations, client_factory=get_sql_databases_operations) as g:
-        g.custom_command('create', 'dw_create', no_wait_param='raw')
+        g.custom_command('create', 'dw_create', no_wait_param='no_wait')
         g.command('show', 'get')
         g.custom_command('list', 'dw_list')
         g.command('delete', 'delete', confirmation=True)
         g.command('pause', 'pause')
         g.command('resume', 'resume')
-        g.generic_update_command('update', custom_func_name='dw_update', no_wait_param='raw')
+        g.generic_update_command('update', custom_func_name='dw_update', no_wait_param=no_wait_params)
 
     database_operations_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations.database_operations#DatabaseOperations.{}',

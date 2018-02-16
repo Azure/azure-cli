@@ -22,7 +22,8 @@ import six
 
 logger = get_logger(__name__)
 
-EXCLUDED_PARAMS = ['self', 'raw', 'custom_headers', 'operation_config', 'content_version', 'kwargs', 'client']
+EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',
+                   'content_version', 'kwargs', 'client']
 
 
 class AzCli(CLI):

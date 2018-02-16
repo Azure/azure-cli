@@ -227,3 +227,16 @@ DISABLE_VERIFY_VARIABLE_NAME = "AZURE_CLI_DISABLE_CONNECTION_VERIFICATION"
 def should_disable_connection_verify():
     import os
     return bool(os.environ.get(DISABLE_VERIFY_VARIABLE_NAME))
+
+
+def poller_classes():
+    from msrestazure.azure_operation import AzureOperationPoller
+    from msrest.polling.poller import LROPoller
+    return (AzureOperationPoller, LROPoller)
+
+
+def no_wait_params(is_no_wait):
+    """ Handle the parameters required for no-wait support in Autorest 2 & 3 """
+    if is_no_wait:
+        return {'raw': True, 'polling': False}
+    return {'raw': False, 'polling': True}

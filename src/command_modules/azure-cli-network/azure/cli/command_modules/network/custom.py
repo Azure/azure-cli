@@ -5,11 +5,11 @@
 from __future__ import print_function
 
 from collections import Counter, OrderedDict
-import mock
 
 from knack.log import get_logger
 
 from msrestazure.azure_exceptions import CloudError
+from msrestazure.polling.arm_polling import ARMPolling, BadResponse
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
 from azure.mgmt.trafficmanager.models import MonitorProtocol
@@ -17,7 +17,7 @@ from azure.mgmt.trafficmanager.models import MonitorProtocol
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
-from azure.cli.core.util import CLIError
+from azure.cli.core.util import CLIError, no_wait_params
 from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network._util import _get_property, _set_param
 
@@ -213,7 +213,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
 
-    return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
+    return client.create_or_update(resource_group_name, deployment_name, properties, **no_wait_params(no_wait))
 
 
 def update_application_gateway(instance, sku=None, capacity=None, tags=None, enable_http2=None):
@@ -236,7 +236,7 @@ def create_ag_authentication_certificate(cmd, resource_group_name, application_g
     ag = ncf.get(resource_group_name, application_gateway_name)
     new_cert = AuthCert(data=cert_data, name=item_name)
     _upsert(ag, 'authentication_certificates', new_cert, 'name')
-    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def update_ag_authentication_certificate(instance, parent, item_name, cert_data):
@@ -252,7 +252,7 @@ def create_ag_backend_address_pool(cmd, resource_group_name, application_gateway
     new_pool = ApplicationGatewayBackendAddressPool(name=item_name, backend_addresses=servers)
     _upsert(ag, 'backend_address_pools', new_pool, 'name')
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, raw=no_wait)
+        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def update_ag_backend_address_pool(instance, parent, item_name, servers=None):
@@ -272,16 +272,16 @@ def create_ag_frontend_ip_configuration(cmd, resource_group_name, application_ga
     if public_ip_address:
         new_config = ApplicationGatewayFrontendIPConfiguration(
             name=item_name,
-            public_ip_address=SubResource(public_ip_address))
+            public_ip_address=SubResource(id=public_ip_address))
     else:
         new_config = ApplicationGatewayFrontendIPConfiguration(
             name=item_name,
             private_ip_address=private_ip_address if private_ip_address else None,
             private_ip_allocation_method='Static' if private_ip_address else 'Dynamic',
-            subnet=SubResource(subnet))
+            subnet=SubResource(id=subnet))
     _upsert(ag, 'frontend_ip_configurations', new_config, 'name')
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, raw=no_wait)
+        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def update_ag_frontend_ip_configuration(cmd, instance, parent, item_name, public_ip_address=None,
@@ -289,9 +289,9 @@ def update_ag_frontend_ip_configuration(cmd, instance, parent, item_name, public
                                         private_ip_address=None):
     SubResource = cmd.get_models('SubResource')
     if public_ip_address is not None:
-        instance.public_ip_address = SubResource(public_ip_address)
+        instance.public_ip_address = SubResource(id=public_ip_address)
     if subnet is not None:
-        instance.subnet = SubResource(subnet)
+        instance.subnet = SubResource(id=subnet)
     if private_ip_address is not None:
         instance.private_ip_address = private_ip_address
         instance.private_ip_allocation_method = 'Static'
@@ -306,7 +306,7 @@ def create_ag_frontend_port(cmd, resource_group_name, application_gateway_name, 
     new_port = ApplicationGatewayFrontendPort(name=item_name, port=port)
     _upsert(ag, 'frontend_ports', new_port, 'name')
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, raw=no_wait)
+        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def update_ag_frontend_port(instance, parent, item_name, port=None):
@@ -325,27 +325,27 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
         frontend_ip = _get_default_id(ag, 'frontend_ip_configurations', '--frontend-ip')
     new_listener = ApplicationGatewayHttpListener(
         name=item_name,
-        frontend_ip_configuration=SubResource(frontend_ip),
-        frontend_port=SubResource(frontend_port),
+        frontend_ip_configuration=SubResource(id=frontend_ip),
+        frontend_port=SubResource(id=frontend_port),
         host_name=host_name,
         require_server_name_indication=True if ssl_cert and host_name else None,
         protocol='https' if ssl_cert else 'http',
-        ssl_certificate=SubResource(ssl_cert) if ssl_cert else None)
+        ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None)
     _upsert(ag, 'http_listeners', new_listener, 'name')
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, raw=no_wait)
+        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, frontend_port=None,
                             host_name=None, ssl_cert=None):
     SubResource = cmd.get_models('SubResource')
     if frontend_ip is not None:
-        instance.frontend_ip_configuration = SubResource(frontend_ip)
+        instance.frontend_ip_configuration = SubResource(id=frontend_ip)
     if frontend_port is not None:
-        instance.frontend_port = SubResource(frontend_port)
+        instance.frontend_port = SubResource(id=frontend_port)
     if ssl_cert is not None:
         if ssl_cert:
-            instance.ssl_certificate = SubResource(ssl_cert)
+            instance.ssl_certificate = SubResource(id=ssl_cert)
             instance.protocol = 'Https'
         else:
             instance.ssl_certificate = None
@@ -370,12 +370,12 @@ def create_ag_backend_http_settings_collection(cmd, resource_group_name, applica
         protocol=protocol,
         cookie_based_affinity=cookie_based_affinity or 'Disabled',
         request_timeout=timeout,
-        probe=SubResource(probe) if probe else None,
+        probe=SubResource(id=probe) if probe else None,
         name=item_name)
     if cmd.supported_api_version(min_api='2016-12-01'):
         new_settings.connection_draining = \
             ApplicationGatewayConnectionDraining(
-                bool(connection_draining_timeout), connection_draining_timeout or 1)
+                enabled=bool(connection_draining_timeout), drain_timeout_in_sec=connection_draining_timeout or 1)
     if cmd.supported_api_version(min_api='2017-06-01'):
         new_settings.host_name = host_name
         new_settings.pick_host_name_from_backend_address = host_name_from_backend_pool
@@ -384,7 +384,7 @@ def create_ag_backend_http_settings_collection(cmd, resource_group_name, applica
         new_settings.path = path
     _upsert(ag, 'backend_http_settings_collection', new_settings, 'name')
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, raw=no_wait)
+        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def update_ag_backend_http_settings_collection(cmd, instance, parent, item_name, port=None, probe=None, protocol=None,
@@ -396,7 +396,7 @@ def update_ag_backend_http_settings_collection(cmd, instance, parent, item_name,
     if port is not None:
         instance.port = port
     if probe is not None:
-        instance.probe = SubResource(probe)
+        instance.probe = SubResource(id=probe)
     if protocol is not None:
         instance.protocol = protocol
     if cookie_based_affinity is not None:
@@ -429,13 +429,13 @@ def create_ag_redirect_configuration(cmd, resource_group_name, application_gatew
     new_config = ApplicationGatewayRedirectConfiguration(
         name=item_name,
         redirect_type=redirect_type,
-        target_listener=SubResource(target_listener) if target_listener else None,
+        target_listener=SubResource(id=target_listener) if target_listener else None,
         target_url=target_url,
         include_path=include_path,
         include_query_string=include_query_string)
     _upsert(ag, 'redirect_configurations', new_config, 'name')
     return ncf.create_or_update(
-        resource_group_name, application_gateway_name, ag, raw=no_wait)
+        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def update_ag_redirect_configuration(cmd, instance, parent, item_name, redirect_type=None,
@@ -445,7 +445,7 @@ def update_ag_redirect_configuration(cmd, instance, parent, item_name, redirect_
     if redirect_type:
         instance.redirect_type = redirect_type
     if target_listener:
-        instance.target_listener = SubResource(target_listener)
+        instance.target_listener = SubResource(id=target_listener)
         instance.target_url = None
     if target_url:
         instance.target_listener = None
@@ -479,7 +479,7 @@ def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_nam
 
     _upsert(ag, 'probes', new_probe, 'name')
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, raw=no_wait)
+        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, path=None,
@@ -528,15 +528,15 @@ def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway
     new_rule = ApplicationGatewayRequestRoutingRule(
         name=item_name,
         rule_type=rule_type,
-        backend_address_pool=SubResource(address_pool) if address_pool else None,
-        backend_http_settings=SubResource(http_settings) if http_settings else None,
-        http_listener=SubResource(http_listener),
-        url_path_map=SubResource(url_path_map) if url_path_map else None)
+        backend_address_pool=SubResource(id=address_pool) if address_pool else None,
+        backend_http_settings=SubResource(id=http_settings) if http_settings else None,
+        http_listener=SubResource(id=http_listener),
+        url_path_map=SubResource(id=url_path_map) if url_path_map else None)
     if cmd.supported_api_version(min_api='2017-06-01'):
-        new_rule.redirect_configuration = SubResource(redirect_config) if redirect_config else None
+        new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else None
     _upsert(ag, 'request_routing_rules', new_rule, 'name')
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, raw=no_wait)
+        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_pool=None,
@@ -544,15 +544,15 @@ def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_poo
                                    rule_type=None):
     SubResource = cmd.get_models('SubResource')
     if address_pool is not None:
-        instance.backend_address_pool = SubResource(address_pool)
+        instance.backend_address_pool = SubResource(id=address_pool)
     if http_settings is not None:
-        instance.backend_http_settings = SubResource(http_settings)
+        instance.backend_http_settings = SubResource(id=http_settings)
     if redirect_config is not None:
-        instance.redirect_configuration = SubResource(redirect_config)
+        instance.redirect_configuration = SubResource(id=redirect_config)
     if http_listener is not None:
-        instance.http_listener = SubResource(http_listener)
+        instance.http_listener = SubResource(id=http_listener)
     if url_path_map is not None:
-        instance.url_path_map = SubResource(url_path_map)
+        instance.url_path_map = SubResource(id=url_path_map)
     if rule_type is not None:
         instance.rule_type = rule_type
     return parent
@@ -567,7 +567,7 @@ def create_ag_ssl_certificate(cmd, resource_group_name, application_gateway_name
         name=item_name, data=cert_data, password=cert_password)
     _upsert(ag, 'ssl_certificates', new_cert, 'name')
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, raw=no_wait)
+        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_password=None):
@@ -585,7 +585,7 @@ def set_ag_ssl_policy_2017_03_01(cmd, resource_group_name, application_gateway_n
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(
         disabled_ssl_protocols=disabled_ssl_protocols)
-    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def set_ag_ssl_policy_2017_06_01(cmd, resource_group_name, application_gateway_name, policy_name=None, policy_type=None,
@@ -606,7 +606,7 @@ def set_ag_ssl_policy_2017_06_01(cmd, resource_group_name, application_gateway_n
         disabled_ssl_protocols=disabled_ssl_protocols,
         cipher_suites=cipher_suites,
         min_protocol_version=min_protocol_version)
-    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def show_ag_ssl_policy(cmd, resource_group_name, application_gateway_name):
@@ -625,19 +625,19 @@ def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, i
 
     new_rule = ApplicationGatewayPathRule(
         name=rule_name,
-        backend_address_pool=SubResource(address_pool) if address_pool else None,
-        backend_http_settings=SubResource(http_settings) if http_settings else None,
+        backend_address_pool=SubResource(id=address_pool) if address_pool else None,
+        backend_http_settings=SubResource(id=http_settings) if http_settings else None,
         paths=paths
     )
     new_map = ApplicationGatewayUrlPathMap(
         name=item_name,
-        default_backend_address_pool=SubResource(default_address_pool) if default_address_pool else None,
-        default_backend_http_settings=SubResource(default_http_settings) if default_http_settings else None,
+        default_backend_address_pool=SubResource(id=default_address_pool) if default_address_pool else None,
+        default_backend_http_settings=SubResource(id=default_http_settings) if default_http_settings else None,
         path_rules=[])
     if cmd.supported_api_version(min_api='2017-06-01'):
-        new_rule.redirect_configuration = SubResource(redirect_config) if redirect_config else None
+        new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else None
         new_map.default_redirect_configuration = \
-            SubResource(default_redirect_config) if default_redirect_config else None
+            SubResource(id=default_redirect_config) if default_redirect_config else None
 
     # pull defaults from the rule specific properties if the default-* option isn't specified
     if new_rule.backend_address_pool and not new_map.default_backend_address_pool:
@@ -652,7 +652,7 @@ def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, i
     new_map.path_rules.append(new_rule)
     _upsert(ag, 'url_path_maps', new_map, 'name')
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, raw=no_wait)
+        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def update_ag_url_path_map(cmd, instance, parent, item_name, default_address_pool=None,
@@ -661,17 +661,17 @@ def update_ag_url_path_map(cmd, instance, parent, item_name, default_address_poo
     if default_address_pool == '':
         instance.default_backend_address_pool = None
     elif default_address_pool:
-        instance.default_backend_address_pool = SubResource(default_address_pool)
+        instance.default_backend_address_pool = SubResource(id=default_address_pool)
 
     if default_http_settings == '':
         instance.default_backend_http_settings = None
     elif default_http_settings:
-        instance.default_backend_http_settings = SubResource(default_http_settings)
+        instance.default_backend_http_settings = SubResource(id=default_http_settings)
 
     if default_redirect_config == '':
         instance.default_redirect_configuration = None
     elif default_redirect_config:
-        instance.default_redirect_configuration = SubResource(default_redirect_config)
+        instance.default_redirect_configuration = SubResource(id=default_redirect_config)
     return parent
 
 
@@ -684,22 +684,22 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
     url_map = next((x for x in ag.url_path_maps if x.name == url_path_map_name), None)
     if not url_map:
         raise CLIError('URL path map "{}" not found.'.format(url_path_map_name))
-    default_backend_pool = SubResource(url_map.default_backend_address_pool.id) \
+    default_backend_pool = SubResource(id=url_map.default_backend_address_pool.id) \
         if url_map.default_backend_address_pool else None
-    default_http_settings = SubResource(url_map.default_backend_http_settings.id) \
+    default_http_settings = SubResource(id=url_map.default_backend_http_settings.id) \
         if url_map.default_backend_http_settings else None
     new_rule = ApplicationGatewayPathRule(
         name=item_name,
         paths=paths,
-        backend_address_pool=SubResource(address_pool) if address_pool else default_backend_pool,
-        backend_http_settings=SubResource(http_settings) if http_settings else default_http_settings)
+        backend_address_pool=SubResource(id=address_pool) if address_pool else default_backend_pool,
+        backend_http_settings=SubResource(id=http_settings) if http_settings else default_http_settings)
     if cmd.supported_api_version(min_api='2017-06-01'):
-        default_redirect = SubResource(url_map.default_redirect_configuration.id) \
+        default_redirect = SubResource(id=url_map.default_redirect_configuration.id) \
             if url_map.default_redirect_configuration else None
-        new_rule.redirect_configuration = SubResource(redirect_config) if redirect_config else default_redirect
+        new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else default_redirect
     _upsert(url_map, 'path_rules', new_rule, 'name')
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, raw=no_wait)
+        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def delete_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_name, url_path_map_name,
@@ -712,7 +712,7 @@ def delete_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
     url_map.path_rules = \
         [x for x in url_map.path_rules if x.name.lower() != item_name.lower()]
     return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, raw=no_wait)
+        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def set_ag_waf_config_2016_09_01(cmd, resource_group_name, application_gateway_name, enabled,
@@ -726,7 +726,7 @@ def set_ag_waf_config_2016_09_01(cmd, resource_group_name, application_gateway_n
         ApplicationGatewayWebApplicationFirewallConfiguration(
             enabled=(enabled == 'true'), firewall_mode=firewall_mode)
 
-    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def set_ag_waf_config_2017_03_01(cmd, resource_group_name, application_gateway_name, enabled,
@@ -740,7 +740,8 @@ def set_ag_waf_config_2017_03_01(cmd, resource_group_name, application_gateway_n
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.web_application_firewall_configuration = \
         ApplicationGatewayWebApplicationFirewallConfiguration(
-            enabled == 'true', firewall_mode, rule_set_type, rule_set_version)
+            enabled=(enabled == 'true'), firewall_mode=firewall_mode, rule_set_type=rule_set_type,
+            rule_set_version=rule_set_version)
     if disabled_rule_groups or disabled_rules:
         ApplicationGatewayFirewallDisabledRuleGroup = cmd.get_models('ApplicationGatewayFirewallDisabledRuleGroup')
 
@@ -748,7 +749,7 @@ def set_ag_waf_config_2017_03_01(cmd, resource_group_name, application_gateway_n
 
         # disabled groups can be added directly
         for group in disabled_rule_groups or []:
-            disabled_groups.append(ApplicationGatewayFirewallDisabledRuleGroup(group))
+            disabled_groups.append(ApplicationGatewayFirewallDisabledRuleGroup(rule_group_name=group))
 
         def _flatten(collection, expand_property_fn):
             for each in collection:
@@ -769,7 +770,7 @@ def set_ag_waf_config_2017_03_01(cmd, resource_group_name, application_gateway_n
                     disabled_groups.append(disabled_group)
         ag.web_application_firewall_configuration.disabled_rule_groups = disabled_groups
 
-    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, raw=no_wait)
+    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
 
 
 def show_ag_waf_config(cmd, resource_group_name, application_gateway_name):
@@ -981,27 +982,28 @@ def _build_record(data):
     record_type = data['type'].lower()
     try:
         if record_type == 'aaaa':
-            return AaaaRecord(data['ip'])
+            return AaaaRecord(ipv6_address=data['ip'])
         elif record_type == 'a':
-            return ARecord(data['ip'])
+            return ARecord(ipv4_address=data['ip'])
         elif record_type == 'caa':
             return CaaRecord(value=data['value'], flags=data['flags'], tag=data['tag'])
         elif record_type == 'cname':
-            return CnameRecord(data['alias'])
+            return CnameRecord(cname=data['alias'])
         elif record_type == 'mx':
-            return MxRecord(data['preference'], data['host'])
+            return MxRecord(preference=data['preference'], exchange=data['host'])
         elif record_type == 'ns':
-            return NsRecord(data['host'])
+            return NsRecord(nsdname=data['host'])
         elif record_type == 'ptr':
-            return PtrRecord(data['host'])
+            return PtrRecord(ptrdname=data['host'])
         elif record_type == 'soa':
-            return SoaRecord(data['host'], data['email'], data['serial'], data['refresh'],
-                             data['retry'], data['expire'], data['minimum'])
+            return SoaRecord(host=data['host'], email=data['email'], serial_number=data['serial'],
+                             refresh_time=data['refresh'], retry_time=data['retry'], expire_time=data['expire'],
+                             minimum_ttl=data['minimum'])
         elif record_type == 'srv':
-            return SrvRecord(data['priority'], data['weight'], data['port'], data['target'])
+            return SrvRecord(priority=data['priority'], weight=data['weight'], port=data['port'], target=data['target'])
         elif record_type in ['txt', 'spf']:
             text_data = data['txt']
-            return TxtRecord(text_data) if isinstance(text_data, list) else TxtRecord([text_data])
+            return TxtRecord(value=text_data) if isinstance(text_data, list) else TxtRecord(value=[text_data])
     except KeyError as ke:
         raise CLIError("The {} record '{}' is missing a property.  {}"
                        .format(record_type, data['name'], ke))
@@ -1344,9 +1346,9 @@ def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mb
             service_provider_name=service_provider_name,
             peering_location=peering_location,
             bandwidth_in_mbps=bandwidth_in_mbps),
-        sku=ExpressRouteCircuitSku(sku_name, sku_tier, sku_family)
+        sku=ExpressRouteCircuitSku(name=sku_name, tier=sku_tier, family=sku_family)
     )
-    return client.create_or_update(resource_group_name, circuit_name, circuit, raw=no_wait)
+    return client.create_or_update(resource_group_name, circuit_name, circuit, **no_wait_params(no_wait))
 
 
 def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
@@ -1581,7 +1583,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
 
-    return client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
+    return client.create_or_update(resource_group_name, deployment_name, properties, **no_wait_params(no_wait))
 
 
 def create_lb_inbound_nat_rule(
@@ -1674,8 +1676,8 @@ def create_lb_frontend_ip_configuration(
         name=item_name,
         private_ip_address=private_ip_address,
         private_ip_allocation_method=private_ip_address_allocation,
-        public_ip_address=PublicIPAddress(public_ip_address) if public_ip_address else None,
-        subnet=Subnet(subnet) if subnet else None)
+        public_ip_address=PublicIPAddress(id=public_ip_address) if public_ip_address else None,
+        subnet=Subnet(id=subnet) if subnet else None)
 
     if zone and cmd.supported_api_version(min_api='2017-06-01'):
         new_config.zones = zone
@@ -1700,12 +1702,12 @@ def set_lb_frontend_ip_configuration(
     if subnet == '':
         instance.subnet = None
     elif subnet is not None:
-        instance.subnet = Subnet(subnet)
+        instance.subnet = Subnet(id=subnet)
 
     if public_ip_address == '':
         instance.public_ip_address = None
     elif public_ip_address is not None:
-        instance.public_ip_address = PublicIPAddress(public_ip_address)
+        instance.public_ip_address = PublicIPAddress(id=public_ip_address)
 
     return parent
 
@@ -1838,7 +1840,7 @@ def create_local_gateway(cmd, resource_group_name, local_network_gateway_name, g
         local_gateway.bgp_settings = BgpSettings(asn=asn, bgp_peering_address=bgp_peering_address,
                                                  peer_weight=peer_weight)
     return client.create_or_update(
-        resource_group_name, local_network_gateway_name, local_gateway, raw=no_wait)
+        resource_group_name, local_network_gateway_name, local_gateway, **no_wait_params(no_wait))
 
 
 def update_local_gateway(cmd, instance, gateway_ip_address=None, local_address_prefix=None, asn=None,
@@ -1912,7 +1914,7 @@ def update_nic(cmd, instance, network_security_group=None, enable_ip_forwarding=
         instance.network_security_group = None
     elif network_security_group is not None:
         NetworkSecurityGroup = cmd.get_models('NetworkSecurityGroup')
-        instance.network_security_group = NetworkSecurityGroup(network_security_group)
+        instance.network_security_group = NetworkSecurityGroup(id=network_security_group)
 
     if internal_dns_name_label == '':
         instance.dns_settings.internal_dns_name_label = None
@@ -1955,8 +1957,8 @@ def create_nic_ip_config(cmd, resource_group_name, network_interface_name, ip_co
 
     new_config_args = {
         'name': ip_config_name,
-        'subnet': Subnet(subnet) if subnet else None,
-        'public_ip_address': PublicIPAddress(public_ip_address) if public_ip_address else None,
+        'subnet': Subnet(id=subnet) if subnet else None,
+        'public_ip_address': PublicIPAddress(id=public_ip_address) if public_ip_address else None,
         'load_balancer_backend_address_pools': load_balancer_backend_address_pool_ids,
         'load_balancer_inbound_nat_rules': load_balancer_inbound_nat_rule_ids,
         'private_ip_address': private_ip_address,
@@ -2003,12 +2005,12 @@ def set_nic_ip_config(cmd, instance, parent, ip_config_name, subnet=None,
     if subnet == '':
         instance.subnet = None
     elif subnet is not None:
-        instance.subnet = Subnet(subnet)
+        instance.subnet = Subnet(id=subnet)
 
     if public_ip_address == '':
         instance.public_ip_address = None
     elif public_ip_address is not None:
-        instance.public_ip_address = PublicIPAddress(public_ip_address)
+        instance.public_ip_address = PublicIPAddress(id=public_ip_address)
 
     if load_balancer_backend_address_pool_ids == '':
         instance.load_balancer_backend_address_pools = None
@@ -2314,6 +2316,13 @@ def configure_network_watcher(cmd, client, locations, resource_group_name=None, 
     return client.list_all()
 
 
+def show_topology_watcher(cmd, client, resource_group_name, network_watcher_name, target_resource_group_name):
+    TopologyParameters = cmd.get_models('TopologyParameters')
+    return client.get_topology(resource_group_name=resource_group_name,
+                               network_watcher_name=network_watcher_name,
+                               parameters=TopologyParameters(target_resource_group_name=target_resource_group_name))
+
+
 def check_nw_connectivity(cmd, client, watcher_rg, watcher_name, source_resource, source_port=None,
                           dest_resource=None, dest_port=None, dest_address=None,
                           resource_group_name=None):
@@ -2416,7 +2425,7 @@ def start_nw_troubleshooting(cmd, client, watcher_name, watcher_rg, resource, st
     TroubleshootingParameters = cmd.get_models('TroubleshootingParameters')
     params = TroubleshootingParameters(target_resource_id=resource, storage_id=storage_account,
                                        storage_path=storage_path)
-    return client.get_troubleshooting(watcher_rg, watcher_name, params, raw=no_wait)
+    return client.get_troubleshooting(watcher_rg, watcher_name, params, **no_wait_params(no_wait))
 
 
 def show_nw_troubleshooting_result(client, watcher_name, watcher_rg, resource, resource_type=None,
@@ -2471,7 +2480,8 @@ def update_public_ip(cmd, instance, dns_name=None, allocation_method=None, versi
                 instance.dns_settings.reverse_fqdn = reverse_fqdn
         else:
             PublicIPAddressDnsSettings = cmd.get_models('PublicIPAddressDnsSettings')
-            instance.dns_settings = PublicIPAddressDnsSettings(dns_name, None, reverse_fqdn)
+            instance.dns_settings = PublicIPAddressDnsSettings(domain_name_label=dns_name, fqdn=None,
+                                                               reverse_fqdn=reverse_fqdn)
     if allocation_method is not None:
         instance.public_ip_allocation_method = allocation_method
     if version is not None:
@@ -2678,8 +2688,8 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
 
     vnet = VirtualNetwork(
         location=location, tags=tags,
-        dhcp_options=DhcpOptions(dns_servers),
-        address_space=AddressSpace(vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes]))
+        dhcp_options=DhcpOptions(dns_servers=dns_servers),
+        address_space=AddressSpace(address_prefixes=(vnet_prefixes if isinstance(vnet_prefixes, list) else [vnet_prefixes])))  # pylint: disable=line-too-long
     if subnet_name:
         vnet.subnets = [Subnet(name=subnet_name, address_prefix=subnet_prefix)]
     if cmd.supported_api_version(min_api='2017-09-01'):
@@ -2695,7 +2705,7 @@ def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protec
     if vnet_prefixes and instance.address_space:
         instance.address_space.address_prefixes = vnet_prefixes
     elif vnet_prefixes:
-        instance.address_space = AddressSpace(vnet_prefixes)
+        instance.address_space = AddressSpace(address_prefixes=vnet_prefixes)
 
     if dns_servers == ['']:
         instance.dhcp_options.dns_servers = None
@@ -2792,7 +2802,7 @@ def create_vnet_peering(cmd, resource_group_name, virtual_network_name, virtual_
             type='virtualNetworks',
             name=virtual_network_name),
         name=virtual_network_peering_name,
-        remote_virtual_network=SubResource(remote_virtual_network),
+        remote_virtual_network=SubResource(id=remote_virtual_network),
         allow_virtual_network_access=allow_virtual_network_access,
         allow_gateway_transit=allow_gateway_transit,
         allow_forwarded_traffic=allow_forwarded_traffic,
@@ -2897,15 +2907,16 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
         ip_configurations=[])
     for i, public_ip in enumerate(public_ip_address):
         ip_configuration = VirtualNetworkGatewayIPConfiguration(
-            subnet=SubResource(subnet),
-            public_ip_address=SubResource(public_ip),
+            subnet=SubResource(id=subnet),
+            public_ip_address=SubResource(id=public_ip),
             private_ip_allocation_method='Dynamic',
             name='vnetGatewayConfig{}'.format(i)
         )
         vnet_gateway.ip_configurations.append(ip_configuration)
     if asn or bgp_peering_address or peer_weight:
         vnet_gateway.enable_bgp = True
-        vnet_gateway.bgp_settings = BgpSettings(asn, bgp_peering_address, peer_weight)
+        vnet_gateway.bgp_settings = BgpSettings(asn=asn, bgp_peering_address=bgp_peering_address,
+                                                peer_weight=peer_weight)
 
     if any((address_prefixes, radius_secret, radius_server, client_protocol)):
         vnet_gateway.vpn_client_configuration = VpnClientConfiguration()
@@ -2917,7 +2928,7 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
             vnet_gateway.vpn_client_configuration.radius_server_secret = radius_secret
 
     return client.create_or_update(
-        resource_group_name, virtual_network_gateway_name, vnet_gateway, raw=no_wait)
+        resource_group_name, virtual_network_gateway_name, vnet_gateway, **no_wait_params(no_wait))
 
 
 def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
@@ -2966,8 +2977,8 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
         instance.ip_configurations = []
         for i, public_ip in enumerate(public_ip_address):
             ip_configuration = VirtualNetworkGatewayIPConfiguration(
-                subnet=SubResource(subnet_id),
-                public_ip_address=SubResource(public_ip),
+                subnet=SubResource(id=subnet_id),
+                public_ip_address=SubResource(id=public_ip),
                 private_ip_allocation_method='Dynamic', name='vnetGatewayConfig{}'.format(i))
             instance.ip_configurations.append(ip_configuration)
 
@@ -2990,130 +3001,22 @@ def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
     return instance
 
 
-# region VPN CLIENT WORKAROUND
-# This is needed due to NRP doing exactly the opposite of what the specification says they should do.
-# pylint: disable=line-too-long, protected-access, mixed-line-endings
-def _poll(self, update_cmd):
-    from msrestazure.azure_operation import finished, failed, BadResponse, OperationFailed
-    initial_url = self._response.request.url
+# Workaround for https://github.com/Azure/azure-cli/issues/4392
+# TODO The 202 is fixed in newer versions of the SDK
+class VPNFixARMPolling(ARMPolling):
 
-    while not finished(self.status()):
-        self._delay()
-        headers = self._polling_cookie()
-
+    def update_status(self):
         if self._operation.location_url:
-            self._response = update_cmd(
-                self._operation.location_url, headers)
+            self._response = self.request_status(self._operation.location_url)
             self._operation.set_async_url_if_present(self._response)
-            self._operation.get_status_from_location(
-                self._response)
+            self._operation.get_status_from_location(self._response)
         elif self._operation.method == "PUT":
-            self._response = update_cmd(initial_url, headers)
+            initial_url = self._operation.initial_response.request.url
+            self._response = self.request_status(initial_url)
             self._operation.set_async_url_if_present(self._response)
-            self._operation.get_status_from_resource(
-                self._response)
+            self._operation.get_status_from_resource(self._response)
         else:
-            raise BadResponse(
-                'Location header is missing from long-running operation.')
-
-    if failed(self._operation.status):
-        raise OperationFailed("Operation failed or cancelled")
-    elif self._operation.should_do_final_get():
-        self._response = update_cmd(initial_url)
-        self._operation.get_status_from_resource(
-            self._response)
-
-
-# This is needed due to a bug in autorest code generation. It adds 202 as a valid status code.
-def _vpn_client_core(self, url, resource_group_name, virtual_network_gateway_name, parameters, custom_headers=None, raw=False, **operation_config):
-    import uuid
-    from msrest.pipeline import ClientRawResponse
-    from msrestazure.azure_operation import AzureOperationPoller
-    path_format_arguments = {
-        'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
-        'virtualNetworkGatewayName': self._serialize.url("virtual_network_gateway_name", virtual_network_gateway_name, 'str'),
-        'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str')
-    }
-    url = self._client.format_url(url, **path_format_arguments)
-
-    # Construct parameters
-    query_parameters = {}
-    query_parameters['api-version'] = self._serialize.query("self.api_version", self.api_version, 'str')
-
-    # Construct headers
-    header_parameters = {}
-    header_parameters['Content-Type'] = 'application/json; charset=utf-8'
-    if self.config.generate_client_request_id:
-        header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
-    if custom_headers:
-        header_parameters.update(custom_headers)
-    if self.config.accept_language is not None:
-        header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
-
-    # Construct body
-    body_content = self._serialize.body(parameters, 'VpnClientParameters')
-
-    # Construct and send request
-    def long_running_send():
-
-        request = self._client.post(url, query_parameters)
-        return self._client.send(
-            request, header_parameters, body_content, **operation_config)
-
-    def get_long_running_status(status_link, headers=None):
-
-        request = self._client.get(status_link)
-        if headers:
-            request.headers.update(headers)
-        return self._client.send(
-            request, header_parameters, **operation_config)
-
-    def get_long_running_output(response):
-
-        if response.status_code not in [200, 202]:
-            exp = CloudError(response)
-            exp.request_id = response.headers.get('x-ms-request-id')
-            raise exp
-
-        deserialized = None
-
-        if response.status_code in [200, 202]:
-            deserialized = self._deserialize('str', response)
-
-        if raw:
-            client_raw_response = ClientRawResponse(deserialized, response)
-            return client_raw_response
-
-        return deserialized
-
-    if raw:
-        response = long_running_send()
-        return get_long_running_output(response)
-
-    long_running_operation_timeout = operation_config.get(
-        'long_running_operation_timeout',
-        self.config.long_running_operation_timeout)
-    return AzureOperationPoller(
-        long_running_send, get_long_running_output,
-        get_long_running_status, long_running_operation_timeout)
-
-
-@mock.patch('msrestazure.azure_operation.AzureOperationPoller._poll', _poll)
-def _generate_vpn_profile(
-        self, resource_group_name, virtual_network_gateway_name, parameters, custom_headers=None, raw=False, **operation_config):
-    # Construct URL
-    url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkGateways/{virtualNetworkGatewayName}/generatevpnprofile'
-    return _vpn_client_core(self, url, resource_group_name, virtual_network_gateway_name, parameters, custom_headers, raw, **operation_config)
-
-
-@mock.patch('msrestazure.azure_operation.AzureOperationPoller._poll', _poll)
-def _generatevpnclientpackage(
-        self, resource_group_name, virtual_network_gateway_name, parameters, custom_headers=None, raw=False, **operation_config):
-    # Construct URL
-    url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkGateways/{virtualNetworkGatewayName}/generatevpnclientpackage'
-    return _vpn_client_core(self, url, resource_group_name, virtual_network_gateway_name, parameters, custom_headers, raw, **operation_config)
-
-# endregion VPN CLIENT WORKAROUND`
+            raise BadResponse("Unable to find status link for polling.")
 
 
 def generate_vpn_client(cmd, client, resource_group_name, virtual_network_gateway_name, processor_architecture=None,
@@ -3127,10 +3030,12 @@ def generate_vpn_client(cmd, client, resource_group_name, virtual_network_gatewa
         params.authentication_method = authentication_method
         params.radius_server_auth_certificate = radius_server_auth_certificate
         params.client_root_certificates = client_root_certificates
-        return _generate_vpn_profile(client, resource_group_name, virtual_network_gateway_name, params)
+        return client.generate_vpn_profile(resource_group_name, virtual_network_gateway_name, params,
+                                           polling=VPNFixARMPolling())
 
     # legacy implementation
-    return _generatevpnclientpackage(client, resource_group_name, virtual_network_gateway_name, params)
+    return client.generatevpnclientpackage(resource_group_name, virtual_network_gateway_name, params,
+                                           polling=VPNFixARMPolling())
 
 # endregion
 
@@ -3190,7 +3095,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
         return client.validate(resource_group_name, deployment_name, properties)
 
     return client.create_or_update(
-        resource_group_name, deployment_name, properties, raw=no_wait)
+        resource_group_name, deployment_name, properties, **no_wait_params(no_wait))
 
 
 def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, tags=None,
@@ -3249,7 +3154,7 @@ def add_vpn_conn_ipsec_policy(cmd, resource_group_name, connection_name,
         conn.ipsec_policies.append(new_policy)
     else:
         conn.ipsec_policies = [new_policy]
-    return ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
+    return ncf.create_or_update(resource_group_name, connection_name, conn, **no_wait_params(no_wait))
 
 
 def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_wait=False):
@@ -3258,10 +3163,10 @@ def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_
     conn.ipsec_policies = None
     conn.use_policy_based_traffic_selectors = False
     if no_wait:
-        return ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
+        return ncf.create_or_update(resource_group_name, connection_name, conn, **no_wait_params(no_wait))
 
     from azure.cli.core.commands import LongRunningOperation
-    poller = ncf.create_or_update(resource_group_name, connection_name, conn, raw=no_wait)
+    poller = ncf.create_or_update(resource_group_name, connection_name, conn, **no_wait_params(no_wait))
     return LongRunningOperation(cmd.cli_ctx)(poller).ipsec_policies
 
 

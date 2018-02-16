@@ -157,6 +157,42 @@ Since most wait commands rely on a simple GET call from the SDK, most of these e
    g.generic_wait_command('wait')
 ```
 
+**(4) Supporting --no-wait**
+
+When registering a command, the `no_wait_param` can be used to specify the parameter(s) to be passed to your command handler.
+
+***no_wait_param as a string***
+
+```Python
+command(..., no_wait_param='no_wait')
+```
+
+`no_wait_param` is the name of a boolean parameter that will be exposed as `--no-wait` to skip long running operation polling.
+This is the most straightforward way to use `no_wait_param`.
+
+In the example above, we specify that if `--no-wait` is passed on the command line, the CLI should set the `no_wait` argument to `True` when calling our command handler.
+
+***no_wait_param as a callable***
+
+```Python
+
+def my_no_wait_callable(is_no_wait):
+    if is_no_wait:
+        return {'arg_1': True, 'arg_2': False}
+    return {'arg_1': False, 'arg_2': True}
+
+command(..., no_wait_param=my_no_wait_callable)
+```
+
+`no_wait_param` is a callable that takes one boolean argument as input and returns a dictionary with key being the name of the argument on the command handler and key being the value to pass in for this argument.
+
+This is useful when to support `--no-wait` in your command handler, multiple arguments need to be specified.
+
+Ensure that for both the `True` and `False` cases, the callable returns the same dictionary keys.
+
+For most cases, such as Autorest based SDKs, the following utility method should be sufficient `from azure.cli.core.util import no_wait_params`.
+
+
 ## Write Help Entry
 
 See the following for guidance on writing a help entry: https://github.com/Azure/azure-cli/blob/master/doc/authoring_help.md

@@ -8,7 +8,7 @@
 import subprocess
 import sys
 
-ALLOWED_ERRORS = []
+ALLOWED_ERRORS = ['azure-batch-extensions 1.0.1 has requirement azure-mgmt-storage<2,>=1.0, but you have azure-mgmt-storage 2.0.0.']
 
 
 def init(root):

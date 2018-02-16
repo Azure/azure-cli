@@ -43,7 +43,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=storage_account_custom_type) as g:
         g.command('check-name', 'check_name_availability')
         g.custom_command('create', 'create_storage_account', min_api='2016-01-01')
-        g.custom_command('create', 'create_storage_account_with_account_type', max_api='2015-06-15')
         g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get_properties', exception_handler=g.get_handler_suppress_404())
         g.custom_command('list', 'list_storage_accounts')
