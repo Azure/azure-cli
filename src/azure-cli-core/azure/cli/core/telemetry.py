@@ -42,8 +42,10 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     extension_version = None
     feedback = None
     extension_management_detail = None
+    raw_command = None
 
     def add_exception(self, exception, fault_type, description=None, message=''):
+        fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
         details = {
             'Reserved.DataModel.EntityType': 'Fault',
             'Reserved.DataModel.Fault.Description': description or fault_type,
@@ -51,10 +53,11 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
             'Reserved.DataModel.Fault.TypeString': exception.__class__.__name__,
             'Reserved.DataModel.Fault.Exception.Message': _remove_cmd_chars(
                 message or str(exception)),
-            'Reserved.DataModel.Fault.Exception.StackTrace': _remove_cmd_chars(_get_stack_trace())
+            'Reserved.DataModel.Fault.Exception.StackTrace': _remove_cmd_chars(_get_stack_trace()),
+            AZURE_CLI_PREFIX + 'FaultType': fault_type.lower()
         }
-        fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
-        fault_name = '{}/commands/{}'.format(PRODUCT_NAME, fault_type.lower())
+
+        fault_name = '{}/fault'.format(PRODUCT_NAME)
 
         self.exceptions.append((fault_name, details))
 
@@ -68,7 +71,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         user_task.update(base)
         user_task.update(cli)
 
-        events.append({'name': self.event_name, 'properties': user_task})
+        events.append({'name': '{}/command'.format(PRODUCT_NAME), 'properties': user_task})
 
         for name, props in self.exceptions:
             props.update(base)
@@ -144,6 +147,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.set_custom_properties(result, 'StartTime', str(self.start_time))
         self.set_custom_properties(result, 'EndTime', str(self.end_time))
         self.set_custom_properties(result, 'OutputType', self.output_type)
+        self.set_custom_properties(result, 'RawCommand', self.raw_command)
         self.set_custom_properties(result, 'Params', ','.join(self.parameters or []))
         self.set_custom_properties(result, 'PythonVersion', platform.python_version())
         self.set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
@@ -158,16 +162,12 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         return self.command.lower().replace('-', '').replace(' ', '-')
 
     @property
-    def event_name(self):
-        return '{}/{}/{}'.format(PRODUCT_NAME, self.feature_name, self.command_name)
-
-    @property
     def feature_name(self):
         # The feature name is used to created the event name. The feature name should be eventually
         # the module name. However, it takes time to resolve the actual module name using pip
         # module. Therefore, a hard coded replacement is used before a better solution is
         # implemented
-        return 'commands'
+        return 'command'
 
     @property
     def module_version(self):
@@ -286,6 +286,12 @@ def set_command_details(command, output_type=None, parameters=None, extension_na
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def set_module_correlation_data(correlation_data):
     _session.module_correlation = correlation_data[:512]
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_raw_command_name(command):
+    # the raw command name user inputs
+    _session.raw_command = command
 
 
 # definitions
