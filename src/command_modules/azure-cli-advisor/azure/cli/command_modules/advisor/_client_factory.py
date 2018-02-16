@@ -10,8 +10,8 @@ def cf_advisor(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, AdvisorManagementClient)
 
 
-def advisor_mgmt_client_factory(cli_ctx, **kwargs):
-    return cf_advisor(cli_ctx, **kwargs)
+def advisor_mgmt_client_factory(cli_ctx, _):
+    return cf_advisor(cli_ctx)
 
 
 def recommendations_mgmt_client_factory(cli_ctx, _):
