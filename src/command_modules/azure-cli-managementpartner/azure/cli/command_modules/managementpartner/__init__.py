@@ -24,4 +24,8 @@ class ManagementpartnerCommandsLoader(AzCommandsLoader):
         load_command_table(self, args)
         return self.command_table
 
+    def load_arguments(self, command):
+        from azure.cli.command_modules.managementpartner._params import load_arguments
+        load_arguments(self, command)
+
 COMMAND_LOADER_CLS = ManagementpartnerCommandsLoader

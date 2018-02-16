@@ -20,7 +20,7 @@ def load_command_table(self, _):
     )
 
     with self.command_group('managementpartner', managementpartner_partner_sdk) as g:
-        g.command('get', 'get')
+        g.command('show', 'get')
         g.command('create', 'create')
         g.command('update', 'update')
         g.command('delete', 'delete')

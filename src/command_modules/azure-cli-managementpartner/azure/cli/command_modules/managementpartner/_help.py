@@ -7,45 +7,25 @@ from knack.help_files import helps
 
 helps['managementpartner'] = """
     type: group
-    short-summary: Manage Azure ManagementPartner.
+    short-summary: Allows the partners to associate a Microsoft Partner Network(MPN) ID to a user or service principal in the customer‘s Azure directory.
 """
 
 helps['managementpartner create'] = """
     type: command
-    short-summary: Create new management partner
-    long-summary: Add a management partner id to the current user
-    parameters:
-        - name: --partner-id
-          type: string
-          short-summary: Id of management partner
+    short-summary: Associates a Microsoft Partner Network(MPN) ID to the current authenticated user or service principal.  
 """
 
-helps['managementpartner get'] = """
+helps['managementpartner show'] = """
     type: command
-    short-summary: Get the management partner
-    long-summary: Get the management partner id for the current user
-    parameters:
-        - name: --partner-id
-          type: string
-          short-summary: Id of management partner
+    short-summary: Gets the Microsoft Partner Network(MPN) ID of the current authenticated user or service principal.  
 """
 
 helps['managementpartner update'] = """
     type: command
-    short-summary: Update the management partner
-    long-summary: update the management partner id for the current user
-    parameters:
-        - name: --partner-id
-          type: string
-          short-summary: Id of management partner
+    short-summary: Updates the Microsoft Partner Network(MPN) ID of the current authenticated user or service principal.
 """
 
-helps['managementpartner remove'] = """
+helps['managementpartner delete'] = """
     type: command
-    short-summary: Remove the management partner
-    long-summary: Remove the management partner id for the current user
-    parameters:
-        - name: --partner-id
-          type: string
-          short-summary: Id of management partner
+    short-summary: Delete the Microsoft Partner Network(MPN) ID of the current authenticated user or service principal.
 """

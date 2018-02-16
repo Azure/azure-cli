@@ -40,7 +40,7 @@ class AzureManagementPartnerTests(ScenarioTest):
         # Cleanup
         self.cmd('az managementpartner delete --partner-id {partnerid}')
 
-    def test_get_managementpartner(self):
+    def test_show_managementpartner(self):
         self.kwargs.update({
             'partnerid': '123456'
         })
@@ -48,7 +48,7 @@ class AzureManagementPartnerTests(ScenarioTest):
         self.cmd('az managementpartner create --partner-id {partnerid}')
 
         # Run
-        result = self.cmd('az managementpartner get --partner-id {partnerid}')\
+        result = self.cmd('az managementpartner show --partner-id {partnerid}')\
                      .get_output_in_json()
 
         # Validate
