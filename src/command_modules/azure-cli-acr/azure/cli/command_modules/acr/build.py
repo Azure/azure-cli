@@ -266,7 +266,7 @@ def acr_queue(cmd,
         result = LongRunningOperation(cmd.cli_ctx)(client.queue(
             build_request=build_request, resource_group_name=resource_group_name, registry_name=registry_name))
 
-        print("Successfully queued a build with build-id: {}.".format(result.build_id))
+        print("Queued a build with build-id: {}.".format(result.build_id))
 
         if show_logs == 'true':
             print("Starting to stream the logs...")
@@ -342,7 +342,7 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
         source_upload_location = client.get_source_upload_url(
             resource_group_name=resource_group_name, registry_name=registry_name)
 
-        logger.debug(
+        print(
             "Starting to archive the source code to '{}'.".format(tar_file_path))
 
         ignore_list = _load_dockerignore_file(source_location)
@@ -365,6 +365,10 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
         with tarfile.open(tar_file_path, "w:gz") as tar:
             # NOTE: Need to set arcname to empty string otherwise the child item name will have a prefix (eg, ../) which can block unpacking.
             tar.add(source_location, arcname="", filter=_filter_file)
+
+        print(
+            "The source code tarball file size is {} bytes.".format(os.path.getsize(tar_file_path))
+        )
 
         logger.debug(
             "Starting to upload the archived source code from '{}'.".format(tar_file_path))
