@@ -71,5 +71,4 @@ def load_command_table(self, _):
         g.generic_wait_command('wait')
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
-        g.custom_command('get-versions', 'aks_get_versions', table_transformer=aks_versions_table_format,
-                         deprecate_info="az aks get-upgrades")
+        g.custom_command('get-versions', 'aks_get_versions', table_transformer=aks_versions_table_format)
