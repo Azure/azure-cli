@@ -5,7 +5,7 @@
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format
-from azure.cli.core.util import empty_on_404
+from azure.cli.core.util import empty_on_404, no_wait_params
 
 from ._client_factory import cf_container_services
 from ._client_factory import cf_managed_clusters
@@ -56,7 +56,7 @@ def load_command_table(self, _):
     with self.command_group('aks', managed_clusters_sdk, client_factory=cf_managed_clusters) as g:
         g.custom_command('browse', 'aks_browse')
         g.custom_command('create', 'aks_create', no_wait_param='no_wait')
-        g.command('delete', 'delete', no_wait_param='raw', confirmation=True)
+        g.command('delete', 'delete', no_wait_param=no_wait_params, confirmation=True)
         g.custom_command('get-credentials', 'aks_get_credentials')
         g.command('get-upgrades', 'get_upgrade_profile', table_transformer=aks_upgrades_table_format)
         g.custom_command('install-cli', 'k8s_install_cli', client_factory=None)

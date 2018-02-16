@@ -873,7 +873,7 @@ def process_nw_topology_namespace(cmd, namespace):
         namespace.location = resource_group.location  # pylint: disable=no-member
 
     get_network_watcher_from_location(
-        watcher_name='network_watcher_name', rg_name='resource_group_name')(cmd, namespace)
+        remove=True, watcher_name='network_watcher_name', rg_name='resource_group_name')(cmd, namespace)
 
 
 def process_nw_packet_capture_create_namespace(cmd, namespace):

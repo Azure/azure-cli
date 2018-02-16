@@ -3,6 +3,10 @@
 Release History
 ===============
 
+1.0.7
++++++
+* Support Autorest 3.0 based SDKs
+
 1.0.6
 +++++
 * New feature: 'az backup item list' command now has '--container-name' parameter as optional instead of mandatory and output contains item health details.

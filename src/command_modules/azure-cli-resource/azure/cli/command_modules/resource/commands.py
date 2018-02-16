@@ -125,8 +125,10 @@ def load_command_table(self, _):
         g.custom_command('show', 'get_lock', exception_handler=empty_on_404)
         g.custom_command('update', 'update_lock')
 
+    from azure.cli.core.util import no_wait_params
+
     with self.command_group('group', resource_group_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.command('delete', 'delete', no_wait_param='raw', confirmation=True)
+        g.command('delete', 'delete', no_wait_param=no_wait_params, confirmation=True)
         g.command('show', 'get', exception_handler=empty_on_404)
         g.command('exists', 'check_existence')
         g.custom_command('list', 'list_resource_groups', table_transformer=transform_resource_group_list)
