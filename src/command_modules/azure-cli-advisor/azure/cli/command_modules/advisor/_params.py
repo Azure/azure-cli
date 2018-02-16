@@ -20,7 +20,7 @@ def load_arguments(self, _):
                                    help='One or more resource IDs (space-delimited). If provided, no other '
                                         '"Resource Id" arguments should be specified.')
 
-    name_arg_type = CLIArgumentType(options_list=['--name', '-n'], id_part='name',
+    name_arg_type = CLIArgumentType(options_list=['--name', '-n'], id_part='child_name_1',
                                     help='The name of the recommendation as output by the list command.',
                                     completer=get_resource_name_completion_list('Microsoft.Advisor/recommendations'))
 

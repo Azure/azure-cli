@@ -22,30 +22,32 @@ def cli_advisor_disable_recommendations(client, resource_group_name,
         resource_group_name=resource_group_name)
     rec = next((r for r in recs if r.name == recommendation_name), None)
 
-    if rec:
-        suppressionName = str(uuid.uuid4())
-        ttl = '{}:00:00:00'.format(days) if days else ''
+    if not rec:
+        raise CLIError(
+            "Recommendation with name {} in resource group {} not found".format(
+                recommendation_name,
+                resource_group_name))
 
-        result = _cli_advisor_parse_recommendation_uri(rec.id)
-        resourceUri = result['resourceUri']
-        recommendationId = result['recommendationId']
+    suppressionName = str(uuid.uuid4())
+    ttl = '{}:00:00:00'.format(days) if days else ''
 
-        client.suppressions.create(
-            resource_uri=resourceUri,
-            recommendation_id=recommendationId,
-            name=suppressionName,
-            ttl=ttl
-        )
+    result = _cli_advisor_parse_recommendation_uri(rec.id)
+    resourceUri = result['resourceUri']
+    recommendationId = result['recommendationId']
 
-        # return recommendation object for consistency with enable
-        return client.suppressions.get(
-            resource_uri=resourceUri,
-            recommendation_id=recommendationId,
-            name=suppressionName
-        )
+    sup = client.suppressions.create(
+        resource_uri=resourceUri,
+        recommendation_id=recommendationId,
+        name=suppressionName,
+        ttl=ttl
+    )
 
-    raise CLIError(
-        "Recommendation with name '{recommendation_name}' in resource group '{resource_group_name}' not found")
+    if rec.suppression_ids:
+        rec.suppression_ids.append(sup.suppression_id)
+    else:
+        rec.suppression_ids = [sup.suppression_id]
+
+    return rec
 
 
 def cli_advisor_enable_recommendations(client, resource_group_name, recommendation_name):
@@ -55,33 +57,44 @@ def cli_advisor_enable_recommendations(client, resource_group_name, recommendati
         client=client.recommendations,
         resource_group_name=resource_group_name)
     rec = next((r for r in recs if r.name == recommendation_name), None)
+
     if rec:
         matches = [x for x in allSups if x.suppression_id in rec.suppression_ids]
+    else:
+        matches = [s for s in allSups if 'Microsoft.Advisor/recommendations/{}'.format(recommendation_name) in s.id]
+
+    if matches:
         for match in matches:
+            result = _cli_advisor_parse_recommendation_uri(match.id)
             client.suppressions.delete(
-                resource_uri=_cli_advisor_parse_recommendation_uri(rec.id)['resourceUri'],
-                recommendation_id=recommendation_name,
+                resource_uri=result['resourceUri'],
+                recommendation_id=result['recommendationId'],
                 name=match.name
             )
-        rec.suppression_ids = None
-        return rec
 
-    raise CLIError(
-        "Recommendation with name '{recommendation_name}' in resource group '{resource_group_name}' not found")
+        rec = cli_advisor_list_recommendations(
+            client=client.recommendations,
+            ids=result['resourceUri'])
+
+    return rec
 
 
-def cli_advisor_list_configurations(client):
+def cli_advisor_list_configuration(client):
     return client.list_by_subscription()
 
 
 def cli_advisor_show_configuration(client, resource_group_name=None):
+    output = None
     if resource_group_name:
-        return client.list_by_resource_group(resource_group_name)
-    return client.list_by_subscription()[0]
+        output = client.list_by_resource_group(resource_group_name)
+    else:
+        output = client.list_by_subscription()
+    # the list is guaranteed to have one element
+    return list(output)[0]
 
 
-def cli_advisor_update_configurations(instance, low_cpu_threshold=None,
-                                      exclude=None, include=None):
+def cli_advisor_update_configuration(instance, low_cpu_threshold=None,
+                                     exclude=None, include=None):
     instance.properties.low_cpu_threshold = low_cpu_threshold
     instance.properties.exclude = exclude
     if include:
@@ -96,13 +109,13 @@ def _cli_advisor_build_filter_string(ids=None, resource_group_name=None, categor
     if ids:
         idFilter = ' or '.join(["ResourceId eq '{}'".format(id_arg) for id_arg in ids])
     elif resource_group_name:
-        idFilter = "ResourceGroup eq '{resource_group_name}'"
+        idFilter = "ResourceGroup eq '{}'".format(resource_group_name)
 
     categoryFilter = "Category eq '{}'".format(category) if category else None
 
     if idFilter:
         if categoryFilter:
-            return '({idFilter}) and {categoryFilter}'
+            return '({}) and {}'.format(idFilter, categoryFilter)
         return idFilter
     elif categoryFilter:
         return categoryFilter
@@ -121,7 +134,10 @@ def _cli_advisor_parse_operation_id(location):
 
 def _cli_advisor_parse_recommendation_uri(recommendationUri):
     resourceUri = recommendationUri[:recommendationUri.find("/providers/Microsoft.Advisor/recommendations")]
-    recommendationId = recommendationUri[recommendationUri.find("/recommendations/") + len('/recommendations/'):]
+    rStart = recommendationUri.find("/recommendations/") + len('/recommendations/')
+    # recommendation ID is a GUID (i.e. a string of length 36)
+    rEnd = rStart + 36
+    recommendationId = recommendationUri[rStart:rEnd]
     return {'resourceUri': resourceUri, 'recommendationId': recommendationId}
 
 

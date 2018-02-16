@@ -33,6 +33,13 @@ helps['advisor configuration show'] = """
 helps['advisor configuration update'] = """
     type: command
     short-summary: Update Azure Advisor configuration.
+    examples:
+        - name: Update low CPU threshold for a given subscription to 20%.
+          text: >
+            az advisor configuration update -l 20
+        - name: Exclude a given resource group from recommendation generation.
+          text: >
+            az advisor configuration update -g myRG -e
 """
 
 helps['advisor recommendation list'] = """

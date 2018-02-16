@@ -22,12 +22,12 @@ def load_command_table(self, _):
                          client_factory=advisor_mgmt_client_factory)
 
     with self.command_group('advisor configuration', client_factory=configurations_mgmt_client_factory) as g:
-        g.custom_command('list', 'cli_advisor_list_configurations')
+        g.custom_command('list', 'cli_advisor_list_configuration')
         g.custom_command('show', 'cli_advisor_show_configuration')
         g.generic_update_command('update',
                                  getter_name='cli_advisor_show_configuration',
                                  getter_type=advisor_custom,
                                  setter_name='_cli_advisor_set_configuration',
                                  setter_type=advisor_custom,
-                                 custom_func_name='cli_advisor_update_configurations',
+                                 custom_func_name='cli_advisor_update_configuration',
                                  custom_func_type=advisor_custom)
