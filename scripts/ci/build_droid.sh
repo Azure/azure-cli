@@ -24,13 +24,11 @@ $dp0/build.sh
 
 #############################################
 # Move dockerfile
-cp $dp0/a01/Dockerfile.py36 artifacts/
+cp $dp0/a01/dockerfiles/py36/Dockerfile artifacts/
 
 #############################################
 # Move other scripts for docker
 cp -R $dp0/a01/* artifacts/
-curl -sL https://a01tools.blob.core.windows.net/droid/linux/a01droid -o artifacts/docker_app/a01droid 
-chmod +x artifacts/docker_app/a01droid
 
 #############################################
 # for travis repo slug, remove the suffix to reveal the owner
@@ -52,11 +50,17 @@ if [ $AZURECLIDEV_ACR_SP_USERNAME ] && [ $AZURECLIDEV_ACR_SP_PASSWORD ]; then
 fi
 
 title 'Build docker image'
-docker build -t $image_name -f artifacts/Dockerfile.py36 artifacts
+docker build -t $image_name -f artifacts/Dockerfile artifacts
 
 title 'Push docker image'
 if [ "$1" == "push" ] || [ "$TRAVIS" == "true" ]; then
     docker push $image_name
 else
     echo "Skip"
+fi
+
+title 'Push docker image as latest'
+if [ "$TRAVIS" == "true" ]; then
+    docker tag $image_name azureclidev.azurecr.io/azurecli-test-$image_owner:latest
+    docker push azureclidev.azurecr.io/azurecli-test-$image_owner:latest
 fi
