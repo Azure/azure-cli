@@ -852,5 +852,13 @@ class WebappImplictIdentityTest(ScenarioTest):
         ])
 
 
+class WebappListLocationsFreeSKUTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_list-locations-free-sku-test')
+    def test_webapp_list_locations_free_sku(self, resource_group):
+        asp_F1 = self.cmd('appservice list-locations --sku F1').get_output_in_json()
+        result = self.cmd('appservice list-locations --sku Free').get_output_in_json()
+        self.assertEqual(asp_F1, result)
+
+
 if __name__ == '__main__':
     unittest.main()
