@@ -28,3 +28,7 @@ def pricesheet_mgmt_client_factory(cli_ctx, kwargs):
 
 def marketplace_mgmt_client_factory(cli_ctx, kwargs):
     return cf_consumption(cli_ctx, **kwargs).marketplaces
+
+
+def budget_mgmt_client_factory(cli_ctx, kwargs):
+    return cf_consumption(cli_ctx, **kwargs).budgets

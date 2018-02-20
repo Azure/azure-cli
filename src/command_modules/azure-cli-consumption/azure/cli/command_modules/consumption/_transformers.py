@@ -66,5 +66,29 @@ def marketplace_list_output(result):
     return result
 
 
-def transform_marketplace_get_output(result):
+def budget_list_output(result):
+    return result
+
+
+def budget_show_output(result):
+    return result
+
+
+def budget_create_update_output(result):
+    return result
+
+
+def transform_marketplace_list_output(result):
     return marketplace_list_output(result)
+
+
+def transform_budget_list_output(result):
+    return budget_list_output(result)
+
+
+def transform_budget_show_output(result):
+    return budget_show_output(result)
+
+
+def transform_budget_create_update_output(result):
+    return budget_create_update_output(result)

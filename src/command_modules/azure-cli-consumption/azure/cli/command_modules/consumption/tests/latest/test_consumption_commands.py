@@ -165,3 +165,10 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         reservations_details_list = self.cmd('consumption reservations details list -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -i f37f4b70-52ba-4344-a8bd-28abfd21d640 -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
         self.assertTrue(reservations_details_list)
         self._validate_reservation_details(reservations_details_list[0])
+
+....def test_consumption_budget_create(self):        
+        budget = self.models.Budget(category=self.models.CategoryType.cost, amount=60.0, time_grain=self.models.TimeGrainType.monthly, time_period=self.models.BudgetTimePeriod(start_date=MgmtConsumptionTest.startDate, end_date=MgmtConsumptionTest.endDate))
+        output = self.consumption_client.budgets.create_or_update(resource_group_name='testResource1', budget_name='PythonSDKTestBudgetCost', parameters=budget)
+        self.assertEqual('PythonSDKTestBudgetCost', output.name)
+	
+		

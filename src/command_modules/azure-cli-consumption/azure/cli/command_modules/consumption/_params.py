@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long
 from ._validators import get_datetime_type
-
+from ._validators import get_parameters_type
 
 def load_arguments(self, _):
     with self.argument_context('consumption usage') as c:
@@ -26,23 +26,38 @@ def load_arguments(self, _):
         rs.argument('grain', options_list=['--grain', '-g'], type=str, help='Reservation summaries grain. Possible values are daily or monthly')
 
     with self.argument_context('consumption pricesheet show') as cps:
+        cps.argument('top', options_list=['--top', '-t'], type=int, help='maximum number of items to return. Accepted range for this value is 1 - 1000')
         cps.argument('include_meter_details', options_list=['--include-meter-details', '-m'], action='store_true', help='include meter details in the price sheet')
         cps.argument('billing_period_name', options_list=['--billing-period-name', '-p'], help='name of a specific billing period to get the price sheet')
         cps.argument('include_meter_details', options_list=['--include-meter-details', '-m'], action='store_true', help='include meter details in the price sheet')
 
-    with self.argument_context('consumption marketplace get') as cmp:
+    with self.argument_context('consumption marketplace list') as cmp:
+        cmp.argument('billing_period_name', options_list=['--billing-period-name', '-p'], help='name of a specific billing period to get the marketplace')
         cmp.argument('top', options_list=['--top', '-t'], type=int, help='maximum number of items to return. Accepted range for this value is 1 - 1000')
-        cmp.argument('usage_start', options_list=['--usage-start', '-s'], type=get_datetime_type(), help='start date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
-        cmp.argument('usage_end', options_list=['--usage-end', '-e'], type=get_datetime_type(), help='end date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
+        cmp.argument('start_date', options_list=['--start-date', '-s'], type=get_datetime_type(), help='start date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
+        cmp.argument('end_date', options_list=['--end-date', '-e'], type=get_datetime_type(), help='end date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
         cmp.argument('resource_group', options_list=['--resource_group', '-grp'], type=int, help='resourse group')
         cmp.argument('instance_name', options_list=['--instance-name', '-in'], type=int, help='instance name')
         cmp.argument('instance_id', options_list=['--instance-id', '-id'], type=int, help='instance id')
 
-    with self.argument_context('consumption marketplace billing period get') as cmp:
-        cmp.argument('billing_period_name', options_list=['--billing-period-name', '-p'], help='name of a specific billing period to get the marketplace')
-        cmp.argument('top', options_list=['--top', '-t'], type=int, help='maximum number of items to return. Accepted range for this value is 1 - 1000')
-        cmp.argument('usage_start', options_list=['--usage-start', '-s'], type=get_datetime_type(), help='start date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
-        cmp.argument('usage_end', options_list=['--usage-end', '-e'], type=get_datetime_type(), help='end date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
-        cmp.argument('resource_group', options_list=['--resource_group', '-grp'], type=int, help='resourse group')
-        cmp.argument('instance_name', options_list=['--instance-name', '-in'], type=int, help='instance name')
-        cmp.argument('instance_id', options_list=['--instance-id', '-id'], type=int, help='instance id')
+    with self.argument_context('consumption budget list') as cb:
+        cb.argument('resource_group_name', options_list=['--resource-group-name','-r'],  action='store_true', help='get budget list for subscription by specific resource group name')
+
+    with self.argument_context('consumption budget show') as cb:
+        cb.argument('resource_group_name', options_list=['--resource-group-name','-r'], help='get budget for subscription by specific resource group name')        
+        cb.argument('budget_name', options_list=['--budget-name','-b'], help='get budget information by budget name')
+
+    with self.argument_context('consumption budget create') as cb:
+        cb.argument('resource_group_name', options_list=['--resource-group-name','-r'], help='create budget for subscription by specific resource group name')        
+        cb.argument('budget_name', options_list=['--budget-name','-b'], help='create budget information by budget name')
+        cb.argument('parameters', options_list=['--parameters','-p'], type=get_parameters_type(), help='create budget with these parameters')
+
+    with self.argument_context('consumption budget update') as cb:
+        cb.argument('resource_group_name', options_list=['--resource-group-name','-r'], help='update budget for subscription by specific resource group name')        
+        cb.argument('budget_name', options_list=['--budget-name','-b'], help='update information for budget with this budget name')
+        cb.argument('parameters', options_list=['--parameters','-p'], type=get_parameters_type(), help='update budget with these parameters')
+
+    with self.argument_context('consumption budget delete') as cb:
+        cb.argument('resource_group_name', options_list=['--resource-group-name','-r'], help='delete budget for subscription by specific resource group name')        
+        cb.argument('budget_name', options_list=['--budget-name','-b'], help='delete budget information by budget name')
+
