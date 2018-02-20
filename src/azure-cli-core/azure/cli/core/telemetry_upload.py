@@ -87,8 +87,7 @@ def upload(data_to_save):
             raw_properties = record['properties']
             properties = {}
             measurements = {}
-            for k in raw_properties:
-                v = raw_properties[k]
+            for k, v in raw_properties.items():
                 if isinstance(v, six.string_types):
                     properties[k] = v
                 else:
