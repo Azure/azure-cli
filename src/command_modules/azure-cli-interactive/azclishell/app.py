@@ -34,7 +34,7 @@ from azclishell.configuration import Configuration, SELECT_SYMBOL
 from azclishell.frequency_heuristic import DISPLAY_TIME, frequency_heuristic
 from azclishell.gather_commands import add_new_lines, GatherCommands
 from azclishell.key_bindings import InteractiveKeyBindings
-from azclishell.layout import create_layout, create_tutorial_layout, set_scope
+from azclishell.layout import create_layout, create_tutorial_layout, set_scope, get_scope
 from azclishell.progress import progress_view
 from azclishell.telemetry import Telemetry
 from azclishell.threads import LoadCommandTableThread
@@ -88,8 +88,8 @@ def restart_completer(shell_ctx):
 # pylint: disable=too-many-instance-attributes
 class AzInteractiveShell(object):
 
-    def __init__(self, cli_ctx, style=None, completer=None, styles=None,
-                 lexer=None, history=InMemoryHistory(),
+    def __init__(self, cli_ctx, style=None, completer=None,
+                 lexer=None, history=None,
                  app=None, input_custom=sys.stdin, output_custom=None,
                  user_feedback=False, intermediate_sleep=.25, final_sleep=4):
 
@@ -106,7 +106,8 @@ class AzInteractiveShell(object):
             self.completer = completer or AzCompleter(self, GatherCommands(self.config))
         except IOError:  # if there is no cache
             self.completer = None
-        self.history = history or FileHistory(os.path.join(self.config.config_dir, self.config.get_history()))
+        self._default_history = history or FileHistory(os.path.join(self.config.config_dir, self.config.get_history()))
+        self.history = self._default_history
         os.environ[ENV_ADDITIONAL_USER_AGENT] = 'AZURECLISHELL/' + __version__
         self.telemetry = Telemetry(self.cli_ctx)
 
@@ -142,7 +143,7 @@ class AzInteractiveShell(object):
     def __call__(self):
 
         if self.cli_ctx.data["az_interactive_active"]:
-            logger.warning("You're in the interactive shell already.\n")
+            logger.warning("You're in the interactive shell already.")
             return
 
         if self.config.BOOLEAN_STATES[self.config.config.get('DEFAULT', 'firsttime')]:
@@ -527,7 +528,7 @@ class AzInteractiveShell(object):
             elif SELECT_SYMBOL['example'] in cmd:
                 cmd, continue_flag = self.handle_example(cmd, continue_flag)
                 self.telemetry.track_ssg('tutorial', cmd)
-            elif len(cmd_stripped) > 2 and SELECT_SYMBOL['scope'] == cmd_stripped[0:2]:
+            elif SELECT_SYMBOL['scope'] == cmd_stripped[0:2]:
                 continue_flag, cmd = self.handle_scoping_input(continue_flag, cmd, cmd_stripped)
 
         return break_flag, continue_flag, outside, cmd
@@ -579,6 +580,7 @@ class AzInteractiveShell(object):
         cmd = cmd.replace(SELECT_SYMBOL['scope'], '')
 
         continue_flag = True
+        original_scope = get_scope()
 
         if not default_split:
             self.default_command = ""
@@ -604,8 +606,7 @@ class AzInteractiveShell(object):
                 cmd = cmd.replace(SELECT_SYMBOL['scope'], '')
                 self.telemetry.track_ssg('scope command', value)
 
-            elif SELECT_SYMBOL['unscope'] == default_split[0] and \
-                    len(self.default_command.split()) > 0:
+            elif SELECT_SYMBOL['unscope'] == default_split[0] and self.default_command.split():
 
                 value = self.default_command.split()[-1]
                 self.default_command = ' ' + ' '.join(self.default_command.split()[:-1])
@@ -619,7 +620,15 @@ class AzInteractiveShell(object):
                 print("Scope must be a valid command", file=self.output)
 
             default_split = default_split[1:]
+        if not get_scope():
+            self.set_history(history=self._default_history)
+        elif get_scope() != original_scope:
+            self.set_history(history=InMemoryHistory())
         return continue_flag, cmd
+
+    def set_history(self, history=None):
+        self.history = history
+        self.cli.buffers[DEFAULT_BUFFER].history = history
 
     def cli_execute(self, cmd):
         """ sends the command to the CLI to be executed """
@@ -709,9 +718,9 @@ class AzInteractiveShell(object):
                     # when the user pressed Control D
                     break
                 else:
+                    self.history.append(text)
                     b_flag, c_flag, outside, cmd = self._special_cases(cmd, outside)
-                    if not self.default_command:
-                        self.history.append(text)
+
                     if b_flag:
                         break
                     if c_flag:
