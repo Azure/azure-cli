@@ -286,13 +286,13 @@ class AzCommandsLoader(CLICommandsLoader):
                 raise APIVersionException(operation_group, self.cli_ctx.cloud.profile)
 
     def supported_api_version(self, resource_type=None, min_api=None, max_api=None, operation_group=None):
-        from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
+        from azure.cli.core.profiles import supported_api_version
         if not min_api and not max_api:
             # optimistically assume that fully supported if no api restriction listed
             return True
         api_support = supported_api_version(
             cli_ctx=self.cli_ctx,
-            resource_type=resource_type or self._get_resource_type() or PROFILE_TYPE,
+            resource_type=resource_type or self._get_resource_type(),
             min_api=min_api or self.min_profile,
             max_api=max_api or self.max_profile,
             operation_group=operation_group)
