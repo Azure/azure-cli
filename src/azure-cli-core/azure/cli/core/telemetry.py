@@ -20,7 +20,8 @@ import azure.cli.core.telemetry_upload as telemetry_core
 PRODUCT_NAME = 'azurecli'
 TELEMETRY_VERSION = '0.0.1.4'
 AZURE_CLI_PREFIX = 'Context.Default.AzureCLI.'
-EXTENSION_EVENT_NAME = '{}/extension/{}'
+EXTENSION_EVENT_NAME = PRODUCT_NAME + '/extension/{}'
+DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
 
 decorators.is_diagnostics_mode = telemetry_core.in_diagnostic_mode
 
@@ -44,7 +45,11 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     feedback = None
     extension_management_detail = None
     raw_command = None
-    events = []
+    # A dictionary with the application insight instrumentation key
+    # as the key and an array of telemetry events as value
+    events = {
+        DEFAULT_INSTRUMENTATION_KEY: []
+    }
 
     def add_exception(self, exception, fault_type, description=None, message=''):
         fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
@@ -72,14 +77,20 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         user_task.update(base)
         user_task.update(cli)
 
-        self.events.append({'name': self.event_name, 'properties': user_task})
+        self.events[DEFAULT_INSTRUMENTATION_KEY].append({
+            'name': self.event_name,
+            'properties': user_task
+        })
 
         for name, props in self.exceptions:
             props.update(base)
             props.update(cli)
             props.update({'Reserved.DataModel.CorrelationId': str(uuid.uuid4()),
                           'Reserved.EventId': str(uuid.uuid4())})
-            self.events.append({'name': name, 'properties': props})
+            self.events[DEFAULT_INSTRUMENTATION_KEY].append({
+                'name': name,
+                'properties': props
+            })
 
         payload = json.dumps(self.events)
         return _remove_symbols(payload)
@@ -295,12 +306,16 @@ def set_raw_command_name(command):
     _session.raw_command = command
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
-def add_extension_events(name, properties):
-    if name and properties:
+def add_extension_event(event_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
+    if event_name and properties:
         # Inject correlation ID into the extension event
         properties.update({'Reserved.DataModel.CorrelationId': _session.correlation_id})
-        _session.events.append({
-            'name': EXTENSION_EVENT_NAME.format(PRODUCT_NAME, name),
+
+        if instrumentation_key not in _session.events:
+            _session.events.update({instrumentation_key: []})
+
+        _session.events[instrumentation_key].append({
+            'name': EXTENSION_EVENT_NAME.format(event_name),
             'properties': properties
         })
 

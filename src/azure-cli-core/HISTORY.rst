@@ -5,7 +5,7 @@ Release History
 
 2.0.28
 ++++++
-* Expose telemetry to Azure CLI Extension
+* Allow extensions to send telemetry with custom instrumentation key
 
 2.0.27
 ++++++
