@@ -5,7 +5,7 @@ Release History
 
 2.0.28
 ++++++
-* Minor fixes
+* Allow extensions to send telemetry with custom instrumentation key
 
 2.0.27
 ++++++
