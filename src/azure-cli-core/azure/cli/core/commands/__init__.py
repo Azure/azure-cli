@@ -36,7 +36,6 @@ CLI_PARAM_KWARGS = \
     ['id_part', 'completer', 'validator', 'options_list', 'configured_default', 'arg_group', 'arg_type'] \
     + CLI_COMMON_KWARGS + ARGPARSE_SUPPORTED_KWARGS
 
-
 CONFIRM_PARAM_NAME = 'yes'
 
 # 1 hour in milliseconds
@@ -200,18 +199,22 @@ class AzCliCommandInvoker(CommandInvoker):
 
     # pylint: disable=too-many-statements,too-many-locals
     def execute(self, args):
-        import knack.events as events
+        from knack.events import (EVENT_INVOKER_PRE_CMD_TBL_CREATE, EVENT_INVOKER_POST_CMD_TBL_CREATE,
+                                  EVENT_INVOKER_CMD_TBL_LOADED, EVENT_INVOKER_PRE_PARSE_ARGS,
+                                  EVENT_INVOKER_POST_PARSE_ARGS, EVENT_INVOKER_TRANSFORM_RESULT,
+                                  EVENT_INVOKER_FILTER_RESULT)
         from knack.util import CommandResultItem, todict
         from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 
         # TODO: Can't simply be invoked as an event because args are transformed
         args = _pre_command_table_create(self.cli_ctx, args)
 
-        self.cli_ctx.raise_event(events.EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
+        self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
         self.commands_loader.load_command_table(args)
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE,
                                  load_cmd_tbl_func=self.commands_loader.load_command_table, args=args)
         command = self._rudimentary_get_command(args)
+        telemetry.set_raw_command_name(command)
 
         try:
             self.commands_loader.command_table = {command: self.commands_loader.command_table[command]}
@@ -250,11 +253,11 @@ class AzCliCommandInvoker(CommandInvoker):
         self.commands_loader.command_table = self.commands_loader.command_table  # update with the truncated table
         self.commands_loader.command_name = command
         self.commands_loader.load_arguments(command)
-        self.cli_ctx.raise_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, cmd_tbl=self.commands_loader.command_table)
+        self.cli_ctx.raise_event(EVENT_INVOKER_POST_CMD_TBL_CREATE, cmd_tbl=self.commands_loader.command_table)
         self.parser.cli_ctx = self.cli_ctx
         self.parser.load_command_table(self.commands_loader.command_table)
 
-        self.cli_ctx.raise_event(events.EVENT_INVOKER_CMD_TBL_LOADED, cmd_tbl=self.commands_loader.command_table,
+        self.cli_ctx.raise_event(EVENT_INVOKER_CMD_TBL_LOADED, cmd_tbl=self.commands_loader.command_table,
                                  parser=self.parser)
 
         if not args:
@@ -272,9 +275,9 @@ class AzCliCommandInvoker(CommandInvoker):
 
         self.cli_ctx.completion.enable_autocomplete(self.parser)
 
-        self.cli_ctx.raise_event(events.EVENT_INVOKER_PRE_PARSE_ARGS, args=args)
+        self.cli_ctx.raise_event(EVENT_INVOKER_PRE_PARSE_ARGS, args=args)
         parsed_args = self.parser.parse_args(args)
-        self.cli_ctx.raise_event(events.EVENT_INVOKER_POST_PARSE_ARGS, command=parsed_args.command, args=parsed_args)
+        self.cli_ctx.raise_event(EVENT_INVOKER_POST_PARSE_ARGS, command=parsed_args.command, args=parsed_args)
 
         # TODO: This fundamentally alters the way Knack.invocation works here. Cannot be customized
         # with an event. Would need to be customized via inheritance.
@@ -326,8 +329,8 @@ class AzCliCommandInvoker(CommandInvoker):
 
                 result = todict(result)
                 event_data = {'result': result}
-                self.cli_ctx.raise_event(events.EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
-                self.cli_ctx.raise_event(events.EVENT_INVOKER_FILTER_RESULT, event_data=event_data)
+                self.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
+                self.cli_ctx.raise_event(EVENT_INVOKER_FILTER_RESULT, event_data=event_data)
                 result = event_data['result']
                 results.append(result)
 
