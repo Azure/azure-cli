@@ -1967,8 +1967,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('zoneRedundant', False)])
 
         # Test running update on regular database with zone resilience set to true.  Expect zone resilience to update to true.
-        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --zone-redundant {}'
-                 .format(rg, server, database_name, 'P1', True),
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --zone-redundant'
+                 .format(rg, server, database_name, 'P1'),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name),
@@ -1978,8 +1978,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('zoneRedundant', True)])
 
         # Test creating database with zone resilience set to true.  Expect zone resilient database created.
-        self.cmd('sql db create -g {} --server {} --name {} --edition {} --zone-redundant {}'
-                 .format(rg, server, database_name_2, "Premium", True),
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --z'
+                 .format(rg, server, database_name_2, "Premium"),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name_2),
@@ -1989,7 +1989,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('zoneRedundant', True)])
 
         # Test running update on zoned database with zone resilience set to false.  Expect zone resilience to update to false
-        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --zone-redundant {}'
+        self.cmd('sql db update -g {} -s {} -n {} --service-objective {} --z {}'
                  .format(rg, server, database_name_2, 'P1', False),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
@@ -2022,8 +2022,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('zoneRedundant', False)])
 
         # Create database with zone resilience set.  Expect zone resilient database created.
-        self.cmd('sql db create -g {} --server {} --name {} --edition {} --zone-redundant {}'
-                 .format(rg, server, database_name_4, "Premium", True),
+        self.cmd('sql db create -g {} --server {} --name {} --edition {} --zone-redundant'
+                 .format(rg, server, database_name_4, "Premium"),
                  checks=[
                      JMESPathCheck('resourceGroup', rg),
                      JMESPathCheck('name', database_name_4),
@@ -2054,7 +2054,7 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
         rg = resource_group
 
         # Test creating pool with zone resilience set to false.  Expect regular pool created.
-        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --zone-redundant {}'
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --z {}'
                  .format(rg, server, pool_name, "Premium", False))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
@@ -2067,8 +2067,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('zoneRedundant', False)])
 
         # Test running update on regular pool with zone resilience set to true.  Expect zone resilience to update to true
-        self.cmd('sql elastic-pool update -g {} -s {} -n {} --zone-redundant {}'
-                 .format(rg, server, pool_name, True))
+        self.cmd('sql elastic-pool update -g {} -s {} -n {} --z'
+                 .format(rg, server, pool_name))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
                  .format(rg, server, pool_name),
@@ -2078,8 +2078,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('zoneRedundant', True)])
 
         # Test creating pool with zone resilience set to true.  Expect zone resilient pool created.
-        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --zone-redundant {}'
-                 .format(rg, server, pool_name_2, "Premium", True))
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --zone-redundant'
+                 .format(rg, server, pool_name_2, "Premium"))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
                  .format(rg, server, pool_name_2),
@@ -2127,8 +2127,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('zoneRedundant', False)])
 
         # Create pool with zone resilience set.  Expect zone resilient pool created.
-        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --zone-redundant {}'
-                 .format(rg, server, pool_name_4, "Premium", True))
+        self.cmd('sql elastic-pool create -g {} --server {} --name {} --edition {} --zone-redundant'
+                 .format(rg, server, pool_name_4, "Premium"))
 
         self.cmd('sql elastic-pool show -g {} --server {} --name {}'
                  .format(rg, server, pool_name_4),
