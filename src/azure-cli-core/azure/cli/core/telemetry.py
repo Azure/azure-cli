@@ -12,6 +12,7 @@ import re
 import sys
 import traceback
 import uuid
+from collections import defaultdict
 from functools import wraps
 
 import azure.cli.core.decorators as decorators
@@ -20,6 +21,8 @@ import azure.cli.core.telemetry_upload as telemetry_core
 PRODUCT_NAME = 'azurecli'
 TELEMETRY_VERSION = '0.0.1.4'
 AZURE_CLI_PREFIX = 'Context.Default.AzureCLI.'
+DEFAULT_INSTRUMENTATION_KEY = 'c4395b75-49cc-422c-bc95-c7d51aef5d46'
+CORRELATION_ID_PROP_NAME = 'Reserved.DataModel.CorrelationId'
 
 decorators.is_diagnostics_mode = telemetry_core.in_diagnostic_mode
 
@@ -42,8 +45,13 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     extension_version = None
     feedback = None
     extension_management_detail = None
+    raw_command = None
+    # A dictionary with the application insight instrumentation key
+    # as the key and an array of telemetry events as value
+    events = defaultdict(list)
 
     def add_exception(self, exception, fault_type, description=None, message=''):
+        fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
         details = {
             'Reserved.DataModel.EntityType': 'Fault',
             'Reserved.DataModel.Fault.Description': description or fault_type,
@@ -51,16 +59,16 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
             'Reserved.DataModel.Fault.TypeString': exception.__class__.__name__,
             'Reserved.DataModel.Fault.Exception.Message': _remove_cmd_chars(
                 message or str(exception)),
-            'Reserved.DataModel.Fault.Exception.StackTrace': _remove_cmd_chars(_get_stack_trace())
+            'Reserved.DataModel.Fault.Exception.StackTrace': _remove_cmd_chars(_get_stack_trace()),
+            AZURE_CLI_PREFIX + 'FaultType': fault_type.lower()
         }
-        fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
-        fault_name = '{}/commands/{}'.format(PRODUCT_NAME, fault_type.lower())
+
+        fault_name = '{}/fault'.format(PRODUCT_NAME)
 
         self.exceptions.append((fault_name, details))
 
     @decorators.suppress_all_exceptions(raise_in_diagnostics=True, fallback_return=None)
     def generate_payload(self):
-        events = []
         base = self._get_base_properties()
         cli = self._get_azure_cli_properties()
 
@@ -68,16 +76,22 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         user_task.update(base)
         user_task.update(cli)
 
-        events.append({'name': self.event_name, 'properties': user_task})
+        self.events[DEFAULT_INSTRUMENTATION_KEY].append({
+            'name': '{}/command'.format(PRODUCT_NAME),
+            'properties': user_task
+        })
 
         for name, props in self.exceptions:
             props.update(base)
             props.update(cli)
-            props.update({'Reserved.DataModel.CorrelationId': str(uuid.uuid4()),
+            props.update({CORRELATION_ID_PROP_NAME: str(uuid.uuid4()),
                           'Reserved.EventId': str(uuid.uuid4())})
-            events.append({'name': name, 'properties': props})
+            self.events[DEFAULT_INSTRUMENTATION_KEY].append({
+                'name': name,
+                'properties': props
+            })
 
-        payload = json.dumps(events)
+        payload = json.dumps(self.events)
         return _remove_symbols(payload)
 
     def _get_base_properties(self):
@@ -94,7 +108,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
             'Reserved.DataModel.ProductName': PRODUCT_NAME,
             'Reserved.DataModel.FeatureName': self.feature_name,
             'Reserved.DataModel.EntityName': self.command_name,
-            'Reserved.DataModel.CorrelationId': self.correlation_id,
+            CORRELATION_ID_PROP_NAME: self.correlation_id,
 
             'Context.Default.VS.Core.ExeName': PRODUCT_NAME,
             'Context.Default.VS.Core.ExeVersion': '{}@{}'.format(
@@ -144,6 +158,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         self.set_custom_properties(result, 'StartTime', str(self.start_time))
         self.set_custom_properties(result, 'EndTime', str(self.end_time))
         self.set_custom_properties(result, 'OutputType', self.output_type)
+        self.set_custom_properties(result, 'RawCommand', self.raw_command)
         self.set_custom_properties(result, 'Params', ','.join(self.parameters or []))
         self.set_custom_properties(result, 'PythonVersion', platform.python_version())
         self.set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
@@ -158,16 +173,12 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         return self.command.lower().replace('-', '').replace(' ', '-')
 
     @property
-    def event_name(self):
-        return '{}/{}/{}'.format(PRODUCT_NAME, self.feature_name, self.command_name)
-
-    @property
     def feature_name(self):
         # The feature name is used to created the event name. The feature name should be eventually
         # the module name. However, it takes time to resolve the actual module name using pip
         # module. Therefore, a hard coded replacement is used before a better solution is
         # implemented
-        return 'commands'
+        return 'command'
 
     @property
     def module_version(self):
@@ -286,6 +297,26 @@ def set_command_details(command, output_type=None, parameters=None, extension_na
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def set_module_correlation_data(correlation_data):
     _session.module_correlation = correlation_data[:512]
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_raw_command_name(command):
+    # the raw command name user inputs
+    _session.raw_command = command
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def add_extension_event(extension_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
+    # Inject correlation ID into the extension event
+    properties.update({
+        CORRELATION_ID_PROP_NAME: _session.correlation_id,
+    })
+
+    _session.set_custom_properties(properties, 'ExtensionName', extension_name)
+    _session.events[instrumentation_key].append({
+        'name': '{}/extension'.format(PRODUCT_NAME),
+        'properties': properties
+    })
 
 
 # definitions

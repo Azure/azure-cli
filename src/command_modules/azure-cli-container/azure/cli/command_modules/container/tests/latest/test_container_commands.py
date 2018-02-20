@@ -27,6 +27,8 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
         command = '"/bin/sh -c \'while true; do echo hello; sleep 20; done\'"'
         env = 'KEY1=VALUE1 KEY2=FOO=BAR='
         restart_policy = 'Never'
+        secrets = 'secret1=superawesomesecret secret2="nothing to see"'
+        secret_path = '/s'
 
         self.kwargs.update({
             'container_group_name': container_group_name,
@@ -43,13 +45,16 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
             'memory': memory,
             'command': command,
             'env': env,
-            'restart_policy': restart_policy
+            'restart_policy': restart_policy,
+            'secrets': secrets,
+            'secrets_mount_path': secret_path
         })
 
         # Test create
         self.cmd('container create -g {rg} -n {container_group_name} --image {image} --os-type {os_type} '
                  '--ip-address {ip_address_type} --dns-name-label {dns_name_label} --ports {ports} --cpu {cpu} --memory {memory} '
-                 '--command-line {command} -e {env} --restart-policy {restart_policy}',
+                 '--command-line {command} -e {env} --restart-policy {restart_policy} '
+                 '--secrets {secrets} --secrets-mount-path {secrets_mount_path}',
                  checks=[self.check('name', '{container_group_name}'),
                          self.check('location', '{resource_group_location}'),
                          self.check('provisioningState', 'Creating'),
@@ -65,7 +70,9 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.exists('containers[0].command'),
                          self.exists('containers[0].environmentVariables'),
                          self.check('containers[0].resources.requests.cpu', cpu),
-                         self.check('containers[0].resources.requests.memoryInGb', memory)])
+                         self.check('containers[0].resources.requests.memoryInGb', memory),
+                         self.exists('volumes'),
+                         self.check('volumes[0].secret', {})])
 
         # Wait for container to be provisioned
         time.sleep(30)

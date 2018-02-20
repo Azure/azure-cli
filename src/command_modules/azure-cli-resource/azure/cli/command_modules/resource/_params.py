@@ -106,7 +106,7 @@ def load_arguments(self, _):
         c.argument('display_name', help='display name of the assignment')
         c.argument('policy', help='name or id of the policy definition.', completer=get_policy_completion_list)
 
-    with self.argument_context('policy assignment create') as c:
+    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         c.argument('name', options_list=('--name', '-n'), help='name of the new assignment')
         c.argument('params', options_list=('--params', '-p'), help='JSON formatted string or path to file with parameter values of policy rule', min_api='2016-12-01')
 

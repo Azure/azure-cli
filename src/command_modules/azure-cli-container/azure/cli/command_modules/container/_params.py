@@ -4,12 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
+from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.parameters import (get_enum_type,
                                                 get_location_type,
                                                 resource_group_name_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.mgmt.containerinstance.models import (ContainerGroupRestartPolicy, OperatingSystemTypes)
-from ._validators import validate_volume_mount_path
+from ._validators import validate_volume_mount_path, validate_secrets
 
 # pylint: disable=line-too-long
 
@@ -25,6 +26,13 @@ def _environment_variables_type(value):
                    "Argument values should be in the format a=b c=d")
         raise CLIError(message)
     return {'name': env_name, 'value': env_value}
+
+
+secrets_type = CLIArgumentType(
+    validator=validate_secrets,
+    help="space-separated secrets in 'key=value' format.",
+    nargs='+'
+)
 
 
 def load_arguments(self, _):
@@ -45,6 +53,8 @@ def load_arguments(self, _):
         c.argument('restart_policy', arg_type=get_enum_type(ContainerGroupRestartPolicy), help='Restart policy for all containers within the container group')
         c.argument('command_line', help='The command line to run when the container is started, e.g. \'/bin/bash -c myscript.sh\'')
         c.argument('environment_variables', nargs='+', options_list=['--environment-variables', '-e'], type=_environment_variables_type, help='A list of environment variable for the container. Space-separated values in \'key=value\' format.')
+        c.argument('secrets', secrets_type)
+        c.argument('secrets_mount_path', validator=validate_volume_mount_path, help='The path within the container where the secrets volume should be mounted. Must not contain colon (:).')
 
     with self.argument_context('container create', arg_group='Image Registry') as c:
         c.argument('registry_login_server', help='The container image registry login server')
