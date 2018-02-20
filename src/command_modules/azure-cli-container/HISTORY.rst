@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.19
+++++++
+* Add '--secrets' and '--secrets-mount-path' options to 'az container create' for using secrets in ACI
+
 0.1.18
 ++++++
 * Add '--follow' option to 'az container logs' for streaming logs
