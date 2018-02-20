@@ -211,7 +211,6 @@ helps['aks get-upgrades'] = """
 helps['aks get-versions'] = """
     type: command
     short-summary: Get the versions available for creating a managed Kubernetes cluster.
-    long-summary: 'Deprecation notice: the previous behavior of this command is now in `az aks get-upgrades`.'
 """
 
 helps['aks install-cli'] = """
