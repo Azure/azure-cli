@@ -204,7 +204,7 @@ def load_arguments(self, _):
         c.argument('zone_redundant',
                    options_list=['--zone-redundant', '-z'],
                    help='The zone redundancy to associate with the database.',
-                   arg_type=get_three_state_flag(return_label=True))
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('sql db create') as c:
         _configure_db_create_params(c, Engine.db, CreateMode.default)
@@ -562,7 +562,7 @@ def load_arguments(self, _):
         c.argument('zone_redundant',
                    options_list=['--zone-redundant', '-z'],
                    help='The zone redundancy to associate with the elastic pool.',
-                   arg_type=get_three_state_flag(return_label=True))
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('sql elastic-pool create') as c:
         c.expand('parameters', ElasticPool)

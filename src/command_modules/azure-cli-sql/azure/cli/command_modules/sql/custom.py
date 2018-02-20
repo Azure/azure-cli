@@ -52,16 +52,6 @@ def _get_server_location(cli_ctx, server_name, resource_group_name):
 
 _DEFAULT_SERVER_VERSION = "12.0"
 
-
-# Returns True/False boolean given an input boolean in string 'true'/'false' format regardless of casing
-def str_to_bool(input_str):
-    if input_str.lower() == 'true':
-        return True
-    elif input_str.lower() == 'false':
-        return False
-    else:
-        raise ValueError("Cannot covert {} to a bool".format(input_str))
-
 ###############################################
 #                sql db                       #
 ###############################################
@@ -640,8 +630,7 @@ def db_update(
     # Set other properties
     instance.max_size_bytes = max_size_bytes or instance.max_size_bytes
 
-    if zone_redundant is not None:
-        instance.zone_redundant = str_to_bool(zone_redundant)
+    instance.zone_redundant = zone_redundant
 
     return instance
 
@@ -955,9 +944,7 @@ def elastic_pool_update(
     instance.database_dtu_min = database_dtu_min or instance.database_dtu_min
     instance.dtu = dtu or instance.dtu
     instance.storage_mb = storage_mb or instance.storage_mb
-
-    if zone_redundant is not None:
-        instance.zone_redundant = str_to_bool(zone_redundant)
+    instance.zone_redundant = zone_redundant
 
     return instance
 

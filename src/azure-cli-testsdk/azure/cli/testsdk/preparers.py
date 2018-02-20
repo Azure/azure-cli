@@ -16,14 +16,14 @@ from .exceptions import CliTestError
 class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix='clitest.rg',
                  parameter_name='resource_group',
-                 parameter_name_for_location='resource_group_location', location='eastus2',
+                 parameter_name_for_location='resource_group_location', location='westus',
                  dev_setting_name='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_NAME',
                  dev_setting_location='AZURE_CLI_TEST_DEV_RESOURCE_GROUP_LOCATION',
                  random_name_length=75, key='rg'):
         super(ResourceGroupPreparer, self).__init__(name_prefix, random_name_length)
         from azure.cli.testsdk import TestCli
         self.cli_ctx = TestCli()
-        self.location = "eastus2"
+        self.location = location
         self.parameter_name = parameter_name
         self.parameter_name_for_location = parameter_name_for_location
         self.key = key
