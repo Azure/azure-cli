@@ -74,3 +74,4 @@ class AzureManagementPartnerTests(ScenarioTest):
 
         # Cleanup
         self.cmd('az managementpartner delete --partner-id {newpartnerid}')
+
