@@ -29,3 +29,4 @@ helps['managementpartner delete'] = """
     type: command
     short-summary: Delete the Microsoft Partner Network(MPN) ID of the current authenticated user or service principal.
 """
+
