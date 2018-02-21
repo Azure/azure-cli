@@ -115,9 +115,6 @@ def _configure_db_create_params(
     create_mode: Valid CreateMode enum value (e.g. `default`, `copy`, etc)
     """
 
-    # This line to be removed when zone redundancy is fully supported in production.
-    arg_ctx.ignore('zone_redundant')
-
     # DW does not support all create modes. Check that engine and create_mode are consistent.
     if engine == Engine.dw and create_mode not in [
             CreateMode.default,
@@ -203,6 +200,11 @@ def load_arguments(self, _):
         c.argument('edition',
                    options_list=['--edition'],
                    help='The edition of the database.')
+
+        c.argument('zone_redundant',
+                   options_list=['--zone-redundant', '-z'],
+                   help='Specifies whether to enable zone redundancy for the database.',
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('sql db create') as c:
         _configure_db_create_params(c, Engine.db, CreateMode.default)
@@ -529,9 +531,6 @@ def load_arguments(self, _):
     #                sql elastic-pool             #
     ###############################################
     with self.argument_context('sql elastic-pool') as c:
-        # This line to be removed when zone redundancy is fully supported in production.
-        c.ignore('zone_redundant')
-
         c.argument('server_name',
                    arg_type=server_param_type,
                    # Allow --ids command line argument. id_part=name is 1st name in uri
@@ -559,6 +558,11 @@ def load_arguments(self, _):
                    type=SizeWithUnitConverter('MB', result_type=int),
                    help='The max storage size of the elastic pool. If no unit is specified, defaults'
                    ' to megabytes (MB).')
+
+        c.argument('zone_redundant',
+                   options_list=['--zone-redundant', '-z'],
+                   help='Specifies whether to enable zone redundancy for the elastic pool.',
+                   arg_type=get_three_state_flag())
 
     with self.argument_context('sql elastic-pool create') as c:
         c.expand('parameters', ElasticPool)
