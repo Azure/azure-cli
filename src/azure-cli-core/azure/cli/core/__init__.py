@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.27"
+__version__ = "2.0.28"
 
 import os
 import sys
@@ -286,13 +286,13 @@ class AzCommandsLoader(CLICommandsLoader):
                 raise APIVersionException(operation_group, self.cli_ctx.cloud.profile)
 
     def supported_api_version(self, resource_type=None, min_api=None, max_api=None, operation_group=None):
-        from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
+        from azure.cli.core.profiles import supported_api_version
         if not min_api and not max_api:
             # optimistically assume that fully supported if no api restriction listed
             return True
         api_support = supported_api_version(
             cli_ctx=self.cli_ctx,
-            resource_type=resource_type or self._get_resource_type() or PROFILE_TYPE,
+            resource_type=resource_type or self._get_resource_type(),
             min_api=min_api or self.min_profile,
             max_api=max_api or self.max_profile,
             operation_group=operation_group)
@@ -336,13 +336,14 @@ class AzCommandsLoader(CLICommandsLoader):
 
         def default_command_handler(command_args):
             from azure.cli.core.util import get_arg_list
+            from azure.cli.core.commands.client_factory import resolve_client_arg_name
+
             op = handler or self.get_op_handler(operation)
             op_args = get_arg_list(op)
 
             client = client_factory(self.cli_ctx, command_args) if client_factory else None
             if client:
-                client_arg_name = kwargs.get('client_arg_name',
-                                             'client' if operation.startswith(('azure.cli', 'azext')) else 'self')
+                client_arg_name = resolve_client_arg_name(operation, kwargs)
                 if client_arg_name in op_args:
                     command_args[client_arg_name] = client
             result = op(**command_args)

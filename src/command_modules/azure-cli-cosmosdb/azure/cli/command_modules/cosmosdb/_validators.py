@@ -30,3 +30,13 @@ def validate_locations(ns):
 def validate_ip_range_filter(ns):
     if ns.ip_range_filter:
         ns.ip_range_filter = ",".join(ns.ip_range_filter)
+
+
+def validate_capabilities(ns):
+    """ Extracts multiple space-separated capabilities """
+    from azure.mgmt.cosmosdb.models.capability import Capability
+    if ns.capabilities is not None:
+        capabilties_list = []
+        for item in ns.capabilities:
+            capabilties_list.append(Capability(name=item))
+        ns.capabilities = capabilties_list

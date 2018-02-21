@@ -67,6 +67,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.monitor.operations.log_profiles_operations#LogProfilesOperations.{}',
         client_factory=cf_log_profiles)
 
+    log_profiles_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.monitor.operations.log_profiles#{}',
+        client_factory=cf_log_profiles)
+
     metric_operations_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.monitor.operations.metrics_operations#MetricsOperations.{}',
         client_factory=cf_metrics)
@@ -132,8 +136,8 @@ def load_command_table(self, _):
         g.command('show', 'get')
         g.command('list', 'list')
 
-    with self.command_group('monitor log-profiles', log_profiles_sdk) as g:
-        g.command('create', 'create_or_update')
+    with self.command_group('monitor log-profiles', log_profiles_sdk, custom_command_type=log_profiles_custom) as g:
+        g.custom_command('create', 'create_log_profile_operations')
         g.command('delete', 'delete')
         g.command('show', 'get')
         g.command('list', 'list')

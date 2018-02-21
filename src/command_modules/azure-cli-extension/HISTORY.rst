@@ -2,6 +2,12 @@
 
 Release History
 ===============
+
+0.0.9
+++++++
+* Added support for --pip-proxy parameter to az extension add/update commands.
+* Added support for --pip-extra-index-urls argument to az extension add and update commands.
+
 0.0.8
 ++++++
 Minor fixes

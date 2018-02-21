@@ -9,6 +9,7 @@ import os
 import uuid
 import tempfile
 import time
+import datetime
 import unittest
 import mock
 
@@ -252,6 +253,41 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('role assignment list --assignee {upn}',
                          checks=self.check("length([])", 1))
                 self.cmd('role assignment delete --assignee {upn} --role reader')
+            finally:
+                self.cmd('ad user delete --upn-or-object-id {upn}')
+
+    @ResourceGroupPreparer(name_prefix='cli_role_audit')
+    def test_role_assignment_audits(self, resource_group):
+        if self.run_under_service_principal():
+            return  # this test delete users which are beyond a SP's capacity, so quit...
+
+        self.enable_large_payload()
+        user = self.create_random_name('testuser', 15)
+        self.kwargs.update({
+            'upn': user + '@azuresdkteam.onmicrosoft.com',
+        })
+
+        self.cmd('ad user create --display-name tester123 --password Test123456789 --user-principal-name {upn}')
+        time.sleep(15)  # By-design, it takes some time for RBAC system propagated with graph object change
+
+        guids = ['88DAAF5A-EA86-4A68-9D89-477538D41100']
+        with self.get_guid_gen_patch(guids):
+            try:
+                self.cmd('role assignment create --assignee {upn} --role contributor -g {rg}')
+
+                if self.is_live or self.in_recording:
+                    now = datetime.datetime.utcnow()
+                    start_time = '{}-{}-{}T{}:{}:{}Z'.format(now.year, now.month, now.day - 1, now.hour,
+                                                             now.minute, now.second)
+                    time.sleep(15)
+                    self.cmd('role assignment list-changelogs --start-time {}'.format(start_time))
+                else:
+                    # NOTE: get the time range from the recording file and use them below for playback
+                    start_time, end_time = '2018-02-10T21:36:06Z', '2018-02-11T21:39:05Z'
+                    result = self.cmd('role assignment list-changelogs --start-time {} --end-time {}'.format(
+                        start_time, end_time)).get_output_in_json()
+                    self.assertTrue([x for x in result if (resource_group in x['scope'] and
+                                                           x['principalName'] == self.kwargs['upn'])])
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 

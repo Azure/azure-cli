@@ -27,6 +27,22 @@ def set_blob_tier(client, container_name, blob_name, tier, blob_type='block', ti
         raise ValueError('Blob tier is only applicable to block or page blob.')
 
 
+def set_delete_policy(client, enable=None, days_retained=None):
+    policy = client.get_blob_service_properties().delete_retention_policy
+
+    if enable is not None:
+        policy.enabled = enable == 'true'
+    if days_retained is not None:
+        policy.days = days_retained
+
+    if policy.enabled and not policy.days:
+        from knack.util import CLIError
+        raise CLIError("must specify days-retained")
+
+    client.set_blob_service_properties(delete_retention_policy=policy)
+    return client.get_blob_service_properties().delete_retention_policy
+
+
 def storage_blob_copy_batch(cmd, client, source_client,
                             destination_container=None, source_container=None, source_share=None,
                             source_sas=None, pattern=None, dryrun=False):

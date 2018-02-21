@@ -90,7 +90,7 @@ def get_folded_parameter_validator(
         raise CLIError('Cannot use default_none=True if allow_none=False')
 
     # construct the validator
-    def validator(namespace):
+    def validator(cmd, namespace):
         from msrestazure.tools import resource_id
         type_field_name = '{}_type'.format(property_name)
         property_val = getattr(namespace, property_name, None)
@@ -110,10 +110,10 @@ def get_folded_parameter_validator(
 
         # Create a resource ID we can check for existence.
         (resource_id_parts, value_was_id) = _validate_name_or_id(
-            namespace.cmd.cli_ctx, namespace.resource_group_name, property_val, property_type, parent_val, parent_type)
+            cmd.cli_ctx, namespace.resource_group_name, property_val, property_type, parent_val, parent_type)
 
         # 2) resource exists
-        if resource_exists(namespace.cmd.cli_ctx, **resource_id_parts):
+        if resource_exists(cmd.cli_ctx, **resource_id_parts):
             setattr(namespace, type_field_name, 'existingId')
             setattr(namespace, property_name, resource_id(**resource_id_parts))
             if parent_val:

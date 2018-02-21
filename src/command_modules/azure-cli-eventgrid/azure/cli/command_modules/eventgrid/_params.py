@@ -18,12 +18,12 @@ from azure.cli.core.commands.parameters import (
 )
 
 included_event_types_type = CLIArgumentType(
-    help="A space separated list of event types. To subscribe to all event types, the string \"All\" should be specified.",
+    help="A space-separated list of event types. To subscribe to all event types, the string \"All\" should be specified.",
     nargs='+'
 )
 
 labels_type = CLIArgumentType(
-    help="A space separated list of labels to associate with this event subscription.",
+    help="A space-separated list of labels to associate with this event subscription.",
     nargs='+'
 )
 

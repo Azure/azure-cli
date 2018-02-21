@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.0.13
+++++++
+* Add `cdn custom-domain enable/disable-https` commands.
+
 0.0.12
 ++++++
 * `cdn custom-domain create`: Fixed missing client issue.

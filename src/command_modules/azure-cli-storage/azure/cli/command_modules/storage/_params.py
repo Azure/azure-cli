@@ -220,6 +220,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('tier', validator=blob_tier_validator)
         c.argument('timeout', type=int)
 
+    with self.argument_context('storage blob service-properties delete-policy update') as c:
+        c.argument('enable', arg_type=get_enum_type(['true', 'false']), help='Enables/disables soft-delete.')
+        c.argument('days_retained', type=int,
+                   help='Number of days that soft-deleted blob will be retained. Must be in range [1,365].')
+
     with self.argument_context('storage blob upload') as c:
         from ._validators import page_blob_tier_validator
         from .sdkutil import get_blob_types, get_blob_tier_names
@@ -663,7 +668,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.ignore('property_resolver')
         c.argument('entity', options_list=('--entity', '-e'), validator=validate_entity, nargs='+')
         c.argument('select', nargs='+', validator=validate_select,
-                   help='Space separated list of properties to return for each entity.')
+                   help='Space-separated list of properties to return for each entity.')
 
     with self.argument_context('storage entity insert') as c:
         c.argument('if_exists', arg_type=get_enum_type(['fail', 'merge', 'replace']))

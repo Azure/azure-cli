@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.25
+++++++
+* Added `storage blob service-properties delete-policy` and `storage blob undelete` commands to enable soft-delete.
+
 2.0.24
 ++++++
 * `storage account update`: do not create new networkRuleSet if "default_action" arg is not provided.

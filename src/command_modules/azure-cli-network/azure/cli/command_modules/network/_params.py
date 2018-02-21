@@ -64,7 +64,7 @@ def load_arguments(self, _):
     private_ip_address_type = CLIArgumentType(help='Static private IP address to use.', validator=validate_private_ip_address)
     cookie_based_affinity_type = CLIArgumentType(arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled', return_label=True))
     http_protocol_type = CLIArgumentType(get_enum_type(ApplicationGatewayProtocol))
-    ag_servers_type = CLIArgumentType(nargs='+', help='Space separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
+    ag_servers_type = CLIArgumentType(nargs='+', help='Space-separated list of IP addresses or DNS names corresponding to backend servers.', validator=get_servers_validator())
 
     # region NetworkRoot
     with self.argument_context('network') as c:
@@ -216,11 +216,11 @@ def load_arguments(self, _):
 
     with self.argument_context('network application-gateway ssl-policy') as c:
         c.argument('clear', action='store_true', help='Clear SSL policy.')
-        c.argument('disabled_ssl_protocols', nargs='+', help='Space separated list of protocols to disable.', arg_type=get_enum_type(ApplicationGatewaySslProtocol))
+        c.argument('disabled_ssl_protocols', nargs='+', help='Space-separated list of protocols to disable.', arg_type=get_enum_type(ApplicationGatewaySslProtocol))
 
     with self.argument_context('network application-gateway url-path-map') as c:
         c.argument('rule_name', help='The name of the url-path-map rule.', arg_group='First Rule')
-        c.argument('paths', nargs='+', help='Space separated list of paths to associate with the rule. Valid paths start and end with "/" (ex: "/bar/")', arg_group='First Rule')
+        c.argument('paths', nargs='+', help='Space-separated list of paths to associate with the rule. Valid paths start and end with "/" (ex: "/bar/")', arg_group='First Rule')
         c.argument('address_pool', help='The name or ID of the backend address pool to use with the created rule.', completer=get_ag_subresource_completion_list('backend_address_pools'), arg_group='First Rule')
         c.argument('http_settings', help='The name or ID of the HTTP settings to use with the created rule.', completer=get_ag_subresource_completion_list('backend_http_settings_collection'), arg_group='First Rule')
 
@@ -270,7 +270,7 @@ def load_arguments(self, _):
         c.argument('policy_name', name_arg_type)
         c.argument('cipher_suites', nargs='+')
         c.argument('min_protocol_version')
-        c.argument('disabled_ssl_protocols', nargs='+', help='Space separated list of protocols to disable.')
+        c.argument('disabled_ssl_protocols', nargs='+', help='Space-separated list of protocols to disable.')
 
     with self.argument_context('network application-gateway http-settings', min_api='2017-06-01') as c:
         c.argument('host_name', help='Host header sent to the backend servers.')
@@ -320,8 +320,8 @@ def load_arguments(self, _):
 
         # TODO: Uncomment when feature is ready
         # c.argument('zone_type', help='Type of DNS zone to create.', arg_type=get_enum_type(ZoneType))
-        # c.argument('registration_vnets', arg_group='Private Zone', nargs='+', help='Space separated names or IDs of virtual networks that register hostnames in this DNS zone.', validator=get_vnet_validator('registration_vnets'))
-        # c.argument('resolution_vnets', arg_group='Private Zone', nargs='+', help='Space separated names or IDs of virtual networks that resolve records in this DNS zone.', validator=get_vnet_validator('resolution_vnets'))
+        # c.argument('registration_vnets', arg_group='Private Zone', nargs='+', help='Space-separated names or IDs of virtual networks that register hostnames in this DNS zone.', validator=get_vnet_validator('registration_vnets'))
+        # c.argument('resolution_vnets', arg_group='Private Zone', nargs='+', help='Space-separated names or IDs of virtual networks that resolve records in this DNS zone.', validator=get_vnet_validator('resolution_vnets'))
 
     with self.argument_context('network dns zone import') as c:
         c.argument('file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
@@ -394,7 +394,7 @@ def load_arguments(self, _):
         c.argument('target', options_list=('--target', '-t'), help='Target domain name.')
 
     with self.argument_context('network dns record-set txt') as c:
-        c.argument('value', options_list=('--value', '-v'), nargs='+', help='Space separated list of text values which will be concatenated together.')
+        c.argument('value', options_list=('--value', '-v'), nargs='+', help='Space-separated list of text values which will be concatenated together.')
 
     # endregion
 
@@ -428,7 +428,7 @@ def load_arguments(self, _):
         c.argument('sku_tier', arg_type=get_enum_type(ExpressRouteCircuitSkuTier))
         c.argument('primary_peer_address_prefix', options_list=['--primary-peer-subnet'], help='/30 subnet used to configure IP addresses for primary interface.')
         c.argument('secondary_peer_address_prefix', options_list=['--secondary-peer-subnet'], help='/30 subnet used to configure IP addresses for secondary interface.')
-        c.argument('advertised_public_prefixes', arg_group='Microsoft Peering', nargs='+', help='Space separated list of prefixes to be advertised through the BGP peering.')
+        c.argument('advertised_public_prefixes', arg_group='Microsoft Peering', nargs='+', help='Space-separated list of prefixes to be advertised through the BGP peering.')
         c.argument('customer_asn', arg_group='Microsoft Peering', help='Autonomous system number of the customer.')
         c.argument('routing_registry_name', arg_group='Microsoft Peering', arg_type=get_enum_type(routing_registry_values), help='Internet Routing Registry / Regional Internet Registry')
         c.argument('route_filter', min_api='2016-12-01', arg_group='Microsoft Peering', help='Name or ID of a route filter to apply to the peering settings.', validator=validate_route_filter)
@@ -529,7 +529,7 @@ def load_arguments(self, _):
         c.argument('enable_accelerated_networking', min_api='2016-09-01', options_list=['--accelerated-networking'], help='Enable accelerated networking.', arg_type=get_three_state_flag())
         c.argument('network_interface_name', nic_type, options_list=('--name', '-n'))
         c.argument('internal_dns_name_label', options_list=('--internal-dns-name',), help='The internal DNS name label.', arg_group='DNS')
-        c.argument('dns_servers', help='Space separated list of DNS server IP addresses.', nargs='+', arg_group='DNS')
+        c.argument('dns_servers', help='Space-separated list of DNS server IP addresses.', nargs='+', arg_group='DNS')
         c.argument('enable_ip_forwarding', options_list=('--ip-forwarding',), help='Enable IP forwarding.', arg_type=get_three_state_flag())
 
     with self.argument_context('network nic create') as c:
@@ -547,14 +547,14 @@ def load_arguments(self, _):
 
     with self.argument_context('network nic update') as c:
         c.argument('network_security_group', help='Name or ID of the associated network security group.', validator=get_nsg_validator(), completer=get_resource_name_completion_list('Microsoft.Network/networkSecurityGroups'))
-        c.argument('dns_servers', help='Space separated list of DNS server IP addresses. Use "" to revert to default Azure servers.', nargs='+', arg_group='DNS')
+        c.argument('dns_servers', help='Space-separated list of DNS server IP addresses. Use "" to revert to default Azure servers.', nargs='+', arg_group='DNS')
 
     for item in ['create', 'ip-config update', 'ip-config create']:
         with self.argument_context('network nic {}'.format(item)) as c:
             c.extra('load_balancer_name', options_list=('--lb-name',), completer=get_resource_name_completion_list('Microsoft.Network/loadBalancers'), help='The name of the load balancer to use when adding NAT rules or address pools by name (ignored when IDs are specified).')
-            c.argument('load_balancer_backend_address_pool_ids', options_list=('--lb-address-pools',), nargs='+', validator=validate_address_pool_id_list, help='Space separated list of names or IDs of load balancer address pools to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('backendAddresPools'))
-            c.argument('load_balancer_inbound_nat_rule_ids', options_list=('--lb-inbound-nat-rules',), nargs='+', validator=validate_inbound_nat_rule_id_list, help='Space separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('inboundNatRules'))
-            c.argument('application_security_groups', min_api='2017-09-01', help='Space separated list of application security groups.', nargs='+', validator=get_asg_validator(self, 'application_security_groups'))
+            c.argument('load_balancer_backend_address_pool_ids', options_list=('--lb-address-pools',), nargs='+', validator=validate_address_pool_id_list, help='Space-separated list of names or IDs of load balancer address pools to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('backendAddresPools'))
+            c.argument('load_balancer_inbound_nat_rule_ids', options_list=('--lb-inbound-nat-rules',), nargs='+', validator=validate_inbound_nat_rule_id_list, help='Space-separated list of names or IDs of load balancer inbound NAT rules to associate with the NIC. If names are used, --lb-name must be specified.', completer=get_lb_subresource_completion_list('inboundNatRules'))
+            c.argument('application_security_groups', min_api='2017-09-01', help='Space-separated list of application security groups.', nargs='+', validator=get_asg_validator(self, 'application_security_groups'))
 
     with self.argument_context('network nic ip-config') as c:
         c.argument('network_interface_name', options_list=('--nic-name',), metavar='NIC_NAME', help='The network interface (NIC).', id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'))
@@ -706,7 +706,7 @@ def load_arguments(self, _):
         c.argument('dns_name', help='Globally unique DNS entry.')
         c.argument('idle_timeout', help='Idle timeout in minutes.')
         c.argument('zone', zone_type, min_api='2017-06-01')
-        c.argument('ip_tags', nargs='+', min_api='2017-11-01', help="Space separated list of IP tags in 'TYPE=VAL' format.", validator=validate_ip_tags)
+        c.argument('ip_tags', nargs='+', min_api='2017-11-01', help="Space-separated list of IP tags in 'TYPE=VAL' format.", validator=validate_ip_tags)
 
     with self.argument_context('network public-ip create') as c:
         c.argument('name', completer=None)
@@ -799,8 +799,8 @@ def load_arguments(self, _):
     # region VirtualNetworks
     with self.argument_context('network vnet') as c:
         c.argument('virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')
-        c.argument('vnet_prefixes', nargs='+', help='Space separated list of IP address prefixes for the VNet.', options_list=('--address-prefixes',), metavar='PREFIX')
-        c.argument('dns_servers', nargs='+', help='Space separated list of DNS server IP addresses.', metavar='IP')
+        c.argument('vnet_prefixes', nargs='+', help='Space-separated list of IP address prefixes for the VNet.', options_list=('--address-prefixes',), metavar='PREFIX')
+        c.argument('dns_servers', nargs='+', help='Space-separated list of DNS server IP addresses.', metavar='IP')
         c.argument('ddos_protection', arg_type=get_three_state_flag(), help='Enable DDoS protection for protected resources in the VNet.', min_api='2017-09-01')
         c.argument('vm_protection', arg_type=get_three_state_flag(), help='Enable VM protection for all subnets in the VNet.', min_api='2017-09-01')
 
@@ -844,7 +844,7 @@ def load_arguments(self, _):
         c.argument('vpn_type', help='VPN routing type.', arg_type=get_enum_type(VpnType), default=VpnType.route_based.value)
         c.argument('bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')
         c.argument('public_ip_address', options_list=['--public-ip-addresses'], nargs='+', help='Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
-        c.argument('address_prefixes', help='Space separated list of CIDR prefixes representing the address space for the P2S client.', nargs='+', arg_group='VPN Client')
+        c.argument('address_prefixes', help='Space-separated list of CIDR prefixes representing the address space for the P2S client.', nargs='+', arg_group='VPN Client')
         c.argument('radius_server', min_api='2017-06-01', help='Radius server address to connect to.', arg_group='VPN Client')
         c.argument('radius_secret', min_api='2017-06-01', help='Radius secret to use for authentication.', arg_group='VPN Client')
         c.argument('client_protocol', min_api='2017-06-01', help='Protocols to use for connecting', nargs='+', arg_group='VPN Client', arg_type=get_enum_type(VpnClientProtocol))
@@ -870,7 +870,7 @@ def load_arguments(self, _):
         c.argument('processor_architecture', arg_type=get_enum_type(ProcessorArchitecture))
         c.argument('authentication_method', arg_type=get_enum_type(AuthenticationMethod))
         c.argument('radius_server_auth_certificate', help='Public certificate data for the Radius server auth certificate in Base-64 format. Required only if external Radius auth has been configured with EAPTLS auth.')
-        c.argument('client_root_certificates', nargs='+', help='Space separated list of client root certificate public certificate data in Base-64 format. Optional for external Radius-based auth with EAPTLS')
+        c.argument('client_root_certificates', nargs='+', help='Space-separated list of client root certificate public certificate data in Base-64 format. Optional for external Radius-based auth with EAPTLS')
         c.argument('use_legacy', min_api='2017-06-01', help='Generate VPN client package using legacy implementation.', arg_type=get_three_state_flag())
 
     # endregion

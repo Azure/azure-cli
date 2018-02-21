@@ -2,10 +2,17 @@
 
 Release History
 ===============
+
+2.0.28
+++++++
+* Fix issue that required extension to use `client_arg_name` keyword argument. This is no longer necessary.
+* Allow extensions to send telemetry with custom instrumentation key
+* Enable HTTP logging with --debug
+
 2.0.27
 ++++++
 * auth: key on both subscription id and name on msi login
-* Minor fixes
+* Add events module in core for EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
 
 2.0.26
 ++++++

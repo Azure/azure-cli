@@ -135,6 +135,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # wait
         self.cmd('aks wait -g {resource_group} -n {name} --created', checks=[self.is_empty()])
 
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('name', '{name}'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('agentPoolProfiles[0].count', 3),
+            self.check('agentPoolProfiles[0].vmSize', 'Standard_DS1_v2'),
+            self.check('dnsPrefix', '{dns_name_prefix}'),
+            self.check('provisioningState', 'Succeeded')
+        ])
+
         # delete
         self.cmd('aks delete -g {resource_group} -n {name} --yes', checks=[self.is_empty()])
 
@@ -153,6 +163,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
             'k8s_version': '1.7.12'
         })
+
+        # show k8s versions
+        self.cmd('aks get-versions -l {location}', checks=[
+            self.exists('orchestrators[*].orchestratorVersion')
+        ])
+
+        # show k8s versions in table format
+        self.cmd('aks get-versions -l {location} -o table', checks=[
+            StringContainCheck(self.kwargs['k8s_version'])
+        ])
 
         # create
         create_cmd = 'aks create -g {resource_group} -n {name} --dns-name-prefix {dns_name_prefix} ' \
@@ -176,7 +196,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # get versions for upgrade
-        self.cmd('aks get-versions -g {resource_group} -n {name}', checks=[
+        self.cmd('aks get-upgrades -g {resource_group} -n {name}', checks=[
             self.exists('id'),
             self.check('resourceGroup', '{resource_group}'),
             self.check('agentPoolProfiles[0].kubernetesVersion', '{k8s_version}'),
@@ -185,8 +205,16 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('type', 'Microsoft.ContainerService/managedClusters/upgradeprofiles')
         ])
 
+        # get versions for upgrade in table format
+        k8s_upgrade_version = '1.8.7'
+        self.cmd('aks get-upgrades -g {resource_group} -n {name} --output=table', checks=[
+            StringContainCheck('Upgrades'),
+            StringContainCheck(k8s_upgrade_version)
+        ])
+
+
         # upgrade
-        self.kwargs.update({'k8s_version': '1.8.6'})
+        self.kwargs.update({'k8s_version': k8s_upgrade_version})
         self.cmd('aks upgrade -g {resource_group} -n {name} --kubernetes-version {k8s_version} --yes', checks=[
             self.check('provisioningState', 'Succeeded')
         ])
@@ -194,6 +222,12 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # show again
         self.cmd('aks show -g {resource_group} -n {name}', checks=[
             self.check('kubernetesVersion', '{k8s_version}')
+        ])
+
+        # get versions for upgrade in table format
+        self.cmd('aks get-upgrades -g {resource_group} -n {name} --output=table', checks=[
+            StringContainCheck('Upgrades'),
+            StringContainCheck('None available')
         ])
 
         # delete
