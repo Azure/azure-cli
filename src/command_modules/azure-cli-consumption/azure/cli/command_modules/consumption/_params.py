@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long
 from ._validators import get_datetime_type
-from ._validators import get_parameters_type
+from ._validators import get_decimal_type
 
 def load_arguments(self, _):
     with self.argument_context('consumption usage') as c:
@@ -50,12 +50,20 @@ def load_arguments(self, _):
     with self.argument_context('consumption budget create') as cb:
         cb.argument('resource_group_name', options_list=['--resource-group-name','-r'], help='create budget for subscription by specific resource group name')        
         cb.argument('budget_name', options_list=['--budget-name','-b'], help='create budget information by budget name')
-        cb.argument('parameters', options_list=['--parameters','-p'], type=get_parameters_type(), help='create budget with these parameters')
+        cb.argument('category', options_list=['--category','-c'], type=str, help='create budget with category')
+        cb.argument('amount', options_list=['--amount','-a'], type=get_decimal_type(), help='create budget with amount')
+        cb.argument('time_grain', options_list=['--time_grain','-tg'], type=str, help='create budget with time grain')
+        cb.argument('start_date', options_list=['--start_date','-s'], type=get_datetime_type(), help='create budget with start date of time period')
+        cb.argument('end_date', options_list=['--end_date','-e'], type=get_datetime_type(), help='create budget with end date of time period')
 
     with self.argument_context('consumption budget update') as cb:
         cb.argument('resource_group_name', options_list=['--resource-group-name','-r'], help='update budget for subscription by specific resource group name')        
         cb.argument('budget_name', options_list=['--budget-name','-b'], help='update information for budget with this budget name')
-        cb.argument('parameters', options_list=['--parameters','-p'], type=get_parameters_type(), help='update budget with these parameters')
+        cb.argument('category', options_list=['--category','-c'], type=str, help='create budget with category')
+        cb.argument('amount', options_list=['--amount','-a'], type=get_decimal_type(), help='create budget with amount')
+        cb.argument('time_grain', options_list=['--time_grain','-tg'], type=str, help='create budget with time grain')
+        cb.argument('start_date', options_list=['--start_date','-s'], type=get_datetime_type(), help='create budget with start date of time period')
+        cb.argument('end_date', options_list=['--end_date','-e'], type=get_datetime_type(), help='create budget with end date of time period')
 
     with self.argument_context('consumption budget delete') as cb:
         cb.argument('resource_group_name', options_list=['--resource-group-name','-r'], help='delete budget for subscription by specific resource group name')        

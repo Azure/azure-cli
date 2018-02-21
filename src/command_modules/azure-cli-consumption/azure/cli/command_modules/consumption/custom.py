@@ -97,8 +97,7 @@ def cli_consumption_list_marketplace(client, billing_period_name=None, start_dat
 
 def cli_consumption_list_budgets(client, resource_group_name=None):
     if resource_group_name:
-        return list(client.list_by_resource_group_name(resource_group_name))
-    get_output_in_json()
+        return list(client.list_by_resource_group_name(resource_group_name))    
     return list(client.list())
 
 
@@ -108,13 +107,19 @@ def cli_consumption_show_budget(client, budget_name, resource_group_name=None):
     return client.get(budget_name)
 
 
-def cli_consumption_create_budget(client, budget_name, parameters, resource_group_name=None):
+def cli_consumption_create_budget(client, budget_name, category, amount, time_grain, start_date, end_date, resource_group_name=None):
+    time_period = client.models.BudgetTimePeriod(start_date, end_date)
+    parameters = client.models.Budget(category=category, amount=amount, time_grain=time_grain, time_period=time_period)
+
     if resource_group_name:
         return client.create_or_update(resource_group_name, budget_name, parameters)
     return client.create_or_update(budget_name, parameters)
 
 
-def cli_consumption_update_budget(client, budget_name, parameters, resource_group_name=None):
+def cli_consumption_update_budget(client, budget_name, category, amount, time_grain, start_date, end_date, resource_group_name=None):
+    time_period = client.models.BudgetTimePeriod(start_date, end_date)
+    parameters = client.models.Budget(category=category, amount=amount, time_grain=time_grain, time_period=time_period)
+    
     if resource_group_name:
         return client.create_or_update(resource_group_name, budget_name, parameters)
     return client.create_or_update(budget_name, parameters)

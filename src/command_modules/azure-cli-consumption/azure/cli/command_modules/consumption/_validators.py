@@ -5,8 +5,22 @@
 
 import json
 from datetime import datetime
+from decimal import *
 from azure.cli.core.util import CLIError
+from pprint import pprint
 
+from azure.mgmt.consumption.models import BudgetTimePeriod
+from azure.mgmt.consumption.models import CategoryType
+#from azure.mgmt.consumption.models import models
+#from azure.mgmt.consumption.BudgetTimePeriod import BudgetTimePeriod
+
+def get_decimal_type():
+    def decimal_type(string):
+        try:
+            return Decimal(string)
+        except ValueError:
+            raise ValueError("the value passed cannot be converted to decimal")
+    return decimal_type
 
 def get_datetime_type():
     """ Validates UTC datetime. Examples of accepted forms:
@@ -60,23 +74,21 @@ def validate_reservations_summaries(namespace):
 
 def validate_budget_parameters(namespace):
     """lowercase the time grain for comparison"""
-    print(namespace.parameters)
-    parameters = json.loads(namespace.parameters)
-    time_grain = parameters.time_grain.lower()
-    if time_grain != 'annually' and time_grain != 'quarterly' and time_grain != 'monthly':
-        raise CLIError("usage error: --parameters.time_grain must be specified and values can be either 'Annually', 'Quaterly', or 'Monthly'.")
-    time_period = namespace.parameters.time_period
-    try:
-        datetime_type(time_period.start_date)
-    except ValueError:
-        raise CLIError("usage error: --parameters.time_period.start_date is not valid. start date must be specified")
-    try:
-        datetime_type(time_period.end_date)
-    except ValueError:
-        raise CLIError("usage error: --parameters.time_period.end_date is not valid. end date must be specified")
-    if amount < 0:
-        raise CLIError("usage error: --parameters.time_period.amount must be greater than 0")
-    budgetcategory = namespace.parameters.category.lower()
+    
+    budgetcategory = namespace.category.lower()
     if budgetcategory != 'cost' and budgetcategory != 'usage':
         raise CLIError("usage error: --parameters.category must be set to either cost or usage")
+
+    time_grain = namespace.time_grain.lower().strip()
+    if time_grain!='annually' and time_grain!='quarterly' and time_grain!='monthly':
+        raise CLIError("usage error: --parameters.time_grain must be specified and values can be either 'Annually', 'Quarterly', or 'Monthly'. Value passed {}".format(time_grain))
+
+    try:
+        time_period = BudgetTimePeriod(namespace.start_date, namespace.end_date)
+    except ValueError:
+        raise CLIError("usage error: --parameters.time_period.start_date is not valid. start date must be specified")
+
+    if namespace.amount < 0:
+        raise CLIError("usage error: --parameters.time_period.amount must be greater than 0")
+
     
