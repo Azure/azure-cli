@@ -201,7 +201,7 @@ def get_storage_client(cli_ctx, service_type, namespace):
     return get_storage_data_service_client(cli_ctx, service_type, name, key, connection_string, sas_token)
 
 
-def create_normalized_blob_file_path(path, name):
+def normalized_blob_file_path(path, name):
     # '/' is the path separator used by blobs/files, we normalize to it
     path_sep = '/'
     if path:
