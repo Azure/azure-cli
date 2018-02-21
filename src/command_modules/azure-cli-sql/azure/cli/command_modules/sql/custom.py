@@ -52,10 +52,10 @@ def _get_server_location(cli_ctx, server_name, resource_group_name):
 
 _DEFAULT_SERVER_VERSION = "12.0"
 
-
 ###############################################
 #                sql db                       #
 ###############################################
+
 
 # pylint: disable=too-few-public-methods
 class ClientType(Enum):
@@ -588,7 +588,8 @@ def db_update(
         instance,
         elastic_pool_name=None,
         max_size_bytes=None,
-        requested_service_objective_name=None):
+        requested_service_objective_name=None,
+        zone_redundant=None):
 
     # Verify edition
     if instance.edition.lower() == DatabaseEdition.data_warehouse.value.lower():
@@ -628,6 +629,8 @@ def db_update(
 
     # Set other properties
     instance.max_size_bytes = max_size_bytes or instance.max_size_bytes
+
+    instance.zone_redundant = zone_redundant
 
     return instance
 
@@ -933,13 +936,15 @@ def elastic_pool_update(
         database_dtu_max=None,
         database_dtu_min=None,
         dtu=None,
-        storage_mb=None):
+        storage_mb=None,
+        zone_redundant=None):
 
     # Apply params to instance
     instance.database_dtu_max = database_dtu_max or instance.database_dtu_max
     instance.database_dtu_min = database_dtu_min or instance.database_dtu_min
     instance.dtu = dtu or instance.dtu
     instance.storage_mb = storage_mb or instance.storage_mb
+    instance.zone_redundant = zone_redundant
 
     return instance
 
