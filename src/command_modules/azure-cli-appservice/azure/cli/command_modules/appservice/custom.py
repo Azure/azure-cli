@@ -11,8 +11,8 @@ except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 from binascii import hexlify
 from os import urandom
-import OpenSSL.crypto
 import json
+import OpenSSL.crypto
 
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
@@ -26,8 +26,7 @@ from azure.mgmt.web.models import (Site, SiteConfig, User, AppServicePlan, SiteC
                                    SkuDescription, SslState, HostNameBinding, NameValuePair,
                                    BackupRequest, DatabaseBackupSetting, BackupSchedule,
                                    RestoreRequest, FrequencyUnit, Certificate, HostNameSslState,
-                                   RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity,
-                                   ApplicationStackPaged, ApplicationStack, StackMajorVersion, StackMinorVersion)
+                                   RampUpRule, UnauthenticatedClientAction, ManagedServiceIdentity)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
@@ -1452,7 +1451,7 @@ class _StackRuntimeHelper(object):
             return
         os_type = ('Linux' if self._linux else 'Windows')
         raw_stacks = self._client.provider.get_available_stacks(os_type_selected=os_type, raw=True)
-        bytes_value = raw_stacks._get_next().content
+        bytes_value = raw_stacks._get_next().content  # pylint: disable=protected-access
         json_value = bytes_value.decode('utf8')
         json_stacks = json.loads(json_value)
         stacks = json_stacks['value']
