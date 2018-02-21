@@ -7,6 +7,7 @@
 Commands for storage file share operations
 """
 
+import os
 from knack.log import get_logger
 
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_files,
@@ -36,7 +37,6 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
     """ Upload local files to Azure Storage File Share in batch """
 
     from ..util import glob_files_locally, create_normalized_blob_file_path
-    import os.path
 
     source_files = [c for c in glob_files_locally(source, pattern)]
     logger = get_logger(__name__)
@@ -82,7 +82,6 @@ def storage_file_download_batch(cmd, client, source, destination, pattern=None, 
     """
 
     from ..util import glob_files_remotely, mkdir_p
-    import os.path
 
     source_files = glob_files_remotely(cmd, client, source, pattern)
 
@@ -183,7 +182,6 @@ def storage_file_copy_batch(cmd, client, source_client, destination_share=None, 
         def action_file_copy(file_info):
             dir_name, file_name = file_info
             if dryrun:
-                import os.path
                 logger.warning('  - copy file %s', os.path.join(dir_name, file_name))
             else:
                 return _create_file_and_directory_from_file(client, source_client, destination_share, source_share,
@@ -233,7 +231,6 @@ def _create_file_and_directory_from_blob(file_service, blob_service, share, cont
     """
     from azure.common import AzureException
     from ..util import create_normalized_blob_file_path
-    import os.path
 
     blob_url = blob_service.make_blob_url(container, encode_for_url(blob_name), sas_token=sas)
     full_path = create_normalized_blob_file_path(destination_dir, blob_name)
@@ -259,7 +256,6 @@ def _create_file_and_directory_from_file(file_service, source_file_service, shar
     """
     from azure.common import AzureException
     from ..util import create_normalized_blob_file_path
-    import os.path
 
     file_url, source_file_dir, source_file_name = make_encoded_file_url_and_params(source_file_service, source_share,
                                                                                    source_file_dir, source_file_name,
@@ -289,7 +285,6 @@ def _make_directory_in_files_share(file_service, file_share, directory_path, exi
     which already exists.
     """
     from azure.common import AzureHttpError
-    import os.path
 
     if not directory_path:
         return

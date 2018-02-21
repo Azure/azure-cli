@@ -5,6 +5,7 @@
 
 from __future__ import print_function
 
+import os
 from knack.log import get_logger
 
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
@@ -81,7 +82,6 @@ def storage_blob_copy_batch(cmd, client, source_client, destination_container=No
                                                                                  pattern)))
 
     elif source_share:
-        import os.path
         # copy blob from file share
 
         # if the source client is None, recreate one from the destination client.
@@ -111,7 +111,6 @@ def storage_blob_copy_batch(cmd, client, source_client, destination_container=No
 # pylint: disable=unused-argument
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False,
                                 progress_callback=None, max_connections=2):
-    import os.path
 
     def _download_blob(blob_service, container, destination_folder, blob_name):
         # TODO: try catch IO exception
@@ -223,7 +222,6 @@ def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=Non
 
     def upload_block_blob():
         # increase the block size to 100MB when the file is larger than 200GB
-        import os.path
         if os.path.isfile(file_path) and os.stat(file_path).st_size > 200 * 1024 * 1024 * 1024:
             client.MAX_BLOCK_SIZE = 100 * 1024 * 1024
             client.MAX_SINGLE_PUT_SIZE = 256 * 1024 * 1024
@@ -312,7 +310,6 @@ def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_
 def _copy_file_to_blob_container(blob_service, source_file_service, destination_container, destination_path,
                                  source_share, source_sas, source_file_dir, source_file_name):
     from azure.common import AzureException
-    import os.path
     file_url, source_file_dir, source_file_name = \
         make_encoded_file_url_and_params(source_file_service, source_share, source_file_dir,
                                          source_file_name, source_sas)

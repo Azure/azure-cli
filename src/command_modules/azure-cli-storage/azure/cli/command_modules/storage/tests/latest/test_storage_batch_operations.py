@@ -199,7 +199,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
                          src_account_info, dst_container).assert_with_checks(JMESPathCheck('length(@)', 41))
 
         # from blob container to container with a sas between different accounts with pattern
-        dst_container = self.create_container(src_account_info)
+        dst_container = self.create_container(dst_account_info)
         self.storage_cmd('storage blob copy start-batch --source-container {} '
                          '--destination-container {} --source-sas {} --pattern apple/* '
                          '--source-account-name {}', dst_account_info, src_container, dst_container, sas_token,
@@ -208,8 +208,8 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
                          dst_account_info, dst_container).assert_with_checks(JMESPathCheck('length(@)', 10))
 
         # from blob container to container without a sas between different accounts with pattern
-        dst_container = self.create_container(src_account_info)
-        self.storage_cmd('storage file copy start-batch --source-container {} '
+        dst_container = self.create_container(dst_account_info)
+        self.storage_cmd('storage blob copy start-batch --source-container {} '
                          '--destination-container {} --source-account-name {} --source-account-key {}'
                          ' --pattern */file_0', dst_account_info, src_container, dst_container, src_account_info[0],
                          src_account_info[1])
@@ -221,36 +221,36 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         sas_token = self.storage_cmd('storage share generate-sas -n {} --permissions rl --expiry {} -otsv',
                                      src_account_info, src_share, expiry).output.strip()
 
-        self.storage_cmd('storage file copy start-batch --source-share {} --destination-share {} --source-sas {}',
+        self.storage_cmd('storage blob copy start-batch --source-share {} --destination-container {} --source-sas {}',
                          src_account_info, src_share, dst_container, sas_token)
         self.storage_cmd('storage blob list -c {}',
                          src_account_info, dst_container).assert_with_checks(JMESPathCheck('length(@)', 41))
 
         # from file share to blob container with a sas between different accounts with pattern
-        dst_container = self.create_container(src_account_info)
-        self.storage_cmd('storage file copy start-batch --source-share {} '
-                         '--destination-share {} --source-sas {} --pattern apple/* '
+        dst_container = self.create_container(dst_account_info)
+        self.storage_cmd('storage blob copy start-batch --source-share {} '
+                         '--destination-container {} --source-sas {} --pattern apple/* '
                          '--source-account-name {}', dst_account_info, src_share, dst_container, sas_token,
                          src_account_info[0])
         self.storage_cmd('storage blob list -c {}',
                          dst_account_info, dst_container).assert_with_checks(JMESPathCheck('length(@)', 10))
 
         # from file share to blob container without a sas between different accounts with pattern
-        dst_container = self.create_container(src_account_info)
-        self.storage_cmd('storage file copy start-batch --source-share {} '
-                         '--destination-share {} --source-account-name {} --source-account-key {}'
+        dst_container = self.create_container(dst_account_info)
+        self.storage_cmd('storage blob copy start-batch --source-share {} '
+                         '--destination-container {} --source-account-name {} --source-account-key {}'
                          ' --pattern */file_0', dst_account_info, src_share, dst_container, src_account_info[0],
                          src_account_info[1])
         self.storage_cmd('storage blob list -c {}',
                          dst_account_info, dst_container).assert_with_checks(JMESPathCheck('length(@)', 4))
 
         # from file share to blob container while specifying destination path
-        dst_container = self.create_container(src_account_info)
-        self.storage_cmd('storage file copy start-batch --source-share {} '
-                         '--destination-share {} --source-account-name {} --source-account-key {}'
+        dst_container = self.create_container(dst_account_info)
+        self.storage_cmd('storage blob copy start-batch --source-share {} '
+                         '--destination-container {} --source-account-name {} --source-account-key {}'
                          ' --pattern */file_0 --destination-path some_dir', dst_account_info, src_share, dst_container,
                          src_account_info[0], src_account_info[1])
-        self.storage_cmd('storage blob list -c {} --pattern some_dir*',
+        self.storage_cmd('storage blob list -c {} --prefix some_dir',
                          dst_account_info, dst_container).assert_with_checks(JMESPathCheck('length(@)', 4))
 
     @ResourceGroupPreparer()
