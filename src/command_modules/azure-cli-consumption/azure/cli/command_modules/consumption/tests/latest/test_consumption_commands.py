@@ -77,6 +77,13 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
     #     else:
     #         self.assertIsNone(pricesheet['pricesheets'][0]['meterDetails'])
 
+    def _validate_budget(self, output_budget):
+        self.assertIsNotNone(output_budget)
+        self.assertTrue(output_budget['amount'])
+        self.assertTrue(output_budget['timeGrain'])
+        self.assertTrue(output_budget['timePeriod'])
+        self.assertTrue(output_budget['name'])
+
     # def test_consumption_pricesheet_billing_period(self):
     #     self.enable_large_payload()
     #     pricesheet = self.cmd('consumption pricesheet show -p 20171001').get_output_in_json()
@@ -166,26 +173,26 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
     #     self.assertTrue(reservations_details_list)
     #     self._validate_reservation_details(reservations_details_list[0])
 
-    def test_consumption_marketplace_list(self):
-        marketplace_list = self.cmd('consumption marketplace list -p 20170101 -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
-        self.assertTrue(marketplace_list)
+    # def test_consumption_marketplace_list(self):
+    #     marketplace_list = self.cmd('consumption marketplace list -p 20170101 -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
+    #     self.assertTrue(marketplace_list)
 
-    def test_consumption_budget_create(self):
-        output_name = self.cmd('consumption budget create -b ''costbudget'' -c ''cost'' -a 100.0 -s ''2018-02-01'' -e ''2018-10-01'' -tg ''monthly''')
-        self.assertEqual('OK', output_name)
+    # def test_consumption_budget_create(self):
+    #     output_budget = self.cmd('consumption budget create -b ''costbudget'' -c ''cost'' -a 100.0 -s ''2018-02-01'' -e ''2018-10-01'' -tg ''monthly''').get_output_in_json()
+    #     self.assertTrue(output_budget)
+    #     self._validate_budget(output_budget)
 
     def test_consumption_budget_update(self):
-        budget = get_budget(self,name)
-        pprint(vars(budget))
-        e_tag = budget.e_tag
-        start_date = budget.time_period.start_date
-        end_date = budget.time_period.end_date
-        time_grain = budget.time_grain
+        output_budget = self.cmd('consumption budget create -b ''costbudget3'' -c ''cost'' -a 100.0 -s ''2018-02-01'' -e ''2018-10-01'' -tg ''monthly''').get_output_in_json()
+        eTag = output_budget['eTag']
+        
+        # e_tag = budget.e_tag
+        # start_date = budget.time_period.start_date
+        # end_date = budget.time_period.end_date
+        # time_grain = budget.time_grain
 
-        output_name = self.cmd('consumption budget create -b ''b1'' -c ''cost'' -a 100.0 -s ''2017-02-01'' -e ''2019-01-01'' -tg ''monthly''')
-        self.assertEqual('OK', output_name)
+        output_name = self.cmd("consumption budget update -b ''costbudget3'' -c ''cost'' -a 125.0 -s ''2018-02-01'' -e ''2018-10-01'' -tg ''monthly'' -et '{}'".format(eTag))
+        self.assertTrue(output_name)
 
-    def get_budget(self, name):
-        return self.cmd("consumption budget -b '{}'".format(name))
 	
 		

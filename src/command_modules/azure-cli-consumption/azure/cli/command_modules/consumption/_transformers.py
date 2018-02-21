@@ -62,29 +62,29 @@ def transform_pricesheet_show_output(result):
     result.pricesheets = [pricesheet_show_properties(item) for item in result.pricesheets]
     return result
 
+
 def marketplace_list_output(result):
     return result
 
 
 def budget_list_output(result):
-    print(result)
-    print(result.amount)
-    print("==============")
     result.amount = str(result.amount)
-    result.current_spend.amount = str(result.current_spend.amount)
-     #'current_spend': <azure.mgmt.consumption.models.current_spend.CurrentSpend
+    if result.current_spend:
+        result.current_spend.amount = str(result.current_spend.amount)     
     return result
 
 
 def budget_show_output(result):
     result.amount = str(result.amount)
-    result.current_spend.amount = str(result.current_spend.amount)
+    if result.current_spend:
+        result.current_spend.amount = str(result.current_spend.amount)
     return result
 
 
 def budget_create_update_output(result):
     result.amount = str(result.amount)
-    result.current_spend.amount = str(result.current_spend.amount)
+    if result.current_spend:
+        result.current_spend.amount = str(result.current_spend.amount)
     return result
 
 
