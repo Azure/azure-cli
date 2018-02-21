@@ -83,6 +83,13 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.storage_cmd('storage blob list -c {}', storage_account_info, container).assert_with_checks(
             JMESPathCheck('length(@)', 0))
 
+        # upload files while specifying container path
+        container = self.create_container(storage_account_info)
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --pattern */file_0 --destination-path some_dir',
+                         storage_account_info, test_dir, container)
+        self.storage_cmd('storage blob list -c {} --prefix some_dir',
+                         storage_account_info, container).assert_with_checks(JMESPathCheck('length(@)', 4))
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
@@ -154,6 +161,21 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
                          test_dir, src_share)
         self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share, local_folder)
         self.assertEqual(0, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='src_account')
+    @StorageAccountPreparer(parameter_name='dst_account')
+    @StorageTestFilesPreparer()
+    def test_storage_blob_batch_copy(self, src_account_info, dst_account_info, test_dir):
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        src_container = self.create_container(src_account_info)
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {}', src_account_info, test_dir, src_container)
+
+        src_share = self.create_share(src_account_info)
+        self.storage_cmd('storage file upload-batch -s "{}" -d {}', src_account_info, test_dir, src_share)
+
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='src_account')

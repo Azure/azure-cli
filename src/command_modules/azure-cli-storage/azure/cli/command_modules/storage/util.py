@@ -200,3 +200,13 @@ def get_storage_client(cli_ctx, service_type, namespace):
     sas_token = getattr(namespace, 'sas_token', az_config.get('storage', 'sas_token', None))
 
     return get_storage_data_service_client(cli_ctx, service_type, name, key, connection_string, sas_token)
+
+
+def create_normalized_blob_file_path(path, name):
+    import os
+
+    # '/' is the path separator used by blobs/files, we normalize to it
+    path_sep = '/'
+    if path:
+        name = path_sep.join((path, name))
+    return path_sep.join(os.path.normpath(name).split(os.path.sep))
