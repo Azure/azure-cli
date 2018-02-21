@@ -12,12 +12,12 @@ helps['managementpartner'] = """
 
 helps['managementpartner create'] = """
     type: command
-    short-summary: Associates a Microsoft Partner Network(MPN) ID to the current authenticated user or service principal.  
+    short-summary: Associates a Microsoft Partner Network(MPN) ID to the current authenticated user or service principal.
 """
 
 helps['managementpartner show'] = """
     type: command
-    short-summary: Gets the Microsoft Partner Network(MPN) ID of the current authenticated user or service principal.  
+    short-summary: Gets the Microsoft Partner Network(MPN) ID of the current authenticated user or service principal.
 """
 
 helps['managementpartner update'] = """

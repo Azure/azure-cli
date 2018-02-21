@@ -12,3 +12,4 @@ def cf_managementpartner(cli_ctx, **_):
 
 def managementpartner_partner_client_factory(cli_ctx, kwargs):
     return cf_managementpartner(cli_ctx, **kwargs).partner
+

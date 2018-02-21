@@ -6,3 +6,4 @@
 def load_arguments(self, _):
     with self.argument_context('managementpartner') as c:
         c.argument('partner_id', help='Microsoft partner network ID')
+
