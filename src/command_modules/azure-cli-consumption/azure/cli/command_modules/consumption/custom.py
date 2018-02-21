@@ -116,13 +116,14 @@ def cli_consumption_create_budget(client, budget_name, category, amount, time_gr
     return client.create_or_update(budget_name, parameters)
 
 
-def cli_consumption_update_budget(client, budget_name, category, amount, time_grain, start_date, end_date, resource_group_name=None):
+def cli_consumption_update_budget(client, budget_name, category, amount, time_grain, start_date, end_date, e_tag, filters=None, 
+notifications=None, resource_group_name=None):
     time_period = client.models.BudgetTimePeriod(start_date, end_date)
-    parameters = client.models.Budget(category=category, amount=amount, time_grain=time_grain, time_period=time_period)
-    
+    budget = client.models.Budget(category=category, amount=amount, time_grain=time_grain, time_period=time_period, e_tag=e_tag, 
+    filters=filters, notifications=notifications)
     if resource_group_name:
-        return client.create_or_update(resource_group_name, budget_name, parameters)
-    return client.create_or_update(budget_name, parameters)
+        return client.create_or_update(resource_group_name, budget_name, budget)
+    return client.create_or_update(budget_name, budget)
 
 
 def cli_consumption_delete_budget(client, budget_name, resource_group_name=None):

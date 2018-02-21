@@ -59,8 +59,9 @@ def load_arguments(self, _):
     with self.argument_context('consumption budget update') as cb:
         cb.argument('resource_group_name', options_list=['--resource-group-name','-r'], help='update budget for subscription by specific resource group name')        
         cb.argument('budget_name', options_list=['--budget-name','-b'], help='update information for budget with this budget name')
-        cb.argument('category', options_list=['--category','-c'], type=str, help='create budget with category')
-        cb.argument('amount', options_list=['--amount','-a'], type=get_decimal_type(), help='create budget with amount')
+        cb.argument('category', options_list=['--category','-c'], type=str, help='update budget category')
+        cb.argument('amount', options_list=['--amount','-a'], type=get_decimal_type(), help='update budget amount')
+        cb.argument('e_tag', options_list=['--e-tag','-et'], type=str, help='etag required when updating existing budget')
         cb.argument('time_grain', options_list=['--time_grain','-tg'], type=str, help='create budget with time grain')
         cb.argument('start_date', options_list=['--start_date','-s'], type=get_datetime_type(), help='create budget with start date of time period')
         cb.argument('end_date', options_list=['--end_date','-e'], type=get_datetime_type(), help='create budget with end date of time period')

@@ -6,7 +6,7 @@
 from datetime import datetime
 from azure.cli.testsdk import ScenarioTest, record_only
 
-
+from pprint import pprint
 #@record_only()
 class AzureConsumptionServiceScenarioTest(ScenarioTest):
     # def enable_large_payload(self, size=8192):
@@ -171,7 +171,21 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         self.assertTrue(marketplace_list)
 
     def test_consumption_budget_create(self):
-        output_name = self.cmd('consumption budget create -b ''b1'' -p ''{''category'': ''cost''}'' ')        
+        output_name = self.cmd('consumption budget create -b ''costbudget'' -c ''cost'' -a 100.0 -s ''2018-02-01'' -e ''2018-10-01'' -tg ''monthly''')
         self.assertEqual('OK', output_name)
+
+    def test_consumption_budget_update(self):
+        budget = get_budget(self,name)
+        pprint(vars(budget))
+        e_tag = budget.e_tag
+        start_date = budget.time_period.start_date
+        end_date = budget.time_period.end_date
+        time_grain = budget.time_grain
+
+        output_name = self.cmd('consumption budget create -b ''b1'' -c ''cost'' -a 100.0 -s ''2017-02-01'' -e ''2019-01-01'' -tg ''monthly''')
+        self.assertEqual('OK', output_name)
+
+    def get_budget(self, name):
+        return self.cmd("consumption budget -b '{}'".format(name))
 	
 		
