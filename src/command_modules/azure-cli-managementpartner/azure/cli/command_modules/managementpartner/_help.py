@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
 from knack.help_files import helps
 
 helps['managementpartner'] = """
@@ -29,4 +30,3 @@ helps['managementpartner delete'] = """
     type: command
     short-summary: Delete the Microsoft Partner Network(MPN) ID of the current authenticated user or service principal.
 """
-

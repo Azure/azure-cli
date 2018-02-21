@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
 from azure.cli.testsdk import ScenarioTest, record_only
 
 
@@ -74,5 +75,3 @@ class AzureManagementPartnerTests(ScenarioTest):
 
         # Cleanup
         self.cmd('az managementpartner delete --partner-id {newpartnerid}')
-
-        

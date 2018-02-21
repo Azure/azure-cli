@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
 def create_managementpartner(client, managementpartner_id):
     return client.create(managementpartner_id)
 
@@ -17,4 +18,3 @@ def update_managementpartner(client, managementpartner_id):
 
 def delete_managementpartner(client, managementpartner_id):
     return client.delete(managementpartner_id)
-

@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.managementpartner._client_factory import managementpartner_partner_client_factory
 from ._exception_handler import managementpartner_exception_handler
