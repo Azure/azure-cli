@@ -112,6 +112,7 @@ def storage_blob_copy_batch(cmd, client, source_client, destination_container=No
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False,
                                 progress_callback=None, max_connections=2):
     import os.path
+
     def _download_blob(blob_service, container, destination_folder, blob_name):
         # TODO: try catch IO exception
         destination_path = os.path.join(destination_folder, blob_name)
