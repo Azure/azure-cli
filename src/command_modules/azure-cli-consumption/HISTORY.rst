@@ -4,7 +4,7 @@ Release History
 ===============
 0.2.2
 +++++
-* Added new commands for pricesheet API
+* Added new commands for pricesheet, marketplace and budget API
 
 0.2.1
 +++++

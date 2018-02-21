@@ -25,17 +25,10 @@ def get_datetime_type():
     return datetime_type
 
 def get_parameters_type():
-    def parameters_type(string):
-        x = json2obj(data)
-        #parameters = json.loads(string)
+    def parameters_type(string):        
+        parameters = json.loads(string)
         print (string)
         return parameters_type
-
-### TO CONTINUEEE. . .##########################################################################################
-def _json_object_hook(d): return parameters('X', d.keys())(*d.values())
-def json2obj(data): return json.loads(data, object_hook=_json_object_hook)
-
-
 
 def datetime_type(string):
     """ Validates UTC datetime. Examples of accepted forms:
