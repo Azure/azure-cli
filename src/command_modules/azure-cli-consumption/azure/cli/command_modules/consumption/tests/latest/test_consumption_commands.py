@@ -61,30 +61,6 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         self.assertTrue(reservationdetails['totalReservedQuantity'])
         self.assertTrue(reservationdetails['usageDate'])
         self.assertTrue(reservationdetails['usedHours'])
-#TODO
-    def _validate_pricesheet(self, pricesheet, includeMeterDetails = false){
-        self.assertIsNotNone(pricesheet)
-        self.assertEqual(pricesheet['type'], 'Microsoft.Consumption/pricesheets')
-        self.assertEqual(pricesheet['name'], 'default')
-        self.assertTrue(pricesheet['id'])
-        self.assertIsNotNone(pricesheet['billingPeriodId'])
-        self.assertIsNotNone(pricesheet['meterId'])
-        self.assertIsNotNone(pricesheet['meterName'])
-        self.assertIsNotNone(pricesheet['unitOfMeasure'])
-        self.assertIsNotNone(pricesheet['includedQuantity'])
-        self.assertIsNotNone(pricesheet['partNumber'])
-        self.assertIsNotNone(pricesheet['unitPrice'])
-        self.assertIsNotNone(pricesheet['currencyCode'])
-
-        if includeMeterDetails:
-            self.assertIsNotNone(pricesheet['meterDetails'])
-            self.assertIsNotNone(pricesheet['meterDetails']['meterName'])
-            self.assertIsNotNone(pricesheet['meterDetails']['meterCategory'])
-            self.assertIsNotNone(pricesheet['meterDetails']['meterLocation'])
-            self.assertIsNotNone(pricesheet['meterDetails']['totalIncludedQuantity'])
-            self.assertIsNotNone(pricesheet['meterDetails']['pretaxStandardRate'])
-        else:
-            self.assertIsNone(pricesheet['meterDetails'])
 
     def _validate_pricesheet(self, pricesheet, includeMeterDetails=False):
         self.assertIsNotNone(pricesheet)
@@ -100,6 +76,29 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
             self.assertIsNotNone(pricesheet['pricesheets'][0]['meterDetails']['meterName'])
         else:
             self.assertIsNone(pricesheet['pricesheets'][0]['meterDetails'])
+
+    def _validate_marketplace(self, marketplace, billing_period_id=None):
+        self.assertIsNotNone(marketplace)
+        self.assertTrue(marketplace['id'])
+        self.assertTrue(marketplace['name'])
+        self.assertIsNotNone(marketplace['type'])
+        self.assertIsNotNone(marketplace['instanceName'])
+        self.assertIsNotNone(marketplace['instanceId'])
+        self.assertIsNotNone(marketplace['currency'])
+        self.assertIsNotNone(marketplace['pretaxCost'])
+        self.assertIsNotNone(marketplace['isEstimated'])
+        self.assertIsNotNone(marketplace['orderNumber'])
+        if billing_period_id:
+            self.assertTrue(billing_period_id in marketplace['billingPeriodId'])
+        else:
+            self.assertIsNotNone(marketplace['billingPeriodId'])
+
+    def _validate_budget(self, output_budget):
+        self.assertIsNotNone(output_budget)
+        self.assertTrue(output_budget['amount'])
+        self.assertTrue(output_budget['timeGrain'])
+        self.assertTrue(output_budget['timePeriod'])
+        self.assertTrue(output_budget['name'])
 
     def test_consumption_pricesheet_billing_period(self):
         self.enable_large_payload()
@@ -190,13 +189,40 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         self.assertTrue(reservations_details_list)
         self._validate_reservation_details(reservations_details_list[0])
 
-#TODO
-    def test_pricesheet_with_subscriptionid(self):
-        pricesheet_output = self.cmd('consumption price sheet ....').get_output_in_json()
-        #self.assertTrue(pricesheet_get)
-        self._validate_pricesheet(pricesheet_output[0], false)
-#TODO
-    def test_pricesheet_with_subscriptionid_with_meter_details(self):
-        pricesheet_output = self.cmd('consumption price sheet ....').get_output_in_json()
-        #self.assertTrue(pricesheet_get)
-        self._validate_pricesheet(pricesheet_output[0], true)
+    def test_consumption_marketplace_list(self):
+        marketplace_list = self.cmd('consumption marketplace list').get_output_in_json()
+        self.assertTrue(marketplace_list)
+        all(self._validate_marketplace(marketplace_item) for marketplace_item in marketplace_list)
+
+    def test_consumption_marketplace_list_billing_period_filter(self):
+        marketplace_list = self.cmd('consumption marketplace list -p 201804-1 -t 1').get_output_in_json()
+        self.assertTrue(marketplace_list)
+        self.assertTrue(len(marketplace_list) == 1)
+        all(self._validate_marketplace(marketplace_item) for marketplace_item in marketplace_list)
+
+    def test_consumption_marketplace_list_billing_period(self):
+        marketplace_list = self.cmd('consumption marketplace list -p 201804-1').get_output_in_json()
+        self.assertTrue(marketplace_list)
+        all(self._validate_marketplace(marketplace_item, '201804-1') for marketplace_item in marketplace_list)
+
+    def test_consumption_budget_usage_create(self):
+        output_budget = self.cmd('az consumption budget create -b usagetypebudget1 -a 20 -s 2018-02-01 -e 2018-10-01 -tg annually -c usage -m 0dfadad2-6e4f-4078-85e1-90c230d4d482').get_output_in_json()
+        self.assertTrue(output_budget)
+        self._validate_budget(output_budget)
+
+    def test_consumption_budget_create(self):
+        output_budget = self.cmd('consumption budget create -b ''costbudget'' -c ''cost'' -a 100.0 -s ''2018-02-01'' -e ''2018-10-01'' -tg ''monthly''').get_output_in_json()
+        self.assertTrue(output_budget)
+        self._validate_budget(output_budget)
+
+    def test_consumption_budget_update(self):
+        output_budget = self.cmd('consumption budget create -b ''costbudget3'' -c ''cost'' -a 100.0 -s ''2018-02-01'' -e ''2018-10-01'' -tg ''monthly''').get_output_in_json()
+        eTag = output_budget['eTag']
+
+        output = self.cmd("consumption budget update -b ''costbudget3'' -c ''cost'' -a 125.0 -s ''2018-02-01'' -e ''2018-10-01'' -tg ''monthly'' -et '{}'".format(eTag)).get_output_in_json()
+        self.assertTrue(output)
+        self.assertEqual(output['amount'], '125')
+
+    def test_consumption_budget_delete(self):
+        output = self.cmd('consumption budget delete -b ''costbudget''')
+        self.assertTrue(output)
