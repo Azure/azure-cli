@@ -77,6 +77,22 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         else:
             self.assertIsNone(pricesheet['pricesheets'][0]['meterDetails'])
 
+    def _validate_marketplace(self, marketplace, billing_period_id=None):
+        self.assertIsNotNone(marketplace)
+        self.assertTrue(marketplace['id'])
+        self.assertTrue(marketplace['name'])
+        self.assertIsNotNone(marketplace['type'])
+        self.assertIsNotNone(marketplace['instanceName'])
+        self.assertIsNotNone(marketplace['instanceId'])
+        self.assertIsNotNone(marketplace['currency'])
+        self.assertIsNotNone(marketplace['pretaxCost'])
+        self.assertIsNotNone(marketplace['isEstimated'])
+        self.assertIsNotNone(marketplace['orderNumber'])
+        if billing_period_id:
+            self.assertTrue(billing_period_id in marketplace['billingPeriodId'])
+        else:
+            self.assertIsNotNone(marketplace['billingPeriodId'])
+
     def _validate_budget(self, output_budget):
         self.assertIsNotNone(output_budget)
         self.assertTrue(output_budget['amount'])
@@ -174,8 +190,20 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         self._validate_reservation_details(reservations_details_list[0])
 
     def test_consumption_marketplace_list(self):
+        marketplace_list = self.cmd('consumption marketplace list').get_output_in_json()
+        self.assertTrue(marketplace_list)
+        all(self._validate_marketplace(marketplace_item) for marketplace_item in marketplace_list)
+
+    def test_consumption_marketplace_list_billing_period_filter(self):
+        marketplace_list = self.cmd('consumption marketplace list -p 201804-1 -t 1').get_output_in_json()
+        self.assertTrue(marketplace_list)
+        self.assertTrue(len(marketplace_list) == 1)
+        all(self._validate_marketplace(marketplace_item) for marketplace_item in marketplace_list)
+
+    def test_consumption_marketplace_list_billing_period(self):
         marketplace_list = self.cmd('consumption marketplace list -p 201804-1').get_output_in_json()
         self.assertTrue(marketplace_list)
+        all(self._validate_marketplace(marketplace_item, '201804-1') for marketplace_item in marketplace_list)
 
     def test_consumption_budget_usage_create(self):
         output_budget = self.cmd('az consumption budget create -b usagetypebudget1 -a 20 -s 2018-02-01 -e 2018-10-01 -tg annually -c usage -m 0dfadad2-6e4f-4078-85e1-90c230d4d482').get_output_in_json()
