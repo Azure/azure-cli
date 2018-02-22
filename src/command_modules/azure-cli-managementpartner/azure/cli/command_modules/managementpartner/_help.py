@@ -8,7 +8,7 @@ from knack.help_files import helps
 
 helps['managementpartner'] = """
     type: group
-    short-summary: Allows the partners to associate a Microsoft Partner Network(MPN) ID to a user or service principal in the customer‘s Azure directory.
+    short-summary: Allows the partners to associate a Microsoft Partner Network(MPN) ID to a user or service principal in the customer's Azure directory.
 """
 
 helps['managementpartner create'] = """
