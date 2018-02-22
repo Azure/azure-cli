@@ -15,7 +15,11 @@ class ManagementpartnerCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        managementpartner_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.managementpartner.custom#{}', client_factory=managementpartner_partner_client_factory, exception_handler=managementpartner_exception_handler)
+        managementpartner_custom = CliCommandType(
+            operations_tmpl = 'azure.cli.command_modules.managementpartner.custom#{}',
+            client_factory = managementpartner_partner_client_factory,
+            exception_handler = managementpartner_exception_handler
+        )
 
         super(ManagementpartnerCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=managementpartner_custom)
 
