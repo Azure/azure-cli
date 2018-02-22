@@ -25,6 +25,7 @@ from ._validators import validate_both_start_end_dates
 from ._validators import validate_reservations_summaries
 from ._validators import validate_budget_parameters
 
+
 def load_command_table(self, _):
     with self.command_group('consumption usage') as g:
         g.custom_command('list', 'cli_consumption_list_usage', transform=transform_usage_list_output,

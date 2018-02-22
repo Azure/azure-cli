@@ -6,6 +6,7 @@
 from datetime import datetime
 from azure.cli.testsdk import ScenarioTest, record_only
 
+
 @record_only()
 class AzureConsumptionServiceScenarioTest(ScenarioTest):
     def enable_large_payload(self, size=8192):
@@ -69,8 +70,7 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         self.assertIsNotNone(pricesheet['pricesheets'][0]['currencyCode'])
         self.assertIsNotNone(pricesheet['pricesheets'][0]['meterId'])
         self.assertIsNotNone(pricesheet['pricesheets'][0]['unitOfMeasure'])
-        self.assertTrue(pricesheet['pricesheets'][0]['unitPrice'] and pricesheet['pricesheets'][0]['includedQuantity'] 
-        and pricesheet['pricesheets'][0]['partNumber'])
+        self.assertTrue(pricesheet['pricesheets'][0]['unitPrice'] and pricesheet['pricesheets'][0]['includedQuantity'] and pricesheet['pricesheets'][0]['partNumber'])
         if includeMeterDetails:
             self.assertIsNotNone(pricesheet['pricesheets'][0]['meterDetails'])
             self.assertIsNotNone(pricesheet['pricesheets'][0]['meterDetails']['meterName'])

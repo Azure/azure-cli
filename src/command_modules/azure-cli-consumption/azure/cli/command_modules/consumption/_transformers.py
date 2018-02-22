@@ -73,7 +73,7 @@ def marketplace_list_output(result):
 def budget_list_output(result):
     result.amount = str(result.amount)
     if result.current_spend:
-        result.current_spend.amount = str(result.current_spend.amount)     
+        result.current_spend.amount = str(result.current_spend.amount)
     return result
 
 
@@ -97,6 +97,7 @@ def transform_marketplace_list_output(result):
 
 def transform_budget_list_output(result):
     return [budget_list_output(item) for item in result]
+
 
 def transform_budget_show_output(result):
     return budget_show_output(result)
