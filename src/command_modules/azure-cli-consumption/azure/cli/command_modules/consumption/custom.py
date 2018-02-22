@@ -81,7 +81,7 @@ def cli_consumption_list_marketplace(client, billing_period_name=None, start_dat
     filter_from = None
     filter_to = None
     filter_expression = None
-    if start_date and end_date:o
+    if start_date and end_date:
         filter_from = "properties/usageEnd ge \'{}\'".format(start_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
         filter_to = "properties/usageEnd le \'{}\'".format(end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
         filter_expression = "{} and {}".format(filter_from, filter_to)
