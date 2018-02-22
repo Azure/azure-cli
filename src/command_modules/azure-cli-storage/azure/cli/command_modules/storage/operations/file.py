@@ -36,7 +36,7 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
                               progress_callback=None):
     """ Upload local files to Azure Storage File Share in batch """
 
-    from ..util import glob_files_locally, normalized_blob_file_path
+    from azure.cli.command_modules.storage.util import glob_files_locally, normalize_blob_file_path
 
     source_files = [c for c in glob_files_locally(source, pattern)]
     logger = get_logger(__name__)
@@ -54,7 +54,7 @@ def storage_file_upload_batch(cmd, client, destination, source, destination_path
     # TODO: Performance improvement
     # 1. Upload files in parallel
     def _upload_action(src, dst):
-        dst = normalized_blob_file_path(destination_path, dst)
+        dst = normalize_blob_file_path(destination_path, dst)
         dir_name = os.path.dirname(dst)
         file_name = os.path.basename(dst)
 
@@ -81,7 +81,7 @@ def storage_file_download_batch(cmd, client, source, destination, pattern=None, 
     Download files from file share to local directory in batch
     """
 
-    from ..util import glob_files_remotely, mkdir_p
+    from azure.cli.command_modules.storage.util import glob_files_remotely, mkdir_p
 
     source_files = glob_files_remotely(cmd, client, source, pattern)
 
@@ -207,7 +207,7 @@ def storage_file_delete_batch(cmd, client, source, pattern=None, dryrun=False, t
 
         return client.delete_file(**delete_file_args)
 
-    from ..util import glob_files_remotely
+    from azure.cli.command_modules.storage.util import glob_files_remotely
     source_files = list(glob_files_remotely(cmd, client, source, pattern))
 
     if dryrun:
@@ -230,10 +230,10 @@ def _create_file_and_directory_from_blob(file_service, blob_service, share, cont
     Copy a blob to file share and create the directory if needed.
     """
     from azure.common import AzureException
-    from ..util import normalized_blob_file_path
+    from azure.cli.command_modules.storage.util import normalize_blob_file_path
 
     blob_url = blob_service.make_blob_url(container, encode_for_url(blob_name), sas_token=sas)
-    full_path = normalized_blob_file_path(destination_dir, blob_name)
+    full_path = normalize_blob_file_path(destination_dir, blob_name)
     file_name = os.path.basename(full_path)
     dir_name = os.path.dirname(full_path)
     _make_directory_in_files_share(file_service, share, dir_name, existing_dirs)
@@ -255,13 +255,13 @@ def _create_file_and_directory_from_file(file_service, source_file_service, shar
     Copy a file from one file share to another
     """
     from azure.common import AzureException
-    from ..util import normalized_blob_file_path
+    from azure.cli.command_modules.storage.util import normalize_blob_file_path
 
     file_url, source_file_dir, source_file_name = make_encoded_file_url_and_params(source_file_service, source_share,
                                                                                    source_file_dir, source_file_name,
                                                                                    sas_token=sas)
 
-    full_path = normalized_blob_file_path(destination_dir, os.path.join(source_file_dir, source_file_name))
+    full_path = normalize_blob_file_path(destination_dir, os.path.join(source_file_dir, source_file_name))
     file_name = os.path.basename(full_path)
     dir_name = os.path.dirname(full_path)
     _make_directory_in_files_share(file_service, share, dir_name, existing_dirs)

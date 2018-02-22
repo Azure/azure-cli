@@ -13,7 +13,7 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     create_short_lived_share_sas,
                                                     create_short_lived_container_sas,
                                                     filter_none, collect_blobs, collect_files,
-                                                    mkdir_p, guess_content_type, normalized_blob_file_path)
+                                                    mkdir_p, guess_content_type, normalize_blob_file_path)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 
 
@@ -147,7 +147,7 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
                               if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False):
     def _create_return_result(blob_name, blob_content_settings, upload_result=None):
-        blob_name = normalized_blob_file_path(destination_path, blob_name)
+        blob_name = normalize_blob_file_path(destination_path, blob_name)
         return {
             'Blob': client.make_blob_url(destination_container_name, blob_name),
             'Type': blob_content_settings.content_type,
@@ -172,7 +172,7 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
             logger.warning('uploading %s', src)
             guessed_content_settings = guess_content_type(src, content_settings, t_content_settings)
             result = upload_blob(cmd, client, destination_container_name,
-                                 normalized_blob_file_path(destination_path, dst), src,
+                                 normalize_blob_file_path(destination_path, dst), src,
                                  blob_type=blob_type, content_settings=guessed_content_settings, metadata=metadata,
                                  validate_content=validate_content, maxsize_condition=maxsize_condition,
                                  max_connections=max_connections, lease_id=lease_id,
@@ -297,7 +297,7 @@ def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_
     from azure.common import AzureException
     source_blob_url = source_blob_service.make_blob_url(source_container, encode_for_url(source_blob_name),
                                                         sas_token=source_sas)
-    destination_blob_name = normalized_blob_file_path(destination_path, source_blob_name)
+    destination_blob_name = normalize_blob_file_path(destination_path, source_blob_name)
     try:
         blob_service.copy_blob(destination_container, destination_blob_name, source_blob_url)
         return blob_service.make_blob_url(destination_container, destination_blob_name)
@@ -315,7 +315,7 @@ def _copy_file_to_blob_container(blob_service, source_file_service, destination_
                                          source_file_name, source_sas)
 
     source_path = os.path.join(source_file_dir, source_file_name) if source_file_dir else source_file_name
-    destination_blob_name = normalized_blob_file_path(destination_path, source_path)
+    destination_blob_name = normalize_blob_file_path(destination_path, source_path)
 
     try:
         blob_service.copy_blob(destination_container, destination_blob_name, file_url)
