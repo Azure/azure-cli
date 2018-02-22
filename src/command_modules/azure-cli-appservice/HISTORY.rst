@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.28
+++++++
+* webapp: updating tests/code for sdk update
+
 0.1.27
 ++++++
 * appservice: list-location: Fixes the bug where 'Free' was reported as an invalid SKU

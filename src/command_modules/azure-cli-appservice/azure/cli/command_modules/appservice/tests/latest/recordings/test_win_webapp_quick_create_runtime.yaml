@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
+    body: '{"location": "westus", "tags": {"use": "az-test"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -8,9 +8,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.28]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -20,11 +20,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:48:56 GMT']
+      date: ['Sun, 18 Feb 2018 03:01:27 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1184']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -34,9 +34,9 @@ interactions:
       CommandName: [appservice plan create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.28]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -46,15 +46,15 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:48:56 GMT']
+      date: ['Sun, 18 Feb 2018 03:01:30 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"sku": {"name": "B1", "capacity": 1, "tier": "BASIC"}, "location":
-      "westus", "properties": {"name": "plan-quick000003", "perSiteScaling": false}}'''
+    body: 'b''{"properties": {"perSiteScaling": false, "name": "plan-quick000003"},
+      "location": "westus", "sku": {"name": "B1", "capacity": 1, "tier": "BASIC"}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -62,21 +62,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['154']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003","name":"plan-quick000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":0,"name":"plan-quick000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-039_23685","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
+        US","properties":{"serverFarmId":0,"name":"plan-quick000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"301849e3-dc98-4935-bae9-35b5d22ab2d0","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-083_10353","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['1379']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:49:07 GMT']
+      date: ['Sun, 18 Feb 2018 03:01:40 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -84,7 +83,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1179']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -95,21 +94,20 @@ interactions:
       CommandName: [webapp create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003","name":"plan-quick000003","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":0,"name":"plan-quick000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-039_23685","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
+        US","properties":{"serverFarmId":0,"name":"plan-quick000003","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"301849e3-dc98-4935-bae9-35b5d22ab2d0","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-083_10353","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['1379']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:49:08 GMT']
+      date: ['Sun, 18 Feb 2018 03:01:41 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -127,25 +125,24 @@ interactions:
       CommandName: [webapp create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/providers/Microsoft.Web/availableStacks?api-version=2016-03-01
+    uri: https://management.azure.com/providers/Microsoft.Web/availableStacks?api-version=2016-03-01&osTypeSelected=Windows
   response:
-    body: {string: '{"value":[{"id":null,"name":"aspnet","type":"Microsoft.Web/availableStacks","properties":{"name":"aspnet","display":"Net
-        Framework Version","dependency":null,"majorVersions":[{"displayVersion":"v4.7","runtimeVersion":"v4.0","isDefault":true,"minorVersions":[]},{"displayVersion":"v3.5","runtimeVersion":"v2.0","isDefault":false,"minorVersions":[]}],"frameworks":[]}},{"id":null,"name":"node","type":"Microsoft.Web/availableStacks","properties":{"name":"node","display":"node.js
-        Version","dependency":null,"majorVersions":[{"displayVersion":"0.6","runtimeVersion":"0.6","isDefault":false,"minorVersions":[{"displayVersion":"0.6.20","runtimeVersion":"0.6.20","isDefault":true}]},{"displayVersion":"0.8","runtimeVersion":"0.8","isDefault":false,"minorVersions":[{"displayVersion":"0.8.2","runtimeVersion":"0.8.2","isDefault":false},{"displayVersion":"0.8.19","runtimeVersion":"0.8.19","isDefault":false},{"displayVersion":"0.8.26","runtimeVersion":"0.8.26","isDefault":false},{"displayVersion":"0.8.27","runtimeVersion":"0.8.27","isDefault":false},{"displayVersion":"0.8.28","runtimeVersion":"0.8.28","isDefault":true}]},{"displayVersion":"0.10","runtimeVersion":"0.10","isDefault":false,"minorVersions":[{"displayVersion":"0.10.5","runtimeVersion":"0.10.5","isDefault":false},{"displayVersion":"0.10.18","runtimeVersion":"0.10.18","isDefault":false},{"displayVersion":"0.10.21","runtimeVersion":"0.10.21","isDefault":false},{"displayVersion":"0.10.24","runtimeVersion":"0.10.24","isDefault":false},{"displayVersion":"0.10.28","runtimeVersion":"0.10.28","isDefault":false},{"displayVersion":"0.10.29","runtimeVersion":"0.10.29","isDefault":false},{"displayVersion":"0.10.31","runtimeVersion":"0.10.31","isDefault":false},{"displayVersion":"0.10.32","runtimeVersion":"0.10.32","isDefault":false},{"displayVersion":"0.10.40","runtimeVersion":"0.10.40","isDefault":false},{"displayVersion":"0.10.5","runtimeVersion":"0.10.5","isDefault":true}]},{"displayVersion":"0.12","runtimeVersion":"0.12","isDefault":false,"minorVersions":[{"displayVersion":"0.12.0","runtimeVersion":"0.12.0","isDefault":false},{"displayVersion":"0.12.2","runtimeVersion":"0.12.2","isDefault":false},{"displayVersion":"0.12.3","runtimeVersion":"0.12.3","isDefault":false},{"displayVersion":"0.12.6","runtimeVersion":"0.12.6","isDefault":true}]},{"displayVersion":"4.0","runtimeVersion":"4.0","isDefault":false,"minorVersions":[{"displayVersion":"4.0.0","runtimeVersion":"4.0.0","isDefault":true}]},{"displayVersion":"4.1","runtimeVersion":"4.1","isDefault":false,"minorVersions":[{"displayVersion":"4.1.0","runtimeVersion":"4.1.0","isDefault":false},{"displayVersion":"4.1.2","runtimeVersion":"4.1.2","isDefault":true}]},{"displayVersion":"4.2","runtimeVersion":"4.2","isDefault":false,"minorVersions":[{"displayVersion":"4.2.1","runtimeVersion":"4.2.1","isDefault":false},{"displayVersion":"4.2.2","runtimeVersion":"4.2.2","isDefault":false},{"displayVersion":"4.2.3","runtimeVersion":"4.2.3","isDefault":false},{"displayVersion":"4.2.4","runtimeVersion":"4.2.4","isDefault":true}]},{"displayVersion":"4.2","runtimeVersion":"4.2","isDefault":false,"minorVersions":[{"displayVersion":"4.2.4","runtimeVersion":"4.2.4","isDefault":true}]},{"displayVersion":"4.3","runtimeVersion":"4.3","isDefault":false,"minorVersions":[{"displayVersion":"4.3.0","runtimeVersion":"4.3.0","isDefault":false},{"displayVersion":"4.3.2","runtimeVersion":"4.3.2","isDefault":true}]},{"displayVersion":"4.4","runtimeVersion":"4.4","isDefault":false,"minorVersions":[{"displayVersion":"4.4.0","runtimeVersion":"4.4.0","isDefault":false},{"displayVersion":"4.4.1","runtimeVersion":"4.4.1","isDefault":false},{"displayVersion":"4.4.6","runtimeVersion":"4.4.6","isDefault":false},{"displayVersion":"4.4.7","runtimeVersion":"4.4.7","isDefault":true}]},{"displayVersion":"4.5","runtimeVersion":"4.5","isDefault":false,"minorVersions":[{"displayVersion":"4.5.0","runtimeVersion":"4.5.0","isDefault":true}]},{"displayVersion":"4.6","runtimeVersion":"4.6","isDefault":false,"minorVersions":[{"displayVersion":"4.6.0","runtimeVersion":"4.6.0","isDefault":false},{"displayVersion":"4.6.1","runtimeVersion":"4.6.1","isDefault":true}]},{"displayVersion":"5.0","runtimeVersion":"5.0","isDefault":false,"minorVersions":[{"displayVersion":"5.0.0","runtimeVersion":"5.0.0","isDefault":true}]},{"displayVersion":"5.1","runtimeVersion":"5.1","isDefault":false,"minorVersions":[{"displayVersion":"5.1.1","runtimeVersion":"5.1.1","isDefault":true}]},{"displayVersion":"5.3","runtimeVersion":"5.3","isDefault":false,"minorVersions":[{"displayVersion":"5.3.0","runtimeVersion":"5.3.0","isDefault":true}]},{"displayVersion":"5.4","runtimeVersion":"5.4","isDefault":false,"minorVersions":[{"displayVersion":"5.4.0","runtimeVersion":"5.4.0","isDefault":true}]},{"displayVersion":"5.5","runtimeVersion":"5.5","isDefault":false,"minorVersions":[{"displayVersion":"5.5.0","runtimeVersion":"5.5.0","isDefault":true}]},{"displayVersion":"5.6","runtimeVersion":"5.6","isDefault":false,"minorVersions":[{"displayVersion":"5.6.0","runtimeVersion":"5.6.0","isDefault":true}]},{"displayVersion":"5.7","runtimeVersion":"5.7","isDefault":false,"minorVersions":[{"displayVersion":"5.7.0","runtimeVersion":"5.7.0","isDefault":false},{"displayVersion":"5.7.1","runtimeVersion":"5.7.1","isDefault":true}]},{"displayVersion":"5.8","runtimeVersion":"5.8","isDefault":false,"minorVersions":[{"displayVersion":"5.8.0","runtimeVersion":"5.8.0","isDefault":true}]},{"displayVersion":"5.9","runtimeVersion":"5.9","isDefault":false,"minorVersions":[{"displayVersion":"5.9.1","runtimeVersion":"5.9.1","isDefault":true}]},{"displayVersion":"6.0","runtimeVersion":"6.0","isDefault":false,"minorVersions":[{"displayVersion":"6.0.0","runtimeVersion":"6.0.0","isDefault":true}]},{"displayVersion":"6.1","runtimeVersion":"6.1","isDefault":false,"minorVersions":[{"displayVersion":"6.1.0","runtimeVersion":"6.1.0","isDefault":true}]},{"displayVersion":"6.10","runtimeVersion":"6.10","isDefault":false,"minorVersions":[{"displayVersion":"6.10.0","runtimeVersion":"6.10.0","isDefault":true}]},{"displayVersion":"6.2","runtimeVersion":"6.2","isDefault":false,"minorVersions":[{"displayVersion":"6.2.2","runtimeVersion":"6.2.2","isDefault":true}]},{"displayVersion":"6.3","runtimeVersion":"6.3","isDefault":false,"minorVersions":[{"displayVersion":"6.3.0","runtimeVersion":"6.3.0","isDefault":true}]},{"displayVersion":"6.5","runtimeVersion":"6.5","isDefault":false,"minorVersions":[{"displayVersion":"6.5.0","runtimeVersion":"6.5.0","isDefault":true}]},{"displayVersion":"6.6","runtimeVersion":"6.6","isDefault":false,"minorVersions":[{"displayVersion":"6.6.0","runtimeVersion":"6.6.0","isDefault":true}]},{"displayVersion":"6.7","runtimeVersion":"6.7","isDefault":false,"minorVersions":[{"displayVersion":"6.7.0","runtimeVersion":"6.7.0","isDefault":true}]},{"displayVersion":"6.9","runtimeVersion":"6.9","isDefault":false,"minorVersions":[{"displayVersion":"6.9.0","runtimeVersion":"6.9.0","isDefault":false},{"displayVersion":"6.9.1","runtimeVersion":"6.9.1","isDefault":false},{"displayVersion":"6.9.2","runtimeVersion":"6.9.2","isDefault":false},{"displayVersion":"6.9.4","runtimeVersion":"6.9.4","isDefault":false},{"displayVersion":"6.9.5","runtimeVersion":"6.9.5","isDefault":true}]},{"displayVersion":"7.0","runtimeVersion":"7.0","isDefault":false,"minorVersions":[{"displayVersion":"7.0.0","runtimeVersion":"7.0.0","isDefault":true}]},{"displayVersion":"7.1","runtimeVersion":"7.1","isDefault":false,"minorVersions":[{"displayVersion":"7.1.0","runtimeVersion":"7.1.0","isDefault":true}]},{"displayVersion":"7.2","runtimeVersion":"7.2","isDefault":false,"minorVersions":[{"displayVersion":"7.2.0","runtimeVersion":"7.2.0","isDefault":true}]},{"displayVersion":"7.3","runtimeVersion":"7.3","isDefault":false,"minorVersions":[{"displayVersion":"7.3.0","runtimeVersion":"7.3.0","isDefault":true}]},{"displayVersion":"7.4","runtimeVersion":"7.4","isDefault":false,"minorVersions":[{"displayVersion":"7.4.0","runtimeVersion":"7.4.0","isDefault":true}]},{"displayVersion":"7.5","runtimeVersion":"7.5","isDefault":false,"minorVersions":[{"displayVersion":"7.5.0","runtimeVersion":"7.5.0","isDefault":true}]},{"displayVersion":"7.6","runtimeVersion":"7.6","isDefault":false,"minorVersions":[{"displayVersion":"7.6.0","runtimeVersion":"7.6.0","isDefault":true}]},{"displayVersion":"7.7","runtimeVersion":"7.7","isDefault":false,"minorVersions":[{"displayVersion":"7.7.4","runtimeVersion":"7.7.4","isDefault":true}]},{"displayVersion":"7.10","runtimeVersion":"7.10","isDefault":false,"minorVersions":[{"displayVersion":"7.10.1","runtimeVersion":"7.10.1","isDefault":true}]},{"displayVersion":"8.0","runtimeVersion":"8.0","isDefault":false,"minorVersions":[{"displayVersion":"8.0.0","runtimeVersion":"8.0.0","isDefault":true}]},{"displayVersion":"8.1","runtimeVersion":"8.1","isDefault":true,"minorVersions":[{"displayVersion":"8.1.4","runtimeVersion":"8.1.4","isDefault":true}]}],"frameworks":[]}},{"id":null,"name":"php","type":"Microsoft.Web/availableStacks","properties":{"name":"php","display":"PHP
-        Version","dependency":null,"majorVersions":[{"displayVersion":"5.5 (deprecated)","runtimeVersion":"5.5","isDefault":false,"minorVersions":[]},{"displayVersion":"5.6","runtimeVersion":"5.6","isDefault":true,"minorVersions":[]},{"displayVersion":"7.0","runtimeVersion":"7.0","isDefault":false,"minorVersions":[]},{"displayVersion":"7.1","runtimeVersion":"7.1","isDefault":false,"minorVersions":[]}],"frameworks":[]}},{"id":null,"name":"python","type":"Microsoft.Web/availableStacks","properties":{"name":"python","display":"Python
-        Version","dependency":null,"majorVersions":[{"displayVersion":"2.7","runtimeVersion":"2.7","isDefault":false,"minorVersions":[{"displayVersion":"2.7","runtimeVersion":"2.7.3","isDefault":true}]},{"displayVersion":"3.4","runtimeVersion":"3.4","isDefault":false,"minorVersions":[{"displayVersion":"3.4","runtimeVersion":"3.4.0","isDefault":true}]}],"frameworks":[]}},{"id":null,"name":"java","type":"Microsoft.Web/availableStacks","properties":{"name":"java","display":"Java
-        Version","dependency":null,"majorVersions":[{"displayVersion":"1.7","runtimeVersion":"1.7","isDefault":false,"minorVersions":[{"displayVersion":"1.7.0_51","runtimeVersion":"1.7.0_51","isDefault":false},{"displayVersion":"1.7.0_71","runtimeVersion":"1.7.0_71","isDefault":true}]},{"displayVersion":"1.8","runtimeVersion":"1.8","isDefault":true,"minorVersions":[{"displayVersion":"1.8.0_25","runtimeVersion":"1.8.0_25","isDefault":false},{"displayVersion":"1.8.0_60","runtimeVersion":"1.8.0_60","isDefault":false},{"displayVersion":"1.8.0_73","runtimeVersion":"1.8.0_73","isDefault":false},{"displayVersion":"1.8.0_111","runtimeVersion":"1.8.0_111","isDefault":false},{"displayVersion":"Zulu-1.8.0_92","runtimeVersion":"1.8.0_92","isDefault":false},{"displayVersion":"Zulu-1.8.0_102","runtimeVersion":"1.8.0_102","isDefault":false},{"displayVersion":"Zulu-1.8.0_144","runtimeVersion":"1.8.0_144","isDefault":true}]}],"frameworks":[]}},{"id":null,"name":"javaContainers","type":"Microsoft.Web/availableStacks","properties":{"name":"javaContainers","display":"Java
+    body: {string: '{"value":[{"id":null,"name":"aspnet","type":"Microsoft.Web/availableStacks?osTypeSelected=Windows","properties":{"name":"aspnet","display":"Net
+        Framework Version","dependency":null,"majorVersions":[{"displayVersion":"v4.7","runtimeVersion":"v4.0","isDefault":true,"minorVersions":[]},{"displayVersion":"v3.5","runtimeVersion":"v2.0","isDefault":false,"minorVersions":[]}],"frameworks":[]}},{"id":null,"name":"node","type":"Microsoft.Web/availableStacks?osTypeSelected=Windows","properties":{"name":"node","display":"node.js
+        Version","dependency":null,"majorVersions":[{"displayVersion":"0.6","runtimeVersion":"0.6","isDefault":false,"minorVersions":[{"displayVersion":"0.6.20","runtimeVersion":"0.6.20","isDefault":true}]},{"displayVersion":"0.8","runtimeVersion":"0.8","isDefault":false,"minorVersions":[{"displayVersion":"0.8.2","runtimeVersion":"0.8.2","isDefault":false},{"displayVersion":"0.8.19","runtimeVersion":"0.8.19","isDefault":false},{"displayVersion":"0.8.26","runtimeVersion":"0.8.26","isDefault":false},{"displayVersion":"0.8.27","runtimeVersion":"0.8.27","isDefault":false},{"displayVersion":"0.8.28","runtimeVersion":"0.8.28","isDefault":true}]},{"displayVersion":"0.10","runtimeVersion":"0.10","isDefault":false,"minorVersions":[{"displayVersion":"0.10.5","runtimeVersion":"0.10.5","isDefault":false},{"displayVersion":"0.10.18","runtimeVersion":"0.10.18","isDefault":false},{"displayVersion":"0.10.21","runtimeVersion":"0.10.21","isDefault":false},{"displayVersion":"0.10.24","runtimeVersion":"0.10.24","isDefault":false},{"displayVersion":"0.10.28","runtimeVersion":"0.10.28","isDefault":false},{"displayVersion":"0.10.29","runtimeVersion":"0.10.29","isDefault":false},{"displayVersion":"0.10.31","runtimeVersion":"0.10.31","isDefault":false},{"displayVersion":"0.10.32","runtimeVersion":"0.10.32","isDefault":false},{"displayVersion":"0.10.40","runtimeVersion":"0.10.40","isDefault":false},{"displayVersion":"0.10.5","runtimeVersion":"0.10.5","isDefault":true}]},{"displayVersion":"0.12","runtimeVersion":"0.12","isDefault":false,"minorVersions":[{"displayVersion":"0.12.0","runtimeVersion":"0.12.0","isDefault":false},{"displayVersion":"0.12.2","runtimeVersion":"0.12.2","isDefault":false},{"displayVersion":"0.12.3","runtimeVersion":"0.12.3","isDefault":false},{"displayVersion":"0.12.6","runtimeVersion":"0.12.6","isDefault":true}]},{"displayVersion":"4.0","runtimeVersion":"4.0","isDefault":false,"minorVersions":[{"displayVersion":"4.0.0","runtimeVersion":"4.0.0","isDefault":true}]},{"displayVersion":"4.1","runtimeVersion":"4.1","isDefault":false,"minorVersions":[{"displayVersion":"4.1.0","runtimeVersion":"4.1.0","isDefault":false},{"displayVersion":"4.1.2","runtimeVersion":"4.1.2","isDefault":true}]},{"displayVersion":"4.2","runtimeVersion":"4.2","isDefault":false,"minorVersions":[{"displayVersion":"4.2.1","runtimeVersion":"4.2.1","isDefault":false},{"displayVersion":"4.2.2","runtimeVersion":"4.2.2","isDefault":false},{"displayVersion":"4.2.3","runtimeVersion":"4.2.3","isDefault":false},{"displayVersion":"4.2.4","runtimeVersion":"4.2.4","isDefault":true}]},{"displayVersion":"4.2","runtimeVersion":"4.2","isDefault":false,"minorVersions":[{"displayVersion":"4.2.4","runtimeVersion":"4.2.4","isDefault":true}]},{"displayVersion":"4.3","runtimeVersion":"4.3","isDefault":false,"minorVersions":[{"displayVersion":"4.3.0","runtimeVersion":"4.3.0","isDefault":false},{"displayVersion":"4.3.2","runtimeVersion":"4.3.2","isDefault":true}]},{"displayVersion":"4.4","runtimeVersion":"4.4","isDefault":false,"minorVersions":[{"displayVersion":"4.4.0","runtimeVersion":"4.4.0","isDefault":false},{"displayVersion":"4.4.1","runtimeVersion":"4.4.1","isDefault":false},{"displayVersion":"4.4.6","runtimeVersion":"4.4.6","isDefault":false},{"displayVersion":"4.4.7","runtimeVersion":"4.4.7","isDefault":true}]},{"displayVersion":"4.5","runtimeVersion":"4.5","isDefault":false,"minorVersions":[{"displayVersion":"4.5.0","runtimeVersion":"4.5.0","isDefault":true}]},{"displayVersion":"4.6","runtimeVersion":"4.6","isDefault":false,"minorVersions":[{"displayVersion":"4.6.0","runtimeVersion":"4.6.0","isDefault":false},{"displayVersion":"4.6.1","runtimeVersion":"4.6.1","isDefault":true}]},{"displayVersion":"5.0","runtimeVersion":"5.0","isDefault":false,"minorVersions":[{"displayVersion":"5.0.0","runtimeVersion":"5.0.0","isDefault":true}]},{"displayVersion":"5.1","runtimeVersion":"5.1","isDefault":false,"minorVersions":[{"displayVersion":"5.1.1","runtimeVersion":"5.1.1","isDefault":true}]},{"displayVersion":"5.3","runtimeVersion":"5.3","isDefault":false,"minorVersions":[{"displayVersion":"5.3.0","runtimeVersion":"5.3.0","isDefault":true}]},{"displayVersion":"5.4","runtimeVersion":"5.4","isDefault":false,"minorVersions":[{"displayVersion":"5.4.0","runtimeVersion":"5.4.0","isDefault":true}]},{"displayVersion":"5.5","runtimeVersion":"5.5","isDefault":false,"minorVersions":[{"displayVersion":"5.5.0","runtimeVersion":"5.5.0","isDefault":true}]},{"displayVersion":"5.6","runtimeVersion":"5.6","isDefault":false,"minorVersions":[{"displayVersion":"5.6.0","runtimeVersion":"5.6.0","isDefault":true}]},{"displayVersion":"5.7","runtimeVersion":"5.7","isDefault":false,"minorVersions":[{"displayVersion":"5.7.0","runtimeVersion":"5.7.0","isDefault":false},{"displayVersion":"5.7.1","runtimeVersion":"5.7.1","isDefault":true}]},{"displayVersion":"5.8","runtimeVersion":"5.8","isDefault":false,"minorVersions":[{"displayVersion":"5.8.0","runtimeVersion":"5.8.0","isDefault":true}]},{"displayVersion":"5.9","runtimeVersion":"5.9","isDefault":false,"minorVersions":[{"displayVersion":"5.9.1","runtimeVersion":"5.9.1","isDefault":true}]},{"displayVersion":"6.0","runtimeVersion":"6.0","isDefault":false,"minorVersions":[{"displayVersion":"6.0.0","runtimeVersion":"6.0.0","isDefault":true}]},{"displayVersion":"6.1","runtimeVersion":"6.1","isDefault":false,"minorVersions":[{"displayVersion":"6.1.0","runtimeVersion":"6.1.0","isDefault":true}]},{"displayVersion":"6.10","runtimeVersion":"6.10","isDefault":false,"minorVersions":[{"displayVersion":"6.10.0","runtimeVersion":"6.10.0","isDefault":true}]},{"displayVersion":"6.2","runtimeVersion":"6.2","isDefault":false,"minorVersions":[{"displayVersion":"6.2.2","runtimeVersion":"6.2.2","isDefault":true}]},{"displayVersion":"6.3","runtimeVersion":"6.3","isDefault":false,"minorVersions":[{"displayVersion":"6.3.0","runtimeVersion":"6.3.0","isDefault":true}]},{"displayVersion":"6.5","runtimeVersion":"6.5","isDefault":false,"minorVersions":[{"displayVersion":"6.5.0","runtimeVersion":"6.5.0","isDefault":true}]},{"displayVersion":"6.6","runtimeVersion":"6.6","isDefault":false,"minorVersions":[{"displayVersion":"6.6.0","runtimeVersion":"6.6.0","isDefault":true}]},{"displayVersion":"6.7","runtimeVersion":"6.7","isDefault":false,"minorVersions":[{"displayVersion":"6.7.0","runtimeVersion":"6.7.0","isDefault":true}]},{"displayVersion":"6.9","runtimeVersion":"6.9","isDefault":false,"minorVersions":[{"displayVersion":"6.9.0","runtimeVersion":"6.9.0","isDefault":false},{"displayVersion":"6.9.1","runtimeVersion":"6.9.1","isDefault":false},{"displayVersion":"6.9.2","runtimeVersion":"6.9.2","isDefault":false},{"displayVersion":"6.9.4","runtimeVersion":"6.9.4","isDefault":false},{"displayVersion":"6.9.5","runtimeVersion":"6.9.5","isDefault":true}]},{"displayVersion":"7.0","runtimeVersion":"7.0","isDefault":false,"minorVersions":[{"displayVersion":"7.0.0","runtimeVersion":"7.0.0","isDefault":true}]},{"displayVersion":"7.1","runtimeVersion":"7.1","isDefault":false,"minorVersions":[{"displayVersion":"7.1.0","runtimeVersion":"7.1.0","isDefault":true}]},{"displayVersion":"7.2","runtimeVersion":"7.2","isDefault":false,"minorVersions":[{"displayVersion":"7.2.0","runtimeVersion":"7.2.0","isDefault":true}]},{"displayVersion":"7.3","runtimeVersion":"7.3","isDefault":false,"minorVersions":[{"displayVersion":"7.3.0","runtimeVersion":"7.3.0","isDefault":true}]},{"displayVersion":"7.4","runtimeVersion":"7.4","isDefault":false,"minorVersions":[{"displayVersion":"7.4.0","runtimeVersion":"7.4.0","isDefault":true}]},{"displayVersion":"7.5","runtimeVersion":"7.5","isDefault":false,"minorVersions":[{"displayVersion":"7.5.0","runtimeVersion":"7.5.0","isDefault":true}]},{"displayVersion":"7.6","runtimeVersion":"7.6","isDefault":false,"minorVersions":[{"displayVersion":"7.6.0","runtimeVersion":"7.6.0","isDefault":true}]},{"displayVersion":"7.7","runtimeVersion":"7.7","isDefault":false,"minorVersions":[{"displayVersion":"7.7.4","runtimeVersion":"7.7.4","isDefault":true}]},{"displayVersion":"7.10","runtimeVersion":"7.10","isDefault":false,"minorVersions":[{"displayVersion":"7.10.1","runtimeVersion":"7.10.1","isDefault":true}]},{"displayVersion":"8.0","runtimeVersion":"8.0","isDefault":false,"minorVersions":[{"displayVersion":"8.0.0","runtimeVersion":"8.0.0","isDefault":true}]},{"displayVersion":"8.1","runtimeVersion":"8.1","isDefault":true,"minorVersions":[{"displayVersion":"8.1.4","runtimeVersion":"8.1.4","isDefault":true}]}],"frameworks":[]}},{"id":null,"name":"php","type":"Microsoft.Web/availableStacks?osTypeSelected=Windows","properties":{"name":"php","display":"PHP
+        Version","dependency":null,"majorVersions":[{"displayVersion":"5.5 (deprecated)","runtimeVersion":"5.5","isDefault":false,"minorVersions":[]},{"displayVersion":"5.6","runtimeVersion":"5.6","isDefault":true,"minorVersions":[]},{"displayVersion":"7.0","runtimeVersion":"7.0","isDefault":false,"minorVersions":[]},{"displayVersion":"7.1","runtimeVersion":"7.1","isDefault":false,"minorVersions":[]}],"frameworks":[]}},{"id":null,"name":"python","type":"Microsoft.Web/availableStacks?osTypeSelected=Windows","properties":{"name":"python","display":"Python
+        Version","dependency":null,"majorVersions":[{"displayVersion":"2.7","runtimeVersion":"2.7","isDefault":false,"minorVersions":[{"displayVersion":"2.7","runtimeVersion":"2.7.3","isDefault":true}]},{"displayVersion":"3.4","runtimeVersion":"3.4","isDefault":false,"minorVersions":[{"displayVersion":"3.4","runtimeVersion":"3.4.0","isDefault":true}]}],"frameworks":[]}},{"id":null,"name":"java","type":"Microsoft.Web/availableStacks?osTypeSelected=Windows","properties":{"name":"java","display":"Java
+        Version","dependency":null,"majorVersions":[{"displayVersion":"1.7","runtimeVersion":"1.7","isDefault":false,"minorVersions":[{"displayVersion":"1.7.0_51","runtimeVersion":"1.7.0_51","isDefault":false},{"displayVersion":"1.7.0_71","runtimeVersion":"1.7.0_71","isDefault":true}]},{"displayVersion":"1.8","runtimeVersion":"1.8","isDefault":true,"minorVersions":[{"displayVersion":"1.8.0_25","runtimeVersion":"1.8.0_25","isDefault":false},{"displayVersion":"1.8.0_60","runtimeVersion":"1.8.0_60","isDefault":false},{"displayVersion":"1.8.0_73","runtimeVersion":"1.8.0_73","isDefault":false},{"displayVersion":"1.8.0_111","runtimeVersion":"1.8.0_111","isDefault":false},{"displayVersion":"Zulu-1.8.0_92","runtimeVersion":"1.8.0_92","isDefault":false},{"displayVersion":"Zulu-1.8.0_102","runtimeVersion":"1.8.0_102","isDefault":false},{"displayVersion":"Zulu-1.8.0_144","runtimeVersion":"1.8.0_144","isDefault":true}]}],"frameworks":[]}},{"id":null,"name":"javaContainers","type":"Microsoft.Web/availableStacks?osTypeSelected=Windows","properties":{"name":"javaContainers","display":"Java
         Containers","dependency":"java","majorVersions":[],"frameworks":[{"name":"tomcat","display":"Tomcat","dependency":null,"majorVersions":[{"displayVersion":"7.0","runtimeVersion":"7.0","isDefault":false,"minorVersions":[{"displayVersion":"7.0.50","runtimeVersion":"7.0.50","isDefault":false},{"displayVersion":"7.0.62","runtimeVersion":"7.0.62","isDefault":false},{"displayVersion":"7.0.81","runtimeVersion":"7.0.81","isDefault":true}]},{"displayVersion":"8.0","runtimeVersion":"8.0","isDefault":false,"minorVersions":[{"displayVersion":"8.0.23","runtimeVersion":"8.0.23","isDefault":false},{"displayVersion":"8.0.46","runtimeVersion":"8.0.46","isDefault":true}]},{"displayVersion":"8.5","runtimeVersion":"8.5","isDefault":false,"minorVersions":[{"displayVersion":"8.5.6","runtimeVersion":"8.5.6","isDefault":false},{"displayVersion":"8.5.20","runtimeVersion":"8.5.20","isDefault":true}]},{"displayVersion":"9.0","runtimeVersion":"9.0","isDefault":true,"minorVersions":[{"displayVersion":"9.0.0","runtimeVersion":"9.0.0","isDefault":true}]}],"frameworks":null},{"name":"jetty","display":"Jetty","dependency":null,"majorVersions":[{"displayVersion":"9.1","runtimeVersion":"9.1","isDefault":false,"minorVersions":[{"displayVersion":"9.1.0.v20131115","runtimeVersion":"9.1.0.20131115","isDefault":true}]},{"displayVersion":"9.3","runtimeVersion":"9.3","isDefault":true,"minorVersions":[{"displayVersion":"9.3.13.v20161014","runtimeVersion":"9.3.13.20161014","isDefault":true}]}],"frameworks":null}]}}],"nextLink":null,"id":null}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['12670']
+      content-length: ['12808']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:49:11 GMT']
+      date: ['Sun, 18 Feb 2018 03:01:40 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -156,32 +153,32 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''{"properties": {"siteConfig": {"appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION",
-      "value": "6.1.0"}], "netFrameworkVersion": "v4.6", "localMySqlEnabled": false},
-      "scmSiteAlsoStopped": false, "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003",
-      "reserved": false}, "location": "West US"}\'''''
+    body: 'b''b\''{"properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003",
+      "reserved": false, "siteConfig": {"localMySqlEnabled": false, "http20Enabled":
+      true, "appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "6.1.0"}],
+      "netFrameworkVersion": "v4.6"}, "scmSiteAlsoStopped": false}, "location": "West
+      US"}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [webapp create]
       Connection: [keep-alive]
-      Content-Length: ['462']
+      Content-Length: ['485']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002","name":"webapp-quick000002","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"webapp-quick000002","state":"Running","hostNames":["webapp-quick000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-039.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-quick000002","repositorySiteName":"webapp-quick000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-quick000002.azurewebsites.net","webapp-quick000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-quick000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-quick000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003","reserved":false,"lastModifiedTimeUtc":"2017-12-19T04:49:14.86","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-quick000002","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.42.225.41,104.42.224.45,104.42.225.216,104.42.230.71","possibleOutboundIpAddresses":"104.42.225.41,104.42.224.45,104.42.225.216,104.42.230.71","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-039","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-quick000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+        US","properties":{"name":"webapp-quick000002","state":"Running","hostNames":["webapp-quick000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-083.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-quick000002","repositorySiteName":"webapp-quick000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-quick000002.azurewebsites.net","webapp-quick000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-quick000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-quick000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003","reserved":false,"lastModifiedTimeUtc":"2018-02-18T03:01:43.0266667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-quick000002","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.118.246.51,40.78.98.75,40.86.187.157,40.78.101.192,40.78.97.93","possibleOutboundIpAddresses":"40.118.246.51,40.78.98.75,40.86.187.157,40.78.101.192,40.78.97.93,40.85.159.5,13.91.108.158","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-083","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-quick000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3080']
+      content-length: ['3165']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:49:25 GMT']
-      etag: ['"1D37884B8A6C630"']
+      date: ['Sun, 18 Feb 2018 03:01:52 GMT']
+      etag: ['"1D3A864CE3A4E80"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -189,7 +186,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1190']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -200,21 +197,20 @@ interactions:
       CommandName: [webapp create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002","name":"webapp-quick000002","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"webapp-quick000002","state":"Running","hostNames":["webapp-quick000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-039.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-quick000002","repositorySiteName":"webapp-quick000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-quick000002.azurewebsites.net","webapp-quick000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-quick000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-quick000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003","reserved":false,"lastModifiedTimeUtc":"2017-12-19T04:49:15.283","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-quick000002","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"104.42.225.41,104.42.224.45,104.42.225.216,104.42.230.71","possibleOutboundIpAddresses":"104.42.225.41,104.42.224.45,104.42.225.216,104.42.230.71","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-039","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-quick000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+        US","properties":{"name":"webapp-quick000002","state":"Running","hostNames":["webapp-quick000002.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-083.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-quick000002","repositorySiteName":"webapp-quick000002","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-quick000002.azurewebsites.net","webapp-quick000002.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-quick000002.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-quick000002.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan-quick000003","reserved":false,"lastModifiedTimeUtc":"2018-02-18T03:01:43.4","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-quick000002","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.118.246.51,40.78.98.75,40.86.187.157,40.78.101.192,40.78.97.93","possibleOutboundIpAddresses":"40.118.246.51,40.78.98.75,40.86.187.157,40.78.101.192,40.78.97.93,40.85.159.5,13.91.108.158","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-083","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-quick000002.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3081']
+      content-length: ['3159']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:49:25 GMT']
-      etag: ['"1D37884B8A6C630"']
+      date: ['Sun, 18 Feb 2018 03:01:53 GMT']
+      etag: ['"1D3A864CE3A4E80"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -225,30 +221,29 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"properties": {"netFrameworkVersion": "v4.6", "localMySqlEnabled": false,
-      "scmType": "LocalGit"}, "kind": "West US"}'
+    body: '{"kind": "West US", "properties": {"localMySqlEnabled": false, "http20Enabled":
+      true, "scmType": "LocalGit", "netFrameworkVersion": "v4.6"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [webapp create]
       Connection: [keep-alive]
-      Content-Length: ['117']
+      Content-Length: ['140']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002/config/web?api-version=2016-08-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002","name":"webapp-quick000002","type":"Microsoft.Web/sites","location":"West
-        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-quick000002","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"LocalGit","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"ipSecurityRestrictions":null}}'}
+        US","properties":{"numberOfWorkers":1,"defaultDocuments":["Default.htm","Default.html","Default.asp","index.htm","index.html","iisstart.htm","default.aspx","index.php","hostingstart.html"],"netFrameworkVersion":"v4.0","phpVersion":"5.6","pythonVersion":"","nodeVersion":"","linuxFxVersion":"","requestTracingEnabled":false,"remoteDebuggingEnabled":false,"remoteDebuggingVersion":null,"httpLoggingEnabled":false,"logsDirectorySizeLimit":35,"detailedErrorLoggingEnabled":false,"publishingUsername":"$webapp-quick000002","publishingPassword":null,"appSettings":null,"metadata":null,"connectionStrings":null,"machineKey":null,"handlerMappings":null,"documentRoot":null,"scmType":"LocalGit","use32BitWorkerProcess":true,"webSocketsEnabled":false,"alwaysOn":false,"javaVersion":null,"javaContainer":null,"javaContainerVersion":null,"appCommandLine":"","managedPipelineMode":"Integrated","virtualApplications":[{"virtualPath":"/","physicalPath":"site\\wwwroot","preloadEnabled":false,"virtualDirectories":null}],"winAuthAdminState":0,"winAuthTenantState":0,"customAppPoolIdentityAdminState":false,"customAppPoolIdentityTenantState":false,"runtimeADUser":null,"runtimeADUserPassword":null,"loadBalancing":"LeastRequests","routingRules":[],"experiments":{"rampUpRules":[]},"limits":null,"autoHealEnabled":false,"autoHealRules":null,"tracingOptions":null,"vnetName":"","siteAuthEnabled":false,"siteAuthSettings":{"enabled":null,"unauthenticatedClientAction":null,"tokenStoreEnabled":null,"allowedExternalRedirectUrls":null,"defaultProvider":null,"clientId":null,"clientSecret":null,"issuer":null,"allowedAudiences":null,"additionalLoginParams":null,"isAadAutoProvisioned":false,"googleClientId":null,"googleClientSecret":null,"googleOAuthScopes":null,"facebookAppId":null,"facebookAppSecret":null,"facebookOAuthScopes":null,"twitterConsumerKey":null,"twitterConsumerSecret":null,"microsoftAccountClientId":null,"microsoftAccountClientSecret":null,"microsoftAccountOAuthScopes":null},"cors":null,"push":null,"apiDefinition":null,"autoSwapSlotName":null,"localMySqlEnabled":false,"managedServiceIdentityId":null,"ipSecurityRestrictions":null}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['2391']
+      content-length: ['2423']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:49:27 GMT']
-      etag: ['"1D37884BFDE9D10"']
+      date: ['Sun, 18 Feb 2018 03:02:00 GMT']
+      etag: ['"1D3A864D4BB0A60"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -256,7 +251,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1184']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -267,19 +262,18 @@ interactions:
       CommandName: [webapp create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/providers/Microsoft.Web/publishingUsers/web?api-version=2016-03-01
   response:
-    body: {string: '{"id":null,"name":"web","type":"Microsoft.Web/publishingUsers/web","properties":{"name":null,"publishingUserName":"williexu1","publishingPassword":null,"publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":null}}'}
+    body: {string: '{"id":null,"name":"web","type":"Microsoft.Web/publishingUsers/web","properties":{"name":null,"publishingUserName":"weirdluki21","publishingPassword":null,"publishingPasswordHash":null,"publishingPasswordHashSalt":null,"metadata":null,"isDeleted":false,"scmUri":null}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['265']
+      content-length: ['267']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:49:27 GMT']
+      date: ['Sun, 18 Feb 2018 03:01:54 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -297,9 +291,8 @@ interactions:
       CommandName: [webapp create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002/sourcecontrols/web?api-version=2016-08-01
@@ -310,8 +303,8 @@ interactions:
       cache-control: [no-cache]
       content-length: ['534']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:49:27 GMT']
-      etag: ['"1D37884BFDE9D10"']
+      date: ['Sun, 18 Feb 2018 03:01:55 GMT']
+      etag: ['"1D3A864D4BB0A60"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -330,21 +323,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['2']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002/publishxml?api-version=2016-08-01
   response:
     body: {string: '<publishData><publishProfile profileName="webapp-quick000002 -
         Web Deploy" publishMethod="MSDeploy" publishUrl="webapp-quick000002.scm.azurewebsites.net:443"
-        msdeploySite="webapp-quick000002" userName="$webapp-quick000002" userPWD="P7CkSXxWujJNLhwG120h9x8p7kHdaExrY2jKuldWSx2wM42Ksasc6o9Gtzk6"
+        msdeploySite="webapp-quick000002" userName="$webapp-quick000002" userPWD="Q5sLDkz3NHPEqs2TTQviSnKvcDrqRYXPoPRMLH6cQnCYtfjKlF0hd2grqpyb"
         destinationAppUrl="http://webapp-quick000002.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="webapp-quick000002
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-039.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="webapp-quick000002\$webapp-quick000002" userPWD="P7CkSXxWujJNLhwG120h9x8p7kHdaExrY2jKuldWSx2wM42Ksasc6o9Gtzk6"
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-083.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="webapp-quick000002\$webapp-quick000002" userPWD="Q5sLDkz3NHPEqs2TTQviSnKvcDrqRYXPoPRMLH6cQnCYtfjKlF0hd2grqpyb"
         destinationAppUrl="http://webapp-quick000002.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile></publishData>'}
@@ -352,7 +344,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1150']
       content-type: [application/xml]
-      date: ['Tue, 19 Dec 2017 04:49:29 GMT']
+      date: ['Sun, 18 Feb 2018 03:01:56 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -370,9 +362,8 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002/config/appsettings/list?api-version=2016-08-01
@@ -383,7 +374,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['357']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:49:30 GMT']
+      date: ['Sun, 18 Feb 2018 03:02:02 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -402,9 +393,8 @@ interactions:
       CommandName: [webapp config appsettings list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-quick000002/config/slotConfigNames?api-version=2016-08-01
@@ -415,7 +405,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['162']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:49:30 GMT']
+      date: ['Sun, 18 Feb 2018 03:01:57 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -434,9 +424,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.28]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -445,11 +435,11 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Dec 2017 04:49:31 GMT']
+      date: ['Sun, 18 Feb 2018 03:02:05 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdMVkVGRDZJRkxDQ09IUURLTkZYUVBaRlBFVUVWNzNBT1VaSXxBQkI0NDFFRkQ0NTEwMzUzLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdHVTJWSFpMWVFVNDczWjIyVVU1TEdJSDVIQlhPNE5ZR0lYUnw0Nzk0MDdCNTBENTBCNUQ1LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1177']
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 202, message: Accepted}
 version: 1

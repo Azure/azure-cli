@@ -2,9 +2,13 @@
 
 Release History
 ===============
+0.2.3
++++++
+* Added new commands for marketplace and budget API.
+
 0.2.2
 +++++
-* Added new commands for pricesheet, marketplace and budget API
+* Added new commands for pricesheet API. Also, updated the existing Usage Details and Reservation Details API request format.
 
 0.2.1
 +++++

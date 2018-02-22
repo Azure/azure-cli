@@ -336,13 +336,14 @@ class AzCommandsLoader(CLICommandsLoader):
 
         def default_command_handler(command_args):
             from azure.cli.core.util import get_arg_list
+            from azure.cli.core.commands.client_factory import resolve_client_arg_name
+
             op = handler or self.get_op_handler(operation)
             op_args = get_arg_list(op)
 
             client = client_factory(self.cli_ctx, command_args) if client_factory else None
             if client:
-                client_arg_name = kwargs.get('client_arg_name',
-                                             'client' if operation.startswith(('azure.cli', 'azext')) else 'self')
+                client_arg_name = resolve_client_arg_name(operation, kwargs)
                 if client_arg_name in op_args:
                     command_args[client_arg_name] = client
             result = op(**command_args)
