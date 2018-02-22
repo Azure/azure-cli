@@ -74,4 +74,3 @@ def load_arguments(self, _):
     with self.argument_context('consumption budget delete') as cb:
         cb.argument('resource_group_name', options_list=['--resource-group-name','-r'], help='delete budget for subscription by specific resource group name')
         cb.argument('budget_name', options_list=['--budget-name','-b'], help='delete budget information by budget name')
-

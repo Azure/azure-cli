@@ -4,7 +4,7 @@ Release History
 ===============
 0.2.3
 +++++
-* Added new commands for marketplace and budget API.
+* Added new commands for marketplace and budget API. Update to pricesheet to include top filter
 
 0.2.2
 +++++

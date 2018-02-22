@@ -87,5 +87,3 @@ def validate_budget_parameters(namespace):
 
     if namespace.amount < 0:
         raise CLIError("usage error: --parameters.time_period.amount must be greater than 0")
-
-    
