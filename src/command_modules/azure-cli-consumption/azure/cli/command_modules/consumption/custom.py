@@ -77,11 +77,11 @@ def cli_consumption_list_pricesheet_show(client, billing_period_name=None, inclu
     return client.get(expand=expand_properties)
 
 
-def cli_consumption_list_marketplace(client, billing_period_name=None, start_date=None, end_date=None, resource_group=None, instance_id=None, instance_name=None, top=None):
+def cli_consumption_list_marketplace(client, billing_period_name=None, start_date=None, end_date=None, top=None):
     filter_from = None
     filter_to = None
     filter_expression = None
-    if start_date and end_date:
+    if start_date and end_date:o
         filter_from = "properties/usageEnd ge \'{}\'".format(start_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
         filter_to = "properties/usageEnd le \'{}\'".format(end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
         filter_expression = "{} and {}".format(filter_from, filter_to)

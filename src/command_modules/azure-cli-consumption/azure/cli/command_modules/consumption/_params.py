@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+# pylint: disable=too-many-statements
 from ._validators import get_datetime_type
 from ._validators import get_decimal_type
 
