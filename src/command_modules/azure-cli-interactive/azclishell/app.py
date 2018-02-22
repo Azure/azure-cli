@@ -106,8 +106,7 @@ class AzInteractiveShell(object):
             self.completer = completer or AzCompleter(self, GatherCommands(self.config))
         except IOError:  # if there is no cache
             self.completer = None
-        self._default_history = history or FileHistory(os.path.join(self.config.config_dir, self.config.get_history()))
-        self.history = self._default_history
+        self.history = history or FileHistory(os.path.join(self.config.config_dir, self.config.get_history()))
         os.environ[ENV_ADDITIONAL_USER_AGENT] = 'AZURECLISHELL/' + __version__
         self.telemetry = Telemetry(self.cli_ctx)
 
@@ -477,59 +476,58 @@ class AzInteractiveShell(object):
         continue_flag = False
         args = parse_quotes(cmd)
         cmd_stripped = cmd.strip()
-        if cmd_stripped and cmd.split(' ', 1)[0].lower() == 'az':
-            self.telemetry.track_ssg('az', cmd)
-            cmd = ' '.join(cmd.split()[1:])
-        if self.default_command:
-            cmd = self.default_command + " " + cmd
 
-        if cmd_stripped == "quit" or cmd_stripped == "exit":
+        if not cmd_stripped and cmd:
+            # add scope if there are only spaces
+            cmd = self.default_command + " " + cmd
+        elif cmd_stripped == "quit" or cmd_stripped == "exit":
             break_flag = True
         elif cmd_stripped == "clear-history":
-            # clears the history, but only when you restart
-            outside = True
-            cmd = 'echo -n "" >' +\
-                os.path.join(
-                    self.config.config_dir(),
-                    self.config.get_history())
+            continue_flag = True
+            self.reset_history()
         elif cmd_stripped == CLEAR_WORD:
             outside = True
             cmd = CLEAR_WORD
-        if cmd_stripped:
-            if cmd_stripped[0] == SELECT_SYMBOL['outside']:
-                cmd = cmd_stripped[1:]
-                outside = True
-                if cmd.strip() and cmd.split()[0] == 'cd':
-                    self.handle_cd(parse_quotes(cmd))
-                    continue_flag = True
-                self.telemetry.track_ssg('outside', '')
-
-            elif cmd_stripped[0] == SELECT_SYMBOL['exit_code']:
-                meaning = "Success" if self.last_exit == 0 else "Failure"
-
-                print(meaning + ": " + str(self.last_exit), file=self.output)
+        elif cmd_stripped[0] == SELECT_SYMBOL['outside']:
+            cmd = cmd_stripped[1:]
+            outside = True
+            if cmd.strip() and cmd.split()[0] == 'cd':
+                self.handle_cd(parse_quotes(cmd))
                 continue_flag = True
-                self.telemetry.track_ssg('exit code', '')
-            elif SELECT_SYMBOL['query'] in cmd_stripped and self.last and self.last.result:
-                continue_flag = self.handle_jmespath_query(args)
-                self.telemetry.track_ssg('query', '')
+            self.telemetry.track_ssg('outside', '')
 
-            elif args[0] == '--version' or args[0] == '-v':
-                try:
-                    continue_flag = True
-                    self.cli_ctx.show_version()
-                except SystemExit:
-                    pass
-            elif "|" in cmd or ">" in cmd:
+        elif cmd_stripped[0] == SELECT_SYMBOL['exit_code']:
+            meaning = "Success" if self.last_exit == 0 else "Failure"
+
+            print(meaning + ": " + str(self.last_exit), file=self.output)
+            continue_flag = True
+            self.telemetry.track_ssg('exit code', '')
+        elif SELECT_SYMBOL['query'] in cmd_stripped and self.last and self.last.result:
+            continue_flag = self.handle_jmespath_query(args)
+            self.telemetry.track_ssg('query', '')
+
+        elif args[0] == '--version' or args[0] == '-v':
+            try:
+                continue_flag = True
+                self.cli_ctx.show_version()
+            except SystemExit:
+                pass
+        elif SELECT_SYMBOL['example'] in cmd:
+            cmd, continue_flag = self.handle_example(cmd, continue_flag)
+            self.telemetry.track_ssg('tutorial', cmd)
+        elif SELECT_SYMBOL['scope'] == cmd_stripped[0:2]:
+            continue_flag, cmd = self.handle_scoping_input(continue_flag, cmd, cmd_stripped)
+        else:
+            # not a special character; add scope and remove 'az'
+            if self.default_command:
+                cmd = self.default_command + " " + cmd
+            elif cmd.split(' ', 1)[0].lower() == 'az':
+                self.telemetry.track_ssg('az', cmd)
+                cmd = ' '.join(cmd.split()[1:])
+            if "|" in cmd or ">" in cmd:
                 # anything I don't parse, send off
                 outside = True
                 cmd = "az " + cmd
-
-            elif SELECT_SYMBOL['example'] in cmd:
-                cmd, continue_flag = self.handle_example(cmd, continue_flag)
-                self.telemetry.track_ssg('tutorial', cmd)
-            elif SELECT_SYMBOL['scope'] == cmd_stripped[0:2]:
-                continue_flag, cmd = self.handle_scoping_input(continue_flag, cmd, cmd_stripped)
 
         return break_flag, continue_flag, outside, cmd
 
@@ -580,7 +578,6 @@ class AzInteractiveShell(object):
         cmd = cmd.replace(SELECT_SYMBOL['scope'], '')
 
         continue_flag = True
-        original_scope = get_scope()
 
         if not default_split:
             self.default_command = ""
@@ -620,15 +617,13 @@ class AzInteractiveShell(object):
                 print("Scope must be a valid command", file=self.output)
 
             default_split = default_split[1:]
-        if not get_scope():
-            self.set_history(history=self._default_history)
-        elif get_scope() != original_scope:
-            self.set_history(history=InMemoryHistory())
         return continue_flag, cmd
 
-    def set_history(self, history=None):
-        self.history = history
-        self.cli.buffers[DEFAULT_BUFFER].history = history
+    def reset_history(self):
+        history_file_path = os.path.join(self.config.config_dir, self.config.get_history())
+        os.remove(history_file_path)
+        self.history = FileHistory(history_file_path)
+        self.cli.buffers[DEFAULT_BUFFER].history = self.history
 
     def cli_execute(self, cmd):
         """ sends the command to the CLI to be executed """

@@ -6,7 +6,7 @@ Release History
 0.3.17
 ++++++
 * Persist history across different sessions
-* History while in non-default scope disappears after scope is changed and is not saved.
+* Fixed history while in scope
 
 0.3.16
 ++++++
