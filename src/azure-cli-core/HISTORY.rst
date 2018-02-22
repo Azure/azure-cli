@@ -5,7 +5,9 @@ Release History
 
 2.0.28
 ++++++
-* Minor fixes
+* Fix issue that required extension to use `client_arg_name` keyword argument. This is no longer necessary.
+* Allow extensions to send telemetry with custom instrumentation key
+* Enable HTTP logging with --debug
 
 2.0.27
 ++++++

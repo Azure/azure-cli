@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: !!python/unicode '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -8,19 +8,19 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.28]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Dec 2017 18:58:02 GMT']
+      date: ['Sun, 18 Feb 2018 02:57:25 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -34,28 +34,27 @@ interactions:
       CommandName: [appservice plan create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.28]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 22 Dec 2017 18:58:05 GMT']
+      date: ['Sun, 18 Feb 2018 02:57:25 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"sku": {"tier": "STANDARD", "capacity": 1, "name": "S1"},
-      "location": "westus", "properties": {"name": "webapp-git-plan5000002", "perSiteScaling":
-      false}}'
+    body: 'b''{"properties": {"perSiteScaling": false, "name": "webapp-git-plan5000002"},
+      "sku": {"capacity": 1, "tier": "STANDARD", "name": "S1"}, "location": "westus"}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -63,21 +62,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['157']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/webapp-git-plan5000002?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/webapp-git-plan5000002","name":"webapp-git-plan5000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":0,"name":"webapp-git-plan5000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-089_4116","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/webapp-git-plan5000002","name":"webapp-git-plan5000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
+        US","properties":{"serverFarmId":0,"name":"webapp-git-plan5000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"301849e3-dc98-4935-bae9-35b5d22ab2d0","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-017_25000","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1382']
+      content-length: ['1383']
       content-type: [application/json]
-      date: ['Fri, 22 Dec 2017 18:58:19 GMT']
+      date: ['Sun, 18 Feb 2018 02:57:39 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -85,7 +83,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -96,21 +94,20 @@ interactions:
       CommandName: [webapp create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/webapp-git-plan5000002?api-version=2016-09-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/webapp-git-plan5000002","name":"webapp-git-plan5000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
-        US","properties":{"serverFarmId":0,"name":"webapp-git-plan5000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-089_4116","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/webapp-git-plan5000002","name":"webapp-git-plan5000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
+        US","properties":{"serverFarmId":0,"name":"webapp-git-plan5000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"301849e3-dc98-4935-bae9-35b5d22ab2d0","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":10,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-017_25000","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"S1","tier":"Standard","size":"S1","family":"S","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1382']
+      content-length: ['1383']
       content-type: [application/json]
-      date: ['Fri, 22 Dec 2017 18:58:23 GMT']
+      date: ['Sun, 18 Feb 2018 02:57:33 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -121,32 +118,32 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"properties": {"reserved": false, "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/webapp-git-plan5000002",
-      "scmSiteAlsoStopped": false, "siteConfig": {"appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION",
-      "value": "6.9.1"}], "netFrameworkVersion": "v4.6", "localMySqlEnabled": false}},
-      "location": "West US"}'
+    body: 'b''b\''{"properties": {"siteConfig": {"http20Enabled": true, "appSettings":
+      [{"value": "6.9.1", "name": "WEBSITE_NODE_DEFAULT_VERSION"}], "netFrameworkVersion":
+      "v4.6", "localMySqlEnabled": false}, "scmSiteAlsoStopped": false, "reserved":
+      false, "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/webapp-git-plan5000002"},
+      "location": "West US"}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [webapp create]
       Connection: [keep-alive]
-      Content-Length: ['462']
+      Content-Length: ['485']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003?api-version=2016-08-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003","name":"web-git-test2000003","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"web-git-test2000003","state":"Running","hostNames":["web-git-test2000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-git-test2000003","repositorySiteName":"web-git-test2000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-git-test2000003.azurewebsites.net","web-git-test2000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-git-test2000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-git-test2000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/webapp-git-plan5000002","reserved":false,"lastModifiedTimeUtc":"2017-12-22T18:58:31.8533333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-git-test2000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-git-test2000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003","name":"web-git-test2000003","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"web-git-test2000003","state":"Running","hostNames":["web-git-test2000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-017.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-git-test2000003","repositorySiteName":"web-git-test2000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-git-test2000003.azurewebsites.net","web-git-test2000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-git-test2000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-git-test2000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/webapp-git-plan5000002","reserved":false,"lastModifiedTimeUtc":"2018-02-18T02:57:34.353","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-git-test2000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"23.101.206.54,23.101.194.183,23.101.206.60,23.101.205.197","possibleOutboundIpAddresses":"23.101.206.54,23.101.194.183,23.101.206.60,23.101.205.197","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-017","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-git-test2000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3136']
+      content-length: ['3122']
       content-type: [application/json]
-      date: ['Fri, 22 Dec 2017 18:58:38 GMT']
-      etag: ['"1D37B56DCC142D5"']
+      date: ['Sun, 18 Feb 2018 02:57:39 GMT']
+      etag: ['"1D3A86439F611A0"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -158,7 +155,7 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{}'
+    body: '{}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -166,22 +163,21 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['2']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/publishxml?api-version=2016-08-01
   response:
-    body: {string: !!python/unicode '<publishData><publishProfile profileName="web-git-test2000003
+    body: {string: '<publishData><publishProfile profileName="web-git-test2000003
         - Web Deploy" publishMethod="MSDeploy" publishUrl="web-git-test2000003.scm.azurewebsites.net:443"
-        msdeploySite="web-git-test2000003" userName="$web-git-test2000003" userPWD="QC2b0RiZmi0JgqFzrAQ0sdNGemkJanZmk76TdgAttQEAgkRMuPccl27wjjWx"
+        msdeploySite="web-git-test2000003" userName="$web-git-test2000003" userPWD="Qq0oDrNnGmbNkFEL5AF6tYosdpN8jia3GinmvvlqxYJk2y2ePJng4praBtQv"
         destinationAppUrl="http://web-git-test2000003.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="web-git-test2000003
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-089.ftp.azurewebsites.windows.net/site/wwwroot"
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-017.ftp.azurewebsites.windows.net/site/wwwroot"
         ftpPassiveMode="True" userName="web-git-test2000003\$web-git-test2000003"
-        userPWD="QC2b0RiZmi0JgqFzrAQ0sdNGemkJanZmk76TdgAttQEAgkRMuPccl27wjjWx" destinationAppUrl="http://web-git-test2000003.azurewebsites.net"
+        userPWD="Qq0oDrNnGmbNkFEL5AF6tYosdpN8jia3GinmvvlqxYJk2y2ePJng4praBtQv" destinationAppUrl="http://web-git-test2000003.azurewebsites.net"
         SQLServerDBConnectionString="" mySQLDBConnectionString="" hostingProviderForumLink=""
         controlPanelLink="http://windows.azure.com" webSystem="WebSites"><databases
         /></publishProfile></publishData>'}
@@ -189,7 +185,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['1150']
       content-type: [application/xml]
-      date: ['Fri, 22 Dec 2017 18:58:44 GMT']
+      date: ['Sun, 18 Feb 2018 02:57:46 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -206,21 +202,20 @@ interactions:
       CommandName: [webapp deployment source config]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003?api-version=2016-08-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003","name":"web-git-test2000003","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"web-git-test2000003","state":"Running","hostNames":["web-git-test2000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-089.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-git-test2000003","repositorySiteName":"web-git-test2000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-git-test2000003.azurewebsites.net","web-git-test2000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-git-test2000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-git-test2000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/webapp-git-plan5000002","reserved":false,"lastModifiedTimeUtc":"2017-12-22T18:58:32.4933333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-git-test2000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184","possibleOutboundIpAddresses":"40.83.150.233,13.64.108.67,13.64.104.203,13.64.109.86,13.64.107.184,13.64.105.5,13.64.108.146","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-089","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-git-test2000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003","name":"web-git-test2000003","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"web-git-test2000003","state":"Running","hostNames":["web-git-test2000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-017.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-git-test2000003","repositorySiteName":"web-git-test2000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-git-test2000003.azurewebsites.net","web-git-test2000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-git-test2000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-git-test2000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/webapp-git-plan5000002","reserved":false,"lastModifiedTimeUtc":"2018-02-18T02:57:34.65","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-git-test2000003","trafficManagerHostNames":null,"sku":"Standard","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"23.101.206.54,23.101.194.183,23.101.206.60,23.101.205.197","possibleOutboundIpAddresses":"23.101.206.54,23.101.194.183,23.101.206.60,23.101.205.197","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-017","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-git-test2000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3136']
+      content-length: ['3121']
       content-type: [application/json]
-      date: ['Fri, 22 Dec 2017 18:58:48 GMT']
-      etag: ['"1D37B56DCC142D5"']
+      date: ['Sun, 18 Feb 2018 02:57:42 GMT']
+      etag: ['"1D3A86439F611A0"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -231,8 +226,8 @@ interactions:
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: !!python/unicode '{"kind": "West US", "properties": {"repoUrl": "https://github.com/yugangw-msft/azure-site-test",
-      "isMercurial": false, "isManualIntegration": true, "branch": "master"}}'
+    body: '{"properties": {"isMercurial": false, "branch": "master", "repoUrl": "https://github.com/yugangw-msft/azure-site-test",
+      "isManualIntegration": true}, "kind": "West US"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -240,21 +235,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['168']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web?api-version=2016-08-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web","name":"web-git-test2000003","type":"Microsoft.Web/sites/sourcecontrols","location":"West
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web","name":"web-git-test2000003","type":"Microsoft.Web/sites/sourcecontrols","location":"West
         US","properties":{"repoUrl":"https://github.com/yugangw-msft/azure-site-test","branch":"master","isManualIntegration":true,"deploymentRollbackEnabled":false,"isMercurial":false,"provisioningState":"InProgress"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['531']
       content-type: [application/json]
-      date: ['Fri, 22 Dec 2017 18:59:46 GMT']
-      etag: ['"1D37B5707E51060"']
+      date: ['Sun, 18 Feb 2018 02:57:50 GMT']
+      etag: ['"1D3A86442770A50"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -270,22 +264,47 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       CommandName: [webapp deployment source config]
       Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web?api-version=2016-08-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web","name":"web-git-test2000003","type":"Microsoft.Web/sites/sourcecontrols","location":"West
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web","name":"web-git-test2000003","type":"Microsoft.Web/sites/sourcecontrols","location":"West
+        US","properties":{"repoUrl":"https://github.com/yugangw-msft/azure-site-test","branch":"master","isManualIntegration":true,"deploymentRollbackEnabled":false,"isMercurial":false,"provisioningState":"InProgress","provisioningDetails":"2018-02-18T02:58:14.1710891
+        https://web-git-test2000003.scm.azurewebsites.net/api/deployments/latest?deployer=GitHub&time=2018-02-18_02-57-57Z"}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['703']
+      content-type: [application/json]
+      date: ['Sun, 18 Feb 2018 02:58:20 GMT']
+      etag: ['"1D3A86442770A50"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-powered-by: [ASP.NET]
+    status: {code: 201, message: Created}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp deployment source config]
+      Connection: [keep-alive]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web","name":"web-git-test2000003","type":"Microsoft.Web/sites/sourcecontrols","location":"West
         US","properties":{"repoUrl":"https://github.com/yugangw-msft/azure-site-test","branch":"master","isManualIntegration":true,"deploymentRollbackEnabled":false,"isMercurial":false,"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['530']
       content-type: [application/json]
-      date: ['Fri, 22 Dec 2017 19:00:36 GMT']
-      etag: ['"1D37B5707E51060"']
+      date: ['Sun, 18 Feb 2018 02:58:51 GMT']
+      etag: ['"1D3A86442770A50"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -303,21 +322,20 @@ interactions:
       CommandName: [webapp deployment source show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web?api-version=2016-08-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web","name":"web-git-test2000003","type":"Microsoft.Web/sites/sourcecontrols","location":"West
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web","name":"web-git-test2000003","type":"Microsoft.Web/sites/sourcecontrols","location":"West
         US","properties":{"repoUrl":"https://github.com/yugangw-msft/azure-site-test","branch":"master","isManualIntegration":true,"deploymentRollbackEnabled":false,"isMercurial":false,"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['530']
       content-type: [application/json]
-      date: ['Fri, 22 Dec 2017 19:00:55 GMT']
-      etag: ['"1D37B5707E51060"']
+      date: ['Sun, 18 Feb 2018 02:58:52 GMT']
+      etag: ['"1D3A86442770A50"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -336,25 +354,24 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web?api-version=2016-08-01
   response:
-    body: {string: !!python/unicode ''}
+    body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 22 Dec 2017 19:01:13 GMT']
-      etag: ['"1D37B57367F670B"']
+      date: ['Sun, 18 Feb 2018 02:59:02 GMT']
+      etag: ['"1D3A86468C2CFF0"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -365,21 +382,20 @@ interactions:
       CommandName: [webapp deployment source show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 azure-mgmt-web/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.28]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web?api-version=2016-08-01
   response:
-    body: {string: !!python/unicode '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web","name":"web-git-test2000003","type":"Microsoft.Web/sites/sourcecontrols","location":"West
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-git-test2000003/sourcecontrols/web","name":"web-git-test2000003","type":"Microsoft.Web/sites/sourcecontrols","location":"West
         US","properties":{"repoUrl":null,"branch":null,"isManualIntegration":false,"deploymentRollbackEnabled":false,"isMercurial":false,"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['482']
       content-type: [application/json]
-      date: ['Fri, 22 Dec 2017 19:01:32 GMT']
-      etag: ['"1D37B57367F670B"']
+      date: ['Sun, 18 Feb 2018 02:59:03 GMT']
+      etag: ['"1D3A86468C2CFF0"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -398,20 +414,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/2.7.12 (Darwin-17.2.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.22 msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.2 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.18
+          msrest_azure/0.4.21 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.28]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: !!python/unicode ''}
+    body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 22 Dec 2017 19:01:36 GMT']
+      date: ['Sun, 18 Feb 2018 02:59:10 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc3V1lQUUZNQkdKTTJYQkxSRUE0UjJDM0hOUE5JM0QzNFc1T3wwNEIzOTNGNzA4RjkwNzhBLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdUNjNYN05YQUZKWkVZU1hEUTVYRUNBMjVSQ1NENEg1Q0dYNHw3N0RBREE1OTE1N0ZCMUVCLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-ms-ratelimit-remaining-subscription-writes: ['1199']

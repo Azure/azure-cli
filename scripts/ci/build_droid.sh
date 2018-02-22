@@ -29,6 +29,8 @@ cp $dp0/a01/Dockerfile.py36 artifacts/
 #############################################
 # Move other scripts for docker
 cp -R $dp0/a01/* artifacts/
+curl -sL https://a01tools.blob.core.windows.net/droid/linux/a01droid -o artifacts/docker_app/a01droid 
+chmod +x artifacts/docker_app/a01droid
 
 #############################################
 # for travis repo slug, remove the suffix to reveal the owner

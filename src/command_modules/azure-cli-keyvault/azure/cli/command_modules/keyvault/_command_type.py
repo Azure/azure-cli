@@ -78,6 +78,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
 
         def keyvault_command_handler(command_args):
             from azure.cli.core.util import get_arg_list
+            from azure.cli.core.commands.client_factory import resolve_client_arg_name
             from msrest.paging import Paged
             from msrestazure.azure_operation import AzureOperationPoller
 
@@ -87,7 +88,7 @@ class KeyVaultCommandGroup(AzCommandGroup):
             client_factory = command_type.settings.get('client_factory', None) if command_type \
                 else merged_kwargs.get('client_factory', None)
 
-            client_arg_name = 'client' if operations_tmpl.startswith(('azure.cli', 'azext')) else 'self'
+            client_arg_name = resolve_client_arg_name(operations_tmpl.format(method_name), kwargs)
             if client_arg_name in op_args:
                 client = client_factory(self.command_loader.cli_ctx, command_args)
                 command_args[client_arg_name] = client

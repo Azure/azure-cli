@@ -619,7 +619,7 @@ def load_command_table(self, _):
         g.command('list-advertised-routes', 'get_advertised_routes')
         g.command('list-learned-routes', 'get_learned_routes')
 
-    with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk) as g:
+    with self.command_group('network vnet-gateway vpn-client', network_vgw_sdk, client_factory=cf_virtual_network_gateways) as g:
         g.custom_command('generate', 'generate_vpn_client')
         g.command('show-url', 'get_vpn_profile_package_url', min_api='2017-08-01')
 

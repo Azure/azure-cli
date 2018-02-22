@@ -19,6 +19,7 @@ from ._client_factory import cf_container_groups, cf_container_logs
 
 ACR_SERVER_SUFFIX = '.azurecr.io/'
 AZURE_FILE_VOLUME_NAME = 'azurefile'
+SECRETS_VOLUME_NAME = 'secrets'
 
 
 def list_containers(client, resource_group_name=None):
@@ -58,7 +59,9 @@ def create_container(client,
                      azure_file_volume_share_name=None,
                      azure_file_volume_account_name=None,
                      azure_file_volume_account_key=None,
-                     azure_file_volume_mount_path=None):
+                     azure_file_volume_mount_path=None,
+                     secrets=None,
+                     secrets_mount_path=None):
     """Create a container group. """
 
     ports = ports or [80]
@@ -72,12 +75,26 @@ def create_container(client,
 
     command = shlex.split(command_line) if command_line else None
 
+    volumes = []
+    mounts = []
+
     azure_file_volume = _create_azure_file_volume(azure_file_volume_share_name=azure_file_volume_share_name,
                                                   azure_file_volume_account_name=azure_file_volume_account_name,
                                                   azure_file_volume_account_key=azure_file_volume_account_key)
-
     azure_file_volume_mount = _create_azure_file_volume_mount(azure_file_volume=azure_file_volume,
                                                               azure_file_volume_mount_path=azure_file_volume_mount_path)
+
+    if azure_file_volume:
+        volumes.append(azure_file_volume)
+        mounts.append(azure_file_volume_mount)
+
+    secrets_volume = _create_secrets_volume(secrets)
+    secrets_volume_mount = _create_secrets_volume_mount(secrets_volume=secrets_volume,
+                                                        secrets_mount_path=secrets_mount_path)
+
+    if secrets_volume:
+        volumes.append(secrets_volume)
+        mounts.append(secrets_volume_mount)
 
     cgroup_ip_address = _create_ip_address(ip_address, ports, dns_name_label)
 
@@ -87,7 +104,7 @@ def create_container(client,
                           command=command,
                           ports=[ContainerPort(port=p) for p in ports] if cgroup_ip_address else None,
                           environment_variables=environment_variables,
-                          volume_mounts=azure_file_volume_mount)
+                          volume_mounts=mounts or None)
 
     cgroup = ContainerGroup(location=location,
                             containers=[container],
@@ -95,7 +112,7 @@ def create_container(client,
                             restart_policy=restart_policy,
                             ip_address=cgroup_ip_address,
                             image_registry_credentials=image_registry_credentials,
-                            volumes=azure_file_volume)
+                            volumes=volumes or None)
 
     return client.create_or_update(resource_group_name, name, cgroup)
 
@@ -157,7 +174,12 @@ def _create_azure_file_volume(azure_file_volume_share_name, azure_file_volume_ac
                                             storage_account_name=azure_file_volume_account_name,
                                             storage_account_key=azure_file_volume_account_key)
 
-    return [Volume(name=AZURE_FILE_VOLUME_NAME, azure_file=azure_file_volume)] if azure_file_volume else None
+    return Volume(name=AZURE_FILE_VOLUME_NAME, azure_file=azure_file_volume) if azure_file_volume else None
+
+
+def _create_secrets_volume(secrets):
+    """Create secrets volume. """
+    return Volume(name=SECRETS_VOLUME_NAME, secret=secrets) if secrets else None
 
 
 # pylint: disable=inconsistent-return-statements
@@ -167,7 +189,16 @@ def _create_azure_file_volume_mount(azure_file_volume, azure_file_volume_mount_p
         if not azure_file_volume:
             raise CLIError('Please specify --azure-file-volume-share-name --azure-file-volume-account-name --azure-file-volume-account-key '
                            'to enable Azure File volume mount.')
-        return [VolumeMount(name=AZURE_FILE_VOLUME_NAME, mount_path=azure_file_volume_mount_path)]
+        return VolumeMount(name=AZURE_FILE_VOLUME_NAME, mount_path=azure_file_volume_mount_path)
+
+
+def _create_secrets_volume_mount(secrets_volume, secrets_mount_path):
+    """Create secrets volume mount. """
+    if secrets_volume:
+        if not secrets_mount_path:
+            raise CLIError('Please specify --secrets --secrets-mount-path '
+                           'to enable secrets volume mount.')
+        return VolumeMount(name=SECRETS_VOLUME_NAME, mount_path=secrets_mount_path)
 
 
 # pylint: disable=inconsistent-return-statements
