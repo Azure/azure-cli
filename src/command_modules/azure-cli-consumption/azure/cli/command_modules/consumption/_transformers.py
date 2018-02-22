@@ -64,6 +64,9 @@ def transform_pricesheet_show_output(result):
 
 
 def marketplace_list_output(result):
+    result.pretax_cost = str(result.pretax_cost)
+    result.consumed_quantity = str(result.consumed_quantity)
+    result.resource_rate = str(result.resource_rate)
     return result
 
 
