@@ -7,12 +7,9 @@ import json
 from datetime import datetime
 from decimal import *
 from azure.cli.core.util import CLIError
-from pprint import pprint
 
 from azure.mgmt.consumption.models import BudgetTimePeriod
 from azure.mgmt.consumption.models import CategoryType
-#from azure.mgmt.consumption.models import models
-#from azure.mgmt.consumption.BudgetTimePeriod import BudgetTimePeriod
 
 def get_decimal_type():
     def decimal_type(string):

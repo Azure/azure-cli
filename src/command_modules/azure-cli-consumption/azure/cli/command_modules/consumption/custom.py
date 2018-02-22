@@ -5,8 +5,6 @@
 
 # pylint: disable=line-too-long
 
-from pprint import pprint
-
 def cli_consumption_list_usage(client, billing_period_name=None, top=None, include_additional_properties=False, include_meter_details=False, start_date=None, end_date=None):
     if include_additional_properties and include_meter_details:
         expand = 'properties/additionalProperties,properties/meterDetails'
@@ -113,9 +111,6 @@ meters=None, resource_group_name=None):
     time_period = client.models.BudgetTimePeriod(start_date, end_date)
     filters = client.models.Filters(resource_groups=resource_groups, resources=resources, meters=meters)
     parameters = client.models.Budget(category=category, amount=amount, time_grain=time_grain, time_period=time_period, filters=filters, notifications=None)
-    print(meters)
-    pprint(vars(filters))
-    pprint(vars(parameters))
     if resource_group_name:
         return client.create_or_update(resource_group_name, budget_name, parameters)
     return client.create_or_update(budget_name, parameters)
