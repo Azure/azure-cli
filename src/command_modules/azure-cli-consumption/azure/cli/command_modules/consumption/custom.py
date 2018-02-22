@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 
+
 def cli_consumption_list_usage(client, billing_period_name=None, top=None, include_additional_properties=False, include_meter_details=False, start_date=None, end_date=None):
     if include_additional_properties and include_meter_details:
         expand = 'properties/additionalProperties,properties/meterDetails'
@@ -96,7 +97,7 @@ def cli_consumption_list_marketplace(client, billing_period_name=None, start_dat
 
 def cli_consumption_list_budgets(client, resource_group_name=None):
     if resource_group_name:
-        return list(client.list_by_resource_group_name(resource_group_name))    
+        return list(client.list_by_resource_group_name(resource_group_name))
     return list(client.list())
 
 
@@ -106,8 +107,7 @@ def cli_consumption_show_budget(client, budget_name, resource_group_name=None):
     return client.get(budget_name)
 
 
-def cli_consumption_create_budget(client, budget_name, category, amount, time_grain, start_date, end_date, resource_groups=None, resources=None, 
-meters=None, resource_group_name=None):
+def cli_consumption_create_budget(client, budget_name, category, amount, time_grain, start_date, end_date, resource_groups=None, resources=None, meters=None, resource_group_name=None):
     time_period = client.models.BudgetTimePeriod(start_date, end_date)
     filters = client.models.Filters(resource_groups=resource_groups, resources=resources, meters=meters)
     parameters = client.models.Budget(category=category, amount=amount, time_grain=time_grain, time_period=time_period, filters=filters, notifications=None)

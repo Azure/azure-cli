@@ -5,11 +5,12 @@
 
 import json
 from datetime import datetime
-from decimal import *
+from decimal import Decimal
 from azure.cli.core.util import CLIError
 
 from azure.mgmt.consumption.models import BudgetTimePeriod
 from azure.mgmt.consumption.models import CategoryType
+
 
 def get_decimal_type():
     def decimal_type(string):
@@ -18,6 +19,7 @@ def get_decimal_type():
         except ValueError:
             raise ValueError("the value passed cannot be converted to decimal")
     return decimal_type
+
 
 def get_datetime_type():
     """ Validates UTC datetime. Examples of accepted forms:
@@ -35,9 +37,10 @@ def get_datetime_type():
         raise ValueError("Input '{}' not valid. Valid example: 2017-02-11T23:59:59Z".format(string))
     return datetime_type
 
+
 def datetime_type(string):
     """ Validates UTC datetime. Examples of accepted forms:
-    2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """ 
+    2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
     accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ', '%Y-%m-%dT%HZ', '%Y-%m-%d']
     for form in accepted_date_formats:
         try:
@@ -71,7 +74,7 @@ def validate_budget_parameters(namespace):
 
     time_grain = namespace.time_grain.lower().strip()
 
-    if time_grain!='annually' and time_grain!='quarterly' and time_grain!='monthly':
+    if time_grain!= 'annually' and time_grain!= 'quarterly' and time_grain!= 'monthly':
         raise CLIError("usage error: --parameters.time_grain must be specified and values can be either 'Annually', 'Quarterly', or 'Monthly'. Value passed {}".format(time_grain))
 
     if namespace.amount < 0:
