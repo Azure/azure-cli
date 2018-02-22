@@ -29,7 +29,6 @@ def load_arguments(self, _):
         cps.argument('top', options_list=['--top', '-t'], type=int, help='maximum number of items to return. Accepted range for this value is 1 - 1000')
         cps.argument('include_meter_details', options_list=['--include-meter-details', '-m'], action='store_true', help='include meter details in the price sheet')
         cps.argument('billing_period_name', options_list=['--billing-period-name', '-p'], help='name of a specific billing period to get the price sheet')
-        cps.argument('include_meter_details', options_list=['--include-meter-details', '-m'], action='store_true', help='include meter details in the price sheet')
 
     with self.argument_context('consumption marketplace list') as cmp:
         cmp.argument('billing_period_name', options_list=['--billing-period-name', '-p'], help='name of a specific billing period to get the marketplace')
@@ -54,7 +53,10 @@ def load_arguments(self, _):
         cb.argument('amount', options_list=['--amount','-a'], type=get_decimal_type(), help='create budget with amount')
         cb.argument('time_grain', options_list=['--time_grain','-tg'], type=str, help='create budget with time grain')
         cb.argument('start_date', options_list=['--start_date','-s'], type=get_datetime_type(), help='create budget with start date of time period')
-        cb.argument('end_date', options_list=['--end_date','-e'], type=get_datetime_type(), help='create budget with end date of time period')
+        cb.argument('end_date', options_list=['--end_date','-e'], type=get_datetime_type(), help='create budget with end date of time period')        
+        cb.argument('resource_groups', options_list=['--resource-groups','-rg'], nargs='+', help='create budget with resource groups')
+        cb.argument('resources', options_list=['--resources','-rs'], nargs='+', help='create budget with resource(s) specified')
+        cb.argument('meters', options_list=['--meters','-m'], nargs='+', help='create budget with meter(s) specified')
 
     with self.argument_context('consumption budget update') as cb:
         cb.argument('resource_group_name', options_list=['--resource-group-name','-r'], help='update budget for subscription by specific resource group name')        
@@ -62,11 +64,14 @@ def load_arguments(self, _):
         cb.argument('category', options_list=['--category','-c'], type=str, help='update budget category')
         cb.argument('amount', options_list=['--amount','-a'], type=get_decimal_type(), help='update budget amount')
         cb.argument('e_tag', options_list=['--e-tag','-et'], type=str, help='etag required when updating existing budget')
-        cb.argument('time_grain', options_list=['--time_grain','-tg'], type=str, help='create budget with time grain')
-        cb.argument('start_date', options_list=['--start_date','-s'], type=get_datetime_type(), help='create budget with start date of time period')
-        cb.argument('end_date', options_list=['--end_date','-e'], type=get_datetime_type(), help='create budget with end date of time period')
+        cb.argument('time_grain', options_list=['--time_grain','-tg'], type=str, help='update budget with time grain')
+        cb.argument('start_date', options_list=['--start_date','-s'], type=get_datetime_type(), help='update budget with start date of time period')
+        cb.argument('end_date', options_list=['--end-date','-e'], type=get_datetime_type(), help='update budget with end date of time period')
+        cb.argument('resource_groups', options_list=['--resource-groups','-rg'], nargs='+', help='update budget with resource groups')
+        cb.argument('resources', options_list=['--resources','-rs'], nargs='+', help='update budget with resource(s) specified')
+        cb.argument('meters', options_list=['--meters','-m'], nargs='+', help='update budget with meter(s) specified')
 
     with self.argument_context('consumption budget delete') as cb:
-        cb.argument('resource_group_name', options_list=['--resource-group-name','-r'], help='delete budget for subscription by specific resource group name')        
+        cb.argument('resource_group_name', options_list=['--resource-group-name','-r'], help='delete budget for subscription by specific resource group name')
         cb.argument('budget_name', options_list=['--budget-name','-b'], help='delete budget information by budget name')
 

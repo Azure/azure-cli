@@ -1,0 +1,35 @@
+interactions:
+- request:
+    body: '{"properties": {"category": "usage", "amount": 20.0, "timeGrain": "annually",
+      "timePeriod": {"startDate": "2018-02-01T00:00:00.000Z", "endDate": "2018-10-01T00:00:00.000Z"},
+      "filters": {"meters": ["0dfadad2-6e4f-4078-85e1-90c230d4d482"]}}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [consumption budget create]
+      Connection: [keep-alive]
+      Content-Length: ['239']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.26
+          msrest_azure/0.4.21 azure-mgmt-consumption/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.28]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Consumption/budgets/usagetypebudget1?api-version=2018-01-31
+  response:
+    body: {string: '{"id":"subscriptions/0f88eb23-845d-48b9-b363-efd011b05586/providers/Microsoft.Consumption/budgets/usagetypebudget1","name":"usagetypebudget1","type":"Microsoft.Consumption/budgets","eTag":"\"1d3ab875141ad02\"","properties":{"timePeriod":{"startDate":"2018-02-01T00:00:00Z","endDate":"2018-10-01T00:00:00Z"},"timeGrain":"Annually","amount":20.0,"currentSpend":null,"category":"Usage","notifications":{},"filters":{"resourceGroups":[],"resources":[],"meters":["0dfadad2-6e4f-4078-85e1-90c230d4d482"]}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['500']
+      content-type: [application/json; charset=utf-8]
+      date: ['Thu, 22 Feb 2018 02:46:20 GMT']
+      expires: ['-1']
+      location: ['https://consumption.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Consumption/budgets/usagetypebudget1?api-version=2018-01-31']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      session-id: [3268b230-5476-48b4-9e87-07f73dee71d7]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-powered-by: [ASP.NET]
+    status: {code: 201, message: Created}
+version: 1

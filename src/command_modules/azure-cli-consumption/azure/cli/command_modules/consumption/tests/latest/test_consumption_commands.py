@@ -173,9 +173,14 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
     #     self.assertTrue(reservations_details_list)
     #     self._validate_reservation_details(reservations_details_list[0])
 
-    # def test_consumption_marketplace_list(self):
-    #     marketplace_list = self.cmd('consumption marketplace list -p 20170101 -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
-    #     self.assertTrue(marketplace_list)
+    def test_consumption_marketplace_list(self):
+        marketplace_list = self.cmd('consumption marketplace list -p 20170101 -t 1 -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
+        self.assertTrue(marketplace_list)
+
+    def test_consumption_budget_usage_create(self):
+        output_budget = self.cmd('az consumption budget create -b usagetypebudget1 -a 20 -s 2018-02-01 -e 2018-10-01 -tg annually -c usage -m 0dfadad2-6e4f-4078-85e1-90c230d4d482').get_output_in_json()
+        self.assertTrue(output_budget)
+        self._validate_budget(output_budget)
 
     # def test_consumption_budget_create(self):
     #     output_budget = self.cmd('consumption budget create -b ''costbudget'' -c ''cost'' -a 100.0 -s ''2018-02-01'' -e ''2018-10-01'' -tg ''monthly''').get_output_in_json()

@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 
+from pprint import pprint
 
 def cli_consumption_list_usage(client, billing_period_name=None, top=None, include_additional_properties=False, include_meter_details=False, start_date=None, end_date=None):
     if include_additional_properties and include_meter_details:
@@ -107,20 +108,26 @@ def cli_consumption_show_budget(client, budget_name, resource_group_name=None):
     return client.get(budget_name)
 
 
-def cli_consumption_create_budget(client, budget_name, category, amount, time_grain, start_date, end_date, resource_group_name=None):
+def cli_consumption_create_budget(client, budget_name, category, amount, time_grain, start_date, end_date, resource_groups=None, resources=None, 
+meters=None, resource_group_name=None):
     time_period = client.models.BudgetTimePeriod(start_date, end_date)
-    parameters = client.models.Budget(category=category, amount=amount, time_grain=time_grain, time_period=time_period)
-
+    filters = client.models.Filters(resource_groups=resource_groups, resources=resources, meters=meters)
+    parameters = client.models.Budget(category=category, amount=amount, time_grain=time_grain, time_period=time_period, filters=filters, notifications=None)
+    print(meters)
+    pprint(vars(filters))
+    pprint(vars(parameters))
     if resource_group_name:
         return client.create_or_update(resource_group_name, budget_name, parameters)
     return client.create_or_update(budget_name, parameters)
 
 
-def cli_consumption_update_budget(client, budget_name, category, amount, time_grain, start_date, end_date, e_tag, filters=None, 
-notifications=None, resource_group_name=None):
+def cli_consumption_update_budget(client, budget_name, category, amount, time_grain, start_date, end_date, e_tag, resource_groups=None,
+resources=None, meters=None, notifications=None, resource_group_name=None):
     time_period = client.models.BudgetTimePeriod(start_date, end_date)
+    filters = client.models.Filters(resource_groups=resource_groups, resources=resources, meters=meters)
     budget = client.models.Budget(category=category, amount=amount, time_grain=time_grain, time_period=time_period, e_tag=e_tag, 
     filters=filters, notifications=notifications)
+
     if resource_group_name:
         return client.create_or_update(resource_group_name, budget_name, budget)
     return client.create_or_update(budget_name, budget)
