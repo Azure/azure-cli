@@ -375,7 +375,7 @@ class LinuxWebappSceanrioTest(ScenarioTest):
 
     @ResourceGroupPreparer(location='japanwest')
     def test_linux_webapp(self, resource_group):
-        runtime = 'node|6.4'
+        runtime = 'node|6.6'
         plan = self.create_random_name(prefix='webapp-linux-plan', length=24)
         webapp = self.create_random_name(prefix='webapp-linux', length=24)
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan), checks=[
@@ -425,7 +425,7 @@ class WebappACRSceanrioTest(ScenarioTest):
     def test_acr_integration(self, resource_group):
         plan = self.create_random_name(prefix='acrtestplan', length=24)
         webapp = self.create_random_name(prefix='webappacrtest', length=24)
-        runtime = 'node|6.4'
+        runtime = 'node|6.6'
         acr_registry_name = webapp
         self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(resource_group, acr_registry_name))
         self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan))
@@ -604,9 +604,9 @@ class WebappBackupConfigScenarioTest(ScenarioTest):
         plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_result['appServicePlanName']))
 
-        sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?st=2018-02-02T09%3A12%3A00Z&se=2018-02-02T18%3A00%3A00Z&sp=rwdl&sv=2017-04-17&sr=c&sig=HMOnvE2bcr7IEMtgZ%2FaBMHUs9VwhO3sp2mDef%2B2gIYc%3D'
+        sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?st=2018-02-19T19%3A04%3A00Z&se=2018-02-20T19%3A04%3A00Z&sp=rwdl&sv=2017-04-17&sr=c&sig=ItyZeVRgwwj%2FweObpgER20z9nZ1RoKvDUvcA2lpQm7k%3D'
         frequency = '1d'
-        db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-backup;Persist Security Info=False;User ID=cliuser;Password=cli!password12;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+        db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-backup;Persist Security Info=False;User ID=cliuser;Password=password123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
         retention_period = 5
 
         # set without databases
@@ -661,8 +661,8 @@ class WebappBackupConfigScenarioTest(ScenarioTest):
         plan = self.create_random_name(prefix='webapp-backup-plan', length=24)
         plan_result = self.cmd('appservice plan create -g {} -n {} --sku S1'.format(resource_group, plan)).get_output_in_json()
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_result['appServicePlanName']))
-        sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?st=2018-02-02T09%3A12%3A00Z&se=2018-02-02T18%3A00%3A00Z&sp=rwdl&sv=2017-04-17&sr=c&sig=HMOnvE2bcr7IEMtgZ%2FaBMHUs9VwhO3sp2mDef%2B2gIYc%3D'
-        db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-backup;Persist Security Info=False;User ID=cliuser;Password=cli!password12;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+        sas_url = 'https://azureclistore.blob.core.windows.net/sitebackups?st=2018-02-19T19%3A04%3A00Z&se=2018-02-20T19%3A04%3A00Z&sp=rwdl&sv=2017-04-17&sr=c&sig=ItyZeVRgwwj%2FweObpgER20z9nZ1RoKvDUvcA2lpQm7k%3D'
+        db_conn_str = 'Server=tcp:cli-backup.database.windows.net,1433;Initial Catalog=cli-backup;Persist Security Info=False;User ID=cliuser;Password=password123!;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
 
         database_name = 'cli-backup'
         database_type = 'SqlAzure'
