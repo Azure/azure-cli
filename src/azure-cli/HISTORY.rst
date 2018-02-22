@@ -5,7 +5,7 @@ Release History
 
 2.0.28
 ++++++
-* Minor fixes
+* Bug fix for 'ValueError: field 6 out of range (need a 48-bit value)' - https://github.com/Azure/azure-cli/issues/5184
 
 2.0.27
 ++++++
