@@ -129,4 +129,4 @@ notifications=None, resource_group_name=None):
 def cli_consumption_delete_budget(client, budget_name, resource_group_name=None):
     if resource_group_name:
         return client.delete(resource_group_name, budget_name)
-    return client.delete(budget_name, parameters)
+    return client.delete(budget_name)

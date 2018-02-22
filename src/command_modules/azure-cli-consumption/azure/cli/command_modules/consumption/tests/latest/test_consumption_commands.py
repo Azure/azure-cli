@@ -7,7 +7,7 @@ from datetime import datetime
 from azure.cli.testsdk import ScenarioTest, record_only
 
 from pprint import pprint
-#@record_only()
+@record_only()
 class AzureConsumptionServiceScenarioTest(ScenarioTest):
     # def enable_large_payload(self, size=8192):
     #     from azure_devtools.scenario_tests import LargeResponseBodyProcessor
@@ -182,17 +182,15 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
     #     self.assertTrue(output_budget)
     #     self._validate_budget(output_budget)
 
-    def test_consumption_budget_update(self):
-        output_budget = self.cmd('consumption budget create -b ''costbudget3'' -c ''cost'' -a 100.0 -s ''2018-02-01'' -e ''2018-10-01'' -tg ''monthly''').get_output_in_json()
-        eTag = output_budget['eTag']
-        
-        # e_tag = budget.e_tag
-        # start_date = budget.time_period.start_date
-        # end_date = budget.time_period.end_date
-        # time_grain = budget.time_grain
+    # def test_consumption_budget_update(self):
+    #     output_budget = self.cmd('consumption budget create -b ''costbudget3'' -c ''cost'' -a 100.0 -s ''2018-02-01'' -e ''2018-10-01'' -tg ''monthly''').get_output_in_json()
+    #     eTag = output_budget['eTag']
 
-        output_name = self.cmd("consumption budget update -b ''costbudget3'' -c ''cost'' -a 125.0 -s ''2018-02-01'' -e ''2018-10-01'' -tg ''monthly'' -et '{}'".format(eTag))
-        self.assertTrue(output_name)
+    #     output = self.cmd("consumption budget update -b ''costbudget3'' -c ''cost'' -a 125.0 -s ''2018-02-01'' -e ''2018-10-01'' -tg ''monthly'' -et '{}'".format(eTag)).get_output_in_json()
+    #     self.assertTrue(output)
+    #     self.assertEqual(output['amount'], '125')
 
-	
+    def test_consumption_budget_delete(self):
+        output = self.cmd('consumption budget delete -b ''costbudget''')
+        self.assertTrue(output)
 		
