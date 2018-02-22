@@ -74,7 +74,7 @@ def validate_budget_parameters(namespace):
 
     time_grain = namespace.time_grain.lower().strip()
 
-    if time_grain!= 'annually' and time_grain!= 'quarterly' and time_grain!= 'monthly':
+    if time_grain != 'annually' and time_grain != 'quarterly' and time_grain != 'monthly':
         raise CLIError("usage error: --parameters.time_grain must be specified and values can be either 'Annually', 'Quarterly', or 'Monthly'. Value passed {}".format(time_grain))
 
     if namespace.amount < 0:
