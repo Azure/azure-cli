@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import json
 from datetime import datetime
 from decimal import Decimal
 from azure.cli.core.util import CLIError
