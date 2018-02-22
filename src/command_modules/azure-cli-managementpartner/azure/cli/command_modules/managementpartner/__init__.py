@@ -21,7 +21,9 @@ class ManagementpartnerCommandsLoader(AzCommandsLoader):
             exception_handler=managementpartner_exception_handler
         )
 
-        super(ManagementpartnerCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=managementpartner_custom)
+        super(ManagementpartnerCommandsLoader, self).__init__(
+            cli_ctx=cli_ctx,
+            custom_command_type=managementpartner_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.managementpartner.commands import load_command_table
