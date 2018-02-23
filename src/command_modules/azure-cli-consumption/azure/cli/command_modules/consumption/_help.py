@@ -71,7 +71,7 @@ helps['consumption budget'] = """
 
 helps['consumption budget list'] = """
     type: command
-    short-summary: Offers ability to create, get, update, and delete budgets for Azure subscription optionally by resource group name
+    short-summary: Lists budget for Azure subscription optionally by resource group name
 """
 
 helps['consumption budget show'] = """
