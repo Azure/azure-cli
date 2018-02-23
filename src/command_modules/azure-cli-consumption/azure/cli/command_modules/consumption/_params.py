@@ -52,4 +52,3 @@ def load_arguments(self, _):
 
     with self.argument_context('consumption budget update') as cb:
         cb.argument('e_tag', options_list=['--e-tag', '-x'], type=str, help='etag required when updating existing budget')
- 
