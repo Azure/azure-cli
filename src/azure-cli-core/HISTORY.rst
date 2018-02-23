@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.29
+++++++
+* Minor fixes
+
 2.0.28
 ++++++
 * Fix issue that required extension to use `client_arg_name` keyword argument. This is no longer necessary.
