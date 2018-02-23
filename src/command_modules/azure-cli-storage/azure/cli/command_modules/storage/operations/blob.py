@@ -5,6 +5,7 @@
 
 from __future__ import print_function
 
+import os
 from knack.log import get_logger
 
 from azure.cli.command_modules.storage.util import (create_blob_service_from_storage_client,
@@ -12,7 +13,7 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     create_short_lived_share_sas,
                                                     create_short_lived_container_sas,
                                                     filter_none, collect_blobs, collect_files,
-                                                    mkdir_p, guess_content_type)
+                                                    mkdir_p, guess_content_type, normalize_blob_file_path)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 
 
@@ -43,8 +44,8 @@ def set_delete_policy(client, enable=None, days_retained=None):
     return client.get_blob_service_properties().delete_retention_policy
 
 
-def storage_blob_copy_batch(cmd, client, source_client,
-                            destination_container=None, source_container=None, source_share=None,
+def storage_blob_copy_batch(cmd, client, source_client, destination_container=None,
+                            destination_path=None, source_container=None, source_share=None,
                             source_sas=None, pattern=None, dryrun=False):
     """Copy a group of blob or files to a blob container."""
     logger = None
@@ -73,7 +74,7 @@ def storage_blob_copy_batch(cmd, client, source_client,
             if dryrun:
                 logger.warning('  - copy blob %s', blob_name)
             else:
-                return _copy_blob_to_blob_container(client, source_client, destination_container,
+                return _copy_blob_to_blob_container(client, source_client, destination_container, destination_path,
                                                     source_container, source_sas, blob_name)
 
         return list(filter_none(action_blob_copy(blob) for blob in collect_blobs(source_client,
@@ -94,10 +95,9 @@ def storage_blob_copy_batch(cmd, client, source_client,
         def action_file_copy(file_info):
             dir_name, file_name = file_info
             if dryrun:
-                import os.path
                 logger.warning('  - copy file %s', os.path.join(dir_name, file_name))
             else:
-                return _copy_file_to_blob_container(client, source_client, destination_container,
+                return _copy_file_to_blob_container(client, source_client, destination_container, destination_path,
                                                     source_share, source_sas, dir_name, file_name)
 
         return list(filter_none(action_file_copy(file) for file in collect_files(cmd,
@@ -111,8 +111,8 @@ def storage_blob_copy_batch(cmd, client, source_client,
 # pylint: disable=unused-argument
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False,
                                 progress_callback=None, max_connections=2):
+
     def _download_blob(blob_service, container, destination_folder, blob_name):
-        import os
         # TODO: try catch IO exception
         destination_path = os.path.join(destination_folder, blob_name)
         destination_folder = os.path.dirname(destination_path)
@@ -140,13 +140,14 @@ def storage_blob_download_batch(client, source, destination, source_container_na
 
 
 def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  # pylint: disable=too-many-locals
-                              source_files=None,
+                              source_files=None, destination_path=None,
                               destination_container_name=None, blob_type=None,
                               content_settings=None, metadata=None, validate_content=False,
                               maxsize_condition=None, max_connections=2, lease_id=None, progress_callback=None,
                               if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False):
     def _create_return_result(blob_name, blob_content_settings, upload_result=None):
+        blob_name = normalize_blob_file_path(destination_path, blob_name)
         return {
             'Blob': client.make_blob_url(destination_container_name, blob_name),
             'Type': blob_content_settings.content_type,
@@ -170,7 +171,8 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
         for src, dst in source_files or []:
             logger.warning('uploading %s', src)
             guessed_content_settings = guess_content_type(src, content_settings, t_content_settings)
-            result = upload_blob(cmd, client, destination_container_name, dst, src,
+            result = upload_blob(cmd, client, destination_container_name,
+                                 normalize_blob_file_path(destination_path, dst), src,
                                  blob_type=blob_type, content_settings=guessed_content_settings, metadata=metadata,
                                  validate_content=validate_content, maxsize_condition=maxsize_condition,
                                  max_connections=max_connections, lease_id=lease_id,
@@ -220,7 +222,6 @@ def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=Non
 
     def upload_block_blob():
         # increase the block size to 100MB when the file is larger than 200GB
-        import os.path
         if os.path.isfile(file_path) and os.stat(file_path).st_size > 200 * 1024 * 1024 * 1024:
             client.MAX_BLOCK_SIZE = 100 * 1024 * 1024
             client.MAX_SINGLE_PUT_SIZE = 256 * 1024 * 1024
@@ -291,35 +292,34 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
     return [_delete_blob(blob) for blob in source_blobs]
 
 
-def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container,
+def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container, destination_path,
                                  source_container, source_sas, source_blob_name):
     from azure.common import AzureException
     source_blob_url = source_blob_service.make_blob_url(source_container, encode_for_url(source_blob_name),
                                                         sas_token=source_sas)
-
+    destination_blob_name = normalize_blob_file_path(destination_path, source_blob_name)
     try:
-        blob_service.copy_blob(destination_container, source_blob_name, source_blob_url)
-        return blob_service.make_blob_url(destination_container, source_blob_name)
+        blob_service.copy_blob(destination_container, destination_blob_name, source_blob_url)
+        return blob_service.make_blob_url(destination_container, destination_blob_name)
     except AzureException:
         from knack.util import CLIError
         error_template = 'Failed to copy blob {} to container {}.'
         raise CLIError(error_template.format(source_blob_name, destination_container))
 
 
-def _copy_file_to_blob_container(blob_service, source_file_service, destination_container,
+def _copy_file_to_blob_container(blob_service, source_file_service, destination_container, destination_path,
                                  source_share, source_sas, source_file_dir, source_file_name):
     from azure.common import AzureException
-    import os.path
     file_url, source_file_dir, source_file_name = \
         make_encoded_file_url_and_params(source_file_service, source_share, source_file_dir,
                                          source_file_name, source_sas)
 
-    blob_name = os.path.join(source_file_dir, source_file_name) \
-        if source_file_dir else source_file_name
+    source_path = os.path.join(source_file_dir, source_file_name) if source_file_dir else source_file_name
+    destination_blob_name = normalize_blob_file_path(destination_path, source_path)
 
     try:
-        blob_service.copy_blob(destination_container, blob_name=blob_name, copy_source=file_url)
-        return blob_service.make_blob_url(destination_container, blob_name)
+        blob_service.copy_blob(destination_container, destination_blob_name, file_url)
+        return blob_service.make_blob_url(destination_container, destination_blob_name)
     except AzureException as ex:
         from knack.util import CLIError
         error_template = 'Failed to copy file {} to container {}. {}'

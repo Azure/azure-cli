@@ -4,6 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 
+import os
+
+
 def collect_blobs(blob_service, container, pattern=None):
     """
     List the blobs in the given blob container, filter the blob by comparing their path to the given pattern.
@@ -67,13 +70,11 @@ def filter_none(iterable):
 
 def glob_files_locally(folder_path, pattern):
     """glob files in local folder based on the given pattern"""
-    import os
 
     pattern = os.path.join(folder_path, pattern.lstrip('/')) if pattern else None
 
-    from os import walk
     len_folder_path = len(folder_path) + 1
-    for root, _, files in walk(folder_path):
+    for root, _, files in os.walk(folder_path):
         for f in files:
             full_path = os.path.join(root, f)
             if not pattern or _match_path(full_path, pattern):
@@ -82,7 +83,6 @@ def glob_files_locally(folder_path, pattern):
 
 def glob_files_remotely(cmd, client, share_name, pattern):
     """glob the files in remote file share based on the given pattern"""
-    import os
     from collections import deque
     t_dir, t_file = cmd.get_models('file.models#Directory', 'file.models#File')
 
@@ -154,7 +154,6 @@ def create_short_lived_share_sas(cmd, account_name, account_key, share):
 
 def mkdir_p(path):
     import errno
-    import os
     try:
         os.makedirs(path)
     except OSError as exc:  # Python <= 2.5
@@ -200,3 +199,11 @@ def get_storage_client(cli_ctx, service_type, namespace):
     sas_token = getattr(namespace, 'sas_token', az_config.get('storage', 'sas_token', None))
 
     return get_storage_data_service_client(cli_ctx, service_type, name, key, connection_string, sas_token)
+
+
+def normalize_blob_file_path(path, name):
+    # '/' is the path separator used by blobs/files, we normalize to it
+    path_sep = '/'
+    if path:
+        name = path_sep.join((path, name))
+    return path_sep.join(os.path.normpath(name).split(os.path.sep)).strip(path_sep)

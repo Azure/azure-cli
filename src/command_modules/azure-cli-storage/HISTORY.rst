@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.26
+++++++
+* Enabled specifying destination-path/prefix to blobs in batch upload and copy commands.
+
 2.0.25
 ++++++
 * Added `storage blob service-properties delete-policy` and `storage blob undelete` commands to enable soft-delete.
