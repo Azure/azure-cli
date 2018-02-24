@@ -11,6 +11,7 @@ from azure.cli.core.commands.parameters import \
 
 from ._validators import \
     (validate_include_or_exclude,
+     validate_ids_or_names,
      validate_ids_or_resource_group,
      validate_threshold_or_resource_group)
 
@@ -20,7 +21,7 @@ def load_arguments(self, _):
                                    help='One or more resource IDs (space-delimited). If provided, no other '
                                         '"Resource Id" arguments should be specified.')
 
-    name_arg_type = CLIArgumentType(options_list=['--name', '-n'], id_part='child_name_1',
+    name_arg_type = CLIArgumentType(options_list=['--name', '-n'],
                                     help='The name of the recommendation as output by the list command.',
                                     completer=get_resource_name_completion_list('Microsoft.Advisor/recommendations'))
 
@@ -32,12 +33,16 @@ def load_arguments(self, _):
                    help='Generate new recommendations.')
 
     with self.argument_context('advisor recommendation disable') as c:
-        c.argument('recommendation_name', name_arg_type)
+        c.argument('ids', ids_arg_type, arg_group="Resource Id", validator=validate_ids_or_names)
+        c.argument('recommendation_name', name_arg_type, arg_group="Resource Id")
+        c.argument('resource_group_name', arg_group="Resource Id")
         c.argument('days', options_list=['--days', '-d'], type=int,
                    help='Number of days to disable. If not specified, the recommendation is disabled forever.')
 
     with self.argument_context('advisor recommendation enable') as c:
-        c.argument('recommendation_name', name_arg_type)
+        c.argument('ids', ids_arg_type, arg_group="Resource Id", validator=validate_ids_or_names)
+        c.argument('resource_group_name', arg_group="Resource Id")
+        c.argument('recommendation_name', name_arg_type, arg_group="Resource Id")
 
     with self.argument_context('advisor configuration update') as c:
         c.argument('low_cpu_threshold', options_list=['--low-cpu-threshold', '-l'],
