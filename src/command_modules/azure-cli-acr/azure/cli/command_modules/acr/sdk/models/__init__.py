@@ -26,8 +26,6 @@ from .image_descriptor import ImageDescriptor
 from .build import Build
 from .build_trigger import BuildTrigger
 from .build_update_parameters import BuildUpdateParameters
-from .build_log_parameters import BuildLogParameters
-from .build_log_result import BuildLogResult
 from .build_argument import BuildArgument
 from .queue_build_parameters import QueueBuildParameters
 from .queue_build_request import QueueBuildRequest
@@ -73,8 +71,6 @@ __all__ = [
     'Build',
     'BuildTrigger',
     'BuildUpdateParameters',
-    'BuildLogParameters',
-    'BuildLogResult',
     'BuildArgument',
     'QueueBuildParameters',
     'QueueBuildRequest',

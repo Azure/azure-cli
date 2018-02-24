@@ -46,13 +46,9 @@ def acr_build_show_logs(cmd,
     resource_group_name = get_resource_group_name_by_registry_name(
         cmd.cli_ctx, registry_name, resource_group_name)
 
-    # Required and hardcoded for now. Refer to the "HACK" introduced in build_operations.py
-    custom_headers = dict()
-    custom_headers['logType'] = 'RawText'
-    build_log_result = client.get_log_link(
+    log_file_sas = client.get_log_link(
         build_id=build_id, resource_group_name=resource_group_name,
-        registry_name=registry_name, custom_headers=custom_headers)
-    log_file_sas = build_log_result.log_link
+        registry_name=registry_name)
 
     if not log_file_sas:
         return 'No logs found.'
@@ -206,7 +202,7 @@ def acr_queue(cmd,
               timeout=None,
               build_args=None,
               secret_build_args=None,
-              show_logs='true'):
+              no_logs=False):
 
     resource_group_name = get_resource_group_name_by_registry_name(
         cmd.cli_ctx, registry_name, resource_group_name)
@@ -268,7 +264,7 @@ def acr_queue(cmd,
 
         print("Queued a build with build-id: {}.".format(result.build_id))
 
-        if show_logs == 'true':
+        if no_logs == False:
             print("Starting to stream the logs...")
             return acr_build_show_logs(cmd, client, registry_name, result.build_id, resource_group_name)
     except Exception as err:

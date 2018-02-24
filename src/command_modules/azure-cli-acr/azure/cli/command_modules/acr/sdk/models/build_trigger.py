@@ -18,15 +18,19 @@ class BuildTrigger(Model):
     You probably want to use the sub-classes and not this class directly. Known
     sub-classes are: ImageTrigger
 
+    :param id: The unique identifier of a trigger.
+    :type id: str
     :param type: Constant filled by server.
     :type type: str
     """
 
     _validation = {
+        'id': {'required': True},
         'type': {'required': True},
     }
 
     _attribute_map = {
+        'id': {'key': 'id', 'type': 'str'},
         'type': {'key': 'type', 'type': 'str'},
     }
 
@@ -34,6 +38,7 @@ class BuildTrigger(Model):
         'type': {'ImageTrigger': 'ImageTrigger'}
     }
 
-    def __init__(self):
+    def __init__(self, id):
         super(BuildTrigger, self).__init__()
+        self.id = id
         self.type = None

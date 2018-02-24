@@ -42,7 +42,6 @@ class DockerBuildStepCreateParameters(BuildStepCreateParameters):
         'name': {'required': True},
         'type': {'required': True},
         'branch': {'required': True},
-        'image_name': {'required': True},
     }
 
     _attribute_map = {
@@ -56,7 +55,7 @@ class DockerBuildStepCreateParameters(BuildStepCreateParameters):
         'build_arguments': {'key': 'buildArguments', 'type': '[BuildArgument]'},
     }
 
-    def __init__(self, name, branch, image_name, is_push_enabled=False, docker_file_path=None, context_path=None, build_arguments=None):
+    def __init__(self, name, branch, image_name=None, is_push_enabled=False, docker_file_path=None, context_path=None, build_arguments=None):
         super(DockerBuildStepCreateParameters, self).__init__(name=name)
         self.branch = branch
         self.image_name = image_name

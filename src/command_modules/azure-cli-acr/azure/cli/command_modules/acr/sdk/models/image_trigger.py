@@ -15,10 +15,10 @@ from .build_trigger import BuildTrigger
 class ImageTrigger(BuildTrigger):
     """A build trigger based on Image updates.
 
-    :param type: Constant filled by server.
-    :type type: str
     :param id: The unique identifier of a trigger.
     :type id: str
+    :param type: Constant filled by server.
+    :type type: str
     :param repository_name: Name of the repository.
     :type repository_name: str
     :param tag: The tag name.
@@ -26,21 +26,20 @@ class ImageTrigger(BuildTrigger):
     """
 
     _validation = {
-        'type': {'required': True},
         'id': {'required': True},
+        'type': {'required': True},
         'repository_name': {'required': True},
     }
 
     _attribute_map = {
-        'type': {'key': 'type', 'type': 'str'},
         'id': {'key': 'id', 'type': 'str'},
+        'type': {'key': 'type', 'type': 'str'},
         'repository_name': {'key': 'repositoryName', 'type': 'str'},
         'tag': {'key': 'tag', 'type': 'str'},
     }
 
     def __init__(self, id, repository_name, tag=None):
-        super(ImageTrigger, self).__init__()
-        self.id = id
+        super(ImageTrigger, self).__init__(id=id)
         self.repository_name = repository_name
         self.tag = tag
         self.type = 'ImageTrigger'

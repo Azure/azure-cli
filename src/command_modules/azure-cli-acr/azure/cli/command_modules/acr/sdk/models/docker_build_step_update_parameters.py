@@ -17,6 +17,8 @@ class DockerBuildStepUpdateParameters(BuildStepUpdateParameters):
 
     :param type: Constant filled by server.
     :type type: str
+    :param branch: The repository branch name.
+    :type branch: str
     :param image_name: The full qualified name of the image including the
      repository and tag.
     :type image_name: str
@@ -40,6 +42,7 @@ class DockerBuildStepUpdateParameters(BuildStepUpdateParameters):
 
     _attribute_map = {
         'type': {'key': 'type', 'type': 'str'},
+        'branch': {'key': 'branch', 'type': 'str'},
         'image_name': {'key': 'imageName', 'type': 'str'},
         'is_push_enabled': {'key': 'isPushEnabled', 'type': 'bool'},
         'docker_file_path': {'key': 'dockerFilePath', 'type': 'str'},
@@ -47,8 +50,9 @@ class DockerBuildStepUpdateParameters(BuildStepUpdateParameters):
         'build_arguments': {'key': 'buildArguments', 'type': '[BuildArgument]'},
     }
 
-    def __init__(self, image_name=None, is_push_enabled=False, docker_file_path=None, context_path=None, build_arguments=None):
+    def __init__(self, branch=None, image_name=None, is_push_enabled=False, docker_file_path=None, context_path=None, build_arguments=None):
         super(DockerBuildStepUpdateParameters, self).__init__()
+        self.branch = branch
         self.image_name = image_name
         self.is_push_enabled = is_push_enabled
         self.docker_file_path = docker_file_path

@@ -306,7 +306,7 @@ class BuildsOperations(object):
 
     def get_log_link(
             self, build_id, resource_group_name, registry_name, custom_headers=None, raw=False, **operation_config):
-        """Get the links to the various build logs.
+        """Gets a link to download the build logs.
 
         :param build_id: The build ID.
         :type build_id: str
@@ -320,15 +320,10 @@ class BuildsOperations(object):
          deserialized response
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
-        :return: BuildLogResult or ClientRawResponse if raw=true
-        :rtype: ~containerregistrybuild.models.BuildLogResult or
-         ~msrest.pipeline.ClientRawResponse
+        :return: str or ClientRawResponse if raw=true
+        :rtype: str or ~msrest.pipeline.ClientRawResponse
         :raises: :class:`CloudError<msrestazure.azure_exceptions.CloudError>`
         """
-        # TODO: this is a hack, there is a bug in the RP
-        # This should be required - just use the headers for this too...
-        log_parameters = custom_headers
-
         # Construct URL
         url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/builds/{buildId}/getLogLink'
         path_format_arguments = {
@@ -353,13 +348,9 @@ class BuildsOperations(object):
         if self.config.accept_language is not None:
             header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
 
-        # Construct body
-        body_content = self._serialize.body(log_parameters, 'BuildLogParameters')
-
         # Construct and send request
         request = self._client.post(url, query_parameters)
-        response = self._client.send(
-            request, header_parameters, body_content, stream=False, **operation_config)
+        response = self._client.send(request, header_parameters, stream=False, **operation_config)
 
         if response.status_code not in [200]:
             exp = CloudError(response)
@@ -369,7 +360,7 @@ class BuildsOperations(object):
         deserialized = None
 
         if response.status_code == 200:
-            deserialized = self._deserialize('BuildLogResult', response)
+            deserialized = self._deserialize('str', response)
 
         if raw:
             client_raw_response = ClientRawResponse(deserialized, response)
