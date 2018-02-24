@@ -688,7 +688,6 @@ class AzInteractiveShell(object):
 
     def run(self):
         """ starts the REPL """
-        self.telemetry.start()
         self.cli_ctx.get_progress_controller = self.progress_patch
 
         self.command_table_thread = LoadCommandTableThread(restart_completer, self)
@@ -697,6 +696,8 @@ class AzInteractiveShell(object):
         from azclishell.configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(
             initial_document=Document(u'{}'.format(SHELL_HELP)))
+        # flush telemetry for new commands
+        cli_telemetry.flush()
         while True:
             try:
                 try:
@@ -727,13 +728,15 @@ class AzInteractiveShell(object):
                     if outside:
                         subprocess.Popen(cmd, shell=True).communicate()
                     else:
+                        cli_telemetry.start()
                         self.cli_execute(cmd)
-                        # because I catch the sys exit, I have to push out
-                        self.telemetry.conclude()
+                        if self.last_exit and self.last_exit != 0:
+                            cli_telemetry.set_failure()
+                        else:
+                            cli_telemetry.set_success()
+                        cli_telemetry.flush()
 
             except (KeyboardInterrupt, ValueError):
                 # CTRL C
                 self.set_prompt()
                 continue
-
-        self.telemetry.conclude()

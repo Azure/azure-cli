@@ -28,27 +28,28 @@ decorators.is_diagnostics_mode = telemetry_core.in_diagnostic_mode
 
 
 class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
-    start_time = None
-    end_time = None
-    application = None
-    arg_complete_env_name = None
-    correlation_id = str(uuid.uuid4())
-    command = 'execute-unknown-command'
-    output_type = 'none'
-    parameters = []
-    result = 'None'
-    result_summary = None
-    payload_properties = None
-    exceptions = []
-    module_correlation = None
-    extension_name = None
-    extension_version = None
-    feedback = None
-    extension_management_detail = None
-    raw_command = None
-    # A dictionary with the application insight instrumentation key
-    # as the key and an array of telemetry events as value
-    events = defaultdict(list)
+    def __init__(self):
+        self.start_time = None
+        self.end_time = None
+        self.application = None
+        self.arg_complete_env_name = None
+        self.correlation_id = str(uuid.uuid4())
+        self.command = 'execute-unknown-command'
+        self.output_type = 'none'
+        self.parameters = []
+        self.result = 'None'
+        self.result_summary = None
+        self.payload_properties = None
+        self.exceptions = []
+        self.module_correlation = None
+        self.extension_name = None
+        self.extension_version = None
+        self.feedback = None
+        self.extension_management_detail = None
+        self.raw_command = None
+        # A dictionary with the application insight instrumentation key
+        # as the key and an array of telemetry events as value
+        self.events = defaultdict(list)
 
     def add_exception(self, exception, fault_type, description=None, message=''):
         fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
@@ -137,7 +138,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         return result
 
     def _get_azure_cli_properties(self):
-        source = 'az' if self.arg_complete_env_name not in os.environ else 'completer'
+        source = 'az' if self.arg_complete_env_name or self.arg_complete_env_name not in os.environ else 'completer'
         result = {}
         ext_info = '{}@{}'.format(self.extension_name, self.extension_version) if self.extension_name else None
         self.set_custom_properties(result, 'Source', source)
@@ -216,6 +217,24 @@ def _user_agrees_to_telemetry(func):
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def start():
     _session.start_time = datetime.datetime.now()
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def flush():
+    global _session  # pylint: disable=global-statement
+    # flush out current information
+    _session.end_time = datetime.datetime.now()
+
+    payload = _session.generate_payload()
+    if payload:
+        import subprocess
+        subprocess.Popen([sys.executable, os.path.realpath(telemetry_core.__file__), payload])
+
+    # reset fields
+    new_session = TelemetrySession()
+    new_session.correlation_id = _session.correlation_id
+    new_session.application = _session.application
+    _session = new_session
 
 
 @_user_agrees_to_telemetry
@@ -307,14 +326,19 @@ def set_raw_command_name(command):
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def add_extension_event(extension_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
-    # Inject correlation ID into the extension event
+    _session.set_custom_properties(properties, 'ExtensionName', extension_name)
+    add_event("extension", properties, instrumentation_key=instrumentation_key)
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def add_event(event_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
+    # Inject correlation ID into the new event
     properties.update({
         CORRELATION_ID_PROP_NAME: _session.correlation_id,
     })
 
-    _session.set_custom_properties(properties, 'ExtensionName', extension_name)
     _session.events[instrumentation_key].append({
-        'name': '{}/extension'.format(PRODUCT_NAME),
+        'name': '{}/{}'.format(PRODUCT_NAME, event_name),
         'properties': properties
     })
 
