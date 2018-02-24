@@ -96,5 +96,5 @@ def load_arguments(self, _):
         c.argument('timeout', help='The build timeout in seconds.')
         c.argument('build_args', nargs='+', help='The space-separated build arguments in a format of <name>=<value>.')
         c.argument('secret_build_args', nargs='+', help='The space-separated secret build arguments in a format of <name>=<value>.')
-        c.argument('no_logs', options_list=['--no_logs'], action='store_true', help='Do not show logs after successfully queuing the build.')
+        c.argument('no_logs', options_list=['--no-logs'], action='store_true', help='Do not show logs after successfully queuing the build.')
         
