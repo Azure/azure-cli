@@ -14,20 +14,20 @@ def load_command_table(self, _):
     advisor_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.advisor.custom#{}')
 
     with self.command_group('advisor recommendation') as g:
-        g.custom_command('list', 'cli_advisor_list_recommendations',
+        g.custom_command('list', 'list_recommendations',
                          client_factory=recommendations_mgmt_client_factory)
-        g.custom_command('disable', 'cli_advisor_disable_recommendations',
+        g.custom_command('disable', 'disable_recommendations',
                          client_factory=advisor_mgmt_client_factory)
-        g.custom_command('enable', 'cli_advisor_enable_recommendations',
+        g.custom_command('enable', 'enable_recommendations',
                          client_factory=advisor_mgmt_client_factory)
 
     with self.command_group('advisor configuration', client_factory=configurations_mgmt_client_factory) as g:
-        g.custom_command('list', 'cli_advisor_list_configuration')
-        g.custom_command('show', 'cli_advisor_show_configuration')
+        g.custom_command('list', 'list_configuration')
+        g.custom_command('show', 'show_configuration')
         g.generic_update_command('update',
-                                 getter_name='cli_advisor_show_configuration',
+                                 getter_name='show_configuration',
                                  getter_type=advisor_custom,
-                                 setter_name='_cli_advisor_set_configuration',
+                                 setter_name='_set_configuration',
                                  setter_type=advisor_custom,
-                                 custom_func_name='cli_advisor_update_configuration',
+                                 custom_func_name='update_configuration',
                                  custom_func_type=advisor_custom)
