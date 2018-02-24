@@ -287,6 +287,30 @@ helps['sql elastic-pool update'] = """
         - name: Update elastic pool with zone redundancy explicitly disabled
           text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z false
     """
+helps['sql failover-group'] = """
+    type: group
+    short-summary: Manage SQL Failover Groups.
+"""
+helps['sql failover-group create'] = """
+    type: command
+    short-summary: Creates a failover group.
+"""
+helps['sql failover-group update'] = """
+    type: command
+    short-summary: Updates the parameters of the failover group.
+"""
+helps['sql failover-group add-databases'] = """
+    type: command
+    short-summary: Adds provided list of databases to the failover group.
+"""
+helps['sql failover-group remove-databases'] = """
+    type: command
+    short-summary: Removes provided list of databases from failover group.
+"""
+helps['sql failover-group failover'] = """
+    type: command
+    short-summary: Executes a failover of a failover group.
+"""
 helps['sql server'] = """
     type: group
     short-summary: Manage SQL servers.

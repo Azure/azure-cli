@@ -17,6 +17,7 @@ from ._util import (
     get_sql_database_usages_operations,
     get_sql_elastic_pools_operations,
     get_sql_encryption_protectors_operations,
+    get_sql_failover_groups_operations,
     get_sql_firewall_rules_operations,
     get_sql_replication_links_operations,
     get_sql_restorable_dropped_databases_operations,
@@ -160,6 +161,22 @@ def load_command_table(self, _):
 
     with self.command_group('sql elastic-pool', database_operations) as g:
         g.command('list-dbs', 'list_by_elastic_pool')
+
+    ###############################################
+    #             sql failover-group              #
+    ###############################################
+    failover_groups_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.failover_groups_operations#FailoverGroupsOperations.{}',
+        client_factory=get_sql_failover_groups_operations)
+    with self.command_group('sql failover-group', failover_groups_operations, client_factory=get_sql_failover_groups_operations) as g:
+        g.command('show', 'get')
+        g.command('list', 'list_by_server')
+        g.custom_command('create', 'failover_group_create')
+        g.custom_command('update', 'failover_group_update')
+        g.command('delete', 'delete')
+        g.custom_command('add-databases', 'failover_group_add_databases')
+        g.custom_command('remove-databases', 'failover_group_remove_databases')
+        g.custom_command('failover', 'failover_group_failover')
 
     ###############################################
     #                sql server                   #

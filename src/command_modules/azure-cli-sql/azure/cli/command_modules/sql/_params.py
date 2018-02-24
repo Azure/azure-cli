@@ -594,8 +594,35 @@ def load_arguments(self, _):
     with self.argument_context('sql elastic-pool update') as c:
         c.argument('database_dtu_max', help='The maximum DTU any one database can consume.')
         c.argument('database_dtu_min', help='The minimum DTU all databases are guaranteed.')
-        c.argument('dtu', help='TThe total shared DTU for the elastic eool.')
+        c.argument('dtu', help='The total shared DTU for the elastic eool.')
         c.argument('storage_mb', help='Storage limit for the elastic pool in MB.')
+
+    ###############################################
+    #            sql failover-group               #
+    ###############################################
+    with self.argument_context('sql failover-group') as c:
+        c.argument('failover_group_name', options_list=['--name', '-n'], help="The name of the Failover Group")
+        c.argument('server_name', arg_type=server_param_type)
+        c.argument('partner_server_name', help="The name of the partner server of a Failover Group")
+        c.argument('partner_resource_group_name', help="The name of the resource group of the partner server")
+        c.argument('failover_policy', help="The failover policy of the Failover Group")
+        c.argument('grace_period_with_data_loss',
+                   help='Interval before automatic failover is initiated '
+                        'if an outage occurs on the primary server. '
+                        'This indicates that Azure SQL Database will not initiate '
+                        'automatic failover before the grace period expires. '
+                        'Please note that failover operation with AllowDataLoss option '
+                        'might cause data loss due to the nature of asynchronous synchronization.')
+        c.argument('allow_read_only_failover_to_primary',
+                   help='This value indicates whether an outage on the secondary server should '
+                        'trigger automatic failover of the read-only endpoint. '
+                        'This feature is not yet supported.')
+        c.argument('databases', nargs='+',
+                   help='List of databases to add (for add-databases command)'
+                        'or remove (for remove-databases command) from Failover Group')
+        c.argument('allow_data_loss',
+                   help='Complete the failover even if doing so may result in data loss. '
+                        'This will allow the failover to proceed even if a primary database is unavailable.')
 
     ###############################################
     #                sql server                   #
