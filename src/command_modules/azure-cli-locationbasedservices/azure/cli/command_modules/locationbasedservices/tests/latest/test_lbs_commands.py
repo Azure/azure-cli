@@ -12,34 +12,34 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_create_locationbasedservices_account(self, resource_group):
         self.kwargs.update({
-            'name': self.create_random_name(prefix='cli-locationbasedservices', length=20),
-            'name1': self.create_random_name(prefix='cli-locationbasedservices', length=20),
-            'name2': self.create_random_name(prefix='cli-locationbasedservices', length=20),
+            'name': self.create_random_name(prefix='cli-', length=20),
+            'name1': self.create_random_name(prefix='cli-', length=20),
+            'name2': self.create_random_name(prefix='cli-', length=20),
             'sku': 'S0',
-            'loc': 'global',
             'key_type_primary': KeyType.primary.value,
             'key_type_secondary': KeyType.secondary.value
         })
 
         # Test 'az locationbasedservices account create'
         # Test to create an LocationBasedServices account
-        account = self.cmd('az locationbasedservices account create -n {name} -g {rg} --sku {sku} -l {loc}', checks=[
-            self.check('location', '{loc}'),
-            self.check('name', '{name}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('sku.name', '{sku}')
-        ]).get_output_in_json()
+        account = self.cmd('az locationbasedservices account create -n {name} -g {rg} --sku {sku} ' +
+                           '--agree-to-the-preview-terms',
+                           checks=[
+                               self.check('name', '{name}'),
+                               self.check('resourceGroup', '{rg}'),
+                               self.check('sku.name', '{sku}')
+                           ]).get_output_in_json()
 
         # Call create again, expect to get the same account
         account_duplicated = self.cmd(
-            'az locationbasedservices account create -n {name} -g {rg} --sku {sku} -l {loc}').get_output_in_json()
+            'az locationbasedservices account create -n {name} -g {rg} --sku {sku} ' +
+            '--agree-to-the-preview-terms').get_output_in_json()
         self.assertEqual(account, account_duplicated)
 
         # Test 'az locationbasedservices account show'
         # Test to get information on LocationBasedServices account
         self.cmd('az locationbasedservices account show -n {name} -g {rg}', checks=[
             self.check('id', account['id']),
-            self.check('location', '{loc}'),
             self.check('name', '{name}'),
             self.check('resourceGroup', '{rg}'),
             self.check('sku.name', '{sku}')
@@ -51,7 +51,6 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
             self.check('length(@)', 1),
             self.check('type(@)', 'array'),
             self.check('[0].id', account['id']),
-            self.check('[0].location', '{loc}'),
             self.check('[0].name', '{name}'),
             self.check('[0].resourceGroup', '{rg}'),
             self.check('[0].sku.name', '{sku}'),
@@ -59,8 +58,10 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
         ])
 
         # Create two new accounts
-        self.cmd('az locationbasedservices account create -n {name1} -g {rg} --sku {sku} -l {loc}')
-        self.cmd('az locationbasedservices account create -n {name2} -g {rg} --sku {sku} -l {loc}')
+        self.cmd('az locationbasedservices account create -n {name1} -g {rg} --sku {sku} ' +
+                 '--agree-to-the-preview-terms')
+        self.cmd('az locationbasedservices account create -n {name2} -g {rg} --sku {sku} ' +
+                 '--agree-to-the-preview-terms')
         # Check that list command now shows three accounts.
         self.cmd('az locationbasedservices account list -g {rg}', checks=[
             self.check('length(@)', 3),
@@ -99,7 +100,8 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
         # Save the new primary key, and regenerate the secondary key.
         primary_key_old = key_regenerated['primaryKey']
         key_regenerated = self.cmd(
-            'az locationbasedservices account key regenerate -n {name} -g {rg} -t {key_type_secondary}').get_output_in_json()
+            'az locationbasedservices account key regenerate -n {name} -g {rg} -t {key_type_secondary}') \
+            .get_output_in_json()
         self.assertEqual(primary_key_old, key_regenerated['primaryKey'])
         self.assertNotEqual(secondary_key_old, key_regenerated['secondaryKey'])
 

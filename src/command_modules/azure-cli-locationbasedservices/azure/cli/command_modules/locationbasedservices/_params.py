@@ -39,6 +39,10 @@ def load_arguments(self, _):
                    required=False)
         c.argument('tags',
                    arg_type=tags_type)
+        c.argument('agree',
+                   options_list=['--agree-to-the-preview-terms'],
+                   help='You agree to the Preview Terms. Ignore prompt for confirmation.',
+                   action='store_true')
 
     with self.argument_context('locationbasedservices account key regenerate') as c:
         c.argument('key_type',

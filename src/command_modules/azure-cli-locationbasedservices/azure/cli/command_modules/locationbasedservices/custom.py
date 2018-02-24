@@ -3,12 +3,17 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.log import get_logger
+from knack.prompting import prompt_y_n
+from knack.util import CLIError
+
 from azure.mgmt.locationbasedservices.models import LocationBasedServicesAccountCreateParameters, Sku
+
+logger = get_logger(__name__)
 
 
 # pylint: disable=line-too-long
-def create(client, resource_group_name, account_name, sku_name='S0', tags=None, custom_headers=None,
-           raw=False):
+def create(client, resource_group_name, account_name, sku_name='S0', tags=None, agree=None):
     """Create a Location Based Services Account. A Location Based
     Services Account holds the keys which allow access to the Location
     Based Services REST APIs.
@@ -25,9 +30,9 @@ def create(client, resource_group_name, account_name, sku_name='S0', tags=None, 
      resource. Each tag must have a key no greater than 128 characters and
      value no greater than 256 characters.
     :type tags: dict[str, str]
-    :param dict custom_headers: headers that will be added to the request
-    :param bool raw: returns the direct response alongside the
-     deserialized response
+    :param agree: If true, user agrees to the Preview Terms. Ignore prompt
+     for confirmation. False otherwise.
+    :type agree: bool
     :return: LocationBasedServicesAccount or ClientRawResponse if raw=true
     :rtype:
      ~azure.mgmt.locationbasedservices.models.LocationBasedServicesAccount
@@ -35,13 +40,23 @@ def create(client, resource_group_name, account_name, sku_name='S0', tags=None, 
     :raises:
      :class:`ErrorException<azure.mgmt.locationbasedservices.models.ErrorException>`
     """
+    # Prompt for the Preview Terms agreement.
+    logger.warning(
+        'By creating a Location Based Services account, you agree to the Microsoft Azure Preview Terms.' +
+        '\nThe Preview Terms can be found at: ' +
+        '\nhttps://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms/')
+    if not agree:  # ... in order to pass tests
+        response = prompt_y_n('I confirm that I have read and agree to the Microsoft Azure Preview Terms.')
+        if not response:
+            raise CLIError('You must agree to the Microsoft Azure Preview Terms to create an account.')
 
+    # Proceed if user has agreed to the Preview Terms.
     sku = Sku(sku_name)
     lbs_account_create_params = LocationBasedServicesAccountCreateParameters('global', sku, tags)
-    return client.create_or_update(resource_group_name, account_name, lbs_account_create_params, custom_headers, raw)
+    return client.create_or_update(resource_group_name, account_name, lbs_account_create_params)
 
 
-def list_accounts(client, resource_group_name=None, custom_headers=None, raw=False):
+def list_accounts(client, resource_group_name=None):
     """Get all Location Based Services Accounts in a Resource Group OR in a Subscription.
 
     :param resource_group_name: The name of the Azure Resource Group.
@@ -58,5 +73,5 @@ def list_accounts(client, resource_group_name=None, custom_headers=None, raw=Fal
      :class:`ErrorException<azure.mgmt.locationbasedservices.models.ErrorException>`
     """
     if resource_group_name is None:
-        return client.list_by_subscription(custom_headers, raw)
-    return client.list_by_resource_group(resource_group_name, custom_headers, raw)
+        return client.list_by_subscription()
+    return client.list_by_resource_group(resource_group_name)
