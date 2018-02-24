@@ -214,6 +214,7 @@ def load_arguments(self, _):
         c.argument('backup_name', help='Name of the backup. If unspecified, the backup will be named with the webapp name and a timestamp')
 
     with self.argument_context('webapp config backup update') as c:
+        c.argument('backup_name', help='Name of the backup. If unspecified, the backup will be named with the webapp name and a timestamp')
         c.argument('frequency', help='How often to backup. Use a number followed by d or h, e.g. 5d = 5 days, 2h = 2 hours')
         c.argument('keep_at_least_one_backup', help='Always keep one backup, regardless of how old it is', options_list=['--retain-one'], arg_type=get_three_state_flag(return_label=True))
         c.argument('retention_period_in_days', help='How many days to keep a backup before automatically deleting it. Set to 0 for indefinite retention', options_list=['--retention'])
