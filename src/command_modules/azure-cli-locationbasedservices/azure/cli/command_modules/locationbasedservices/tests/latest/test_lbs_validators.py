@@ -7,7 +7,7 @@ import unittest
 
 from argparse import Namespace
 from knack.util import CLIError
-from azure.cli.command_modules.lbs.validators import validate_account_name, ACCOUNT_NAME_MAX_LENGTH
+from azure.cli.command_modules.locationbasedservices.validators import validate_account_name, ACCOUNT_NAME_MAX_LENGTH
 
 
 class TestValidators(unittest.TestCase):
