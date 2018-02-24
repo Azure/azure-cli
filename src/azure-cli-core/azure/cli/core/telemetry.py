@@ -138,34 +138,35 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         return result
 
     def _get_azure_cli_properties(self):
-        source = 'az' if self.arg_complete_env_name or self.arg_complete_env_name not in os.environ else 'completer'
+        source = 'az' if not self.arg_complete_env_name or self.arg_complete_env_name not in os.environ \
+            else 'completer'
         result = {}
         ext_info = '{}@{}'.format(self.extension_name, self.extension_version) if self.extension_name else None
-        self.set_custom_properties(result, 'Source', source)
-        self.set_custom_properties(result,
-                                   'ClientRequestId',
-                                   lambda: self.application.data['headers'][
-                                       'x-ms-client-request-id'])
-        self.set_custom_properties(result, 'CoreVersion', _get_core_version)
-        self.set_custom_properties(result, 'InstallationId', _get_installation_id)
-        self.set_custom_properties(result, 'ShellType', _get_shell_type)
-        self.set_custom_properties(result, 'UserAzureId', _get_user_azure_id)
-        self.set_custom_properties(result, 'UserAzureSubscriptionId', _get_azure_subscription_id)
-        self.set_custom_properties(result, 'DefaultOutputType',
-                                   lambda: _get_config().get('core', 'output', fallback='unknown'))
-        self.set_custom_properties(result, 'EnvironmentVariables', _get_env_string)
-        self.set_custom_properties(result, 'Locale',
-                                   lambda: '{},{}'.format(locale.getdefaultlocale()[0], locale.getdefaultlocale()[1]))
-        self.set_custom_properties(result, 'StartTime', str(self.start_time))
-        self.set_custom_properties(result, 'EndTime', str(self.end_time))
-        self.set_custom_properties(result, 'OutputType', self.output_type)
-        self.set_custom_properties(result, 'RawCommand', self.raw_command)
-        self.set_custom_properties(result, 'Params', ','.join(self.parameters or []))
-        self.set_custom_properties(result, 'PythonVersion', platform.python_version())
-        self.set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
-        self.set_custom_properties(result, 'ExtensionName', ext_info)
-        self.set_custom_properties(result, 'Feedback', self.feedback)
-        self.set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
+        set_custom_properties(result, 'Source', source)
+        set_custom_properties(result,
+                              'ClientRequestId',
+                              lambda: self.application.data['headers'][
+                                  'x-ms-client-request-id'])
+        set_custom_properties(result, 'CoreVersion', _get_core_version)
+        set_custom_properties(result, 'InstallationId', _get_installation_id)
+        set_custom_properties(result, 'ShellType', _get_shell_type)
+        set_custom_properties(result, 'UserAzureId', _get_user_azure_id)
+        set_custom_properties(result, 'UserAzureSubscriptionId', _get_azure_subscription_id)
+        set_custom_properties(result, 'DefaultOutputType',
+                              lambda: _get_config().get('core', 'output', fallback='unknown'))
+        set_custom_properties(result, 'EnvironmentVariables', _get_env_string)
+        set_custom_properties(result, 'Locale',
+                              lambda: '{},{}'.format(locale.getdefaultlocale()[0], locale.getdefaultlocale()[1]))
+        set_custom_properties(result, 'StartTime', str(self.start_time))
+        set_custom_properties(result, 'EndTime', str(self.end_time))
+        set_custom_properties(result, 'OutputType', self.output_type)
+        set_custom_properties(result, 'RawCommand', self.raw_command)
+        set_custom_properties(result, 'Params', ','.join(self.parameters or []))
+        set_custom_properties(result, 'PythonVersion', platform.python_version())
+        set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
+        set_custom_properties(result, 'ExtensionName', ext_info)
+        set_custom_properties(result, 'Feedback', self.feedback)
+        set_custom_properties(result, 'ExtensionManagementDetail', self.extension_management_detail)
 
         return result
 
@@ -189,13 +190,6 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
     @property
     def product_version(self):
         return _get_core_version()
-
-    @classmethod
-    @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
-    def set_custom_properties(cls, prop, name, value):
-        actual_value = value() if hasattr(value, '__call__') else value
-        if actual_value:
-            prop[AZURE_CLI_PREFIX + name] = actual_value
 
 
 _session = TelemetrySession()
@@ -246,6 +240,13 @@ def conclude():
     if payload:
         import subprocess
         subprocess.Popen([sys.executable, os.path.realpath(telemetry_core.__file__), payload])
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def set_custom_properties(prop, name, value):
+    actual_value = value() if hasattr(value, '__call__') else value
+    if actual_value:
+        prop[AZURE_CLI_PREFIX + name] = actual_value
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
@@ -326,7 +327,7 @@ def set_raw_command_name(command):
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def add_extension_event(extension_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
-    _session.set_custom_properties(properties, 'ExtensionName', extension_name)
+    set_custom_properties(properties, 'ExtensionName', extension_name)
     add_event("extension", properties, instrumentation_key=instrumentation_key)
 
 
