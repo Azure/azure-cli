@@ -41,7 +41,7 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
     HISTORY = f.read()
 
 setup(
-    name='azure-cli-lbs',
+    name='azure-cli-locationbasedservices',
     version=VERSION,
     description='Microsoft Azure Command-Line Tools Location Based Services Command Module',
     long_description=README + '\n\n' + HISTORY,
@@ -54,7 +54,7 @@ setup(
         'azure',
         'azure.cli',
         'azure.cli.command_modules',
-        'azure.cli.command_modules.lbs'
+        'azure.cli.command_modules.locationbasedservices'
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass
