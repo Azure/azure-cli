@@ -3,17 +3,24 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import sys
+import platform
 import argparse
 from collections import OrderedDict
 
 from knack.prompting import prompt_y_n
 from knack.util import CLIError
+from knack.log import get_logger
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
 
 import azure.cli.command_modules.extension._help  # pylint: disable=unused-import
 
+IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
+LIST_FILE_PATH = '/etc/apt/sources.list.d/azure-cli.list'
+
+logger = get_logger(__name__)
 
 # pylint: disable=line-too-long
 class ExtensionCommandsLoader(AzCommandsLoader):
@@ -30,8 +37,31 @@ class ExtensionCommandsLoader(AzCommandsLoader):
             return [OrderedDict([('Name', r)]) for r in results]
 
         def validate_extension_add(namespace):
+            if IS_WINDOWS == False:
+                try:
+                    logger.debug('Reading from: %s', LIST_FILE_PATH)
+                    list_file = open(LIST_FILE_PATH, 'r')
+                    package_source = list_file.read() 
+                    list_file.close()
+
+                    stored_linux_dist_name = package_source.split(" ")[3]
+                    logger.debug('Found in list file: %s', stored_linux_dist_name)
+
+                    current_linux_dist_name = platform.linux_distribution()[2]
+                    logger.debug('Reported by API: %s', current_linux_dist_name)
+                except Exception as err:
+                    current_linux_dist_name = ""
+                    stored_linux_dist_name = ""
+                    logger.error('An error occurred while checking linux distribution version source list consistency.')
+                    logger.error(err)                    
+
+                if (current_linux_dist_name != stored_linux_dist_name):
+                    raise CLIError("mismatch distribution name in /etc/apt/sources.list.d/azure-cli.list file")                    
+
             if (namespace.extension_name and namespace.source) or (not namespace.extension_name and not namespace.source):
                 raise CLIError("usage error: --name NAME | --source SOURCE")
+
+        #raise CLIError("installation error: .list file contains does not point to the correct distrubtion")
 
         extension_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.extension.custom#{}')
 
