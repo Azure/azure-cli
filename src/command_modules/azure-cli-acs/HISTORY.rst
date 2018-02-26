@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.28
+++++++
+* add `aks upgrade-connector` command to upgrade an existing connector
+
 2.0.27
 ++++++
 * use the virtual-kubelet-for-aks helm chart for `aks install-connector` by default
