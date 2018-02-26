@@ -73,6 +73,7 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_role_assignments')
         g.custom_command('list', 'list_role_assignments', table_transformer=transform_assignment_list)
         g.custom_command('create', 'create_role_assignment')
+        g.custom_command('list-changelogs', 'list_role_assignment_change_logs')
 
     with self.command_group('ad app', client_factory=get_graph_client_applications, resource_type=PROFILE_TYPE, min_api='2017-03-10') as g:
         g.custom_command('create', 'create_application')

@@ -20,3 +20,7 @@ def reservations_summaries_mgmt_client_factory(cli_ctx, kwargs):
 
 def reservations_details_mgmt_client_factory(cli_ctx, kwargs):
     return cf_consumption(cli_ctx, **kwargs).reservations_details
+
+
+def pricesheet_mgmt_client_factory(cli_ctx, kwargs):
+    return cf_consumption(cli_ctx, **kwargs).price_sheet

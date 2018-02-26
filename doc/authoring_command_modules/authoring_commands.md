@@ -14,21 +14,23 @@ The document provides instructions and guidelines on how to author individual co
 
 **ADDITIONAL TOPICS**
 
-[6. Keyword Argument (kwarg) Reference](#keyword-argument-reference)
+[6. Command Naming and Behavior Guidance](#command-naming-and-behavior-guidance)
 
-[7. Supporting the IDs Parameter](#supporting-the-ids-parameter)
+[7. Keyword Argument (kwarg) Reference](#keyword-argument-reference)
 
-[8. Generic Update Commands](#generic-update-commands)
+[8. Supporting the IDs Parameter](#supporting-the-ids-parameter)
 
-[9. Custom Table Formats](#custom-table-formats)
+[9. Generic Update Commands](#generic-update-commands)
 
-[10. Tab Completion (bash only)](#tab-completion)
+[10. Custom Table Formats](#custom-table-formats)
 
-[11. Validators](#validators)
+[11. Tab Completion (bash only)](#tab-completion)
 
-[12. Registering Flag Arguments](#registering-flags)
+[12. Validators](#validators)
 
-[13. Registering Enum Arguments](#registering-enums)
+[13. Registering Flag Arguments](#registering-flags)
+
+[14. Registering Enum Arguments](#registering-enums)
 
 Authoring Commands
 =============================
@@ -55,7 +57,7 @@ class MyCommandsLoader(AzCommandsLoader):
     def load_arguments(self, command):
         super(MyCommandsLoader, self).load_arguments(command)
         # TODO: Register argument contexts and arguments here
-        
+
 COMMAND_LOADER_CLS = MyCommandsLoader
 ```
 
@@ -63,7 +65,11 @@ COMMAND_LOADER_CLS = MyCommandsLoader
 
 Write your command as a simple function, specifying your arguments as the parameter names.
 
+***Parameter Naming Guidance***
+
 When choosing names, it is recommended that you look at similiar commands and follow those naming conventions to take advantage of any aliasing that may already be in place. For example, you should choose `resource_group_name` over `rg`, `resource_group` or some other shorthand, because this parameter is globally aliased and you will inherit the `-g` short option and the completer.
+
+Avoid using a parameter name called `name` as this is a very common alias in the CLI and will often create aliasing conflicts.
 
 If you specify a default value in your function signature, this will flag the argument as optional and will automatically display the default value in the help text for the command. Any parameters that do not have a default value are required and will automatically appear in help with the [Required] label. The required and default behaviors for arguments can be overridden (see Argument Customization below) but this is not generally needed.
 
@@ -109,6 +115,7 @@ command_group(self, group_name, command_type=None, **kwargs)
 - `group_name`: the group name ('network', 'storage account', etc.)
 - `command_type`: a `CliCommandType` object that will be used for all calls to `command` within the group.
 - `kwargs`: any supported kwarg that will be used as the basis for all command calls. Commonly used kwargs include: `custom_command_type` (if custom commands are split amongst many files) and `client_factory` (if custom commands use the `client` argument).
+
 
 **(3) Command Registration Helpers**
 
@@ -177,7 +184,7 @@ For more information:
 argument_context(self, scope, **kwargs):
 ```
 
-- `scope` - This string is the level at which your customizations are applied. For example, consider the case where you have commands `az mypackage command1` and `az mypackage command2`, which both have a parameter `my_param`. 
+- `scope` - This string is the level at which your customizations are applied. For example, consider the case where you have commands `az mypackage command1` and `az mypackage command2`, which both have a parameter `my_param`.
 
 ```Python
 with self.argument_context('my_param', ...) as c:  # applies to BOTH command1 and command2
@@ -231,6 +238,75 @@ Often reflected SDK methods have complex parameters that are difficult to expose
 
 Additional Topics
 =============================
+
+## Command Naming and Behavior Guidance
+
+**General Guidelines and Conventions**
+
+1. multi-word subgroups should be hyphenated (ex: `foo-resource` instead of `fooresource`)
+2. all command names should contain a verb (ex: `storage account get-connection-string` instead of `storage account connection-string`)
+3. avoid hyphenated command names when moving the commands into a subgroup would eliminate the need. (ex: instead of `show-database` and `list-database` use `database show` and `database get`.
+4. If a command subgroup would only have a single command, move it into the parent command group and hyphenate the name. This is common for commands which exist only to pull down cataloging information. (ex: instead of `database sku-definitions list` use `database list-sku-definitions`).
+5. Avoid command subgroups that have no commands. This often happens at the first level of a command branch. For example, KeyVault has secrets, certificates, etc that exist within a vault. The existing (preferred) CLI structure looks like:
+```
+Group
+    az keyvault: Safeguard and maintain control of keys, secrets, and certificates.
+
+Subgroups:
+    certificate  : Manage certificates.
+    key          : Manage keys.
+    secret       : Manage secrets.
+
+Commands:
+    create       : Create a key vault.
+    delete       : Delete a key vault.
+    delete-policy: Delete security policy settings for a Key Vault.
+    list         : List key vaults.
+    list-deleted : Gets information about the deleted vaults in a subscription.
+    purge        : Permanently deletes the specified vault.
+    recover      : Recover a key vault.
+    set-policy   : Update security policy settings for a Key Vault.
+    show         : Show details of a key vault.
+    update       : Update the properties of a key vault.
+```
+
+To create a vault, you simply use `az keyvault create ...`. An alternative would be to place the vault commands into a separate subgroup, like this:
+```
+Group
+    az keyvault: Safeguard and maintain control of keys, secrets, and certificates.
+
+Subgroups:
+    certificate  : Manage certificates.
+    key          : Manage keys.
+    secret       : Manage secrets.
+    vault        : Manage vaults.
+```
+
+Now, to create a vault, you have to use `az keyvault vault create ...` which is overly verbose adds unnecessary depth to the tree. The preferred style makes the command use more convenient and intuitive.
+
+**Standard Command Types**
+
+The following are standard names and behavioral descriptions for CRUD commands commonly found within the CLI.
+
+1. CREATE - standard command to create a new resource. Usually backed server-side by a PUT request. 'create' commands should be idempotent and should return the resource that was created.
+
+2. UPDATE - command to selectively update properties of a resource and preserve existing values. May be backed server-side by either a PUT or PATCH request, but the behavior of the command should *always* be PATCH-like. All `update` commands should be registerd using the `generic_update_command` helper to expose the three generic update properties. `update` commands MAY also allow for create-like behavior (PUTCH) in cases where a dedicated `create` command is deemed unnecessary. `update` commands should return the updated resource.
+
+3. SET - command to replace all properties of a resource without preserving existing values, typically backed server-side by a PUT request. This is used when PATCH-like behavior is deemed unnecessary and means that any properties not specifies are reset to their default values. `set` commands are more rare compared to `update` commands. `set` commands should return the updated resource.
+
+4. SHOW - command to show the properties of a resource, backed server-side by a GET request.
+
+5. LIST - command to list instances of a resource, backed server-side by a GET request. When there are multiple "list-type" commands within an SDK to list resources at different levels (for example, listing resources in a subscription vice in a resource group) the functionality should be exposed by have a single list command with arguments to control the behavior. For example, if `--resource-group` is provided, the command will call `list_by_resource_group`; otherwise, it will call `list_by_subscription`.
+
+6. DELETE - command to delete a resource, backed server-side by a DELETE request. Delete commands return nothing on success.
+
+**Non-standard Commands**
+
+For commands that don't conform to one of the above-listed standard command patterns, use the following guidance:
+
+1. Don't use single word verbs if they could cause confusion with the standard command types. For example, don't use `get` or `new` as these sound functionally the same as `show` and `create` respectively, leading to confusion as to what the expected behavior should be.
+2. Descriptive, hyphenated command names are often a better option than single verbs (ex: `vm assign-identity`, `vm perform-maintenance`).
+3. If in doubt, ask!
 
 ## Keyword Argument Reference
 
@@ -311,11 +387,11 @@ The following kwargs may be inherited from the command loader:
 
 Most ARM resources can be identified by an ID. In many cases, for example `show` and `delete` commands, it may be more useful to copy and paste an ID to identify the target resource instead of having to specify the names of the resource group, the resource, and the parent resource (if any).
 
-Azure CLI 2.0 supports exposing an `--ids` parameter that will parse a resource ID into its constituent named parts so that this parsing need not be done as part of a client script. Additionally `--ids` will accept a _list_ of space separated IDs, allowing the client to loop the command over each ID.
+Azure CLI 2.0 supports exposing an `--ids` parameter that will parse a resource ID into its constituent named parts so that this parsing need not be done as part of a client script. Additionally `--ids` will accept a _list_ of space-separated IDs, allowing the client to loop the command over each ID.
 
 Enabling this functionality only requires the command author specify the appropriate values for `id_part` in their calls to `AzArgumentContext.argument`.
 
-Consider the following simplified example for NIC IP config. 
+Consider the following simplified example for NIC IP config.
 
 ```Python
 def show_nic_ip_config(resource_group_name, nic_name, ip_config_name):
@@ -335,7 +411,7 @@ The help output for this command would be:
  Arguments
     --name -n          : The IP config name.
     --nic-name         : The NIC name.
-    --resource-group -g: Name of resource group.   
+    --resource-group -g: Name of resource group.
 ```
 
 Now let's specify values for the `id_part` kwarg in the calls to `argument`:
@@ -361,11 +437,11 @@ Resource Id Arguments
                          should be specified.
     --name -n          : The IP config name.
     --nic-name         : The NIC name.
-    --resource-group -g: Name of resource group. 
+    --resource-group -g: Name of resource group.
 ```
 Now the user may identify the target IP config by specifying either the resource group, NIC and IP config names or by simply pasting in the ID for the IP config itself.
 
-This feature is powered by the `parse_resource_id` helper method within the `msrestazure` package, which parses a resource ID into a dictionary. Specifying `id_part` maps the parsed value for a given key in that dictionary into your argument. 
+This feature is powered by the `parse_resource_id` helper method within the `msrestazure` package, which parses a resource ID into a dictionary. Specifying `id_part` maps the parsed value for a given key in that dictionary into your argument.
 
 For example, consider the following ID of a subnet lock:
 ```
@@ -418,7 +494,7 @@ with self.command_group('test', test_sdk) as g:
 - `setter_type` - A `CliCommandType` object which will be used to locate the setter. Only needed if the setter is a custom command (uncommon).
 - `setter_arg_name` - The name of the argument in the setter which corresponds to the object being updated. If the name if `parameters` (which is the case for most SDKs), this can be omitted.
 - `custom_func_name` (optional) - The name of a method which accepts the object being updated (must be named `instance`), mutates, and returns that object. This is commonly used to add convenience options to the command by listing them in the method signature, similar to a purely custom method. The difference is that a custom command function returns the command result while a generic update custom function returns only the object being updated. A simple custom function might look like:
-  
+
   ```Python
   def my_custom_function(instance, item_name, custom_arg=None):
     if custom_arg:
@@ -435,7 +511,7 @@ Sometimes you will want to write commands that operate on child resources and it
   - `child_collection_prop_name` - the name of the child collection property. For example, if object `my_parent` has a child collection called `my_children` that you would access using `my_parent.my_children` then the name you would use is 'my_children'.
   - `child_collection_key_name` - Most child collections in Azure are lists of objects (as opposed to dictionaries) which will have a property in them that serves as the key. This is the name of that key property. By default it is 'name'. In the above example, if an entry in the `my_children` collection has a key property called `my_identifier` then the value you would supply is 'my_identifier'.
   - `child_arg_name` - If you want to refer the child object key (the property identified by `child_collection_key_name`) inside a custom function, you should specify the argument name you use in your custom function. By default, this is called `item_name`. In the above example, where our child object had a key called `my_identifier`, you could refer to this property within your custom function through the `item_name` property, or specify something different.
-  
+
 **Logic Flow**
 
 A simplified understanding of the flow of the generic update is as follows:
@@ -468,7 +544,7 @@ def transform_foo(result):
 
 A string containing Python dictionary-syntax '{Key:JMESPath path to property, ...}'
 
-Example: 
+Example:
 ```Python
 table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}'
 ```
@@ -500,7 +576,7 @@ from azure.cli.core.decorators import Completer
 @Completer
 def get_foo_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     # TODO: Your custom logic here
-    result = ... 
+    result = ...
     return [r.name for r in result]
 ```
 
@@ -533,7 +609,7 @@ Validators are executed after argument parsing, and thus after the native argpar
 The `validator` keyword applies to commands and arguments. A command can have, at most, one validator. If supplied, then *only* this validator will be executed. Any argument-level validators will be ignored. The reason to use a command validator is if the validation sequence is important.  However, the command validator can and very often is composed to individual argument level validators. You simply define the sequence in which they execute.
 
 ***Argument Validators***
-An argument can be assigned, at most, one validator. However, since a command can have many arguments, this means that a command can have many argument validators. Furthermore, since an argument context may apply to many commands, this means that this argument validator can be reused across many commands. At execution time, argument validators are executed *in random order*, so you should ensure you do not have dependencies between validators. If you do, the a command validator is the appropriate route to take. It is fine to have an argument validator involve several parameters as long as they are interdependent (for example, a validator involving a vnet name and subnet name).  
+An argument can be assigned, at most, one validator. However, since a command can have many arguments, this means that a command can have many argument validators. Furthermore, since an argument context may apply to many commands, this means that this argument validator can be reused across many commands. At execution time, argument validators are executed *in random order*, so you should ensure you do not have dependencies between validators. If you do, the a command validator is the appropriate route to take. It is fine to have an argument validator involve several parameters as long as they are interdependent (for example, a validator involving a vnet name and subnet name).
 
 ## Registering Flags
 

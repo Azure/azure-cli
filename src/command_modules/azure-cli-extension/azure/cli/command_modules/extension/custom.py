@@ -20,6 +20,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions,
                                       get_extension, ext_compat_with_cli,
                                       WheelExtension, ExtensionNotInstalledException)
+from azure.cli.core.telemetry import set_extension_management_detail
 
 from ._homebrew_patch import HomebrewPipPatch
 from ._index import get_index_extensions
@@ -86,7 +87,7 @@ def _validate_whl_extension(ext_file):
     _validate_whl_cli_compat(azext_metadata)
 
 
-def _add_whl_ext(source, ext_sha256=None):  # pylint: disable=too-many-statements
+def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=None):  # pylint: disable=too-many-statements
     if not source.endswith('.whl'):
         raise ValueError('Unknown extension type. Only Python wheels are supported.')
     url_parse_result = urlparse(source)
@@ -138,6 +139,13 @@ def _add_whl_ext(source, ext_sha256=None):  # pylint: disable=too-many-statement
     # Install with pip
     extension_path = get_extension_path(extension_name)
     pip_args = ['install', '--target', extension_path, ext_file]
+
+    if pip_proxy:
+        pip_args = pip_args + ['--proxy', pip_proxy]
+    if pip_extra_index_urls:
+        for extra_index_url in pip_extra_index_urls:
+            pip_args = pip_args + ['--extra-index-url', extra_index_url]
+
     logger.debug('Executing pip with args: %s', pip_args)
     with HomebrewPipPatch():
         pip_status_code = _run_pip(pip_args)
@@ -160,7 +168,21 @@ def is_valid_sha256sum(a_file, expected_sum):
     return expected_sum == computed_hash, computed_hash
 
 
-def add_extension(source=None, extension_name=None, index_url=None, yes=None):  # pylint: disable=unused-argument
+def _augment_telemetry_with_ext_info(extension_name):
+    # The extension must be available before calling this otherwise we can't get the version from metadata
+    if not extension_name:
+        return
+    try:
+        ext = get_extension(extension_name)
+        ext_version = ext.version
+        set_extension_management_detail(extension_name, ext_version)
+    except Exception:  # nopa pylint: disable=broad-except
+        # Don't error on telemetry
+        pass
+
+
+def add_extension(source=None, extension_name=None, index_url=None, yes=None,  # pylint: disable=unused-argument
+                  pip_extra_index_urls=None, pip_proxy=None):
     ext_sha256 = None
     if extension_name:
         if extension_exists(extension_name):
@@ -170,12 +192,16 @@ def add_extension(source=None, extension_name=None, index_url=None, yes=None):  
         except NoExtensionCandidatesError as err:
             logger.debug(err)
             raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
-    _add_whl_ext(source, ext_sha256=ext_sha256)
+    _add_whl_ext(source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
+    _augment_telemetry_with_ext_info(extension_name)
 
 
 def remove_extension(extension_name):
     try:
+        # Get the extension and it will raise an error if it doesn't exist
         get_extension(extension_name)
+        # We call this just before we remove the extension so we can get the metadata before it is gone
+        _augment_telemetry_with_ext_info(extension_name)
         shutil.rmtree(get_extension_path(extension_name))
     except ExtensionNotInstalledException as e:
         raise CLIError(e)
@@ -197,7 +223,7 @@ def show_extension(extension_name):
         raise CLIError(e)
 
 
-def update_extension(extension_name, index_url=None):
+def update_extension(extension_name, index_url=None, pip_extra_index_urls=None, pip_proxy=None):
     try:
         ext = get_extension(extension_name)
         cur_version = ext.get_version()
@@ -215,9 +241,12 @@ def update_extension(extension_name, index_url=None):
         shutil.rmtree(extension_path)
         # Install newer version
         try:
-            _add_whl_ext(download_url, ext_sha256=ext_sha256)
+            _add_whl_ext(download_url, ext_sha256=ext_sha256,
+                         pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
             logger.debug('Deleting backup of old extension at %s', backup_dir)
             shutil.rmtree(backup_dir)
+            # This gets the metadata for the extension *after* the update
+            _augment_telemetry_with_ext_info(extension_name)
         except Exception as err:
             logger.error('An error occurred whilst updating.')
             logger.error(err)

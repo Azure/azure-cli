@@ -18,9 +18,7 @@ from azure.cli.command_modules.monitor.validators import process_webhook_prop
 
 # pylint: disable=line-too-long, too-many-statements
 def load_arguments(self, _):
-
     from azure.mgmt.monitor.models.monitor_management_client_enums import ConditionOperator, TimeAggregationOperator
-    from azure.mgmt.monitor.models import LogProfileResource, RetentionPolicy
 
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], metavar='NAME')
     webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
@@ -145,13 +143,11 @@ def load_arguments(self, _):
         c.argument('log_profile_name', options_list=['--name', '-n'])
 
     with self.argument_context('monitor log-profiles create') as c:
-        c.argument('name', options_list=['--log-profile-name'])
-        c.expand('retention_policy', RetentionPolicy)
-        c.expand('parameters', LogProfileResource)
-        c.argument('name', options_list=['--log-profile-resource-name'])
-        c.argument('log_profile_name', options_list=['--name', '-n'])
-        c.argument('categories', nargs='+', help="Space separated categories of the logs.Some values are: 'Write', 'Delete', and/or 'Action.'")
-        c.argument('locations', nargs='+', help="Space separated list of regions for which Activity Log events should be stored.")
+        c.argument('name', options_list=['--name', '-n'])
+        c.argument('categories', nargs='+')
+        c.argument('locations', nargs='+')
+        c.argument('days', type=int, arg_group='Retention Policy')
+        c.argument('enabled', arg_type=get_three_state_flag(), arg_group='Retention Policy')
     # endregion
 
     # region ActivityLog
