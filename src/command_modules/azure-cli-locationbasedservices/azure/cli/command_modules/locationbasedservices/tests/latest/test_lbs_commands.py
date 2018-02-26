@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import re
+
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.mgmt.locationbasedservices.models.client_enums import KeyType
 
@@ -16,6 +18,7 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
             'name1': self.create_random_name(prefix='cli-', length=20),
             'name2': self.create_random_name(prefix='cli-', length=20),
             'sku': 'S0',
+            'tags': 'a=b',
             'key_type_primary': KeyType.primary.value,
             'key_type_secondary': KeyType.secondary.value
         })
@@ -82,8 +85,8 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
         # Retrieve primary and secondary keys
         primary_key_old = account_key_list['primaryKey']
         secondary_key_old = account_key_list['secondaryKey']
-        self.assertIsNotNone(primary_key_old)
-        self.assertIsNotNone(secondary_key_old)
+        self.assertTrue(re.match('^[a-zA-Z0-9_-]+$', primary_key_old))
+        self.assertTrue(re.match('^[a-zA-Z0-9_-]+$', secondary_key_old))
 
         # Test 'az locationbasedservices account key regenerate'
         # Test to change primary and secondary keys for an LocationBasedServices account
