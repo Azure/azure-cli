@@ -97,12 +97,12 @@ def create_endpoint(cmd, client, resource_group_name, profile_name, name, origin
 
 
 # pylint: disable=unused-argument
-def create_custom_domain(cmd, client, resource_group_name, profile_name, endpoint_name, name, hostname,
-                         location=None, tags=None):
+def create_custom_domain(cmd, client, resource_group_name, profile_name, endpoint_name, custom_domain_name,
+                         hostname, location=None, tags=None):
     return client.custom_domains.create(resource_group_name,
                                         profile_name,
                                         endpoint_name,
-                                        name,
+                                        custom_domain_name,
                                         hostname)
 
 

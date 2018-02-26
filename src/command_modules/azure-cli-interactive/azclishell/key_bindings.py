@@ -66,7 +66,6 @@ class InteractiveKeyBindings(object):
         def config_settings(event):
             """ opens the configuration """
             shell_ctx.telemetry.track_key('F1')
-
             shell_ctx.is_prompting = True
             config = shell_ctx.config
             answer = ""

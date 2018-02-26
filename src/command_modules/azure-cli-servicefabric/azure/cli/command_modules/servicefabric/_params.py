@@ -41,7 +41,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('sf client certificate') as c:
         c.argument('certificate_common_name', help='client certificate common name.')
-        c.argument('admin_client_thumbprints', nargs='+', help='Space separated list of client certificate thumbprint that only has admin permission, ')
+        c.argument('admin_client_thumbprints', nargs='+', help='Space-separated list of client certificate thumbprint that only has admin permission, ')
         c.argument('certificate_issuer_thumbprint', help='client certificate issuer thumbprint.')
 
     with self.argument_context('sf cluster certificate') as c:
@@ -52,13 +52,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('certificate_issuer_thumbprint', help='client certificate issuer thumbprint.')
         c.argument('certificate_common_name', help='client certificate common name.')
         c.argument('admin_client_thumbprints', nargs='+', help='client certificate thumbprint that only has admin permission.')
-        c.argument('readonly_client_thumbprints', nargs='+', help='Space separated list of client certificate thumbprint that has read only permission.')
+        c.argument('readonly_client_thumbprints', nargs='+', help='Space-separated list of client certificate thumbprint that has read only permission.')
 
     with self.argument_context('sf cluster client-certificate add') as c:
         c.argument('thumbprint', help='client certificate thumbprint.')
 
     with self.argument_context('sf cluster client-certificate remove') as c:
-        c.argument('thumbprints', nargs='+', help='A single or Space separated list of client certificate thumbprint(s) to be remove.')
+        c.argument('thumbprints', nargs='+', help='A single or Space-separated list of client certificate thumbprint(s) to be remove.')
 
     with self.argument_context('sf cluster node') as c:
         c.argument('number_of_nodes_to_add', help='number of nodes to add.')

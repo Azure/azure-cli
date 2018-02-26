@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.1.2
++++++
+* Minor fixes.
+* Fix az monitor log-profiles create command
+
 0.1.1
 +++++
 * Minor fixes.
@@ -59,7 +64,7 @@ Release History
 * BC: `monitor alert-rule-incidents show` renamed `monitor alert show-incident`
 * BC: `monitor metric-defintions list` renamed `monitor metrics list-definitions`
 * BC: `monitor alert-rules` renamed `monitor alert`
-* BC: `monitor alert create` completely revamped. `condition` and `action` no longer accepts JSON. 
+* BC: `monitor alert create` completely revamped. `condition` and `action` no longer accepts JSON.
 	  Adds numerous parameters to simplify the rule creation process. `location` no longer required.
 	  Added name or ID support for target.
 	  `--alert-rule-resource-name` removed. `is-enabled` renamed `enabled` and no longer required.

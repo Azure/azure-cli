@@ -59,7 +59,7 @@ def validate_ssh_key(namespace):
 
 
 def validate_list_of_integers(string):
-    # extract comma separated list of integers
+    # extract comma-separated list of integers
     return list(map(int, string.split(',')))
 
 
@@ -80,7 +80,7 @@ def validate_k8s_version(namespace):
             namespace.kubernetes_version = found[0]
         else:
             raise CLIError('--kubernetes-version should be the full version number, '
-                           'such as "1.7.12" or "1.8.6"')
+                           'such as "1.7.12" or "1.8.7"')
 
 
 def validate_k8s_client_version(namespace):
@@ -91,7 +91,7 @@ def validate_k8s_client_version(namespace):
         namespace.client_version = found[0]
     else:
         raise CLIError('--client-version should be the full version number '
-                       '(such as "1.7.7" or "1.8.1") or "latest"')
+                       '(such as "1.7.12" or "1.8.7") or "latest"')
 
 
 def validate_linux_host_name(namespace):

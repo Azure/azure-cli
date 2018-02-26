@@ -12,7 +12,7 @@ from ._validators import validate_include_or_exclude, validate_ids_or_resource_g
 
 def load_arguments(self, _):
     ids_arg_type = CLIArgumentType(nargs='+', options_list=['--ids'],
-                                   help='One or more resource IDs (space delimited). If provided, no other '
+                                   help='One or more resource IDs (space-delimited). If provided, no other '
                                         '"Resource Id" arguments should be specified.')
 
     with self.argument_context('advisor recommendation list') as c:

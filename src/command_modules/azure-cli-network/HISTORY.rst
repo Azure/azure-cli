@@ -5,6 +5,7 @@ Release History
 
 2.0.24
 ++++++
+* `network vnet-gateway vpn-client generate`: Fix missing client issue.
 
 2.0.23
 ++++++

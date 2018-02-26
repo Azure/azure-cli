@@ -3,13 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands.client_factory import configure_common_settings
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType
 
 
 def cf_compute_service(cli_ctx, *_):
-    from azure.cli.core.profiles import ResourceType
-
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_COMPUTE)
 
 
@@ -19,6 +17,10 @@ def cf_container_services(cli_ctx, *_):
 
 def cf_managed_clusters(cli_ctx, *_):
     return get_container_service_client(cli_ctx).managed_clusters
+
+
+def cf_resource_groups(cli_ctx, *_):
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).resource_groups
 
 
 def get_auth_management_client(cli_ctx, scope=None, **_):
@@ -41,6 +43,7 @@ def get_container_service_client(cli_ctx, **_):
 
 
 def get_graph_rbac_management_client(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import configure_common_settings
     from azure.cli.core._profile import Profile
     from azure.graphrbac import GraphRbacManagementClient
 

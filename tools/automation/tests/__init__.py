@@ -6,64 +6,245 @@
 import os
 import sys
 import argparse
+import json
+import re
 import shlex
 from subprocess import check_output, CalledProcessError
 
 from colorama import Fore
 
-from ..utilities.path import filter_user_selected_modules_with_tests
+from automation.utilities.display import display, output
+from automation.utilities.path import filter_user_selected_modules_with_tests, get_config_dir
+
+
+IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
+TEST_INDEX_FILE = 'testIndex.json'
 
 
 def execute(args):
     from .main import run_tests, collect_test
-    try:
-        use_shell = sys.platform.lower() in ['windows', 'win32']
-        current_profile = check_output(shlex.split('az cloud show --query profile -otsv'),
-                                       shell=use_shell).decode('utf-8').strip()
-        if not args.profile:
-            args.profile = current_profile
-            print('The tests are set to run against current profile {}.'
-                  .format(Fore.RED + current_profile + Fore.RESET))
-        elif current_profile != args.profile:
-            print('The tests are set to run against profile {} but the current az cloud profile is {}.'
-                  .format(Fore.RED + args.profile + Fore.RESET, Fore.RED + current_profile + Fore.RESET))
-            print('Please use "az cloud set" command to change the current profile.')
-            sys.exit(1)
-    except CalledProcessError:
-        print('Failed to retrieve current az profile')
-        sys.exit(2)
+
+    validate_usage(args)
+    current_profile = get_current_profile(args)
+    test_index = get_test_index(args)
 
     if args.ci:
+        # CI Mode runs specific modules
         selected_modules = [('CI mode', 'azure.cli', 'azure.cli')]
-    else:
+    elif not (args.tests or args.src_file):
+        # Default is to run with modules (possibly via environment variable)
         if not args.modules and os.environ.get('AZURE_CLI_TEST_MODULES', None):
-            print('Test modules list is parsed from environment variable AZURE_CLI_TEST_MODULES.')
+            display('Test modules list is parsed from environment variable AZURE_CLI_TEST_MODULES.')
             args.modules = [m.strip() for m in os.environ.get('AZURE_CLI_TEST_MODULES').split(',')]
 
         selected_modules = filter_user_selected_modules_with_tests(args.modules, args.profile)
         if not selected_modules:
-            print('No module is selected.')
+            display('No module is selected.')
             sys.exit(1)
+    else:
+        # Otherwise run specific tests
+        args.tests = args.tests or []
+        # Add any tests from file
+        if args.src_file:
+            with open(args.src_file, 'r') as f:
+                for line in f.readlines():
+                    line = line.strip('\r\n')
+                    line = line.strip('\n')
+                    if line not in args.tests:
+                        args.tests.append(line)
+        test_paths = []
+        selected_modules = []
+        regex = re.compile(r'azure-cli-([^/\\]*)[/\\]')
+        for t in args.tests:
+            try:
+                test_path = os.path.normpath(test_index[t])
+                mod_name = regex.findall(test_path)[0]
+                test_paths.append(test_path)
+                if mod_name not in selected_modules:
+                    selected_modules.append(mod_name)
+            except KeyError:
+                display("Test '{}' not found.".format(t))
+                continue
+        selected_modules = filter_user_selected_modules_with_tests(selected_modules, args.profile)
+        args.tests = test_paths
 
-    success = run_tests(selected_modules, parallel=args.parallel, run_live=args.live, tests=args.tests)
-
+    success, failed_tests = run_tests(selected_modules, parallel=args.parallel, run_live=args.live, tests=args.tests)
+    if args.dest_file:
+        with open(args.dest_file, 'w') as f:
+            for failed_test in failed_tests:
+                f.write(failed_test + '\n')
     sys.exit(0 if success else 1)
 
 
+def validate_usage(args):
+    """ Ensure conflicting options aren't specified. """
+    test_usage = '[--test TESTS [TESTS ...]] [--src-file FILENAME]'
+    module_usage = '--modules MODULES [MODULES ...]'
+    ci_usage = '--ci'
+
+    usages = []
+    if args.tests or args.src_file:
+        usages.append(test_usage)
+    if args.modules:
+        usages.append(module_usage)
+    if args.ci:
+        usages.append(ci_usage)
+
+    if len(usages) > 1:
+        display('usage error: ' + ' | '.join(usages))
+        sys.exit(1)
+
+
+def get_current_profile(args):
+    try:
+        fore_red = Fore.RED if not IS_WINDOWS else ''
+        fore_reset = Fore.RESET if not IS_WINDOWS else ''
+        current_profile = check_output(shlex.split('az cloud show --query profile -otsv'),
+                                       shell=IS_WINDOWS).decode('utf-8').strip()
+        if not args.profile:
+            args.profile = current_profile
+            display('The tests are set to run against current profile {}.'
+                    .format(fore_red + current_profile + fore_reset))
+        elif current_profile != args.profile:
+            display('The tests are set to run against profile {} but the current az cloud profile is {}.'
+                    .format(fore_red + args.profile + fore_reset, fore_red + current_profile + fore_reset))
+            display('Please use "az cloud set" command to change the current profile.')
+            sys.exit(1)
+        return current_profile
+    except CalledProcessError:
+        display('Failed to retrieve current az profile')
+        sys.exit(2)
+
+
+def get_test_index(args):
+    test_index_path = os.path.join(get_config_dir(), TEST_INDEX_FILE)
+    test_index = {}
+    if args.discover:
+        test_index = discover_tests(args)
+        with open(test_index_path, 'w') as f:
+            f.write(json.dumps(test_index))
+    elif os.path.isfile(test_index_path):
+        with open(test_index_path, 'r') as f:
+            test_index = json.loads(''.join(f.readlines()))
+    else:
+        display('No test index found. Building test')
+        test_index = discover_tests(args)
+        with open(test_index_path, 'w') as f:
+            f.write(json.dumps(test_index))
+    return test_index
+
+
+def discover_tests(args):
+    """ Builds an index of tests so that the user can simply supply the name they wish to test instead of the
+        full path. 
+    """
+    from importlib import import_module
+    import os
+    import pkgutil
+
+    CORE_EXCLUSIONS = ['command_modules', '__main__', 'testsdk']
+
+    profile = args.profile
+
+    mods_ns_pkg = import_module('azure.cli.command_modules')
+    core_ns_pkg = import_module('azure.cli')
+    command_modules = list(pkgutil.iter_modules(mods_ns_pkg.__path__))
+    core_modules = list(pkgutil.iter_modules(core_ns_pkg.__path__))
+    all_modules = command_modules + [x for x in core_modules if x[1] not in CORE_EXCLUSIONS]
+
+    display("""
+==================
+  Discover Tests
+==================
+""")
+
+    module_data = {}
+    for mod in all_modules:
+        mod_name = mod[1]
+        if mod_name == 'core':
+            mod_data = {
+                'filepath': os.path.join(mod[0].path, mod_name, 'tests'),
+                'base_path': 'azure.cli.{}.tests'.format(mod_name),
+                'files': {}
+            }
+        else:
+            mod_data = {
+                'filepath': os.path.join(mod[0].path, mod_name, 'tests', profile),
+                'base_path': 'azure.cli.command_modules.{}.tests.{}'.format(mod_name, profile),
+                'files': {}
+            }
+        # get the list of test files in each module
+        try:
+            contents = os.listdir(mod_data['filepath'])
+            test_files = {x[:-len('.py')]: {} for x in contents if x.startswith('test_') and x.endswith('.py')}
+        except Exception:
+            # skip modules that don't have tests
+            display("Module '{}' has no tests.".format(mod_name))
+            continue
+
+        for file_name in test_files:
+            mod_data['files'][file_name] = {}
+            test_file_path = mod_data['base_path'] + '.' + file_name
+            try:
+                module = import_module(test_file_path)
+            except ImportError:
+                display('Unable to import {}'.format(test_file_path))
+                continue
+            module_dict = module.__dict__
+            classes = {}
+            possible_test_classes = {x: y for x, y in module_dict.items() if not x.startswith('_')}
+            for class_name, class_def in possible_test_classes.items():
+                try:
+                    class_dict = class_def.__dict__
+                except AttributeError:
+                    # skip non-class symbols in files like constants, imported methods, etc.
+                    continue
+                if class_dict.get('__module__') == test_file_path:
+                    tests = [x for x in class_def.__dict__ if x.startswith('test_')]
+                    if tests:
+                        mod_data['files'][file_name][class_name] = tests
+
+        module_data[mod_name] = mod_data
+
+    test_index = {}
+    def add_to_index(key, path):
+        key = key or mod_name
+        if key in test_index:
+            display("COLLISION: Test '{}' Attempted '{}' Existing '{}'".format(key, test_index[key], path))
+        else:
+            test_index[key] = path
+
+    # build the index
+    for mod_name, mod_data in module_data.items():
+        mod_path = mod_data['filepath']
+        for file_name, file_data in mod_data['files'].items():
+            file_path = os.path.join(mod_path, file_name) + '.py'
+            for class_name, test_list in file_data.items():
+                for test_name in test_list:
+                    test_path = '{}:{}.{}'.format(file_path, class_name, test_name)
+                    add_to_index(test_name, test_path)
+                class_path = '{}:{}'.format(file_path, class_name)
+                add_to_index(class_name, class_path)
+            add_to_index(file_name, file_path)
+        add_to_index(mod_name, mod_path)
+    return test_index
+
+
 def setup_arguments(parser):
-    parser.add_argument('--module', dest='modules', nargs='+',
-                        help='The modules of which the test to be run. Accept short names, except azure-cli, '
-                             'azure-cli-core and azure-cli-nspkg. The modules list can also be set through environment '
-                             'variable AZURE_CLI_TEST_MODULES. The value should be a string of space separated module '
-                             'names. The environment variable will be overwritten by command line parameters.')
-    parser.add_argument('--parallel', action='store_true',
-                        help='Run the tests in parallel. This will affect the test output file.')
+    parser.add_argument('--modules', dest='modules', nargs='+',
+                        help='Space separated list of modules to be run. Accepts short names, except azure-cli and azure-cli-nspkg.'
+                             'The modules list can also be set through environment '
+                             'variable AZURE_CLI_TEST_MODULES.'
+                             'The environment variable will be overwritten by command line parameters.')
+    parser.add_argument('--series', dest='parallel', action='store_false', default=True, help='Disable test parallelization.')
     parser.add_argument('--live', action='store_true', help='Run all the tests live.')
-    parser.add_argument('--test', dest='tests', action='append',
-                        help='The specific test to run in the given module. The string can represent a test class or a '
-                             'test class and a test method name. Multiple tests can be given, but they should all '
-                             'belong to one command modules.')
+    parser.add_argument('--tests', dest='tests', nargs='+',
+                        help='Space separated list of tests to run. Can specify test filenames, class name or individual method names.')
+    parser.add_argument('--src-file', dest='src_file', help='Text file of test names to include in the the test run.')
+    parser.add_argument('--dest-file', dest='dest_file', help='File in which to save the names of any test failures.', default='test_failures.txt')
     parser.add_argument('--ci', dest='ci', action='store_true', help='Run the tests in CI mode.')
+    parser.add_argument('--discover', dest='discover', action='store_true', help='Build an index of test names so that you don\'t need to specify '
+                                                                                 'fully qualified paths when using --tests.')
     parser.add_argument('--profile', dest='profile', help='Run automation against a specific profile. If omit, the '
                                                           'tests will run against current profile.')
     parser.set_defaults(func=execute)
