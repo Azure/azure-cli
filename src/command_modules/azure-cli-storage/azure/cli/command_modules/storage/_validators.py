@@ -14,7 +14,6 @@ from azure.cli.command_modules.storage.util import glob_files_locally, guess_con
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 
-
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
 
@@ -600,13 +599,17 @@ def get_source_file_or_blob_service_client(cmd, namespace):
             source_key = _query_account_key(cmd.cli_ctx, source_account)
 
         if source_container:
-            ns['source_client'] = t_block_blob_svc(account_name=source_account,
-                                                   account_key=source_key,
-                                                   sas_token=source_sas)
+            ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx,
+                                                                  t_block_blob_svc,
+                                                                  name=source_account,
+                                                                  key=source_key,
+                                                                  sas_token=source_sas)
         elif source_share:
-            ns['source_client'] = t_file_svc(account_name=source_account,
-                                             account_key=source_key,
-                                             sas_token=source_sas)
+            ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx,
+                                                                  t_file_svc,
+                                                                  name=source_account,
+                                                                  key=source_key,
+                                                                  sas_token=source_sas)
         else:
             raise ValueError(usage_string)
 
@@ -625,13 +628,16 @@ def get_source_file_or_blob_service_client(cmd, namespace):
         elif identifier.container:
             ns['source_container'] = identifier.container
             if identifier.account_name != ns.get('account_name'):
-                ns['source_client'] = t_block_blob_svc(account_name=identifier.account_name,
-                                                       sas_token=identifier.sas_token)
+                ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx, t_block_blob_svc,
+                                                                      name=identifier.account_name,
+                                                                      sas_token=identifier.sas_token)
         elif identifier.share:
             ns['source_share'] = identifier.share
             if identifier.account_name != ns.get('account_name'):
-                ns['source_client'] = t_file_svc(account_name=identifier.account_name,
-                                                 sas_token=identifier.sas_token)
+                ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx,
+                                                                      t_file_svc,
+                                                                      name=identifier.account_name,
+                                                                      sas_token=identifier.sas_token)
 
 
 def add_progress_callback(cmd, namespace):
@@ -642,6 +648,7 @@ def add_progress_callback(cmd, namespace):
             hook.add(message='Alive', value=current, total_val=total)
             if total == current:
                 hook.end()
+
     if not namespace.no_progress:
         namespace.progress_callback = _update_progress
     del namespace.no_progress
