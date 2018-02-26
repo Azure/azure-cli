@@ -68,6 +68,7 @@ def load_command_table(self, _):
         g.custom_command('upgrade', 'aks_upgrade', no_wait_param='no_wait',
                          confirmation='Kubernetes may be unavailable during cluster upgrades.\n' +
                          'Are you sure you want to perform this operation?')
+        g.custom_command('upgrade-connector', 'k8s_upgrade_connector')
         g.generic_wait_command('wait')
 
     with self.command_group('aks', container_services_sdk, client_factory=cf_container_services) as g:
