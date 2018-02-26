@@ -335,7 +335,7 @@ def set_raw_command_name(command):
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def add_extension_event(extension_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
     set_custom_properties(properties, 'ExtensionName', extension_name)
-    add_event("extension", properties, instrumentation_key=instrumentation_key)
+    add_event('extension', properties, instrumentation_key=instrumentation_key)
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
