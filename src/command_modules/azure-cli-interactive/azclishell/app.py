@@ -693,7 +693,8 @@ class AzInteractiveShell(object):
         from azclishell.configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(
             initial_document=Document(u'{}'.format(SHELL_HELP)))
-        # flush telemetry for new commands
+        # flush telemetry for new commands and send successful interactive mode entry event
+        telemetry.set_success()
         telemetry.flush()
         while True:
             try:

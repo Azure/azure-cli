@@ -58,6 +58,7 @@ def conclude():
     _session.interactive_end_time = datetime.datetime.now()
     interactive_session_properties = _session.get_interactive_session_properties()
     telemetry_core.add_event('interactive', interactive_session_properties)
+    telemetry_core.suppress_new_events()
 
 
 def set_failure(summary=None):

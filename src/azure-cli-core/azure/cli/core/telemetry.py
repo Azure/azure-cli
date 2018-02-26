@@ -50,6 +50,7 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         # A dictionary with the application insight instrumentation key
         # as the key and an array of telemetry events as value
         self.events = defaultdict(list)
+        self.suppress_new_event = False  # stops generate_payload() from adding new event
 
     def add_exception(self, exception, fault_type, description=None, message=''):
         fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
@@ -70,27 +71,28 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
 
     @decorators.suppress_all_exceptions(raise_in_diagnostics=True, fallback_return=None)
     def generate_payload(self):
-        base = self._get_base_properties()
-        cli = self._get_azure_cli_properties()
+        if not self.suppress_new_event:
+            base = self._get_base_properties()
+            cli = self._get_azure_cli_properties()
 
-        user_task = self._get_user_task_properties()
-        user_task.update(base)
-        user_task.update(cli)
+            user_task = self._get_user_task_properties()
+            user_task.update(base)
+            user_task.update(cli)
 
-        self.events[DEFAULT_INSTRUMENTATION_KEY].append({
-            'name': '{}/command'.format(PRODUCT_NAME),
-            'properties': user_task
-        })
-
-        for name, props in self.exceptions:
-            props.update(base)
-            props.update(cli)
-            props.update({CORRELATION_ID_PROP_NAME: str(uuid.uuid4()),
-                          'Reserved.EventId': str(uuid.uuid4())})
             self.events[DEFAULT_INSTRUMENTATION_KEY].append({
-                'name': name,
-                'properties': props
+                'name': '{}/command'.format(PRODUCT_NAME),
+                'properties': user_task
             })
+
+            for name, props in self.exceptions:
+                props.update(base)
+                props.update(cli)
+                props.update({CORRELATION_ID_PROP_NAME: str(uuid.uuid4()),
+                              'Reserved.EventId': str(uuid.uuid4())})
+                self.events[DEFAULT_INSTRUMENTATION_KEY].append({
+                    'name': name,
+                    'properties': props
+                })
 
         payload = json.dumps(self.events)
         return _remove_symbols(payload)
@@ -240,6 +242,11 @@ def conclude():
     if payload:
         import subprocess
         subprocess.Popen([sys.executable, os.path.realpath(telemetry_core.__file__), payload])
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def suppress_new_events(unsuppress=False):
+    _session.suppress_new_event = not unsuppress
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
