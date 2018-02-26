@@ -41,10 +41,11 @@ def create(client, resource_group_name, account_name, sku_name='S0', tags=None, 
      :class:`ErrorException<azure.mgmt.locationbasedservices.models.ErrorException>`
     """
     # Prompt for the Preview Terms agreement.
-    logger.warning(
-        'By creating a Location Based Services account, you agree to the Microsoft Azure Preview Terms.' +
-        '\nThe Preview Terms can be found at: ' +
-        '\nhttps://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms/')
+    warning_msg = 'By creating a Location Based Services account, you agree to the Microsoft Azure Preview Terms.' + \
+                  '\nThe Preview Terms can be found at: ' + \
+                  '\nhttps://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms/'
+
+    logger.warning(warning_msg)
     if not agree:  # ... in order to pass tests
         response = prompt_y_n('I confirm that I have read and agree to the Microsoft Azure Preview Terms.')
         if not response:
