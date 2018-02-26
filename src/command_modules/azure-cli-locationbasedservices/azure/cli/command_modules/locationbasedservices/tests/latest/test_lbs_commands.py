@@ -12,6 +12,7 @@ from azure.mgmt.locationbasedservices.models.client_enums import KeyType
 class LocationBasedServicesScenarioTests(ScenarioTest):
 
     @ResourceGroupPreparer(key='rg')
+    @ResourceGroupPreparer(key='rg1')
     def test_create_locationbasedservices_account(self, resource_group):
         tag_key = self.create_random_name(prefix='key-', length=10)
         tag_value = self.create_random_name(prefix='val-', length=10)
@@ -75,19 +76,29 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
             self.check('[0].tags', {tag_key: tag_value})
         ])
 
-        # Create two new accounts.
-        self.cmd('az locationbasedservices account create -n {name1} -g {rg} --sku {sku} ' +
+        # Create two new accounts (One in separate resource group).
+        self.cmd('az locationbasedservices account create -n {name1} -g {rg1} --sku {sku} ' +
                  '--agree-to-the-preview-terms')
         self.cmd('az locationbasedservices account create -n {name2} -g {rg} --sku {sku} ' +
                  '--agree-to-the-preview-terms')
-        # Check that list command now shows three accounts.
+        # Check that list command now shows two accounts in one resource group, and one in another.
         self.cmd('az locationbasedservices account list -g {rg}', checks=[
-            self.check('length(@)', 3),
+            self.check('length(@)', 2),
             self.check('type(@)', 'array'),
             self.check("length([?name == '{name}'])", 1),
-            self.check("length([?name == '{name1}'])", 1),
+            self.check("length([?name == '{name1}'])", 0),
             self.check("length([?name == '{name2}'])", 1),
-            self.check("length([?resourceGroup == '{rg}'])", 3)
+            self.check("length([?resourceGroup == '{rg}'])", 2),
+            self.check("length([?resourceGroup == '{rg1}'])", 0)
+        ])
+        self.cmd('az locationbasedservices account list -g {rg1}', checks=[
+            self.check('length(@)', 1),
+            self.check('type(@)', 'array'),
+            self.check("length([?name == '{name}'])", 0),
+            self.check("length([?name == '{name1}'])", 1),
+            self.check("length([?name == '{name2}'])", 0),
+            self.check("length([?resourceGroup == '{rg}'])", 0),
+            self.check("length([?resourceGroup == '{rg1}'])", 1)
         ])
 
         # Test 'az locationbasedservices account key list'.
@@ -128,12 +139,13 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
         self.cmd('az locationbasedservices account delete -n {name} -g {rg}', checks=self.is_empty())
         self.cmd('az locationbasedservices account show -n {name} -g {rg}', checks=self.is_empty())
         self.cmd('az locationbasedservices account list -g {rg}', checks=[
-            self.check('length(@)', 2),
+            self.check('length(@)', 1),
             self.check("length([?name == '{name}'])", 0)
         ])
 
         # Remove the rest of LocationBasedServices accounts.
-        exit_code = self.cmd('az locationbasedservices account delete -n {name1} -g {rg}').exit_code
+        exit_code = self.cmd('az locationbasedservices account delete -n {name1} -g {rg1}').exit_code
         self.assertEqual(exit_code, 0)
         self.cmd('az locationbasedservices account delete -n {name2} -g {rg}')
         self.cmd('az locationbasedservices account list -g {rg}', checks=self.is_empty())
+        self.cmd('az locationbasedservices account list -g {rg1}', checks=self.is_empty())
