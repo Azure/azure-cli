@@ -318,12 +318,13 @@ def k8s_install_connector(cmd, client, name, resource_group_name, connector_name
                                       location, service_principal, client_secret, chart_url, os_type,
                                       image_tag, aci_resource_group)
 
+
 def k8s_upgrade_connector(cmd, client, name, resource_group_name, connector_name,
                           location=None, service_principal=None, client_secret=None,
                           chart_url=None, os_type='Linux', image_tag=None, aci_resource_group=None):
     _k8s_install_or_upgrade_connector("upgrade", cmd, client, name, resource_group_name, connector_name,
-                                    location, service_principal, client_secret, chart_url, os_type,
-                                    image_tag, aci_resource_group)
+                                      location, service_principal, client_secret, chart_url, os_type,
+                                      image_tag, aci_resource_group)
 
 
 def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_group_name, connector_name,
