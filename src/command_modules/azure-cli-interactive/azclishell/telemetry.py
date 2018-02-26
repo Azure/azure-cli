@@ -29,7 +29,7 @@ class Telemetry(object):
         properties = {}
         telemetry_core.set_custom_properties(properties, 'StartTime', str(self.interactive_start_time))
         telemetry_core.set_custom_properties(properties, 'EndTime', str(self.interactive_end_time))
-        telemetry_core.set_custom_properties(properties, 'OutsideGestures', str(self.num_outside_gesture))
+        telemetry_core.set_custom_properties(properties, 'OutsideGestures', self.num_outside_gesture)
         telemetry_core.set_custom_properties(properties, 'ExitGestures', self.num_exit_code_gesture)
         telemetry_core.set_custom_properties(properties, 'QueryGestures', self.num_query_gesture)
         telemetry_core.set_custom_properties(properties, 'ScopeChanges', self.num_scope_changes)
@@ -49,16 +49,20 @@ _session = Telemetry()
 def start():
     telemetry_core.start()
 
+
 def flush():
     telemetry_core.flush()
+
 
 def conclude():
     _session.interactive_end_time = datetime.datetime.now()
     interactive_session_properties = _session.get_interactive_session_properties()
     telemetry_core.add_event('interactive', interactive_session_properties)
 
+
 def set_failure(summary=None):
     telemetry_core.set_failure(summary=summary)
+
 
 def set_success(summary=None):
     telemetry_core.set_success(summary=summary)
@@ -68,29 +72,38 @@ def set_success(summary=None):
 def track_outside_gesture():
     _session.num_outside_gesture += 1
 
+
 def track_exit_code_gesture():
     _session.num_exit_code_gesture += 1
+
 
 def track_query_gesture():
     _session.num_query_gesture += 1
 
+
 def track_scope_changes():
     _session.num_scope_changes += 1
+
 
 def track_ran_tutorial():
     _session.num_ran_tutorial += 1
 
+
 def track_scroll_examples():
     _session.num_scroll_examples += 1
+
 
 def track_open_config():
     _session.num_open_config += 1
 
+
 def track_toggle_default():
     _session.num_toggle_default += 1
 
+
 def track_toggle_symbol_bindings():
     _session.num_toggle_symbol_bindings += 1
+
 
 def track_cli_commands_used():
     _session.num_cli_commands_used += 1
