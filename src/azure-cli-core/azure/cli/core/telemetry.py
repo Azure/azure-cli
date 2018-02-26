@@ -28,12 +28,12 @@ decorators.is_diagnostics_mode = telemetry_core.in_diagnostic_mode
 
 
 class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
-    def __init__(self):
+    def __init__(self, correlation_id=None, application=None):
         self.start_time = None
         self.end_time = None
-        self.application = None
+        self.application = application
         self.arg_complete_env_name = None
-        self.correlation_id = str(uuid.uuid4())
+        self.correlation_id = correlation_id or str(uuid.uuid4())
         self.command = 'execute-unknown-command'
         self.output_type = 'none'
         self.parameters = []
@@ -227,10 +227,7 @@ def flush():
         subprocess.Popen([sys.executable, os.path.realpath(telemetry_core.__file__), payload])
 
     # reset fields
-    new_session = TelemetrySession()
-    new_session.correlation_id = _session.correlation_id
-    new_session.application = _session.application
-    _session = new_session
+    _session = TelemetrySession(correlation_id=_session.correlation_id, application=_session.application)
 
 
 @_user_agrees_to_telemetry
@@ -252,7 +249,8 @@ def suppress_new_events(unsuppress=False):
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def set_custom_properties(prop, name, value):
     actual_value = value() if hasattr(value, '__call__') else value
-    if actual_value:
+
+    if actual_value is not None:
         prop[AZURE_CLI_PREFIX + name] = actual_value
 
 

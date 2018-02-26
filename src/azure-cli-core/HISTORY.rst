@@ -5,7 +5,7 @@ Release History
 
 2.0.29
 ++++++
-* Allow flushing of events in telemetry and generic add-event capability
+* Minor fixes
 
 2.0.28
 ++++++
