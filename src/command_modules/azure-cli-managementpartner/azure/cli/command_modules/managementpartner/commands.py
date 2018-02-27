@@ -23,4 +23,3 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_managementpartner')
         g.custom_command('update', 'update_managementpartner')
         g.custom_command('show', 'get_managementpartner')
-
