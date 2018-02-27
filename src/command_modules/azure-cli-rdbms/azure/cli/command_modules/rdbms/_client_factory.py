@@ -31,7 +31,7 @@ def get_mysql_management_client(cli_ctx, **_):
                 secret=getenv(CLIENT_SECRET),
                 tenant=getenv(TENANT_ID))
         else:
-            from msrest.authentication import Authentication
+            from msrest.authentication import Authentication    # pylint: disable=import-error
             credentials = Authentication()
 
         return MySQLManagementClient(
@@ -60,7 +60,7 @@ def get_postgresql_management_client(cli_ctx, **_):
                 secret=getenv(CLIENT_SECRET),
                 tenant=getenv(TENANT_ID))
         else:
-            from msrest.authentication import Authentication
+            from msrest.authentication import Authentication    # pylint: disable=import-error
             credentials = Authentication()
 
         return PostgreSQLManagementClient(

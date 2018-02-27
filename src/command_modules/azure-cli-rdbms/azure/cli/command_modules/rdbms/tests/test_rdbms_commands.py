@@ -2,11 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+
 from datetime import datetime
-from dateutil.tz import tzutc
+from dateutil.tz import tzutc   # pylint: disable=import-error
 
 from azure.cli.testsdk.base import execute
-from azure.cli.testsdk.exceptions import CliTestError
+from azure.cli.testsdk.exceptions import CliTestError   # pylint: disable=unused-import
 from azure.cli.testsdk import (
     JMESPathCheck,
     NoneCheck,
@@ -25,9 +26,10 @@ SERVER_NAME_MAX_LENGTH = 63
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine_type='mysql', engine_parameter_name='database_engine',
-                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='westeurope',
+                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='brazilsouth',
                  admin_user='cloudsa', admin_password='SecretPassword123',
-                 resource_group_parameter_name='resource_group', skip_delete=True):
+                 resource_group_parameter_name='resource_group', skip_delete=True,
+                 sku_name='GP_Gen4_2'):
         super(ServerPreparer, self).__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
         from azure.cli.testsdk import TestCli
         self.cli_ctx = TestCli()
@@ -39,15 +41,17 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
         self.admin_password = admin_password
         self.resource_group_parameter_name = resource_group_parameter_name
         self.skip_delete = skip_delete
+        self.sku_name = sku_name
 
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
-        template = 'az {} server create -l {} -g {} -n {} -u {} -p {}'
+        template = 'az {} server create -l {} -g {} -n {} -u {} -p {} --sku-name {}'
         execute(self.cli_ctx, template.format(self.engine_type,
                                               self.location,
                                               group, name,
                                               self.admin_user,
-                                              self.admin_password))
+                                              self.admin_password,
+                                              self.sku_name))
         return {self.parameter_name: name,
                 self.engine_parameter_name: self.engine_type}
 
@@ -77,19 +81,21 @@ class ServerMgmtScenarioTest(ScenarioTest):
                    self.create_random_name('azuredbclirestore', SERVER_NAME_MAX_LENGTH)]
         admin_login = 'cloudsa'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
-        edition = 'Basic'
-        old_cu = 100
-        new_cu = 50
+        edition = 'GeneralPurpose'
+        old_cu = 2
+        new_cu = 4
+        family = 'Gen4'
+        skuname = '{}_{}_{}'.format("GP", family, old_cu)
 
         rg = resource_group_1
-        loc = 'westeurope'
+        loc = 'brazilsouth'
 
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {} '
-                 '--performance-tier {} --compute-units {} --tags key=1'
+                 '--sku-name {} --tags key=1'
                  .format(database_engine, rg, servers[0], loc,
-                         admin_login, admin_passwords[0], edition, old_cu),
+                         admin_login, admin_passwords[0], skuname),
                  checks=[
                      JMESPathCheck('name', servers[0]),
                      JMESPathCheck('resourceGroup', rg),
@@ -105,7 +111,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                           checks=[
                               JMESPathCheck('name', servers[0]),
                               JMESPathCheck('administratorLogin', admin_login),
-                              JMESPathCheck('sku.capacity', 100),
+                              JMESPathCheck('sku.capacity', old_cu),
                               JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
 
         # test update server
@@ -120,7 +126,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('tags.key', '2'),
                      JMESPathCheck('administratorLogin', admin_login)])
 
-        self.cmd('{} server update -g {} --name {} --compute-units {}'
+        self.cmd('{} server update -g {} --name {} --vcore {}'
                  .format(database_engine, rg, servers[0], new_cu),
                  checks=[
                      JMESPathCheck('name', servers[0]),
@@ -142,7 +148,7 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('administratorLogin', admin_login)])
 
         # test update server per property
-        self.cmd('{} server update -g {} --name {} --compute-units {}'
+        self.cmd('{} server update -g {} --name {} --vcore {}'
                  .format(database_engine, rg, servers[0], old_cu),
                  checks=[
                      JMESPathCheck('name', servers[0]),
@@ -222,7 +228,6 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         self._test_log_file_mgmt(resource_group, server, database_engine)
 
     def _test_firewall_mgmt(self, resource_group, server, database_engine):
-        rg = resource_group
         firewall_rule_1 = 'rule1'
         start_ip_address_1 = '0.0.0.0'
         end_ip_address_1 = '255.255.255.255'
@@ -233,87 +238,83 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
         # test firewall-rule create
         self.cmd('{} server firewall-rule create -n {} -g {} -s {} '
                  '--start-ip-address {} --end-ip-address {}'
-                 .format(database_engine, firewall_rule_1, rg, server,
+                 .format(database_engine, firewall_rule_1, resource_group, server,
                          start_ip_address_1, end_ip_address_1),
                  checks=[
                      JMESPathCheck('name', firewall_rule_1),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('startIpAddress', start_ip_address_1),
                      JMESPathCheck('endIpAddress', end_ip_address_1)])
 
         # test firewall-rule show
         self.cmd('{} server firewall-rule show --name {} -g {} --server {}'
-                 .format(database_engine, firewall_rule_1, rg, server),
+                 .format(database_engine, firewall_rule_1, resource_group, server),
                  checks=[
                      JMESPathCheck('name', firewall_rule_1),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('startIpAddress', start_ip_address_1),
                      JMESPathCheck('endIpAddress', end_ip_address_1)])
 
         # test firewall-rule update
         self.cmd('{} server firewall-rule update -n {} -g {} -s {} '
                  '--start-ip-address {} --end-ip-address {}'
-                 .format(database_engine, firewall_rule_1, rg, server,
+                 .format(database_engine, firewall_rule_1, resource_group, server,
                          start_ip_address_2, end_ip_address_2),
                  checks=[
                      JMESPathCheck('name', firewall_rule_1),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('startIpAddress', start_ip_address_2),
                      JMESPathCheck('endIpAddress', end_ip_address_2)])
 
         self.cmd('{} server firewall-rule update --name {} -g {} --server {} '
                  '--start-ip-address {}'
-                 .format(database_engine, firewall_rule_1, rg, server,
+                 .format(database_engine, firewall_rule_1, resource_group, server,
                          start_ip_address_1),
                  checks=[
                      JMESPathCheck('name', firewall_rule_1),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('startIpAddress', start_ip_address_1),
                      JMESPathCheck('endIpAddress', end_ip_address_2)])
 
         self.cmd('{} server firewall-rule update -n {} -g {} -s {} '
                  '--end-ip-address {}'
-                 .format(database_engine, firewall_rule_1, rg, server,
+                 .format(database_engine, firewall_rule_1, resource_group, server,
                          end_ip_address_1),
                  checks=[
                      JMESPathCheck('name', firewall_rule_1),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('startIpAddress', start_ip_address_1),
                      JMESPathCheck('endIpAddress', end_ip_address_1)])
 
         # test firewall-rule create another rule
         self.cmd('{} server firewall-rule create --name {} -g {} --server {} '
                  '--start-ip-address {} --end-ip-address {}'
-                 .format(database_engine, firewall_rule_2, rg, server,
+                 .format(database_engine, firewall_rule_2, resource_group, server,
                          start_ip_address_2, end_ip_address_2),
                  checks=[
                      JMESPathCheck('name', firewall_rule_2),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('startIpAddress', start_ip_address_2),
                      JMESPathCheck('endIpAddress', end_ip_address_2)])
 
         # test firewall-rule list
         self.cmd('{} server firewall-rule list -g {} -s {}'
-                 .format(database_engine, rg, server), checks=[JMESPathCheck('length(@)', 2)])
+                 .format(database_engine, resource_group, server), checks=[JMESPathCheck('length(@)', 2)])
 
         self.cmd('{} server firewall-rule delete --name {} -g {} --server {} --yes'
-                 .format(database_engine, firewall_rule_1, rg, server), checks=NoneCheck())
+                 .format(database_engine, firewall_rule_1, resource_group, server), checks=NoneCheck())
         self.cmd('{} server firewall-rule list -g {} --server {}'
-                 .format(database_engine, rg, server), checks=[JMESPathCheck('length(@)', 1)])
+                 .format(database_engine, resource_group, server), checks=[JMESPathCheck('length(@)', 1)])
         self.cmd('{} server firewall-rule delete -n {} -g {} -s {} --yes'
-                 .format(database_engine, firewall_rule_2, rg, server), checks=NoneCheck())
+                 .format(database_engine, firewall_rule_2, resource_group, server), checks=NoneCheck())
         self.cmd('{} server firewall-rule list -g {} --server {}'
-                 .format(database_engine, rg, server), checks=[NoneCheck()])
+                 .format(database_engine, resource_group, server), checks=[NoneCheck()])
 
     def _test_db_mgmt(self, resource_group, server, database_engine):
-
-        rg = resource_group
-
-        self.cmd('{} db list -g {} -s {}'.format(database_engine, rg, server),
+        self.cmd('{} db list -g {} -s {}'.format(database_engine, resource_group, server),
                  checks=JMESPathCheck('type(@)', 'array'))
 
     def _test_configuration_mgmt(self, resource_group, server, database_engine):
-        rg = resource_group
         if database_engine == 'mysql':
             config_name = 'log_slow_admin_statements'
             default_value = 'OFF'
@@ -325,7 +326,7 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
         # test show configuration
         self.cmd('{} server configuration show --name {} -g {} --server {}'
-                 .format(database_engine, config_name, rg, server),
+                 .format(database_engine, config_name, resource_group, server),
                  checks=[
                      JMESPathCheck('name', config_name),
                      JMESPathCheck('value', default_value),
@@ -333,40 +334,39 @@ class ProxyResourcesMgmtScenarioTest(ScenarioTest):
 
         # test update configuration
         self.cmd('{} server configuration set -n {} -g {} -s {} --value {}'
-                 .format(database_engine, config_name, rg, server, new_value),
+                 .format(database_engine, config_name, resource_group, server, new_value),
                  checks=[
                      JMESPathCheck('name', config_name),
                      JMESPathCheck('value', new_value),
                      JMESPathCheck('source', 'user-override')])
 
         self.cmd('{} server configuration set -n {} -g {} -s {}'
-                 .format(database_engine, config_name, rg, server),
+                 .format(database_engine, config_name, resource_group, server),
                  checks=[
                      JMESPathCheck('name', config_name),
                      JMESPathCheck('value', default_value)])
 
         # test list configurations
         self.cmd('{} server configuration list -g {} -s {}'
-                 .format(database_engine, rg, server),
+                 .format(database_engine, resource_group, server),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
     def _test_log_file_mgmt(self, resource_group, server, database_engine):
-        rg = resource_group
-
         if database_engine == 'mysql':
             config_name = 'slow_query_log'
             new_value = 'ON'
 
             # test update configuration
             self.cmd('{} server configuration set -n {} -g {} -s {} --value {}'
-                     .format(database_engine, config_name, rg, server, new_value),
+                     .format(database_engine, config_name, resource_group, server, new_value),
                      checks=[
                          JMESPathCheck('name', config_name),
                          JMESPathCheck('value', new_value)])
 
         # test list log files
-        result = self.cmd('{} server-logs list -g {} -s {} --file-last-written 43800'  # ensure recording good for at least 5 years!
-                          .format(database_engine, rg, server),
+        # ensure recording good for at least 5 years!
+        result = self.cmd('{} server-logs list -g {} -s {} --file-last-written 43800'
+                          .format(database_engine, resource_group, server),
                           checks=[
                               JMESPathCheck('length(@)', 1),
                               JMESPathCheck('type(@)', 'array')]).get_output_in_json()

@@ -6,9 +6,9 @@
 from azure.cli.core.commands import AzArgumentContext
 
 
-class RdbmsArgumentContext(AzArgumentContext):
+class RdbmsArgumentContext(AzArgumentContext):  # pylint: disable=too-few-public-methods
 
-    def __init__(self, command_loader, scope, **kwargs):
+    def __init__(self, command_loader, scope, **kwargs):    # pylint: disable=unused-argument
         super(RdbmsArgumentContext, self).__init__(command_loader, scope)
         self.validators = []
 
