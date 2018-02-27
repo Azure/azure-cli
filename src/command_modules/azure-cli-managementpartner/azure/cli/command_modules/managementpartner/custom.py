@@ -13,10 +13,12 @@ def print_managementpartner(partnerresponse):
     partner["state"] = partnerresponse.state
     return partner
 
+
 def xstr(s):
     if s is None:
         return ""
     return str(s)
+
 
 def create_managementpartner(client, partner_id):
     return print_managementpartner(client.create(partner_id))
