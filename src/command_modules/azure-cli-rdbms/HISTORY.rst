@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.0.13
+++++++
+* Preview release with new business model.
+* Preview release georestore command.
+
 0.0.12
 ++++++
 * Minor fixes.
