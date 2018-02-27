@@ -7,7 +7,7 @@ from knack.help_files import helps
 
 helps['advisor'] = """
     type: group
-    short-summary: (PREVIEW) Manage Azure Advisor.
+    short-summary: Manage Azure Advisor.
 """
 
 helps['advisor configuration'] = """
@@ -20,19 +20,26 @@ helps['advisor recommendation'] = """
     short-summary: Review Azure Advisor recommendations.
 """
 
-helps['advisor configuration get'] = """
+helps['advisor configuration list'] = """
     type: command
-    short-summary: Get Azure Advisor configuration.
+    short-summary: List Azure Advisor configuration for the entire subscription.
 """
 
-helps['advisor configuration set'] = """
+helps['advisor configuration show'] = """
     type: command
-    short-summary: Set Azure Advisor configuration.
+    short-summary: Show Azure Advisor configuration for the given subscription or resource group.
 """
 
-helps['advisor recommendation generate'] = """
+helps['advisor configuration update'] = """
     type: command
-    short-summary: Generate Azure Advisor recommendations.
+    short-summary: Update Azure Advisor configuration.
+    examples:
+        - name: Update low CPU threshold for a given subscription to 20%.
+          text: >
+            az advisor configuration update -l 20
+        - name: Exclude a given resource group from recommendation generation.
+          text: >
+            az advisor configuration update -g myRG -e
 """
 
 helps['advisor recommendation list'] = """
