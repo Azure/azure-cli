@@ -12,6 +12,7 @@ import re
 import sys
 import traceback
 import uuid
+import subprocess
 from collections import defaultdict
 from functools import wraps
 
@@ -50,7 +51,9 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         # A dictionary with the application insight instrumentation key
         # as the key and an array of telemetry events as value
         self.events = defaultdict(list)
-        self.suppress_new_event = False  # stops generate_payload() from adding new event
+        # stops generate_payload() from adding new azurecli/command event
+        # used for interactive to send new custom event upon exit
+        self.suppress_new_event = False
 
     def add_exception(self, exception, fault_type, description=None, message=''):
         fault_type = _remove_symbols(fault_type).replace('"', '').replace("'", '').replace(' ', '-')
@@ -140,8 +143,10 @@ class TelemetrySession(object):  # pylint: disable=too-many-instance-attributes
         return result
 
     def _get_azure_cli_properties(self):
-        source = 'az' if not self.arg_complete_env_name or self.arg_complete_env_name not in os.environ \
-            else 'completer'
+        if self.arg_complete_env_name and self.arg_complete_env_name in os.environ:
+            source = 'completer'
+        else:
+            source = 'az'
         result = {}
         ext_info = '{}@{}'.format(self.extension_name, self.extension_version) if self.extension_name else None
         set_custom_properties(result, 'Source', source)
@@ -212,32 +217,30 @@ def _user_agrees_to_telemetry(func):
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def start():
-    _session.start_time = datetime.datetime.now()
+    _session.start_time = datetime.datetime.utcnow()
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def flush():
-    global _session  # pylint: disable=global-statement
     # flush out current information
-    _session.end_time = datetime.datetime.now()
+    _session.end_time = datetime.datetime.utcnow()
 
     payload = _session.generate_payload()
     if payload:
-        import subprocess
+
         subprocess.Popen([sys.executable, os.path.realpath(telemetry_core.__file__), payload])
 
-    # reset fields
-    _session = TelemetrySession(correlation_id=_session.correlation_id, application=_session.application)
+    # reset session fields, retaining correlation id and application
+    _session.__init__(correlation_id=_session.correlation_id, application=_session.application)
 
 
 @_user_agrees_to_telemetry
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def conclude():
-    _session.end_time = datetime.datetime.now()
+    _session.end_time = datetime.datetime.utcnow()
 
     payload = _session.generate_payload()
     if payload:
-        import subprocess
         subprocess.Popen([sys.executable, os.path.realpath(telemetry_core.__file__), payload])
 
 
@@ -333,11 +336,16 @@ def set_raw_command_name(command):
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
 def add_extension_event(extension_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
     set_custom_properties(properties, 'ExtensionName', extension_name)
-    add_event('extension', properties, instrumentation_key=instrumentation_key)
+    _add_event('extension', properties, instrumentation_key=instrumentation_key)
 
 
 @decorators.suppress_all_exceptions(raise_in_diagnostics=True)
-def add_event(event_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
+def add_interactive_event(properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
+    _add_event('interactive', properties, instrumentation_key=instrumentation_key)
+
+
+@decorators.suppress_all_exceptions(raise_in_diagnostics=True)
+def _add_event(event_name, properties, instrumentation_key=DEFAULT_INSTRUMENTATION_KEY):
     # Inject correlation ID into the new event
     properties.update({
         CORRELATION_ID_PROP_NAME: _session.correlation_id,

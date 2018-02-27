@@ -698,44 +698,42 @@ class AzInteractiveShell(object):
         telemetry.flush()
         while True:
             try:
-                try:
-                    document = self.cli.run(reset_current_buffer=True)
-                    text = document.text
-                    if not text:
-                        # not input
-                        self.set_prompt()
-                        continue
-                    cmd = text
-                    outside = False
-
-                except AttributeError:
-                    # when the user pressed Control D
-                    break
-                else:
-                    self.history.append(text)
-                    b_flag, c_flag, outside, cmd = self._special_cases(cmd, outside)
-
-                    if b_flag:
-                        break
-                    if c_flag:
-                        self.set_prompt()
-                        continue
-
+                document = self.cli.run(reset_current_buffer=True)
+                text = document.text
+                if not text:
+                    # not input
                     self.set_prompt()
+                    continue
+                cmd = text
+                outside = False
 
-                    if outside:
-                        subprocess.Popen(cmd, shell=True).communicate()
-                    else:
-                        telemetry.start()
-                        self.cli_execute(cmd)
-                        if self.last_exit and self.last_exit != 0:
-                            telemetry.set_failure()
-                        else:
-                            telemetry.set_success()
-                        telemetry.flush()
-
+            except AttributeError:
+                # when the user pressed Control D
+                break
             except (KeyboardInterrupt, ValueError):
                 # CTRL C
                 self.set_prompt()
                 continue
+            else:
+                self.history.append(text)
+                b_flag, c_flag, outside, cmd = self._special_cases(cmd, outside)
+
+                if b_flag:
+                    break
+                if c_flag:
+                    self.set_prompt()
+                    continue
+
+                self.set_prompt()
+
+                if outside:
+                    subprocess.Popen(cmd, shell=True).communicate()
+                else:
+                    telemetry.start()
+                    self.cli_execute(cmd)
+                    if self.last_exit and self.last_exit != 0:
+                        telemetry.set_failure()
+                    else:
+                        telemetry.set_success()
+                    telemetry.flush()
         telemetry.conclude()

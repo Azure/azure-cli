@@ -12,7 +12,7 @@ class Telemetry(object):
 
     def __init__(self):
         self.core = telemetry_core
-        self.interactive_start_time = datetime.datetime.now()
+        self.interactive_start_time = datetime.datetime.utcnow()
         self.interactive_end_time = None
         self.num_outside_gesture = 0
         self.num_exit_code_gesture = 0
@@ -55,9 +55,9 @@ def flush():
 
 
 def conclude():
-    _session.interactive_end_time = datetime.datetime.now()
+    _session.interactive_end_time = datetime.datetime.utcnow()
     interactive_session_properties = _session.get_interactive_session_properties()
-    telemetry_core.add_event('interactive', interactive_session_properties)
+    telemetry_core.add_interactive_event(interactive_session_properties)
     telemetry_core.suppress_new_events()
 
 
