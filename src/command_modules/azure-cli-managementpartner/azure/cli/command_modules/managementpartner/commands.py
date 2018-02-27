@@ -19,7 +19,8 @@ def load_command_table(self, _):
     )
 
     with self.command_group('managementpartner', managementpartner_partner_sdk) as g:
-        g.command('show', 'get')
-        g.command('create', 'create')
-        g.command('update', 'update')
         g.command('delete', 'delete')
+        g.custom_command('create', 'create_managementpartner')
+        g.custom_command('update', 'update_managementpartner')
+        g.custom_command('show', 'get_managementpartner')
+
