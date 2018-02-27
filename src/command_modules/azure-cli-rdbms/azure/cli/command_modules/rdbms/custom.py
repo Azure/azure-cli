@@ -5,8 +5,8 @@
 
 # pylint: disable=unused-argument
 
-from azure.cli.core.commands.client_factory import get_subscription_id
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.mgmt.rdbms.mysql.operations.servers_operations import ServersOperations
 from ._client_factory import get_mysql_management_client, get_postgresql_management_client
 

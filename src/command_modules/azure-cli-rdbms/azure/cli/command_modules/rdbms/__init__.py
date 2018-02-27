@@ -15,9 +15,9 @@ class RdbmsCommandsLoader(AzCommandsLoader):
         from azure.cli.command_modules.rdbms._util import RdbmsArgumentContext
         rdbms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.custom#{}')
         super(RdbmsCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                     min_profile='2017-03-10-profile',
-                                                     custom_command_type=rdbms_custom,
-                                                     argument_context_cls=RdbmsArgumentContext)
+                                                  min_profile='2017-03-10-profile',
+                                                  custom_command_type=rdbms_custom,
+                                                  argument_context_cls=RdbmsArgumentContext)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.rdbms.commands import load_command_table
