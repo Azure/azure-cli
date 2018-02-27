@@ -532,7 +532,7 @@ helps['network application-gateway waf-config set'] = """
           - az network application-gateway waf-config list-rule-sets
     examples:
         - name: Disable rules for validation of request body parsing and SQL injection.
-          text: >
+          text: |
             az network application-gateway waf-config set -g MyResourceGroup -n MyGatewayName \\
                     --enabled true --rule-set-type OWASP --rule-set-version 3.0 \\
                     --disabled-rules 920130 920140 \\
@@ -879,18 +879,11 @@ helps['network express-route peering create'] = """
     short-summary: Create peering settings.
     examples:
         - name: Create Microsoft Peering settings with IPv4 configuration.
-          text: >
-            az network express-route peering create -g MyResourceGroup
-            --circuit-name MyCircuit --peering-type MicrosoftPeering --peer-asn 10002 
-            --vlan-id 103 --primary-peer-subnet 101.0.0.0/30 
-            --secondary-peer-subnet 102.0.0.0/30 --advertised-public-prefixes 101.0.0.0/30
-        - name: Add IPv6 Microsoft Peering settings to existing IPv4 config.
-          text: >
-            az network express-route peering update -g MyResourceGroup 
-            --circuit-name MyCircuit --peering-type MicrosoftPeering --ip-version ipv6 
-            --primary-peer-subnet 2002:db00::/126 --secondary-peer-subnet 2003:db00::/126 
-            --advertised-public-prefixes 2002:db00::/126
-          min_profile: latest
+          text: |
+            az network express-route peering create -g MyResourceGroup \\
+                --circuit-name MyCircuit --peering-type MicrosoftPeering --peer-asn 10002 \\
+                --vlan-id 103 --primary-peer-subnet 101.0.0.0/30 \\
+                --secondary-peer-subnet 102.0.0.0/30 --advertised-public-prefixes 101.0.0.0/30
 """
 
 helps['network express-route peering delete'] = """
@@ -913,11 +906,11 @@ helps['network express-route peering update'] = """
     short-summary: Update peering settings.
     examples:
         - name: Add IPv6 Microsoft Peering settings to existing IPv4 config.
-          text: >
-            az network express-route peering update -g MyResourceGroup 
-            --circuit-name MyCircuit --peering-type MicrosoftPeering --ip-version ipv6 
-            --primary-peer-subnet 2002:db00::/126 --secondary-peer-subnet 2003:db00::/126 
-            --advertised-public-prefixes 2002:db00::/126
+          text: |
+            az network express-route peering update -g MyResourceGroup \\
+                --circuit-name MyCircuit --peering-type MicrosoftPeering --ip-version ipv6 \\
+                --primary-peer-subnet 2002:db00::/126 --secondary-peer-subnet 2003:db00::/126 \\
+                --advertised-public-prefixes 2002:db00::/126
           min_profile: latest
 """
 # endregion
@@ -939,7 +932,7 @@ helps['network lb create'] = """
         - name: Create a load balancer on a specific virtual network and subnet.
           text: >
             az network lb create -g MyResourceGroup -n MyLb --vnet-name MyVnet --subnet MySubnet
-        - name: create a zone flavored public facing load balancer through provisioning a zonal public ip.
+        - name: Create a zone flavored public facing load balancer through provisioning a zonal public ip.
           text: >
             az network lb create -g MyResourceGroup -n MyLB --public-ip-zone 2
         - name: create a zone flavored internal facing load balancer through provisioning a zonal frontend ip configuration.
@@ -1074,9 +1067,9 @@ helps['network lb inbound-nat-rule create'] = """
     short-summary: Create an inbound NAT rule.
     examples:
         - name: Create a basic inbound NAT rule for port 80.
-          text: >
-            az network lb inbound-nat-rule create -g MyResourceGroup --lb-name MyLb -n MyNatRule 
-            --protocol Tcp --frontend-port 80 --backend-port 80
+          text: |
+            az network lb inbound-nat-rule create -g MyResourceGroup --lb-name MyLb -n MyNatRule \\
+                --protocol Tcp --frontend-port 80 --backend-port 80
 """
 
 helps['network lb inbound-nat-rule delete'] = """
@@ -1112,9 +1105,9 @@ helps['network lb probe create'] = """
     short-summary: Create a probe.
     examples:
         - name: Create a probe on a load balancer over HTTP and port 80.
-          text: >
-            az network lb probe create -g MyResourceGroup --lb-name MyLb -n MyProbe 
-            --protocol http --port 80 --path /
+          text: |
+            az network lb probe create -g MyResourceGroup --lb-name MyLb -n MyProbe \\
+                --protocol http --port 80 --path /
 """
 
 helps['network lb probe delete'] = """
@@ -1152,9 +1145,9 @@ helps['network lb rule create'] = """
         - name: >
             Create a basic load balancing rule that assigns a front-facing IP
             configuration and port to a backend address pool and port.
-          text: >
-            az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule 
-            --protocol Tcp --frontend-port 80 --backend-port 80
+          text: |
+            az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule \\
+                --protocol Tcp --frontend-port 80 --backend-port 80
 """
 
 helps['network lb rule delete'] = """
@@ -1214,19 +1207,22 @@ helps['network local-gateway update'] = """
 helps['network nic'] = """
     type: group
     short-summary: Manage network interfaces.
-    long-summary: To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
+    long-summary: >
+        To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
 """
 
 helps['network nic show-effective-route-table'] = """
     type: command
     short-summary: Show all route tables applied to a network interface.
-    long-summary: To learn more about how to troubleshoot using effective route tables visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-routes-troubleshoot-portal#using-effective-routes-to-troubleshoot-vm-traffic-flow
+    long-summary: >
+        To learn more about how to troubleshoot using effective route tables visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-routes-troubleshoot-portal#using-effective-routes-to-troubleshoot-vm-traffic-flow
 """
 
 helps['network nic list-effective-nsg'] = """
     type: command
     short-summary: List all effective network security groups applied to a network interface.
-    long-summary: To learn more about how to troubleshoot using effective security rules visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-nsg-troubleshoot-portal
+    long-summary: >
+        To learn more about how to troubleshoot using effective security rules visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-nsg-troubleshoot-portal
 """
 
 helps['network nic create'] = """
@@ -1237,16 +1233,18 @@ helps['network nic create'] = """
         - name: Create a network interface for a specified subnet on a specified virtual network.
           text: >
             az network nic create -g MyResourceGroup --vnet-name MyVnet --subnet MySubnet -n MyNic
-        - name: Create a network interface for a specified subnet on a virtual network which allows
+        - name: >
+            Create a network interface for a specified subnet on a virtual network which allows
                 IP forwarding subject to a network security group.
-          text: >
-            az network nic create -g MyResourceGroup --vnet-name MyVnet --subnet MySubnet -n MyNic 
-            --ip-forwarding --network-security-group MyNsg
-        - name: Create a network interface for a specified subnet on a virtual network with network security group and application security groups.
-          text: >
-            az network nic create -g MyResourceGroup --vnet-name MyVnet 
-            --subnet MySubnet -n MyNic --network-security-group MyNsg 
-            --network-security-group MyNsg --application-security-groups Web, App
+          text: |
+            az network nic create -g MyResourceGroup --vnet-name MyVnet --subnet MySubnet -n MyNic \\
+                --ip-forwarding --network-security-group MyNsg
+        - name: >
+            Create a network interface for a specified subnet on a virtual network with network security group and application security groups.
+          text: |
+            az network nic create -g MyResourceGroup --vnet-name MyVnet \\
+                --subnet MySubnet -n MyNic --network-security-group MyNsg \\
+                --network-security-group MyNsg --application-security-groups Web, App
 """
 
 helps['network nic delete'] = """
@@ -1269,7 +1267,8 @@ helps['network nic list'] = """
 helps['network nic show'] = """
     type: command
     short-summary: Get the details of a network interface.
-    long-summary: To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
+    long-summary: >
+        To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
     examples:
         - name: Get the internal domain name suffix for a NIC.
           text: az network nic show -g MyResourceGroup -n MyNic --query "dnsSettings.internalDomainNameSuffix"
@@ -1278,7 +1277,8 @@ helps['network nic show'] = """
 helps['network nic update'] = """
     type: command
     short-summary: Update a network interface.
-    long-summary: To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
+    long-summary: >
+        To learn more about network interfaces in Azure visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface
     examples:
         - name: Update a network interface to use a different network security group.
           text: az network nic update -g MyResourceGroup -n MyNic --network-security-group MyNsg
@@ -1419,21 +1419,21 @@ helps['network nsg rule create'] = """
           text: >
             az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --priority 100
         - name: Create a "Deny" rule over TCP for a specific IP address range with the lowest priority.
-          text: >
-            az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --priority 4096
-                --source-address-prefixes 208.130.28/24 --source-port-ranges 80
-                --destination-address-prefixes '*' --destination-port-ranges 80 8080 --access Deny
+          text: |
+            az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --priority 4096 \\
+                --source-address-prefixes 208.130.28/24 --source-port-ranges 80 \\
+                --destination-address-prefixes '*' --destination-port-ranges 80 8080 --access Deny \\
                 --protocol Tcp --description "Deny from specific IP address ranges on 80 and 8080."
-        - name: Create a security rule using service tags.  For details, please see https://aka.ms/servicetags
-          text: >
-            az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithTags 
-            --priority 400 --source-address-prefixes VirtualNetwork --destination-address-prefixes Storage 
-            --destination-port-ranges * --direction Outbound --access Allow --protocol Tcp --description "Allow VirtualNetwork to Storage."
+        - name: Create a security rule using service tags.  For more details visit https://aka.ms/servicetags
+          text: |
+            az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithTags \\
+                --priority 400 --source-address-prefixes VirtualNetwork --destination-address-prefixes Storage \\
+                --destination-port-ranges * --direction Outbound --access Allow --protocol Tcp --description "Allow VirtualNetwork to Storage."
         - name: Create a security rule using application security groups. https://aka.ms/applicationsecuritygroups
-          text: >
-            az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithAsg 
-            --priority 500 --source-address-prefixes Internet --destination-port-ranges 80 8080 
-            --destination-asgs Web --access Allow --protocol Tcp --description "Allow Internet to Web ASG on ports 80,8080."
+          text: |
+            az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRuleWithAsg \\
+                --priority 500 --source-address-prefixes Internet --destination-port-ranges 80 8080 \\
+                --destination-asgs Web --access Allow --protocol Tcp --description "Allow Internet to Web ASG on ports 80,8080."
 """
 
 helps['network nsg rule delete'] = """
@@ -1467,7 +1467,8 @@ helps['network nsg rule update'] = """
 helps['network public-ip'] = """
     type: group
     short-summary: Manage public IP addresses.
-    long-summary: To learn more about public IP address visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-public-ip-address
+    long-summary: >
+        To learn more about public IP addresses visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-public-ip-address
 """
 
 helps['network public-ip create'] = """
@@ -1812,7 +1813,7 @@ helps['network vnet subnet create'] = """
             - az network vnet list-endpoint-services
     examples:
         - name: Create new subnet attached to an NSG with a custom route table.
-          text: >
+          text: |
             az network vnet subnet create -g MyResourceGroup --vnet-name MyVnet -n MySubnet \\
                 --address-prefix 10.0.0.0/24 --network-security-group MyNsg --route-table MyRouteTable
 """
@@ -1868,21 +1869,21 @@ helps['network vnet peering create'] = """
     short-summary: Create a peering.
     examples:
         - name: Create a virtual network peering between virtual networks in the same region
-          text: >
-            az network vnet create --name MyVnet1 --resource-group MyResourceGroup --location eastus --address-prefix 10.0.0.0/16
-            \\n\\n az network vnet create --name MyVnet2 --resource-group MyResourceGroup --location eastus --address-prefix 10.1.0.0/16
-            \\n\\n vnet1Id=$(az network vnet show --resource-group MyResourceGroup--name MyVnet1 --query id --out tsv)
-            \\n\\n vnet2Id=$(az network vnet show --resource-group MyResourceGroup --name MyVnet2 --query id --out tsv)
-            \\n\\n az network vnet peering create --name MyVnet1ToMyVnet2 --resource-group MyResourceGroup --vnet-name MyVnet1 --remote-vnet-id $vnet2Id --allow-vnet-access
-            \\n\\n az network vnet peering create --name MyVnet2ToMyVnet1 --resource-group MyResourceGroup --vnet-name MyVnet2 --remote-vnet-id $vnet1Id --allow-vnet-access
+          text: |
+            az network vnet create --name MyVnet1 --resource-group MyResourceGroup --location eastus --address-prefix 10.0.0.0/16 \\
+                \\n\\n az network vnet create --name MyVnet2 --resource-group MyResourceGroup --location eastus --address-prefix 10.1.0.0/16 \\
+                \\n\\n vnet1Id=$(az network vnet show --resource-group MyResourceGroup--name MyVnet1 --query id --out tsv) \\
+                \\n\\n vnet2Id=$(az network vnet show --resource-group MyResourceGroup --name MyVnet2 --query id --out tsv) \\
+                \\n\\n az network vnet peering create --name MyVnet1ToMyVnet2 --resource-group MyResourceGroup --vnet-name MyVnet1 --remote-vnet-id $vnet2Id --allow-vnet-access \\
+                \\n\\n az network vnet peering create --name MyVnet2ToMyVnet1 --resource-group MyResourceGroup --vnet-name MyVnet2 --remote-vnet-id $vnet1Id --allow-vnet-access
         - name: Create a virtual network peering between virtual networks in different regions
-          text: >
-            az network vnet create --name MyVnet1 --resource-group MyResourceGroup --location westcentralus --address-prefix 10.0.0.0/16
-            \\n\\n az network vnet create --name MyVnet2 --resource-group MyResourceGroup --location canadacentral --address-prefix 10.2.0.0/16
-            \\n\\n vnet1Id=$(az network vnet show --resource-group MyResourceGroup--name MyVnet1 --query id --out tsv)
-            \\n\\n vnet2Id=$(az network vnet show --resource-group MyResourceGroup --name MyVnet2 --query id --out tsv)
-            \\n\\n az network vnet peering create --name MyVnet1ToMyVnet2 --resource-group MyResourceGroup --vnet-name MyVnet1 --remote-vnet-id $vnet2Id --allow-vnet-access
-            \\n\\n az network vnet peering create --name MyVnet2ToMyVnet1 --resource-group MyResourceGroup --vnet-name MyVnet2 --remote-vnet-id $vnet1Id --allow-vnet-access
+          text: |
+            az network vnet create --name MyVnet1 --resource-group MyResourceGroup --location westcentralus --address-prefix 10.0.0.0/16 \\
+                \\n\\n az network vnet create --name MyVnet2 --resource-group MyResourceGroup --location canadacentral --address-prefix 10.2.0.0/16 \\
+                \\n\\n vnet1Id=$(az network vnet show --resource-group MyResourceGroup--name MyVnet1 --query id --out tsv) \\
+                \\n\\n vnet2Id=$(az network vnet show --resource-group MyResourceGroup --name MyVnet2 --query id --out tsv) \\
+                \\n\\n az network vnet peering create --name MyVnet1ToMyVnet2 --resource-group MyResourceGroup --vnet-name MyVnet1 --remote-vnet-id $vnet2Id --allow-vnet-access \\
+                \\n\\n az network vnet peering create --name MyVnet2ToMyVnet1 --resource-group MyResourceGroup --vnet-name MyVnet2 --remote-vnet-id $vnet1Id --allow-vnet-access
 """
 
 helps['network vnet peering delete'] = """
@@ -2115,7 +2116,9 @@ helps['network vnet-gateway root-cert delete'] = """
 helps['network watcher'] = """
     type: group
     short-summary: Manage the Azure Network Watcher.
-    long-summary: Network Watcher assists with monitoring and diagnosing conditions at a network scenario level. Visit https://docs.microsoft.com/en-us/azure/network-watcher/
+    long-summary: >
+        Network Watcher assists with monitoring and diagnosing conditions at a network scenario level. 
+            Visit https://docs.microsoft.com/en-us/azure/network-watcher/
 """
 
 helps['network watcher list'] = """
@@ -2133,8 +2136,9 @@ helps['network watcher configure'] = """
           short-summary: Space-separated list of locations to configure.
         - name: --resource-group -g
           short-summary: Name of resource group. Required when enabling new regions.
-          long-summary: When a previously disabled region is enabled to use Network Watcher, a
-            Network Watcher resource will be created in this resource group.
+          long-summary: >
+            When a previously disabled region is enabled to use Network Watcher, a
+                Network Watcher resource will be created in this resource group.
     examples:
         - name: Configure Network Watcher in a region
           text: az network watcher configure --resource-group NetworkWatcherRG  --locations westus --enabled true
@@ -2143,7 +2147,8 @@ helps['network watcher configure'] = """
 helps['network watcher troubleshooting'] = """
     type: group
     short-summary: Manage Network Watcher troubleshooting sessions.
-    long-summary: For more information on configuring troubleshooting visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-troubleshoot-manage-cli
+    long-summary: >
+        For more information on configuring troubleshooting visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-troubleshoot-manage-cli
 """
 
 helps['network watcher troubleshooting start'] = """
@@ -2158,10 +2163,10 @@ helps['network watcher troubleshooting start'] = """
           short-summary: Fully qualified URI to the storage blob container in which to store the troubleshooting results.
     examples:
         - name: Start a troubleshooting operation
-          text: >
-            az network watcher troubleshooting start --resource-group resourceGroupName 
-            --resource resourceName --resource-type {vnetGateway/vpnConnection} --storage-account storageAccountName 
-            --storage-path https://{storageAccountName}.blob.core.windows.net/{containerName}
+          text: |
+            az network watcher troubleshooting start --resource-group MyResourceGroup \\
+                --resource MyResourceName --resource-type {vnetGateway/vpnConnection} --storage-account MyStorageAccount \\
+                --storage-path https://{storageAccountName}.blob.core.windows.net/{containerName}
 """
 
 helps['network watcher troubleshooting show'] = """
@@ -2191,7 +2196,9 @@ helps['network watcher test-ip-flow'] = """
           short-summary: Protocol to test.
     examples:
         - name: Run test-ip-flow verify to test logical connectivity from a VM to the specified destination IPv4 address and port.
-          text: az network watcher test-ip-flow --resource-group resourceGroupName --direction Outbound  --protocol TCP --local 10.0.0.4:* --remote 10.1.0.4:80 --vm vmName
+          text: |
+            az network watcher test-ip-flow --resource-group MyResourceGroup --direction Outbound  \\
+                --protocol TCP --local 10.0.0.4:* --remote 10.1.0.4:80 --vm MyVm
 """
 
 helps['network watcher test-connectivity'] = """
@@ -2216,10 +2223,10 @@ helps['network watcher test-connectivity'] = """
         - name: Checks connectivity between two virtual machines in the same resource group over port 80.
           text: az network watcher test-connectivity -g MyResourceGroup --source-resource MyVmName1 --dest-resource MyVmName2 --dest-port 80
         - name: Checks connectivity between two virtual machines in the same subscription in two different resource groups over port 80.
-          text: <
-            Vm1Id=$(az vm show --resource-group MyResourceGroup--name MyVm1 --query id --out tsv)
-            \\n\\n Vm2Id=$(az vm show --resource-group MyResourceGroup--name MyVm2 --query id --out tsv)
-            \\n\\n az network watcher test-connectivity --source-resource $MyVmId1 --dest-resource $MyVmId2 --dest-port 80
+          text: |
+            Vm1Id=$(az vm show --resource-group MyResourceGroup--name MyVm1 --query id --out tsv) \\
+                \\n\\n Vm2Id=$(az vm show --resource-group MyResourceGroup--name MyVm2 --query id --out tsv) \\
+                \\n\\n az network watcher test-connectivity --source-resource $MyVmId1 --dest-resource $MyVmId2 --dest-port 80
 """
 
 helps['network watcher show-next-hop'] = """
@@ -2249,7 +2256,8 @@ helps['network watcher show-topology'] = """
           short-summary: The name of the target resource group to perform topology on.
         - name: --location -l
           short-summary: Location. Defaults to the location of the target resource group.
-          long-summary: Topology information is only shown for resources within the target
+          long-summary: >
+            Topology information is only shown for resources within the target
             resource group that are within the specified region.
 """
 
@@ -2291,14 +2299,14 @@ helps['network watcher packet-capture create'] = """
         - name: Create a packet capture session on a VM
           text: az network watcher packet-capture create -g MyResourceGroup -n MyPacketCaptureName --vm MyVm --storage-account MyStorageAccount
         - name: Create a packet capture session on a VM with optional filters for protocols, local IP address and remote IP address ranges and ports
-          text: >
-                az network watcher packet-capture create -g MyResourceGroup -n MyPacketCaptureName --vm MyVm 
-                --storage-account MyStorageAccount --filters "[{\"protocol\":\"TCP\", 
-                \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", 
-                \"remotePort\":\"20\"},{\"protocol\":\"TCP\", \"remoteIPAddress\":\"1.1.1.1-255.255.255\",
-                \"localIPAddress\":\"10.0.0.3\", \"remotePort\":\"80\"},{\"protocol\":\"TCP\", 
-                \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", 
-                \"remotePort\":\"443\"},{\"protocol\":\"UDP\"}]"
+          text: |
+                az network watcher packet-capture create -g MyResourceGroup -n MyPacketCaptureName --vm MyVm  \\
+                    --storage-account MyStorageAccount --filters "[{\"protocol\":\"TCP\", \\
+                    \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", \\
+                    \"remotePort\":\"20\"},{\"protocol\":\"TCP\", \"remoteIPAddress\":\"1.1.1.1-255.255.255\", \\
+                    \"localIPAddress\":\"10.0.0.3\", \"remotePort\":\"80\"},{\"protocol\":\"TCP\", \\
+                    \"remoteIPAddress\":\"1.1.1.1-255.255.255\",\"localIPAddress\":\"10.0.0.3\", \\
+                    \"remotePort\":\"443\"},{\"protocol\":\"UDP\"}]"
 """
 
 helps['network watcher packet-capture delete'] = """
