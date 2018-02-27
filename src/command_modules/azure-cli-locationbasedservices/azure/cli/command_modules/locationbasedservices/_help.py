@@ -12,12 +12,12 @@ helps['locationbasedservices'] = """
 
 helps['locationbasedservices account'] = """
     type: group
-    short-summary: Commands to manage Azure Location Based Services accounts.
+    short-summary: Manage Azure Location Based Services accounts.
 """
 
 helps['locationbasedservices account key'] = """
     type: group
-    short-summary: Commands to manage Azure Location Based Services account keys.
+    short-summary: Manage Azure Location Based Services account keys.
 """
 
 helps['locationbasedservices account show'] = """
