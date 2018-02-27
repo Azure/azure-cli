@@ -15,7 +15,7 @@ helps['locationbasedservices account'] = """
     short-summary: Manage Azure Location Based Services accounts.
 """
 
-helps['locationbasedservices account key'] = """
+helps['locationbasedservices account keys'] = """
     type: group
     short-summary: Manage Azure Location Based Services account keys.
 """
@@ -42,16 +42,16 @@ helps['locationbasedservices account delete'] = """
     short-summary: Delete a Location Based Services account.
 """
 
-helps['locationbasedservices account key list'] = """
+helps['locationbasedservices account keys list'] = """
     type: command
     short-summary: List the keys to use with the Location Based Services APIs.
     long-summary: |
         List the keys to use with the Location Based Services APIs. A key is used to authenticate and authorize access to the Location Based Services REST APIs. Only one key is needed at a time; two are given to provide seamless key regeneration.
 """
 
-helps['locationbasedservices account key regenerate'] = """
+helps['locationbasedservices account keys renew'] = """
     type: command
-    short-summary: Regenerate either the primary or secondary key for use with the Location Based Services APIs.
+    short-summary: Renew either the primary or secondary key for use with the Location Based Services APIs.
     long-summary: |
-        Regenerate either the primary or secondary key for use with the Location Based Services APIs. The old key will stop working immediately.
+        Renew either the primary or secondary key for use with the Location Based Services APIs. The old key will stop working immediately.
 """

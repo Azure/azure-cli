@@ -18,6 +18,6 @@ def load_command_table(self, _):
         g.custom_command('create', 'create')
         g.command('delete', 'delete')
 
-    with self.command_group('locationbasedservices account key', mgmt_type) as g:
-        g.command('regenerate', 'regenerate_keys')
+    with self.command_group('locationbasedservices account keys', mgmt_type) as g:
+        g.command('renew', 'regenerate_keys')
         g.command('list', 'list_keys')

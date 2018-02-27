@@ -44,7 +44,7 @@ def load_arguments(self, _):
                    help='You agree to the Preview Terms. Ignore prompt for confirmation.',
                    action='store_true')
 
-    with self.argument_context('locationbasedservices account key regenerate') as c:
+    with self.argument_context('locationbasedservices account keys regenerate') as c:
         c.argument('key_type',
-                   options_list=['--type', '-t'],
+                   options_list=['--key'],
                    arg_type=get_enum_type(KeyType))

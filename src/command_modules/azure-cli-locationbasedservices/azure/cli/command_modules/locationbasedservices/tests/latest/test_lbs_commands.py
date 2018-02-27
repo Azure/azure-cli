@@ -103,7 +103,7 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
 
         # Test 'az locationbasedservices account key list'.
         # Test to list keys for an LocationBasedServices account.
-        account_key_list = self.cmd('az locationbasedservices account key list -n {name} -g {rg}', checks=[
+        account_key_list = self.cmd('az locationbasedservices account keys list -n {name} -g {rg}', checks=[
             self.check('id', account['id']),
             self.check('resourceGroup', '{rg}')
         ]).get_output_in_json()
@@ -117,7 +117,7 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
         # Test 'az locationbasedservices account key regenerate'.
         # Test to change primary and secondary keys for an LocationBasedServices account.
         key_regenerated = self.cmd(
-            'az locationbasedservices account key regenerate -n {name} -g {rg} -t {key_type_primary}', checks=[
+            'az locationbasedservices account keys renew -n {name} -g {rg} -t {key_type_primary}', checks=[
                 self.check('id', account['id']),
                 self.check('resourceGroup', '{rg}')
             ]).get_output_in_json()
@@ -129,7 +129,7 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
         # Save the new primary key, and regenerate the secondary key.
         primary_key_old = key_regenerated['primaryKey']
         key_regenerated = self.cmd(
-            'az locationbasedservices account key regenerate -n {name} -g {rg} -t {key_type_secondary}') \
+            'az locationbasedservices account keys renew -n {name} -g {rg} -t {key_type_secondary}') \
             .get_output_in_json()
         self.assertEqual(primary_key_old, key_regenerated['primaryKey'])
         self.assertNotEqual(secondary_key_old, key_regenerated['secondaryKey'])
