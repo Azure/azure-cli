@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.27
+++++++
+* Fix issue of missing endpoint suffix in batch copy command.
+
 2.0.26
 ++++++
 * Enabled specifying destination-path/prefix to blobs in batch upload and copy commands.
