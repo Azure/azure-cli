@@ -96,6 +96,10 @@ class AzHelpGenDirective(Directive):
                   if arg.choices:
                      yield '{}:values: {}'.format(DOUBLEINDENT, ', '.join(sorted([str(x) for x in arg.choices])))
                   if arg.default and arg.default != argparse.SUPPRESS:
+                     try:
+                         arg.default = arg.default.replace("\\", "\\\\")
+                     except Exception:
+                         pass
                      yield '{}:default: {}'.format(DOUBLEINDENT, arg.default)
                   if arg.value_sources:
                      yield '{}:source: {}'.format(DOUBLEINDENT, ', '.join(arg.value_sources))
