@@ -592,7 +592,7 @@ class Profile(object):
             else:  # try to sniff it
                 payload['client_id'] = identity_id
                 identity_id_type = _User_Assigned_Client_Id_type
-                result = requests.post(request_uri, data=payload, headers={'Metadata': 'true'})
+                result = requests.get(request_uri, params=payload, headers={'Metadata': 'true'})
                 if result.status_code != 200:
                     payload.pop('client_id')
                     payload['object_id'] = identity_id
@@ -612,7 +612,7 @@ class Profile(object):
         while True:
             err = None
             try:
-                result = requests.post(request_uri, data=payload, headers={'Metadata': 'true'})
+                result = requests.get(request_uri, params=payload, headers={'Metadata': 'true'})
                 logger.debug("MSI: Retrieving a token from %s, with payload %s", request_uri, payload)
                 if result.status_code != 200:
                     err = result.text
