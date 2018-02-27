@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.23
+++++++
+* Improve error handling of wincred fallback.
+
 2.0.22
 ++++++
 * Improve repository delete command with --image parameter to support docker image format.
