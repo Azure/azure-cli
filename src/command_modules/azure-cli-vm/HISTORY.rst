@@ -8,6 +8,7 @@ Release History
 * vm/vmss: author managed identity commands `identity assign/remove/show`, and deprecate `assign-identity/remove-identity`
 * vmss create: default priority to None
 * Support Autorest 3.0 based SDKs
+* BREAKING CHANGE: `vm unmanaged-disk list`, `vm extension list`, `vm secret list` no longer support `--ids`
 
 2.0.27
 ++++++
