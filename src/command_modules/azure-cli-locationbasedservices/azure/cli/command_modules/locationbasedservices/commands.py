@@ -13,11 +13,10 @@ def load_command_table(self, _):
         client_factory=cf_accounts)
 
     with self.command_group('locationbasedservices account', mgmt_type) as g:
-        g.command('show', 'get')
+        g.custom_command('show', 'get_account')
         g.custom_command('list', 'list_accounts')
-        g.custom_command('create', 'create')
+        g.custom_command('create', 'create_account')
         g.command('delete', 'delete')
-
     with self.command_group('locationbasedservices account keys', mgmt_type) as g:
         g.command('renew', 'regenerate_keys')
         g.command('list', 'list_keys')

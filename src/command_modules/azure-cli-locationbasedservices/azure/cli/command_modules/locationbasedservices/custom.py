@@ -9,11 +9,21 @@ from knack.util import CLIError
 
 from azure.mgmt.locationbasedservices.models import LocationBasedServicesAccountCreateParameters, Sku
 
+ACCOUNT_LOCATION = 'global'
+
 logger = get_logger(__name__)
 
 
 # pylint: disable=line-too-long
-def create(client, resource_group_name, account_name, sku_name='S0', tags=None, agree=None):
+def get_account(client, resource_group_name, account_name):
+    response = client.get(resource_group_name, account_name)
+    if response is None:
+        raise CLIError("The resource 'Microsoft.LocationBasedServices/accounts/" + account_name +
+                       "' under resource group '" + resource_group_name + "' was not found.")
+    return response
+
+
+def create_account(client, resource_group_name, account_name, sku_name='S0', tags=None, agree=None):
     """Create a Location Based Services Account. A Location Based
     Services Account holds the keys which allow access to the Location
     Based Services REST APIs.
@@ -44,16 +54,16 @@ def create(client, resource_group_name, account_name, sku_name='S0', tags=None, 
     warning_msg = 'By creating a Location Based Services account, you agree to the Microsoft Azure Preview Terms.' + \
                   '\nThe Preview Terms can be found at: ' + \
                   '\nhttps://azure.microsoft.com/en-us/support/legal/preview-supplemental-terms/'
-
     logger.warning(warning_msg)
-    if not agree:  # ... in order to pass tests
+
+    if not agree:  # ... in order to pass ScenarioTest
         response = prompt_y_n('I confirm that I have read and agree to the Microsoft Azure Preview Terms.')
         if not response:
             raise CLIError('You must agree to the Microsoft Azure Preview Terms to create an account.')
 
     # Proceed if user has agreed to the Preview Terms.
     sku = Sku(sku_name)
-    lbs_account_create_params = LocationBasedServicesAccountCreateParameters('global', sku, tags)
+    lbs_account_create_params = LocationBasedServicesAccountCreateParameters(ACCOUNT_LOCATION, sku, tags)
     return client.create_or_update(resource_group_name, account_name, lbs_account_create_params)
 
 
