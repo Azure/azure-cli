@@ -18,7 +18,7 @@ from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import shell_safe_json_parse
+from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args
 from azure.cli.core.profiles import ResourceType
 
 logger = get_logger(__name__)
@@ -430,31 +430,24 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
 
         # Handle no-wait
-        no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
-        no_wait_new_args = None
-        if no_wait_param:
-            if isinstance(no_wait_param, string_types):
+        supports_no_wait = cmd.command_kwargs.get('supports_no_wait', None)
+        if supports_no_wait:
+            no_wait_enabled = args.get('no_wait', False)
+            augment_no_wait_handler_args(no_wait_enabled,
+                                         setter,
+                                         setterargs)
+        else:
+            no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+            if no_wait_param:
                 setterargs[no_wait_param] = args[no_wait_param]
-            elif callable(no_wait_param):
-                # Get the dict from the callable if --no-wait is specified.
-                no_wait_new_args = no_wait_param(True)
-                if no_wait_new_args and isinstance(no_wait_new_args, dict):
-                    # Get the keys from this dict. The actual real values will come from args but we know the keys
-                    # that are used for no wait support in the setter.
-                    for k in no_wait_new_args.keys():
-                        if k in args:
-                            setterargs[k] = args[k]
 
         result = setter(**setterargs)
 
-        if no_wait_param:
-            # If no_wait_param is a string, we simply get the value from setterargs to know if --no-wait was specified
-            if isinstance(no_wait_param, string_types) and setterargs.get(no_wait_param, None):
-                return None
-            # If no_wait_param is a callable, get the args used to indicate --no-wait was specified and check all their
-            # values are as expected. If not, --no-wait was not specified.
-            elif callable(no_wait_param) and no_wait_new_args and \
-                    all(k in setterargs and setterargs[k] == v for k, v in no_wait_new_args.items()):
+        if supports_no_wait and no_wait_enabled:
+            return None
+        else:
+            no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+            if no_wait_param and setterargs.get(no_wait_param, None):
                 return None
 
         if _is_poller(result):

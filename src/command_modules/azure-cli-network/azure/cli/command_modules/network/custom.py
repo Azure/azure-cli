@@ -17,7 +17,7 @@ from azure.mgmt.trafficmanager.models import MonitorProtocol
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 
-from azure.cli.core.util import CLIError, no_wait_params
+from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.network._client_factory import network_client_factory
 from azure.cli.command_modules.network._util import _get_property, _set_param
 
@@ -213,7 +213,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
 
-    return client.create_or_update(resource_group_name, deployment_name, properties, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
 
 
 def update_application_gateway(instance, sku=None, capacity=None, tags=None, enable_http2=None):
@@ -236,7 +236,7 @@ def create_ag_authentication_certificate(cmd, resource_group_name, application_g
     ag = ncf.get(resource_group_name, application_gateway_name)
     new_cert = AuthCert(data=cert_data, name=item_name)
     _upsert(ag, 'authentication_certificates', new_cert, 'name')
-    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 
 
 def update_ag_authentication_certificate(instance, parent, item_name, cert_data):
@@ -251,8 +251,8 @@ def create_ag_backend_address_pool(cmd, resource_group_name, application_gateway
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_pool = ApplicationGatewayBackendAddressPool(name=item_name, backend_addresses=servers)
     _upsert(ag, 'backend_address_pools', new_pool, 'name')
-    return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
+                       resource_group_name, application_gateway_name, ag)
 
 
 def update_ag_backend_address_pool(instance, parent, item_name, servers=None):
@@ -280,8 +280,8 @@ def create_ag_frontend_ip_configuration(cmd, resource_group_name, application_ga
             private_ip_allocation_method='Static' if private_ip_address else 'Dynamic',
             subnet=SubResource(id=subnet))
     _upsert(ag, 'frontend_ip_configurations', new_config, 'name')
-    return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
+                       resource_group_name, application_gateway_name, ag)
 
 
 def update_ag_frontend_ip_configuration(cmd, instance, parent, item_name, public_ip_address=None,
@@ -305,8 +305,8 @@ def create_ag_frontend_port(cmd, resource_group_name, application_gateway_name, 
     ag = ncf.application_gateways.get(resource_group_name, application_gateway_name)
     new_port = ApplicationGatewayFrontendPort(name=item_name, port=port)
     _upsert(ag, 'frontend_ports', new_port, 'name')
-    return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
+                       resource_group_name, application_gateway_name, ag)
 
 
 def update_ag_frontend_port(instance, parent, item_name, port=None):
@@ -332,8 +332,8 @@ def create_ag_http_listener(cmd, resource_group_name, application_gateway_name, 
         protocol='https' if ssl_cert else 'http',
         ssl_certificate=SubResource(id=ssl_cert) if ssl_cert else None)
     _upsert(ag, 'http_listeners', new_listener, 'name')
-    return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
+                       resource_group_name, application_gateway_name, ag)
 
 
 def update_ag_http_listener(cmd, instance, parent, item_name, frontend_ip=None, frontend_port=None,
@@ -383,8 +383,8 @@ def create_ag_backend_http_settings_collection(cmd, resource_group_name, applica
         new_settings.probe_enabled = enable_probe
         new_settings.path = path
     _upsert(ag, 'backend_http_settings_collection', new_settings, 'name')
-    return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
+                       resource_group_name, application_gateway_name, ag)
 
 
 def update_ag_backend_http_settings_collection(cmd, instance, parent, item_name, port=None, probe=None, protocol=None,
@@ -434,8 +434,7 @@ def create_ag_redirect_configuration(cmd, resource_group_name, application_gatew
         include_path=include_path,
         include_query_string=include_query_string)
     _upsert(ag, 'redirect_configurations', new_config, 'name')
-    return ncf.create_or_update(
-        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 
 
 def update_ag_redirect_configuration(cmd, instance, parent, item_name, redirect_type=None,
@@ -478,8 +477,8 @@ def create_ag_probe(cmd, resource_group_name, application_gateway_name, item_nam
         new_probe.match = ProbeMatchCriteria(body=match_body, status_codes=match_status_codes)
 
     _upsert(ag, 'probes', new_probe, 'name')
-    return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
+                       resource_group_name, application_gateway_name, ag)
 
 
 def update_ag_probe(cmd, instance, parent, item_name, protocol=None, host=None, path=None,
@@ -535,8 +534,8 @@ def create_ag_request_routing_rule(cmd, resource_group_name, application_gateway
     if cmd.supported_api_version(min_api='2017-06-01'):
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else None
     _upsert(ag, 'request_routing_rules', new_rule, 'name')
-    return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
+                       resource_group_name, application_gateway_name, ag)
 
 
 def update_ag_request_routing_rule(cmd, instance, parent, item_name, address_pool=None,
@@ -566,8 +565,8 @@ def create_ag_ssl_certificate(cmd, resource_group_name, application_gateway_name
     new_cert = ApplicationGatewaySslCertificate(
         name=item_name, data=cert_data, password=cert_password)
     _upsert(ag, 'ssl_certificates', new_cert, 'name')
-    return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
+                       resource_group_name, application_gateway_name, ag)
 
 
 def update_ag_ssl_certificate(instance, parent, item_name, cert_data=None, cert_password=None):
@@ -585,7 +584,7 @@ def set_ag_ssl_policy_2017_03_01(cmd, resource_group_name, application_gateway_n
     ag = ncf.get(resource_group_name, application_gateway_name)
     ag.ssl_policy = None if clear else ApplicationGatewaySslPolicy(
         disabled_ssl_protocols=disabled_ssl_protocols)
-    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 
 
 def set_ag_ssl_policy_2017_06_01(cmd, resource_group_name, application_gateway_name, policy_name=None, policy_type=None,
@@ -606,7 +605,7 @@ def set_ag_ssl_policy_2017_06_01(cmd, resource_group_name, application_gateway_n
         disabled_ssl_protocols=disabled_ssl_protocols,
         cipher_suites=cipher_suites,
         min_protocol_version=min_protocol_version)
-    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 
 
 def show_ag_ssl_policy(cmd, resource_group_name, application_gateway_name):
@@ -651,8 +650,8 @@ def create_ag_url_path_map(cmd, resource_group_name, application_gateway_name, i
 
     new_map.path_rules.append(new_rule)
     _upsert(ag, 'url_path_maps', new_map, 'name')
-    return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
+                       resource_group_name, application_gateway_name, ag)
 
 
 def update_ag_url_path_map(cmd, instance, parent, item_name, default_address_pool=None,
@@ -698,8 +697,8 @@ def create_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
             if url_map.default_redirect_configuration else None
         new_rule.redirect_configuration = SubResource(id=redirect_config) if redirect_config else default_redirect
     _upsert(url_map, 'path_rules', new_rule, 'name')
-    return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
+                       resource_group_name, application_gateway_name, ag)
 
 
 def delete_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_name, url_path_map_name,
@@ -711,8 +710,8 @@ def delete_ag_url_path_map_rule(cmd, resource_group_name, application_gateway_na
         raise CLIError('URL path map "{}" not found.'.format(url_path_map_name))
     url_map.path_rules = \
         [x for x in url_map.path_rules if x.name.lower() != item_name.lower()]
-    return ncf.application_gateways.create_or_update(
-        resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.application_gateways.create_or_update,
+                       resource_group_name, application_gateway_name, ag)
 
 
 def set_ag_waf_config_2016_09_01(cmd, resource_group_name, application_gateway_name, enabled,
@@ -726,7 +725,7 @@ def set_ag_waf_config_2016_09_01(cmd, resource_group_name, application_gateway_n
         ApplicationGatewayWebApplicationFirewallConfiguration(
             enabled=(enabled == 'true'), firewall_mode=firewall_mode)
 
-    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 
 
 def set_ag_waf_config_2017_03_01(cmd, resource_group_name, application_gateway_name, enabled,
@@ -770,7 +769,7 @@ def set_ag_waf_config_2017_03_01(cmd, resource_group_name, application_gateway_n
                     disabled_groups.append(disabled_group)
         ag.web_application_firewall_configuration.disabled_rule_groups = disabled_groups
 
-    return ncf.create_or_update(resource_group_name, application_gateway_name, ag, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, application_gateway_name, ag)
 
 
 def show_ag_waf_config(cmd, resource_group_name, application_gateway_name):
@@ -1348,7 +1347,7 @@ def create_express_route(cmd, circuit_name, resource_group_name, bandwidth_in_mb
             bandwidth_in_mbps=bandwidth_in_mbps),
         sku=ExpressRouteCircuitSku(name=sku_name, tier=sku_tier, family=sku_family)
     )
-    return client.create_or_update(resource_group_name, circuit_name, circuit, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, circuit_name, circuit)
 
 
 def update_express_route(instance, bandwidth_in_mbps=None, peering_location=None,
@@ -1583,7 +1582,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
 
-    return client.create_or_update(resource_group_name, deployment_name, properties, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties)
 
 
 def create_lb_inbound_nat_rule(
@@ -1839,8 +1838,8 @@ def create_local_gateway(cmd, resource_group_name, local_network_gateway_name, g
     if bgp_peering_address or asn or peer_weight:
         local_gateway.bgp_settings = BgpSettings(asn=asn, bgp_peering_address=bgp_peering_address,
                                                  peer_weight=peer_weight)
-    return client.create_or_update(
-        resource_group_name, local_network_gateway_name, local_gateway, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name, local_network_gateway_name, local_gateway)
 
 
 def update_local_gateway(cmd, instance, gateway_ip_address=None, local_address_prefix=None, asn=None,
@@ -2424,7 +2423,7 @@ def start_nw_troubleshooting(cmd, client, watcher_name, watcher_rg, resource, st
     TroubleshootingParameters = cmd.get_models('TroubleshootingParameters')
     params = TroubleshootingParameters(target_resource_id=resource, storage_id=storage_account,
                                        storage_path=storage_path)
-    return client.get_troubleshooting(watcher_rg, watcher_name, params, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, client.get_troubleshooting, watcher_rg, watcher_name, params)
 
 
 def show_nw_troubleshooting_result(client, watcher_name, watcher_rg, resource, resource_type=None,
@@ -2926,8 +2925,8 @@ def create_vnet_gateway(cmd, resource_group_name, virtual_network_gateway_name, 
             vnet_gateway.vpn_client_configuration.radius_server_address = radius_server
             vnet_gateway.vpn_client_configuration.radius_server_secret = radius_secret
 
-    return client.create_or_update(
-        resource_group_name, virtual_network_gateway_name, vnet_gateway, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name, virtual_network_gateway_name, vnet_gateway)
 
 
 def update_vnet_gateway(cmd, instance, sku=None, vpn_type=None, tags=None,
@@ -3199,8 +3198,8 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
         _log_pprint_template(template)
         return client.validate(resource_group_name, deployment_name, properties)
 
-    return client.create_or_update(
-        resource_group_name, deployment_name, properties, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       resource_group_name, deployment_name, properties)
 
 
 def update_vpn_connection(cmd, instance, routing_weight=None, shared_key=None, tags=None,
@@ -3259,7 +3258,7 @@ def add_vpn_conn_ipsec_policy(cmd, resource_group_name, connection_name,
         conn.ipsec_policies.append(new_policy)
     else:
         conn.ipsec_policies = [new_policy]
-    return ncf.create_or_update(resource_group_name, connection_name, conn, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, connection_name, conn)
 
 
 def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_wait=False):
@@ -3268,10 +3267,10 @@ def clear_vpn_conn_ipsec_policies(cmd, resource_group_name, connection_name, no_
     conn.ipsec_policies = None
     conn.use_policy_based_traffic_selectors = False
     if no_wait:
-        return ncf.create_or_update(resource_group_name, connection_name, conn, **no_wait_params(no_wait))
+        return sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, connection_name, conn)
 
     from azure.cli.core.commands import LongRunningOperation
-    poller = ncf.create_or_update(resource_group_name, connection_name, conn, **no_wait_params(no_wait))
+    poller = sdk_no_wait(no_wait, ncf.create_or_update, resource_group_name, connection_name, conn)
     return LongRunningOperation(cmd.cli_ctx)(poller).ipsec_policies
 
 

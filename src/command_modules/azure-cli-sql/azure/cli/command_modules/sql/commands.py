@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.util import no_wait_params
 
 from ._util import (
     get_sql_server_azure_ad_administrators_operations,
@@ -75,7 +74,7 @@ def load_command_table(self, _):
         g.command('show', 'get')
         g.custom_command('list', 'db_list')
         g.command('delete', 'delete', confirmation=True)
-        g.generic_update_command('update', custom_func_name='db_update', no_wait_param=no_wait_params)
+        g.generic_update_command('update', custom_func_name='db_update', supports_no_wait=True)
         g.custom_command('import', 'db_import')
         g.custom_command('export', 'db_export')
 
@@ -89,7 +88,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.command('pause', 'pause')
         g.command('resume', 'resume')
-        g.generic_update_command('update', custom_func_name='dw_update', no_wait_param=no_wait_params)
+        g.generic_update_command('update', custom_func_name='dw_update', supports_no_wait=True)
 
     database_operations_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations.database_operations#DatabaseOperations.{}',

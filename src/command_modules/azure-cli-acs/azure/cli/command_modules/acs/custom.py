@@ -41,7 +41,7 @@ from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
-from azure.cli.core.util import shell_safe_json_parse, truncate_text, no_wait_params
+from azure.cli.core.util import shell_safe_json_parse, truncate_text, sdk_no_wait
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
                                     KeyCredential,
@@ -881,7 +881,7 @@ def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, 
         logger.info(json.dumps(template, indent=2))
         logger.info('==== END TEMPLATE ====')
         return smc.validate(resource_group_name, deployment_name, properties)
-    return smc.create_or_update(resource_group_name, deployment_name, properties, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, smc.create_or_update, resource_group_name, deployment_name, properties)
 
 
 def k8s_get_credentials(cmd, client, name, resource_group_name,
@@ -1325,8 +1325,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     retry_exception = Exception(None)
     for _ in range(0, max_retry):
         try:
-            return client.create_or_update(
-                resource_group_name=resource_group_name, resource_name=name, parameters=mc, **no_wait_params(no_wait))
+            return sdk_no_wait(no_wait, client.create_or_update,
+                               resource_group_name=resource_group_name, resource_name=name, parameters=mc)
         except CloudError as ex:
             retry_exception = ex
             if 'not found in Active Directory tenant' in ex.message:
@@ -1374,7 +1374,7 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, no_wait=False)
     # null out the service principal because otherwise validation complains
     instance.service_principal_profile = None
 
-    return client.create_or_update(resource_group_name, name, instance, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
 def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
@@ -1384,7 +1384,7 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
     # null out the service principal because otherwise validation complains
     instance.service_principal_profile = None
 
-    return client.create_or_update(resource_group_name, name, instance, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
 def _ensure_aks_service_principal(cli_ctx,

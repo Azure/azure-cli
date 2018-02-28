@@ -19,7 +19,7 @@ from msrest.serialization import Deserializer
 import azure.mgmt.batchai.models as models
 
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
-from azure.cli.core.util import should_disable_connection_verify, no_wait_params
+from azure.cli.core.util import should_disable_connection_verify, sdk_no_wait
 
 
 # Environment variables for specifying azure storage account and key. We want the user to make explicit
@@ -352,7 +352,7 @@ def create_cluster(cmd, client,  # pylint: disable=too-many-locals
         params = _add_azure_container_to_cluster_create_parameters(cmd.cli_ctx, params, container_name,
                                                                    container_mount_path, account_name, account_key)
 
-    return client.clusters.create(resource_group, cluster_name, params, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, client.clusters.create, resource_group, cluster_name, params)
 
 
 def list_clusters(client, resource_group=None):
@@ -388,7 +388,7 @@ def create_job(client, resource_group, job_name, json_file, location=None, clust
             params.cluster = models.ResourceId(cluster.id)
         if params.cluster is None:
             raise CLIError('Please provide cluster information via command line or configuration file.')
-        return client.jobs.create(resource_group, job_name, params, **no_wait_params(no_wait))
+        return sdk_no_wait(no_wait, client.jobs.create, resource_group, job_name, params)
 
 
 def list_jobs(client, resource_group=None):
@@ -473,7 +473,7 @@ def create_file_server(client, resource_group, file_server_name, json_file=None,
         parameters.vm_size = vm_size
     if not parameters.vm_size:
         raise CLIError('Please provide VM size.')
-    return client.create(resource_group, file_server_name, parameters, **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, client.create, resource_group, file_server_name, parameters)
 
 
 def list_file_servers(client, resource_group=None):

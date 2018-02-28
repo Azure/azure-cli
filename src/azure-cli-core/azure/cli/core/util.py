@@ -235,8 +235,20 @@ def poller_classes():
     return (AzureOperationPoller, LROPoller)
 
 
-def no_wait_params(is_no_wait):
-    """ Handle the parameters required for no-wait support in Autorest 2 & 3 """
-    if is_no_wait:
-        return {'raw': True, 'polling': False}
-    return {}
+def augment_no_wait_handler_args(no_wait_enabled, handler, handler_args):
+    """ Populates handler_args with the appropriate args for no wait """
+    h_args = get_arg_list(handler)
+    if 'no_wait' in h_args:
+        handler_args['no_wait'] = no_wait_enabled
+    if 'raw' in h_args and no_wait_enabled:
+        # support autorest 2
+        handler_args['raw'] = True
+    if 'polling' in h_args and no_wait_enabled:
+        # support autorest 3
+        handler_args['polling'] = False
+
+
+def sdk_no_wait(no_wait, func, *args, **kwargs):
+    if no_wait:
+        kwargs.update({'raw': True, 'polling': False})
+    return func(*args, **kwargs)

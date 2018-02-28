@@ -18,7 +18,7 @@ except ImportError:
 
 from msrestazure.azure_exceptions import CloudError
 
-from azure.cli.core.util import CLIError, get_file_json, b64_to_hex, no_wait_params
+from azure.cli.core.util import CLIError, get_file_json, b64_to_hex, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac import GraphRbacManagementClient
 from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
@@ -1302,9 +1302,10 @@ def _deploy_arm_template_core(cli_ctx,
         template=template, template_link=None, parameters=parameters, mode=mode)
     client = resource_client_factory(cli_ctx)
     if validate_only:
-        return client.deployments.validate(resource_group_name, deployment_name, properties, **no_wait_params(no_wait))
+        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name, properties)
 
-    deploy_poll = client.deployments.create_or_update(resource_group_name, deployment_name, properties, **no_wait_params(no_wait))
+    deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name,
+                              deployment_name, properties)
     result = LongRunningOperation(cli_ctx)(deploy_poll)
     return result
 

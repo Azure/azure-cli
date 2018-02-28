@@ -21,7 +21,7 @@ from azure.mgmt.recoveryservicesbackup.models import ProtectedItemResource, Azur
     IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, OperationStatusValues, \
     JobStatus, ILRRequestResource, IaasVMILRRegistrationRequest
 
-from azure.cli.core.util import CLIError, no_wait_params
+from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
@@ -169,8 +169,8 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
     vm_item = ProtectedItemResource(properties=vm_item_properties)
 
     # Trigger enable protection and wait for completion
-    result = client.create_or_update(vault_name, resource_group_name, fabric_name, container_uri, item_uri, vm_item,
-                                     **no_wait_params(True))
+    result = sdk_no_wait(True, client.create_or_update,
+                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, vm_item)
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -227,8 +227,8 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, contain
     vm_item = ProtectedItemResource(properties=vm_item_properties)
 
     # Update policy
-    result = client.create_or_update(vault_name, resource_group_name, fabric_name, container_uri, item_uri, vm_item,
-                                     **no_wait_params(True))
+    result = sdk_no_wait(True, client.create_or_update,
+                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, vm_item)
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -244,8 +244,9 @@ def backup_now(cmd, client, resource_group_name, vault_name, container_name, ite
     trigger_backup_request = _get_backup_request(item.properties.workload_type, retain_until)
 
     # Trigger backup
-    result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
-                            trigger_backup_request, **no_wait_params(True))
+    result = sdk_no_wait(True, client.trigger,
+                         vault_name, resource_group_name, fabric_name, container_uri, item_uri,
+                         trigger_backup_request)
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -353,8 +354,9 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
     # Trigger restore
-    result = client.trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
-                            trigger_restore_request, **no_wait_params(True))
+    result = sdk_no_wait(True, client.trigger,
+                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
+                         trigger_restore_request)
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -379,8 +381,9 @@ def restore_files_mount_rp(cmd, client, resource_group_name, vault_name, contain
     if recovery_point.properties.is_instant_ilr_session_active:
         recovery_point.properties.renew_existing_registration = True
 
-    result = client.provision(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
-                              file_restore_request, **no_wait_params(True))
+    result = sdk_no_wait(True, client.provision,
+                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
+                         file_restore_request)
 
     client_scripts = _track_backup_ilr(cmd.cli_ctx, result, vault_name, resource_group_name)
 
@@ -403,8 +406,8 @@ def restore_files_unmount_rp(cmd, client, resource_group_name, vault_name, conta
                                                          container_uri, item_uri, rp_name)
 
     if recovery_point.properties.is_instant_ilr_session_active:
-        result = client.revoke(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
-                               **no_wait_params(True))
+        result = sdk_no_wait(True, client.revoke,
+                             vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name)
         _track_backup_operation(cmd.cli_ctx, resource_group_name, result, vault_name)
 
 
@@ -420,14 +423,14 @@ def disable_protection(cmd, client, resource_group_name, vault_name, container_n
 
     # Trigger disable protection and wait for completion
     if delete_backup_data:
-        result = client.delete(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
-                               **no_wait_params(True))
+        result = sdk_no_wait(True, client.delete,
+                             vault_name, resource_group_name, fabric_name, container_uri, item_uri)
         return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
     vm_item = _get_disable_protection_request(item)
 
-    result = client.create_or_update(vault_name, resource_group_name, fabric_name, container_uri, item_uri, vm_item,
-                                     **no_wait_params(True))
+    result = sdk_no_wait(True, client.create_or_update,
+                         vault_name, resource_group_name, fabric_name, container_uri, item_uri, vm_item)
     return _track_backup_job(cmd.cli_ctx, result, vault_name, resource_group_name)
 
 
@@ -487,7 +490,8 @@ def _get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg):
     protectable_item = _try_get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg)
     if protectable_item is None:
         # Protectable item not found. Trigger discovery.
-        refresh_result = protection_containers_client.refresh(vault_name, vault_rg, fabric_name, **no_wait_params(True))
+        refresh_result = sdk_no_wait(True, protection_containers_client.refresh,
+                                     vault_name, vault_rg, fabric_name)
         _track_refresh_operation(cli_ctx, refresh_result, vault_name, vault_rg)
     protectable_item = _try_get_protectable_item_for_vm(cli_ctx, vault_name, vault_rg, vm_name, vm_rg)
     return protectable_item
@@ -705,12 +709,12 @@ def _track_refresh_operation(cli_ctx, result, vault_name, resource_group):
     protection_container_refresh_operation_results_client = protection_container_refresh_operation_results_cf(cli_ctx)
 
     operation_id = _get_operation_id_from_header(result.response.headers['Location'])
-    result = protection_container_refresh_operation_results_client.get(vault_name, resource_group, fabric_name,
-                                                                       operation_id, **no_wait_params(True))
+    result = sdk_no_wait(True, protection_container_refresh_operation_results_client.get,
+                         vault_name, resource_group, fabric_name, operation_id)
     while result.response.status_code == 202:
         time.sleep(1)
-        result = protection_container_refresh_operation_results_client.get(vault_name, resource_group, fabric_name,
-                                                                           operation_id, **no_wait_params(True))
+        result = sdk_no_wait(True, protection_container_refresh_operation_results_client.get,
+                             vault_name, resource_group, fabric_name, operation_id)
 
 
 def _job_in_progress(job_status):

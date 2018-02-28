@@ -30,15 +30,13 @@ CLI_COMMON_KWARGS = ['min_api', 'max_api', 'resource_type', 'operation_group',
                      'custom_command_type', 'command_type']
 
 CLI_COMMAND_KWARGS = ['transform', 'table_transformer', 'confirmation', 'exception_handler',
-                      'client_factory', 'operations_tmpl', 'no_wait_param', 'validator',
+                      'client_factory', 'operations_tmpl', 'no_wait_param', 'supports_no_wait', 'validator',
                       'client_arg_name', 'doc_string_source', 'deprecate_info'] + CLI_COMMON_KWARGS
 CLI_PARAM_KWARGS = \
     ['id_part', 'completer', 'validator', 'options_list', 'configured_default', 'arg_group', 'arg_type'] \
     + CLI_COMMON_KWARGS + ARGPARSE_SUPPORTED_KWARGS
 
 CONFIRM_PARAM_NAME = 'yes'
-
-NO_WAIT_PARAM_DEST_CALLABLE = '_no_wait_dest_for_callable'
 
 # 1 hour in milliseconds
 DEFAULT_QUERY_TIME_RANGE = 3600000
@@ -123,6 +121,7 @@ class AzCliCommand(CLICommand):
         self.loader = loader
         self.command_source = None
         self.no_wait_param = kwargs.get('no_wait_param', None)
+        self.supports_no_wait = kwargs.get('supports_no_wait', False)
         self.exception_handler = kwargs.get('exception_handler', None)
         self.confirmation = kwargs.get('confirmation', False)
         self.command_kwargs = kwargs
@@ -150,14 +149,11 @@ class AzCliCommand(CLICommand):
         super(AzCliCommand, self).load_arguments()
         if self.arguments_loader:
             cmd_args = self.arguments_loader()
-            if self.no_wait_param:
-                if isinstance(self.no_wait_param, six.string_types):
+            if self.supports_no_wait or self.no_wait_param:
+                if self.supports_no_wait:
+                    no_wait_param_dest = 'no_wait'
+                elif self.no_wait_param:
                     no_wait_param_dest = self.no_wait_param
-                elif callable(self.no_wait_param):
-                    no_wait_param_dest = NO_WAIT_PARAM_DEST_CALLABLE
-                else:
-                    raise ValueError("command authoring error: invalid type for no_wait_param "
-                                     "{}".format(self.no_wait_param))
                 cmd_args.append(
                     (no_wait_param_dest,
                      CLICommandArgument(no_wait_param_dest, options_list=['--no-wait'], action='store_true',
@@ -300,8 +296,6 @@ class AzCliCommandInvoker(CommandInvoker):
 
             self._validation(expanded_arg)
 
-            self._augment_no_wait_params(expanded_arg, cmd)
-
             params = self._filter_params(expanded_arg)
 
             command_source = self.commands_loader.command_table[command].command_source
@@ -323,14 +317,10 @@ class AzCliCommandInvoker(CommandInvoker):
 
             try:
                 result = cmd(params)
-                no_wait_param = cmd.no_wait_param
-                if no_wait_param:
-                    if hasattr(expanded_arg, NO_WAIT_PARAM_DEST_CALLABLE) and \
-                            getattr(expanded_arg, NO_WAIT_PARAM_DEST_CALLABLE):
-                        result = None
-                    elif not hasattr(expanded_arg, NO_WAIT_PARAM_DEST_CALLABLE) and \
-                            getattr(expanded_arg, no_wait_param, False):
-                        result = None
+                if cmd.supports_no_wait and getattr(expanded_arg, 'no_wait', False):
+                    result = None
+                elif cmd.no_wait_param and getattr(expanded_arg, cmd.no_wait_param, False):
+                    result = None
 
                 # TODO: Not sure how to make this actually work with the TRANSFORM event...
                 transform_op = cmd.command_kwargs.get('transform', None)
@@ -363,14 +353,6 @@ class AzCliCommandInvoker(CommandInvoker):
             results,
             table_transformer=self.commands_loader.command_table[parsed_args.command].table_transformer,
             is_query_active=self.data['query_active'])
-
-    def _augment_no_wait_params(self, expanded_arg, cmd):  # pylint: disable=no-self-use
-        if hasattr(expanded_arg, NO_WAIT_PARAM_DEST_CALLABLE) and hasattr(cmd, 'no_wait_param') and \
-                callable(cmd.no_wait_param):
-            new_args = cmd.no_wait_param(getattr(expanded_arg, NO_WAIT_PARAM_DEST_CALLABLE))  # pylint: disable=protected-access
-            if new_args and isinstance(new_args, dict):
-                for k, v in new_args.items():
-                    setattr(expanded_arg, k, v)
 
     def _build_kwargs(self, func, ns):  # pylint: disable=no-self-use
         from azure.cli.core.util import get_arg_list
@@ -719,8 +701,9 @@ class AzCommandGroup(CommandGroup):
             - confirmation: Prompt prior to the action being executed. This is useful if the action
                             would cause a loss of data. (bool)
             - exception_handler: Exception handler for handling non-standard exceptions (function)
-            - no_wait_param: The name of a boolean parameter that will be exposed as `--no-wait` to skip long-running
-              operation polling OR a callable taking one boolean argument that returns a dictionary.
+            - supports_no_wait: The command supports no wait. (bool)
+            - no_wait_param: [deprecated] The name of a boolean parameter that will be exposed as `--no-wait`
+              to skip long-running operation polling. (string)
             - transform: Transform function for transforming the output of the command (function)
             - table_transformer: Transform function or JMESPath query to be applied to table output to create a
                                  better output format for tables. (function or string)
@@ -750,8 +733,9 @@ class AzCommandGroup(CommandGroup):
             - confirmation: Prompt prior to the action being executed. This is useful if the action
                             would cause a loss of data. (bool)
             - exception_handler: Exception handler for handling non-standard exceptions (function)
-            - no_wait_param: The name of a boolean parameter that will be exposed as `--no-wait` to skip long
-              running operation polling OR a callable taking one boolean argument that returns a dictionary.
+            - supports_no_wait: The command supports no wait. (bool)
+            - no_wait_param: [deprecated] The name of a boolean parameter that will be exposed as `--no-wait`
+              to skip long running operation polling. (string)
             - transform: Transform function for transforming the output of the command (function)
             - table_transformer: Transform function or JMESPath query to be applied to table output to create a
                                  better output format for tables. (function or string)

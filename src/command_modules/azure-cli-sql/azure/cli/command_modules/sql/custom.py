@@ -14,7 +14,7 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)
-from azure.cli.core.util import CLIError, no_wait_params
+from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.mgmt.sql.models.server_key import ServerKey
 from azure.mgmt.sql.models.encryption_protector import EncryptionProtector
 from azure.mgmt.sql.models.resource_identity import ResourceIdentity
@@ -208,12 +208,11 @@ def _db_dw_create(
         resource_group_name=db_id.resource_group_name)
 
     # Create
-    return client.create_or_update(
-        server_name=db_id.server_name,
-        resource_group_name=db_id.resource_group_name,
-        database_name=db_id.database_name,
-        parameters=kwargs,
-        **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       server_name=db_id.server_name,
+                       resource_group_name=db_id.resource_group_name,
+                       database_name=db_id.database_name,
+                       parameters=kwargs)
 
 
 # Creates a database. Wrapper function which uses the server location so that the user doesn't
@@ -260,12 +259,11 @@ def _db_create_special(
     kwargs['source_database_id'] = source_db.id()
 
     # Create
-    return client.create_or_update(
-        server_name=dest_db.server_name,
-        resource_group_name=dest_db.resource_group_name,
-        database_name=dest_db.database_name,
-        parameters=kwargs,
-        **no_wait_params(no_wait))
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       server_name=dest_db.server_name,
+                       resource_group_name=dest_db.resource_group_name,
+                       database_name=dest_db.database_name,
+                       parameters=kwargs)
 
 
 # Copies a database. Wrapper function to make create mode more convenient.

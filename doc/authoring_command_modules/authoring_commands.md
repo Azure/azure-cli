@@ -159,9 +159,29 @@ Since most wait commands rely on a simple GET call from the SDK, most of these e
 
 **(4) Supporting --no-wait**
 
-When registering a command, the `no_wait_param` can be used to specify the parameter(s) to be passed to your command handler.
+When registering a command, the boolean `supports_no_wait` property can be used to specify that the command supports `--no-wait`.
 
-***no_wait_param as a string***
+For commands that point to autorest based SDKs, that's it. Your command now supports `--no-wait`.
+
+For custom commands, a boolean `no_wait` parameter will be exposed on your command. Handle this as desired in your command.
+
+
+***Custom command Azure SDK calls***
+
+Instead of this:
+
+```Python
+client.create_or_update(..., raw=no_wait)
+```
+
+Use this:
+
+```Python
+from azure.cli.core.util import sdk_no_wait
+sdk_no_wait(no_wait, client.create_or_update, ...)
+```
+
+***The deprecated no_wait_param***
 
 ```Python
 command(..., no_wait_param='no_wait')
@@ -171,24 +191,6 @@ command(..., no_wait_param='no_wait')
 This is the most straightforward way to use `no_wait_param`.
 
 In the example above, we specify that if `--no-wait` is passed on the command line, the CLI should set the `no_wait` argument to `True` when calling our command handler.
-
-***no_wait_param as a callable***
-
-```Python
-
-def my_no_wait_callable(is_no_wait):
-    if is_no_wait:
-        return {'arg_1': True, 'arg_2': False}
-    return {'arg_1': False, 'arg_2': True}
-
-command(..., no_wait_param=my_no_wait_callable)
-```
-
-`no_wait_param` is a callable that takes one boolean argument as input and returns a dictionary with key being the name of the argument on the command handler and key being the value to pass in for this argument.
-
-This is useful when to support `--no-wait` in your command handler, multiple arguments need to be specified.
-
-For most cases, such as Autorest based SDKs, the following utility method should be sufficient `from azure.cli.core.util import no_wait_params`.
 
 
 ## Write Help Entry
