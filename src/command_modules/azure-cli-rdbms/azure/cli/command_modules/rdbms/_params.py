@@ -41,21 +41,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('source_server_id', options_list=['--source-server', '-s'], help='The name or ID of the source server to restore from.')
             c.argument('restore_point_in_time', help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
 
-        with self.argument_context('{} server georestore'. format(command_group)) as c:
-            c.expand('sku', engine.models.Sku)
-            c.ignore('size', 'family', 'capacity', 'tier')
-
-            c.expand('storage_profile', engine.models.StorageProfile)
-            c.ignore('storage_mb')
-
-            c.expand('properties', engine.models.ServerPropertiesForGeoRestore)
-            c.ignore('version', 'ssl_enforcement')
-
-            c.expand('parameters', engine.models.ServerForCreate)
-            c.ignore('tags')
-
-            c.argument('source_server_id', options_list=['--source-server', '-s'], help='The name or ID of the source server to restore from.')
-
         with self.argument_context('{} server configuration set'.format(command_group)) as c:
             c.argument('value', help='Value of the configuration. If not provided, configuration value will be set to default.', validator=configuration_value_validator)
             c.ignore('source')

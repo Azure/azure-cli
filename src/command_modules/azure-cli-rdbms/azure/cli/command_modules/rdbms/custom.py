@@ -44,36 +44,6 @@ def _server_restore(cmd, client, resource_group_name, server_name, parameters, n
     return client.create(resource_group_name, server_name, parameters, raw=no_wait)
 
 
-# need to replace source sever name with source server id, so customer server restore function
-# The parameter list should be the same as that in factory to use the ParametersContext
-# auguments and validators
-def _server_georestore(cmd, client, resource_group_name, server_name, parameters, no_wait=False, **kwargs):
-    source_server = kwargs['source_server_id']
-
-    if not is_valid_resource_id(source_server):
-        if len(source_server.split('/')) == 1:
-            provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
-            source_server = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
-                                        resource_group=resource_group_name,
-                                        namespace=provider,
-                                        type='servers',
-                                        name=source_server)
-        else:
-            raise ValueError('The provided source-server {} is invalid.'.format(source_server))
-
-    parameters.properties.source_server_id = source_server
-
-    id_parts = parse_resource_id(source_server)
-    try:
-        source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
-        if parameters.sku.name is None:
-            parameters.sku.name = source_server_object.sku.name
-    except Exception as e:
-        raise ValueError('Unable to get source server: {}.'.format(str(e)))
-
-    return client.create(resource_group_name, server_name, parameters, raw=no_wait)
-
-
 def _server_update_custom_func(instance,
                                capacity=None,
                                storage_mb=None,
