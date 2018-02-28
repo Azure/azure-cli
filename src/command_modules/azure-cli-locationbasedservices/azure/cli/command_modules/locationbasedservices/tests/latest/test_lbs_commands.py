@@ -137,7 +137,6 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
         # Test 'az locationbasedservices account delete'.
         # Test to remove an LocationBasedServices account.
         self.cmd('az locationbasedservices account delete -n {name} -g {rg}', checks=self.is_empty())
-        self.cmd('az locationbasedservices account show -n {name} -g {rg}', checks=self.is_empty())
         self.cmd('az locationbasedservices account list -g {rg}', checks=[
             self.check('length(@)', 1),
             self.check("length([?name == '{name}'])", 0)
