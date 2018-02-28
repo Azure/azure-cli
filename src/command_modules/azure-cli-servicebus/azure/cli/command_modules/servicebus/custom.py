@@ -9,9 +9,6 @@
 # pylint: disable=unused-variable
 
 import re
-from datetime import timedelta
-from isodate import parse_duration
-from duration import to_iso8601
 
 
 # Namespace Region
@@ -399,6 +396,8 @@ timedeltapattern = re.compile("^\\d+:\\d+:\\d+$")
 
 
 def return_valid_duration(objinstance, duration_property, update_value):
+    from datetime import timedelta
+    from isodate import parse_duration
     if update_value is not None:
         if iso8601pattern.match(update_value):
             for attr, value in vars(objinstance).items():
@@ -421,6 +420,9 @@ def return_valid_duration(objinstance, duration_property, update_value):
 
 
 def return_valid_duration_create(update_value):
+    from datetime import timedelta
+    from isodate import parse_duration
+    from duration import to_iso8601
     if update_value is not None:
         if iso8601pattern.match(update_value):
             if parse_duration(update_value) < timedelta(days=10675199, minutes=10085, seconds=477581):
