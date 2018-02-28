@@ -1499,7 +1499,8 @@ helps['network public-ip show'] = """
 helps['network public-ip update'] = """
     type: command
     short-summary: Update a public IP address.
-    long-summary: To learn more information about public IP addresses in Azure, visit: https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-public-ip-address#view-change-settings-for-or-delete-a-public-ip-address
+    long-summary: >
+        To learn more information about public IP addresses in Azure, visit: https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-public-ip-address#view-change-settings-for-or-delete-a-public-ip-address
     examples:
         - name: Update a public IP resource with a DNS name label and static allocation.
           text: >
@@ -1747,7 +1748,8 @@ helps['network vnet create'] = """
 helps['network vnet delete'] = """
     type: command
     short-summary: Delete a virtual network.
-    long-summary: To learn more about deleting a virtual network, visit: https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-network#delete-vnet
+    long-summary: >
+        To learn more about deleting a virtual network, visit: https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-network#delete-vnet
     examples:
      - name: Delete a virtual network
        text: az network vnet delete -n myVNet -g MyResourceGroup
