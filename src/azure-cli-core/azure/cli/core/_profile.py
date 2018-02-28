@@ -105,13 +105,22 @@ def get_credential_types(cli_ctx):
 
 class Profile(object):
 
-    def __init__(self, storage=None, auth_ctx_factory=None, async_persist=True, cli_ctx=None):
+    def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
+                 async_persist=True, cli_ctx=None):
         from azure.cli.core import get_default_cli
 
         self.cli_ctx = cli_ctx or get_default_cli()
         self._storage = storage or ACCOUNT
         self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
-        self._creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
+
+        if use_global_creds_cache:
+            global GLOBAL_CREDS_CACHE
+            if not GLOBAL_CREDS_CACHE:
+                GLOBAL_CREDS_CACHE = CredsCache(self.cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
+            self._creds_cache = GLOBAL_CREDS_CACHE
+        else:
+            self._creds_cache = CredsCache(cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
+
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
         self._msi_creds = None
@@ -878,6 +887,7 @@ class CredsCache(object):
         # we can clear file contents, but deleting it is simpler
         _delete_file(self._token_file)
 
+GLOBAL_CREDS_CACHE = None 
 
 class ServicePrincipalAuth(object):
 
