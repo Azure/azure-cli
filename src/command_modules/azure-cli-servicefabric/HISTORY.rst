@@ -2,6 +2,9 @@
 
 Release History
 ===============
+0.0.10
++++++
+* use managed disk on windows vmss
 
 0.0.10
 ++++++
