@@ -17,7 +17,7 @@ from azure.mgmt.locationbasedservices.models.client_enums import KeyType
 
 def load_arguments(self, _):
     # Argument Definition
-    locationbasedservices_name_type = CLIArgumentType(options_list=['--account-name', '-n'],
+    locationbasedservices_name_type = CLIArgumentType(options_list=['--name', '-n'],
                                                       completer=get_resource_name_completion_list(
                                                           'Microsoft.LocationBasedServices/accounts'),
                                                       help='The name of the Location Based Services Account',
@@ -27,8 +27,10 @@ def load_arguments(self, _):
     with self.argument_context('locationbasedservices') as c:
         c.argument('resource_group_name',
                    arg_type=resource_group_name_type,
+                   id_part='resource_group',
                    help='Resource group name')
         c.argument('account_name',
+                   id_part='name',
                    arg_type=locationbasedservices_name_type)
 
     with self.argument_context('locationbasedservices account create') as c:
@@ -44,7 +46,13 @@ def load_arguments(self, _):
                    help='You agree to the Preview Terms. Ignore prompt for confirmation.',
                    action='store_true')
 
-    with self.argument_context('locationbasedservices account keys regenerate') as c:
+    # Prevent --ids argument in keys with id_part=None
+    with self.argument_context('locationbasedservices account keys') as c:
+        c.argument('account_name',
+                   id_part=None,
+                   arg_type=locationbasedservices_name_type)
+
+    with self.argument_context('locationbasedservices account keys renew') as c:
         c.argument('key_type',
                    options_list=['--key'],
                    arg_type=get_enum_type(KeyType))
