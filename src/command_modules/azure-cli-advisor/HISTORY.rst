@@ -10,6 +10,7 @@ Release History
 * BC: `advisor recommendation generate` has been removed.
 * `advisor recommendation list` has a new --refresh parameter.
 * `advisor recommendation show` has been added.
+* Support Autorest 3.0 based SDKs
 
 0.1.2
 +++++

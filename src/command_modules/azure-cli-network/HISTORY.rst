@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.25
+++++++
+* Support Autorest 3.0 based SDKs
+
 2.0.24
 ++++++
 * `network vnet-gateway vpn-client generate`: Fix missing client issue.

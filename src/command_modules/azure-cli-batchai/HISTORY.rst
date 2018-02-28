@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+0.1.6
++++++
+* Support Autorest 3.0 based SDKs
+
 0.1.5
 ++++++
 * minor fixes
