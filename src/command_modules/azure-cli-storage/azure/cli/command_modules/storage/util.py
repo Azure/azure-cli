@@ -207,3 +207,16 @@ def normalize_blob_file_path(path, name):
     if path:
         name = path_sep.join((path, name))
     return path_sep.join(os.path.normpath(name).split(os.path.sep)).strip(path_sep)
+
+
+def check_precondition_success(func):
+    def new_func(*args, **kwargs):
+        from azure.common import AzureHttpError
+        try:
+            return (True, func(*args, **kwargs))
+        except AzureHttpError as ex:
+            # Precondition failed error
+            if ex.status_code != 412:
+                raise ex
+            return (False, None)
+    return new_func
