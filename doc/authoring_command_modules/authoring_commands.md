@@ -127,7 +127,7 @@ command(self, name, method_name=None, command_type=None, **kwargs)
 - `name`: The name of the command within the command group
 - `method_name`: The name of the SDK or custom method, relative to the path specified in `operations_tmpl`.
 - `command_type`: A `CliCommandType` object to apply to this command (optional).
-- `kwargs`: any supported kwarg. Commonly used kwargs include `validator`, `table_transformer`, `confirmation`, `no_wait_param` and  `transform`.
+- `kwargs`: any supported kwarg. Commonly used kwargs include `validator`, `table_transformer`, `confirmation`, `supports_no_wait` and  `transform`.
 
 Any kwargs that are not specified will be pulled from the `command_type` kwarg, if present.
 
@@ -161,36 +161,46 @@ Since most wait commands rely on a simple GET call from the SDK, most of these e
 
 When registering a command, the boolean `supports_no_wait` property can be used to specify that the command supports `--no-wait`.
 
-For commands that point to autorest based SDKs, that's it. Your command now supports `--no-wait`.
+Here are examples:
 
-For custom commands, a boolean `no_wait` parameter will be exposed on your command. Handle this as desired in your command.
-
-
-***Custom command Azure SDK calls***
-
-Instead of this:
+***command()***
 
 ```Python
-client.create_or_update(..., raw=no_wait)
+with self.command_group('mymod', mymod_sdk) as g:
+    g.command('command1', 'do_something_1', supports_no_wait=True)
 ```
 
-Use this:
+***custom_command()***
 
 ```Python
+# inside load_command_table(...)
+with self.command_group('mymod', mymod_sdk) as g:
+    g.custom_command('command2', 'do_something_2', supports_no_wait=True)
+
+# inside custom.py
 from azure.cli.core.util import sdk_no_wait
-sdk_no_wait(no_wait, client.create_or_update, ...)
+def do_something_2(cmd, arg1, arg2, no_wait=False):
+    return sdk_no_wait(no_wait, client.create_or_update, arg1, arg2)
 ```
 
-***The deprecated no_wait_param***
+The signature of `azure.cli.core.util.sdk_no_wait` is:
 
 ```Python
-command(..., no_wait_param='no_wait')
+sdk_no_wait(no_wait, func, *args, **kwargs)
 ```
 
-`no_wait_param` is the name of a boolean parameter that will be exposed as `--no-wait` to skip long running operation polling.
-This is the most straightforward way to use `no_wait_param`.
 
-In the example above, we specify that if `--no-wait` is passed on the command line, the CLI should set the `no_wait` argument to `True` when calling our command handler.
+- `no_wait` - The boolean for no wait. `True` if `--no-wait` specified. `False` otherwise.
+- `func` - The callable to use.
+- `args` - The positional arguments that should be passed to the callable.
+- `kwargs` - The keyword arguments that should be passed to the callable.
+
+***generic_update_command()***
+
+```Python
+with self.command_group('mymod', mymod_sdk) as g:
+    g.generic_update_command('update', supports_no_wait=True)
+```
 
 
 ## Write Help Entry

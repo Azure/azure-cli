@@ -67,9 +67,9 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations.databases_operations#DatabasesOperations.{}',
         client_factory=get_sql_databases_operations)
     with self.command_group('sql db', database_operations, client_factory=get_sql_databases_operations) as g:
-        g.custom_command('create', 'db_create', no_wait_param='no_wait')
-        g.custom_command('copy', 'db_copy', no_wait_param='no_wait')
-        g.custom_command('restore', 'db_restore', no_wait_param='no_wait')
+        g.custom_command('create', 'db_create', supports_no_wait=True)
+        g.custom_command('copy', 'db_copy', supports_no_wait=True)
+        g.custom_command('restore', 'db_restore', supports_no_wait=True)
         g.custom_command('rename', 'db_rename')
         g.command('show', 'get')
         g.custom_command('list', 'db_list')
@@ -79,10 +79,10 @@ def load_command_table(self, _):
         g.custom_command('export', 'db_export')
 
     with self.command_group('sql db replica', database_operations, client_factory=get_sql_databases_operations) as g:
-        g.custom_command('create', 'db_create_replica', no_wait_param='no_wait')
+        g.custom_command('create', 'db_create_replica', supports_no_wait=True)
 
     with self.command_group('sql dw', database_operations, client_factory=get_sql_databases_operations) as g:
-        g.custom_command('create', 'dw_create', no_wait_param='no_wait')
+        g.custom_command('create', 'dw_create', supports_no_wait=True)
         g.command('show', 'get')
         g.custom_command('list', 'dw_list')
         g.command('delete', 'delete', confirmation=True)
