@@ -7,6 +7,7 @@ Release History
 ++++++
 * Persist history across different sessions
 * Fixed history while in scope
+* Updates to interactive telemetry
 
 0.3.16
 ++++++
