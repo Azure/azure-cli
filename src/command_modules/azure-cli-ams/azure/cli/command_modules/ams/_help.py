@@ -14,3 +14,13 @@ helps['ams create'] = """
     type: command
     short-summary: Create an Azure Media Service.
 """
+
+helps['ams list'] = """
+    type: command
+    short-summary: List Azure Media Services for the entire subscription.
+"""
+
+helps['ams show'] = """
+    type: command
+    short-summary: Show the details of an Azure Media Service.
+"""
