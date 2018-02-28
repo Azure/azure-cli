@@ -179,15 +179,16 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
 
             include, result = _upload_blob(cmd, client, destination_container_name,
                                            normalize_blob_file_path(destination_path, dst), src,
-                                           blob_type=blob_type, content_settings=guessed_content_settings, metadata=metadata,
-                                           validate_content=validate_content, maxsize_condition=maxsize_condition,
-                                           max_connections=max_connections, lease_id=lease_id,
-                                           progress_callback=progress_callback, if_modified_since=if_modified_since,
+                                           blob_type=blob_type, content_settings=guessed_content_settings,
+                                           metadata=metadata, validate_content=validate_content,
+                                           maxsize_condition=maxsize_condition, max_connections=max_connections,
+                                           lease_id=lease_id, progress_callback=progress_callback,
+                                           if_modified_since=if_modified_since,
                                            if_unmodified_since=if_unmodified_since, if_match=if_match,
                                            if_none_match=if_none_match, timeout=timeout)
             if include:
                 results.append(_create_return_result(dst, guessed_content_settings, result))
-            
+
     return results
 
 
