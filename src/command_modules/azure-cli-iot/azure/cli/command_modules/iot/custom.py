@@ -395,7 +395,7 @@ def iot_hub_delete(client, hub_name, resource_group_name=None):
 
 
 # pylint: disable=inconsistent-return-statements
-def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=None, policy_name='iothubowner',
+def iot_hub_show_connection_string(cmd, client, hub_name=None, resource_group_name=None, policy_name='iothubowner',
                                    key_type=KeyType.primary.value):
     if hub_name is None:
         hubs = iot_hub_list(client, resource_group_name)
@@ -403,22 +403,23 @@ def iot_hub_show_connection_string(client, hub_name=None, resource_group_name=No
             raise CLIError("No IoT Hub found.")
 
         def conn_str_getter(h):
-            return _get_single_hub_connection_string(client, h.name, h.resourcegroup, policy_name, key_type)
+            return _get_single_hub_connection_string(cmd, client, h.name, h.resourcegroup, policy_name, key_type)
         return [{'name': h.name, 'connectionString': conn_str_getter(h)} for h in hubs]
     else:
         resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-        conn_str = _get_single_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type)
+        conn_str = _get_single_hub_connection_string(cmd, client, hub_name, resource_group_name, policy_name, key_type)
         return {'connectionString': conn_str}
 
 
-def _get_single_hub_connection_string(client, hub_name, resource_group_name, policy_name, key_type):
+def _get_single_hub_connection_string(cmd, client, hub_name, resource_group_name, policy_name, key_type):
     access_policy = iot_hub_policy_get(client, hub_name, policy_name, resource_group_name)
-    conn_str_template = 'HostName={}.azure-devices.net;SharedAccessKeyName={};SharedAccessKey={}'
+    server_suffix = _get_device_dns_suffix(cmd.cli_ctx)
+    conn_str_template = 'HostName={}{};SharedAccessKeyName={};SharedAccessKey={}'
     key = access_policy.secondary_key if key_type == KeyType.secondary else access_policy.primary_key
-    return conn_str_template.format(hub_name, policy_name, key)
+    return conn_str_template.format(hub_name, server_suffix, policy_name, key)
 
 
-def iot_hub_sku_list(client, hub_name, resource_group_name=None):
+def iot_hub_sku_list(cmd, client, hub_name, resource_group_name=None):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     return client.iot_hub_resource.get_valid_skus(resource_group_name, hub_name)
 
@@ -491,8 +492,8 @@ def iot_hub_job_get(client, hub_name, job_id, resource_group_name=None):
     return client.iot_hub_resource.get_job(resource_group_name, hub_name, job_id)
 
 
-def iot_hub_job_cancel(client, hub_name, job_id, resource_group_name=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, '')
+def iot_hub_job_cancel(cmd, client, hub_name, job_id, resource_group_name=None):
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, '')
     return device_client.cancel_job(job_id)
 
 
@@ -506,10 +507,10 @@ def iot_hub_get_stats(client, hub_name, resource_group_name=None):
     return client.iot_hub_resource.get_stats(resource_group_name, hub_name)
 
 
-def iot_device_create(client, hub_name, device_id, resource_group_name=None, x509=False, primary_thumbprint=None,
+def iot_device_create(cmd, client, hub_name, device_id, resource_group_name=None, x509=False, primary_thumbprint=None,
                       secondary_thumbprint=None, valid_days=None, output_dir=None):
     _validate_x509_parameters(x509, primary_thumbprint, secondary_thumbprint, valid_days, output_dir)
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     device = DeviceDescription(device_id=device_id)
 
     if x509 is True:
@@ -540,52 +541,52 @@ def _construct_x509_auth(device_id, primary_thumbprint, secondary_thumbprint, va
     return Authentication(x509_thumbprint=X509Thumbprint(cert_info['thumbprint']))
 
 
-def iot_device_get(client, hub_name, device_id, resource_group_name=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+def iot_device_get(cmd, client, hub_name, device_id, resource_group_name=None):
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     return device_client.get(device_id)
 
 
-def iot_device_update(client, hub_name, device_id, parameters, resource_group_name=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+def iot_device_update(cmd, client, hub_name, device_id, parameters, resource_group_name=None):
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     return device_client.create_or_update(device_id, parameters)
 
 
-def iot_device_list(client, hub_name, resource_group_name=None, top=20):
-    device_client = _get_device_client(client, resource_group_name, hub_name, '')
+def iot_device_list(cmd, client, hub_name, resource_group_name=None, top=20):
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, '')
     return device_client.list(top)
 
 
-def iot_device_delete(client, hub_name, device_id, resource_group_name=None, etag='*'):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+def iot_device_delete(cmd, client, hub_name, device_id, resource_group_name=None, etag='*'):
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     return device_client.delete(device_id, etag)
 
 
 # pylint: disable=inconsistent-return-statements
-def iot_device_show_connection_string(client, hub_name, device_id=None, resource_group_name=None, top=20,
+def iot_device_show_connection_string(cmd, client, hub_name, device_id=None, resource_group_name=None, top=20,
                                       key_type=KeyType.primary.value):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
     if device_id is None:
-        devices = iot_device_list(client, hub_name, resource_group_name, top)
+        devices = iot_device_list(cmd, client, hub_name, resource_group_name, top)
         if devices is None:
             raise CLIError("No devices found in IoT Hub {}.".format(hub_name))
 
         def conn_str_getter(d):
-            return _get_single_device_connection_string(client, hub_name, d.device_id, resource_group_name, key_type)
+            return _get_single_device_connection_string(cmd, client, hub_name, d.device_id, resource_group_name, key_type)
         return [{'deviceId': d.device_id, 'connectionString': conn_str_getter(d)} for d in devices]
     else:
-        conn_str = _get_single_device_connection_string(client, hub_name, device_id, resource_group_name, key_type)
+        conn_str = _get_single_device_connection_string(cmd, client, hub_name, device_id, resource_group_name, key_type)
         return {'connectionString': conn_str}
 
 
-def iot_device_send_message(client, hub_name, device_id, resource_group_name=None, data='Ping from Azure CLI',
+def iot_device_send_message(cmd, client, hub_name, device_id, resource_group_name=None, data='Ping from Azure CLI',
                             message_id=None, correlation_id=None, user_id=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     return device_client.send_message(device_id, data, message_id, correlation_id, user_id)
 
 
 # pylint: disable=inconsistent-return-statements
-def iot_device_receive_message(client, hub_name, device_id, resource_group_name=None, lock_timeout=60):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+def iot_device_receive_message(cmd, client, hub_name, device_id, resource_group_name=None, lock_timeout=60):
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     result = device_client.receive_message(device_id, lock_timeout, raw=True)
     if result is not None and result.response.status_code == 200:
         return {
@@ -603,18 +604,18 @@ def iot_device_receive_message(client, hub_name, device_id, resource_group_name=
         }
 
 
-def iot_device_complete_message(client, hub_name, device_id, lock_token, resource_group_name=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+def iot_device_complete_message(cmd, client, hub_name, device_id, lock_token, resource_group_name=None):
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     return device_client.complete_or_reject_message(device_id, lock_token)
 
 
-def iot_device_reject_message(client, hub_name, device_id, lock_token, resource_group_name=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+def iot_device_reject_message(cmd, client, hub_name, device_id, lock_token, resource_group_name=None):
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     return device_client.complete_or_reject_message(device_id, lock_token, '')
 
 
-def iot_device_abandon_message(client, hub_name, device_id, lock_token, resource_group_name=None):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+def iot_device_abandon_message(cmd, client, hub_name, device_id, lock_token, resource_group_name=None):
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     return device_client.abandon_message(device_id, lock_token)
 
 
@@ -628,26 +629,34 @@ def iot_device_import(client, hub_name, input_blob_container_uri, output_blob_co
     return client.iot_hub_resource.import_devices(resource_group_name, hub_name, input_blob_container_uri, output_blob_container_uri)
 
 
-def _get_single_device_connection_string(client, hub_name, device_id, resource_group_name, key_type):
-    device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
+def _get_single_device_connection_string(cmd, client, hub_name, device_id, resource_group_name, key_type):
+    device_client = _get_device_client(cmd, client, resource_group_name, hub_name, device_id)
     device = device_client.get(device_id)
     if device is None:
         raise CLIError("Device {} not found.".format(device_id))
-
-    conn_str_template = "HostName={0}.azure-devices.net;DeviceId={1};{2}={3}"
+    server_suffix = _get_device_dns_suffix(cmd.cli_ctx)
+    conn_str_template = "HostName={0}{1};DeviceId={2};{3}={4}"
     keys = device.authentication.symmetric_key
     if any([keys.primary_key, keys.secondary_key]):
         key = keys.secondary_key if key_type == KeyType.secondary else keys.primary_key
         if key is None:
             raise CLIError("{0} key not found.".format(key_type))
-        return conn_str_template.format(hub_name, device_id, 'SharedAccessKey', key)
+        return conn_str_template.format(hub_name, server_suffix, device_id, 'SharedAccessKey', key)
     else:
-        return conn_str_template.format(hub_name, device_id, 'x509', 'true')
+        return conn_str_template.format(hub_name, server_suffix, device_id, 'x509', 'true')
 
 
-def _get_device_client(client, resource_group_name, hub_name, device_id):
+def _get_device_dns_suffix(cli_ctx):
+    # Allow dns suffix to be overridden by environment variable for testing purposes
+    from os import getenv
+    from azure.cli.core._profile import get_active_cloud
+    return getenv('_AZURE_CLI_IOT_DNS_SUFFIX', default=get_active_cloud(cli_ctx).suffixes.iot_device_hostname)
+
+
+def _get_device_client(cmd, client, resource_group_name, hub_name, device_id):
     resource_group_name = _ensure_resource_group_name(client, resource_group_name, hub_name)
-    base_url = '{0}.azure-devices.net'.format(hub_name)
+    server_suffix = _get_device_dns_suffix(cmd.cli_ctx)
+    base_url = '{0}{1}'.format(hub_name, server_suffix)
     uri = '{0}/devices/{1}'.format(base_url, device_id)
     access_policy = iot_hub_policy_get(client, hub_name, 'iothubowner', resource_group_name)
     creds = SasTokenAuthentication(uri, access_policy.key_name, access_policy.primary_key)

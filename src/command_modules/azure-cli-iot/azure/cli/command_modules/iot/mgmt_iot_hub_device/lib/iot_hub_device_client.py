@@ -45,7 +45,7 @@ class IotHubDeviceClientConfiguration(AzureConfiguration):
     """
 
     def __init__(
-            self, credentials, subscription_id, api_version='2016-11-14', accept_language='en-US', long_running_operation_retry_timeout=30, generate_client_request_id=True, base_url=None, filepath=None):
+            self, credentials, subscription_id, api_version='2016-11-14', accept_language='en-US', long_running_operation_retry_timeout=30, generate_client_request_id=True, base_url=None, filepath=None, cli_ctx=None):
 
         if credentials is None:
             raise ValueError("Parameter 'credentials' must not be None.")
@@ -58,9 +58,10 @@ class IotHubDeviceClientConfiguration(AzureConfiguration):
         if accept_language is not None and not isinstance(accept_language, str):
             raise TypeError("Optional parameter 'accept_language' must be str.")
         if not base_url:
-            base_url = 'https://example.azure-devices.net'
+            suffix = cli_ctx.cloud.suffixes.iot_device_hostname
+            base_url = 'https://example{}'.format(suffix)
 
-        super(IotHubDeviceClientConfiguration, self).__init__(base_url, filepath)
+        super(IotHubDeviceClientConfiguration, self).__init__(base_url, filepath, cli_ctx=cli_ctx)
 
         self.add_user_agent('iothubdeviceclient/{}'.format(VERSION))
         self.add_user_agent('Azure-SDK-For-Python')
@@ -106,7 +107,7 @@ class IotHubDeviceClient(object):
     def __init__(
             self, credentials, subscription_id, api_version='2016-11-14', accept_language='en-US', long_running_operation_retry_timeout=30, generate_client_request_id=True, base_url=None, filepath=None):
 
-        self.config = IotHubDeviceClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath)
+        self.config = IotHubDeviceClientConfiguration(credentials, subscription_id, api_version, accept_language, long_running_operation_retry_timeout, generate_client_request_id, base_url, filepath, cli_ctx=None)
         self._client = ServiceClient(self.config.credentials, self.config)
 
         client_models = {k: v for k, v in models.__dict__.items() if isinstance(v, type)}
