@@ -4,96 +4,107 @@
 # --------------------------------------------------------------------------------------------
 
 import datetime
-import subprocess
-import sys
-import os
-import json
-from six.moves._thread import start_new_thread
-
-from applicationinsights import TelemetryClient
-from applicationinsights.exceptions import enable
-
-from azclishell import __version__
-
-from azure.cli.core._profile import Profile
-from azure.cli.core.telemetry import _user_agrees_to_telemetry
-from azclishell.util import parse_quotes
-
-INSTRUMENTATION_KEY = '762871d5-45a2-4d67-bf47-e396caf53d9d'
+import azure.cli.core.telemetry as telemetry_core
 
 
-def set_custom_properties(prop, name, value):
-    actual_value = value() if hasattr(value, '__call__') else value
-    if actual_value:
-        prop['Context.Default.AzureCLI.' + name] = actual_value
+class Telemetry(object):
+    """ Handles Interactive Telemetry """
 
+    def __init__(self):
+        self.core = telemetry_core
+        self.interactive_start_time = datetime.datetime.utcnow()
+        self.interactive_end_time = None
+        self.num_outside_gesture = 0
+        self.num_exit_code_gesture = 0
+        self.num_query_gesture = 0
+        self.num_scope_changes = 0
+        self.num_ran_tutorial = 0
+        self.num_scroll_examples = 0
+        self.num_open_config = 0
+        self.num_toggle_default = 0
+        self.num_toggle_symbol_bindings = 0
+        self.num_cli_commands_used = 0
 
-class Telemetry(TelemetryClient):
-    """ base telemetry sessions """
-
-    def __init__(self, cli_ctx):
-        super(Telemetry, self).__init__(INSTRUMENTATION_KEY, None)
-        self.start_time = None
-        self.end_time = None
-        enable(INSTRUMENTATION_KEY)
-        # adding context
-        self.context.application.id = 'Azure CLI Shell'
-        self.context.application.ver = __version__
-        self.context.user.id = Profile(cli_ctx=cli_ctx).get_installation_id()
-        self.context.instrumentation_key = INSTRUMENTATION_KEY
-
-    def _track_event(self, name, properties=None, measurements=None):
-        """ tracks the telemetry events and pushes them out """
-        self.track_event(name, properties, measurements)
-        start_new_thread(self.flush, ())
-
-    @_user_agrees_to_telemetry
-    def track_ssg(self, gesture, cmd):
-        """ track shell specific gestures """
-        self._track_event('az/interactive/gesture', {gesture: scrub(cmd)})
-
-    @_user_agrees_to_telemetry
-    def track_key(self, key):
-        """ tracks the special key bindings """
-        self._track_event('az/interactive/key/{}'.format(key))
-
-    @_user_agrees_to_telemetry
-    def start(self):
-        """ starts recording stuff """
-        self.start_time = str(datetime.datetime.now())
-
-    @_user_agrees_to_telemetry
-    def conclude(self):
-        """ concludings recording stuff """
-        self.end_time = str(datetime.datetime.now())
+    def get_interactive_session_properties(self):
         properties = {}
-        set_custom_properties(properties, 'starttime', str(self.start_time))
-        set_custom_properties(properties, 'endtime', str(self.end_time))
-
-        subprocess.Popen([
-            sys.executable,
-            os.path.realpath(__file__),
-            json.dumps(properties)])
-
-
-def scrub(text):
-    """ scrubs the parameter values from args """
-    args = parse_quotes(text)
-    next_scrub = False
-    values = []
-    for arg in args:
-        if arg.startswith('-'):
-            next_scrub = True
-            values.append(arg)
-        elif next_scrub:
-            values.append('*****')
-        else:
-            values.append(arg)
-    return ' '.join(values)
+        telemetry_core.set_custom_properties(properties, 'StartTime', str(self.interactive_start_time))
+        telemetry_core.set_custom_properties(properties, 'EndTime', str(self.interactive_end_time))
+        telemetry_core.set_custom_properties(properties, 'OutsideGestures', self.num_outside_gesture)
+        telemetry_core.set_custom_properties(properties, 'ExitGestures', self.num_exit_code_gesture)
+        telemetry_core.set_custom_properties(properties, 'QueryGestures', self.num_query_gesture)
+        telemetry_core.set_custom_properties(properties, 'ScopeChanges', self.num_scope_changes)
+        telemetry_core.set_custom_properties(properties, 'TutorialRuns', self.num_ran_tutorial)
+        telemetry_core.set_custom_properties(properties, 'ExampleScrollingActions', self.num_scroll_examples)
+        telemetry_core.set_custom_properties(properties, 'ConfigurationChanges', self.num_open_config)
+        telemetry_core.set_custom_properties(properties, 'DefaultToggles', self.num_toggle_default)
+        telemetry_core.set_custom_properties(properties, 'SymbolBindingToggles', self.num_toggle_symbol_bindings)
+        telemetry_core.set_custom_properties(properties, 'CliCommandsUsed', self.num_cli_commands_used)
+        return properties
 
 
-# TODO: restore this wonky telemetry thing...
-# if __name__ == '__main__':
-#    # If user doesn't agree to upload telemetry, this scripts won't be executed. The caller should control.
-#    SHELL_TELEMETRY.track_event('az/interactive/run', json.loads(sys.argv[1]))
-#    SHELL_TELEMETRY.flush()
+_session = Telemetry()
+
+
+# core telemetry operations
+def start():
+    telemetry_core.start()
+
+
+def flush():
+    telemetry_core.flush()
+
+
+def conclude():
+    _session.interactive_end_time = datetime.datetime.utcnow()
+    interactive_session_properties = _session.get_interactive_session_properties()
+    telemetry_core.add_interactive_event(interactive_session_properties)
+    telemetry_core.suppress_new_events()
+
+
+def set_failure(summary=None):
+    telemetry_core.set_failure(summary=summary)
+
+
+def set_success(summary=None):
+    telemetry_core.set_success(summary=summary)
+
+
+# operations for aggregating data
+def track_outside_gesture():
+    _session.num_outside_gesture += 1
+
+
+def track_exit_code_gesture():
+    _session.num_exit_code_gesture += 1
+
+
+def track_query_gesture():
+    _session.num_query_gesture += 1
+
+
+def track_scope_changes():
+    _session.num_scope_changes += 1
+
+
+def track_ran_tutorial():
+    _session.num_ran_tutorial += 1
+
+
+def track_scroll_examples():
+    _session.num_scroll_examples += 1
+
+
+def track_open_config():
+    _session.num_open_config += 1
+
+
+def track_toggle_default():
+    _session.num_toggle_default += 1
+
+
+def track_toggle_symbol_bindings():
+    _session.num_toggle_symbol_bindings += 1
+
+
+def track_cli_commands_used():
+    _session.num_cli_commands_used += 1
