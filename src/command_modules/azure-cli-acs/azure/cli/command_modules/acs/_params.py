@@ -188,15 +188,14 @@ def load_arguments(self, _):
         c.argument('kubernetes_version', completer=get_k8s_upgrades_completion_list)
 
     with self.argument_context('aks upgrade-connector') as c:
-        c.argument('aci_resource_group', help='The resource group to create the ACI container groups')
-        c.argument('chart_url', default=aci_connector_chart_url, help='URL to the chart')
-        c.argument('client_secret', help='Client secret to use with the service principal for making calls to Azure APIs')
-        c.argument('connector_name', help='The name for the ACI Connector', validator=validate_connector_name)
-        c.argument('image_tag', help='The image tag of the virtual kubelet')
-        c.argument('location', help='The location to create the ACI container groups')
-        c.argument('os_type', get_enum_type(aci_connector_os_type), help='The OS type of the connector')
-        c.argument('service_principal',
-                   help='Service principal for making calls into Azure APIs. If not set, auto generate a new service principal of Contributor role, and save it locally for reusing')
+        c.argument('aci_resource_group')
+        c.argument('chart_url', default=aci_connector_chart_url)
+        c.argument('client_secret')
+        c.argument('connector_name', validator=validate_connector_name)
+        c.argument('image_tag')
+        c.argument('location')
+        c.argument('os_type', get_enum_type(aci_connector_os_type))
+        c.argument('service_principal')
 
 
 def _get_default_install_location(exe_name):

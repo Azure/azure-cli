@@ -381,7 +381,7 @@ helps['aks upgrade-connector'] = """
           text: |-
             az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
               --connector-name aci-connector --chart-url <CustomURL> --image-tag <VirtualKubeletImageTag>
-""".format(sp_cache=AKS_SERVICE_PRINCIPAL_CACHE)
+"""
 
 helps['aks wait'] = """
     type: command
