@@ -44,9 +44,9 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
             '--agree-to-the-preview-terms').get_output_in_json()
         self.assertEqual(account, account_duplicated)
 
-        # Test update/override a LocationBasedServices account with tags param update.
-        self.cmd('az locationbasedservices account create -n {name} -g {rg} --sku {sku} --tags {tags} ' +
-                 '--agree-to-the-preview-terms',
+        # Test 'az locationbasedservices account update'
+        # Test to add a new tag to an existing account.
+        self.cmd('az locationbasedservices account update -n {name} -g {rg} --sku {sku} --tags {tags}',
                  checks=[
                      self.check('id', account['id']),
                      self.check('name', '{name}'),
@@ -62,6 +62,14 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
             self.check('name', '{name}'),
             self.check('resourceGroup', '{rg}'),
             self.check('sku.name', '{sku}')
+        ])
+        # Search by id
+        self.cmd('az locationbasedservices account show --ids ' + account['id'], checks=[
+            self.check('id', account['id']),
+            self.check('name', '{name}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('sku.name', '{sku}'),
+            self.check('tags', {tag_key: tag_value})
         ])
 
         # Test 'az locationbasedservices account list'.
