@@ -504,7 +504,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None,
-              zone=None):
+              zone=None, enable_write_accelerator=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -618,7 +618,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
         os_type, os_caching, data_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
         os_vhd_uri, attach_os_disk, os_disk_size_gb, attach_data_disks, data_disk_sizes_gb, image_data_disks,
-        custom_data, secrets, license_type, zone)
+        custom_data, secrets, license_type, zone, enable_write_accelerator)
     vm_resource['dependsOn'] = vm_dependencies
 
     if plan_name:
@@ -882,7 +882,8 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
         else get_vm(cmd, resource_group_name, vm_name)
 
 
-def update_vm(cmd, resource_group_name, vm_name, os_disk=None, no_wait=False, **kwargs):
+def update_vm(cmd, resource_group_name, vm_name, os_disk=None,
+              write_accelerator=None, no_wait=False, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
     vm = kwargs['parameters']
     if os_disk is not None:
@@ -895,8 +896,38 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, no_wait=False, **
             disk_name = os_disk
         vm.storage_profile.os_disk.managed_disk.id = disk_id
         vm.storage_profile.os_disk.name = disk_name
+
+    if write_accelerator is not None:
+        _upodate_storagage_profile_with_write_accelerator(vm.storage_profile, write_accelerator)
+
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
+
+
+def _upodate_storagage_profile_with_write_accelerator(storage_profile, write_accelerator):
+    apply_all = None
+    if write_accelerator == []:
+        apply_all = True
+    if len(write_accelerator) == 1 and ('=' not in write_accelerator[0]):
+        apply_all = (write_accelerator[0].lower() == 'true')
+    if apply_all is not None:
+        storage_profile.os_disk.write_accelerator_enabled = apply_all
+        for d in (storage_profile.data_disks or []):
+            d.write_accelerator_enabled = apply_all
+    else:
+        for x in write_accelerator:
+            disk_name, value = x.split('=', 1)
+            value = value.lower() == 'true'
+            if disk_name.lower() == 'os':
+                storage_profile.os_disk.write_accelerator_enabled = value
+            else:
+                lun = int(disk_name)
+                disk = next((d for d in storage_profile.data_disks if d.lun == lun), None)
+                if disk:
+                    disk.write_accelerator_enabled = value
+                else:
+                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
+
 # endregion
 
 
@@ -1757,7 +1788,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 single_placement_group=None, custom_data=None, secrets=None, platform_fault_domain_count=None,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
-                identity_role_id=None, zones=None, priority=None):
+                identity_role_id=None, zones=None, priority=None, enable_write_accelerator=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -1958,7 +1989,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                                         single_placement_group=single_placement_group,
                                         platform_fault_domain_count=platform_fault_domain_count,
                                         custom_data=custom_data, secrets=secrets,
-                                        license_type=license_type, zones=zones, priority=priority)
+                                        license_type=license_type, zones=zones, priority=priority,
+                                        enable_write_accelerator=enable_write_accelerator)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:

@@ -139,6 +139,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vm update') as c:
         c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to. Feature registration for 'Microsoft.Compute/AllowManagedDisksReplaceOSDisk' is needed")
+        c.argument('write_accelerator', nargs='*', min_api='2017-03-30', help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g. '1=true 2=true' should enable for data disk with lun of 1 and 2")
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
@@ -304,6 +305,9 @@ def load_arguments(self, _):
     with self.argument_context('vmss diagnostics') as c:
         c.argument('vmss_name', id_part=None, help='Scale set name')
 
+    with self.argument_context('vmss update') as c:
+        c.argument('write_accelerator', nargs='*', min_api='2017-03-30', help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g. '1=true 2=true' should enable for data disk with lun of 1 and 2")
+
     with self.argument_context('vmss disk') as c:
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine instance size.')
         c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.')
@@ -360,6 +364,7 @@ def load_arguments(self, _):
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@<file path>` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('license_type', help="license type if the Windows image or disk used was licensed on-premises", arg_type=get_enum_type(['Windows_Server', 'Windows_Client']))
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
+            c.argument('enable_write_accelerator', nargs='*', min_api='2017-03-30', help="enable disk write accelerator. By default, enable all disk; or you can specify individual disks, e.g. 'os 1' should enable os disk and the data disk with lun of 1(the 2nd)")
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
