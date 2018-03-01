@@ -105,6 +105,8 @@ def get_credential_types(cli_ctx):
 
 class Profile(object):
 
+    _global_creds_cache = None
+
     def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
                  async_persist=True, cli_ctx=None):
         from azure.cli.core import get_default_cli
@@ -114,10 +116,11 @@ class Profile(object):
         self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
 
         if use_global_creds_cache:
-            global GLOBAL_CREDS_CACHE
-            if not GLOBAL_CREDS_CACHE:
-                GLOBAL_CREDS_CACHE = CredsCache(self.cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
-            self._creds_cache = GLOBAL_CREDS_CACHE
+            # for perf, use global cache
+            if not Profile._global_creds_cache:
+                Profile._global_creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory,
+                                                         async_persist=async_persist)
+            self._creds_cache = Profile._global_creds_cache
         else:
             self._creds_cache = CredsCache(cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
 
@@ -887,7 +890,6 @@ class CredsCache(object):
         # we can clear file contents, but deleting it is simpler
         _delete_file(self._token_file)
 
-GLOBAL_CREDS_CACHE = None 
 
 class ServicePrincipalAuth(object):
 
