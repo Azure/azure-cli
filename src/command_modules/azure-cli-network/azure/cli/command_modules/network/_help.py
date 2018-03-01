@@ -5,7 +5,7 @@
 
 from knack.help_files import helps
 
-# pylint: disable=line-too-long, too-many-lines
+# -*- coding: utf8 -*-
 
 helps['network'] = """
     type: group
@@ -1830,7 +1830,7 @@ helps['network vnet subnet show'] = """
     long-summary: To learn more about subnets, visit https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-manage-subnet
     examples:
         - name: Show subnets associated to a specific virtual network
-          text: az network vnet subnet show -n mySubnet– vnet-name myVNet -g myResourceGroup
+          text: az network vnet subnet show -n mySubnet --vnet-name myVNet -g myResourceGroup
 """
 
 helps['network vnet subnet update'] = """
@@ -2351,7 +2351,7 @@ helps['network watcher packet-capture list'] = """
         For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
     examples:
         - name: List all packet capture sessions within a resource group.
-          text: az network watcher packet-capture list --locationshow- myresourcegroup
+          text: az network watcher packet-capture list --location westus
 """
 
 helps['network watcher packet-capture show'] = """
@@ -2361,7 +2361,7 @@ helps['network watcher packet-capture show'] = """
         For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
     examples:
         - name: Show a packet capture session.
-          text: az network watcher packet-capture show --location myresourcegroup –n mypacketcapture
+          text: az network watcher packet-capture show --location westus -n MyPacketCapture
 """
 
 helps['network watcher packet-capture show-status'] = """
@@ -2371,7 +2371,7 @@ helps['network watcher packet-capture show-status'] = """
         For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
     examples:
         - name: Show the status of a packet capture session.
-          text: az network watcher packet-capture show-status --location myresourcegroup –n mypacketcapture
+          text: az network watcher packet-capture show-status --location westus -n MyPacketCapture
 """
 
 helps['network watcher packet-capture stop'] = """
@@ -2381,7 +2381,7 @@ helps['network watcher packet-capture stop'] = """
         For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
     examples:
         - name: Stop a running packet capture session.
-          text: az network watcher packet-capture stop --location myresourcegroup –n mypacketcapture
+          text: az network watcher packet-capture stop --location westus -n MyPacketCapture
 """
 
 helps['network watcher flow-log'] = """
