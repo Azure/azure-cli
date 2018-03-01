@@ -518,6 +518,9 @@ helps['storage file upload-batch'] = """
           type: string
           short-summary: The destination of the upload operation.
           long-summary: The destination can be the file share URL or the share name. When the destination is the share URL, the storage account name is parsed from the URL.
+        - name: --destination-path
+          type: string
+          short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
         - name: --pattern
           type: string
           short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'.
