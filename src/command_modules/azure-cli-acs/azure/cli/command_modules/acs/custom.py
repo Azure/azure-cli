@@ -41,7 +41,7 @@ from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
-from azure.cli.core.util import shell_safe_json_parse, truncate_text, sdk_no_wait
+from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
                                     KeyCredential,
@@ -1231,6 +1231,9 @@ def _update_dict(dict1, dict2):
 
 
 def aks_browse(cmd, client, resource_group_name, name, disable_browser=False):
+    if in_cloud_console():
+        raise CLIError('This command requires a web browser, which is not supported in Azure Cloud Shell.')
+
     if not which('kubectl'):
         raise CLIError('Can not find kubectl executable in PATH')
 
