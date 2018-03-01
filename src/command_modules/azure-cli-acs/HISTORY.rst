@@ -5,6 +5,8 @@ Release History
 
 2.0.28
 ++++++
+* Support Autorest 3.0 based SDKs
+* warn the user that `az aks browse` won't work in Azure Cloud Shell
 * add `aks upgrade-connector` command to upgrade an existing connector
 
 2.0.27
