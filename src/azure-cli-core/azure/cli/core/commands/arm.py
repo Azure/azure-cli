@@ -18,7 +18,7 @@ from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import shell_safe_json_parse
+from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args
 from azure.cli.core.profiles import ResourceType
 
 logger = get_logger(__name__)
@@ -428,13 +428,27 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
         # Done... update the instance!
         setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
-        no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
-        if no_wait_param:
-            setterargs[no_wait_param] = args[no_wait_param]
+
+        # Handle no-wait
+        supports_no_wait = cmd.command_kwargs.get('supports_no_wait', None)
+        if supports_no_wait:
+            no_wait_enabled = args.get('no_wait', False)
+            augment_no_wait_handler_args(no_wait_enabled,
+                                         setter,
+                                         setterargs)
+        else:
+            no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+            if no_wait_param:
+                setterargs[no_wait_param] = args[no_wait_param]
+
         result = setter(**setterargs)
 
-        if no_wait_param and setterargs.get(no_wait_param, None):
+        if supports_no_wait and no_wait_enabled:
             return None
+        else:
+            no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+            if no_wait_param and setterargs.get(no_wait_param, None):
+                return None
 
         if _is_poller(result):
             result = LongRunningOperation(cmd.cli_ctx, 'Starting {}'.format(cmd.name))(result)

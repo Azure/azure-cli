@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.28
+++++++
+* Support Autorest 3.0 based SDKs
+
 2.0.27
 ++++++
 * use the virtual-kubelet-for-aks helm chart for `aks install-connector` by default
