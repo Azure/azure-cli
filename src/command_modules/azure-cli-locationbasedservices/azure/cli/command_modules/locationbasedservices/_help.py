@@ -22,7 +22,7 @@ helps['locationbasedservices account keys'] = """
 
 helps['locationbasedservices account show'] = """
     type: command
-    short-summary: Show a Location Based Services account.
+    short-summary: Show the details of a Location Based Services account.
 """
 
 helps['locationbasedservices account list'] = """
@@ -35,6 +35,11 @@ helps['locationbasedservices account create'] = """
     short-summary: Create a Location Based Services account.
     long-summary: |
         Create a Location Based Services account. A Location Based Services account holds the keys which allow access to the Location Based Services REST APIs.
+"""
+
+helps['locationbasedservices account update'] = """
+    type: command
+    short-summary: Update the properties of a Location Based Services account.
 """
 
 helps['locationbasedservices account delete'] = """
