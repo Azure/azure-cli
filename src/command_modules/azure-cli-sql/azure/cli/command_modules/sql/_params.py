@@ -25,6 +25,7 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     CatalogCollationType,
     CreateMode,
     DatabaseLicenseType,
+    DatabaseReadScale,
     ElasticPoolLicenseType,
     SecurityAlertPolicyState,
     SecurityAlertPolicyEmailAccountAdmins,
@@ -133,11 +134,6 @@ def _configure_db_create_params(
         raise ValueError('Engine {} does not support create mode {}'.format(engine, create_mode))
 
     # Include all Database params as a starting point. We will filter from there.
-    def set_options_list(options_list):
-        def _patch_action(xxx):
-            xxx.options_list = options_list
-        return _patch_action
-
     arg_ctx.expand('parameters', Database)
 
     # sku & tier parameters are processed in validate_sku function
@@ -162,14 +158,11 @@ def _configure_db_create_params(
     # functions in custom.py
     arg_ctx.ignore('location', 'create_mode', 'source_database_id')
 
-    # Read scale is only applicable to sql db (not dw). However it is a preview feature and will
-    # be not exposed for now.
-    arg_ctx.ignore('read_scale')
-
     # Only applicable to default create mode. Also only applicable to db.
     if create_mode != CreateMode.default or engine != Engine.db:
         arg_ctx.ignore('sample_name')
         arg_ctx.ignore('catalog_collation')
+        arg_ctx.ignore('read_scale')
 
     # Only applicable to point in time restore or deleted restore create mode.
     if create_mode not in [CreateMode.restore, CreateMode.point_in_time_restore]:
@@ -236,6 +229,8 @@ def load_arguments(self, _):
         c.argument('sample_name', arg_group=creation_arg_group)
 
         c.argument('license_type', arg_type=get_enum_type(DatabaseLicenseType))
+
+        c.argument('read_scale', arg_type=get_enum_type(DatabaseReadScale))
 
     with self.argument_context('sql db create') as c:
         _configure_db_create_params(c, Engine.db, CreateMode.default)
