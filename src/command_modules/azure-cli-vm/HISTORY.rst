@@ -2,9 +2,9 @@
 
 Release History
 ===============
-
 2.0.28
 ++++++
+* vmss create: default priority to None
 * Support Autorest 3.0 based SDKs
 
 2.0.27
