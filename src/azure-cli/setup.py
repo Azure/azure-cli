@@ -87,7 +87,8 @@ DEPENDENCIES = [
     'azure-cli-sql',
     'azure-cli-storage',
     'azure-cli-vm',
-    'azure-cli-servicefabric'
+    'azure-cli-servicefabric',
+    'azure-cli-eventhubs'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
