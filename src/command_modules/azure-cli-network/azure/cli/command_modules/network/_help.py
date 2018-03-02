@@ -5,7 +5,7 @@
 
 from knack.help_files import helps
 
-# -*- coding: utf8 -*-
+# pylint: disable=line-too-long, too-many-lines
 
 helps['network'] = """
     type: group
