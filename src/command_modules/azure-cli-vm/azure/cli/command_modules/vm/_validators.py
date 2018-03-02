@@ -329,15 +329,15 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     elif namespace.storage_profile == StorageProfile.SAPirImage:
         required = ['image', 'use_unmanaged_disk']
-        forbidden = ['os_type', 'data_caching', 'attach_os_disk', 'data_disk_sizes_gb']
+        forbidden = ['os_type', 'attach_os_disk', 'data_disk_sizes_gb']
 
     elif namespace.storage_profile == StorageProfile.SACustomImage:
         required = ['image', 'os_type', 'use_unmanaged_disk']
-        forbidden = ['attach_os_disk', 'data_caching', 'data_disk_sizes_gb']
+        forbidden = ['attach_os_disk', 'data_disk_sizes_gb']
 
     elif namespace.storage_profile == StorageProfile.SASpecializedOSDisk:
         required = ['os_type', 'attach_os_disk', 'use_unmanaged_disk']
-        forbidden = ['os_disk_name', 'os_caching', 'data_caching', 'image', 'storage_account',
+        forbidden = ['os_disk_name', 'os_caching', 'image', 'storage_account',
                      'storage_container_name', 'data_disk_sizes_gb', 'storage_sku'] + auth_params
 
     else:
@@ -384,6 +384,17 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
+
+    if not namespace.os_caching:
+        # we will apply client side default till VMSS has the server side fault at ReadWrite.
+        from azure.cli.core.profiles import ResourceType
+        CachingTypes = cmd.get_models('CachingTypes', resource_type=ResourceType.MGMT_COMPUTE)
+        namespace.os_caching = CachingTypes.read_write.value
+
+    if namespace.data_caching and len(namespace.data_caching) > 1:
+        # verify if we have 2+ entries, all should have the format of '<lun>=<value>'
+        if len([x for x in namespace.data_caching if '=' in x]) != len(namespace.data_caching):
+            raise CLIError('usage error: --data-disk-caching VALUE | --data-disk-caching LUN=VALUE LUN2=VALUE2 ...')
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
