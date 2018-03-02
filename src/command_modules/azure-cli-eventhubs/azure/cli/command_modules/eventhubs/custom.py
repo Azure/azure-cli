@@ -9,7 +9,7 @@
 
 
 # Namespace Region
-def cli_namespace_create(client, resource_group_name, namespace_name, location, tags=None, sku='Standard', capacity=None, is_auto_inflate_enabled=None, maximum_throughput_units=None):
+def cli_namespace_create(client, resource_group_name, namespace_name, location=None, tags=None, sku='Standard', capacity=None, is_auto_inflate_enabled=None, maximum_throughput_units=None):
     from azure.mgmt.eventhub.models import EHNamespace, Sku
     return client.create_or_update(
         resource_group_name=resource_group_name,
@@ -60,7 +60,7 @@ def cli_autho_update(instance, rights):
 
 # Eventhub Region
 def cli_eheventhub_create(client, resource_group_name, namespace_name, name, message_retention_in_days=None, partition_count=None, status=None,
-                          enabled=None, encoding=None, capture_interval_seconds=None, capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None, blob_container=None, archive_name_format=None):
+                          enabled=None, capture_interval_seconds=None, capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None, blob_container=None, archive_name_format=None):
     from azure.mgmt.eventhub.models import Eventhub, CaptureDescription, Destination
     from azure.mgmt.eventhub.models.event_hub_management_client_enums import EncodingCaptureDescription
     eventhubparameter1 = Eventhub()
