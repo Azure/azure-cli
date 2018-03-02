@@ -105,13 +105,25 @@ def get_credential_types(cli_ctx):
 
 class Profile(object):
 
-    def __init__(self, storage=None, auth_ctx_factory=None, async_persist=True, cli_ctx=None):
+    _global_creds_cache = None
+
+    def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
+                 async_persist=True, cli_ctx=None):
         from azure.cli.core import get_default_cli
 
         self.cli_ctx = cli_ctx or get_default_cli()
         self._storage = storage or ACCOUNT
         self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
-        self._creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
+
+        if use_global_creds_cache:
+            # for perf, use global cache
+            if not Profile._global_creds_cache:
+                Profile._global_creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory,
+                                                         async_persist=async_persist)
+            self._creds_cache = Profile._global_creds_cache
+        else:
+            self._creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
+
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
         self._msi_creds = None
@@ -592,7 +604,7 @@ class Profile(object):
             else:  # try to sniff it
                 payload['client_id'] = identity_id
                 identity_id_type = _User_Assigned_Client_Id_type
-                result = requests.post(request_uri, data=payload, headers={'Metadata': 'true'})
+                result = requests.get(request_uri, params=payload, headers={'Metadata': 'true'})
                 if result.status_code != 200:
                     payload.pop('client_id')
                     payload['object_id'] = identity_id
@@ -612,7 +624,7 @@ class Profile(object):
         while True:
             err = None
             try:
-                result = requests.post(request_uri, data=payload, headers={'Metadata': 'true'})
+                result = requests.get(request_uri, params=payload, headers={'Metadata': 'true'})
                 logger.debug("MSI: Retrieving a token from %s, with payload %s", request_uri, payload)
                 if result.status_code != 200:
                     err = result.text

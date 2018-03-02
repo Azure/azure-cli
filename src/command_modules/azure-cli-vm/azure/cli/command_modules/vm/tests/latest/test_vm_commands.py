@@ -1264,7 +1264,9 @@ class VMSSCreateAndModify(ScenarioTest):
 
         self.cmd('vmss create --admin-password testPassword0 --name {vmss} -g {rg} --admin-username myadmin --image Win2012R2Datacenter --instance-count {count}')
 
-        self.cmd('vmss show --name {vmss} -g {rg}')
+        self.cmd('vmss show --name {vmss} -g {rg}', checks=[
+            self.check('virtualMachineProfile.priority', None)
+        ])
 
         self.cmd('vmss list',
                  checks=self.check('type(@)', 'array'))

@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.25
+++++++
+* Support Autorest 3.0 based SDKs
+* Fix issues with update commands in `express-route`, `nsg rule`, `public-ip`, `traffic manager profile` and `vnet-gateway` where some parameters erroneously had default values.
+
 2.0.24
 ++++++
 * `network vnet-gateway vpn-client generate`: Fix missing client issue.

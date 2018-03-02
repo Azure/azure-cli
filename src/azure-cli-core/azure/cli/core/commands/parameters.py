@@ -170,7 +170,7 @@ def get_enum_type(data, default=None):
     if default:
         default_value = next((x for x in choices if x.lower() == default.lower()), None)
         if not default_value:
-            raise CLIError("Command authoring exception: urecognized default '{}' from choices '{}'"
+            raise CLIError("Command authoring exception: unrecognized default '{}' from choices '{}'"
                            .format(default, choices))
         arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), action=DefaultAction, default=default_value)
     else:
