@@ -24,6 +24,7 @@ def load_command_table(self, _):
     not_found_msg = "{}(s) not found. Please verify the resource(s), group or it's parent resources " \
                     "exist."
     ams_not_found_msg = not_found_msg.format('Media Service')
+    storage_account_not_found_msg = not_found_msg.format('Storage Account')
 
     ams_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.media.operations#MediaservicesOperations.{}',
@@ -44,7 +45,7 @@ def load_command_table(self, _):
     with self.command_group('ams', ams_sdk) as g:        
         g.command('show', 'get')
         g.command('list', 'list')
-        g.custom_command('create', 'create_mediaservice', custom_command_type=ams_custom, client_factory=get_mediaservices_client)
+        g.custom_command('create', 'create_mediaservice', custom_command_type=ams_custom, client_factory=get_mediaservices_client, exception_handler=_not_found(storage_account_not_found_msg))
 
     with self.command_group('ams transform', ams_encoding_sdk) as g:        
         g.command('list', 'list')
