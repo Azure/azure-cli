@@ -122,7 +122,7 @@ class Profile(object):
                                                          async_persist=async_persist)
             self._creds_cache = Profile._global_creds_cache
         else:
-            self._creds_cache = CredsCache(cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
+            self._creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
 
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
