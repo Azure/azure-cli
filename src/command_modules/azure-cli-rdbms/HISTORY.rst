@@ -3,9 +3,9 @@
 Release History
 ===============
 
-0.0.13
+0.1.0
 ++++++
-* Preview release with new business model.
+* Preview release with new business model API 2017-12-01-preview.
 
 0.0.12
 ++++++

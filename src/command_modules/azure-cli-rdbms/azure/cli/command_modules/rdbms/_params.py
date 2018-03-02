@@ -62,18 +62,18 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
             c.argument('server_name', options_list=['--name', '-n'], id_part='name', help='Name of the server.')
             c.argument('administrator_login', options_list=['--admin-user', '-u'])
-            c.argument('administrator_login_password', options_list=['--admin-password', '-p'], required=False, help='The password of the administrator login.')
+            c.argument('administrator_login_password', options_list=['--admin-password', '-p'], help='The password of the administrator login.')
             c.argument('ssl_enforcement', arg_type=get_enum_type(['Enabled', 'Disabled']), options_list=['--ssl-enforcement'], help='Enable ssl enforcement or not when connect to server.')
-            c.argument('tier', arg_type=get_enum_type(['Basic', 'GeneralPurpose', 'MemoryOptimized']), required=False, options_list=['--performance-tier'], help='The performance tier of the server.')
-            c.argument('capacity', options_list=['--vcore'], type=int, required=False, help='Number of vcore.')
-            c.argument('family', options_list=['--family'], arg_type=get_enum_type(['Gen4', 'Gen5']), required=False, help='Hardware generation.')
-            c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The max storage size of the server, unit is MB.')
-            c.argument('backup_retention_days', options_list=['--backup-retention'], type=int, help='The max days of retention, unit is days.')
+            c.argument('tier', arg_type=get_enum_type(['Basic', 'GeneralPurpose', 'MemoryOptimized']), options_list=['--performance-tier'], help='The performance tier of the server.')
+            c.argument('capacity', options_list=['--vcore'], type=int, help='Number of vcore.')
+            c.argument('family', options_list=['--family'], arg_type=get_enum_type(['Gen4', 'Gen5']), help='Hardware generation.')
+            c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The max storage size of the server. Unit is megabytes.')
+            c.argument('backup_retention_days', options_list=['--backup-retention'], type=int, help='The number of days a backup is retained.')
             c.argument('tags', tags_type)
 
     for scope in ['mysql server-logs', 'postgres server-logs']:
         with self.argument_context(scope) as c:
-            c.argument('file_name', options_list=['--name', '-n'], nargs='+', help='Space separated list of log filenames on the server to download.')
+            c.argument('file_name', options_list=['--name', '-n'], nargs='+', help='Space-separated list of log filenames on the server to download.')
             c.argument('max_file_size', type=int, help='The file size limitation to filter files.')
             c.argument('file_last_written', type=int, help='Integer in hours to indicate file last modify time, default value is 72.')
             c.argument('filename_contains', help='The pattern that file name should match.')

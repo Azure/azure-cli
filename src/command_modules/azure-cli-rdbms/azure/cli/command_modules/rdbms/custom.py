@@ -7,6 +7,7 @@
 
 from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
 from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.util import sdk_no_wait
 from azure.mgmt.rdbms.mysql.operations.servers_operations import ServersOperations
 from ._client_factory import get_mysql_management_client, get_postgresql_management_client
 
@@ -41,7 +42,7 @@ def _server_restore(cmd, client, resource_group_name, server_name, parameters, n
     except Exception as e:
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
 
-    return client.create(resource_group_name, server_name, parameters, raw=no_wait)
+    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
 def _server_update_custom_func(instance,

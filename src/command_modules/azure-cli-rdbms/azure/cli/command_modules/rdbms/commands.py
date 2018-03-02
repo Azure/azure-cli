@@ -25,67 +25,57 @@ def load_command_table(self, _):
 
     mysql_servers_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql.operations.servers_operations#ServersOperations.{}',
-        client_arg_name='self',
         client_factory=cf_mysql_servers
     )
 
     postgres_servers_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql.operations.servers_operations#ServersOperations.{}',
-        client_arg_name='self',
         client_factory=cf_postgres_servers
     )
 
     mysql_firewall_rule_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql.operations.firewall_rules_operations#FirewallRulesOperations.{}',
-        client_arg_name='self',
         client_factory=cf_mysql_firewall_rules
     )
 
     postgres_firewall_rule_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql.operations.firewall_rules_operations#FirewallRulesOperations.{}',
-        client_arg_name='self',
         client_factory=cf_postgres_firewall_rules
     )
 
     mysql_config_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql.operations.configurations_operations#ConfigurationsOperations.{}',
-        client_arg_name='self',
         client_factory=cf_mysql_config
     )
 
     postgres_config_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql.operations.configurations_operations#ConfigurationsOperations.{}',
-        client_arg_name='self',
         client_factory=cf_postgres_config
     )
 
     mysql_log_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql.operations.log_files_operations#LogFilesOperations.{}',
-        client_arg_name='self',
         client_factory=cf_mysql_log
     )
 
     postgres_log_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql.operations.log_files_operations#LogFilesOperations.{}',
-        client_arg_name='self',
         client_factory=cf_postgres_log
     )
 
     mysql_db_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.mysql.operations.databases_operations#DatabasesOperations.{}',
-        client_arg_name='self',
         client_factory=cf_mysql_db
     )
 
     postgres_db_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.rdbms.postgresql.operations.databases_operations#DatabasesOperations.{}',
-        client_arg_name='self',
         client_factory=cf_postgres_db
     )
 
     with self.command_group('mysql server', mysql_servers_sdk, client_factory=cf_mysql_servers) as g:
         g.command('create', 'create')
-        g.custom_command('restore', '_server_restore', no_wait_param='no_wait')
+        g.custom_command('restore', '_server_restore', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get')
         g.custom_command('list', '_server_list_custom_func')
@@ -97,7 +87,7 @@ def load_command_table(self, _):
 
     with self.command_group('postgres server', postgres_servers_sdk, client_factory=cf_postgres_servers) as g:
         g.command('create', 'create')
-        g.custom_command('restore', '_server_restore', no_wait_param='no_wait')
+        g.custom_command('restore', '_server_restore', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True)
         g.command('show', 'get')
         g.custom_command('list', '_server_list_custom_func')
