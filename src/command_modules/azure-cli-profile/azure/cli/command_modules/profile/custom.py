@@ -105,7 +105,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
 
     profile = Profile(cli_ctx=cmd.cli_ctx, async_persist=False)
 
-    if in_cloud_console():
+    if in_cloud_console() and msi:
         return profile.find_subscriptions_in_cloud_console()
 
     if msi:
