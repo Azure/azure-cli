@@ -57,7 +57,11 @@ class AzInteractiveCommandsLoader(MainCommandsLoader):
 
             for loader in command_loaders:
                 loader.skip_applicability = True
-                loader.load_arguments(command)  # load each module's params file to the argument registry
+                try:
+                    loader.load_arguments(None)  # load each module's params file to the argument registry
+                except (ValueError, ImportError) as ex:
+                    logger.debug(ex)
+
                 self.argument_registry.arguments.update(loader.argument_registry.arguments)
                 self.extra_argument_registry.update(loader.extra_argument_registry)
                 # _update_command_definitions needs these set
