@@ -82,6 +82,26 @@ class TestProfile(unittest.TestCase):
                                      'Q8U2g9kXHrbYFeY2gJxF_hnfLvNKxUKUBnftmyYxZwKi0GDS0BvdJnJnsqSRSpxUx__Ra9QJkG1IaDzj'
                                      'ZcSZPHK45T6ohK9Hk9ktZo0crVl7Tmw')
 
+        cls.test_cloud_shell_msi_access_token = (
+            'yJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IlNTUWRoSTFjS3ZoUUVEU0p4RTJnR1lzNDBRMCIsImtpZCI6IlNTUWRoSTFjS3'
+            'ZoUUVEU0p4RTJnR1lzNDBRMCJ9.eyJhdWQiOiJodHRwczovL21hbmFnZW1lbnQuY29yZS53aW5kb3dzLm5ldC8iLCJpc3MiOiJodHRwcz'
+            'ovL3N0cy53aW5kb3dzLm5ldC81NDgyNmIyMi0zOGQ2LTRmYjItYmFkOS1iN2I5M2EzZTljNWEvIiwiaWF0IjoxNTIwMjgzODI3LCJuYmY'
+            'iOjE1MjAyODM4MjcsImV4cCI6MTUyMDI4ODAyNiwiYWNyIjoiMSIsImFpbyI6IkFWUUFxLzhHQUFBQXppd1c2VE1heElJeGxxVkR3TnAx'
+            'MkZvNG5IeVc3NnFXd0ZlS2VlanlYTmdrRUFlckNBM1JoQ0ZLU3VMOGRaQXVBQnd6cTErOTgzdlRoK1dHMTdqa0NWSWVtN1JwYXU5M3Zla'
+            '2RVbkxxdVpRPSIsImFsdHNlY2lkIjoiNTo6MTAwMzAwMDA4MDFDNDREMyIsImFtciI6WyJyc2EiXSwiYXBwaWQiOiJiNjc3YzI5MC1jZj'
+            'RiLTRhOGUtYTYwZS05MWJhNjUwYTRhYmUiLCJhcHBpZGFjciI6IjIiLCJlX2V4cCI6MjYzMDk5LCJlbWFpbCI6Inl1Z2FuZ3dAbWljcm9'
+            'zb2Z0LmNvbSIsImZhbWlseV9uYW1lIjoiV2FuZyIsImdpdmVuX25hbWUiOiJZdWdhbmciLCJncm91cHMiOlsiZTRiYjBiNTYtMTAxNC00'
+            'MGY4LTg4YWItM2Q4YThjYjBlMDg2Il0sImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0LzcyZjk4OGJmLTg2ZjEtNDFhZi05MWFiL'
+            'TJkN2NkMDExZGI0Ny8iLCJpcGFkZHIiOiIxNjcuMjIwLjEuMjM0IiwibmFtZSI6Ill1Z2FuZyBXYW5nIiwib2lkIjoiODllZDViZTgtZm'
+            'Y5Ny00MWI1LWFiMTEtMDU1ZTFlM2NjMzRiIiwicHVpZCI6IjEwMDNCRkZEOTU5Rjg5NTUiLCJzY3AiOiJ1c2VyX2ltcGVyc29uYXRpb24'
+            'iLCJzdWIiOiIyRFhuT05jNUVBcjZhXzNVcmtSUmJRQXZHbnh6cUFhLUhMVnMxcld3Z3RJIiwidGlkIjoiNTQ4MjZiMjItMzhkNi00ZmIy'
+            'LWJhZDktYjdiOTNhM2U5YzVhIiwidW5pcXVlX25hbWUiOiJ5dWdhbmd3QG1pY3Jvc29mdC5jb20iLCJ1dGkiOiJESGNDOFQwYkJrLTh5W'
+            'VB2cjlBQ0FBIiwidmVyIjoiMS4wIiwid2lkcyI6WyI2MmU5MDM5NC02OWY1LTQyMzctOTE5MC0wMTIxNzcxNDVlMTAiXX0.U5rdKCPd_3'
+            'EsleHmZhWaYe19I3jNzFSwvzn84f8cExXbgxkK-X8ejkE_J4A_SufHnaI1x_QHgEIpbIz6RD99tUyccI-emNCpJpM7Ucfhl779gAOdVzy'
+            '75Nc87RhXOXVObNlfvay_BKJ3bDEcayXeoRcPRa2uJ-4c8t6rAqFAHi8UrxOOo2lTTJqhWWlLJ00qY3y31MJQqR_ThwMyaHrORgrnMS6_'
+            '2if0WIg9-BMDbZYiSOIHKJApZNBi2W1Bl-S4FIkh_e70QWQn1h5p1D8eGmnI1vSyCwb6PpIYW93vldYe0Q4hketRlDXyGlOmRZywN7eHZ'
+            'qUGFKxJnyEx9rKrvg')
+
     def test_normalize(self):
         cli = TestCli()
         storage_mock = {'subscriptions': None}
@@ -826,6 +846,47 @@ class TestProfile(unittest.TestCase):
             mgmt_resource, self.user1, 'bar', mock.ANY)
         mock_auth_context.acquire_token.assert_called_once_with(
             mgmt_resource, self.user1, mock.ANY)
+
+    @mock.patch('requests.get', autospec=True)
+    @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
+    @mock.patch('azure.cli.core._profile._get_cloud_console_token_endpoint', autospec=True)
+    def test_find_subscriptions_in_cloud_console(self, mock_get_token_endpoint, mock_get_client_class, mock_get):
+
+        class ClientStub:
+            def __init__(self, *args, **kwargs):
+                self.subscriptions = mock.MagicMock()
+                self.subscriptions.list.return_value = [TestProfile.subscription1]
+                self.config = mock.MagicMock()
+
+        mock_get_token_endpoint.return_value = "http://great_endpoint"
+        mock_get_client_class.return_value = ClientStub
+        cli = TestCli()
+        storage_mock = {'subscriptions': None}
+        profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+
+        test_token_entry = {
+            'token_type': 'Bearer',
+            'access_token': TestProfile.test_msi_access_token
+        }
+        encoded_test_token = json.dumps(test_token_entry).encode()
+        good_response = mock.MagicMock()
+        good_response.status_code = 200
+        good_response.content = encoded_test_token
+        mock_get.return_value = good_response
+
+        subscriptions = profile.find_subscriptions_in_cloud_console()
+
+        # assert
+        self.assertEqual(len(subscriptions), 1)
+        s = subscriptions[0]
+        self.assertEqual(s['user']['name'], 'admin3@AzureSDKTeam.onmicrosoft.com')
+        self.assertEqual(s['user']['type'], 'user')
+        self.assertEqual(s['name'], self.display_name1)
+        self.assertEqual(s['id'], self.id1.split('/')[-1])
+        self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
+        mock_get.assert_called_once_with(mock_get_token_endpoint.return_value,
+                                         params={'resource': 'https://management.core.windows.net/'},
+                                         headers={'Metadata': 'true'})
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)

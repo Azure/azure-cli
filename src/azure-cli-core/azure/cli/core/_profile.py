@@ -105,6 +105,10 @@ def get_credential_types(cli_ctx):
     return CredentialType
 
 
+def _get_cloud_console_token_endpoint():
+    return os.environ.get('MSI_ENDPOINT')
+
+
 class Profile(object):
 
     _global_creds_cache = None
@@ -246,7 +250,7 @@ class Profile(object):
     def find_subscriptions_in_cloud_console(self):
         import jwt
         token, _ = Profile.get_msi_token(self.cli_ctx.cloud.endpoints.active_directory_resource_id,
-                                         Profile._get_cloud_console_token_port(), identity_id=None, for_login=True)
+                                         _get_cloud_console_token_endpoint(), identity_id=None, for_login=True)
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, verify=False, algorithms=['RS256'])
         tenant = decode['tid']
@@ -262,10 +266,6 @@ class Profile(object):
             s[_USER_ENTITY][_CLOUD_SHELL_ID] = True
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
-
-    @staticmethod
-    def _get_cloud_console_token_port():
-        return os.environ.get('MSI_ENDPOINT')
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
 
@@ -411,7 +411,7 @@ class Profile(object):
             if msi_port is not None:
                 return Profile.get_msi_token(resource, msi_port, identity_id)
             elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-                return Profile.get_msi_token(resource, Profile._get_cloud_console_token_port())
+                return Profile.get_msi_token(resource, _get_cloud_console_token_endpoint())
             elif user_type == _USER:
                 return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                  account[_TENANT_ID], resource)
@@ -449,7 +449,7 @@ class Profile(object):
         if msi_port is not None:
             creds = Profile.get_msi_token(resource, msi_port, identity_id)
         elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-            return Profile.get_msi_token(resource, Profile._get_cloud_console_token_port())
+            return Profile.get_msi_token(resource, _get_cloud_console_token_endpoint())
         elif user_type == _USER:
             creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                               account[_TENANT_ID], resource)
