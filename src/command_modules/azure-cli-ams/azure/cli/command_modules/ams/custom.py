@@ -3,20 +3,53 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+def create_mediaservice(client, resource_group_name, account_name, storage_account, location=None, tags=None):
 
-# from ._client_factory import get_mediaservices_client
-
-def create_mediaservice(
-        client, resource_group_name, account_name, storage_account, location=None, tags=None):
-
-    storage_account_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Storage/storageAccounts/{2}".format(client.config.subscription_id, resource_group_name, storage_account)
+    storage_account_id = _build_storage_account_id(client.config.subscription_id, resource_group_name, storage_account)
 
     from azure.mgmt.media.models import StorageAccount
-    storage_account = StorageAccount("Primary", storage_account_id)
+    storage_account_primary = StorageAccount('Primary', storage_account_id)
+
+    return create_or_update_mediaservice(client, resource_group_name, account_name, [storage_account_primary], location, tags)
+
+
+def add_mediaservice_secondary_storage(client, resource_group_name, account_name, storage_account):
+
+    storage_account_id = _build_storage_account_id(client.config.subscription_id, resource_group_name, storage_account)
+
+    ams = client.get(resource_group_name, account_name)
+
+    storage_accounts_filtered = list(filter(lambda s: storage_account in s.id, ams.storage_accounts))
+
+    from azure.mgmt.media.models import StorageAccount
+    storage_account_secondary = StorageAccount('Secondary', storage_account_id)
+
+    ams.storage_accounts.append(storage_account_secondary) if len(storage_accounts_filtered) == 0 else None
+
+    return create_or_update_mediaservice(client, resource_group_name, account_name, ams.storage_accounts, ams.location, ams.tags)
+
+
+def remove_mediaservice_secondary_storage(client, resource_group_name, account_name, storage_account):
+
+    storage_account_id = _build_storage_account_id(client.config.subscription_id, resource_group_name, storage_account)
+
+    ams = client.get(resource_group_name, account_name)
+
+    storage_accounts_filtered = list(filter(lambda s: storage_account not in s.id and 'Secondary' in s.type.value, ams.storage_accounts))
+
+    primary_storage_account = list(filter(lambda s: 'Primary' in s.type.value, ams.storage_accounts))[0]
+    storage_accounts_filtered.append(primary_storage_account)
+
+    return create_or_update_mediaservice(client, resource_group_name, account_name, storage_accounts_filtered, ams.location, ams.tags)
+
+
+def create_or_update_mediaservice(client, resource_group_name, account_name, storage_accounts=None, location=None, tags=None):
 
     from azure.mgmt.media.models import MediaService
-    media_service = MediaService(location=location, storage_accounts=[storage_account], tags=tags)
-
-    #return 0
+    media_service = MediaService(location=location, storage_accounts=storage_accounts, tags=tags)
 
     return client.create_or_update(resource_group_name, account_name, media_service)
+
+
+def _build_storage_account_id(subscription_id, resource_group_name, storage_account):
+    return "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Storage/storageAccounts/{2}".format(subscription_id, resource_group_name, storage_account)

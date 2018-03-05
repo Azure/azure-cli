@@ -4,8 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from ._client_factory import cf_media
-from ._client_factory import get_mediaservices_client
+from ._client_factory import (cf_media, get_mediaservices_client)
 from ._exception_handler import (ams_resource_not_found, storage_account_not_found)
 
 def load_command_table(self, _):
@@ -34,3 +33,7 @@ def load_command_table(self, _):
     with self.command_group('ams transform', ams_encoding_sdk) as g:        
         g.command('list', 'list')
         g.command('show', 'show')
+
+    with self.command_group('ams storage', ams_sdk) as g:        
+        g.custom_command('add', 'add_mediaservice_secondary_storage', custom_command_type=ams_custom, client_factory=get_mediaservices_client, exception_handler=storage_account_not_found())
+        g.custom_command('remove', 'remove_mediaservice_secondary_storage', custom_command_type=ams_custom, client_factory=get_mediaservices_client)

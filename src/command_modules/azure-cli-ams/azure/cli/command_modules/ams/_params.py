@@ -17,4 +17,10 @@ def load_arguments(self, _):
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
 
     with self.argument_context('ams create') as c:
-        c.argument('storage_account', storage_account_arg_type, help='The name of the storage account to attach to the media service account.')
+        c.argument('storage_account', storage_account_arg_type, help='The name of the primary storage account to attach to the media service account.')
+
+    with self.argument_context('ams storage add') as c:
+        c.argument('storage_account', storage_account_arg_type, help='The name of the secondary storage account to attach to the media service account.')
+
+    with self.argument_context('ams storage remove') as c:
+        c.argument('storage_account', storage_account_arg_type, help='The name of the secondary storage account to detach from the media service account.')
