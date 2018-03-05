@@ -18,7 +18,7 @@ class AmsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    def test_ams_create(self, resource_group, storage_account_for_create):
+    def test_ams_create_show(self, resource_group, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
 
         self.kwargs.update({
@@ -34,4 +34,3 @@ class AmsTests(ScenarioTest):
         self.cmd('az ams show -n {amsname} -g {rg}',
                  checks=[self.check('name', '{amsname}'),
                          self.check('resourceGroup', '{rg}')])
-
