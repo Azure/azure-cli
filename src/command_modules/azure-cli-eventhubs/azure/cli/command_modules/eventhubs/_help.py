@@ -12,17 +12,17 @@ helps['eventhubs'] = """
 
 helps['eventhubs namespace'] = """
     type: group
-    short-summary: Manage Azure Event Hubs namespace and authorization rule
+    short-summary: Manage Azure Event Hubs namespace and Authorizationrule
 """
 
 helps['eventhubs namespace authorization-rule'] = """
     type: group
-    short-summary: Manage Azure Event Hubs Authorization Rule for Namespace
+    short-summary: Manage Azure Event Hubs Authorizationrule for Namespace
 """
 
 helps['eventhubs namespace authorization-rule keys'] = """
     type: group
-    short-summary: Manage Azure Event Hubs Authorization Rule connection strings for Namespace
+    short-summary: Manage Azure Event Hubs Authorizationrule connection strings for Namespace
 """
 
 helps['eventhubs eventhub'] = """
@@ -32,12 +32,12 @@ helps['eventhubs eventhub'] = """
 
 helps['eventhubs eventhub authorization-rule'] = """
     type: group
-    short-summary: Manage Azure Service Bus Authorization Rule for Eventhub
+    short-summary: Manage Azure Service Bus Authorizationrule for Eventhub
 """
 
 helps['eventhubs eventhub authorization-rule keys'] = """
     type: group
-    short-summary: Manage Azure Authorization Rule connection strings for Eventhub
+    short-summary: Manage Azure Authorizationrule connection strings for Eventhub
 """
 
 helps['eventhubs eventhub consumer-group'] = """
@@ -52,12 +52,12 @@ helps['eventhubs georecovery-alias'] = """
 
 helps['eventhubs georecovery-alias authorization-rule'] = """
     type: group
-    short-summary: Manage Azure Event Hubs Authorization Rule for Geo Recovery configuration Alias
+    short-summary: Manage Azure Event Hubs Authorizationrule for Geo Recovery configuration Alias
 """
 
 helps['eventhubs georecovery-alias authorization-rule keys'] = """
     type: group
-    short-summary: Manage Azure Event Hubs Authorization Rule connection strings for Geo Recovery configuration Alias
+    short-summary: Manage Azure Event Hubs Authorizationrule connection strings for Geo Recovery configuration Alias
 """
 
 helps['eventhubs namespace exists'] = """
@@ -113,33 +113,33 @@ helps['eventhubs namespace delete'] = """
 
 helps['eventhubs namespace authorization-rule create'] = """
     type: command
-    short-summary: Creates Authorization Rule for the given Namespace
+    short-summary: Creates Authorizationrule for the given Namespace
     examples:
-        - name: Creates Authorization rules
+        - name: Creates Authorizationrule
           text: az eventhubs namespace authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --rights Send Listen
 """
 
 helps['eventhubs namespace authorization-rule update'] = """
     type: command
-    short-summary: Updates Authorization Rule for the given Namespace
+    short-summary: Updates Authorizationrule for the given Namespace
     examples:
-        - name: Updates Authorization rules
+        - name: Updates Authorizationrule
           text: az eventhubs namespace authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --rights Send
 """
 
 helps['eventhubs namespace authorization-rule show'] = """
     type: command
-    short-summary: Shows the details of Authorization Rule
+    short-summary: Shows the details of Authorizationrule
     examples:
-        - name: Shows the details of Authorization Rule
+        - name: Shows the details of Authorizationrule
           text: az eventhubs namespace authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
 """
 
 helps['eventhubs namespace authorization-rule list'] = """
     type: command
-    short-summary: Shows the list of Authorization Rule by Namespace
+    short-summary: Shows the list of Authorizationrule by Namespace
     examples:
-        - name: Shows the list of Authorization Rule by Namespace
+        - name: Shows the list of Authorizationrule by Namespace
           text: az eventhubs namespace authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace
 """
 
@@ -147,24 +147,24 @@ helps['eventhubs namespace authorization-rule keys list'] = """
     type: command
     short-summary: Shows the connection strings for namespace
     examples:
-        - name: Shows the connection strings of Authorization Rule for the namespace.
+        - name: Shows the connection strings of Authorizationrule for the namespace.
           text: az eventhubs namespace authorization-rule list-keys --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
 """
 
 helps['eventhubs namespace authorization-rule keys renew'] = """
     type: command
-    short-summary: Regenerate the connection strings of Authorization Rule for the namespace.
+    short-summary: Regenerate the connection strings of Authorizationrule for the namespace.
     examples:
-        - name: Regenerate the connection strings of Authorization Rule for the namespace.
+        - name: Regenerate the connection strings of Authorizationrule for the namespace.
           text: az eventhubs namespace authorization-rule regenerate-keys --resource-group myresourcegroup
            --namespace-name mynamespace --name myauthorule --key PrimaryKey
 """
 
 helps['eventhubs namespace authorization-rule delete'] = """
     type: command
-    short-summary: Deletes the Authorization Rule of the namespace.
+    short-summary: Deletes the Authorizationrule of the namespace.
     examples:
-        - name: Deletes the Authorization Rule of the namespace.
+        - name: Deletes the Authorizationrule of the namespace.
           text: az eventhubs namespace authorization-rule delete --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
 """
 
@@ -210,57 +210,57 @@ helps['eventhubs eventhub delete'] = """
 
 helps['eventhubs eventhub authorization-rule create'] = """
     type: command
-    short-summary: Creates Authorization Rule for the given Eventhub
+    short-summary: Creates Authorizationrule for the given Eventhub
     examples:
-        - name: Creates Authorization rules
+        - name: Creates Authorizationrule
           text: az eventhubs eventhub authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --event-hub-name myeventhub --name myauthorule --rights Listen
 """
 
 helps['eventhubs eventhub authorization-rule update'] = """
     type: command
-    short-summary: Updates Authorization Rule for the given Eventhub
+    short-summary: Updates Authorizationrule for the given Eventhub
     examples:
-        - name: Updates Authorization rules
+        - name: Updates Authorizationrule
           text: az eventhubs eventhub authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --event-hub-name myeventhub --name myauthorule --rights Send
 """
 
 helps['eventhubs eventhub authorization-rule show'] = """
     type: command
-    short-summary: shows the details of Authorization Rule
+    short-summary: shows the details of Authorizationrule
     examples:
-        - name: shows the details of Authorization Rule
+        - name: shows the details of Authorizationrule
           text: az eventhubs eventhub authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --event-hub-name myeventhub --name myauthorule
 """
 
 helps['eventhubs eventhub authorization-rule list'] = """
     type: command
-    short-summary: shows the list of Authorization Rule by Eventhub
+    short-summary: shows the list of Authorizationrule by Eventhub
     examples:
-        - name: shows the list of Authorization Rule by Eventhub
+        - name: shows the list of Authorizationrule by Eventhub
           text: az eventhubs eventhub authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --event-hub-name myeventhub
 """
 
-helps['eventhubs eventhub authorization-rule  keys list'] = """
+helps['eventhubs eventhub authorization-rule keys list'] = """
     type: command
-    short-summary: Shows the connection strings of Authorization Rule for the Eventhub.
+    short-summary: Shows the connection strings of Authorizationrule for the Eventhub.
     examples:
-        - name: Shows the connection strings of Authorization Rule for the eventhub.
+        - name: Shows the connection strings of Authorizationrule for the eventhub.
           text: az eventhubs eventhub authorization-rule list-keys --resource-group myresourcegroup --namespace-name mynamespace --event-hub-name myeventhub --name myauthorule
 """
 
-helps['eventhubs eventhub authorization-rule  keys renew'] = """
+helps['eventhubs eventhub authorization-rule keys renew'] = """
     type: command
-    short-summary: Regenerate the connection strings of Authorization-Rule for the namespace.
+    short-summary: Regenerate the connection strings of Authorizationrule for the namespace.
     examples:
-        - name: Regenerate the connection strings of Authorization Rule for the namespace.
+        - name: Regenerate the connection strings of Authorizationrule for the namespace.
           text: az eventhubs eventhub authorization-rule regenerate-keys --resource-group myresourcegroup --namespace-name mynamespace --event-hub-name myeventhub --name myauthorule --key PrimaryKey
 """
 
 helps['eventhubs eventhub authorization-rule delete'] = """
     type: command
-    short-summary: Deletes the Authorization Rule of the Eventhub.
+    short-summary: Deletes the Authorizationrule of the Eventhub.
     examples:
-        - name: Deletes the Authorization Rule of the Eventhub.
+        - name: Deletes the Authorizationrule of the Eventhub.
           text: az eventhubs eventhub authorization-rule delete --resource-group myresourcegroup --namespace-name mynamespace --event-hub-name myeventhub --name myauthorule
 """
 
@@ -332,25 +332,25 @@ helps['eventhubs georecovery-alias show'] = """
 
 helps['eventhubs georecovery-alias authorization-rule show'] = """
     type: command
-    short-summary: Shows the details of Event Hubs Geo Recovery Alias and Namespace Authorization Rule
+    short-summary: Shows the details of Event Hubs Geo Recovery Alias and Namespace Authorizationrule
     examples:
-        - name: Shows the details Authorization Rule by Event Hubs Namespace
+        - name: Shows the details Authorizationrule by Event Hubs Namespace
           text: az eventhubs georecovery-alias authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace
 """
 
 helps['eventhubs georecovery-alias authorization-rule list'] = """
     type: command
-    short-summary: Shows the list of Authorization Rule by Event Hubs Namespace
+    short-summary: Shows the list of Authorizationrule by Event Hubs Namespace
     examples:
-        - name: Shows the list of Authorization Rule by Event Hubs Namespace
+        - name: Shows the list of Authorizationrule by Event Hubs Namespace
           text: az eventhubs georecovery-alias authorization-rule list --resource-group myresourcegroup --namespace-name mynamespace
 """
 
 helps['eventhubs georecovery-alias authorization-rule keys list'] = """
     type: command
-    short-summary: Shows the connection strings of Authorization Rule for the Event Hubs Namespace
+    short-summary: Shows the connection strings of Authorizationrule for the Event Hubs Namespace
     examples:
-        - name: Shows the connection strings of Authorization Rule for the namespace.
+        - name: Shows the connection strings of Authorizationrule for the namespace.
           text: az eventhubs georecovery-alias authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
 """
 

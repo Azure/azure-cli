@@ -71,7 +71,7 @@ def load_arguments_eh(self, _):
             c.argument('message_retention_in_days', options_list=['--message-retention'], type=int, help='Number of days to retain events for this Event Hub, value should be 1 to 7 days')
             c.argument('partition_count', type=int, help='Number of partitions created for the Event Hub, allowed values are from 1 to 32 partitions.')
             c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled', 'ReceiveDisabled']), help='Status of Eventhub')
-            c.argument('enabled', options_list=['--enable-capture'], arg_type=get_three_state_flag(), help='A boolean  value that indicates whether capture description is enabled.')
+            c.argument('enabled', options_list=['--enable-capture'], arg_type=get_three_state_flag(), help='A boolean value that indicates whether capture description is enabled.')
             c.argument('capture_interval_seconds', arg_group='Capture', options_list=['--capture-interval'], type=int, help='Allows you to set the frequency with which the capture to Azure Blobs will happen, value should between 60 to 900 seconds')
             c.argument('capture_size_limit_bytes', arg_group='Capture', options_list=['--capture-size-limit'], type=int, help='Defines the amount of data built up in your Event Hub before an capture operation, value should be between 10485760 to 524288000 bytes')
             c.argument('destination_name', arg_group='Capture-Destination', help='Name for capture destination')
