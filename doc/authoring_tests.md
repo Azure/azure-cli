@@ -153,9 +153,9 @@ class StorageAccountTests(ScenarioTest):
           'loc': group_location
         })
         self.cmd('az group show -n {rg}', checks=[
-            JMESPathCheck('name', '{rg}'),
-            JMESPathCheck('location', '{loc}'),
-            JMESPathCheck('properties.provisioningState', 'Succeeded')
+            self.check('name', '{rg}'),
+            self.check('location', '{loc}'),
+            self.check('properties.provisioningState', 'Succeeded')
         ])
 ```
 Notes:
@@ -179,10 +179,10 @@ class StorageAccountTests(ScenarioTest):
         })
         self.cmd('az storage account create -n {name} -g {rg} --sku {sku} -l {loc}')
         self.cmd('az storage account show -n {name} -g {rg}', checks=[
-            JMESPathCheck('name', '{name}'),
-            JMESPathCheck('location', '{loc}'),
-            JMESPathCheck('sku.name', '{sku}'),
-            JMESPathCheck('kind', '{kind}')
+            self.check('name', '{name}'),
+            self.check('location', '{loc}'),
+            self.check('sku.name', '{sku}'),
+            self.check('kind', '{kind}')
         ])
 ```
 Note:
