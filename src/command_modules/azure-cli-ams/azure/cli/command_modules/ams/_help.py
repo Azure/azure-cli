@@ -26,7 +26,7 @@ helps['ams show'] = """
 """
 
 helps['ams storage'] = """
-    type: command
+    type: group
     short-summary: Manage secondary storage for an Azure Media Service.
 """
 
