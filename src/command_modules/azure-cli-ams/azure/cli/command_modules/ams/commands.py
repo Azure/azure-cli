@@ -6,36 +6,20 @@
 from azure.cli.core.commands import CliCommandType
 from ._client_factory import cf_media
 from ._client_factory import get_mediaservices_client
+from ._exception_handler import (ams_resource_not_found, storage_account_not_found)
 
 def load_command_table(self, _):
-    
-    def _not_found(message):
-        def _inner_not_found(ex):
-            from azure.mgmt.media.models.api_error import ApiErrorException
-            from knack.util import CLIError
-
-            if isinstance(ex, ApiErrorException) \
-                    and ex.response is not None \
-                    and ex.response.status_code == 404:
-                raise CLIError(message)
-            raise ex
-        return _inner_not_found
-
-    not_found_msg = "{}(s) not found. Please verify the resource(s), group or it's parent resources " \
-                    "exist."
-    ams_not_found_msg = not_found_msg.format('Media Service')
-    storage_account_not_found_msg = not_found_msg.format('Storage Account')
 
     ams_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.media.operations#MediaservicesOperations.{}',
         client_factory=cf_media,
-        exception_handler=_not_found(ams_not_found_msg)
+        exception_handler=ams_resource_not_found('Media Service')
     )
 
     ams_encoding_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.media.operations#TransformsOperations.{}',
         client_factory=cf_media,
-        exception_handler=_not_found(ams_not_found_msg)
+        exception_handler=ams_resource_not_found('Media Service')
     )
 
     ams_custom = CliCommandType(
@@ -45,7 +29,7 @@ def load_command_table(self, _):
     with self.command_group('ams', ams_sdk) as g:        
         g.command('show', 'get')
         g.command('list', 'list')
-        g.custom_command('create', 'create_mediaservice', custom_command_type=ams_custom, client_factory=get_mediaservices_client, exception_handler=_not_found(storage_account_not_found_msg))
+        g.custom_command('create', 'create_mediaservice', custom_command_type=ams_custom, client_factory=get_mediaservices_client, exception_handler=storage_account_not_found())
 
     with self.command_group('ams transform', ams_encoding_sdk) as g:        
         g.command('list', 'list')

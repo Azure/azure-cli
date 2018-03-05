@@ -17,4 +17,6 @@ def create_mediaservice(
     from azure.mgmt.media.models import MediaService
     media_service = MediaService(location=location, storage_accounts=[storage_account], tags=tags)
 
+    #return 0
+
     return client.create_or_update(resource_group_name, account_name, media_service)
