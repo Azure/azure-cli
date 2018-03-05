@@ -75,6 +75,7 @@ DEPENDENCIES = [
     'azure-cli-iot',
     'azure-cli-keyvault',
     'azure-cli-lab',
+    'azure-cli-managementgroups',
     'azure-cli-monitor',
     'azure-cli-network',
     'azure-cli-nspkg',
