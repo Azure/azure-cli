@@ -198,7 +198,7 @@ helps['servicebus queue create'] = """
 
 helps['servicebus queue update'] = """
     type: command
-    short-summary: Upates the Service Bus Queue
+    short-summary: Updates existing Service Bus Queue
     examples:
         - name: Updates Service Bus Queue.
           text: az servicebus queue update --resource-group myresourcegroup --namespace-name mynamespace --name myqueue --auto-delete-on-idle PT30M
@@ -230,7 +230,7 @@ helps['servicebus queue delete'] = """
 
 helps['servicebus queue authorization-rule create'] = """
     type: command
-    short-summary: Creates Authorization rule for the given Service Bus Queue
+    short-summary: Creates Authorization rule for the given Service Bus Queue.
     examples:
         - name: Creates Authorization rules for Queue
           text: az servicebus queue authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule --rights Listen
@@ -238,7 +238,7 @@ helps['servicebus queue authorization-rule create'] = """
 
 helps['servicebus queue authorization-rule update'] = """
     type: command
-    short-summary: Updates Authorization rule for the given Service Bus Queue
+    short-summary: Updates Authorization rule for the given Service Bus Queue.
     examples:
         - name: Updates Authorization rules for Queue
           text: az servicebus queue authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule --rights Send
@@ -246,7 +246,7 @@ helps['servicebus queue authorization-rule update'] = """
 
 helps['servicebus queue authorization-rule show'] = """
     type: command
-    short-summary: shows the details of Authorization Rule
+    short-summary: shows the details of Authorization Rule for the given Service Bus Queue.
     examples:
         - name: shows the details of Authorization Rule
           text: az servicebus queue authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule
@@ -254,7 +254,7 @@ helps['servicebus queue authorization-rule show'] = """
 
 helps['servicebus queue authorization-rule list'] = """
     type: command
-    short-summary: shows the list of Authorization Rule by Queue
+    short-summary: shows the list of Authorization Rule by Service Bus Queue.
     examples:
         - name: shows the list of Authorization Rule by Queue
           text: az servicebus queue authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue
@@ -262,7 +262,7 @@ helps['servicebus queue authorization-rule list'] = """
 
 helps['servicebus queue authorization-rule keys list'] = """
     type: command
-    short-summary: Shows the connection strings of Authorization Rule for the Queue.
+    short-summary: Shows the connection strings of Authorization Rule for the given Service Bus Queue.
     examples:
         - name: Shows the connection strings of Authorization Rule for the queue.
           text: az servicebus queue authorization-rule list-keys --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule
@@ -270,7 +270,7 @@ helps['servicebus queue authorization-rule keys list'] = """
 
 helps['servicebus queue authorization-rule keys renew'] = """
     type: command
-    short-summary: Regenerate the connection strings of Authorization Rule for the namespace.
+    short-summary: Regenerate the connection strings of Authorization Rule for the given Service Bus Queue.
     examples:
         - name: Regenerate the connection strings of Authorization Rule for the namespace.
           text: az servicebus queue authorization-rule regenerate-keys --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule --key PrimaryKey
@@ -278,9 +278,9 @@ helps['servicebus queue authorization-rule keys renew'] = """
 
 helps['servicebus queue authorization-rule delete'] = """
     type: command
-    short-summary: Deletes the Authorization Rule of the Queue.
+    short-summary: Deletes the Authorization Rule of the given Service Bus Queue.
     examples:
-        - name: Deletes the Authorization Rule of the queue.
+        - name: Deletes the Authorization Rule of the given Service Bus Queue.
           text: az servicebus queue authorization-rule delete --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule
 """
 
@@ -288,7 +288,7 @@ helps['servicebus topic create'] = """
     type: command
     short-summary: Creates the Service Bus Topic
     examples:
-        - name: Create a new queue.
+        - name: Create a new Service Bus Topic
           text: az servicebus topic create --resource-group myresourcegroup --namespace-name mynamespace --name mytopic
 """
 
@@ -296,7 +296,7 @@ helps['servicebus topic update'] = """
     type: command
     short-summary: Updates the Service Bus Topic
     examples:
-        - name: Updates a new queue.
+        - name: Updates existing Service Bus Topic.
           text: az servicebus topic update --resource-group myresourcegroup --namespace-name mynamespace --name mytopic --support-ordering True
 """
 
@@ -320,63 +320,63 @@ helps['servicebus topic delete'] = """
     type: command
     short-summary: Deletes the Service Bus Topic
     examples:
-        - name: Deletes the topic
+        - name: Deletes the Service Bus Topic
           text: az servicebus topic delete --resource-group myresourcegroup --namespace-name mynamespace --name mytopic
 """
 
 helps['servicebus topic authorization-rule create'] = """
     type: command
-    short-summary: Creates Authorization Rule for the given Service Bus Topic
+    short-summary: Creates Authorization Rule for given Service Bus Topic
     examples:
-        - name: Creates Authorization rules
+        - name: Creates Authorization rules for given Service Bus Topic
           text: az servicebus topic authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule --rights Send Listen
 """
 
 helps['servicebus topic authorization-rule update'] = """
     type: command
-    short-summary: Creates Authorization Rule for the given Service Bus Topic
+    short-summary: Creates Authorization Rule for given Service Bus Topic
     examples:
-        - name: Creates Authorization rules
+        - name: Creates Authorization rules for given Service Bus Topic
           text: az servicebus topic authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule --rights Send
 """
 
 helps['servicebus topic authorization-rule show'] = """
     type: command
-    short-summary: Shows the details of Authorization Rule
+    short-summary: Shows the details of Authorization Rule for given Service Bus Topic
     examples:
-        - name: Shows the details of Authorization Rule
+        - name: Shows the details of Authorization Rule for given Service Bus Topic
           text: az servicebus topic authorization-rule get --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule
 """
 
 helps['servicebus topic authorization-rule list'] = """
     type: command
-    short-summary: shows list of Authorization Rule by Topic
+    short-summary: shows list of Authorization Rule by Service Bus Topic
     examples:
-        - name: shows list of Authorization Rule by Topic
+        - name: shows list of Authorization Rule by Service Bus Topic
           text: az servicebus topic authorization-rule get --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic
 """
 
 helps['servicebus topic authorization-rule keys list'] = """
     type: command
-    short-summary: shows connection strings of Authorization Rule for the Topic.
+    short-summary: shows connection strings of Authorization Rule for given Service Bus Topic.
     examples:
-        - name: shows connection strings of Authorization Rule for the topic.
+        - name: shows connection strings of Authorization Rule for given Service Bus Topic.
           text: az servicebus topic authorization-rule listkeys --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule
 """
 
 helps['servicebus topic authorization-rule keys renew'] = """
     type: command
-    short-summary: Regenerate the connection strings of Authorization Rule for the Topic.
+    short-summary: Regenerate the connection strings of Authorization Rule for Service Bus Topic.
     examples:
-        - name: Regenerate Primary/Secondary key of connection string for the Topic.
+        - name: Regenerate Primary/Secondary key of connection string for Service Bus Topic.
           text: az servicebus topic authorization-rule regenerate_keys --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule --key PrimaryKey
 """
 
 helps['servicebus topic authorization-rule delete'] = """
     type: command
-    short-summary: Deletes the Authorization Rule of the Topic.
+    short-summary: Deletes the Authorization Rule of Service Bus Topic.
     examples:
-        - name: Deletes the Authorization Rule of the topic
+        - name: Deletes the Authorization Rule of Service Bus Topic.
           text: az servicebus topic authorization-rule delete --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule
 """
 
@@ -395,7 +395,6 @@ helps['servicebus topic subscription update'] = """
     examples:
         - name: Update a new Subscription.
           text: az servicebus topic subscription update --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name mysubscription --lock-duration PT3M
-
     """
 
 helps['servicebus topic subscription show'] = """
@@ -440,26 +439,26 @@ helps['servicebus topic subscription rule update'] = """
 
 helps['servicebus topic subscription rule show'] = """
     type: command
-    short-summary: Shows Rule Details
+    short-summary: Shows ServiceBus Rule Details
     examples:
-        - name: Shows the Rule details.
+        - name: Shows the ServiceBus Rule details.
           text: az servicebus topic subscription rule show --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --subscription-name mysubscription --name myrule
 """
 
 helps['servicebus topic subscription rule list'] = """
     type: command
-    short-summary: List the Rule by Subscription
+    short-summary: List the ServiceBus Rule by Subscription
     examples:
-        - name: Shows the Rule by Subscription.
+        - name: Shows the Rule ServiceBus by Subscription.
           text: az servicebus topic subscription rule list --resource-group myresourcegroup --namespace-name mynamespace
            --subscription-name mysubscription
 """
 
 helps['servicebus topic subscription rule delete'] = """
     type: command
-    short-summary: Deletes the Rule
+    short-summary: Deletes the ServiceBus Rule
     examples:
-        - name: Deletes the Rule
+        - name: Deletes the ServiceBus Rule
           text: az servicebus topic subscription rule delete --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --subscription-name mysubscription --name myrule
 """
 

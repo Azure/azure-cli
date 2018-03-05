@@ -48,8 +48,7 @@ def cli_namespace_list(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name=resource_group_name)
 
-    if not resource_group_name:
-        return client.list()
+    return client.list()
 
 
 # Namespace Authorization rule:
@@ -409,36 +408,33 @@ def return_valid_duration(objinstance, duration_property, update_value):
                         return None
 
         if timedeltapattern.match(update_value):
-            day, miniute, seconds = update_value.split(":")
+            day, minute, seconds = update_value.split(":")
             for attr, value in vars(objinstance).items():
                 if attr == duration_property:
-                    if timedelta(days=int(day), minutes=int(miniute), seconds=int(seconds)) < timedelta(days=10675199, minutes=10085, seconds=477581):
-                        return timedelta(days=int(day), minutes=int(miniute), seconds=int(seconds))
+                    if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) < timedelta(days=10675199, minutes=10085, seconds=477581):
+                        return timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
 
-                    if timedelta(days=int(day), minutes=int(miniute), seconds=int(seconds)) > timedelta(days=10675198, minutes=10085, seconds=477581):
+                    if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) > timedelta(days=10675198, minutes=10085, seconds=477581):
                         return None
 
 
 def return_valid_duration_create(update_value):
     from datetime import timedelta
     from isodate import parse_duration
-    from duration import to_iso8601
     if update_value is not None:
         if iso8601pattern.match(update_value):
             if parse_duration(update_value) < timedelta(days=10675199, minutes=10085, seconds=477581):
-                print("Create ISO: ", parse_duration(update_value))
                 return update_value
 
             if parse_duration(update_value) > timedelta(days=10675199, minutes=10085, seconds=477581):
                 return None
 
         if timedeltapattern.match(update_value):
-            day, miniute, seconds = update_value.split(":")
-            if timedelta(days=int(day), minutes=int(miniute), seconds=int(seconds)) < timedelta(days=10675199, minutes=10085, seconds=477581):
-                print("Create: ", to_iso8601(timedelta(int(day), int(miniute), int(seconds))))
-                return timedelta(days=int(day), minutes=int(miniute), seconds=int(seconds))
+            day, minute, seconds = update_value.split(":")
+            if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) < timedelta(days=10675199, minutes=10085, seconds=477581):
+                return timedelta(days=int(day), minutes=int(minute), seconds=int(seconds))
 
-            if timedelta(days=int(day), minutes=int(miniute), seconds=int(seconds)) > timedelta(days=10675198, minutes=10085, seconds=477581):
+            if timedelta(days=int(day), minutes=int(minute), seconds=int(seconds)) > timedelta(days=10675198, minutes=10085, seconds=477581):
                 return None
     else:
         return None
