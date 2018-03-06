@@ -35,8 +35,6 @@ class ShellProgressView(ProgressViewBase):
 
         ShellProgressView.progress = message
 
-
-
     def flush(self):
         pass
 
@@ -83,9 +81,10 @@ def progress_view(shell):
             doc = u'{}:{}'.format(progress, ShellProgressView.progress_bar)
             shell.spin_val = -1
             counter = 0
-            heart_bar = ''
+            ShellProgressView.heart_bar = ''
         else:
             if progress and not ShellProgressView.done:
+                heart_bar = ShellProgressView.heart_bar
                 if shell.spin_val >= 0:
                     beat = ShellProgressView.heart_beat_values[_get_heart_frequency()]
                     heart_bar += beat
@@ -105,7 +104,8 @@ def progress_view(shell):
                         beat = ShellProgressView.heart_beat_values[_get_heart_frequency()]
                         heart_bar += beat
                         counter += len(beat)
-            doc = u'{}:{}'.format(progress, heart_bar)
+                ShellProgressView.heart_bar = heart_bar
+            doc = u'{}:{}'.format(progress, ShellProgressView.heart_bar)
         shell.cli.buffers['progress'].reset(
             initial_document=Document(doc))
         shell.cli.request_redraw()

@@ -26,9 +26,8 @@ MAX_COMPLETION = 16
 
 
 # pylint:disable=too-few-public-methods
-class LayoutUtil(object):
+class LayoutManager(object):
     """ store information and conditions for the layout """
-    default_command = ''
 
     def __init__(self, shell_ctx):
         self.shell_ctx = shell_ctx
@@ -47,48 +46,156 @@ class LayoutUtil(object):
             done = get_done()
             return progress != '' and not done
 
+        @Condition
+        def has_default_scope(_):
+            return self.shell_ctx.default_command == ''
+
+        self.has_default_scope = has_default_scope
         self.show_default = show_default
         self.show_symbol = show_symbol
         self.show_progress = show_progress
 
-    @staticmethod
-    @Condition
-    def has_default_scope(_):
-        return LayoutUtil.default_command == ''
+        # TODO fix this somehow
+        self.input_processors = [
+            ConditionalProcessor(
+                # By default, only highlight search when the search
+                # input has the focus. (Note that this doesn't mean
+                # there is no search: the Vi 'n' binding for instance
+                # still allows to jump to the next match in
+                # navigation mode.)
+                HighlightSearchProcessor(preview_search=Always()),
+                HasFocus(SEARCH_BUFFER)),
+            HighlightSelectionProcessor(),
+            ConditionalProcessor(AppendAutoSuggestion(), HasFocus(DEFAULT_BUFFER) & self.has_default_scope)
+        ]
 
+    def get_prompt_tokens(self, _):
+        """ returns prompt tokens """
+        if self.shell_ctx.default_command:
+            prompt = 'az {}>> '.format(self.shell_ctx.default_command)
+        else:
+            prompt = 'az>> '
+        return [(Token.Az, prompt)]
 
-# TODO fix this somehow
-input_processors = [
-    ConditionalProcessor(
-        # By default, only highlight search when the search
-        # input has the focus. (Note that this doesn't mean
-        # there is no search: the Vi 'n' binding for instance
-        # still allows to jump to the next match in
-        # navigation mode.)
-        HighlightSearchProcessor(preview_search=Always()),
-        HasFocus(SEARCH_BUFFER)),
-    HighlightSelectionProcessor(),
-    ConditionalProcessor(
-        AppendAutoSuggestion(), HasFocus(DEFAULT_BUFFER) & LayoutUtil.has_default_scope)
-]
+    def create_tutorial_layout(self):
+        """ layout for example tutorial """
+        lexer, _, _ = get_lexers(self.shell_ctx.lexer, None, None)
+        layout_full = HSplit([
+            FloatContainer(
+                Window(
+                    BufferControl(
+                        input_processors=self.input_processors,
+                        lexer=lexer,
+                        preview_search=Always()),
+                    get_height=get_height),
+                [
+                    Float(xcursor=True,
+                          ycursor=True,
+                          content=CompletionsMenu(
+                              max_height=MAX_COMPLETION,
+                              scroll_offset=1,
+                              extra_filter=(HasFocus(DEFAULT_BUFFER))))]),
+            ConditionalContainer(
+                HSplit([
+                    get_hline(),
+                    get_param(lexer),
+                    get_hline(),
+                    Window(
+                        content=BufferControl(
+                            buffer_name='example_line',
+                            lexer=lexer
+                        ),
+                    ),
+                    Window(
+                        TokenListControl(
+                            get_tutorial_tokens,
+                            default_char=Char(' ', Token.Toolbar)),
+                        height=LayoutDimension.exact(1)),
+                ]),
+                filter=~IsDone() & RendererHeightIsKnown()
+            )
+        ])
+        return layout_full
 
+    def create_layout(self, exam_lex, toolbar_lex):
+        """ creates the layout """
+        lexer, exam_lex, toolbar_lex = get_lexers(self.shell_ctx.lexer, exam_lex, toolbar_lex)
 
-def get_scope():
-    """" returns the default command """
-    return LayoutUtil.default_command
+        if not any(isinstance(processor, DefaultPrompt) for processor in self.input_processors):
+            self.input_processors.append(DefaultPrompt(self.get_prompt_tokens))
 
+        layout_lower = ConditionalContainer(
+            HSplit([
+                get_anyhline(self.shell_ctx.config),
+                get_descriptions(self.shell_ctx.config, exam_lex, lexer),
+                get_examplehline(self.shell_ctx.config),
+                get_example(self.shell_ctx.config, exam_lex),
 
-def set_scope(com, add=True):
-    """ sets the scope """
-    if add:
-        LayoutUtil.default_command += " " + com
-    else:
-        LayoutUtil.default_command = com
+                ConditionalContainer(
+                    get_hline(),
+                    filter=self.show_default | self.show_symbol
+                ),
+                ConditionalContainer(
+                    Window(
+                        content=BufferControl(
+                            buffer_name='default_values',
+                            lexer=lexer
+                        )
+                    ),
+                    filter=self.show_default
+                ),
+                ConditionalContainer(
+                    get_hline(),
+                    filter=self.show_default & self.show_symbol
+                ),
+                ConditionalContainer(
+                    Window(
+                        content=BufferControl(
+                            buffer_name='symbols',
+                            lexer=exam_lex
+                        )
+                    ),
+                    filter=self.show_symbol
+                ),
+                ConditionalContainer(
+                    Window(
+                        content=BufferControl(
+                            buffer_name='progress',
+                            lexer=lexer
+                        )
+                    ),
+                    filter=self.show_progress
+                ),
+                Window(
+                    content=BufferControl(
+                        buffer_name='bottom_toolbar',
+                        lexer=toolbar_lex
+                    ),
+                ),
+            ]),
+            filter=~IsDone() & RendererHeightIsKnown()
+        )
 
+        layout_full = HSplit([
+            FloatContainer(
+                Window(
+                    BufferControl(
+                        input_processors=self.input_processors,
+                        lexer=lexer,
+                        preview_search=Always()),
+                    get_height=get_height,
+                ),
+                [
+                    Float(xcursor=True,
+                          ycursor=True,
+                          content=CompletionsMenu(
+                              max_height=MAX_COMPLETION,
+                              scroll_offset=1,
+                              extra_filter=(HasFocus(DEFAULT_BUFFER))))]),
+            layout_lower
+        ])
 
-def get_prompt_tokens(_):
-    """ returns prompt tokens """
-    return [(Token.Az, 'az%s>> ' % LayoutUtil.default_command)]
+        return layout_full
 
 
 def get_height(cli):
@@ -123,133 +230,6 @@ def get_lexers(main_lex, exam_lex, tool_lex):
             tool_lex = PygmentsLexer(tool_lex)
 
     return lexer, exam_lex, tool_lex
-
-
-def create_tutorial_layout(lex):
-    """ layout for example tutorial """
-    lexer, _, _ = get_lexers(lex, None, None)
-    layout_full = HSplit([
-        FloatContainer(
-            Window(
-                BufferControl(
-                    input_processors=input_processors,
-                    lexer=lexer,
-                    preview_search=Always()),
-                get_height=get_height),
-            [
-                Float(xcursor=True,
-                      ycursor=True,
-                      content=CompletionsMenu(
-                          max_height=MAX_COMPLETION,
-                          scroll_offset=1,
-                          extra_filter=(HasFocus(DEFAULT_BUFFER))))]),
-        ConditionalContainer(
-            HSplit([
-                get_hline(),
-                get_param(lexer),
-                get_hline(),
-                Window(
-                    content=BufferControl(
-                        buffer_name='example_line',
-                        lexer=lexer
-                    ),
-                ),
-                Window(
-                    TokenListControl(
-                        get_tutorial_tokens,
-                        default_char=Char(' ', Token.Toolbar)),
-                    height=LayoutDimension.exact(1)),
-            ]),
-            filter=~IsDone() & RendererHeightIsKnown()
-        )
-    ])
-    return layout_full
-
-
-def create_layout(shell_ctx, lex, exam_lex, toolbar_lex):
-    """ creates the layout """
-    lexer, exam_lex, toolbar_lex = get_lexers(lex, exam_lex, toolbar_lex)
-
-
-
-
-    if not any(isinstance(processor, DefaultPrompt) for processor in input_processors):
-        input_processors.append(DefaultPrompt(get_prompt_tokens))
-
-    conditions = LayoutUtil(shell_ctx)
-
-    layout_lower = ConditionalContainer(
-        HSplit([
-            get_anyhline(shell_ctx.config),
-            get_descriptions(shell_ctx.config, exam_lex, lexer),
-            get_examplehline(shell_ctx.config),
-            get_example(shell_ctx.config, exam_lex),
-
-            ConditionalContainer(
-                get_hline(),
-                filter=conditions.show_default | conditions.show_symbol
-            ),
-            ConditionalContainer(
-                Window(
-                    content=BufferControl(
-                        buffer_name='default_values',
-                        lexer=lexer
-                    )
-                ),
-                filter=conditions.show_default
-            ),
-            ConditionalContainer(
-                get_hline(),
-                filter=conditions.show_default & conditions.show_symbol
-            ),
-            ConditionalContainer(
-                Window(
-                    content=BufferControl(
-                        buffer_name='symbols',
-                        lexer=exam_lex
-                    )
-                ),
-                filter=conditions.show_symbol
-            ),
-            ConditionalContainer(
-                Window(
-                    content=BufferControl(
-                        buffer_name='progress',
-                        lexer=lexer
-                    )
-                ),
-                filter=conditions.show_progress
-            ),
-            Window(
-                content=BufferControl(
-                    buffer_name='bottom_toolbar',
-                    lexer=toolbar_lex
-                ),
-            ),
-        ]),
-        filter=~IsDone() & RendererHeightIsKnown()
-    )
-
-    layout_full = HSplit([
-        FloatContainer(
-            Window(
-                BufferControl(
-                    input_processors=input_processors,
-                    lexer=lexer,
-                    preview_search=Always()),
-                get_height=get_height,
-            ),
-            [
-                Float(xcursor=True,
-                      ycursor=True,
-                      content=CompletionsMenu(
-                          max_height=MAX_COMPLETION,
-                          scroll_offset=1,
-                          extra_filter=(HasFocus(DEFAULT_BUFFER))))]),
-        layout_lower
-    ])
-
-    return layout_full
 
 
 def get_anyhline(config):

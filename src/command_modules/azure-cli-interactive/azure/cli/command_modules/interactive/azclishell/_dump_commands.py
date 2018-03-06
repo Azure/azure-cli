@@ -3,19 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from importlib import import_module
-
 import json
 import os
-import pkgutil
 import yaml
-
-from azure.cli.core import MainCommandsLoader
-from azure.cli.core.commands import BLACKLISTED_MODS
-from azure.cli.core.commands.arm import add_id_parameters
 
 from knack.help_files import helps
 from knack.log import get_logger
+from azure.cli.core import MainCommandsLoader
+from azure.cli.core.commands.arm import add_id_parameters
 
 
 logger = get_logger(__name__)
@@ -67,24 +62,23 @@ class AzInteractiveCommandsLoader(MainCommandsLoader):
                 loader._update_command_definitions()  # pylint: disable=protected-access
 
 
-class LoadFreshTable(object):
+# pylint: disable=too-few-public-methods
+class FreshTable(object):
     """
     this class generates and dumps the fresh command table into a file
     as well as installs all the modules
     """
-    def __init__(self):
-        self.command_table = None
-        self.shell_ctx = None
+    command_table = None
 
-    def __call__(self, shell_ctx):
+    def __init__(self, shell_ctx):
         self.shell_ctx = shell_ctx
-        return self
 
-    def dump_command_table(self, shell_ctx):
+    def dump_command_table(self, shell_ctx=None):
         """ dumps the command table """
         import timeit
 
         start_time = timeit.default_timer()
+        shell_ctx = shell_ctx or self.shell_ctx
         main_loader = AzInteractiveCommandsLoader(shell_ctx.cli_ctx)
 
         main_loader.load_command_table(None)
@@ -121,8 +115,8 @@ class LoadFreshTable(object):
 
         load_help_files(cmd_table_data)
         elapsed = timeit.default_timer() - start_time
-        logger.debug('Command table dumped: {} sec'.format(elapsed))
-        self.command_table = main_loader.command_table
+        logger.debug('Command table dumped: %s sec', elapsed)
+        FreshTable.command_table = main_loader.command_table
 
         # dump into the cache file
         command_file = shell_ctx.config.get_help_files()
@@ -167,8 +161,9 @@ def load_help_files(data):
                     data[command_name]['parameters'][param_name]['help'] = param["short-summary"]
 
         if 'examples' in help_entry:
-            data[command_name]['examples'] = [[example['name'], example['text']] \
-                for example in help_entry['examples']]
+            data[command_name]['examples'] = [[example['name'], example['text']]
+                                              for example in help_entry['examples']]
+
 
 def get_cache_dir(shell_ctx):
     """ gets the location of the cache """
@@ -179,6 +174,3 @@ def get_cache_dir(shell_ctx):
     if not os.path.exists(cache_path):
         os.makedirs(cache_path)
     return cache_path
-
-
-FRESH_TABLE = LoadFreshTable()

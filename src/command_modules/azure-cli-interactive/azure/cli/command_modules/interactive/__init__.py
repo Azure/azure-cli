@@ -9,7 +9,7 @@ from azure.cli.core import AzCommandsLoader
 
 
 def start_shell(cmd, style=None):
-    from azure.cli.command_modules.interactive.azclishell.app import AzInteractiveShell
+    from .azclishell.app import AzInteractiveShell
     AzInteractiveShell(cmd.cli_ctx, style)()
 
 

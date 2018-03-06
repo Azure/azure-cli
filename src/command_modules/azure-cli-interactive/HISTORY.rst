@@ -8,6 +8,8 @@ Release History
 * Persist history across different sessions
 * Fixed history while in scope
 * Updates to interactive telemetry
+* Fixed progress meter for long running operations
+* Completions more robust to command table exceptions
 
 0.3.16
 ++++++

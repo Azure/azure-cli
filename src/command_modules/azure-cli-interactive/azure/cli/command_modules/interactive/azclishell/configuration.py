@@ -11,7 +11,6 @@ from six.moves import configparser
 from azure.cli.core._help import PRIVACY_STATEMENT
 
 
-
 SELECT_SYMBOL = {
     'outside': '#',
     'query': '??',

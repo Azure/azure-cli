@@ -10,15 +10,14 @@ from azure.cli.core.parser import AzCliCommandParser
 from . import configuration
 from .argfinder import ArgsFinder
 from .command_tree import in_tree
-from .layout import get_scope
 from .util import parse_quotes
 
 SELECT_SYMBOL = configuration.SELECT_SYMBOL
 
 
 def initialize_command_table_attributes(completer):
-    from ._dump_commands import FRESH_TABLE
-    completer.cmdtab = FRESH_TABLE(completer.shell_ctx).command_table
+    from ._dump_commands import FreshTable
+    completer.cmdtab = FreshTable(completer.shell_ctx).command_table
     if completer.cmdtab:
         completer.parser.load_command_table(completer.cmdtab)
         completer.argsfinder = ArgsFinder(completer.parser)
@@ -46,19 +45,6 @@ def dynamic_param_logic(text):
             started_param = True
             prefix = txtspt[-1]
     return is_param, started_param, prefix, param
-
-
-def reformat_cmd(text):
-    """ reformat the text to be stripped of noise """
-    # remove az if there
-    text = text.replace('az', '')
-    # disregard defaulting symbols
-    if text and SELECT_SYMBOL['scope'] == text[0:2]:
-        text = text.replace(SELECT_SYMBOL['scope'], "")
-
-    if get_scope():
-        text = get_scope() + ' ' + text
-    return text
 
 
 def verify_dynamic_completion(comp, started_param, prefix, text):
@@ -150,7 +136,7 @@ class AzCompleter(Completer):
         self.branch = self.command_tree
         self.curr_command = ''
         self._is_command = True
-        text = reformat_cmd(text)
+        text = self.reformat_cmd(text)
         if text.split():
 
             for comp in sort_completions(self.gen_cmd_and_param_completions(text)):
@@ -172,8 +158,7 @@ class AzCompleter(Completer):
             for choice in self.cmdtab[
                     self.curr_command].arguments[arg_name].choices:
                 if started_param:
-                    if choice.lower().startswith(prefix.lower())\
-                    and choice not in text.split():
+                    if choice.lower().startswith(prefix.lower()) and choice not in text.split():
                         yield Completion(choice, -len(prefix))
                 else:
                     yield Completion(choice, -len(prefix))
@@ -364,3 +349,15 @@ class AzCompleter(Completer):
         """ if a parameter has a description """
         return param in self.param_description.keys() and \
             not self.param_description[param].isspace()
+
+    def reformat_cmd(self, text):
+        """ reformat the text to be stripped of noise """
+        # remove az if there
+        text = text.replace('az', '')
+        # disregard defaulting symbols
+        if text and SELECT_SYMBOL['scope'] == text[0:2]:
+            text = text.replace(SELECT_SYMBOL['scope'], "")
+
+        if self.shell_ctx.default_command:
+            text = self.shell_ctx.default_command + ' ' + text
+        return text
