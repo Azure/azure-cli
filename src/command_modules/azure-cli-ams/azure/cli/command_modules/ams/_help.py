@@ -39,3 +39,19 @@ helps['ams storage remove'] = """
     type: command
     short-summary: Detach a secondary storage from an Azure Media Service.
 """
+
+helps['ams sp create'] = """
+    type: command
+    short-summary: Create a service principal and configure its access to an Azure Media Service account.
+    parameters:
+        - name: --sp-name
+          short-summary: Name or app URI to associate the RBAC with. If not present, a name will be generated.
+        - name: --sp-password
+          short-summary: The password used to log in.. If not present, a random password will be generated.
+        - name: --role
+          short-summary: Role of the service principal.
+    examples:
+        - name: Create a service principal with password and configure its access to an Azure Media Service account.
+          text: >
+            az ams sp create -n {myamsaccount} -g {myresourcegroup} --sp-name {mySpName} --sp-password {mySpPassword} --role {rol}
+    """
