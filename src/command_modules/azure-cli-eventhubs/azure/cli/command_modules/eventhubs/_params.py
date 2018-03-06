@@ -17,19 +17,20 @@ def load_arguments_eh(self, _):
 
     rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), help='Space-separated Authorization rule rights list')
     key_arg_type = CLIArgumentType(options_list=['--key-name'], arg_type=get_enum_type(KeyType), help='specifies Primary or Secondary key needs to be reset')
-    event_hub_name_arg_type = CLIArgumentType(options_list=['--eventhub-name'], help='Name of the EventHub')
+    event_hub_name_arg_type = CLIArgumentType(options_list=['--eventhub-name'], help='Name of EventHub')
 
     with self.argument_context('eventhubs') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('namespace_name', id_part='name', help='name of Namespace')
 
     with self.argument_context('eventhubs namespace exists') as c:
-        c.argument('namespace_name', arg_type=name_type, help='name of Namespace')
+        c.argument('namespace_name', arg_type=name_type, help='Name of Namespace')
 
-    with self.argument_context('eventhubs namespace') as c:
-        c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
+    for scope in ['eventhubs namespace show', 'eventhubs namespace delete', 'eventhubs namespace update']:
+        with self.argument_context(scope) as c:
+            c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
 
     with self.argument_context('eventhubs namespace create') as c:
+        c.argument('namespace_name', arg_type=name_type, completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
         c.argument('tags', arg_type=tags_type)
         c.argument('sku', options_list=['--sku'], arg_type=get_enum_type(SkuName))
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
@@ -38,7 +39,6 @@ def load_arguments_eh(self, _):
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
 
     with self.argument_context('eventhubs namespace update') as c:
-        c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='name of the Namespace')
         c.argument('tags', arg_type=tags_type)
         c.argument('sku', options_list=['--sku'], arg_type=get_enum_type(SkuName))
         c.argument('capacity', type=int, help='Capacity for Sku')
@@ -46,25 +46,34 @@ def load_arguments_eh(self, _):
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
 
     # region Namespace Authorizationrule
-    with self.argument_context('eventhubs namespace authorization-rule list') as c:
-        c.argument('namespace_name', options_list=['--namespace-name'], help='name of the Namespace')
 
-    for scope in ['eventhubs namespace authorization-rule', 'eventhubs namespace authorization-rule keys list', 'eventhubs namespace authorization-rule keys renew']:
+    for scope in ['eventhubs namespace authorization-rule show', 'eventhubs namespace authorization-rule delete',
+                  'eventhubs namespace authorization-rule create', 'eventhubs namespace authorization-rule update',
+                  'eventhubs namespace authorization-rule keys renew']:
         with self.argument_context(scope) as c:
-            c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_1', help='name of the Namespace AuthorizationRule')
-            c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='name of the Namespace')
+            c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_1', help='name of Namespace AuthorizationRule')
+            c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='name of Namespace')
 
-    for scope in ['eventhubs namespace authorization-rule create', 'eventhubs namespace authorization-rule update', 'eventhubs eventhub authorization-rule create', 'eventhubs eventhub authorization-rule update']:
+    for scope in ['eventhubs namespace authorization-rule create', 'eventhubs namespace authorization-rule update']:
         with self.argument_context(scope) as c:
             c.argument('rights', arg_type=rights_arg_type)
+
+    with self.argument_context('eventhubs namespace authorization-rule list') as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], help='Name of Namespace')
+
+    with self.argument_context('eventhubs namespace authorization-rule keys list') as c:
+        c.argument('authorization_rule_name', arg_type=name_type, help='name of Namespace AuthorizationRule')
+        c.argument('namespace_name', options_list=['--namespace-name'], help='name of Namespace')
 
     with self.argument_context('eventhubs namespace authorization-rule keys renew') as c:
         c.argument('key_type', arg_type=key_arg_type)
 
 
 # region - Eventhub Create
-    with self.argument_context('eventhubs eventhub') as c:
-        c.argument('event_hub_name', arg_type=name_type, id_part='child_name_1', completer=get_eventhubs_command_completion_list, help='Name of Eventhub')
+    for scope in ['eventhubs eventhub show', 'eventhubs eventhub delete', 'eventhubs eventhub update', 'eventhubs eventhub create']:
+        with self.argument_context(scope) as c:
+            c.argument('event_hub_name', arg_type=name_type, id_part='child_name_1', completer=get_eventhubs_command_completion_list, help='Name of Eventhub')
+            c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='name of Namespace')
 
     for scope in ['eventhubs eventhub create', 'eventhubs eventhub update']:
         with self.argument_context(scope) as c:
@@ -79,23 +88,39 @@ def load_arguments_eh(self, _):
             c.argument('blob_container', arg_group='Capture-Destination', help='Blob container Name')
             c.argument('archive_name_format', arg_group='Capture-Destination', help='Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order')
 
-    # region EventHub Authorizationrule
-    for scope in ['eventhubs eventhub authorization-rule', 'eventhubs eventhub authorization-rule keys list', 'eventhubs eventhub authorization-rule keys renew']:
-        with self.argument_context(scope) as c:
-            c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='name of the EventHub AuthorizationRule')
-            c.argument('event_hub_name', id_part='child_name_1', arg_type=event_hub_name_arg_type)
+    with self.argument_context('eventhubs eventhub list') as c:
+        c.argument('namespace_name', help='Name of Namespace')
 
-    with self.argument_context('eventhubs eventhub authorization-rule create') as c:
-        c.argument('rights', arg_type=rights_arg_type)
+    # region EventHub Authorizationrule
+    for scope in ['eventhubs eventhub authorization-rule create', 'eventhubs eventhub authorization-rule update', 'eventhubs eventhub authorization-rule keys renew']:
+        with self.argument_context(scope) as c:
+            c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='Name of EventHub AuthorizationRule')
+            c.argument('event_hub_name', id_part='child_name_1', arg_type=event_hub_name_arg_type)
+            c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
+
+    for scope in ['eventhubs eventhub authorization-rule create', 'eventhubs eventhub authorization-rule update']:
+        with self.argument_context(scope) as c:
+            c.argument('rights', arg_type=rights_arg_type)
+
+    with self.argument_context('eventhubs eventhub authorization-rule list') as c:
+        c.argument('event_hub_name', arg_type=event_hub_name_arg_type)
+        c.argument('namespace_name', options_list=['--namespace-name'], help='name of Namespace')
+
+    with self.argument_context('eventhubs eventhub authorization-rule keys list') as c:
+        c.argument('authorization_rule_name', arg_type=name_type, help='Name of EventHub AuthorizationRule')
+        c.argument('event_hub_name', arg_type=event_hub_name_arg_type)
+        c.argument('namespace_name', options_list=['--namespace-name'], help='Name of Namespace')
 
     with self.argument_context('eventhubs eventhub authorization-rule keys renew') as c:
         c.argument('key_type', arg_type=key_arg_type)
 
 
 # - ConsumerGroup Region
-    with self.argument_context('eventhubs eventhub consumer-group') as c:
-        c.argument('event_hub_name', arg_type=event_hub_name_arg_type)
-        c.argument('consumer_group_name', arg_type=name_type, id_part='child_name_2', completer=get_consumergroup_command_completion_list, help='Name of ConsumerGroup')
+    for scope in ['eventhubs eventhub consumer-group create', 'eventhubs eventhub consumer-group update', 'eventhubs eventhub consumer-group show', 'eventhubs eventhub consumer-group delete']:
+        with self.argument_context(scope) as c:
+            c.argument('event_hub_name', id_part='child_name_1', arg_type=event_hub_name_arg_type)
+            c.argument('consumer_group_name', arg_type=name_type, id_part='child_name_2', completer=get_consumergroup_command_completion_list, help='Name of ConsumerGroup')
+            c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
 
     for scope in ['eventhubs eventhub consumer-group create', 'eventhubs eventhub consumer-group update']:
         with self.argument_context(scope) as c:
@@ -103,18 +128,28 @@ def load_arguments_eh(self, _):
 
     with self.argument_context('eventhubs eventhub consumer-group list') as c:
         c.argument('event_hub_name', arg_type=event_hub_name_arg_type)
+        c.argument('namespace_name', options_list=['--namespace-name'], help='Name of Namespace')
 
 #   : Region Geo DR Configuration
-    with self.argument_context('eventhubs georecovery-alias') as c:
-        c.argument('alias', id_part='child_name_1', help='Name of the Alias (Disaster Recovery)')
+    for scope in ['eventhubs georecovery-alias set', 'eventhubs georecovery-alias show', 'eventhubs georecovery-alias delete', 'eventhubs georecovery-alias break-pair', 'eventhubs georecovery-alias fail-over']:
+        with self.argument_context(scope) as c:
+            c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of Alias (Disaster Recovery)')
+            c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
 
     with self.argument_context('eventhubs georecovery-alias exists') as c:
-        c.argument('name', options_list=['--alias'], arg_type=name_type, help='Name of the Geo Recovery Configs - Alias to check availability')
+        c.argument('name', options_list=['--alias', '-a'], arg_type=name_type, help='Name of Geo Recovery Configs - Alias to check availability')
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
 
-    with self.argument_context('eventhubs georecovery-alias create') as c:
+    with self.argument_context('eventhubs georecovery-alias set') as c:
         c.argument('partner_namespace', help='ARM Id of the Primary/Secondary eventhub namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name for the Alias, when the Namespace name and Alias name are same')
 
     for scope in ['eventhubs georecovery-alias authorization-rule show', 'eventhubs georecovery-alias authorization-rule keys lists']:
         with self.argument_context(scope)as c:
-            c.argument('authorization_rule_name', arg_type=name_type, help='Name of the Namespace AuthorizationRule')
+            c.argument('alias', options_list=['--alias', '-a'], help='Name of Alias (Disaster Recovery)')
+            c.argument('namespace_name', options_list=['--namespace-name'], help='Name of Namespace')
+            c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
+
+    with self.argument_context('eventhubs georecovery-alias authorization-rule list') as c:
+        c.argument('alias', options_list=['--alias', '-a'], help='Name of Alias (Disaster Recovery)')
+        c.argument('namespace_name', options_list=['--namespace-name'], help='Name of Namespace')
