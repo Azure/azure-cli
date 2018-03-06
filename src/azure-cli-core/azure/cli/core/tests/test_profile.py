@@ -16,7 +16,9 @@ from adal import AdalError
 from azure.mgmt.resource.subscriptions.models import \
     (SubscriptionState, Subscription, SubscriptionPolicies, SpendingLimit)
 
-from azure.cli.core._profile import Profile, CredsCache, SubscriptionFinder, ServicePrincipalAuth, _AUTH_CTX_FACTORY
+from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
+                                     ServicePrincipalAuth, _AUTH_CTX_FACTORY)
+from azure.cli.core.msi_imds_authentication import MSIImdsAuthentication
 
 from azure.cli.testsdk import TestCli
 
@@ -476,9 +478,8 @@ class TestProfile(unittest.TestCase):
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
-        test_port = '12345'
         test_user = 'systemAssignedIdentity'
-        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id, 'MSI@' + str(test_port), self.state1, test_tenant_id)
+        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id, 'MSI', self.state1, test_tenant_id)
         consolidated = profile._normalize_properties(test_user,
                                                      [msi_subscription],
                                                      True)
@@ -502,12 +503,13 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subscription_id, test_subscription_id)
 
         # verify the cred._tokenRetriever is a working lambda
-        token_type, token, whole_entry = cred._token_retriever()
-        self.assertEqual(test_token_entry['access_token'], token)
-        self.assertEqual(test_token_entry['token_type'], token_type)
-        self.assertEqual(test_token_entry, whole_entry)
-        mock_get.assert_called_with('http://localhost:12345/oauth2/token',
-                                    params={'resource': 'https://management.core.windows.net/'},
+        token_entry = cred.get_token()
+        self.assertEqual(token_entry, test_token_entry)
+        mock_get.assert_called_with('http://169.254.169.254/metadata/identity/oauth2/token',
+                                    params={
+                                        'resource': 'https://management.core.windows.net/',
+                                        'api-version': '2018-02-01'
+                                    },
                                     headers={'Metadata': 'true'})
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
@@ -521,10 +523,9 @@ class TestProfile(unittest.TestCase):
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
-        test_port = '12345'
         test_user = 'userAssignedIdentity'
         test_client_id = '12345678-38d6-4fb2-bad9-b7b93a3e8888'
-        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id, 'MSIClient-{}@{}'.format(test_client_id, test_port), self.state1, test_tenant_id)
+        msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id, 'MSIClient-{}'.format(test_client_id), self.state1, test_tenant_id)
         consolidated = profile._normalize_properties(test_user, [msi_subscription], True)
         profile._set_subscriptions(consolidated, secondary_key_name='name')
 
@@ -546,14 +547,13 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subscription_id, test_subscription_id)
 
         # verify the cred._tokenRetriever is a working lambda
-        token_type, token, whole_entry = cred._token_retriever()
-        self.assertEqual(test_token_entry['access_token'], token)
-        self.assertEqual(test_token_entry['token_type'], token_type)
-        self.assertEqual(test_token_entry, whole_entry)
-        mock_get.assert_called_with('http://localhost:12345/oauth2/token',
+        token_entry = cred.get_token()
+        self.assertEqual(test_token_entry, token_entry)
+        mock_get.assert_called_with('http://169.254.169.254/metadata/identity/oauth2/token',
                                     params={
                                         'resource': 'https://management.core.windows.net/',
-                                        'client_id': test_client_id
+                                        'client_id': '12345678-38d6-4fb2-bad9-b7b93a3e8888',
+                                        'api-version': '2018-02-01'
                                     },
                                     headers={'Metadata': 'true'})
 
@@ -568,7 +568,7 @@ class TestProfile(unittest.TestCase):
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         test_object_id = '12345678-38d6-4fb2-bad9-b7b93a3e9999'
         msi_subscription = SubscriptionStub('/subscriptions/12345678-1bf0-4dda-aec3-cb9272f09590',
-                                            'MSIObject-{}@12345'.format(test_object_id),
+                                            'MSIObject-{}'.format(test_object_id),
                                             self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
         consolidated = profile._normalize_properties('userAssignedIdentity', [msi_subscription], True)
         profile._set_subscriptions(consolidated, secondary_key_name='name')
@@ -588,11 +588,12 @@ class TestProfile(unittest.TestCase):
         cred, subscription_id, _ = profile.get_login_credentials()
 
         # assert
-        token_type, token, whole_entry = cred._token_retriever()
-        mock_get.assert_called_with('http://localhost:12345/oauth2/token',
+        cred.get_token()
+        mock_get.assert_called_with('http://169.254.169.254/metadata/identity/oauth2/token',
                                     params={
                                         'resource': 'https://management.core.windows.net/',
-                                        'object_id': test_object_id
+                                        'object_id': test_object_id,
+                                        'api-version': '2018-02-01'
                                     },
                                     headers={'Metadata': 'true'})
 
@@ -609,7 +610,7 @@ class TestProfile(unittest.TestCase):
         test_res_id = ('/subscriptions/{}/resourceGroups/r1/providers/Microsoft.ManagedIdentity/'
                        'userAssignedIdentities/id1').format(test_sub_id)
         msi_subscription = SubscriptionStub('/subscriptions/{}'.format(test_sub_id),
-                                            'MSIResource-{}@12345'.format(test_res_id),
+                                            'MSIResource-{}'.format(test_res_id),
                                             self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
         consolidated = profile._normalize_properties('userAssignedIdentity', [msi_subscription], True)
         profile._set_subscriptions(consolidated, secondary_key_name='name')
@@ -629,11 +630,12 @@ class TestProfile(unittest.TestCase):
         cred, subscription_id, _ = profile.get_login_credentials()
 
         # assert
-        token_type, token, whole_entry = cred._token_retriever()
-        mock_get.assert_called_with('http://localhost:12345/oauth2/token',
+        cred.get_token()
+        mock_get.assert_called_with('http://169.254.169.254/metadata/identity/oauth2/token',
                                     params={
                                         'resource': 'https://management.core.windows.net/',
-                                        'msi_res_id': test_res_id
+                                        'msi_res_id': test_res_id,
+                                        'api-version': '2018-02-01'
                                     },
                                     headers={'Metadata': 'true'})
 
@@ -642,26 +644,25 @@ class TestProfile(unittest.TestCase):
     def test_msi_token_request_retries(self, mock_sleep, mock_get):
         # set up error case: #1 exception thrown, #2 error status
         bad_response = mock.MagicMock()
-        bad_response.status_code = 400
+        bad_response.status_code = 429
         bad_response.text = 'just bad'
 
         test_token_entry = {
             'token_type': 'Bearer',
-            'access_token': 'good token for you'
+            'access_token': 'good token for you',
         }
         encoded_test_token = json.dumps(test_token_entry).encode()
         good_response = mock.MagicMock()
         good_response.status_code = 200
         good_response.content = encoded_test_token
 
-        mock_get.side_effect = [ValueError('fail'), bad_response, good_response]
+        mock_get.side_effect = [bad_response, good_response]
 
+        msi_auth = MSIImdsAuthentication(resource='azure-resource', object_id='12345')
         # action
-        token_type, token, whole_entry = Profile.get_msi_token('azure-resource', 12345, 'MSI')
+        whole_entry = msi_auth.get_token()
 
         # assert
-        self.assertEqual(test_token_entry['access_token'], token)
-        self.assertEqual(test_token_entry['token_type'], token_type)
         self.assertEqual(test_token_entry, whole_entry)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
@@ -704,10 +705,9 @@ class TestProfile(unittest.TestCase):
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
         test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
         test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
-        test_port = '12345'
         test_user = 'systemAssignedIdentity'
         msi_subscription = SubscriptionStub('/subscriptions/' + test_subscription_id,
-                                            'MSI@' + str(test_port), self.state1, test_tenant_id)
+                                            'MSI', self.state1, test_tenant_id)
         consolidated = profile._normalize_properties(test_user,
                                                      [msi_subscription],
                                                      True)
@@ -735,8 +735,11 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(test_token_entry['access_token'], token)
         self.assertEqual(test_token_entry['token_type'], token_type)
         self.assertEqual(test_token_entry, whole_entry)
-        mock_get.assert_called_with('http://localhost:12345/oauth2/token',
-                                    params={'resource': test_resource},
+        mock_get.assert_called_with('http://169.254.169.254/metadata/identity/oauth2/token',
+                                    params={
+                                        'resource': test_resource,
+                                        'api-version': '2018-02-01'
+                                    },
                                     headers={'Metadata': 'true'})
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
@@ -913,14 +916,14 @@ class TestProfile(unittest.TestCase):
         good_response.content = encoded_test_token
         mock_get.return_value = good_response
 
-        subscriptions = profile.find_subscriptions_in_vm_with_msi('9999')
+        subscriptions = profile.find_subscriptions_in_vm_with_msi()
 
         # assert
         self.assertEqual(len(subscriptions), 1)
         s = subscriptions[0]
         self.assertEqual(s['user']['name'], 'systemAssignedIdentity')
         self.assertEqual(s['user']['type'], 'servicePrincipal')
-        self.assertEqual(s['name'], 'MSI@9999')
+        self.assertEqual(s['name'], 'MSI')
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 
@@ -950,14 +953,14 @@ class TestProfile(unittest.TestCase):
         good_response.content = encoded_test_token
         mock_get.return_value = good_response
 
-        subscriptions = profile.find_subscriptions_in_vm_with_msi('9999', identity_id=test_client_id)
+        subscriptions = profile.find_subscriptions_in_vm_with_msi(identity_id=test_client_id)
 
         # assert
         self.assertEqual(len(subscriptions), 1)
         s = subscriptions[0]
         self.assertEqual(s['user']['name'], 'userAssignedIdentity')
         self.assertEqual(s['user']['type'], 'servicePrincipal')
-        self.assertEqual(s['name'], 'MSIClient-{}@9999'.format(test_client_id))
+        self.assertEqual(s['name'], 'MSIClient-{}'.format(test_client_id))
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
 
@@ -991,10 +994,10 @@ class TestProfile(unittest.TestCase):
         good_response.content = encoded_test_token
         mock_get.side_effect = [bad_response, good_response]
 
-        subscriptions = profile.find_subscriptions_in_vm_with_msi('9999', identity_id=test_object_id)
+        subscriptions = profile.find_subscriptions_in_vm_with_msi(identity_id=test_object_id)
 
         # assert
-        self.assertEqual(subscriptions[0]['name'], 'MSIObject-{}@9999'.format(test_object_id))
+        self.assertEqual(subscriptions[0]['name'], 'MSIObject-{}'.format(test_object_id))
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
@@ -1024,10 +1027,10 @@ class TestProfile(unittest.TestCase):
         good_response.content = encoded_test_token
         mock_get.return_value = good_response
 
-        subscriptions = profile.find_subscriptions_in_vm_with_msi('9999', identity_id=test_res_id)
+        subscriptions = profile.find_subscriptions_in_vm_with_msi(identity_id=test_res_id)
 
         # assert
-        self.assertEqual(subscriptions[0]['name'], 'MSIResource-{}@9999'.format(test_res_id))
+        self.assertEqual(subscriptions[0]['name'], 'MSIResource-{}'.format(test_res_id))
 
     @mock.patch('adal.AuthenticationContext.acquire_token_with_username_password', autospec=True)
     @mock.patch('adal.AuthenticationContext.acquire_token', autospec=True)

@@ -225,10 +225,33 @@ class Profile(object):
         s.state = StateType.enabled
         return s
 
-    def find_subscriptions_in_vm_with_msi(self, msi_port, identity_id=None):
+    def find_subscriptions_in_vm_with_msi(self, identity_id=None):
         import jwt
-        token, identity_id_type = Profile.get_msi_token(self.cli_ctx.cloud.endpoints.active_directory_resource_id,
-                                                        msi_port, identity_id, for_login=True)
+        from .msi_imds_authentication import MSIImdsAuthentication
+        from msrestazure.tools import is_valid_resource_id
+        resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
+        msi_creds = MSIImdsAuthentication()
+
+        token_entry = None
+        if identity_id:
+            if is_valid_resource_id(identity_id):
+                msi_creds = MSIImdsAuthentication(resource=resource, msi_res_id=identity_id)
+                identity_type = MsiAccountTypes.user_assigned_resource_id
+            else:
+                msi_creds = MSIImdsAuthentication(resource=resource, client_id=identity_id)
+                try:
+                    token_entry = msi_creds.get_token()
+                    identity_type = MsiAccountTypes.user_assigned_client_id
+                except ValueError:
+                    identity_type = MsiAccountTypes.user_assigned_object_id
+                    msi_creds = MSIImdsAuthentication(resource=resource, object_id=identity_id)
+        else:
+            identity_type = MsiAccountTypes.system_assigned
+            msi_creds = MSIImdsAuthentication(resource=resource)
+
+        if not token_entry:
+            token_entry = msi_creds.get_token()
+        token = token_entry['access_token']
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, verify=False, algorithms=['RS256'])
         tenant = decode['tid']
@@ -237,20 +260,20 @@ class Profile(object):
         subscriptions = subscription_finder.find_from_raw_token(tenant, token)
         if not subscriptions:
             raise CLIError('No access was configured for the VM, hence no subscriptions were found')
-        base_name = '{}-{}'.format(identity_id_type, identity_id) if identity_id else identity_id_type
+        base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
         user = 'userAssignedIdentity' if identity_id else 'systemAssignedIdentity'
 
         consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True)
         for s in consolidated:
-            s[_SUBSCRIPTION_NAME] = "{}@{}".format(base_name, msi_port)
+            s[_SUBSCRIPTION_NAME] = base_name
         # key-off subscription name to allow accounts with same id(but under different identities)
         self._set_subscriptions(consolidated, secondary_key_name=_SUBSCRIPTION_NAME)
         return deepcopy(consolidated)
 
     def find_subscriptions_in_cloud_console(self):
         import jwt
-        token, _ = Profile.get_msi_token(self.cli_ctx.cloud.endpoints.active_directory_resource_id,
-                                         _get_cloud_console_token_endpoint(), identity_id=None, for_login=True)
+        token_entry = self._get_token_from_cloud_shell(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
+        token = token_entry['access_token']
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, verify=False, algorithms=['RS256'])
         tenant = decode['tid']
@@ -266,6 +289,15 @@ class Profile(object):
             s[_USER_ENTITY][_CLOUD_SHELL_ID] = True
         self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
+
+    def _get_token_from_cloud_shell(self, resource):  # pylint: disable=no-self-use
+        import requests
+        request_uri = _get_cloud_console_token_endpoint()
+        payload = {
+            'resource': resource
+        }
+        result = requests.get(request_uri, params=payload, headers={'Metadata': 'true'})
+        return json.loads(result.content.decode())
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
 
@@ -390,13 +422,10 @@ class Profile(object):
         return access_token
 
     @staticmethod
-    def _try_parse_for_msi_port(subscription_name):
-        if '@' in subscription_name:
-            try:
-                parts = subscription_name.split('@', 1)
-                return parts[0], int(parts[1])
-            except ValueError:
-                pass
+    def _try_parse_msi_account_name(subscription_name):
+        parts = subscription_name.split('-', 1)
+        if parts[0] in MsiAccountTypes.valid_msi_account_types():
+            return parts[0], (None if len(parts) <= 1 else parts[1])
         return None, None
 
     def get_login_credentials(self, resource=None,
@@ -406,19 +435,21 @@ class Profile(object):
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
-        def _retrieve_token():
-            identity_id, msi_port = Profile._try_parse_for_msi_port(account[_SUBSCRIPTION_NAME])
-            if msi_port is not None:
-                return Profile.get_msi_token(resource, msi_port, identity_id)
-            elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-                return Profile.get_msi_token(resource, _get_cloud_console_token_endpoint())
-            elif user_type == _USER:
-                return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
-                                                                 account[_TENANT_ID], resource)
-            return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource)
-
-        from azure.cli.core.adal_authentication import AdalAuthentication
-        auth_object = AdalAuthentication(_retrieve_token)
+        identity_type, identity_id = Profile._try_parse_msi_account_name(account[_SUBSCRIPTION_NAME])
+        if identity_type is None:
+            def _retrieve_token():
+                if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+                    return self._get_token_from_cloud_shell(resource)
+                if user_type == _USER:
+                    return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
+                                                                     account[_TENANT_ID], resource)
+                return self._creds_cache.retrieve_token_for_service_principal(username_or_sp_id, resource)
+            from azure.cli.core.adal_authentication import AdalAuthentication
+            auth_object = AdalAuthentication(_retrieve_token)
+        else:
+            if self._msi_creds is None:
+                self._msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
+            auth_object = self._msi_creds
 
         return (auth_object,
                 str(account[_SUBSCRIPTION_ID]),
@@ -445,11 +476,14 @@ class Profile(object):
         username_or_sp_id = account[_USER_ENTITY][_USER_NAME]
         resource = resource or self.cli_ctx.cloud.endpoints.active_directory_resource_id
 
-        identity_id, msi_port = Profile._try_parse_for_msi_port(account[_SUBSCRIPTION_NAME])
-        if msi_port is not None:
-            creds = Profile.get_msi_token(resource, msi_port, identity_id)
+        identity_type, identity_id = Profile._try_parse_msi_account_name(account[_SUBSCRIPTION_NAME])
+        if identity_type:
+            msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
+            token_entry = msi_creds.get_token()
+            creds = (token_entry['token_type'], token_entry['access_token'], token_entry)
         elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-            creds = Profile.get_msi_token(resource, _get_cloud_console_token_endpoint())
+            creds = self._get_token_from_cloud_shell(resource)
+
         elif user_type == _USER:
             creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                               account[_TENANT_ID], resource)
@@ -461,11 +495,8 @@ class Profile(object):
                 str(account[_TENANT_ID]))
 
     def refresh_accounts(self, subscription_finder=None):
-        import re
         subscriptions = self.load_cached_subscriptions()
-        # filter away MSI related ones whose name always end with '@<port-number>'
-        to_refresh = [s for s in subscriptions if not re.match('@[0-9]+$', s[_SUBSCRIPTION_NAME])]
-        not_to_refresh = [s for s in subscriptions if s not in to_refresh]
+        to_refresh = subscriptions
 
         from azure.cli.core._debug import allow_debug_adal_connection
         allow_debug_adal_connection()
@@ -511,7 +542,6 @@ class Profile(object):
         if self._creds_cache.adal_token_cache.has_state_changed:
             self._creds_cache.persist_cached_creds()
 
-        result = result + not_to_refresh
         self._set_subscriptions(result, merge=False)
 
     def get_sp_auth_info(self, subscription_id=None, name=None, password=None, cert_file=None):
@@ -564,71 +594,32 @@ class Profile(object):
             self._storage[_INSTALLATION_ID] = installation_id
         return installation_id
 
+
+class MsiAccountTypes(object):
+    # pylint: disable=no-method-argument,no-self-argument
+    system_assigned = 'MSI'
+    user_assigned_client_id = 'MSIClient'
+    user_assigned_object_id = 'MSIObject'
+    user_assigned_resource_id = 'MSIResource'
+
     @staticmethod
-    def get_msi_token(resource, port, identity_id=None, for_login=False):
-        import requests
-        import time
-        from msrestazure.tools import is_valid_resource_id
-        _System_Assigned_Id_Type = 'MSI'
-        _User_Assigned_Client_Id_type = 'MSIClient'
-        _User_assigned_Object_Id_Type = 'MSIObject'
-        _User_assigned_Resource_Id_Type = 'MSIResource'
+    def valid_msi_account_types():
+        return [MsiAccountTypes.system_assigned, MsiAccountTypes.user_assigned_client_id,
+                MsiAccountTypes.user_assigned_object_id, MsiAccountTypes.user_assigned_resource_id]
 
-        request_uri = 'http://localhost:{}/oauth2/token'.format(port) if '://' not in str(port) else port
-        payload = {
-            'resource': resource
-        }
-        identity_id_type = None
-        if for_login:  # we will figure out the right type of id here
-            if not identity_id:
-                identity_id_type = _System_Assigned_Id_Type
-            elif is_valid_resource_id(identity_id):
-                payload['msi_res_id'] = identity_id
-                identity_id_type = _User_assigned_Resource_Id_Type
-            else:  # try to sniff it
-                payload['client_id'] = identity_id
-                identity_id_type = _User_Assigned_Client_Id_type
-                result = requests.get(request_uri, params=payload, headers={'Metadata': 'true'})
-                if result.status_code != 200:
-                    payload.pop('client_id')
-                    payload['object_id'] = identity_id
-                    identity_id_type = _User_assigned_Object_Id_Type
-        elif identity_id:
-            parts = identity_id.split('-', 1)
-            identity_id_type = parts[0]
-            if parts[0] == _User_assigned_Resource_Id_Type:
-                payload['msi_res_id'] = parts[1]
-            elif parts[0] == _User_Assigned_Client_Id_type:
-                payload['client_id'] = parts[1]
-            elif parts[0] == _User_assigned_Object_Id_Type:
-                payload['object_id'] = parts[1]
-
-        # retry as the token endpoint might not be available yet, one example is you use CLI in a
-        # custom script extension of VMSS, which might get provisioned before the MSI extensioon
-        while True:
-            err = None
-            try:
-                result = requests.get(request_uri, params=payload, headers={'Metadata': 'true'})
-                logger.debug("MSI: Retrieving a token from %s, with payload %s", request_uri, payload)
-                if result.status_code != 200:
-                    err = result.text
-            except Exception as ex:  # pylint: disable=broad-except
-                err = str(ex)
-
-            if err:
-                # we might need some error code checking to avoid silly waiting. The bottom line is users can
-                # always press ctrl+c to stop it
-                logger.warning("MSI: Failed to retrieve a token from '%s' with an error of '%s'. This could be caused "
-                               "by the MSI extension not yet fullly provisioned. Will retry in 60 seconds...",
-                               request_uri, err)
-                time.sleep(60)
-            else:
-                logger.debug('MSI: token retrieved')
-                break
-        token_entry = json.loads(result.content.decode())
-        if for_login:
-            return token_entry['access_token'], identity_id_type
-        return token_entry['token_type'], token_entry['access_token'], token_entry
+    @staticmethod
+    def msi_auth_factory(cli_account_name, identity, resource):
+        from .msi_imds_authentication import MSIImdsAuthentication
+        if cli_account_name == MsiAccountTypes.system_assigned:
+            return MSIImdsAuthentication(resource=resource)
+        elif cli_account_name == MsiAccountTypes.user_assigned_client_id:
+            return MSIImdsAuthentication(resource=resource, client_id=identity)
+        elif cli_account_name == MsiAccountTypes.user_assigned_object_id:
+            return MSIImdsAuthentication(resource=resource, object_id=identity)
+        elif cli_account_name == MsiAccountTypes.user_assigned_resource_id:
+            return MSIImdsAuthentication(resource=resource, msi_res_id=identity)
+        else:
+            raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
 
 
 class SubscriptionFinder(object):
