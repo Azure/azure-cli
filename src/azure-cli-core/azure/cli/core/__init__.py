@@ -105,7 +105,7 @@ class MainCommandsLoader(CLICommandsLoader):
         from azure.cli.core.commands import (
             _load_module_command_loader, _load_extension_command_loader, BLACKLISTED_MODS, ExtensionCommandSource)
         from azure.cli.core.extension import (
-            get_extension_names, get_extension_path, get_extension_modname)
+            get_extensions, get_extension_path, get_extension_modname)
 
         cmd_to_mod_map = {}
 
@@ -145,12 +145,24 @@ class MainCommandsLoader(CLICommandsLoader):
                          "(note: there's always an overhead with the first module loaded)",
                          cumulative_elapsed_time)
 
-        def _update_command_table_from_extensions():
+        def _update_command_table_from_extensions(ext_filters):
 
-            extensions = get_extension_names()
+            def _extension_suppress_filter(extensions):
+                filtered_extensions = []
+                for ext in extensions:
+                    should_include = True
+                    for f in ext_filters:
+                        if should_include and _wrap_suppress_extension_func(f, ext):
+                            should_include = False
+                    if should_include:
+                        filtered_extensions.append(ext)
+                return filtered_extensions
+
+            extensions = get_extensions()
             if extensions:
-                logger.debug("Found %s extensions: %s", len(extensions), extensions)
-                for ext_name in extensions:
+                logger.debug("Found %s extensions: %s", len(extensions), [e.name for e in extensions])
+                allowed_extensions = _extension_suppress_filter(extensions)
+                for ext_name in [e.name for e in allowed_extensions]:
                     ext_dir = get_extension_path(ext_name)
                     sys.path.append(ext_dir)
                     try:
@@ -173,11 +185,34 @@ class MainCommandsLoader(CLICommandsLoader):
                         logger.warning("Unable to load extension '%s'. Use --debug for more information.", ext_name)
                         logger.debug(traceback.format_exc())
 
+        def _get_extension_suppress_filters(mod_loaders):
+            filter_func_name = 'module_suppress_extension'
+            return [getattr(m, filter_func_name) for m in mod_loaders if callable(getattr(m, filter_func_name, None))]
+
+        def _wrap_suppress_extension_func(func, ext):
+            """ Wrapper method to handle centralization of log messages for extension filters """
+            res = func(ext)
+            should_suppress = res
+            reason = "Use --debug for more information."
+            if isinstance(res, tuple):
+                should_suppress, reason = res
+            suppress_types = (bool, type(None))
+            if not isinstance(should_suppress, suppress_types):
+                raise ValueError("Command module authoring error: "
+                                 "Valid extension suppression values are {} in {}".format(suppress_types, func))
+            if should_suppress:
+                logger.warning("Extension %s (%s) has been suppressed. %s",
+                               ext.name, ext.version, reason)
+                logger.debug("Extension %s (%s) suppressed from being loaded due "
+                             "to %s", ext.name, ext.version, func)
+            return should_suppress
+
         _update_command_table_from_modules(args)
         try:
+            ext_filters = _get_extension_suppress_filters(self.loaders)
             # We always load extensions even if the appropriate module has been loaded
             # as an extension could override the commands already loaded.
-            _update_command_table_from_extensions()
+            _update_command_table_from_extensions(ext_filters)
         except Exception:  # pylint: disable=broad-except
             logger.warning("Unable to load extensions. Use --debug for more information.")
             logger.debug(traceback.format_exc())
