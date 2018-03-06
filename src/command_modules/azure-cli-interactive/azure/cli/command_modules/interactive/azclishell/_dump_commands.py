@@ -33,10 +33,7 @@ class AzInteractiveCommandsLoader(MainCommandsLoader):
             loader.command_table = self.command_table
             loader._update_command_definitions()  # pylint: disable=protected-access
 
-    def load_command_table(self, args):
-        return super(AzInteractiveCommandsLoader, self).load_command_table(args)
-
-    def load_arguments(self):
+    def load_arguments(self, _):
         from azure.cli.core.commands.parameters import resource_group_name_type, get_location_type, deployment_name_type
         from azure.cli.core import ArgumentsContext
 
@@ -52,7 +49,7 @@ class AzInteractiveCommandsLoader(MainCommandsLoader):
                 c.argument('cmd', ignore_type)
 
             # load each command's arguments via reflection
-            for command_name, command in self.command_table.items():
+            for _, command in self.command_table.items():
                 command.load_arguments()
 
             for loader in command_loaders:
@@ -83,45 +80,6 @@ class LoadFreshTable(object):
         self.shell_ctx = shell_ctx
         return self
 
-    def load_help_files(self, data):
-        """ loads all the extra information from help files """
-        for command_name, help_yaml in helps.items():
-
-            help_entry = yaml.load(help_yaml)
-            try:
-                help_type = help_entry['type']
-            except KeyError:
-                continue
-
-            # if there is extra help for this command but it's not reflected in the command table
-            if command_name not in data and help_type == 'command':
-                logger.debug('Command: %s not found in command table', command_name)
-                continue
-
-            short_summary = help_entry.get('short-summary')
-            short_summary = short_summary() if callable(short_summary) else short_summary
-            if short_summary and help_type == 'command':
-                data[command_name]['help'] = short_summary
-            else:
-                # must be a command group or sub-group
-                data[command_name] = {'help': short_summary}
-                continue
-
-            if 'parameters' in help_entry:
-                for param in help_entry['parameters']:
-                    # this could fail if the help file and options list are not in the same order
-                    param_name = param['name'].split()[0]
-
-                    if param_name not in data[command_name]['parameters']:
-                        logger.debug('Command %s does not have parameter: %s', command_name, param_name)
-                        continue
-
-                    if 'short-summary' in param:
-                        data[command_name]['parameters'][param_name]['help'] = param["short-summary"]
-
-            if 'examples' in help_entry:
-                data[command_name]['examples'] = [[example['name'], example['text']] for example in help_entry['examples']]
-
     def dump_command_table(self, shell_ctx):
         """ dumps the command table """
         import timeit
@@ -130,7 +88,7 @@ class LoadFreshTable(object):
         main_loader = AzInteractiveCommandsLoader(shell_ctx.cli_ctx)
 
         main_loader.load_command_table(None)
-        main_loader.load_arguments()
+        main_loader.load_arguments(None)
         add_id_parameters(main_loader.command_table)
         cmd_table = main_loader.command_table
 
@@ -161,7 +119,7 @@ class LoadFreshTable(object):
             except (ImportError, ValueError):
                 pass
 
-        self.load_help_files(cmd_table_data)
+        load_help_files(cmd_table_data)
         elapsed = timeit.default_timer() - start_time
         logger.debug('Command table dumped: {} sec'.format(elapsed))
         self.command_table = main_loader.command_table
@@ -171,6 +129,46 @@ class LoadFreshTable(object):
         with open(os.path.join(get_cache_dir(shell_ctx), command_file), 'w') as help_file:
             json.dump(cmd_table_data, help_file)
 
+
+def load_help_files(data):
+    """ loads all the extra information from help files """
+    for command_name, help_yaml in helps.items():
+
+        help_entry = yaml.load(help_yaml)
+        try:
+            help_type = help_entry['type']
+        except KeyError:
+            continue
+
+        # if there is extra help for this command but it's not reflected in the command table
+        if command_name not in data and help_type == 'command':
+            logger.debug('Command: %s not found in command table', command_name)
+            continue
+
+        short_summary = help_entry.get('short-summary')
+        short_summary = short_summary() if callable(short_summary) else short_summary
+        if short_summary and help_type == 'command':
+            data[command_name]['help'] = short_summary
+        else:
+            # must be a command group or sub-group
+            data[command_name] = {'help': short_summary}
+            continue
+
+        if 'parameters' in help_entry:
+            for param in help_entry['parameters']:
+                # this could fail if the help file and options list are not in the same order
+                param_name = param['name'].split()[0]
+
+                if param_name not in data[command_name]['parameters']:
+                    logger.debug('Command %s does not have parameter: %s', command_name, param_name)
+                    continue
+
+                if 'short-summary' in param:
+                    data[command_name]['parameters'][param_name]['help'] = param["short-summary"]
+
+        if 'examples' in help_entry:
+            data[command_name]['examples'] = [[example['name'], example['text']] \
+                for example in help_entry['examples']]
 
 def get_cache_dir(shell_ctx):
     """ gets the location of the cache """

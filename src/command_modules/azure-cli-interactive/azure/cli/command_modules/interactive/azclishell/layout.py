@@ -4,11 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 from prompt_toolkit.enums import DEFAULT_BUFFER, SEARCH_BUFFER
-from prompt_toolkit.filters import Filter, Always, IsDone, HasFocus, RendererHeightIsKnown
+from prompt_toolkit.filters import Condition, Always, IsDone, HasFocus, RendererHeightIsKnown
 from prompt_toolkit.layout.containers import VSplit, HSplit, \
     Window, FloatContainer, Float, ConditionalContainer
 from prompt_toolkit.layout.controls import BufferControl, FillControl, TokenListControl
-from prompt_toolkit.layout.dimension import LayoutDimension as D
+from prompt_toolkit.layout.dimension import LayoutDimension
 from prompt_toolkit.layout.lexers import PygmentsLexer, Lexer as PromptLex
 from prompt_toolkit.layout.menus import CompletionsMenu
 from prompt_toolkit.layout.processors import HighlightSearchProcessor, \
@@ -20,18 +20,41 @@ from prompt_toolkit.layout.screen import Char
 from pygments.token import Token
 from pygments.lexer import Lexer as PygLex
 
-import azclishell.configuration
-from azclishell.progress import get_progress_message, get_done
+from .progress import get_progress_message, get_done
 
 MAX_COMPLETION = 16
-DEFAULT_COMMAND = ""
 
 
-# pylint: disable=too-few-public-methods
-class HasDefaultScope(Filter):
-    """ if there is a scope on the input """
-    def __call__(self, *a, **kw):
-        return DEFAULT_COMMAND == ""
+# pylint:disable=too-few-public-methods
+class LayoutUtil(object):
+    """ store information and conditions for the layout """
+    default_command = ''
+
+    def __init__(self, shell_ctx):
+        self.shell_ctx = shell_ctx
+
+        @Condition
+        def show_default(_):
+            return self.shell_ctx.is_showing_default
+
+        @Condition
+        def show_symbol(_):
+            return self.shell_ctx.is_symbols
+
+        @Condition
+        def show_progress(_):
+            progress = get_progress_message()
+            done = get_done()
+            return progress != '' and not done
+
+        self.show_default = show_default
+        self.show_symbol = show_symbol
+        self.show_progress = show_progress
+
+    @staticmethod
+    @Condition
+    def has_default_scope(_):
+        return LayoutUtil.default_command == ''
 
 
 # TODO fix this somehow
@@ -46,65 +69,36 @@ input_processors = [
         HasFocus(SEARCH_BUFFER)),
     HighlightSelectionProcessor(),
     ConditionalProcessor(
-        AppendAutoSuggestion(), HasFocus(DEFAULT_BUFFER) & HasDefaultScope()),
+        AppendAutoSuggestion(), HasFocus(DEFAULT_BUFFER) & LayoutUtil.has_default_scope)
 ]
-
-
-# pylint: disable=too-few-public-methods
-class ShowDefault(Filter):
-    """ toggle on and off seeing the default """
-    def __init__(self, shell_ctx):
-        self.shell_ctx = shell_ctx
-
-    def __call__(self, *a, **kw):
-        return self.shell_ctx.is_showing_default
-
-
-# pylint: disable=too-few-public-methods
-class ShowSymbol(Filter):
-    """ toggle showing the symbols """
-    def __init__(self, shell_ctx):
-        self.shell_ctx = shell_ctx
-
-    def __call__(self, *a, **kw):
-        return self.shell_ctx.is_symbols
-
-
-# pylint: disable=too-few-public-methods
-class ShowProgress(Filter):
-    """ toggle showing the progress """
-    def __call__(self, *a, **kw):
-        progress = get_progress_message()
-        done = get_done()
-        return progress != '' and not done
 
 
 def get_scope():
     """" returns the default command """
-    return DEFAULT_COMMAND
+    return LayoutUtil.default_command
 
 
 def set_scope(com, add=True):
     """ sets the scope """
-    global DEFAULT_COMMAND
     if add:
-        DEFAULT_COMMAND += " " + com
+        LayoutUtil.default_command += " " + com
     else:
-        DEFAULT_COMMAND = com
+        LayoutUtil.default_command = com
 
 
-def get_prompt_tokens(cli):
+def get_prompt_tokens(_):
     """ returns prompt tokens """
-    return [(Token.Az, 'az%s>> ' % DEFAULT_COMMAND)]
+    return [(Token.Az, 'az%s>> ' % LayoutUtil.default_command)]
 
 
 def get_height(cli):
     """ gets the height of the cli """
     if not cli.is_done:
-        return D(min=8)
+        return LayoutDimension(min=8)
+    return None
 
 
-def get_tutorial_tokens(cli):
+def get_tutorial_tokens(_):
     """ tutorial tokens """
     return [(Token.Toolbar, 'In Tutorial Mode: Press [Enter] after typing each part')]
 
@@ -164,7 +158,7 @@ def create_tutorial_layout(lex):
                     TokenListControl(
                         get_tutorial_tokens,
                         default_char=Char(' ', Token.Toolbar)),
-                    height=D.exact(1)),
+                    height=LayoutDimension.exact(1)),
             ]),
             filter=~IsDone() & RendererHeightIsKnown()
         )
@@ -176,8 +170,13 @@ def create_layout(shell_ctx, lex, exam_lex, toolbar_lex):
     """ creates the layout """
     lexer, exam_lex, toolbar_lex = get_lexers(lex, exam_lex, toolbar_lex)
 
+
+
+
     if not any(isinstance(processor, DefaultPrompt) for processor in input_processors):
         input_processors.append(DefaultPrompt(get_prompt_tokens))
+
+    conditions = LayoutUtil(shell_ctx)
 
     layout_lower = ConditionalContainer(
         HSplit([
@@ -188,7 +187,7 @@ def create_layout(shell_ctx, lex, exam_lex, toolbar_lex):
 
             ConditionalContainer(
                 get_hline(),
-                filter=ShowDefault(shell_ctx) | ShowSymbol(shell_ctx)
+                filter=conditions.show_default | conditions.show_symbol
             ),
             ConditionalContainer(
                 Window(
@@ -197,11 +196,11 @@ def create_layout(shell_ctx, lex, exam_lex, toolbar_lex):
                         lexer=lexer
                     )
                 ),
-                filter=ShowDefault(shell_ctx)
+                filter=conditions.show_default
             ),
             ConditionalContainer(
                 get_hline(),
-                filter=ShowDefault(shell_ctx) & ShowSymbol(shell_ctx)
+                filter=conditions.show_default & conditions.show_symbol
             ),
             ConditionalContainer(
                 Window(
@@ -210,7 +209,7 @@ def create_layout(shell_ctx, lex, exam_lex, toolbar_lex):
                         lexer=exam_lex
                     )
                 ),
-                filter=ShowSymbol(shell_ctx)
+                filter=conditions.show_symbol
             ),
             ConditionalContainer(
                 Window(
@@ -219,7 +218,7 @@ def create_layout(shell_ctx, lex, exam_lex, toolbar_lex):
                         lexer=lexer
                     )
                 ),
-                filter=ShowProgress()
+                filter=conditions.show_progress
             ),
             Window(
                 content=BufferControl(
@@ -258,11 +257,10 @@ def get_anyhline(config):
     if config.BOOLEAN_STATES[config.config.get('Layout', 'command_description')] or\
        config.BOOLEAN_STATES[config.config.get('Layout', 'param_description')]:
         return Window(
-            width=D.exact(1),
-            height=D.exact(1),
+            width=LayoutDimension.exact(1),
+            height=LayoutDimension.exact(1),
             content=FillControl('-', token=Token.Line))
-    else:
-        return get_empty()
+    return get_empty()
 
 
 def get_descript(lexer):
@@ -288,16 +286,14 @@ def get_example(config, exam_lex):
             content=BufferControl(
                 buffer_name="examples",
                 lexer=exam_lex))
-    else:
-        return get_empty()
+    return get_empty()
 
 
 def get_examplehline(config):
     """ gets a line if there are examples """
     if config.BOOLEAN_STATES[config.config.get('Layout', 'examples')]:
         return get_hline()
-    else:
-        return get_empty()
+    return get_empty()
 
 
 def get_empty():
@@ -310,16 +306,16 @@ def get_empty():
 def get_hline():
     """ gets a horiztonal line """
     return Window(
-        width=D.exact(1),
-        height=D.exact(1),
+        width=LayoutDimension.exact(1),
+        height=LayoutDimension.exact(1),
         content=FillControl('-', token=Token.Line))
 
 
 def get_vline():
     """ gets a vertical line """
     return Window(
-        width=D.exact(1),
-        height=D.exact(1),
+        width=LayoutDimension.exact(1),
+        height=LayoutDimension.exact(1),
         content=FillControl('*', token=Token.Line))
 
 
@@ -332,9 +328,7 @@ def get_descriptions(config, exam_lex, lexer):
                 get_vline(),
                 get_param(lexer),
             ])
-        else:
-            return get_descript(exam_lex)
+        return get_descript(exam_lex)
     elif config.BOOLEAN_STATES[config.config.get('Layout', 'param_description')]:
         return get_param(lexer)
-    else:
-        return get_empty()
+    return get_empty()

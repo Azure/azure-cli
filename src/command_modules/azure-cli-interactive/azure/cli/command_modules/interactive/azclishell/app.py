@@ -26,19 +26,19 @@ from prompt_toolkit.history import FileHistory, InMemoryHistory
 from prompt_toolkit.interface import Application
 from prompt_toolkit.shortcuts import create_eventloop
 
-from azclishell import __version__
-from azclishell.az_completer import AzCompleter
-from azclishell.az_lexer import get_az_lexer, ExampleLexer, ToolbarLexer
-from azclishell.command_tree import in_tree
-from azclishell.configuration import Configuration, SELECT_SYMBOL
-from azclishell.frequency_heuristic import DISPLAY_TIME, frequency_heuristic
-from azclishell.gather_commands import add_new_lines, GatherCommands
-from azclishell.key_bindings import InteractiveKeyBindings
-from azclishell.layout import create_layout, create_tutorial_layout, set_scope, get_scope
-from azclishell.progress import progress_view
-import azclishell.telemetry as telemetry
-from azclishell.threads import LoadCommandTableThread
-from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
+from . import __version__
+from .az_completer import AzCompleter
+from .az_lexer import get_az_lexer, ExampleLexer, ToolbarLexer
+from .command_tree import in_tree
+from .configuration import Configuration, SELECT_SYMBOL
+from .frequency_heuristic import DISPLAY_TIME, frequency_heuristic
+from .gather_commands import add_new_lines, GatherCommands
+from .key_bindings import InteractiveKeyBindings
+from .layout import create_layout, create_tutorial_layout, set_scope, get_scope
+from .progress import progress_view
+from . import telemetry
+from .threads import LoadCommandTableThread
+from .util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import ENV_ADDITIONAL_USER_AGENT
@@ -92,7 +92,7 @@ class AzInteractiveShell(object):
                  app=None, input_custom=sys.stdin, output_custom=None,
                  user_feedback=False, intermediate_sleep=.25, final_sleep=4):
 
-        from azclishell.color_styles import style_factory
+        from .color_styles import style_factory
 
         self.cli_ctx = cli_ctx
         self.config = Configuration(cli_ctx.config, style=style)
@@ -100,9 +100,9 @@ class AzInteractiveShell(object):
         self.styles = style or style_factory(self.config.get_style())
         self.lexer = lexer or get_az_lexer(self.config) if self.styles else None
         try:
-            from azclishell.gather_commands import GatherCommands
-            from azclishell.az_completer import AzCompleter
             self.completer = completer or AzCompleter(self, GatherCommands(self.config))
+            from .az_completer import initialize_command_table_attributes
+            initialize_command_table_attributes(self.completer)
         except IOError:  # if there is no cache
             self.completer = None
         self.history = history or FileHistory(os.path.join(self.config.config_dir, self.config.get_history()))
@@ -131,7 +131,7 @@ class AzInteractiveShell(object):
 
         # try to consolidate state information here...
         # These came from key bindings...
-        self._section = 1
+        self.example_page = 1
         self.is_prompting = False
         self.is_example_repl = False
         self.is_showing_default = False
@@ -229,7 +229,7 @@ class AzInteractiveShell(object):
                 # default chops top off
                 example = '\n'.join(group[begin:]) + "\n"
                 while ((section_value - 1) * len_of_excerpt) > num_newline:
-                    self._section -= 1
+                    self.example_page -= 1
             page_number = '\n' + str(section_value) + "/" + str(int(math.ceil(num_newline / len_of_excerpt)))
 
         return example + page_number + ' CTRL+Y (^) CTRL+N (v)'
@@ -314,7 +314,7 @@ class AzInteractiveShell(object):
                         for part in example:
                             string_example += part
                     example = self._space_examples(
-                        self.completer.command_examples[cmdstp], rows, self._section)
+                        self.completer.command_examples[cmdstp], rows, self.example_page)
 
         if not any_documentation:
             self.description_docs = u''
@@ -679,7 +679,7 @@ class AzInteractiveShell(object):
 
     def progress_patch(self, _=False):
         """ forces to use the Shell Progress """
-        from azclishell.progress import ShellProgressView
+        from .progress import ShellProgressView
         self.cli_ctx.progress_controller.init_progress(ShellProgressView())
         return self.cli_ctx.progress_controller
 
@@ -690,7 +690,7 @@ class AzInteractiveShell(object):
         self.command_table_thread = LoadCommandTableThread(restart_completer, self)
         self.command_table_thread.start()
 
-        from azclishell.configuration import SHELL_HELP
+        from .configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(
             initial_document=Document(u'{}'.format(SHELL_HELP)))
         # flush telemetry for new commands and send successful interactive mode entry event
