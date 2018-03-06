@@ -258,7 +258,7 @@ class Profile(object):
         subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
         subscriptions = subscription_finder.find_from_raw_token(tenant, token)
         if not subscriptions:
-            raise CLIError('No access was configured for the VM, hence no subscriptions were found')
+            raise CLIError('No subscriptions were found in the cloud shell')
         user = decode.get('unique_name', 'N/A')
 
         consolidated = self._normalize_properties(user, subscriptions, is_service_principal=False)
