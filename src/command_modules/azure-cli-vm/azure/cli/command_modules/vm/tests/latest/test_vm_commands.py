@@ -2175,7 +2175,11 @@ class VMZoneScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'zones': '1 2 3',
-            'vmss': 'vmss123'
+            'vmss': 'vmss123',
+            'lb': 'vmss123LB',  # default name chosen by the create
+            'rule': 'LBRule',  # default name chosen by the create,
+            'nsg': 'vmss123NSG',  # default name chosen by the create
+            'probe': 'LBProbe'
         })
         self.cmd('vmss create -g {rg} -n {vmss} --admin-username clitester --admin-password PasswordPassword1! --image debian --zones {zones}')
         self.cmd('vmss show -g {rg} -n {vmss}',
@@ -2191,6 +2195,21 @@ class VMZoneScenarioTest(ScenarioTest):
             self.check('[0].sku.name', 'Standard'),
             self.check('[0].zones', None)
         ])
+
+        # Now provision a web server
+        self.cmd('network lb probe create -g {rg} --lb-name {lb} -n {probe} --protocol http --port 80 --path /')
+        self.cmd('network lb rule create -g {rg} --lb-name {lb} -n {rule} --protocol tcp --frontend-port 80 --backend-port 80 --probe-name {probe}')
+        self.cmd('network nsg rule create -g {rg} --nsg-name {nsg} -n allowhttp --priority 4096 --destination-port-ranges 80 --protocol Tcp')
+
+        self.cmd('vmss extension set -g {rg} --vmss-name {vmss} -n customScript --publisher Microsoft.Azure.Extensions --settings "{{\\"commandToExecute\\": \\"sudo apt-get install -y nginx\\"}}" --version 2.0')
+        self.cmd('vmss update-instances -g {rg} -n {vmss} --instance-ids "*"')
+
+        # verify the server works
+        result = self.cmd('vmss list-instance-connection-info -g {rg} -n {vmss} -o tsv')
+        time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
+        import requests
+        r = requests.get('http://' + result.output.split(':')[0])
+        self.assertTrue('Welcome to nginx' in str(r.content))
 
     @ResourceGroupPreparer(name_prefix='cli_test_disk_zones', location='eastus2')
     def test_disk_create_zones(self, resource_group, resource_group_location):
@@ -2232,7 +2251,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
         time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
         import requests
         r = requests.get('http://' + public_ip)
-        self.assertTrue('Welcome to nginx!' in str(r.content))
+        self.assertTrue('Welcome to nginx' in str(r.content))
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_run_command_w_params')
     def test_run_command_with_parameters(self, resource_group):
@@ -2311,7 +2330,7 @@ class VMSSRollingUpgrade(ScenarioTest):
         time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
         import requests
         r = requests.get('http://' + result.output.split(':')[0])
-        self.assertTrue('Welcome to nginx!' in str(r.content))
+        self.assertTrue('Welcome to nginx' in str(r.content))
 
         # do some rolling upgrade, maybe nonsense, but we need to test the command anyway
         self.cmd('vmss rolling-upgrade start -g {rg} -n {vmss}')
@@ -2379,7 +2398,7 @@ class VMLBIntegrationTesting(ScenarioTest):
         time.sleep(15)  # 15 seconds should be enough for nginx started(Skipped under playback mode)
         import requests
         r = requests.get('http://' + pip)
-        self.assertTrue('Welcome to nginx!' in str(r.content))
+        self.assertTrue('Welcome to nginx' in str(r.content))
 
 
 class VMCreateWithExistingNic(ScenarioTest):
