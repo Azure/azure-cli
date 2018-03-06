@@ -449,7 +449,7 @@ class Profile(object):
         if msi_port is not None:
             creds = Profile.get_msi_token(resource, msi_port, identity_id)
         elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
-            return Profile.get_msi_token(resource, _get_cloud_console_token_endpoint())
+            creds = Profile.get_msi_token(resource, _get_cloud_console_token_endpoint())
         elif user_type == _USER:
             creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                               account[_TENANT_ID], resource)
