@@ -12,12 +12,10 @@ from knack.util import CLIError
 from azure.cli.core._profile import Profile
 from azure.cli.core.util import in_cloud_console
 
-from azure.cli.core.commands.validators import DefaultStr
-
 logger = get_logger(__name__)
 
 _CLOUD_CONSOLE_LOGOUT_WARNING = ("Logout successful. Re-login to your initial Cloud Shell identity with"
-                                 " 'az login --msi'. Login with a new identity with 'az login'.")
+                                 " 'az login --identity'. Login with a new identity with 'az login'.")
 _CLOUD_CONSOLE_LOGIN_WARNING = ("Cloud Shell is automatically authenticated under the initial account signed-in with."
                                 " Run 'az login' only if you need to use a different account")
 
@@ -92,22 +90,23 @@ def account_clear(cmd):
 
 
 # pylint: disable=inconsistent-return-statements
-def login(cmd, username=None, password=None, service_principal=None, tenant=None,
-          allow_no_subscriptions=False, msi=False, msi_port=DefaultStr(50342)):
+def login(cmd, username=None, password=None, service_principal=None, tenant=None, allow_no_subscriptions=False,
+          identity=False, identity_port=None,
+          msi=False, msi_port=None):  # will remove msi_xxx in a future release
     """Log in to access Azure subscriptions"""
     from adal.adal_error import AdalError
     import requests
 
     # quick argument usage check
     if (any([password, service_principal, tenant, allow_no_subscriptions]) and
-            any([msi, not getattr(msi_port, 'is_default', None)])):
-        raise CLIError("usage error: '--msi/--msi-port' are not applicable with other arguments")
+            any([identity, msi])):
+        raise CLIError("usage error: '--identity/--identity-port' are not applicable with other arguments")
 
     interactive = False
 
     profile = Profile(cli_ctx=cmd.cli_ctx, async_persist=False)
 
-    if msi:
+    if identity or msi:
         if in_cloud_console():
             return profile.find_subscriptions_in_cloud_console()
         return profile.find_subscriptions_in_vm_with_msi(msi_port, username)

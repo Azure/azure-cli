@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.29
+++++++
+* webapp/functionapp: author managed identity commands `identity assign/show`, and deprecate `assign-identity`
+
 0.1.28
 ++++++
 * webapp: updating tests/code for sdk update

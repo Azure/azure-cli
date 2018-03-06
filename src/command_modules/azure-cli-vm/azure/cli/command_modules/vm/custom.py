@@ -406,6 +406,16 @@ def update_snapshot(cmd, instance, sku=None):
 
 
 # region VirtualMachines Identity
+def show_vm_identity(cmd, resource_group_name, vm_name):
+    client = _compute_client_factory(cmd.cli_ctx)
+    return client.virtual_machines.get(resource_group_name, vm_name).identity
+
+
+def show_vmss_identity(cmd, resource_group_name, vm_name):
+    client = _compute_client_factory(cmd.cli_ctx)
+    return client.virtual_machine_scale_sets.get(resource_group_name, vm_name).identity
+
+
 def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, identity_role='Contributor',
                        identity_role_id=None, identity_scope=None, port=None):
     VirtualMachineIdentity, ResourceIdentityType = cmd.get_models('VirtualMachineIdentity', 'ResourceIdentityType')
