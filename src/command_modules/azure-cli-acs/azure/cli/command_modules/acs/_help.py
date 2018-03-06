@@ -326,6 +326,63 @@ helps['aks upgrade'] = """
           - "`az aks get-upgrades`"
 """
 
+helps['aks upgrade-connector'] = """
+    type: command
+    short-summary: Upgrade the ACI Connector on a managed Kubernetes cluster.
+    parameters:
+        - name: --chart-url
+          type: string
+          short-summary: URL of a Helm chart that installs ACI Connector.
+        - name: --connector-name
+          type: string
+          short-summary: Name of the ACI Connector.
+        - name: --os-type
+          type: string
+          short-summary: Install support for deploying ACIs of this operating system type.
+        - name: --service-principal
+          type: string
+          short-summary: Service principal used for authentication to Azure APIs.
+          long-summary:  If not specified, use the AKS service principal defined in the file
+                         /etc/kubernetes/azure.json on the node which runs the virtual kubelet pod.
+        - name: --client-secret
+          type: string
+          short-summary: Secret associated with the service principal. This argument is required if
+                         `--service-principal` is specified.
+        - name: --image-tag
+          type: string
+          short-summary: The image tag of the virtual kubelet. Use 'latest' if it is not specified
+        - name: --aci-resource-group
+          type: string
+          short-summary: The resource group to create the ACI container groups. Use the MC_*
+                         resource group if it is not specified.
+        - name: --location
+          type: string
+          short-summary: The location to create the ACI container groups. Use the location of the MC_*
+                         resource group if it is not specified.
+    examples:
+        - name: Upgrade the ACI Connector for Linux to a managed Kubernetes cluster.
+          text: |-
+            az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
+              --connector-name aci-connector
+        - name: Upgrade the ACI Connector for Windows to a managed Kubernetes cluster.
+          text: |-
+            az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
+               --connector-name aci-connector --os-type Windows
+        - name: Upgrade the ACI Connector for both Windows and Linux to a managed Kubernetes cluster.
+          text: |-
+            az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
+              --connector-name aci-connector --os-type Both
+        - name: Upgrade the ACI Connector to use a specific service principal in a specific resource group.
+          text: |-
+            az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
+              --connector-name aci-connector --service-principal <SPN_ID> --client-secret <SPN_SECRET> \\
+              --aci-resource-group <ACI resource group>
+        - name: Upgrade the ACI Connector from a custom Helm chart with custom tag.
+          text: |-
+            az aks upgrade-connector --name MyManagedCluster --resource-group MyResourceGroup \\
+              --connector-name aci-connector --chart-url <CustomURL> --image-tag <VirtualKubeletImageTag>
+"""
+
 helps['aks wait'] = """
     type: command
     short-summary: Wait for a managed Kubernetes cluster to reach a desired state.
