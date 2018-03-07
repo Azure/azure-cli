@@ -3,20 +3,25 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from msrestazure.tools import (
-    resource_id, is_valid_resource_id, parse_resource_id)
+# pylint: disable=unused-argument
+
+from msrestazure.tools import resource_id, is_valid_resource_id, parse_resource_id  # pylint: disable=import-error
+from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.util import sdk_no_wait
+from azure.mgmt.rdbms.mysql.operations.servers_operations import ServersOperations
+from ._client_factory import get_mysql_management_client, get_postgresql_management_client
+
+SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 
 
-# need to replace source sever name with source server id, so customer server restore function
+# Need to replace source server name with source server id, so customer server restore function
 # The parameter list should be the same as that in factory to use the ParametersContext
-# auguments and validators
-def _server_restore(cmd, client, resource_group_name, server_name, parameters, **kwargs):
+# arguments and validators
+def _server_restore(cmd, client, resource_group_name, server_name, parameters, no_wait=False, **kwargs):
     source_server = kwargs['source_server_id']
 
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
-            from azure.cli.core.commands.client_factory import get_subscription_id
-            from azure.mgmt.rdbms.mysql.operations.servers_operations import ServersOperations
             provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
             source_server = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
                                         resource_group=resource_group_name,
@@ -37,26 +42,36 @@ def _server_restore(cmd, client, resource_group_name, server_name, parameters, *
     except Exception as e:
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
 
-    return client.create_or_update(resource_group_name, server_name, parameters)
+    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
 def _server_update_custom_func(instance,
                                capacity=None,
+                               storage_mb=None,
+                               backup_retention_days=None,
                                administrator_login_password=None,
                                ssl_enforcement=None,
                                tags=None):
+    from azure.mgmt.rdbms.mysql.models import StorageProfile  # pylint: disable=unused-variable
     from importlib import import_module
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
     ServerUpdateParameters = getattr(module, 'ServerUpdateParameters')
 
     if capacity is not None:
+        instance.sku.name = _get_sku_name(instance.sku.tier, instance.sku.family, capacity)
         instance.sku.capacity = capacity
     else:
         instance.sku = None
 
+    if storage_mb is not None:
+        instance.storage_profile.storage_mb = storage_mb
+
+    if backup_retention_days is not None:
+        instance.storage_profile.backup_retention_days = backup_retention_days
+
     params = ServerUpdateParameters(sku=instance.sku,
-                                    storage_mb=None,
+                                    storage_profile=instance.storage_profile,
                                     administrator_login_password=administrator_login_password,
                                     version=None,
                                     ssl_enforcement=ssl_enforcement,
@@ -65,15 +80,39 @@ def _server_update_custom_func(instance,
     return params
 
 
-# define custom func for firewall rule update, because flatten make generic update not work
-def _firewall_rule_custom_setter(client, resource_group_name, server_name, firewall_rule_name,
-                                 parameters):
+def _server_mysql_get(cmd, resource_group_name, server_name):
+    client = get_mysql_management_client(cmd.cli_ctx)
+    return client.servers.get(resource_group_name, server_name)
+
+
+def _server_postgresql_get(cmd, resource_group_name, server_name):
+    client = get_postgresql_management_client(cmd.cli_ctx)
+    return client.servers.get(resource_group_name, server_name)
+
+
+def _server_update_get(client, resource_group_name, server_name):
+    return client.get(resource_group_name, server_name)
+
+
+def _server_update_set(client, resource_group_name, server_name, parameters):
+    return client.update(resource_group_name, server_name, parameters)
+
+
+def _get_sku_name(tier, family, capacity):
+    return '{}_{}_{}'.format(SKU_TIER_MAP[tier], family, str(capacity))
+
+
+def _firewall_rule_custom_getter(client, resource_group_name, server_name, firewall_rule_name):
+    return client.get(resource_group_name, server_name, firewall_rule_name)
+
+
+def _firewall_rule_custom_setter(client, resource_group_name, server_name, firewall_rule_name, parameters):
     return client.create_or_update(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        firewall_rule_name=firewall_rule_name,
-        start_ip_address=parameters.start_ip_address,
-        end_ip_address=parameters.end_ip_address)
+        resource_group_name,
+        server_name,
+        firewall_rule_name,
+        parameters.start_ip_address,
+        parameters.end_ip_address)
 
 
 def _firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_address=None):
@@ -84,7 +123,7 @@ def _firewall_rule_update_custom_func(instance, start_ip_address=None, end_ip_ad
     return instance
 
 
-#        Custom funcs for server logs        #
+# Custom functions for server logs
 def _download_log_files(
         client,
         resource_group_name,
@@ -104,7 +143,7 @@ def _list_log_files_with_filter(client, resource_group_name, server_name, filena
                                 file_last_written=None, max_file_size=None):
     import re
     from datetime import datetime, timedelta
-    from dateutil.tz import tzutc
+    from dateutil.tz import tzutc   # pylint: disable=import-error
 
     # list all files
     all_files = client.list_by_server(resource_group_name, server_name)
@@ -128,7 +167,7 @@ def _list_log_files_with_filter(client, resource_group_name, server_name, filena
     return files
 
 
-#        Custom funcs for list servers        #
+# Custom functions for list servers
 def _server_list_custom_func(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
