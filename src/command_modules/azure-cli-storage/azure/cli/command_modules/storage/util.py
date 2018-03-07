@@ -210,13 +210,17 @@ def normalize_blob_file_path(path, name):
 
 
 def check_precondition_success(func):
-    def new_func(*args, **kwargs):
+    def wrapper(*args, **kwargs):
         from azure.common import AzureHttpError
         try:
-            return (True, func(*args, **kwargs))
+            return True, func(*args, **kwargs)
         except AzureHttpError as ex:
             # Precondition failed error
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/412
             if ex.status_code != 412:
-                raise ex
-            return (False, None)
-    return new_func
+                raise
+            from knack.log import get_logger
+            logger = get_logger(__name__)
+            logger.warning('Failed precondition')
+            return False, None
+    return wrapper
