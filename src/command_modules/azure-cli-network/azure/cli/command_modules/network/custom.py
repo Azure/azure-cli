@@ -822,7 +822,7 @@ def update_asg(instance, tags=None):
 
 # region DNS Commands
 def create_dns_zone(client, resource_group_name, zone_name, location='global', tags=None,
-                    if_none_match=False, zone_type=None, resolution_vnets=None, registration_vnets=None):
+                    if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
     zone = Zone(location=location, tags=tags)
 
     if hasattr(zone, 'zone_type'):
