@@ -8,12 +8,12 @@ from collections import OrderedDict
 
 from knack.prompting import prompt_y_n
 from knack.util import CLIError
+from knack.log import get_logger
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
 
 import azure.cli.command_modules.extension._help  # pylint: disable=unused-import
-
 
 # pylint: disable=line-too-long
 class ExtensionCommandsLoader(AzCommandsLoader):
@@ -29,7 +29,7 @@ class ExtensionCommandsLoader(AzCommandsLoader):
         def transform_extension_list_available(results):
             return [OrderedDict([('Name', r)]) for r in results]
 
-        def validate_extension_add(namespace):
+        def validate_extension_add(namespace):            
             if (namespace.extension_name and namespace.source) or (not namespace.extension_name and not namespace.source):
                 raise CLIError("usage error: --name NAME | --source SOURCE")
 
