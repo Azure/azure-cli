@@ -14,6 +14,7 @@ def load_arguments_eh(self, _):
     from knack.arguments import CLIArgumentType
     from azure.mgmt.eventhub.models.event_hub_management_client_enums import KeyType, AccessRights, SkuName
     from azure.cli.command_modules.eventhubs._completers import get_consumergroup_command_completion_list, get_eventhubs_command_completion_list
+    from azure.cli.command_modules.eventhubs._validator import validate_storageaccount
 
     rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), help='Space-separated Authorization rule rights list')
     key_arg_type = CLIArgumentType(options_list=['--key-name'], arg_type=get_enum_type(KeyType), help='specifies Primary or Secondary key needs to be reset')
@@ -39,7 +40,6 @@ def load_arguments_eh(self, _):
         c.argument('maximum_throughput_units', type=int, help='Upper limit of throughput units when AutoInflate is enabled, vaule should be within 0 to 20 throughput units. ( 0 if AutoInflateEnabled = true)')
 
     with self.argument_context('eventhubs namespace update') as c:
-        c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
         c.argument('tags', arg_type=tags_type)
         c.argument('sku', options_list=['--sku'], arg_type=get_enum_type(SkuName))
         c.argument('capacity', type=int, help='Capacity for Sku')
@@ -71,7 +71,7 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs eventhub') as c:
         c.argument('event_hub_name', arg_type=name_type, id_part='child_name_1', completer=get_eventhubs_command_completion_list, help='Name of Eventhub')
 
-    for scope in ['eventhubs eventhub create', 'eventhubs eventhub update']:
+    for scope in ['eventhubs eventhub update', 'eventhubs eventhub create']:
         with self.argument_context(scope) as c:
             c.argument('message_retention_in_days', options_list=['--message-retention'], type=int, help='Number of days to retain events for this Event Hub, value should be 1 to 7 days')
             c.argument('partition_count', type=int, help='Number of partitions created for the Event Hub, allowed values are from 1 to 32 partitions.')
@@ -80,7 +80,7 @@ def load_arguments_eh(self, _):
             c.argument('capture_interval_seconds', arg_group='Capture', options_list=['--capture-interval'], type=int, help='Allows you to set the frequency with which the capture to Azure Blobs will happen, value should between 60 to 900 seconds')
             c.argument('capture_size_limit_bytes', arg_group='Capture', options_list=['--capture-size-limit'], type=int, help='Defines the amount of data built up in your Event Hub before an capture operation, value should be between 10485760 to 524288000 bytes')
             c.argument('destination_name', arg_group='Capture-Destination', help='Name for capture destination')
-            c.argument('storage_account_resource_id', arg_group='Capture-Destination', options_list=['--storage-account'], help='Resource id of the storage account to be used to create the blobs')
+            c.argument('storage_account_resource_id', arg_group='Capture-Destination', validator=validate_storageaccount, options_list=['--storage-account'], help='Name (if within same resource group and not of type Classic Storage) or ARM id of the storage account to be used to create the blobs')
             c.argument('blob_container', arg_group='Capture-Destination', help='Blob container Name')
             c.argument('archive_name_format', arg_group='Capture-Destination', help='Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order')
 
