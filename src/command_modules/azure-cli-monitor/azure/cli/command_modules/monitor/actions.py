@@ -6,7 +6,7 @@
 import argparse
 
 from azure.cli.command_modules.monitor.util import (
-    get_aggregation_map, get_operator_map, get_autoscale_statistic_map, get_autoscale_operator_map,
+    get_aggregation_map, get_operator_map, get_autoscale_operator_map,
     get_autoscale_aggregation_map, get_autoscale_scale_direction_map)
 
 
@@ -185,16 +185,6 @@ class AutoscaleConditionAction(argparse.Action):  # pylint: disable=protected-ac
             values = values[0].split(' ')
         name_offset = 0
         try:
-            time_grain = period_type(values[1])
-            name_offset += 1
-        except ValueError:
-            time_grain = period_type('1m')
-        try:
-            statistic = get_autoscale_statistic_map()[values[0]]
-            name_offset += 1
-        except KeyError:
-            statistic = get_autoscale_statistic_map()['avg']
-        try:
             metric_name = ' '.join(values[name_offset:-4])
             operator = get_autoscale_operator_map()[values[-4]]
             threshold = int(values[-3])
@@ -202,13 +192,13 @@ class AutoscaleConditionAction(argparse.Action):  # pylint: disable=protected-ac
             window = period_type(values[-1])
         except (IndexError, KeyError):
             from knack.util import CLIError
-            raise CLIError('usage error: --condition [{avg,min,max,sum} TIMEGRAIN] METRIC {==,!=,>,>=,<,<=} '
+            raise CLIError('usage error: --condition METRIC {==,!=,>,>=,<,<=} '
                            'THRESHOLD {avg,min,max,total,count} PERIOD')
         condition = MetricTrigger(
             metric_name=metric_name,
             metric_resource_uri=None,  # will be filled in later
-            time_grain=time_grain,
-            statistic=statistic,
+            time_grain=None,  # will be filled in later
+            statistic=None,  # will be filled in later
             time_window=window,
             time_aggregation=aggregation,
             operator=operator,

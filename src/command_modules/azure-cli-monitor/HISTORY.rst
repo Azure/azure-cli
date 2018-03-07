@@ -7,7 +7,7 @@ Release History
 +++++
 * Deprecates the `monitor autoscale-settings` commands.
 * Adds the `monitor autoscale` command group.
-* Adds the `monitor autoscale schedule` command group.
+* Adds the `monitor autoscale profile` command group.
 * Adds the `monitor autoscale rule` command group.
 
 0.1.2

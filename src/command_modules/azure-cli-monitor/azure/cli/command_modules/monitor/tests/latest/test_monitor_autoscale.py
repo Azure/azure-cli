@@ -55,7 +55,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
 
         self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}')
 
-        self.cmd('monitor autoscale rule add -g {rg} --autoscale-name {vmss} --condition "Percentage CPU > 75 avg 5m" --scale to 5', checks=[
+        self.cmd('monitor autoscale rule create -g {rg} --autoscale-name {vmss} --condition "Percentage CPU > 75 avg 5m" --scale to 5', checks=[
             self.check('metricTrigger.metricName', 'Percentage CPU'),
             self.check('metricTrigger.operator', 'GreaterThan'),
             self.check('metricTrigger.threshold', 75),
@@ -68,7 +68,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             self.check('scaleAction.type', 'ExactCount'),
             self.check('scaleAction.value', '5')
         ])
-        self.cmd('monitor autoscale rule add -g {rg} --autoscale-name {vmss} --condition "avg 5m Percentage CPU < 30 avg 10m" --scale in 50% --cooldown 10', checks=[
+        self.cmd('monitor autoscale rule create -g {rg} --autoscale-name {vmss} --timegrain "avg 5m" --condition "Percentage CPU < 30 avg 10m" --scale in 50% --cooldown 10', checks=[
             self.check('metricTrigger.metricName', 'Percentage CPU'),
             self.check('metricTrigger.operator', 'LessThan'),
             self.check('metricTrigger.threshold', 30),
@@ -81,7 +81,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             self.check('scaleAction.type', 'PercentChangeCount'),
             self.check('scaleAction.value', '50')
         ])
-        self.cmd('monitor autoscale rule add -g {rg} --autoscale-name {vmss} --condition "min 1m Percentage CPU < 10 avg 5m" --scale to 1', checks=[
+        self.cmd('monitor autoscale rule create -g {rg} --autoscale-name {vmss} --timegrain "min 1m" --condition "Percentage CPU < 10 avg 5m" --scale to 1', checks=[
             self.check('metricTrigger.metricName', 'Percentage CPU'),
             self.check('metricTrigger.operator', 'LessThan'),
             self.check('metricTrigger.threshold', 10),
@@ -103,31 +103,31 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             self.assertTrue(list_1[x] == list_2[x])
 
         # verify copy works
-        self.cmd('monitor autoscale schedule create -g {rg} --autoscale-name {vmss} -n test2 --start 2018-03-01 --end 2018-04-01 --count 3 --timezone "Pacific Standard Time"')
-        self.cmd('monitor autoscale schedule create -g {rg} --autoscale-name {vmss} -n test3 --start 2018-05-01 --end 2018-06-01 --count 2 --timezone "Pacific Standard Time"')
-        self.cmd('monitor autoscale schedule create -g {rg} --autoscale-name {vmss} -n test1 --start 2018-01-01 --end 2018-02-01 --count 2 --timezone "Pacific Standard Time" --copy-rules default')
+        self.cmd('monitor autoscale profile create -g {rg} --autoscale-name {vmss} -n test2 --start 2018-03-01 --end 2018-04-01 --min-count 1 --count 3 --max-count 5 --timezone "Pacific Standard Time"')
+        self.cmd('monitor autoscale profile create -g {rg} --autoscale-name {vmss} -n test3 --start 2018-05-01 --end 2018-06-01 --min-count 1 --count 2 --max-count 5 --timezone "Pacific Standard Time"')
+        self.cmd('monitor autoscale profile create -g {rg} --autoscale-name {vmss} -n test1 --start 2018-01-01 --end 2018-02-01 --min-count 1 --count 2 --max-count 5 --timezone "Pacific Standard Time" --copy-rules default')
 
-        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --schedule-name test1',
+        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --profile-name test1',
                  checks=self.check('length(@)', 3))
-        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --schedule-name test2',
+        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --profile-name test2',
                  checks=self.check('length(@)', 0))
-        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --schedule-name test3',
+        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --profile-name test3',
                  checks=self.check('length(@)', 0))
 
         self.cmd('monitor autoscale rule copy -g {rg} --autoscale-name {vmss} --source-schedule test1 --dest-schedule test2 --index "*"')
         self.cmd('monitor autoscale rule copy -g {rg} --autoscale-name {vmss} --source-schedule test2 --dest-schedule test3 --index 0')
 
-        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --schedule-name test2',
+        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --profile-name test2',
                  checks=self.check('length(@)', 3))
-        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --schedule-name test3',
+        self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss} --profile-name test3',
                  checks=self.check('length(@)', 1))
 
         # verify rule removal by index and remove all works
-        self.cmd('monitor autoscale rule remove -g {rg} --autoscale-name {vmss} --index 2')
+        self.cmd('monitor autoscale rule delete -g {rg} --autoscale-name {vmss} --index 2')
         list_3 = self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}').get_output_in_json()
         self.assertTrue(len(list_3) == 2)
 
-        self.cmd('monitor autoscale rule remove -g {rg} --autoscale-name {vmss} --index "*"')
+        self.cmd('monitor autoscale rule delete -g {rg} --autoscale-name {vmss} --index "*"')
         list_4 = self.cmd('monitor autoscale rule list -g {rg} --autoscale-name {vmss}').get_output_in_json()
         self.assertTrue(len(list_4) == 0)
 
@@ -142,7 +142,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
 
         self.cmd('monitor autoscale create --resource {vmss_id} --count 3')
 
-        self.cmd('monitor autoscale schedule create -g {rg} --autoscale-name {vmss} -n {sched} --start 2018-12-24 --end 2018-12-26 --count 5 --timezone "Pacific Standard Time"', checks=[
+        self.cmd('monitor autoscale profile create -g {rg} --autoscale-name {vmss} -n {sched} --start 2018-12-24 --end 2018-12-26 --count 5 --timezone "Pacific Standard Time"', checks=[
             self.check('capacity.default', 5),
             self.check('capacity.minimum', 5),
             self.check('capacity.maximum', 5),
@@ -152,10 +152,10 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             self.check('recurrence', None)
         ])
 
-        self.cmd('monitor autoscale schedule list -g {rg} --autoscale-name {vmss}',
+        self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}',
                  checks=self.check('length(@)', 2))
-        self.cmd('monitor autoscale schedule delete -g {rg} --autoscale-name {vmss} -n {sched}')
-        self.cmd('monitor autoscale schedule list -g {rg} --autoscale-name {vmss}',
+        self.cmd('monitor autoscale profile delete -g {rg} --autoscale-name {vmss} -n {sched}')
+        self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}',
                  checks=self.check('length(@)', 1))
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale_recurring')
@@ -174,14 +174,14 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         self.cmd('monitor autoscale create --resource {vmss_id} --count 3')
         time.sleep(sleep_time)
 
-        self.cmd('monitor autoscale schedule create -g {rg} --autoscale-name {vmss} -n weekend --recurrence week sat sun --count 1 --timezone "Pacific Standard Time"')
+        self.cmd('monitor autoscale profile create -g {rg} --autoscale-name {vmss} -n weekend --recurrence week sat sun --count 1 --timezone "Pacific Standard Time"')
         time.sleep(sleep_time)
 
-        self.cmd('monitor autoscale schedule create -g {rg} --autoscale-name {vmss} -n weekday --recurrence week mo tu we th fr --count 4 --timezone "Pacific Standard Time"')
+        self.cmd('monitor autoscale profile create -g {rg} --autoscale-name {vmss} -n weekday --recurrence week mo tu we th fr --count 4 --timezone "Pacific Standard Time"')
         time.sleep(sleep_time)
 
         # 2 profiles + 2 "default" profiles + default "default" profile
-        self.cmd('monitor autoscale schedule list -g {rg} --autoscale-name {vmss}',
+        self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}',
                  checks=self.check('length(@)', 5))
 
         # should update all "default" profiles
@@ -189,7 +189,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         self.cmd('monitor autoscale update -g {{rg}} -n {{vmss}} --count {}'.format(value))
         time.sleep(sleep_time)
 
-        schedules = self.cmd('monitor autoscale schedule list -g {rg} --autoscale-name {vmss}').get_output_in_json()
+        schedules = self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}').get_output_in_json()
 
         def _is_default(val):
             if not val['fixedDate'] and not val['recurrence']:
@@ -206,23 +206,23 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
             self.assertTrue(schedule['capacity']['maximum'] == str(value))
 
         # should delete the weekend profile and its matching default
-        self.cmd('monitor autoscale schedule delete -g {rg} --autoscale-name {vmss} -n weekend')
+        self.cmd('monitor autoscale profile delete -g {rg} --autoscale-name {vmss} -n weekend')
         time.sleep(sleep_time)
-        self.cmd('monitor autoscale schedule list -g {rg} --autoscale-name {vmss}',
+        self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}',
                  checks=self.check('length(@)', 3))
 
         # should delete the weekday profile and its matching default
-        self.cmd('monitor autoscale schedule delete -g {rg} --autoscale-name {vmss} -n weekday')
+        self.cmd('monitor autoscale profile delete -g {rg} --autoscale-name {vmss} -n weekday')
         time.sleep(sleep_time)
-        self.cmd('monitor autoscale schedule list -g {rg} --autoscale-name {vmss}',
+        self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}',
                  checks=self.check('length(@)', 1))
 
     def test_monitor_autoscale_timezones(self):
-        self.cmd('monitor autoscale schedule list-timezones',
+        self.cmd('monitor autoscale profile list-timezones',
                  checks=self.check('length(@)', 136))
-        self.cmd('monitor autoscale schedule list-timezones -q pacific',
+        self.cmd('monitor autoscale profile list-timezones -q pacific',
                  checks=self.check('length(@)', 6))
-        self.cmd('monitor autoscale schedule list-timezones --offset +12',
+        self.cmd('monitor autoscale profile list-timezones --offset +12',
                  checks=self.check('length(@)', 6))
-        self.cmd('monitor autoscale schedule list-timezones -q pacific --offset -4',
+        self.cmd('monitor autoscale profile list-timezones -q pacific --offset -4',
                  checks=self.check('length(@)', 1))

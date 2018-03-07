@@ -13,9 +13,11 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 
 from azure.cli.command_modules.monitor.actions import (
     AlertAddAction, AlertRemoveAction, ConditionAction, AutoscaleAddAction, AutoscaleRemoveAction,
-    AutoscaleScaleAction, AutoscaleConditionAction, period_type, timezone_offset_type, timezone_name_type)
+    AutoscaleScaleAction, AutoscaleConditionAction, period_type,
+    timezone_offset_type, timezone_name_type)
 from azure.cli.command_modules.monitor.util import get_operator_map, get_aggregation_map
-from azure.cli.command_modules.monitor.validators import process_webhook_prop, validate_autoscale_recurrence
+from azure.cli.command_modules.monitor.validators import (
+    process_webhook_prop, validate_autoscale_recurrence, validate_autoscale_timegrain)
 
 
 # pylint: disable=line-too-long, too-many-statements
@@ -26,7 +28,7 @@ def load_arguments(self, _):
     webhook_prop_type = CLIArgumentType(validator=process_webhook_prop, nargs='*')
 
     autoscale_name_type = CLIArgumentType(options_list=['--autoscale-name'], help='Name of the autoscale settings.', id_part='name')
-    autoscale_schedule_name_type = CLIArgumentType(options_list=['--schedule-name'], help='Name of the autoscale schedule.')
+    autoscale_profile_name_type = CLIArgumentType(options_list=['--profile-name'], help='Name of the autoscale profile.')
     autoscale_rule_name_type = CLIArgumentType(options_list=['--rule-name'], help='Name of the autoscale rule.')
 
     with self.argument_context('monitor') as c:
@@ -103,7 +105,7 @@ def load_arguments(self, _):
     with self.argument_context('monitor autoscale') as c:
         c.argument('autoscale_name', arg_type=autoscale_name_type, options_list=['--name', '-n'])
         c.argument('autoscale_setting_name', arg_type=autoscale_name_type, options_list=['--name', '-n'])
-        c.argument('profile_name', arg_type=autoscale_schedule_name_type)
+        c.argument('profile_name', arg_type=autoscale_profile_name_type)
         c.argument('rule_name', arg_type=autoscale_rule_name_type)
         c.argument('enabled', arg_type=get_three_state_flag(), help='Autoscale settings enabled status.')
 
@@ -123,16 +125,16 @@ def load_arguments(self, _):
         c.argument('min_count', type=int, help='The minimum number of instances.')
         c.argument('max_count', type=int, help='The maximum number of instances.')
 
-    with self.argument_context('monitor autoscale schedule') as c:
+    with self.argument_context('monitor autoscale profile') as c:
         c.argument('autoscale_name', arg_type=autoscale_name_type, id_part=None)
-        c.argument('profile_name', arg_type=autoscale_schedule_name_type, options_list=['--name', '-n'])
+        c.argument('profile_name', arg_type=autoscale_profile_name_type, options_list=['--name', '-n'])
         c.argument('copy_rules', help='Name of an existing schedule from which to copy the scaling rules for the new schedule.')
 
-    with self.argument_context('monitor autoscale schedule list-timezones') as c:
+    with self.argument_context('monitor autoscale profile list-timezones') as c:
         c.argument('search_query', options_list=['--search-query', '-q'], help='Query text to find.')
         c.argument('offset', help='Filter results based on UTC hour offset.', type=timezone_offset_type)
 
-    with self.argument_context('monitor autoscale schedule', arg_group='Schedule') as c:
+    with self.argument_context('monitor autoscale profile', arg_group='Schedule') as c:
         c.argument('timezone', type=timezone_name_type)
         c.argument('start', arg_type=get_datetime_type(help='Start time.', timezone=False))
         c.argument('end', arg_type=get_datetime_type(help='End time.', timezone=False))
@@ -143,9 +145,10 @@ def load_arguments(self, _):
         c.argument('rule_name', arg_type=autoscale_rule_name_type, options_list=['--name', '-n'])
         c.argument('scale', help='The direction and amount to scale.', action=AutoscaleScaleAction, nargs='+')
         c.argument('condition', help='Condition on which to scale.', action=AutoscaleConditionAction, nargs='+')
+        c.argument('timegrain', validator=validate_autoscale_timegrain, nargs='+')
         c.argument('cooldown', type=int, help='The number of minutes that must elapse before another scaling event can occur.')
 
-    with self.argument_context('monitor autoscale rule remove') as c:
+    with self.argument_context('monitor autoscale rule delete') as c:
         c.argument('index', nargs='+', help="Space-separated list of rule indices to remove, or '*' to clear all rules.")
 
     with self.argument_context('monitor autoscale rule copy') as c:
@@ -153,7 +156,7 @@ def load_arguments(self, _):
         c.argument('source_profile', options_list=['--source-schedule'], help='Name of the profile to copy rules from.')
         c.argument('dest_profile', options_list=['--dest-schedule'], help='Name of the profile to copy rules to.')
 
-    with self.argument_context('monitor autoscale rule add') as c:
+    with self.argument_context('monitor autoscale rule create') as c:
         c.resource_parameter('source', arg_group='Source', required=False)
     # endregion
 

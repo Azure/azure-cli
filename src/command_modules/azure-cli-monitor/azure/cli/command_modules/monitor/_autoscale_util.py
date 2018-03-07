@@ -557,7 +557,7 @@ AUTOSCALE_TIMEZONES = [
 ]
 
 
-def build_autoscale_schedule(autoscale_settings):
+def build_autoscale_profile(autoscale_settings):
     """ Builds up a logical model of the autoscale weekly schedule. This then has to later be
         translated into objects that work with the Monitor autoscale API. """
     from datetime import time
@@ -630,7 +630,7 @@ def build_autoscale_schedule(autoscale_settings):
     return default_profile, profile_schedule
 
 
-def validate_autoscale_schedule(schedule, start, end, recurrence):
+def validate_autoscale_profile(schedule, start, end, recurrence):
     """ Check whether the proposed schedule conflicts with existing schedules. If so,
         issue a warning. """
     # pylint: disable=cell-var-from-loop

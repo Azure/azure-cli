@@ -273,6 +273,8 @@ helps['monitor diagnostic-settings update'] = """
 helps['monitor autoscale'] = """
     type: group
     short-summary: Manage autoscale settings.
+    long-summary: >
+        For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 """
 
 helps['monitor autoscale show'] = """
@@ -283,6 +285,8 @@ helps['monitor autoscale show'] = """
 helps['monitor autoscale create'] = """
     type: command
     short-summary: Create new autoscale settings.
+    long-summary: >
+        For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
     parameters:
         - name: --action -a
           short-summary: Add an action to fire when a scaling event occurs.
@@ -298,10 +302,10 @@ helps['monitor autoscale create'] = """
               az monitor autoscale create -g {myrg} --resource {resource-id} --min-count 2 --max-count 5 \\
                 --count 3 --email-administrator
 
-              az monitor autoscale rule add -g {myrg} --autoscale-name {resource-name} --scale out 1 \\
+              az monitor autoscale rule create -g {myrg} --autoscale-name {resource-name} --scale out 1 \\
                 --condition "Percentage CPU > 75 avg 5m"
 
-              az monitor autoscale rule add -g {myrg} --autoscale-name {resource-name} --scale in 1 \\
+              az monitor autoscale rule create -g {myrg} --autoscale-name {resource-name} --scale in 1 \\
                 --condition "Percentage CPU < 25 avg 5m"
         - name: Create autoscale settings for exactly 4 instances.
           text: >
@@ -311,6 +315,8 @@ helps['monitor autoscale create'] = """
 helps['monitor autoscale update'] = """
     type: command
     short-summary: Update autoscale settings.
+    long-summary: >
+        For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
     parameters:
         - name: --add-action -a
           short-summary: Add an action to fire when a scaling event occurs.
@@ -336,110 +342,108 @@ helps['monitor autoscale update'] = """
                 --remove-action email bob@contoso.com
 """
 
-helps['monitor autoscale schedule'] = """
+helps['monitor autoscale profile'] = """
     type: group
-    short-summary: Manage autoscaling schedules.
+    short-summary: Manage autoscaling profiles.
+    long-summary: >
+        For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 """
 
-helps['monitor autoscale schedule create'] = """
+helps['monitor autoscale profile create'] = """
     type: command
-    short-summary: Create a fixed or recurring autoscale schedule.
+    short-summary: Create a fixed or recurring autoscale profile.
+    long-summary: >
+        For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
     parameters:
         - name: --timezone
           short-summary: Timezone name.
           populator-commands:
-            - az monitor autoscale schedule list-timezones
+            - az monitor autoscale profile list-timezones
         - name: --recurrence -r
-          short-summary: When the schedule recurs. If omitted, a fixed (non-recurring) schedule is created.
+          short-summary: When the profile recurs. If omitted, a fixed (non-recurring) profile is created.
           long-summary: |
                 Usage:     --recurrence {week} [ARG ARG ...]
                 Weekly:    --recurrence week Sat Sun
         - name: --start
-          short-summary: When the autoscale schedule begins. Format depends on the type of schedule.
+          short-summary: When the autoscale profile begins. Format depends on the type of profile.
           long-summary: |
                 Fixed:  --start yyyy-mm-dd [hh:mm:ss]
                 Weekly: [--start hh:mm]
         - name: --end
-          short-summary: When the autoscale schedule ends. Format depends on the type of schedule.
+          short-summary: When the autoscale profile ends. Format depends on the type of profile.
           long-summary: |
                 Fixed:  --end yyyy-mm-dd [hh:mm:ss]
                 Weekly: [--end hh:mm]
     examples:
-        - name: Create a fixed date schedule, inheriting the default scaling rules but changing the capacity.
+        - name: Create a fixed date profile, inheriting the default scaling rules but changing the capacity.
           text: |
               az monitor autoscale create -g {myrg} --resource {resource-id} --min-count 2 --count 3 \\
                 --max-count 5
 
-              az monitor autoscale rule add -g {myrg} --autoscale-name {name} --scale out 1 \\
+              az monitor autoscale rule create -g {myrg} --autoscale-name {name} --scale out 1 \\
                 --condition "Percentage CPU > 75 avg 5m"
 
-              az monitor autoscale rule add -g {myrg} --autoscale-name {name} --scale in 1 \\
+              az monitor autoscale rule create -g {myrg} --autoscale-name {name} --scale in 1 \\
                 --condition "Percentage CPU < 25 avg 5m"
 
-              az monitor autoscale schedule create -g {myrg} --autoscale-name {name} -n Christmas \\
+              az monitor autoscale profile create -g {myrg} --autoscale-name {name} -n Christmas \\
                 --copy-rules default --min-count 3 --count 6 --max-count 10 --start 2018-12-24 \\
                 --end 2018-12-26 --timezone "Pacific Standard Time"
-        - name: Create a recurring weekend schedule, inheriting the default scaling rules but changing the capacity.
+        - name: Create a recurring weekend profile, inheriting the default scaling rules but changing the capacity.
           text: |
               az monitor autoscale create -g {myrg} --resource {resource-id} --min-count 2 --count 3 \\
                 --max-count 5
 
-              az monitor autoscale rule add -g {myrg} --autoscale-name {name} --scale out 1 \\
+              az monitor autoscale rule create -g {myrg} --autoscale-name {name} --scale out 1 \\
                 --condition "Percentage CPU > 75 avg 5m"
 
-              az monitor autoscale rule add -g {myrg} --autoscale-name {name} --scale in 1 \\
+              az monitor autoscale rule create -g {myrg} --autoscale-name {name} --scale in 1 \\
                 --condition "Percentage CPU < 25 avg 5m"
 
-              az monitor autoscale schedule create -g {myrg} --autoscale-name {name} -n weeekend \\
+              az monitor autoscale profile create -g {myrg} --autoscale-name {name} -n weeekend \\
                 --copy-rules default --min-count 1 --count 2 --max-count 2 \\
                 --recurrence week sat sun --timezone "Pacific Standard Time"
 """
 
-helps['monitor autoscale schedule update'] = """
+helps['monitor autoscale profile delete'] = """
     type: command
-    short-summary: Update an autoscale schedule.
-    parameters:
-        - name: --timezone
-          short-summary: Timezone name.
-          populator-commands:
-            - az monitor autoscale schedule list-timezones
+    short-summary: Delete an autoscale profile.
 """
 
-helps['monitor autoscale schedule delete'] = """
+helps['monitor autoscale profile list'] = """
     type: command
-    short-summary: Delete an autoscale schedule.
+    short-summary: List autoscale profiles.
 """
 
-helps['monitor autoscale schedule list'] = """
-    type: command
-    short-summary: List autoscale schedules.
-"""
-
-helps['monitor autoscale schedule list-timezones'] = """
+helps['monitor autoscale profile list-timezones'] = """
     type: command
     short-summary: Look up time zone information.
 """
 
-helps['monitor autoscale schedule show'] = """
+helps['monitor autoscale profile show'] = """
     type: command
-    short-summary: Show details of an autoscale schedule.
+    short-summary: Show details of an autoscale profile.
 """
 
 helps['monitor autoscale rule'] = """
     type: group
     short-summary: Manage autoscale scaling rules.
+    long-summary: >
+        For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
 """
 
-helps['monitor autoscale rule add'] = """
+helps['monitor autoscale rule create'] = """
     type: command
     short-summary: Add a new autoscale rule.
+    long-summary: >
+        For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
     parameters:
         - name: --condition
           short-summary: The condition which triggers the scaling action.
           long-summary: >
-            The form of a condition is "[{avg,min,max,sum} TIMEGRAIN] METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD".
-            Values for METRIC, TIMEGRAIN and appropriate THRESHOLD values can be obtained from the `az monitor metric` command.
-            TIMEGRAIN and PERIOD are of the form "##h##m##s".
+            The form of a condition is "METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD".
+            Values for METRIC and appropriate THRESHOLD values can be obtained from the `az monitor metric` command.
+            Format of PERIOD is "##h##m##s".
         - name: --scale
           short-summary: The direction and amount to scale.
           long-summary: |
@@ -447,19 +451,25 @@ helps['monitor autoscale rule add'] = """
                 Fixed Count:    --scale to 5
                 In by Count:    --scale in 2
                 Out by Percent: --scale out 10%
+        - name: --timegrain
+          short-summary: >
+            The way metrics are polled across instances.
+          long-summary: >
+            The form of the timegrain is {avg,min,max,sum} VALUE. Values can be obtained from the `az monitor metric` command.
+            Format of VALUE is "##h##m##s".
     examples:
-        - name: Scale to 5 instances when the maximum 5 min CPU Percentage across instances is greater than 75 averaged over 10 minutes.
+        - name: Scale to 5 instances when the CPU Percentage across instances is greater than 75 averaged over 10 minutes.
           text: |
-              az monitor autoscale rule add -g {myrg} --autoscale-name {myvmss} \\
-                --scale to 5 --condition "max 5m Percentage CPU > 75 avg 10m"
-        - name: Scale up 2 instances when the average 5 min CPU Percentage across instances is greater than 75 averaged over 5 minutes.
+              az monitor autoscale rule create -g {myrg} --autoscale-name {myvmss} \\
+                --scale to 5 --condition "Percentage CPU > 75 avg 10m"
+        - name: Scale up 2 instances when the CPU Percentage across instances is greater than 75 averaged over 5 minutes.
           text: |
-              az monitor autoscale rule add -g {myrg} --autoscale-name {myvmss} \\
+              az monitor autoscale rule create -g {myrg} --autoscale-name {myvmss} \\
                 --scale out 2 --condition "Percentage CPU > 75 avg 5m"
-        - name: Scale down 50% when the average 10 min CPU Percentage across instances is less than 25 averaged over 15 minutes.
+        - name: Scale down 50% when the CPU Percentage across instances is less than 25 averaged over 15 minutes.
           text: |
-              az monitor autoscale rule add -g {myrg} --autoscale-name {myvmss} \\
-                --scale in 50% --condition "avg 10m Percentage CPU < 25 avg 15m"
+              az monitor autoscale rule create -g {myrg} --autoscale-name {myvmss} \\
+                --scale in 50% --condition "Percentage CPU < 25 avg 15m"
 """
 
 
@@ -471,13 +481,13 @@ helps['monitor autoscale rule list'] = """
 
 helps['monitor autoscale rule copy'] = """
     type: command
-    short-summary: Copy autoscale rules from one schedule to another.
+    short-summary: Copy autoscale rules from one profile to another.
 """
 
 
-helps['monitor autoscale rule remove'] = """
+helps['monitor autoscale rule delete'] = """
     type: command
-    short-summary: Remove autoscale rules from a schedule.
+    short-summary: Remove autoscale rules from a profile.
 """
 
 

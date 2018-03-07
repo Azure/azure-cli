@@ -41,9 +41,11 @@ def autoscale_create(client, resource, count, autoscale_name=None, resource_grou
     if not autoscale_name:
         from msrestazure.tools import parse_resource_id
         autoscale_name = parse_resource_id(resource)['name']
+    min_count = min_count or count
+    max_count = max_count or count
     default_profile = AutoscaleProfile(
         name=DEFAULT_PROFILE_NAME,
-        capacity=ScaleCapacity(default=count, minimum=min_count or count, maximum=max_count or count),
+        capacity=ScaleCapacity(default=count, minimum=min_count, maximum=max_count),
         rules=[]
     )
     notification = AutoscaleNotification(
@@ -69,6 +71,8 @@ def autoscale_create(client, resource, count, autoscale_name=None, resource_grou
         autoscale_setting_resource_name=autoscale_name,
         target_resource_uri=resource
     )
+    if not (min_count == count and max_count == count):
+        logger.warning('Follow up with `az monitor autoscale rule create` to add scaling rules.')
     return client.create_or_update(resource_group_name, autoscale_name, autoscale)
 
 
@@ -78,7 +82,7 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
                      email_coadministrators=None):
     import json
     from azure.mgmt.monitor.models import EmailNotification, WebhookNotification
-    from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_schedule
+    from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile
 
     if tags is not None:
         instance.tags = tags
@@ -88,7 +92,7 @@ def autoscale_update(instance, count=None, min_count=None, max_count=None, tags=
     if any([count, min_count, max_count]):
 
         # resolve the interrelated aspects of capacity
-        default_profile, _ = build_autoscale_schedule(instance)
+        default_profile, _ = build_autoscale_profile(instance)
         curr_count = default_profile.capacity.default
         curr_min = default_profile.capacity.minimum
         curr_max = default_profile.capacity.maximum
@@ -186,7 +190,7 @@ def _create_recurring_profile(autoscale_settings, profile_name, start, end, recu
                               copy_rules=None, timezone=None):
     from azure.mgmt.monitor.models import (
         AutoscaleProfile, Recurrence, RecurrentSchedule)
-    from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_schedule, validate_autoscale_schedule
+    from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile, validate_autoscale_profile
     import dateutil
     from datetime import time
     import json
@@ -206,8 +210,8 @@ def _create_recurring_profile(autoscale_settings, profile_name, start, end, recu
     start_time = dateutil.parser.parse(start).time() if start else time(hour=0, minute=0)
     end_time = dateutil.parser.parse(end).time() if end else time(hour=23, minute=59)
 
-    default_profile, autoscale_schedule = build_autoscale_schedule(autoscale_settings)
-    validate_autoscale_schedule(autoscale_schedule, start_time, end_time, recurrence)
+    default_profile, autoscale_profile = build_autoscale_profile(autoscale_settings)
+    validate_autoscale_profile(autoscale_profile, start_time, end_time, recurrence)
 
     start_profile = AutoscaleProfile(
         name=profile_name,
@@ -227,9 +231,9 @@ def _create_recurring_profile(autoscale_settings, profile_name, start, end, recu
     autoscale_settings.profiles.append(end_profile)
 
 
-def autoscale_schedule_create(client, autoscale_name, resource_group_name, profile_name,
-                              count, timezone, start=None, end=None, copy_rules=None, min_count=None,
-                              max_count=None, recurrence=None):
+def autoscale_profile_create(client, autoscale_name, resource_group_name, profile_name,
+                             count, timezone, start=None, end=None, copy_rules=None, min_count=None,
+                             max_count=None, recurrence=None):
     from azure.mgmt.monitor.models import ScaleCapacity
     autoscale_settings = client.get(resource_group_name, autoscale_name)
     capacity = ScaleCapacity(
@@ -248,12 +252,12 @@ def autoscale_schedule_create(client, autoscale_name, resource_group_name, profi
     return profile
 
 
-def autoscale_schedule_list(cmd, client, autoscale_name, resource_group_name):
+def autoscale_profile_list(cmd, client, autoscale_name, resource_group_name):
     autoscale_settings = client.get(resource_group_name, autoscale_name)
     return autoscale_settings.profiles
 
 
-def autoscale_schedule_list_timezones(cmd, client, offset=None, search_query=None):
+def autoscale_profile_list_timezones(cmd, client, offset=None, search_query=None):
     from azure.cli.command_modules.monitor._autoscale_util import AUTOSCALE_TIMEZONES
     timezones = []
     for zone in AUTOSCALE_TIMEZONES:
@@ -265,18 +269,18 @@ def autoscale_schedule_list_timezones(cmd, client, offset=None, search_query=Non
     return timezones
 
 
-def autoscale_schedule_show(cmd, client, autoscale_name, resource_group_name, profile_name):
+def autoscale_profile_show(cmd, client, autoscale_name, resource_group_name, profile_name):
     autoscale_settings = client.get(resource_group_name, autoscale_name)
     profile = next(x for x in autoscale_settings.profiles if x.name == profile_name)
     return profile
 
 
-def autoscale_schedule_delete(cmd, client, autoscale_name, resource_group_name, profile_name):
-    from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_schedule
+def autoscale_profile_delete(cmd, client, autoscale_name, resource_group_name, profile_name):
+    from azure.cli.command_modules.monitor._autoscale_util import build_autoscale_profile
     import json
 
     autoscale_settings = client.get(resource_group_name, autoscale_name)
-    default_profile, _ = build_autoscale_schedule(autoscale_settings)
+    default_profile, _ = build_autoscale_profile(autoscale_settings)
 
     def _should_retain_profile(profile):
         name = profile.name
@@ -289,19 +293,22 @@ def autoscale_schedule_delete(cmd, client, autoscale_name, resource_group_name, 
     autoscale_settings.profiles = [x for x in autoscale_settings.profiles if _should_retain_profile(x)]
 
     # if we removed the last "default" of a recurring pair, we need to preserve it
-    new_default, _ = build_autoscale_schedule(autoscale_settings)
+    new_default, _ = build_autoscale_profile(autoscale_settings)
     if not new_default:
         autoscale_settings.profiles.append(default_profile)
 
     autoscale_settings = client.create_or_update(resource_group_name, autoscale_name, autoscale_settings)
 
 
-def autoscale_rule_add(cmd, client, autoscale_name, resource_group_name, condition,
-                       scale, profile_name=DEFAULT_PROFILE_NAME, cooldown=5, source=None):
+def autoscale_rule_create(cmd, client, autoscale_name, resource_group_name, condition,
+                          scale, profile_name=DEFAULT_PROFILE_NAME, cooldown=5, source=None,
+                          timegrain="avg 1m"):
     from azure.mgmt.monitor.models import ScaleRule, ScaleAction, ScaleDirection
     autoscale_settings = client.get(resource_group_name, autoscale_name)
     profile = next(x for x in autoscale_settings.profiles if x.name == profile_name)
     condition.metric_resource_uri = source or autoscale_settings.target_resource_uri
+    condition.statistic = timegrain.statistic
+    condition.time_grain = timegrain.time_grain
     rule = ScaleRule(
         metric_trigger=condition,
         scale_action=ScaleAction(
@@ -337,7 +344,7 @@ def autoscale_rule_list(cmd, client, autoscale_name, resource_group_name, profil
     return profile.rules
 
 
-def autoscale_rule_remove(cmd, client, autoscale_name, resource_group_name, index, profile_name=DEFAULT_PROFILE_NAME):
+def autoscale_rule_delete(cmd, client, autoscale_name, resource_group_name, index, profile_name=DEFAULT_PROFILE_NAME):
     autoscale_settings = client.get(resource_group_name, autoscale_name)
     profile = next(x for x in autoscale_settings.profiles if x.name == profile_name)
     # delete the indices provided
@@ -358,5 +365,5 @@ def autoscale_rule_copy(cmd, client, autoscale_name, resource_group_name, dest_p
         dst_profile.rules = src_profile.rules
     else:
         for i in index:
-            dst_profile.rules.append(src_profile.rules[i])
+            dst_profile.rules.append(src_profile.rules[int(i)])
     autoscale_settings = client.create_or_update(resource_group_name, autoscale_name, autoscale_settings)

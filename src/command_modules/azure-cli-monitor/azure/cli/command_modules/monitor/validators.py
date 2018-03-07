@@ -65,6 +65,40 @@ def validate_autoscale_recurrence(namespace):
             raise CLIError('invalid usage: -r {{{}}} [ARG ARG ...]'.format(','.join(valid_recurrence)))
 
 
+def validate_autoscale_timegrain(namespace):
+    from azure.mgmt.monitor.models import MetricTrigger
+    from azure.cli.command_modules.monitor.actions import period_type
+    from azure.cli.command_modules.monitor.util import get_autoscale_statistic_map
+
+    values = namespace.timegrain
+    if len(values) == 1:
+        # workaround because CMD.exe eats > character... Allows condition to be
+        # specified as a quoted expression
+        values = values[0].split(' ')
+    name_offset = 0
+    try:
+        time_grain = period_type(values[1])
+        name_offset += 1
+    except ValueError:
+        time_grain = period_type('1m')
+    try:
+        statistic = get_autoscale_statistic_map()[values[0]]
+        name_offset += 1
+    except KeyError:
+        statistic = get_autoscale_statistic_map()['avg']
+    timegrain = MetricTrigger(
+        metric_name=None,
+        metric_resource_uri=None,
+        time_grain=time_grain,
+        statistic=statistic,
+        time_window=None,
+        time_aggregation=None,
+        operator=None,
+        threshold=None
+    )
+    namespace.timegrain = timegrain
+
+
 def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False):
     def _validator(cmd, namespace):
         from msrestazure.tools import is_valid_resource_id

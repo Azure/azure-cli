@@ -142,17 +142,17 @@ def load_command_table(self, _):
         g.command('show', 'get')
         g.command('list', 'list_by_resource_group')
 
-    with self.command_group('monitor autoscale schedule', autoscale_sdk, custom_command_type=autoscale_custom) as g:
-        g.custom_command('create', 'autoscale_schedule_create')
-        g.custom_command('list', 'autoscale_schedule_list')
-        g.custom_command('show', 'autoscale_schedule_show')
-        g.custom_command('delete', 'autoscale_schedule_delete')
-        g.custom_command('list-timezones', 'autoscale_schedule_list_timezones')
+    with self.command_group('monitor autoscale profile', autoscale_sdk, custom_command_type=autoscale_custom) as g:
+        g.custom_command('create', 'autoscale_profile_create')
+        g.custom_command('list', 'autoscale_profile_list')
+        g.custom_command('show', 'autoscale_profile_show')
+        g.custom_command('delete', 'autoscale_profile_delete')
+        g.custom_command('list-timezones', 'autoscale_profile_list_timezones')
 
     with self.command_group('monitor autoscale rule', autoscale_sdk, custom_command_type=autoscale_custom) as g:
-        g.custom_command('add', 'autoscale_rule_add')
+        g.custom_command('create', 'autoscale_rule_create')
         g.custom_command('list', 'autoscale_rule_list')
-        g.custom_command('remove', 'autoscale_rule_remove')
+        g.custom_command('delete', 'autoscale_rule_delete')
         g.custom_command('copy', 'autoscale_rule_copy')
 
     with self.command_group('monitor autoscale-settings', autoscale_sdk, custom_command_type=autoscale_custom) as g:
