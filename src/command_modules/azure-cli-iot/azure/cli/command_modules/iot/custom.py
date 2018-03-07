@@ -7,9 +7,7 @@
 from __future__ import print_function
 from os.path import exists
 from enum import Enum
-from knack.config import CLIConfig
 from knack.util import CLIError
-from knack.log import get_logger
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.mgmt.iothub.models import (IotHubSku,
@@ -32,14 +30,10 @@ from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.authentication
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.device_description import DeviceDescription
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.x509_thumbprint import X509Thumbprint
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
-from azure.cli.core.extension import extension_exists
-from azure.cli.core._environment import get_config_dir
 from azure.cli.core.util import sdk_no_wait
 
 from ._client_factory import resource_service_factory
 from ._utils import create_self_signed_certificate, open_certificate
-
-logger = get_logger(__name__)
 
 
 # CUSTOM TYPE
