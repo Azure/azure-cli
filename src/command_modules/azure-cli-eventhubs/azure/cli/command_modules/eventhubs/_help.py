@@ -312,12 +312,12 @@ helps['eventhubs georecovery-alias exists'] = """
           text: az eventhubs georecovery-alias check-name-availability --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
 """
 
-helps['eventhubs georecovery-alias create'] = """
+helps['eventhubs georecovery-alias set'] = """
     type: command
-    short-summary: Creates a Geo Recovery - Alias for the give Namespace
+    short-summary: Sets a Geo Recovery - Alias for the give Namespace
     examples:
-        - name: Creats Geo Recovery configuration - Alias for the give Namespace
-          text: az eventhubs georecovery-alias create  --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname --partner-namespace resourcearmid
+        - name: Sets Geo Recovery configuration - Alias for the give Namespace
+          text: az eventhubs georecovery-alias set --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname --partner-namespace resourcearmid
 """
 
 helps['eventhubs georecovery-alias show'] = """

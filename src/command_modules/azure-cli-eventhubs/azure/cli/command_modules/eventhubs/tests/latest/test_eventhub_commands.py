@@ -275,7 +275,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         self.cmd('eventhubs georecovery-alias exists --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}', checks=[self.check('nameAvailable', True)])
 
         # Create alias
-        self.cmd('eventhubs georecovery-alias create  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname} --partner-namespace {id}')
+        self.cmd('eventhubs georecovery-alias set  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname} --partner-namespace {id}')
 
         # get alias - Primary
         self.cmd('eventhubs georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}')
@@ -307,7 +307,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
             getaliasafterbreak = self.cmd('eventhubs georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
 
         # Create alias
-        self.cmd('eventhubs georecovery-alias create  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname} --partner-namespace {id}')
+        self.cmd('eventhubs georecovery-alias set  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname} --partner-namespace {id}')
 
         getaliasaftercreate = self.cmd('eventhubs georecovery-alias show  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}').get_output_in_json()
 
