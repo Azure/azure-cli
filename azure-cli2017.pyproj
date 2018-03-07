@@ -7,15 +7,14 @@
     <ProjectHome>src\</ProjectHome>
     <StartupFile>azure-cli\azure\cli\__main__.py</StartupFile>
     <SearchPath>.</SearchPath>
-    <WorkingDirectory>
-    </WorkingDirectory>
+    <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <InterpreterId>MSBuild|{54f4b6dc-0859-46dc-99bb-b275c9d0aca3}|$(MSBuildProjectFullPath)</InterpreterId>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
-    <CommandLineArguments>
-    </CommandLineArguments>
+    <CommandLineArguments></CommandLineArguments>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -143,6 +142,9 @@
     <Compile Include="command_modules\azure-cli-ams\azure\cli\command_modules\ams\tests\latest\test_ams.py" />
     <Compile Include="command_modules\azure-cli-ams\azure\cli\command_modules\ams\_client_factory.py" />
     <Compile Include="command_modules\azure-cli-ams\azure\cli\command_modules\ams\_exception_handler.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="command_modules\azure-cli-ams\azure\cli\command_modules\ams\_format.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="command_modules\azure-cli-appservice\azure\cli\command_modules\appservice\commands.py" />

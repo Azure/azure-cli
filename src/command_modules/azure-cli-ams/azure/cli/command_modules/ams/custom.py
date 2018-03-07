@@ -1,7 +1,10 @@
 # --------------------------------------------------------------------------------------------
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License. See License.txt in the project root for license information.
+# Copyright (c) Microsoft Corporation.  All rights reserved.
+# Licensed under the MIT License.  See License.txt in the project root for
+# license information.
 # --------------------------------------------------------------------------------------------
+
+import importlib
 
 def create_mediaservice(client, resource_group_name, account_name, storage_account, location=None, tags=None):
 
@@ -54,14 +57,16 @@ def create_or_update_mediaservice(client, resource_group_name, account_name, sto
 def _build_storage_account_id(subscription_id, resource_group_name, storage_account):
     return "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Storage/storageAccounts/{2}".format(subscription_id, resource_group_name, storage_account)
 
-def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_name, sp_name=None, role='Contributor', sp_password=None):
+def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_name, sp_name=None, role='Contributor', sp_password=None, xml=False):
 
     ams = client.get(resource_group_name, account_name)
 
     from azure.cli.command_modules.role.custom import (create_service_principal_for_rbac, create_role_assignment)
     create_sp_result = create_service_principal_for_rbac(cmd, name=sp_name, password=sp_password, skip_assignment=True)
 
-    # Workaround to allow 'create_service_principal_for_rbac' operation to complete and continue with the 'create_role_assignment' operation succesfully
+    # Workaround to allow 'create_service_principal_for_rbac' operation to
+    # complete and continue with the 'create_role_assignment' operation
+    # succesfully
     import time
     time.sleep(15)
 
@@ -80,4 +85,4 @@ def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_n
         'ArmEndpoint': cmd.cli_ctx.cloud.endpoints.resource_manager
     }
 
-    return result
+    return getattr(importlib.import_module('azure.cli.command_modules.ams._format'), 'get_sp_create_output_{}'.format('xml'))(result) if xml else result

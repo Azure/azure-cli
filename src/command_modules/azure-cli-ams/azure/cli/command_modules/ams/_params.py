@@ -5,14 +5,14 @@
 
 from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.commands.parameters import get_location_type
+from azure.cli.core.commands.parameters import (get_location_type, get_three_state_flag)
 
 from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
 
 def load_arguments(self, _):
 
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
-    storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='NAME')
+    storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='STORAGE_NAME')
 
     with self.argument_context('ams') as c:
         c.argument('account_name', name_arg_type, help='The name of the media service account within the resource group.')
@@ -31,3 +31,4 @@ def load_arguments(self, _):
         c.argument('sp_name', help='The name or app URI to associate the RBAC with. If not present, a name will be generated.')
         c.argument('sp_password', help='The password used to log in. If not present, a random password will be generated.')
         c.argument('role', completer=get_role_definition_name_completion_list)
+        c.argument('xml', help='Enables xml output format.')
