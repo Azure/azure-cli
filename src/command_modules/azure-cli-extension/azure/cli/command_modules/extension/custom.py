@@ -266,13 +266,14 @@ def update_extension(extension_name, index_url=None, pip_extra_index_urls=None, 
 def list_available_extensions(index_url=None):
     return get_index_extensions(index_url=index_url)
 
+
 def check_distro_consistency():
     if not IS_WINDOWS:
         try:
             logger.debug('Linux distro check: Reading from: %s', LIST_FILE_PATH)
 
             with open(LIST_FILE_PATH, 'r') as list_file:
-                package_source = list_file.read() 
+                package_source = list_file.read()
                 stored_linux_dist_name = package_source.split(" ")[3]
                 logger.debug('Linux distro check: Found in list file: %s', stored_linux_dist_name)
                 current_linux_dist_name = platform.linux_distribution()[2]
@@ -282,7 +283,7 @@ def check_distro_consistency():
             current_linux_dist_name = None
             stored_linux_dist_name = None
             logger.debug('Linux distro check: An error occurred while checking linux distribution version source list consistency.')
-            logger.debug(err)                    
+            logger.debug(err)        
 
         if (current_linux_dist_name != stored_linux_dist_name):
             logger.warning("Linux distro check: Mismatch distribution name in %s file", LIST_FILE_PATH)
