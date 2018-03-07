@@ -29,7 +29,7 @@ def cli_namespace_create(client, resource_group_name, namespace_name, location=N
     )
 
 
-def cli_namespace_update(instance, tags=None, sku='Standard', capacity=None):
+def cli_namespace_update(instance, tags=None, sku=None, capacity=None):
 
     if tags is not None:
         instance.tags = tags
