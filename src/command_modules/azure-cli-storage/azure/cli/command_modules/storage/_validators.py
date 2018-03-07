@@ -5,13 +5,6 @@
 
 # pylint: disable=protected-access
 
-import argparse
-import os
-import re
-from datetime import datetime
-
-from knack.util import CLIError
-
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -20,7 +13,6 @@ from azure.cli.command_modules.storage._client_factory import get_storage_data_s
 from azure.cli.command_modules.storage.util import glob_files_locally, guess_content_type
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
-
 
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
@@ -263,6 +255,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
         # generate a sas token even in the same account when the source and destination are not the
         # same kind.
         if valid_file_source and (ns.get('container_name', None) or not same_account):
+            import os
             dir_name, file_name = os.path.split(path) if path else (None, '')
             sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
                                               dir_name, file_name)
@@ -374,7 +367,7 @@ def validate_encryption_services(cmd, namespace):
     if namespace.encryption_services:
         t_encryption_services, t_encryption_service = get_sdk(cmd.cli_ctx, ResourceType.MGMT_STORAGE,
                                                               'EncryptionServices', 'EncryptionService', mod='models')
-        services = {service: t_encryption_service(True) for service in namespace.encryption_services}
+        services = {service: t_encryption_service(enabled=True) for service in namespace.encryption_services}
 
         namespace.encryption_services = t_encryption_services(**services)
 
@@ -403,7 +396,7 @@ def validate_encryption_source(cmd, namespace):
         if not KeyVaultProperties:
             return
 
-        kv_prop = KeyVaultProperties(key_name, key_version, key_vault_uri)
+        kv_prop = KeyVaultProperties(key_name=key_name, key_version=key_version, key_vault_uri=key_vault_uri)
         namespace.encryption_key_vault_properties = kv_prop
 
 
@@ -426,6 +419,7 @@ def validate_entity(namespace):
     missing_keys = '{}PartitionKey'.format(missing_keys) \
         if 'PartitionKey' not in keys else missing_keys
     if missing_keys:
+        import argparse
         raise argparse.ArgumentError(
             None, 'incorrect usage: entity requires: {}'.format(missing_keys))
 
@@ -453,6 +447,7 @@ def get_file_path_validator(default_file_param=None):
     Allows another path-type parameter to be named which can supply a default filename. """
 
     def validator(namespace):
+        import os
         if not hasattr(namespace, 'path'):
             return
 
@@ -472,11 +467,11 @@ def get_file_path_validator(default_file_param=None):
 def validate_included_datasets(cmd, namespace):
     if namespace.include:
         include = namespace.include
-        if set(include) - set('cms'):
-            help_string = '(c)opy-info (m)etadata (s)napshots'
+        if set(include) - set('cmsd'):
+            help_string = '(c)opy-info (m)etadata (s)napshots (d)eleted'
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
         t_blob_include = cmd.get_models('blob#Include')
-        namespace.include = t_blob_include('s' in include, 'm' in include, False, 'c' in include)
+        namespace.include = t_blob_include('s' in include, 'm' in include, False, 'c' in include, 'd' in include)
 
 
 def validate_key(namespace):
@@ -604,13 +599,17 @@ def get_source_file_or_blob_service_client(cmd, namespace):
             source_key = _query_account_key(cmd.cli_ctx, source_account)
 
         if source_container:
-            ns['source_client'] = t_block_blob_svc(account_name=source_account,
-                                                   account_key=source_key,
-                                                   sas_token=source_sas)
+            ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx,
+                                                                  t_block_blob_svc,
+                                                                  name=source_account,
+                                                                  key=source_key,
+                                                                  sas_token=source_sas)
         elif source_share:
-            ns['source_client'] = t_file_svc(account_name=source_account,
-                                             account_key=source_key,
-                                             sas_token=source_sas)
+            ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx,
+                                                                  t_file_svc,
+                                                                  name=source_account,
+                                                                  key=source_key,
+                                                                  sas_token=source_sas)
         else:
             raise ValueError(usage_string)
 
@@ -629,17 +628,35 @@ def get_source_file_or_blob_service_client(cmd, namespace):
         elif identifier.container:
             ns['source_container'] = identifier.container
             if identifier.account_name != ns.get('account_name'):
-                ns['source_client'] = t_block_blob_svc(account_name=identifier.account_name,
-                                                       sas_token=identifier.sas_token)
+                ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx, t_block_blob_svc,
+                                                                      name=identifier.account_name,
+                                                                      sas_token=identifier.sas_token)
         elif identifier.share:
             ns['source_share'] = identifier.share
             if identifier.account_name != ns.get('account_name'):
-                ns['source_client'] = t_file_svc(account_name=identifier.account_name,
-                                                 sas_token=identifier.sas_token)
+                ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx,
+                                                                      t_file_svc,
+                                                                      name=identifier.account_name,
+                                                                      sas_token=identifier.sas_token)
+
+
+def add_progress_callback(cmd, namespace):
+    def _update_progress(current, total):
+        hook = cmd.cli_ctx.get_progress_controller(det=True)
+
+        if total:
+            hook.add(message='Alive', value=current, total_val=total)
+            if total == current:
+                hook.end()
+
+    if not namespace.no_progress:
+        namespace.progress_callback = _update_progress
+    del namespace.no_progress
 
 
 def process_blob_download_batch_parameters(namespace, cmd):
     """Process the parameters for storage blob download command"""
+    import os
 
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
@@ -668,6 +685,7 @@ def process_blob_batch_source_parameters(cmd, namespace):
 
 def process_blob_upload_batch_parameters(cmd, namespace):
     """Process the source and destination of storage blob upload command"""
+    import os
 
     # 1. quick check
     if not os.path.exists(namespace.source):
@@ -717,6 +735,7 @@ def process_blob_upload_batch_parameters(cmd, namespace):
             namespace.blob_type = 'page'
         elif any(vhd_files):
             # source files contain vhd files but not all of them
+            from knack.util import CLIError
             raise CLIError("""Fail to guess the required blob type. Type of the files to be
             uploaded are not consistent. Default blob type for .vhd files is "page", while
             others are "block". You can solve this problem by either explicitly set the blob
@@ -732,6 +751,7 @@ def process_blob_copy_batch_namespace(namespace):
 
 def process_file_upload_batch_parameters(cmd, namespace):
     """Process the parameters of storage file batch upload command"""
+    import os
 
     # 1. quick check
     if not os.path.exists(namespace.source):
@@ -757,6 +777,7 @@ def process_file_upload_batch_parameters(cmd, namespace):
 
 def process_file_download_batch_parameters(cmd, namespace):
     """Process the parameters for storage file batch download command"""
+    import os
 
     # 1. quick check
     if not os.path.exists(namespace.destination) or not os.path.isdir(namespace.destination):
@@ -780,6 +801,8 @@ def process_file_batch_source_parameters(cmd, namespace):
 
 
 def process_file_download_namespace(namespace):
+    import os
+
     get_file_path_validator()(namespace)
 
     dest = namespace.file_path
@@ -789,6 +812,7 @@ def process_file_download_namespace(namespace):
 
 
 def process_metric_update_namespace(namespace):
+    import argparse
     namespace.hour = namespace.hour == 'true'
     namespace.minute = namespace.minute == 'true'
     namespace.api = namespace.api == 'true' if namespace.api else None
@@ -820,12 +844,14 @@ def validate_subnet(cmd, namespace):
             child_type_1='subnets',
             child_name_1=subnet)
     else:
+        from knack.util import CLIError
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
 
 
 def get_datetime_type(to_string):
     """ Validates UTC datetime. Examples of accepted forms:
     2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
+    from datetime import datetime
 
     def datetime_type(string):
         """ Validates UTC datetime. Examples of accepted forms:
@@ -847,6 +873,7 @@ def get_datetime_type(to_string):
 
 def ipv4_range_type(string):
     """ Validates an IPv4 address or address range. """
+    import re
     ip_format = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
     if not re.match("^{}$".format(ip_format), string):
         if not re.match("^{}-{}$".format(ip_format, ip_format), string):

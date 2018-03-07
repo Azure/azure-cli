@@ -3,6 +3,23 @@
 Release History
 ===============
 
+2.0.25
+++++++
+* Support Autorest 3.0 based SDKs
+
+2.0.24
+++++++
+* `group deployment export`: On failure, command will now output a partial template and any failures.
+
+2.0.23
+++++++
+* feature: bring back 'feature show' command
+
+2.0.22
+++++++
+* `deployment create/validate`: Fix bug where warning was incorrectly displayed when a template 'type' field contained
+                                uppercase values.
+
 2.0.21
 ++++++
 * Helpfile changes
@@ -43,7 +60,7 @@ Release History
 
 2.0.14 (2017-09-11)
 +++++++++++++++++++
-* Allows passing in resource policy parameter definitions in 'policy definition create', and 'policy definition update'. 
+* Allows passing in resource policy parameter definitions in 'policy definition create', and 'policy definition update'.
 * Allows passing in parameter values for 'policy assignment create'.
 * In all cases params can be provided either via json or file.
 * Incremented API version.

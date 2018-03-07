@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import argparse
+from collections import OrderedDict
+import json
 import re
 from six import string_types
 
@@ -16,14 +18,80 @@ from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import shell_safe_json_parse
+from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args
 from azure.cli.core.profiles import ResourceType
 
 logger = get_logger(__name__)
 
 
+class ArmTemplateBuilder(object):
+
+    def __init__(self):
+        template = OrderedDict()
+        template['$schema'] = \
+            'https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#'
+        template['contentVersion'] = '1.0.0.0'
+        template['parameters'] = {}
+        template['variables'] = {}
+        template['resources'] = []
+        template['outputs'] = {}
+        self.template = template
+        self.parameters = OrderedDict()
+
+    def add_resource(self, resource):
+        self.template['resources'].append(resource)
+
+    def add_variable(self, key, value):
+        self.template['variables'][key] = value
+
+    def add_parameter(self, key, value):
+        self.template['parameters'][key] = value
+
+    def add_secure_parameter(self, key, value, description=None):
+        param = {
+            "type": "securestring",
+            "metadata": {
+                "description": description or 'Secure {}'.format(key)
+            }
+        }
+        self.template['parameters'][key] = param
+        self.parameters[key] = {'value': value}
+
+    def add_id_output(self, key, provider, property_type, property_name):
+        new_output = {
+            key: {
+                'type': 'string',
+                'value': "[resourceId('{}/{}', '{}')]".format(
+                    provider, property_type, property_name)
+            }
+        }
+        self.template['outputs'].update(new_output)
+
+    def add_output(self, key, property_name, provider=None, property_type=None,
+                   output_type='string', path=None):
+
+        if provider and property_type:
+            value = "[reference(resourceId('{provider}/{type}', '{property}'),providers('{provider}', '{type}').apiVersions[0])".format(  # pylint: disable=line-too-long
+                provider=provider, type=property_type, property=property_name)
+        else:
+            value = "[reference('{}')".format(property_name)
+        value = '{}.{}]'.format(value, path) if path else '{}]'.format(value)
+        new_output = {
+            key: {
+                'type': output_type,
+                'value': value
+            }
+        }
+        self.template['outputs'].update(new_output)
+
+    def build(self):
+        return json.loads(json.dumps(self.template))
+
+    def build_parameters(self):
+        return json.loads(json.dumps(self.parameters))
+
+
 def handle_long_running_operation_exception(ex):
-    import json
     import azure.cli.core.telemetry as telemetry
 
     telemetry.set_exception(
@@ -53,7 +121,7 @@ def handle_long_running_operation_exception(ex):
 
 
 def deployment_validate_table_format(result):
-    from collections import OrderedDict
+
     if result.get('error', None):
         error_result = OrderedDict()
         error_result['result'] = result['error']['code']
@@ -174,7 +242,7 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                              '--ids',
                              metavar='RESOURCE_ID',
                              dest=argparse.SUPPRESS,
-                             help="One or more resource IDs (space delimited). If provided, "
+                             help="One or more resource IDs (space-delimited). If provided, "
                                   "no other 'Resource Id' arguments should be specified.",
                              action=split_action(command.arguments),
                              nargs='+',
@@ -289,6 +357,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         return [(k, v) for k, v in arguments.items()]
 
     def _extract_handler_and_args(args, commmand_kwargs, op):
+        from azure.cli.core.commands.client_factory import resolve_client_arg_name
         factory = _get_client_factory(name, commmand_kwargs)
         client = None
         if factory:
@@ -297,7 +366,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             except TypeError:
                 client = factory(context.cli_ctx, None)
 
-        client_arg_name = 'client' if op.startswith(('azure.cli', 'azext')) else 'self'
+        client_arg_name = resolve_client_arg_name(op, kwargs)
         op_handler = context.get_op_handler(op)
         exclude = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
         raw_args = dict(extract_args_from_signature(op_handler, excluded_params=exclude))
@@ -359,13 +428,27 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
         # Done... update the instance!
         setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
-        no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
-        if no_wait_param:
-            setterargs[no_wait_param] = args[no_wait_param]
+
+        # Handle no-wait
+        supports_no_wait = cmd.command_kwargs.get('supports_no_wait', None)
+        if supports_no_wait:
+            no_wait_enabled = args.get('no_wait', False)
+            augment_no_wait_handler_args(no_wait_enabled,
+                                         setter,
+                                         setterargs)
+        else:
+            no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+            if no_wait_param:
+                setterargs[no_wait_param] = args[no_wait_param]
+
         result = setter(**setterargs)
 
-        if no_wait_param and setterargs.get(no_wait_param, None):
+        if supports_no_wait and no_wait_enabled:
             return None
+        else:
+            no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+            if no_wait_param and setterargs.get(no_wait_param, None):
+                return None
 
         if _is_poller(result):
             result = LongRunningOperation(cmd.cli_ctx, 'Starting {}'.format(cmd.name))(result)
@@ -440,6 +523,7 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         return provisioning_state
 
     def handler(args):
+        from azure.cli.core.commands.client_factory import resolve_client_arg_name
         from msrest.exceptions import ClientException
         import time
 
@@ -448,8 +532,7 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         operations_tmpl = _get_operations_tmpl(cmd)
         getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
                                                        excluded_params=EXCLUDED_PARAMS))
-
-        client_arg_name = 'client' if operations_tmpl.startswith(('azure.cli', 'azext')) else 'self'
+        client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)
         try:
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
@@ -471,21 +554,26 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
             raise CLIError(
                 "incorrect usage: --created | --updated | --deleted | --exists | --custom JMESPATH")
 
+        progress_indicator = context.cli_ctx.get_progress_controller()
+        progress_indicator.begin()
         for _ in range(0, timeout, interval):
             try:
+                progress_indicator.add(message='Waiting')
                 instance = getter(**args)
                 if wait_for_exists:
+                    progress_indicator.end()
                     return None
                 provisioning_state = get_provisioning_state(instance)
                 # until we have any needs to wait for 'Failed', let us bail out on this
                 if provisioning_state == 'Failed':
+                    progress_indicator.stop()
                     raise CLIError('The operation failed')
-                if wait_for_created or wait_for_updated:
-                    if provisioning_state == 'Succeeded':
-                        return None
-                if custom_condition and bool(verify_property(instance, custom_condition)):
+                if ((wait_for_created or wait_for_updated) and provisioning_state == 'Succeeded') or \
+                        custom_condition and bool(verify_property(instance, custom_condition)):
+                    progress_indicator.end()
                     return None
             except ClientException as ex:
+                progress_indicator.stop()
                 if getattr(ex, 'status_code', None) == 404:
                     if wait_for_deleted:
                         return None
@@ -494,10 +582,12 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
                 else:
                     raise
             except Exception as ex:  # pylint: disable=broad-except
+                progress_indicator.stop()
                 raise
 
             time.sleep(interval)
 
+        progress_indicator.end()
         return CLIError('Wait operation timed-out after {} seconds'.format(timeout))
 
     context._cli_command(name, handler=handler, argument_loader=generic_wait_arguments_loader, **kwargs)  # pylint: disable=protected-access

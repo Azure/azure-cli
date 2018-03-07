@@ -34,9 +34,9 @@ from azclishell.configuration import Configuration, SELECT_SYMBOL
 from azclishell.frequency_heuristic import DISPLAY_TIME, frequency_heuristic
 from azclishell.gather_commands import add_new_lines, GatherCommands
 from azclishell.key_bindings import InteractiveKeyBindings
-from azclishell.layout import create_layout, create_tutorial_layout, set_scope
+from azclishell.layout import create_layout, create_tutorial_layout, set_scope, get_scope
 from azclishell.progress import progress_view
-from azclishell.telemetry import Telemetry
+import azclishell.telemetry as telemetry
 from azclishell.threads import LoadCommandTableThread
 from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
@@ -47,7 +47,6 @@ from azure.cli.core._config import DEFAULTS_SECTION
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import _SUBSCRIPTION_NAME, Profile
 from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
-import azure.cli.core.telemetry as cli_telemetry
 from azure.cli.core.util import handle_exception
 
 from knack.log import get_logger
@@ -88,15 +87,15 @@ def restart_completer(shell_ctx):
 # pylint: disable=too-many-instance-attributes
 class AzInteractiveShell(object):
 
-    def __init__(self, cli_ctx, style=None, completer=None, styles=None,
-                 lexer=None, history=InMemoryHistory(),
+    def __init__(self, cli_ctx, style=None, completer=None,
+                 lexer=None, history=None,
                  app=None, input_custom=sys.stdin, output_custom=None,
                  user_feedback=False, intermediate_sleep=.25, final_sleep=4):
 
         from azclishell.color_styles import style_factory
 
         self.cli_ctx = cli_ctx
-        self.config = Configuration(cli_ctx.config)
+        self.config = Configuration(cli_ctx.config, style=style)
         self.config.set_style(style)
         self.styles = style or style_factory(self.config.get_style())
         self.lexer = lexer or get_az_lexer(self.config) if self.styles else None
@@ -108,7 +107,6 @@ class AzInteractiveShell(object):
             self.completer = None
         self.history = history or FileHistory(os.path.join(self.config.config_dir, self.config.get_history()))
         os.environ[ENV_ADDITIONAL_USER_AGENT] = 'AZURECLISHELL/' + __version__
-        self.telemetry = Telemetry(self.cli_ctx)
 
         # OH WHAT FUN TO FIGURE OUT WHAT THESE ARE!
         self._cli = None
@@ -142,7 +140,7 @@ class AzInteractiveShell(object):
     def __call__(self):
 
         if self.cli_ctx.data["az_interactive_active"]:
-            logger.warning("You're in the interactive shell already.\n")
+            logger.warning("You're in the interactive shell already.")
             return
 
         if self.config.BOOLEAN_STATES[self.config.config.get('DEFAULT', 'firsttime')]:
@@ -476,59 +474,59 @@ class AzInteractiveShell(object):
         continue_flag = False
         args = parse_quotes(cmd)
         cmd_stripped = cmd.strip()
-        if cmd_stripped and cmd.split(' ', 1)[0].lower() == 'az':
-            self.telemetry.track_ssg('az', cmd)
-            cmd = ' '.join(cmd.split()[1:])
-        if self.default_command:
-            cmd = self.default_command + " " + cmd
 
-        if cmd_stripped == "quit" or cmd_stripped == "exit":
+        if not cmd_stripped and cmd:
+            # add scope if there are only spaces
+            cmd = self.default_command + " " + cmd
+        elif cmd_stripped == "quit" or cmd_stripped == "exit":
             break_flag = True
         elif cmd_stripped == "clear-history":
-            # clears the history, but only when you restart
-            outside = True
-            cmd = 'echo -n "" >' +\
-                os.path.join(
-                    self.config.config_dir(),
-                    self.config.get_history())
+            continue_flag = True
+            self.reset_history()
         elif cmd_stripped == CLEAR_WORD:
             outside = True
             cmd = CLEAR_WORD
-        if cmd_stripped:
-            if cmd_stripped[0] == SELECT_SYMBOL['outside']:
-                cmd = cmd_stripped[1:]
-                outside = True
-                if cmd.strip() and cmd.split()[0] == 'cd':
-                    self.handle_cd(parse_quotes(cmd))
-                    continue_flag = True
-                self.telemetry.track_ssg('outside', '')
-
-            elif cmd_stripped[0] == SELECT_SYMBOL['exit_code']:
-                meaning = "Success" if self.last_exit == 0 else "Failure"
-
-                print(meaning + ": " + str(self.last_exit), file=self.output)
+        elif cmd_stripped[0] == SELECT_SYMBOL['outside']:
+            cmd = cmd_stripped[1:]
+            outside = True
+            if cmd.strip() and cmd.split()[0] == 'cd':
+                self.handle_cd(parse_quotes(cmd))
                 continue_flag = True
-                self.telemetry.track_ssg('exit code', '')
-            elif SELECT_SYMBOL['query'] in cmd_stripped and self.last and self.last.result:
-                continue_flag = self.handle_jmespath_query(args)
-                self.telemetry.track_ssg('query', '')
+            telemetry.track_outside_gesture()
 
-            elif args[0] == '--version' or args[0] == '-v':
-                try:
-                    continue_flag = True
-                    self.cli_ctx.show_version()
-                except SystemExit:
-                    pass
-            elif "|" in cmd or ">" in cmd:
+        elif cmd_stripped[0] == SELECT_SYMBOL['exit_code']:
+            meaning = "Success" if self.last_exit == 0 else "Failure"
+
+            print(meaning + ": " + str(self.last_exit), file=self.output)
+            continue_flag = True
+            telemetry.track_exit_code_gesture()
+        elif SELECT_SYMBOL['query'] in cmd_stripped and self.last and self.last.result:
+            continue_flag = self.handle_jmespath_query(args)
+            telemetry.track_query_gesture()
+
+        elif args[0] == '--version' or args[0] == '-v':
+            try:
+                continue_flag = True
+                self.cli_ctx.show_version()
+            except SystemExit:
+                pass
+        elif SELECT_SYMBOL['example'] in cmd:
+            cmd, continue_flag = self.handle_example(cmd, continue_flag)
+            telemetry.track_ran_tutorial()
+        elif SELECT_SYMBOL['scope'] == cmd_stripped[0:2]:
+            continue_flag, cmd = self.handle_scoping_input(continue_flag, cmd, cmd_stripped)
+            telemetry.track_scope_changes()
+        else:
+            # not a special character; add scope and remove 'az'
+            if self.default_command:
+                cmd = self.default_command + " " + cmd
+            elif cmd.split(' ', 1)[0].lower() == 'az':
+                cmd = ' '.join(cmd.split()[1:])
+            if "|" in cmd or ">" in cmd:
                 # anything I don't parse, send off
                 outside = True
                 cmd = "az " + cmd
-
-            elif SELECT_SYMBOL['example'] in cmd:
-                cmd, continue_flag = self.handle_example(cmd, continue_flag)
-                self.telemetry.track_ssg('tutorial', cmd)
-            elif len(cmd_stripped) > 2 and SELECT_SYMBOL['scope'] == cmd_stripped[0:2]:
-                continue_flag, cmd = self.handle_scoping_input(continue_flag, cmd, cmd_stripped)
+            telemetry.track_cli_commands_used()
 
         return break_flag, continue_flag, outside, cmd
 
@@ -602,10 +600,7 @@ class AzInteractiveShell(object):
                 self.set_scope(value)
                 print("defaulting: " + value, file=self.output)
                 cmd = cmd.replace(SELECT_SYMBOL['scope'], '')
-                self.telemetry.track_ssg('scope command', value)
-
-            elif SELECT_SYMBOL['unscope'] == default_split[0] and \
-                    len(self.default_command.split()) > 0:
+            elif SELECT_SYMBOL['unscope'] == default_split[0] and self.default_command.split():
 
                 value = self.default_command.split()[-1]
                 self.default_command = ' ' + ' '.join(self.default_command.split()[:-1])
@@ -621,6 +616,12 @@ class AzInteractiveShell(object):
             default_split = default_split[1:]
         return continue_flag, cmd
 
+    def reset_history(self):
+        history_file_path = os.path.join(self.config.config_dir, self.config.get_history())
+        os.remove(history_file_path)
+        self.history = FileHistory(history_file_path)
+        self.cli.buffers[DEFAULT_BUFFER].history = self.history
+
     def cli_execute(self, cmd):
         """ sends the command to the CLI to be executed """
 
@@ -631,7 +632,7 @@ class AzInteractiveShell(object):
                 self.config.set_feedback('yes')
                 self.user_feedback = False
 
-            azure_folder = self.config.config_dir
+            azure_folder = get_config_dir()
             if not os.path.exists(azure_folder):
                 os.makedirs(azure_folder)
             ACCOUNT.load(os.path.join(azure_folder, 'azureProfile.json'))
@@ -684,7 +685,6 @@ class AzInteractiveShell(object):
 
     def run(self):
         """ starts the REPL """
-        self.telemetry.start()
         self.cli_ctx.get_progress_controller = self.progress_patch
 
         self.command_table_thread = LoadCommandTableThread(restart_completer, self)
@@ -693,43 +693,47 @@ class AzInteractiveShell(object):
         from azclishell.configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(
             initial_document=Document(u'{}'.format(SHELL_HELP)))
+        # flush telemetry for new commands and send successful interactive mode entry event
+        telemetry.set_success()
+        telemetry.flush()
         while True:
             try:
-                try:
-                    document = self.cli.run(reset_current_buffer=True)
-                    text = document.text
-                    if not text:
-                        # not input
-                        self.set_prompt()
-                        continue
-                    cmd = text
-                    outside = False
-
-                except AttributeError:
-                    # when the user pressed Control D
-                    break
-                else:
-                    b_flag, c_flag, outside, cmd = self._special_cases(cmd, outside)
-                    if not self.default_command:
-                        self.history.append(text)
-                    if b_flag:
-                        break
-                    if c_flag:
-                        self.set_prompt()
-                        continue
-
+                document = self.cli.run(reset_current_buffer=True)
+                text = document.text
+                if not text:
+                    # not input
                     self.set_prompt()
+                    continue
+                cmd = text
+                outside = False
 
-                    if outside:
-                        subprocess.Popen(cmd, shell=True).communicate()
-                    else:
-                        self.cli_execute(cmd)
-                        # because I catch the sys exit, I have to push out
-                        self.telemetry.conclude()
-
+            except AttributeError:
+                # when the user pressed Control D
+                break
             except (KeyboardInterrupt, ValueError):
                 # CTRL C
                 self.set_prompt()
                 continue
+            else:
+                self.history.append(text)
+                b_flag, c_flag, outside, cmd = self._special_cases(cmd, outside)
 
-        self.telemetry.conclude()
+                if b_flag:
+                    break
+                if c_flag:
+                    self.set_prompt()
+                    continue
+
+                self.set_prompt()
+
+                if outside:
+                    subprocess.Popen(cmd, shell=True).communicate()
+                else:
+                    telemetry.start()
+                    self.cli_execute(cmd)
+                    if self.last_exit and self.last_exit != 0:
+                        telemetry.set_failure()
+                    else:
+                        telemetry.set_success()
+                    telemetry.flush()
+        telemetry.conclude()

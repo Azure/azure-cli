@@ -3,6 +3,23 @@
 Release History
 ===============
 
+2.0.23
+++++++
+* Support Autorest 3.0 based SDKs
+
+2.0.22
+++++++
+* Added zone redundancy support for databases and elastic pools on creation and update. 
+
+2.0.21
+++++++
+* Added az sql server dns-alias commands.
+
+2.0.20
+++++++
+* Added az sql db rename
+* Support `--ids` argument for db, dw, server, elastic-pool, and server firewall-rule commands.
+
 2.0.19
 ++++++
 * Updated helpfile

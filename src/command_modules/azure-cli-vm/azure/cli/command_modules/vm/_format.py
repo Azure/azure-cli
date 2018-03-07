@@ -3,10 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from collections import OrderedDict
-
 
 def transform_ip_addresses(result):
+    from collections import OrderedDict
     transformed = []
     for r in result:
         network = r['virtualMachine']['network']
@@ -23,6 +22,7 @@ def transform_ip_addresses(result):
 
 
 def transform_vm(vm):
+    from collections import OrderedDict
     result = OrderedDict([('name', vm['name']),
                           ('resourceGroup', vm['resourceGroup']),
                           ('powerState', vm.get('powerState')),
@@ -36,6 +36,7 @@ def transform_vm(vm):
 
 def transform_vm_create_output(result):
     from msrestazure.tools import parse_resource_id
+    from collections import OrderedDict
     try:
         resource_group = getattr(result, 'resource_group', None) or parse_resource_id(result.id)['resource_group']
         output = OrderedDict([('id', result.id),
@@ -71,6 +72,7 @@ def transform_vm_list(vm_list):
 
 # flattern out important fields (single member arrays) to be displayed in the table output
 def transform_sku_for_table_output(skus):
+    from collections import OrderedDict
     result = []
     for k in skus:
         order_dict = OrderedDict()

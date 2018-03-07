@@ -9,6 +9,7 @@ from prompt_toolkit import prompt
 from prompt_toolkit.filters import Filter
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.key_binding.manager import KeyBindingManager
+import azclishell.telemetry as telemetry
 
 import azclishell.configuration
 
@@ -38,7 +39,6 @@ class InteractiveKeyBindings(object):
         @self.registry.add_binding(Keys.ControlD, eager=True)
         def exit_(event):
             """ exits the program when Control D is pressed """
-            shell_ctx.telemetry.track_key('ControlD')
             event.cli.set_return_value(None)
 
         @self.registry.add_binding(Keys.Enter, filter=_PromptFilter() & _ExampleFilter())
@@ -49,7 +49,7 @@ class InteractiveKeyBindings(object):
         @self.registry.add_binding(Keys.ControlY, eager=True)
         def pan_up(event):
             """ Pans the example pan up"""
-            shell_ctx.telemetry.track_key('ControlY')
+            telemetry.track_scroll_examples()
 
             if shell_ctx._section > 1:
                 shell_ctx._section -= 1
@@ -57,7 +57,7 @@ class InteractiveKeyBindings(object):
         @self.registry.add_binding(Keys.ControlN, eager=True)
         def pan_down(event):
             """ Pans the example pan down"""
-            shell_ctx.telemetry.track_key('ControlN')
+            telemetry.track_scroll_examples()
 
             if shell_ctx._section < 10:
                 shell_ctx._section += 1
@@ -65,8 +65,7 @@ class InteractiveKeyBindings(object):
         @self.registry.add_binding(Keys.F1, eager=True)
         def config_settings(event):
             """ opens the configuration """
-            shell_ctx.telemetry.track_key('F1')
-
+            telemetry.track_open_config()
             shell_ctx.is_prompting = True
             config = shell_ctx.config
             answer = ""
@@ -88,14 +87,14 @@ class InteractiveKeyBindings(object):
         @self.registry.add_binding(Keys.F2, eager=True)
         def toggle_default(event):
             """ shows the defaults"""
-            shell_ctx.telemetry.track_key('F2')
+            telemetry.track_toggle_default()
 
             shell_ctx.is_showing_default = not shell_ctx.is_showing_default
 
         @self.registry.add_binding(Keys.F3, eager=True)
         def toggle_symbols(event):
             """ shows the symbol bindings"""
-            shell_ctx.telemetry.track_key('F3')
+            telemetry.track_toggle_symbol_bindings()
 
             shell_ctx.is_symbols = not shell_ctx.is_symbols
 

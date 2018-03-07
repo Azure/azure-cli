@@ -3,6 +3,25 @@
 Release History
 ===============
 
+0.3.17
+++++++
+* Persist history across different sessions
+* Fixed history while in scope
+* Updates to interactive telemetry
+
+0.3.16
+++++++
+* Fix issue where user is prompted to login when using interactive mode in Cloud Shell.
+* Fixed regression with missing parameter completions.
+
+0.3.15
+++++++
+* Fixed issue where command option completions no longer appeared.
+
+0.3.14
+++++++
+* Clean up unused test files
+
 0.3.13
 ++++++
 * Fix issue where interactive would not start on Python 2.

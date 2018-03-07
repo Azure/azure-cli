@@ -5,10 +5,7 @@
 import uuid
 import os
 
-from msrestazure.tools import parse_resource_id
-
 from knack.log import get_logger
-from knack.util import CLIError
 
 from azure.cli.core.commands import LongRunningOperation
 
@@ -56,6 +53,9 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
                key_encryption_algorithm='RSA-OAEP',
                volume_type=None,
                encrypt_format_all=False):
+    from msrestazure.tools import parse_resource_id
+    from knack.util import CLIError
+
     # pylint: disable=no-member
     compute_client = _compute_client_factory(cmd.cli_ctx)
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
@@ -177,6 +177,8 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
 
 
 def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False):
+    from knack.util import CLIError
+
     compute_client = _compute_client_factory(cmd.cli_ctx)
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     # pylint: disable=no-member
@@ -290,9 +292,13 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
             encryption_status['dataDisk'] = 'Unknown'
     else:
         # Windows - get os and data volume encryption state from the vm model
-        if (encryption_status['osDiskEncryptionSettings'].enabled and
+        if (encryption_status['osDiskEncryptionSettings'] and
+                encryption_status['osDiskEncryptionSettings'].enabled and
+                encryption_status['osDiskEncryptionSettings'].disk_encryption_key and
                 encryption_status['osDiskEncryptionSettings'].disk_encryption_key.secret_url):
             encryption_status['osDisk'] = _STATUS_ENCRYPTED
+        else:
+            encryption_status['osDisk'] = 'Unknown'
 
         if extension_result.provisioning_state == 'Succeeded':
             volume_type = extension_result.settings.get('VolumeType', None)
@@ -376,6 +382,7 @@ def _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, forc
             if force:
                 logger.warning(msg)
             else:
+                from knack.util import CLIError
                 raise CLIError(msg)
     else:
         volume_type = volume_type or 'ALL'
@@ -389,6 +396,8 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
                  key_encryption_algorithm='RSA-OAEP',
                  volume_type=None,
                  force=False):
+    from msrestazure.tools import parse_resource_id
+
     # pylint: disable=no-member
     UpgradeMode, VirtualMachineScaleSetExtension, VirtualMachineScaleSetExtensionProfile = cmd.get_models(
         'UpgradeMode', 'VirtualMachineScaleSetExtension', 'VirtualMachineScaleSetExtensionProfile')
@@ -484,6 +493,7 @@ def decrypt_vmss(cmd, resource_group_name, vmss_name, volume_type=None, force=Fa
     ade_extension = [x for x in extensions if
                      x.type.lower() == extension['name'].lower() and x.publisher.lower() == extension['publisher'].lower()]  # pylint: disable=line-too-long
     if not ade_extension:
+        from knack.util import CLIError
         raise CLIError("VM scale set '{}' was not encrypted".format(vmss_name))
 
     index = vmss.virtual_machine_profile.extension_profile.extensions.index(ade_extension[0])
@@ -508,6 +518,7 @@ def show_vmss_encryption_status(cmd, resource_group_name, vmss_name):
     encryption_ext_names = [v['name'] for v in vmss_extension_info.values()]
     views = get_vmss_instance_view(cmd, resource_group_name, vmss_name)
     if not views.extensions or not [e for e in views.extensions if e.name in encryption_ext_names]:
+        from knack.util import CLIError
         raise CLIError("'{}' is not encrypted yet".format(vmss_name))
 
     views = get_vmss_instance_view(cmd, resource_group_name, vmss_name, instance_id='*')
@@ -526,10 +537,13 @@ def _verify_keyvault_good_for_encryption(cli_ctx, disk_vault_id, kek_vault_id, v
         if force:
             logger.warning(msg)
         else:
+            from knack.util import CLIError
             raise CLIError(msg)
 
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.mgmt.keyvault import KeyVaultManagementClient
+    from msrestazure.tools import parse_resource_id
+
     client = get_mgmt_service_client(cli_ctx, KeyVaultManagementClient).vaults
     disk_vault_resource_info = parse_resource_id(disk_vault_id)
     key_vault = client.get(disk_vault_resource_info['resource_group'], disk_vault_resource_info['name'])

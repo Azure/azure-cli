@@ -5,7 +5,7 @@
 
 # TODO Move this to a package shared by CLI and SDK
 from enum import Enum
-from functools import total_ordering, partial
+from functools import total_ordering
 from importlib import import_module
 
 
@@ -79,7 +79,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: '2017-06-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2017-05-10',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.DATA_STORAGE: '2017-04-17',
+        ResourceType.DATA_STORAGE: '2017-07-29',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
     },
     '2017-03-09-profile': {
@@ -215,7 +215,7 @@ def _validate_api_version(api_version_str, min_api=None, max_api=None):
     return True
 
 
-def supported_api_version(api_profile, resource_type, min_api=None, max_api=None):
+def supported_api_version(api_profile, resource_type, min_api=None, max_api=None, operation_group=None):
     """
     Returns True if current API version for the resource type satisfies min/max range.
     To compare profile versions, set resource type to None.
@@ -224,17 +224,13 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
     or YYYY-MM-DD-profile-preview  formatted strings.
     """
     if not isinstance(resource_type, ResourceType) and resource_type != PROFILE_TYPE:
-        raise TypeError()
+        raise ValueError("'resource_type' is required.")
     if min_api is None and max_api is None:
         raise ValueError('At least a min or max version must be specified')
     api_version_obj = get_api_version(api_profile, resource_type, as_sdk_profile=True) \
         if isinstance(resource_type, ResourceType) else api_profile
     if isinstance(api_version_obj, SDKProfile):
-        return _get_api_version_tuple(
-            resource_type,
-            api_version_obj,
-            partial(_validate_api_version, min_api=min_api, max_api=max_api)
-        )
+        api_version_obj = api_version_obj.profile.get(operation_group or '', api_version_obj.default_api_version)
     return _validate_api_version(api_version_obj, min_api, max_api)
 
 

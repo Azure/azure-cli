@@ -170,7 +170,7 @@ def get_enum_type(data, default=None):
     if default:
         default_value = next((x for x in choices if x.lower() == default.lower()), None)
         if not default_value:
-            raise CLIError("Command authoring exception: urecognized default '{}' from choices '{}'"
+            raise CLIError("Command authoring exception: unrecognized default '{}' from choices '{}'"
                            .format(default, choices))
         arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), action=DefaultAction, default=default_value)
     else:
@@ -212,7 +212,7 @@ quote_text = 'Use {} to clear existing tags.'.format(quotes)
 
 tags_type = CLIArgumentType(
     validator=validate_tags,
-    help="space separated tags in 'key[=value]' format. {}".format(quote_text),
+    help="space-separated tags in 'key[=value]' format. {}".format(quote_text),
     nargs='*'
 )
 
@@ -232,7 +232,7 @@ no_wait_type = CLIArgumentType(
 zones_type = CLIArgumentType(
     options_list=['--zones', '-z'],
     nargs='+',
-    help='Space separated list of availability zones into which to provision the resource.',
+    help='Space-separated list of availability zones into which to provision the resource.',
     choices=['1', '2', '3']
 )
 

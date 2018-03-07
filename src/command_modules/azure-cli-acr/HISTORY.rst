@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.0.21
+++++++
+* Minor fixes
+
+2.0.20
+++++++
+* minor fix
+
 2.0.19
 ++++++
 * Add acr login fallback on wincred errors.

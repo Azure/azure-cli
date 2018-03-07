@@ -49,8 +49,9 @@ def _quote_field(data, field):
     if data is None:
         return None
 
-    data[field] = '"%s"' % data[field]
     data[field] = data[field].replace(";", "\;")
+    data[field] = data[field].replace('"', '\\"')
+    data[field] = '"%s"' % data[field]
 
     return data
 

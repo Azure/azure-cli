@@ -4,8 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import json
-import re
-from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 
 from knack.util import CLIError
 
@@ -72,14 +70,19 @@ def load_images_thru_services(cli_ctx, publisher, offer, sku, location):
 
 
 def load_images_from_aliases_doc(cli_ctx, publisher=None, offer=None, sku=None):
+    import requests
     from azure.cli.core.cloud import CloudEndpointNotSetException
+    from azure.cli.core.util import should_disable_connection_verify
     try:
         target_url = cli_ctx.cloud.endpoints.vm_image_alias_doc
     except CloudEndpointNotSetException:
         raise CLIError("'endpoint_vm_image_alias_doc' isn't configured. Please invoke 'az cloud update' to configure "
                        "it or use '--all' to retrieve images from server")
-    txt = urlopen(target_url).read()
-    dic = json.loads(txt.decode())
+    # under hack mode(say through proxies with unsigned cert), opt out the cert verification
+    response = requests.get(target_url, verify=(not should_disable_connection_verify()))
+    if response.status_code != 200:
+        raise CLIError("Failed to retrieve image alias doc '{}'. Error: '{}'".format(target_url, response))
+    dic = json.loads(response.content.decode())
     try:
         all_images = []
         result = (dic['outputs']['aliases']['value'])
@@ -159,6 +162,7 @@ def _partial_matched(pattern, string):
     if not pattern:
         return True  # empty pattern means wildcard-match
     pattern = r'.*' + pattern
+    import re
     return re.match(pattern, string, re.I)  # pylint: disable=no-member
 
 
@@ -169,3 +173,15 @@ def _create_image_instance(publisher, offer, sku, version):
         'sku': sku,
         'version': version
     }
+
+
+def _get_latest_image_version(cli_ctx, location, publisher, offer, sku):
+    top_one = _compute_client_factory(cli_ctx).virtual_machine_images.list(location,
+                                                                           publisher,
+                                                                           offer,
+                                                                           sku,
+                                                                           top=1,
+                                                                           orderby='name desc')
+    if not top_one:
+        raise CLIError("Can't resolve the vesion of '{}:{}:{}'".format(publisher, offer, sku))
+    return top_one[0].name

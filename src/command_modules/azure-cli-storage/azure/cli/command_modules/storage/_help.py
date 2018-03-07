@@ -196,8 +196,7 @@ helps['storage blob list'] = """
     short-summary: List blobs in a given container.
     parameters:
         - name: --include
-          short-summary: 'Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots. Can be
-                         combined.'
+          short-summary: 'Specifies additional datasets to include: (c)opy-info, (m)etadata, (s)napshots, (d)eleted-soft. Can be combined.'
 """
 
 helps['storage blob copy'] = """
@@ -223,6 +222,19 @@ helps['storage blob metadata'] = """
 helps['storage blob service-properties'] = """
     type: group
     short-summary: Manage storage blob service properties.
+"""
+
+helps['storage blob service-properties delete-policy'] = """
+    type: group
+    short-summary: Manage storage blob delete-policy service properties.
+"""
+helps['storage blob service-properties delete-policy show'] = """
+    type: command
+    short-summary: Show the storage blob delete-policy.
+"""
+helps['storage blob service-properties delete-policy update'] = """
+    type: command
+    short-summary: Update the storage blob delete-policy.
 """
 
 helps['storage blob set-tier'] = """
@@ -506,6 +518,9 @@ helps['storage file upload-batch'] = """
           type: string
           short-summary: The destination of the upload operation.
           long-summary: The destination can be the file share URL or the share name. When the destination is the share URL, the storage account name is parsed from the URL.
+        - name: --destination-path
+          type: string
+          short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
         - name: --pattern
           type: string
           short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'.

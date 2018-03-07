@@ -135,7 +135,7 @@ helps['monitor metrics list'] = """
     parameters:
         - name: --aggregation
           type: string
-          short-summary: The list of aggregation types (space separated) to retrieve.
+          short-summary: The list of aggregation types (space-separated) to retrieve.
         - name: --interval
           type: string
           short-summary: The interval of the metric query. In ISO 8601 duration format, eg "PT1M"
@@ -157,7 +157,7 @@ helps['monitor metrics list'] = """
           short-summary: Returns the metadata values instead of metric data
         - name: --dimension
           type: string
-          short-summary: The list of dimensions (space separated) the metrics are queried into.
+          short-summary: The list of dimensions (space-separated) the metrics are queried into.
     examples:
         - name: List a VM's CPU usage for the past hour
           text: >
@@ -193,10 +193,6 @@ helps['monitor metrics list'] = """
 helps['monitor metrics list-definitions'] = """
     type: command
     short-summary: Lists the metric definitions for the resource.
-    parameters:
-        - name: --metric-names
-          type: string
-          short-summary: The list of the metrics definitions to be shown.
 """
 
 # endregion
@@ -205,10 +201,37 @@ helps['monitor log-profiles'] = """
             type: group
             short-summary: Manage log profiles.
             """
+helps['monitor log-profiles create'] = """
+            type: command
+            short-summary: Create a log profile.
+            parameters:
+                - name: --name -n
+                  short-summary: The name of the log profile.
+                - name: --location -l
+                  short-summary:
+                - name: --locations
+                  short-summary: Space-separated list of regions for which Activity Log events should be stored.
+                - name: --categories
+                  short-summary: Space-separated categories of the logs. These categories are created as is convenient
+                                 to the user. Some values are Write, Delete, and/or Action.
+                - name: --storage-account-id
+                  short-summary: The resource id of the storage account to which you would like to send the Activity
+                                 Log.
+                - name: --service-bus-rule-id
+                  short-summary: The service bus rule ID of the service bus namespace in which you would like to have
+                                 Event Hubs created for streaming the Activity Log. The rule ID is of the format
+                                 '{service bus resource ID}/authorizationrules/{key name}'.
+                - name: --days
+                  short-summary: The number of days for the retention in days. A value of 0 will retain the events
+                                 indefinitely
+                - name: --enabled
+                  short-summary: Whether the retention policy is enabled.
+            """
 helps['monitor log-profiles update'] = """
             type: command
             short-summary: Update a log profile.
             """
+
 helps['monitor diagnostic-settings'] = """
             type: group
             short-summary: Manage service diagnostic settings.
@@ -219,9 +242,6 @@ helps['monitor diagnostic-settings create'] = """
             parameters:
                 - name: --name -n
                   short-summary: The name of the diagnostic settings.
-                - name: --resource-id
-                  type: string
-                  short-summary: The identifier of the resource.
                 - name: --resource-group -g
                   type: string
                   short-summary: Name of the resource group for the Log Analytics and Storage Account when the name of
@@ -229,9 +249,6 @@ helps['monitor diagnostic-settings create'] = """
                 - name: --logs
                   type: string
                   short-summary: JSON encoded list of logs settings. Use '@{file}' to load from a file.
-                - name: --event-hub-name
-                  type: string
-                  short-summary: The name of the event hub. If none is specified, the default event hub will be selected.
                 - name: --metrics
                   type: string
                   short-summary: JSON encoded list of metric settings. Use '@{file}' to load from a file.
@@ -247,8 +264,6 @@ helps['monitor diagnostic-settings create'] = """
                                  selected.
                 - name: --event-hub-rule
                   short-summary: The resource Id for the event hub authorization rule
-                - name: --tags
-                  short-summary: Space separated tags in 'key[=value]' format. Use the "" value to clear existing tags.
             """
 helps['monitor diagnostic-settings update'] = """
             type: command
@@ -320,7 +335,7 @@ helps['monitor action-group update'] = """
             Webhook: --add-action https://www.contoso.com/alert
             Multiple actions can be specified by using more than one `--add-action` argument.
         - name: --remove-action -r
-          short-summary: Remove receivers from the action group. Accept space separated list of receiver names.
+          short-summary: Remove receivers from the action group. Accept space-separated list of receiver names.
 """
 
 helps['monitor activity-log alert'] = """
@@ -362,11 +377,11 @@ helps['monitor activity-log alert create'] = """
             'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties.'.
         - name: --action-group -a
           short-summary: >
-            Add an action group. Accepts space separated action group identifiers. The identifier can be the action group's name
+            Add an action group. Accepts space-separated action group identifiers. The identifier can be the action group's name
             or its resource ID.
         - name: --webhook-properties -w
           short-summary: >
-            Space separated webhook properties in 'key[=value]' format. These properties are associated with the action groups
+            Space-separated webhook properties in 'key[=value]' format. These properties are associated with the action groups
             added in this command.
           long-summary: >
             For any webhook receiver in these action group, this data is appended to the webhook payload. To attach different webhook
@@ -400,8 +415,6 @@ helps['monitor activity-log alert update'] = """
           long-summary: >
             The possible values for the field are 'resourceId', 'category', 'caller', 'level', 'operationName', 'resourceGroup',
             'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties.'.
-        - name: --enable
-          short-summary: Enable or disable this activity log alert. Takes a boolean value of 'true' or 'false'.
     examples:
         - name: Update the condition
           text: >
@@ -430,7 +443,7 @@ helps['monitor activity-log alert action-group add'] = """
           short-summary: Remove all the existing action groups before add new conditions.
         - name: --webhook-properties -w
           short-summary: >
-            Space separated webhook properties in 'key[=value]' format. These properties will be associated with
+            Space-separated webhook properties in 'key[=value]' format. These properties will be associated with
             the action groups added in this command.
           long-summary: >
             For any webhook receiver in these action group, these data are appended to the webhook payload.

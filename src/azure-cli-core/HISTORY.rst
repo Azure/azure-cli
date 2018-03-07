@@ -3,9 +3,28 @@
 Release History
 ===============
 
+2.0.29
+++++++
+* Support Autorest 3.0 based SDKs
+* Support mechanism for a command module to suppress the loading of particular extensions.
+
+2.0.28
+++++++
+* Fix issue that required extension to use `client_arg_name` keyword argument. This is no longer necessary.
+* Allow extensions to send telemetry with custom instrumentation key
+* Enable HTTP logging with --debug
+
+2.0.27
+++++++
+* auth: key on both subscription id and name on msi login
+* Add events module in core for EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
+
 2.0.26
 ++++++
-* Minor fixes
+* Support raw token retrival in MSI context
+* Remove polling indicator string after finishing LRO on Windows cmd.exe
+* Warning that appears when using a configured default has been changed to an INFO level entry. Use --verbose to see.
+* Add a progress indicator for wait command
 
 2.0.25
 ++++++
@@ -108,7 +127,7 @@ Release History
 
 2.0.5 (2017-05-05)
 ++++++++++++++++++
-* core: capture exceptions caused by unregistered provider and auto-register it   
+* core: capture exceptions caused by unregistered provider and auto-register it
 * login: avoid the bad exception when the user account has no subscription and no tenants
 * perf: persist adal token cache in memory till process exits (#2603)
 

@@ -21,6 +21,11 @@ helps['sql db copy'] = """
 helps['sql db create'] = """
     type: command
     short-summary: Create a database.
+    examples:
+        - name: Create database with zone redundancy enabled
+          text: az sql db create -g mygroup -s myserver -n mydb -z
+        - name: Create database with zone redundancy explicitly disabled
+          text: az sql db create -g mygroup -s myserver -n mydb -z false
     """
 helps['sql db delete'] = """
     type: command
@@ -42,6 +47,10 @@ helps['sql db list-editions'] = """
         - name: Show available max database sizes for P1 service objective
           text: az sql db list-editions -l westus --service-objective P1 --show-details max-size
     """
+helps['sql db rename'] = """
+    type: command
+    short-summary: Rename a database.
+    """
 helps['sql db show'] = """
     type: command
     short-summary: Get the details for a database.
@@ -56,6 +65,11 @@ helps['sql db show-connection-string'] = """
 helps['sql db update'] = """
     type: command
     short-summary: Update a database.
+    examples:
+        - name: Update database with zone redundancy enabled
+          text: az sql db update -g mygroup -s myserver -n mypool -z
+        - name: Update database with zone redundancy explicitly disabled
+          text: az sql db update -g mygroup -s myserver -n mypool -z false
     """
 helps['sql db audit-policy'] = """
     type: group
@@ -241,6 +255,11 @@ helps['sql elastic-pool'] = """
 helps['sql elastic-pool create'] = """
     type: command
     short-summary: Create an elastic pool.
+    examples:
+        - name: Create elastic pool with zone redundancy enabled
+          text: az sql elastic-pool create -g mygroup -s myserver -n mypool -z
+        - name: Create elastic pool with zone redundancy explicitly disabled
+          text: az sql elastic-pool create -g mygroup -s myserver -n mypool -z false
     """
 helps['sql elastic-pool list-editions'] = """
     type: command
@@ -262,6 +281,11 @@ helps['sql elastic-pool list-editions'] = """
 helps['sql elastic-pool update'] = """
     type: command
     short-summary: Update an elastic pool.
+    examples:
+        - name: Update elastic pool with zone redundancy enabled
+          text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z
+        - name: Update elastic pool with zone redundancy explicitly disabled
+          text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z false
     """
 helps['sql server'] = """
     type: group
@@ -295,6 +319,14 @@ helps['sql server conn-policy show'] = """
 helps['sql server conn-policy update'] = """
     type: command
     short-summary: Updates a server's secure connection policy.
+    """
+helps['sql server dns-alias'] = """
+    type: group
+    short-summary: Manage a server's DNS aliases.
+    """
+helps['sql server dns-alias set'] = """
+    type: command
+    short-summary: Sets a server to which DNS alias should point
     """
 helps['sql server firewall-rule'] = """
     type: group

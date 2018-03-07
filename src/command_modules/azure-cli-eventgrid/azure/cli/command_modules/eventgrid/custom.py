@@ -64,7 +64,7 @@ def cli_eventgrid_event_subscription_create(
         is_subject_case_sensitive)
     event_subscription_info = EventSubscription(destination, event_subscription_filter, labels)
 
-    async_event_subscription_create = client.create(
+    async_event_subscription_create = client.create_or_update(
         scope,
         event_subscription_name,
         event_subscription_info)

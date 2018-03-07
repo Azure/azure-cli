@@ -4,66 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 
-from collections import OrderedDict
-import json
-
 from enum import Enum
 
 from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType
-
-
-class ArmTemplateBuilder(object):
-
-    def __init__(self):
-        template = OrderedDict()
-        template['$schema'] = \
-            'https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#'
-        template['contentVersion'] = '1.0.0.0'
-        template['parameters'] = {}
-        template['variables'] = {}
-        template['resources'] = []
-        template['outputs'] = {}
-        self.template = template
-
-    def add_resource(self, resource):
-        self.template['resources'].append(resource)
-
-    def add_variable(self, key, value):
-        self.template['variables'][key] = value
-
-    def add_parameter(self, key, value):
-        self.template['parameters'][key] = value
-
-    def add_id_output(self, key, provider, property_type, property_name):
-        new_output = {
-            key: {
-                'type': 'string',
-                'value': "[resourceId('{}/{}', '{}')]".format(
-                    provider, property_type, property_name)
-            }
-        }
-        self.template['outputs'].update(new_output)
-
-    def add_output(self, key, property_name, provider=None, property_type=None,
-                   output_type='string', path=None):
-
-        if provider and property_type:
-            value = "[reference(resourceId('{provider}/{type}', '{property}'),providers('{provider}', '{type}').apiVersions[0])".format(  # pylint: disable=line-too-long
-                provider=provider, type=property_type, property=property_name)
-        else:
-            value = "[reference('{}')".format(property_name)
-        value = '{}.{}]'.format(value, path) if path else '{}]'.format(value)
-        new_output = {
-            key: {
-                'type': output_type,
-                'value': value
-            }
-        }
-        self.template['outputs'].update(new_output)
-
-    def build(self):
-        return json.loads(json.dumps(self.template))
+from azure.cli.core.commands.arm import ArmTemplateBuilder
 
 
 # pylint: disable=too-few-public-methods
@@ -298,7 +243,7 @@ def build_vm_msi_extension(cmd, vm_name, location, role_assignment_guid, port, i
     return {
         'type': 'Microsoft.Compute/virtualMachines/extensions',
         'name': vm_name + '/' + ext_type_name,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE).virtual_machine_extensions,
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_extensions'),
         'location': location,
         'dependsOn': [role_assignment_guid or 'Microsoft.Compute/virtualMachines/' + vm_name],
         'properties': {
@@ -328,7 +273,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         }
 
         if admin_password:
-            os_profile['adminPassword'] = admin_password
+            os_profile['adminPassword'] = "[parameters('adminPassword')]"
 
         if custom_data:
             os_profile['customData'] = b64encode(custom_data)
@@ -444,7 +389,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         vm_properties['licenseType'] = license_type
 
     vm = {
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE).virtual_machines,
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machines'),
         'type': 'Microsoft.Compute/virtualMachines',
         'name': name,
         'location': location,
@@ -714,7 +659,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
-                        single_placement_group=None, custom_data=None, secrets=None, license_type=None, zones=None):
+                        single_placement_group=None, custom_data=None, secrets=None, license_type=None,
+                        zones=None, priority=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -794,8 +740,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         'computerNamePrefix': naming_prefix,
         'adminUsername': admin_username
     }
-    if authentication_type == 'password':
-        os_profile['adminPassword'] = admin_password
+    if authentication_type == 'password' and admin_password:
+        os_profile['adminPassword'] = "[parameters('adminPassword')]"
     else:
         os_profile['linuxConfiguration'] = {
             'disablePasswordAuthentication': True,
@@ -826,7 +772,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         }
     }
 
-    if cmd.supported_api_version(min_api='2017-03-30').virtual_machine_scale_sets:  # pylint: disable=no-member
+    if cmd.supported_api_version(min_api='2017-03-30', operation_group='virtual_machine_scale_sets'):
         if dns_servers:
             nic_config['properties']['dnsSettings'] = {'dnsServers': dns_servers}
 
@@ -853,18 +799,21 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     if license_type:
         vmss_properties['virtualMachineProfile']['licenseType'] = license_type
 
-    if health_probe and cmd.supported_api_version(min_api='2017-03-30').virtual_machine_scale_sets:  # pylint: disable=no-member
+    if health_probe and cmd.supported_api_version(min_api='2017-03-30', operation_group='virtual_machine_scale_sets'):
         vmss_properties['virtualMachineProfile']['networkProfile']['healthProbe'] = {'id': health_probe}
 
-    if cmd.supported_api_version(min_api='2016-04-30-preview').virtual_machine_scale_sets:  # pylint: disable=no-member
+    if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='virtual_machine_scale_sets'):
         vmss_properties['singlePlacementGroup'] = single_placement_group
+
+    if priority and cmd.supported_api_version(min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
+        vmss_properties['virtualMachineProfile']['priority'] = priority
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE).virtual_machine_scale_sets,  # pylint: disable=no-member
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_scale_sets'),
         'dependsOn': [],
         'sku': {
             'name': vm_sku,
@@ -884,13 +833,13 @@ def build_av_set_resource(cmd, name, location, tags,
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE).availability_sets,  # pylint: disable=no-member
+        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='availability_sets'),
         "properties": {
             'platformFaultDomainCount': platform_fault_domain_count,
         }
     }
 
-    if cmd.supported_api_version(min_api='2016-04-30-preview').availability_sets:  # pylint: disable=no-member
+    if cmd.supported_api_version(min_api='2016-04-30-preview', operation_group='availability_sets'):
         av_set['sku'] = {
             'name': 'Classic' if unmanaged else 'Aligned'
         }
