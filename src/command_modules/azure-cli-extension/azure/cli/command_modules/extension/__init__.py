@@ -3,9 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import sys
-import os
-import platform
 import argparse
 from collections import OrderedDict
 
@@ -17,11 +14,6 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
 
 import azure.cli.command_modules.extension._help  # pylint: disable=unused-import
-
-IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
-LIST_FILE_PATH = os.path.join('etc', 'apt', 'sources.list.d', 'azure-cli.list')
-
-logger = get_logger(__name__)
 
 # pylint: disable=line-too-long
 class ExtensionCommandsLoader(AzCommandsLoader):
@@ -37,31 +29,7 @@ class ExtensionCommandsLoader(AzCommandsLoader):
         def transform_extension_list_available(results):
             return [OrderedDict([('Name', r)]) for r in results]
 
-        def validate_extension_add(namespace):
-            if not IS_WINDOWS:
-                try:
-                    logger.debug('Linux distro check: Reading from: %s', LIST_FILE_PATH)
-
-                    with open(LIST_FILE_PATH, 'r') as list_file:
-                        package_source = list_file.read() 
-
-                    stored_linux_dist_name = package_source.split(" ")[3]
-                    logger.debug('Linux distro check: Found in list file: %s', stored_linux_dist_name)
-
-                    current_linux_dist_name = platform.linux_distribution()[2]
-                    logger.debug('Linux distro check: Reported by API: %s', current_linux_dist_name)
-
-                except Exception as err:
-                    current_linux_dist_name = ""
-                    stored_linux_dist_name = ""
-                    logger.debug('Linux distro check: An error occurred while checking linux distribution version source list consistency.')
-                    logger.debug(err)                    
-
-                if (current_linux_dist_name != stored_linux_dist_name):
-                    logger.warning("Linux distro check: Mismatch distribution name in %s file", LIST_FILE_PATH)
-                    logger.warning("Linux distro check: If command fails, install the appropriate package for your distribution or change the above file accordingly.")
-                    logger.waiting("Linux distro check: %s has %s, current distro is %s", LIST_FILE_PATH, stored_linux_dist_name, current_linux_dist_name)
-
+        def validate_extension_add(namespace):            
             if (namespace.extension_name and namespace.source) or (not namespace.extension_name and not namespace.source):
                 raise CLIError("usage error: --name NAME | --source SOURCE")
 
