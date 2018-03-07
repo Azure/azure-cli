@@ -8,12 +8,12 @@ from collections import OrderedDict
 
 from knack.prompting import prompt_y_n
 from knack.util import CLIError
-from knack.log import get_logger
 
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
 
 import azure.cli.command_modules.extension._help  # pylint: disable=unused-import
+
 
 # pylint: disable=line-too-long
 class ExtensionCommandsLoader(AzCommandsLoader):
