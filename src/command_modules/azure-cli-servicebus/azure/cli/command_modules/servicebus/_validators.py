@@ -60,3 +60,16 @@ def _validate_auto_delete_on_idle(namespace):
             pass
         else:
             raise CLIError('--auto-delete-on-idle Value Error : {0} value is not in ISO 8601 timespan / duration format. e.g. PT10M for duration of 10 min or 00:10:00 for duration of 10 min'.format(namespace.auto_delete_on_idle))
+
+
+def validate_partner_namespace(cmd, namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.partner_namespace:
+        if not is_valid_resource_id(namespace.partner_namespace):
+            namespace.partner_namespace = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.ServiceBus',
+                type='namespaces',
+                name=namespace.partner_namespace)

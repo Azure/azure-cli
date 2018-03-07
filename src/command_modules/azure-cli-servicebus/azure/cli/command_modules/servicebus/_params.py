@@ -15,7 +15,7 @@ def load_arguments_sb(self, _):
     from azure.cli.command_modules.servicebus._validators import _validate_auto_delete_on_idle, \
         _validate_duplicate_detection_history_time_window, \
         _validate_default_message_time_to_live, \
-        _validate_lock_duration
+        _validate_lock_duration, validate_partner_namespace
 
     from knack.arguments import CLIArgumentType
     from azure.mgmt.servicebus.models.service_bus_management_client_enums import SkuName, AccessRights, KeyType, FilterType
@@ -249,7 +249,7 @@ def load_arguments_sb(self, _):
         c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of the Alias (Disaster Recovery)')
 
     with self.argument_context('servicebus georecovery-alias set') as c:
-        c.argument('partner_namespace', options_list=['--partner-namespace-id'], help='ARM Id of Primary/Secondary eventhub namespace name, which is part of GEO DR pairing')
+        c.argument('partner_namespace', options_list=['--partner-namespace-id'], validator=validate_partner_namespace, help='Name(if within the same resource group) or ARM Id of Primary/Secondary eventhub namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name (Post failover) for Primary Namespace, when Namespace name and Alias name are same')
 
     for scope in ['servicebus georecovery-alias authorization-rule show', 'servicebus georecovery-alias authorization-rule keys list']:

@@ -479,7 +479,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # Create alias
         self.cmd(
-            'servicebus georecovery-alias set  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname} --partner-namespace {id}')
+            'servicebus georecovery-alias set  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname} --partner-namespace {namespacenamesecondary}')
 
         # get alias - Primary
         self.cmd(
