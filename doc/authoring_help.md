@@ -40,14 +40,10 @@ helps['account clear'] = """
                   long-summary: |
                       Longer summary with newlines preserved.  Preserving newlines is helpful for paragraph breaks.
                   populator-commands: 
-                  - az account list
-                  - These indicate where values can be retrieved for input to this command
+                    - az account list
                 - name: --another-parameter
                   short-summary: These parameter names must match what is shown in the command's CLI help output, including abbreviation.
             examples:
-                - name: Document a parameter that doesn't exist
-                  text: >
-                    You will get an error when you show help for the command stating there is an extra parameter.
                 - name: Collapse whitespace in YAML
                   text: >
                     The > character collapses multiple lines into a single line, which is good for on-screen wrapping.
@@ -74,7 +70,6 @@ helps['account'] = """
 - Make sure the doc contains all the details that someone unfamiliar with the API needs to use the command.
 - Examples are worth a thousand words. Provide examples that cover common use cases.
 - Don't use "etc". Sometimes it makes sense to spell out a list completely. Sometimes it works to say "like ..." instead of "..., etc".
-- The short summary for a group should start with "Commands to...".
 - Use active voice. For example, say "Update web app configurations" instead of "Updates web app congfigurations" or "Updating web app configurations".
 - Don't use highly formal language. If you imagine that another dev sat down with you and you were telling him what he needs to know to use the command, that's exactly what you need to write, in those words.
 

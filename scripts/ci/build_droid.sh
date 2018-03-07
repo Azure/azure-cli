@@ -16,11 +16,11 @@ function title {
 #############################################
 # Clean up artifacts
 title 'Remove artifacts folder'
-if [ -d artifacts ]; then rm -r artifacts; fi
+if [ -d artifacts ] && [ "$AZURE_CLI_BUILD_INCREMENTAL" != "True" ]; then rm -r artifacts; fi
 
 #############################################
 # Build the whl files first
-$dp0/build.sh
+if [ ! -d artifacts ]; then $dp0/build.sh; fi
 
 #############################################
 # Move dockerfile
@@ -29,6 +29,16 @@ cp $dp0/a01/dockerfiles/py36/Dockerfile artifacts/
 #############################################
 # Move other scripts for docker
 cp -R $dp0/a01/* artifacts/
+
+title 'Downloading applications'
+
+curl -L https://a01tools.blob.core.windows.net/droid/latest/linux/a01droid \
+     -o artifacts/docker_app/a01droid
+chmod +x artifacts/docker_app/a01droid
+
+curl -L https://a01tools.blob.core.windows.net/droid/latest/linux/a01dispatcher \
+     -o artifacts/docker_app/a01dispatcher 
+chmod +x artifacts/docker_app/a01dispatcher
 
 #############################################
 # for travis repo slug, remove the suffix to reveal the owner
@@ -42,7 +52,7 @@ image_owner=${image_owner:="private-${USER}"}
 image_owner=`echo $image_owner | tr '[:upper:]' '[:lower:]'`
 version=`cat artifacts/version`
 image_name=azureclidev.azurecr.io/azurecli-test-$image_owner:python3.6-$version
-echo 'Image name: $image_name'
+echo "Image name: $image_name"
 
 title 'Login docker registry'
 if [ $AZURECLIDEV_ACR_SP_USERNAME ] && [ $AZURECLIDEV_ACR_SP_PASSWORD ]; then
