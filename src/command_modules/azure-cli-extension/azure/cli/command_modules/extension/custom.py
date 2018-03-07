@@ -138,7 +138,7 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=N
         logger.debug(traceback.format_exc())
         raise CLIError('The extension is invalid. Use --debug for more information.')
     except CLIError as e:
-        raise e        
+        raise e
     logger.debug('Validation successful on %s', ext_file)
     # Check for distro consistency
     check_distro_consistency()
@@ -273,16 +273,14 @@ def check_distro_consistency():
 
             with open(LIST_FILE_PATH, 'r') as list_file:
                 package_source = list_file.read() 
-
-            stored_linux_dist_name = package_source.split(" ")[3]
-            logger.debug('Linux distro check: Found in list file: %s', stored_linux_dist_name)
-
-            current_linux_dist_name = platform.linux_distribution()[2]
-            logger.debug('Linux distro check: Reported by API: %s', current_linux_dist_name)
+                stored_linux_dist_name = package_source.split(" ")[3]
+                logger.debug('Linux distro check: Found in list file: %s', stored_linux_dist_name)
+                current_linux_dist_name = platform.linux_distribution()[2]
+                logger.debug('Linux distro check: Reported by API: %s', current_linux_dist_name)
 
         except Exception as err:
-            current_linux_dist_name = ""
-            stored_linux_dist_name = ""
+            current_linux_dist_name = None
+            stored_linux_dist_name = None
             logger.debug('Linux distro check: An error occurred while checking linux distribution version source list consistency.')
             logger.debug(err)                    
 

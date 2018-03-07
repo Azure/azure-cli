@@ -29,7 +29,7 @@ class ExtensionCommandsLoader(AzCommandsLoader):
         def transform_extension_list_available(results):
             return [OrderedDict([('Name', r)]) for r in results]
 
-        def validate_extension_add(namespace):            
+        def validate_extension_add(namespace):
             if (namespace.extension_name and namespace.source) or (not namespace.extension_name and not namespace.source):
                 raise CLIError("usage error: --name NAME | --source SOURCE")
 
