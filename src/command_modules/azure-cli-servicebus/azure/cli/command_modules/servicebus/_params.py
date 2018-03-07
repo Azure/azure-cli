@@ -176,7 +176,7 @@ def load_arguments_sb(self, _):
         c.argument('topic_name', options_list=['--topic-name'], id_part=None, help='Name of Topic')
 
     with self.argument_context('servicebus topic subscription') as c:
-        c.argument('subscription_name', arg_type=name_type, id_part='child_name_2', help='Name of Subscription')
+        c.argument('subscription_name', arg_type=name_type, id_part='child_name_2', completer=get_subscriptions_command_completion_list, help='Name of Subscription')
         c.argument('topic_name', id_part='child_name_1', options_list=['--topic-name'], help='Name of Topic')
 
     # region - Subscription Create
@@ -213,7 +213,7 @@ def load_arguments_sb(self, _):
 
     with self.argument_context('servicebus topic subscription rule') as c:
         c.argument('rule_name', arg_type=name_type, completer=get_rules_command_completion_list, help='Name of Rule')
-        c.argument('subscription_name', options_list=['--subscription-name'], id_part='child_name_2',help='Name of Subscription')
+        c.argument('subscription_name', options_list=['--subscription-name'], id_part='child_name_2', help='Name of Subscription')
         c.argument('topic_name', options_list=['--topic-name'], id_part='child_name_1', help='Name of Topic')
 
     for scope in ['servicebus topic subscription rule create', 'servicebus topic subscription rule update']:
