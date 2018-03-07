@@ -117,7 +117,7 @@ def load_command_table(self, _):
 
 # DisasterRecoveryConfigs Region
     with self.command_group('servicebus georecovery-alias', sb_geodr_util, client_factory=disaster_recovery_mgmt_client_factory) as g:
-        g.command('create', 'create_or_update')
+        g.command('set', 'create_or_update')
         g.command('show', 'get', exception_handler=empty_on_404)
         g.command('list', 'list', exception_handler=empty_on_404)
         g.command('break-pair', 'break_pairing')

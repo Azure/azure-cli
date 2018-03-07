@@ -201,7 +201,7 @@ helps['servicebus queue update'] = """
     short-summary: Updates existing Service Bus Queue
     examples:
         - name: Updates Service Bus Queue.
-          text: az servicebus queue update --resource-group myresourcegroup --namespace-name mynamespace --name myqueue --auto-delete-on-idle PT30M
+          text: az servicebus queue update --resource-group myresourcegroup --namespace-name mynamespace --name myqueue --auto-delete-on-idle PT3M
 """
 
 helps['servicebus queue show'] = """
@@ -426,7 +426,7 @@ helps['servicebus topic subscription rule create'] = """
     short-summary: Creates the ServiceBus Rule for Subscription
     examples:
         - name: Creates Rule.
-          text: az servicebus topic subscription rule create --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --subscription-name mysubscription --name myrule --filter-sql-expression mysqlexpression
+          text: az servicebus topic subscription rule create --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --subscription-name mysubscription --name myrule --filter-sql-expression myproperty=myvalue
 """
 
 helps['servicebus topic subscription rule update'] = """
@@ -434,7 +434,7 @@ helps['servicebus topic subscription rule update'] = """
     short-summary: Updates the ServiceBus Rule for Subscription
     examples:
         - name: Updates Rule.
-          text: az servicebus topic subscription rule update --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --subscription-name mysubscription --name myrule --filter-sql-expression mysqlexpression
+          text: az servicebus topic subscription rule update --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --subscription-name mysubscription --name myrule --filter-sql-expression myproperty=myupdatedvalue
 """
 
 helps['servicebus topic subscription rule show'] = """
@@ -470,12 +470,12 @@ helps['servicebus georecovery-alias exists'] = """
           text: az servicebus georecovery-alias exists --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
 """
 
-helps['servicebus georecovery-alias create'] = """
+helps['servicebus georecovery-alias set'] = """
     type: command
-    short-summary: Creates Service Bus Geo Recovery Alias for the give Namespace
+    short-summary: Sets Service Bus Geo Recovery Alias for the give Namespace
     examples:
-        - name: Creates Geo Disaster Recovery configuration - Alias for the give Namespace
-          text: az servicebus georecovery-alias create  --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname --partner-namespace armresourceid
+        - name: Sets Geo Disaster Recovery configuration - Alias for the give Namespace
+          text: az servicebus georecovery-alias set --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname --partner-namespace armresourceid
 """
 
 helps['servicebus georecovery-alias show'] = """

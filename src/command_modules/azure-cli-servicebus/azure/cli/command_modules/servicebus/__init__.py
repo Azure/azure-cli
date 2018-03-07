@@ -12,6 +12,13 @@ from azure.cli.command_modules.servicebus._help import helps
 class ServicebusCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
+        from azure.cli.core import ModExtensionSuppress
+        # Suppress eventhubs up to and including version 0.0.1
+        super(ServicebusCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                                                     suppress_extension=ModExtensionSuppress(__name__, 'servicebus',
+                                                                                             '0.0.1',
+                                                                                             reason='These commands are now in the CLI.',
+                                                                                             recommend_remove=True))
         from azure.cli.core.commands import CliCommandType
         servicebus_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.servicebus.custom#{}')
         super(ServicebusCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=servicebus_custom,
