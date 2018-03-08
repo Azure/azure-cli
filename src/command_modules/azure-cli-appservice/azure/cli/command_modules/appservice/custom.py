@@ -258,6 +258,10 @@ def assign_identity(cmd, resource_group_name, name, role='Contributor', scope=No
     return webapp.identity
 
 
+def show_identity(cmd, resource_group_name, name):
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get').identity
+
+
 def get_auth_settings(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get_auth_settings', slot)
 

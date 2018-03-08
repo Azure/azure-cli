@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.28
 ++++++
+* vm/vmss: author managed identity commands `identity assign/remove/show`, and deprecate `assign-identity/remove-identity`
 * vmss create: default priority to None
 * Support Autorest 3.0 based SDKs
 

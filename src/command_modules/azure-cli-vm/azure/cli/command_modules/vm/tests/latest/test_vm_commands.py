@@ -1869,7 +1869,7 @@ class MSIScenarioTest(ScenarioTest):
             # create a linux vm w/o identity and later enable it
             vm3_result = self.cmd('vm create -g {rg} -n {vm3} --image debian --admin-username admin123 --admin-password PasswordPassword1!').get_output_in_json()
             self.assertIsNone(vm3_result.get('identity'))
-            result = self.cmd('vm assign-identity -g {rg} -n {vm3} --scope {vm1_id} --role reader --port 50343', checks=[
+            result = self.cmd('vm identity assign -g {rg} -n {vm3} --scope {vm1_id} --role reader --port 50343', checks=[
                 self.check('role', 'reader'),
                 self.check('scope', '{vm1_id}'),
                 self.check('port', 50343)
@@ -1931,7 +1931,7 @@ class MSIScenarioTest(ScenarioTest):
             result = self.cmd('vmss create -g {rg} -n {vmss3} --image debian --instance-count 1 --admin-username admin123 --admin-password PasswordPassword1!').get_output_in_json()['vmss']
             self.assertIsNone(result.get('identity'))
 
-            result = self.cmd('vmss assign-identity -g {rg} -n {vmss3} --scope "{vmss1_id}" --role reader --port 50343', checks=[
+            result = self.cmd('vmss identity assign -g {rg} -n {vmss3} --scope "{vmss1_id}" --role reader --port 50343', checks=[
                 self.check('role', 'reader'),
                 self.check('scope', '{vmss1_id}'),
                 self.check('port', 50343)
@@ -1980,7 +1980,7 @@ class MSIScenarioTest(ScenarioTest):
         # create a vm w/o identity
         self.cmd('vm create -g {rg} -n {vm2} --image debian --admin-username admin123 --admin-password PasswordPassword1!')
         # assign identity but w/o a role assignment
-        self.cmd('vm assign-identity -g {rg} -n {vm2}', checks=[
+        self.cmd('vm identity assign -g {rg} -n {vm2}', checks=[
             self.check('scope', None),
             self.check('port', 50342)
         ])
@@ -1993,7 +1993,7 @@ class MSIScenarioTest(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss2} --image debian --admin-username admin123 --admin-password PasswordPassword1!')
         # skip playing back till the test issue gets addressed https://github.com/Azure/azure-cli/issues/4016
         if self.is_live:
-            self.cmd('vmss assign-identity -g {rg} -n {vmss2}', checks=[
+            self.cmd('vmss identity assign -g {rg} -n {vmss2}', checks=[
                 self.check('scope', None),
                 self.check('port', 50342)
             ])
@@ -2031,15 +2031,15 @@ class MSIScenarioTest(ScenarioTest):
         # create a vm with system + user assigned identities
         result = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys --admin-username ubuntuadmin').get_output_in_json()
         self.assertEqual(result['identity']['userAssignedIdentities'][0].lower(), emsi_result['id'].lower())
-        result = self.cmd('vm show -g {rg} -n {vm}', checks=[
-            self.check('length(identity.identityIds)', 1),
-            self.check('identity.type', 'SystemAssigned, UserAssigned')
+        result = self.cmd('vm identity show -g {rg} -n {vm}', checks=[
+            self.check('length(identityIds)', 1),
+            self.check('type', 'SystemAssigned, UserAssigned')
         ]).get_output_in_json()
-        self.assertEqual(result['identity']['identityIds'][0].lower(), emsi_result['id'].lower())
+        self.assertEqual(result['identityIds'][0].lower(), emsi_result['id'].lower())
         # assign a new managed identity
-        self.cmd('vm assign-identity -g {rg} -n {vm} --identities {emsi2}')
-        self.cmd('vm show -g {rg} -n {vm}',
-                 checks=self.check('length(identity.identityIds)', 2))
+        self.cmd('vm identity assign -g {rg} -n {vm} --identities {emsi2}')
+        self.cmd('vm identity show -g {rg} -n {vm}',
+                 checks=self.check('length(identityIds)', 2))
         # remove the 1st user assigned identity
         self.cmd('vm remove-identity -g {rg} -n {vm} --identities {emsi}')
         result = self.cmd('vm show -g {rg} -n {vm}',
@@ -2049,10 +2049,10 @@ class MSIScenarioTest(ScenarioTest):
         # remove the 2nd
         self.cmd('vm remove-identity -g {rg} -n {vm} --identities {emsi2}')
         # verify the VM still has the system assigned identity
-        result = self.cmd('vm show -g {rg} -n {vm}', checks=[
+        result = self.cmd('vm identity show -g {rg} -n {vm}', checks=[
             # blocked by https://github.com/Azure/azure-cli/issues/5103
             # self.check('length(identity.identityIds)', 0)
-            self.check('identity.type', 'SystemAssigned'),
+            self.check('type', 'SystemAssigned'),
         ])
 
     @ResourceGroupPreparer(random_name_length=20, location='westcentralus')
@@ -2074,16 +2074,16 @@ class MSIScenarioTest(ScenarioTest):
         result = self.cmd('vmss create -g {rg} -n {vmss} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --instance-count 1 --generate-ssh-keys --admin-username ubuntuadmin').get_output_in_json()
         self.assertEqual(result['vmss']['identity']['userAssignedIdentities'][0].lower(), emsi_result['id'].lower())
 
-        result = self.cmd('vmss show -g {rg} -n {vmss}', checks=[
-            self.check('length(identity.identityIds)', 1),
-            self.check('identity.type', 'SystemAssigned, UserAssigned')
+        result = self.cmd('vmss identity show -g {rg} -n {vmss}', checks=[
+            self.check('length(identityIds)', 1),
+            self.check('type', 'SystemAssigned, UserAssigned')
         ]).get_output_in_json()
-        self.assertEqual(result['identity']['identityIds'][0].lower(), emsi_result['id'].lower())
+        self.assertEqual(result['identityIds'][0].lower(), emsi_result['id'].lower())
 
         # assign a new managed identity
-        self.cmd('vmss assign-identity -g {rg} -n {vmss} --identities {emsi2}')
-        self.cmd('vmss show -g {rg} -n {vmss}',
-                 checks=self.check('length(identity.identityIds)', 2))
+        self.cmd('vmss identity assign -g {rg} -n {vmss} --identities {emsi2}')
+        self.cmd('vmss identity show -g {rg} -n {vmss}',
+                 checks=self.check('length(identityIds)', 2))
 
         # update instances
         self.cmd('vmss update-instances -g {rg} -n {vmss} --instance-ids *')
@@ -2097,10 +2097,10 @@ class MSIScenarioTest(ScenarioTest):
         # remove the 2nd
         self.cmd('vmss remove-identity -g {rg} -n {vmss} --identities {emsi2}')
         # verify the vmss still has the system assigned identity
-        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+        self.cmd('vmss identity show -g {rg} -n {vmss}', checks=[
             # blocked by https://github.com/Azure/azure-cli/issues/5103
             # self.check('length(identity.identityIds)', 0)
-            self.check('identity.type', 'SystemAssigned'),
+            self.check('type', 'SystemAssigned'),
         ])
 
 
