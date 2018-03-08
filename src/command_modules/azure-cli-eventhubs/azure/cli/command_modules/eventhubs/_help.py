@@ -7,7 +7,7 @@ from knack.help_files import helps
 
 helps['eventhubs'] = """
     type: group
-    short-summary: Manage Azure Event Hubs namespace, eventhub, consumergroup and Geo Recovery configuration - Alias
+    short-summary: Manage Azure Event Hubs namespaces, eventhubs, consumergroups and geo recovery configurations - Alias
 """
 
 helps['eventhubs namespace'] = """
@@ -258,9 +258,9 @@ helps['eventhubs eventhub authorization-rule keys renew'] = """
 
 helps['eventhubs eventhub authorization-rule delete'] = """
     type: command
-    short-summary: Deletes the Authorizationrule of the Eventhub.
+    short-summary: Deletes the Authorizationrule of Eventhub.
     examples:
-        - name: Deletes the Authorizationrule of the Eventhub.
+        - name: Deletes the Authorizationrule of Eventhub.
           text: az eventhubs eventhub authorization-rule delete --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule
 """
 
@@ -325,9 +325,9 @@ helps['eventhubs georecovery-alias show'] = """
     short-summary: shows details of Geo Recovery configuration - Alias for Primay or Secondary Namespace
     examples:
         - name: Shows details of Geo Recovery configuration - Alias  of the Primary Namespace
-          text: az eventhubs georecovery-alias show  --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
+          text: az eventhubs georecovery-alias show --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
         - name: Shows details of Geo Recovery configuration - Alias  of the Secondary Namespace
-          text: az eventhubs georecovery-alias show  --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
+          text: az eventhubs georecovery-alias show --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
 """
 
 helps['eventhubs georecovery-alias authorization-rule show'] = """
@@ -359,7 +359,7 @@ helps['eventhubs georecovery-alias break-pair'] = """
     short-summary: Disables the Geo Recovery and stops replicating changes from primary to secondary namespaces
     examples:
         - name:  Disables the Geo Recovery and stops replicating changes from primary to secondary namespaces
-          text: az eventhubs georecovery-alias break-pair  --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
+          text: az eventhubs georecovery-alias break-pair --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
 """
 
 helps['eventhubs georecovery-alias fail-over'] = """
@@ -367,7 +367,7 @@ helps['eventhubs georecovery-alias fail-over'] = """
     short-summary: Invokes Geo Recovery configuration - Alias to point to the secondary namespace
     examples:
         - name:  Invokes GEO DR failover and reconfigure the alias to point to the secondary namespace
-          text: az eventhubs georecovery-alias fail-over  --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
+          text: az eventhubs georecovery-alias fail-over --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
 """
 
 helps['eventhubs georecovery-alias delete'] = """
@@ -375,5 +375,5 @@ helps['eventhubs georecovery-alias delete'] = """
     short-summary: Delete Geo Recovery - Alias
     examples:
         - name: Delete Geo Recovery configuration - Alias
-          text: az eventhubs georecovery-alias delete  --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
+          text: az eventhubs georecovery-alias delete --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
 """

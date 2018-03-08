@@ -14,9 +14,9 @@ def load_arguments_eh(self, _):
     from knack.arguments import CLIArgumentType
     from azure.mgmt.eventhub.models.event_hub_management_client_enums import KeyType, AccessRights, SkuName
     from azure.cli.command_modules.eventhubs._completers import get_consumergroup_command_completion_list, get_eventhubs_command_completion_list
-    from azure.cli.command_modules.eventhubs._validator import validate_storageaccount
+    from azure.cli.command_modules.eventhubs._validator import validate_storageaccount, validate_partner_namespace
 
-    rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), help='Space-separated Authorization rule rights list')
+    rights_arg_type = CLIArgumentType(options_list=['--rights'], nargs='+', arg_type=get_enum_type(AccessRights), help='Space-separated list of Authorization rule rights')
     key_arg_type = CLIArgumentType(options_list=['--key-name'], arg_type=get_enum_type(KeyType), help='specifies Primary or Secondary key needs to be reset')
     event_hub_name_arg_type = CLIArgumentType(options_list=['--eventhub-name'], help='Name of EventHub')
     namespace_name_arg_type = CLIArgumentType(options_list=['--namespace-name'], help='Name of Namespace', id_part='name')
@@ -121,21 +121,22 @@ def load_arguments_eh(self, _):
 
     with self.argument_context('eventhubs eventhub consumer-group list') as c:
         c.argument('event_hub_name', arg_type=event_hub_name_arg_type, id_part=None)
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
 #   : Region Geo DR Configuration
     with self.argument_context('eventhubs georecovery-alias') as c:
-        c.argument('alias', id_part='child_name_1', help='Name of Alias (Disaster Recovery)')
+        c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of Alias (Disaster Recovery)')
 
     with self.argument_context('eventhubs georecovery-alias exists') as c:
-        c.argument('name', options_list=['--alias'], arg_type=name_type, help='Name of Geo Recovery Configs - Alias to check availability')
+        c.argument('name', options_list=['--alias', '-a'], arg_type=name_type, help='Name of Geo Recovery Configs - Alias to check availability')
 
     with self.argument_context('eventhubs georecovery-alias set') as c:
-        c.argument('partner_namespace', help='ARM Id of the Primary/Secondary eventhub namespace name, which is part of GEO DR pairing')
+        c.argument('partner_namespace', validator=validate_partner_namespace, help='Name(if within the same resource group) or ARM Id of the Primary/Secondary eventhub namespace name, which is part of GEO DR pairing')
         c.argument('alternate_name', help='Alternate Name for the Alias, when the Namespace name and Alias name are same')
 
     for scope in ['eventhubs georecovery-alias authorization-rule show']:
         with self.argument_context(scope)as c:
-            c.argument('authorization_rule_name', arg_type=name_type, help='Name of Namespace AuthorizationRule')
+            c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='Name of Namespace AuthorizationRule')
 
     with self.argument_context('eventhubs georecovery-alias list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
