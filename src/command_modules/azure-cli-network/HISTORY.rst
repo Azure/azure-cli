@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.26
+++++++
+* `network dns zone create`: Adding support for creating Private DNS zones.
+* `network dns zone update`: Adding support for updating Private DNS zones.
+
 2.0.25
 ++++++
 * Support Autorest 3.0 based SDKs
@@ -171,7 +176,7 @@ Release History
 
 * Add support for active-active VNet gateways
 * Remove nulls values from output of `network vpn-connection list/show` commands.
-* BC: Fix bug in the output of `vpn-connection create` 
+* BC: Fix bug in the output of `vpn-connection create`
 * Fix bug where '--key-length' argument of 'vpn-connection create' was not parsed correctly.
 * Fix bug in `dns zone import` where records were not imported correctly.
 * Fix bug where `traffic-manager endpoint update` did not work.
