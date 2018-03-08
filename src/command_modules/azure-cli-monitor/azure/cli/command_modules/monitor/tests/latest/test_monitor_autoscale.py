@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
 
-class TestMonitorAutoscaleScenario(ScenarioTest):
+class TestMonitorAutoscaleScenario(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_autoscale')
     def test_monitor_autoscale_basic(self, resource_group):
