@@ -5,8 +5,7 @@ Release History
 
 2.0.26
 ++++++
-* `network dns zone create`: Adding support for creating Private DNS zones.
-* `network dns zone update`: Adding support for updating Private DNS zones.
+* `network dns zone create/update`: Adding support for Private DNS zones.
 
 2.0.25
 ++++++

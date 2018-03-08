@@ -174,6 +174,9 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network dns zone list -g {rg}',
                  checks=self.check('length(@)', 1))
 
+        self.cmd('network dns zone update -n {zone} -g {rg} --zone-type Private --registration-vnets "" --resolution-vnets ""')
+        self.cmd('network dns zone update -n {zone} -g {rg} --zone-type Private --registration-vnets {regvnet} --resolution-vnets {resvnet}')
+
         base_record_sets = 1
         self.cmd('network dns zone show -n {zone} -g {rg}',
                  checks=self.check('numberOfRecordSets', base_record_sets))
