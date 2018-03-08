@@ -29,6 +29,6 @@ def validate_partner_namespace(cmd, namespace):
             namespace.partner_namespace = resource_id(
                 subscription=get_subscription_id(cmd.cli_ctx),
                 resource_group=namespace.resource_group_name,
-                namespace='Microsoft.ServiceBus',
+                namespace='Microsoft.EventHub',
                 type='namespaces',
                 name=namespace.partner_namespace)

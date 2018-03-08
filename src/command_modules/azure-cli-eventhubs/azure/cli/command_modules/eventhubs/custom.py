@@ -92,7 +92,7 @@ def cli_eheventhub_create(client, resource_group_name, namespace_name, event_hub
 
 
 def cli_eheventhub_update(instance, message_retention_in_days=None, partition_count=None, status=None,
-                          enabled=None, encoding=None, capture_interval_seconds=None,
+                          enabled=None, capture_interval_seconds=None,
                           capture_size_limit_bytes=None, destination_name=None, storage_account_resource_id=None,
                           blob_container=None, archive_name_format=None):
 
@@ -108,8 +108,6 @@ def cli_eheventhub_update(instance, message_retention_in_days=None, partition_co
     if instance.enabled is True or enabled is True:
         if enabled:
             instance.capture_description.enabled = enabled
-        if encoding:
-            instance.capture_description.enabled = encoding
         if capture_interval_seconds:
             instance.interval_in_seconds = capture_interval_seconds
         if capture_size_limit_bytes:
