@@ -73,3 +73,8 @@ def validate_partner_namespace(cmd, namespace):
                 namespace='Microsoft.ServiceBus',
                 type='namespaces',
                 name=namespace.partner_namespace)
+
+
+def validate_premiumsku_capacity(namespace):
+    if namespace.sku and namespace.sku != 'Premium' and namespace.capacity:
+        raise CLIError('--capacity - This property is only applicable to namespaces of Premium SKU')

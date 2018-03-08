@@ -9,7 +9,7 @@ from knack.help_files import helps
 
 helps['servicebus'] = """
     type: group
-    short-summary: Manage Azure Service Bus namespace, queue, topic, subscription, rule and geo disaster recovery configuration - alias
+    short-summary: Manage Azure Service Bus namespaces, queues, topics, subscriptions, rules and geo disaster recovery configurations - alias
 """
 
 helps['servicebus namespace'] = """
@@ -504,12 +504,12 @@ helps['servicebus georecovery-alias authorization-rule keys list'] = """
           text: az servicebus georecovery-alias authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
 """
 
-helps['servicebus georecovery-alias break-pairing'] = """
+helps['servicebus georecovery-alias break-pair'] = """
     type: command
     short-summary: Disables Service Bus Geo Recovery Alias and stops replicating changes from primary to secondary namespaces
     examples:
         - name:  Disables the Disaster Recovery and stops replicating changes from primary to secondary namespaces
-          text: az servicebus georecovery-alias break-pairing --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
+          text: az servicebus georecovery-alias break-pair --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
 """
 
 helps['servicebus georecovery-alias fail-over'] = """

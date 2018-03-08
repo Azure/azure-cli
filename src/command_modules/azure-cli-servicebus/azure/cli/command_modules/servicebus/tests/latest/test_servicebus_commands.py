@@ -474,12 +474,12 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
         # CheckNameAvailability - Alias
 
         self.cmd(
-            'servicebus georecovery-alias exists --resource-group {rg} --namespace-name {namespacenameprimary} --name {aliasname}',
+            'servicebus georecovery-alias exists --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname}',
             checks=[self.check('nameAvailable', True)])
 
         # Create alias
         self.cmd(
-            'servicebus georecovery-alias set  --resource-group {rg} --namespace-name {namespacenameprimary} --alias {aliasname} --partner-namespace {namespacenamesecondary}')
+            'servicebus georecovery-alias set  --resource-group {rg} --namespace-name {namespacenameprimary} -a {aliasname} --partner-namespace {namespacenamesecondary}')
 
         # get alias - Primary
         self.cmd(

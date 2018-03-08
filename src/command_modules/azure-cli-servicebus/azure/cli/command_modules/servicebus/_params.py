@@ -15,7 +15,7 @@ def load_arguments_sb(self, _):
     from azure.cli.command_modules.servicebus._validators import _validate_auto_delete_on_idle, \
         _validate_duplicate_detection_history_time_window, \
         _validate_default_message_time_to_live, \
-        _validate_lock_duration, validate_partner_namespace
+        _validate_lock_duration, validate_partner_namespace, validate_premiumsku_capacity
 
     from knack.arguments import CLIArgumentType
     from azure.mgmt.servicebus.models.service_bus_management_client_enums import SkuName, AccessRights, KeyType, FilterType
@@ -24,7 +24,7 @@ def load_arguments_sb(self, _):
 
     with self.argument_context('servicebus') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
-        c.argument('namespace_name', id_part='name', options_list=['--namespace-name'], help='Name of Namespace')
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part='name', help='Name of Namespace')
 
     with self.argument_context('servicebus namespace') as c:
         c.argument('namespace_name', id_part='name', arg_type=name_type, completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
@@ -32,16 +32,14 @@ def load_arguments_sb(self, _):
     with self.argument_context('servicebus namespace exists') as c:
         c.argument('name', arg_type=name_type, help='Name to check the namespce name availability. namespace name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
 
+    for scope in ['servicebus namespace create', 'servicebus namespace update']:
+        with self.argument_context(scope) as c:
+            c.argument('tags', arg_type=tags_type)
+            c.argument('sku', arg_type=get_enum_type(SkuName))
+            c.argument('capacity', type=int, choices=[1, 2, 4], help='Number of message units. This property is only applicable to namespaces of Premium SKU', validator=validate_premiumsku_capacity)
+
     with self.argument_context('servicebus namespace create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.argument('tags', arg_type=tags_type)
-        c.argument('sku', arg_type=get_enum_type(SkuName))
-        c.argument('capacity', help='Capacity for Sku')
-
-    with self.argument_context('servicebus namespace update') as c:
-        c.argument('tags', arg_type=tags_type)
-        c.argument('sku', arg_type=get_enum_type(SkuName))
-        c.argument('capacity', help='Capacity for Sku')
 
     # region Namespace Authorization Rule
     with self.argument_context('servicebus namespace authorization-rule list') as c:
