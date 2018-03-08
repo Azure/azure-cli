@@ -29,6 +29,9 @@ def load_arguments_sb(self, _):
     with self.argument_context('servicebus namespace') as c:
         c.argument('namespace_name', id_part='name', arg_type=name_type, completer=get_resource_name_completion_list('Microsoft.ServiceBus/namespaces'), help='Name of Namespace')
 
+    with self.argument_context('servicebus namespace exists') as c:
+        c.argument('name', arg_type=name_type, help='Name to check the namespce name availability. namespace name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
+
     with self.argument_context('servicebus namespace create') as c:
         c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
         c.argument('tags', arg_type=tags_type)
@@ -212,7 +215,7 @@ def load_arguments_sb(self, _):
     # Rules Create
 
     with self.argument_context('servicebus topic subscription rule') as c:
-        c.argument('rule_name', arg_type=name_type, completer=get_rules_command_completion_list, help='Name of Rule')
+        c.argument('rule_name', arg_type=name_type, id_part='child_name_3', completer=get_rules_command_completion_list, help='Name of Rule')
         c.argument('subscription_name', options_list=['--subscription-name'], id_part='child_name_2', help='Name of Subscription')
         c.argument('topic_name', options_list=['--topic-name'], id_part='child_name_1', help='Name of Topic')
 
@@ -243,7 +246,7 @@ def load_arguments_sb(self, _):
 
     # Geo DR - Disaster Recovery Configs - Alias  : Region
     with self.argument_context('servicebus georecovery-alias exists') as c:
-        c.argument('name', arg_type=name_type, help='Name of the Alias (Disaster Recovery) to check availability')
+        c.argument('name', options_list=['--alias', '-a'], arg_type=name_type, help='Name of the Alias (Disaster Recovery) to check availability')
 
     with self.argument_context('servicebus georecovery-alias') as c:
         c.argument('alias', options_list=['--alias', '-a'], id_part='child_name_1', help='Name of the Alias (Disaster Recovery)')
@@ -254,7 +257,7 @@ def load_arguments_sb(self, _):
 
     for scope in ['servicebus georecovery-alias authorization-rule show', 'servicebus georecovery-alias authorization-rule keys list']:
         with self.argument_context(scope)as c:
-            c.argument('authorization_rule_name', arg_type=name_type, help='name of Namespace Authorization Rule')
+            c.argument('authorization_rule_name', arg_type=name_type, id_part='child_name_2', help='name of Namespace Authorization Rule')
 
     with self.argument_context('servicebus georecovery-alias list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')

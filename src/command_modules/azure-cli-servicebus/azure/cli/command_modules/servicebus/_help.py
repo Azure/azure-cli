@@ -374,7 +374,7 @@ helps['servicebus topic authorization-rule keys renew'] = """
 
 helps['servicebus topic authorization-rule delete'] = """
     type: command
-    short-summary: Deletes the Authorization Rule of Service Bus Topic.
+    short-summary: Deletes the Authorization Rule of the given Service Bus Topic.
     examples:
         - name: Deletes the Authorization Rule of Service Bus Topic.
           text: az servicebus topic authorization-rule delete --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule
@@ -509,7 +509,7 @@ helps['servicebus georecovery-alias break-pairing'] = """
     short-summary: Disables Service Bus Geo Recovery Alias and stops replicating changes from primary to secondary namespaces
     examples:
         - name:  Disables the Disaster Recovery and stops replicating changes from primary to secondary namespaces
-          text: az servicebus georecovery-alias break-pairing  --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
+          text: az servicebus georecovery-alias break-pairing --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
 """
 
 helps['servicebus georecovery-alias fail-over'] = """
@@ -517,13 +517,13 @@ helps['servicebus georecovery-alias fail-over'] = """
     short-summary: Invokes Service Bus Geo Recovery Alias failover and re-configure the alias to point to the secondary namespace
     examples:
         - name:  Invokes Geo Disaster Recovery  failover and reconfigure the alias to point to the secondary namespace
-          text: az servicebus georecovery-alias fail-over  --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
+          text: az servicebus georecovery-alias fail-over --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
 """
 
 helps['servicebus georecovery-alias delete'] = """
     type: command
-    short-summary: Delete Service Bus Geo Recovery Alias request accepted
+    short-summary: Deletes Service Bus Geo Recovery Alias request accepted
     examples:
-        - name:  Delete Alias(Disaster Recovery configuration) request accepted
-          text: az servicebus georecovery-alias delete  --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
+        - name:  Deletes Alias(Disaster Recovery configuration) request accepted
+          text: az servicebus georecovery-alias delete --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
 """
