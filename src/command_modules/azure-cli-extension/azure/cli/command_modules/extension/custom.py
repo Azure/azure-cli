@@ -35,7 +35,7 @@ OUT_KEY_METADATA = 'metadata'
 
 IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
 LIST_FILE_PATH = os.path.join(os.sep, 'etc', 'apt', 'sources.list.d', 'azure-cli.list')
-LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'apt', 'lsb-release')
+LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
 
 
 def _run_pip(pip_exec_args):
@@ -297,13 +297,13 @@ def check_distro_consistency():
         current_linux_dist_name = None
         stored_linux_dist_name = None
         logger.debug('Linux distro check: An error occurred while checking \
-            linux distribution version source list consistency.')
+linux distribution version source list consistency.')
         logger.debug(err)
 
     if current_linux_dist_name != stored_linux_dist_name:
         logger.warning("Linux distro check: Mismatch distribution \
-            name in %s file", LIST_FILE_PATH)
+name in %s file", LIST_FILE_PATH)
         logger.warning("Linux distro check: If command fails, install the appropriate package \
-            for your distribution or change the above file accordingly.")
+for your distribution or change the above file accordingly.")
         logger.warning("Linux distro check: %s has '%s', current distro is '%s'",
                        LIST_FILE_PATH, stored_linux_dist_name, current_linux_dist_name)
