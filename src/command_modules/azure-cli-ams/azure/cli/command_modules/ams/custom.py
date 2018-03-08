@@ -16,7 +16,7 @@ def create_mediaservice(client, resource_group_name, account_name, storage_accou
 
     storage_account_id = _build_storage_account_id(client.config.subscription_id, resource_group_name, storage_account)
 
-    from azure.mgmt.media.models import StorageAccount
+    from azure.mediav3.models import StorageAccount
     storage_account_primary = StorageAccount('Primary', storage_account_id)
 
     return create_or_update_mediaservice(client, resource_group_name, account_name, [storage_account_primary], location, tags)
@@ -30,7 +30,7 @@ def add_mediaservice_secondary_storage(client, resource_group_name, account_name
 
     storage_accounts_filtered = list(filter(lambda s: storage_account in s.id, ams.storage_accounts))
 
-    from azure.mgmt.media.models import StorageAccount
+    from azure.mediav3.models import StorageAccount
     storage_account_secondary = StorageAccount('Secondary', storage_account_id)
 
     ams.storage_accounts.append(storage_account_secondary) if len(storage_accounts_filtered) == 0 else None
@@ -54,7 +54,7 @@ def remove_mediaservice_secondary_storage(client, resource_group_name, account_n
 
 def create_or_update_mediaservice(client, resource_group_name, account_name, storage_accounts=None, location=None, tags=None):
 
-    from azure.mgmt.media.models import MediaService
+    from azure.mediav3.models import MediaService
     media_service = MediaService(location=location, storage_accounts=storage_accounts, tags=tags)
 
     return client.create_or_update(resource_group_name, account_name, media_service)

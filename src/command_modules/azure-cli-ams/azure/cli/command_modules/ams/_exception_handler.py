@@ -13,7 +13,7 @@ def storage_account_not_found():
 
 def build_exception_wrapper(status_code, message):
     def build_exception(ex):
-        from azure.mgmt.media.models.api_error import ApiErrorException
+        from azure.mediav3.models.api_error import ApiErrorException
         from knack.util import CLIError
 
         if isinstance(ex, ApiErrorException) \

@@ -10,13 +10,13 @@ from ._exception_handler import (ams_resource_not_found, storage_account_not_fou
 def load_command_table(self, _):
 
     ams_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.media.operations#MediaservicesOperations.{}',
+        operations_tmpl='azure.mediav3.operations#MediaservicesOperations.{}',
         client_factory=cf_media,
         exception_handler=ams_resource_not_found('Media Service')
     )
 
     ams_encoding_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.media.operations#TransformsOperations.{}',
+        operations_tmpl='azure.mediav3.operations#TransformsOperations.{}',
         client_factory=cf_media,
         exception_handler=ams_resource_not_found('Media Service')
     )
