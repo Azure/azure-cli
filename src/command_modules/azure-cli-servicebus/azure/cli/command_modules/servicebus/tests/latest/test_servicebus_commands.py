@@ -86,11 +86,11 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # Regeneratekeys - Primary
         self.cmd(
-            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key-name {primary}')
+            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {primary}')
 
         # Regeneratekeys - Secondary
         self.cmd(
-            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key-name {secondary}')
+            'servicebus namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {secondary}')
 
         # Delete Authorization Rule
         self.cmd(
@@ -168,12 +168,12 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # Regeneratekeys - Primary
         regenrateprimarykeyresult = self.cmd(
-            'servicebus queue authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname} --key-name {primary}')
+            'servicebus queue authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname} --key {primary}')
         self.assertIsNotNone(regenrateprimarykeyresult)
 
         # Regeneratekeys - Secondary
         regenratesecondarykeyresult = self.cmd(
-            'servicebus queue authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname} --key-name {secondary}')
+            'servicebus queue authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --queue-name {queuename} --name {authoname} --key {secondary}')
         self.assertIsNotNone(regenratesecondarykeyresult)
 
         # Delete Queue Authorization Rule
@@ -226,7 +226,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # update Topic
         self.cmd(
-            'servicebus topic update --resource-group {rg} --namespace-name {namespacename} --name {topicname} --enable-support-ordering True',
+            'servicebus topic update --resource-group {rg} --namespace-name {namespacename} --name {topicname} --enable-ordering True',
             checks=[self.check('name', self.kwargs['topicname'])])
 
         # Topic List
@@ -253,11 +253,11 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # Regeneratekeys - Primary
         self.cmd(
-            'servicebus topic authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname} --key-name {primary}')
+            'servicebus topic authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname} --key {primary}')
 
         # Regeneratekeys - Secondary
         self.cmd(
-            'servicebus topic authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname} --key-name {secondary}')
+            'servicebus topic authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname} --key {secondary}')
 
         # Delete Topic Authorization Rule
         self.cmd(

@@ -9,7 +9,7 @@ from knack.help_files import helps
 
 helps['servicebus'] = """
     type: group
-    short-summary: Manage Azure Service Bus namespaces, queues, topics, subscriptions, rules and geo disaster recovery configurations - alias
+    short-summary: Manage Azure Service Bus namespaces, queues, topics, subscriptions, rules and geo-disaster recovery configuration alias
 """
 
 helps['servicebus namespace'] = """
@@ -29,7 +29,7 @@ helps['servicebus namespace authorization-rule keys'] = """
 
 helps['servicebus queue'] = """
     type: group
-    short-summary: Manage Azure Service Bus Queue and authorization rule
+    short-summary: Manage Azure Service Bus Queue and Authorization Rule
 """
 
 helps['servicebus queue authorization-rule'] = """
@@ -39,12 +39,12 @@ helps['servicebus queue authorization-rule'] = """
 
 helps['servicebus queue authorization-rule keys'] = """
     type: group
-    short-summary: Manage Azure Authorization Rule connection strings for Service Bus Queue
+    short-summary: Manage Azure Authorization Rule keys for Service Bus Queue
 """
 
 helps['servicebus topic'] = """
     type: group
-    short-summary: Manage Azure Service Bus Topic and authorization rule
+    short-summary: Manage Azure Service Bus Topic and Authorization Rule
 """
 
 helps['servicebus topic authorization-rule'] = """
@@ -54,7 +54,7 @@ helps['servicebus topic authorization-rule'] = """
 
 helps['servicebus topic authorization-rule keys'] = """
     type: group
-    short-summary: Manage Azure Authorization Rule connection strings for Service Bus Topic
+    short-summary: Manage Azure Authorization Rule keys for Service Bus Topic
 """
 
 helps['servicebus topic subscription'] = """
@@ -69,17 +69,17 @@ helps['servicebus topic subscription rule'] = """
 
 helps['servicebus georecovery-alias'] = """
     type: group
-    short-summary: Manage Azure Service Bus Geo Disaster Recovery Configuration - Alias
+    short-summary: Manage Azure Service Bus Geo-Disaster Recovery Configuration Alias
 """
 
 helps['servicebus georecovery-alias authorization-rule'] = """
     type: group
-    short-summary: Manage Azure Service Bus Authorization Rule for Namespace with GeoDRAlias
+    short-summary: Manage Azure Service Bus Authorization Rule for Namespace with Geo-Disaster Recovery Configuration Alias
 """
 
 helps['servicebus georecovery-alias authorization-rule keys'] = """
     type: group
-    short-summary: Manage Azure Authorization Rule connection strings for Service Bus Namespace
+    short-summary: Manage Azure Authorization Rule keys for Service Bus Namespace
 """
 
 helps['servicebus namespace exists'] = """
@@ -92,7 +92,7 @@ helps['servicebus namespace exists'] = """
 
 helps['servicebus namespace create'] = """
     type: command
-    short-summary: Creates a Service Bus Namespace
+    short-summary: Create a Service Bus Namespace
     examples:
         - name: Create a Service Bus Namespace.
           text: az servicebus namespace create --resource-group myresourcegroup --name mynamespace --location westus --tags tag1=value1 tag2=value2 --sku Standard
@@ -134,9 +134,9 @@ helps['servicebus namespace delete'] = """
 
 helps['servicebus namespace authorization-rule create'] = """
     type: command
-    short-summary: Creates Authorization Rule for the given Service Bus Namespace
+    short-summary: Create Authorization Rule for the given Service Bus Namespace
     examples:
-        - name: Creates Authorization Rule 'myauthorule' for the given Service Bus Namespace 'mynamepsace' in resourcegroup
+        - name: Create Authorization Rule 'myauthorule' for the given Service Bus Namespace 'mynamepsace' in resourcegroup
           text: az servicebus namespace authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --rights Send Listen
 """
 
@@ -166,17 +166,17 @@ helps['servicebus namespace authorization-rule list'] = """
 
 helps['servicebus namespace authorization-rule keys list'] = """
     type: command
-    short-summary: Shows the connection strings of Authorization Rule for the Service Bus Namespace
+    short-summary: List the keys and connection strings of Authorization Rule for Service Bus Namespace
     examples:
-        - name: Shows the connection strings of Authorization Rule for the namespace.
+        - name: List the keys and connection strings of Authorization Rule for Service Bus Namespace
           text: az servicebus namespace authorization-rule list-keys --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
 """
 
 helps['servicebus namespace authorization-rule keys renew'] = """
     type: command
-    short-summary: Regenerate the connection strings of Authorization Rule for the Service Bus Namespace.
+    short-summary: Regenerate keys of Authorization Rule for the Service Bus Namespace.
     examples:
-        - name: Regenerate the connection strings of Authorization Rule for the Service Bus Namespace.
+        - name: Regenerate keys of Authorization Rule for the Service Bus Namespace.
           text: az servicebus namespace authorization-rule regenerate-keys --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule --key PrimaryKey
 """
 
@@ -190,9 +190,9 @@ helps['servicebus namespace authorization-rule delete'] = """
 
 helps['servicebus queue create'] = """
     type: command
-    short-summary: Creates the Service Bus Queue
+    short-summary: Create the Service Bus Queue
     examples:
-        - name: Creates Service Bus Queue.
+        - name: Create Service Bus Queue.
           text: az servicebus queue create --resource-group myresourcegroup --namespace-name mynamespace --name myqueue
 """
 
@@ -230,63 +230,63 @@ helps['servicebus queue delete'] = """
 
 helps['servicebus queue authorization-rule create'] = """
     type: command
-    short-summary: Creates Authorization rule for the given Service Bus Queue.
+    short-summary: Create Authorization Rule for the given Service Bus Queue.
     examples:
-        - name: Creates Authorization rules for Queue
+        - name: Create Authorization Rule for Queue
           text: az servicebus queue authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule --rights Listen
 """
 
 helps['servicebus queue authorization-rule update'] = """
     type: command
-    short-summary: Updates Authorization rule for the given Service Bus Queue.
+    short-summary: Update Authorization Rule for the given Service Bus Queue.
     examples:
-        - name: Updates Authorization rules for Queue
+        - name: Update Authorization Rule for Queue
           text: az servicebus queue authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule --rights Send
 """
 
 helps['servicebus queue authorization-rule show'] = """
     type: command
-    short-summary: shows the details of Authorization Rule for the given Service Bus Queue.
+    short-summary: show properties of Authorization Rule for the given Service Bus Queue.
     examples:
-        - name: shows the details of Authorization Rule
+        - name: show properties of Authorization Rule
           text: az servicebus queue authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule
 """
 
 helps['servicebus queue authorization-rule list'] = """
     type: command
-    short-summary: shows the list of Authorization Rule by Service Bus Queue.
+    short-summary: List of Authorization Rule by Service Bus Queue.
     examples:
-        - name: shows the list of Authorization Rule by Queue
+        - name: List of Authorization Rule by Queue
           text: az servicebus queue authorization-rule show --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue
 """
 
 helps['servicebus queue authorization-rule keys list'] = """
     type: command
-    short-summary: Shows the connection strings of Authorization Rule for the given Service Bus Queue.
+    short-summary: List the keys and connection strings of Authorization Rule for the given Service Bus Queue
     examples:
-        - name: Shows the connection strings of Authorization Rule for the queue.
+        - name: List the keys and connection strings of Authorization Rule for the given Service Bus Queue
           text: az servicebus queue authorization-rule list-keys --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule
 """
 
 helps['servicebus queue authorization-rule keys renew'] = """
     type: command
-    short-summary: Regenerate the connection strings of Authorization Rule for the given Service Bus Queue.
+    short-summary: Regenerate keys of Authorization Rule for Service Bus Queue
     examples:
-        - name: Regenerate the connection strings of Authorization Rule for the namespace.
+        - name: Regenerate keys of Authorization Rule for Service Bus Queue
           text: az servicebus queue authorization-rule regenerate-keys --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule --key PrimaryKey
 """
 
 helps['servicebus queue authorization-rule delete'] = """
     type: command
-    short-summary: Deletes the Authorization Rule of the given Service Bus Queue.
+    short-summary: Delete the Authorization Rule of Service Bus Queue
     examples:
-        - name: Deletes the Authorization Rule of the given Service Bus Queue.
+        - name: Delete the Authorization Rule of Service Bus Queue
           text: az servicebus queue authorization-rule delete --resource-group myresourcegroup --namespace-name mynamespace --queue-name myqueue --name myauthorule
 """
 
 helps['servicebus topic create'] = """
     type: command
-    short-summary: Creates the Service Bus Topic
+    short-summary: Create the Service Bus Topic
     examples:
         - name: Create a new Service Bus Topic
           text: az servicebus topic create --resource-group myresourcegroup --namespace-name mynamespace --name mytopic
@@ -326,17 +326,17 @@ helps['servicebus topic delete'] = """
 
 helps['servicebus topic authorization-rule create'] = """
     type: command
-    short-summary: Creates Authorization Rule for given Service Bus Topic
+    short-summary: Create Authorization Rule for given Service Bus Topic
     examples:
-        - name: Creates Authorization rules for given Service Bus Topic
+        - name: Create Authorization Rule for given Service Bus Topic
           text: az servicebus topic authorization-rule create --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule --rights Send Listen
 """
 
 helps['servicebus topic authorization-rule update'] = """
     type: command
-    short-summary: Creates Authorization Rule for given Service Bus Topic
+    short-summary: Create Authorization Rule for given Service Bus Topic
     examples:
-        - name: Creates Authorization rules for given Service Bus Topic
+        - name: Create Authorization Rule for given Service Bus Topic
           text: az servicebus topic authorization-rule update --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule --rights Send
 """
 
@@ -358,17 +358,17 @@ helps['servicebus topic authorization-rule list'] = """
 
 helps['servicebus topic authorization-rule keys list'] = """
     type: command
-    short-summary: shows connection strings of Authorization Rule for given Service Bus Topic.
+    short-summary: List the keys and connection strings of Authorization Rule for Service Bus Topic.
     examples:
-        - name: shows connection strings of Authorization Rule for given Service Bus Topic.
+        - name: List the keys and connection strings of Authorization Rule for Service Bus Topic.
           text: az servicebus topic authorization-rule listkeys --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule
 """
 
 helps['servicebus topic authorization-rule keys renew'] = """
     type: command
-    short-summary: Regenerate the connection strings of Authorization Rule for Service Bus Topic.
+    short-summary: Regenerate keys of Authorization Rule for Service Bus Topic.
     examples:
-        - name: Regenerate Primary/Secondary key of connection string for Service Bus Topic.
+        - name: Regenerate key of Service Bus Topic.
           text: az servicebus topic authorization-rule regenerate_keys --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name myauthorule --key PrimaryKey
 """
 
@@ -382,7 +382,7 @@ helps['servicebus topic authorization-rule delete'] = """
 
 helps['servicebus topic subscription create'] = """
     type: command
-    short-summary: Creates the ServiceBus Subscription
+    short-summary: Create the ServiceBus Subscription
     examples:
         - name: Create a new Subscription.
           text: az servicebus topic subscription create --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --name mysubscription
@@ -423,9 +423,9 @@ helps['servicebus topic subscription delete'] = """
 
 helps['servicebus topic subscription rule create'] = """
     type: command
-    short-summary: Creates the ServiceBus Rule for Subscription
+    short-summary: Create the ServiceBus Rule for Subscription
     examples:
-        - name: Creates Rule.
+        - name: Create Rule.
           text: az servicebus topic subscription rule create --resource-group myresourcegroup --namespace-name mynamespace --topic-name mytopic --subscription-name mysubscription --name myrule --filter-sql-expression myproperty=myvalue
 """
 
@@ -464,15 +464,15 @@ helps['servicebus topic subscription rule delete'] = """
 
 helps['servicebus georecovery-alias exists'] = """
     type: command
-    short-summary: Checks if Geo Recovery Alias Name is available
+    short-summary: Check if Geo Recovery Alias Name is available
     examples:
-        - name: Check the availability of the Geo Disaster Recovery configuration - Alias Name
+        - name: Check availability of the Geo-Disaster Recovery Configuration Alias Name
           text: az servicebus georecovery-alias exists --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
 """
 
 helps['servicebus georecovery-alias set'] = """
     type: command
-    short-summary: Sets Service Bus Geo Recovery Alias for the give Namespace
+    short-summary: Sets Service Bus Geo-Disaster Recovery Configuration Alias for the give Namespace
     examples:
         - name: Sets Geo Disaster Recovery configuration - Alias for the give Namespace
           text: az servicebus georecovery-alias set --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname --partner-namespace armresourceid
@@ -480,9 +480,9 @@ helps['servicebus georecovery-alias set'] = """
 
 helps['servicebus georecovery-alias show'] = """
     type: command
-    short-summary: shows details of Service Bus Geo Recovery Alias for Primay/Secondary Namespace
+    short-summary: shows properties of Service Bus Geo-Disaster Recovery Configuration Alias for Primay/Secondary Namespace
     examples:
-        - name:  show details of Alias (Geo DR Configuration)  of the Primary Namespace
+        - name:  show properties Geo-Disaster Recovery Configuration Alias of the Primary Namespace
           text: az servicebus georecovery-alias show  --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
         - name:  Get details of Alias (Geo DR Configuration)  of the Secondary Namespace
           text: az servicebus georecovery-alias show  --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
@@ -498,15 +498,15 @@ helps['servicebus georecovery-alias authorization-rule list'] = """
 
 helps['servicebus georecovery-alias authorization-rule keys list'] = """
     type: command
-    short-summary: Shows the connection strings of Authorization Rule for the Service Bus Namespace
+    short-summary: List the keys and connection strings of Authorization Rule for the Service Bus Namespace
     examples:
-        - name: Shows the connection strings of Authorization Rule for the namespace.
+        - name: List the keys and connection strings of Authorization Rule for the namespace.
           text: az servicebus georecovery-alias authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --name myauthorule
 """
 
 helps['servicebus georecovery-alias break-pair'] = """
     type: command
-    short-summary: Disables Service Bus Geo Recovery Alias and stops replicating changes from primary to secondary namespaces
+    short-summary: Disables Service Bus Geo-Disaster Recovery Configuration Alias and stops replicating changes from primary to secondary namespaces
     examples:
         - name:  Disables the Disaster Recovery and stops replicating changes from primary to secondary namespaces
           text: az servicebus georecovery-alias break-pair --resource-group myresourcegroup --namespace-name primarynamespace --alias myaliasname
@@ -514,16 +514,16 @@ helps['servicebus georecovery-alias break-pair'] = """
 
 helps['servicebus georecovery-alias fail-over'] = """
     type: command
-    short-summary: Invokes Service Bus Geo Recovery Alias failover and re-configure the alias to point to the secondary namespace
+    short-summary: Invokes Service Bus Geo-Disaster Recovery Configuration Alias failover and re-configure the alias to point to the secondary namespace
     examples:
-        - name:  Invokes Geo Disaster Recovery  failover and reconfigure the alias to point to the secondary namespace
+        - name:  Invokes Geo-Disaster Recovery Configuration Alias failover and reconfigure the alias to point to the secondary namespace
           text: az servicebus georecovery-alias fail-over --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
 """
 
 helps['servicebus georecovery-alias delete'] = """
     type: command
-    short-summary: Deletes Service Bus Geo Recovery Alias request accepted
+    short-summary: Deletes Service Bus Geo-Disaster Recovery Configuration Alias request accepted
     examples:
-        - name:  Deletes Alias(Disaster Recovery configuration) request accepted
+        - name:  Delete Service Bus Geo-Disaster Recovery Configuration Alias request accepted
           text: az servicebus georecovery-alias delete --resource-group myresourcegroup --namespace-name secondarynamespace --alias myaliasname
 """
