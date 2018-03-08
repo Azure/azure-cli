@@ -29,6 +29,34 @@ def get_aggregation_map():
             'last': TimeAggregationOperator.last.value}
 
 
+# region Autoscale Maps
+def get_autoscale_statistic_map():
+    from azure.mgmt.monitor.models import MetricStatisticType
+    return {'avg': MetricStatisticType.average.value, 'min': MetricStatisticType.min.value,
+            'max': MetricStatisticType.max.value, 'sum': MetricStatisticType.sum.value}
+
+
+def get_autoscale_operator_map():
+    from azure.mgmt.monitor.models import ComparisonOperationType
+    return {'==': ComparisonOperationType.equals.value, '!=': ComparisonOperationType.not_equals.value,
+            '>': ComparisonOperationType.greater_than.value, '>=': ComparisonOperationType.greater_than_or_equal.value,
+            '<': ComparisonOperationType.less_than, '<=': ComparisonOperationType.less_than_or_equal}
+
+
+def get_autoscale_aggregation_map():
+    from azure.mgmt.monitor.models import TimeAggregationType
+    return {'avg': TimeAggregationType.average.value, 'min': TimeAggregationType.minimum.value,
+            'max': TimeAggregationType.maximum.value, 'total': TimeAggregationType.total.value,
+            'count': TimeAggregationType.count.value}
+
+
+def get_autoscale_scale_direction_map():
+    from azure.mgmt.monitor.models import ScaleDirection
+    return {'to': ScaleDirection.none.value, 'out': ScaleDirection.increase.value,
+            'in': ScaleDirection.decrease.value}
+# endregion
+
+
 def validate_time_range_and_add_defaults(start_time, end_time, formatter='startTime eq {} and endTime eq {}'):
     from datetime import datetime, timedelta
     try:
