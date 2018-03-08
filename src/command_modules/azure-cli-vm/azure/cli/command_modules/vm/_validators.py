@@ -385,16 +385,41 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
-    if not namespace.os_caching:
-        # we will apply client side default till VMSS has the server side fault at ReadWrite.
-        from azure.cli.core.profiles import ResourceType
-        CachingTypes = cmd.get_models('CachingTypes', resource_type=ResourceType.MGMT_COMPUTE)
-        namespace.os_caching = CachingTypes.read_write.value
+    namespace.os_caching = _process_disk_caching_value(cmd, namespace.os_caching, is_os_disk=True)
+    namespace.data_caching = _process_disk_caching_value(cmd, namespace.data_caching, is_os_disk=False)
 
-    if namespace.data_caching and len(namespace.data_caching) > 1:
-        # verify if we have 2+ entries, all should have the format of '<lun>=<value>'
-        if len([x for x in namespace.data_caching if '=' in x]) != len(namespace.data_caching):
-            raise CLIError('usage error: --data-disk-caching VALUE | --data-disk-caching LUN=VALUE LUN2=VALUE2 ...')
+
+def _process_disk_caching_value(cmd, disk_caching, is_os_disk):
+    from azure.cli.core.profiles import ResourceType
+    CachingTypes = cmd.get_models('CachingTypes', resource_type=ResourceType.MGMT_COMPUTE)
+    disk_caching_values = [x.value for x in CachingTypes]
+
+    invalid_caching_val_err = 'usage error: please use {} disk caching value from ' + '|'.join(disk_caching_values)
+
+    if is_os_disk:
+        if not disk_caching:
+            return CachingTypes.read_write.value
+        elif disk_caching not in disk_caching_values:
+            raise CLIError(invalid_caching_val_err.format('os'))
+        return disk_caching
+
+    if disk_caching:
+        using_luns = [x for x in disk_caching if '=' in x]
+        if len(disk_caching) > 1:
+            # verify if we have 2+ entries, all should have the format of '<lun>=<value>'
+            if len(using_luns) != len(disk_caching):
+                raise CLIError('usage error: --data-disk-caching VALUE | --data-disk-caching LUN=VALUE LUN2=VALUE2 ...')
+        for x in disk_caching:
+            c = x
+            if '=' in x:
+                lun, c = x.split('=', 1)
+                try:
+                    lun = int(lun)
+                except ValueError:
+                    raise CLIError("usage error: LUN used in --data-disk-caching must be an integer")
+            if c not in disk_caching_values:
+                raise CLIError(invalid_caching_val_err.format('data'))
+    return disk_caching
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
