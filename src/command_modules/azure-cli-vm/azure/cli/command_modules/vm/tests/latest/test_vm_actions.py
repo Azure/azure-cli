@@ -322,18 +322,14 @@ class TestActions(unittest.TestCase):
         r = _process_disk_caching_value(cmd, None, is_os_disk=False)
         self.assertIsNone(r)
 
-        r = _process_disk_caching_value(cmd, 'ReadOnly', is_os_disk=True)
-        self.assertEqual(r, CachingTypes.read_only.value)
-
         r = _process_disk_caching_value(cmd, ['0=None'], is_os_disk=False)
         self.assertEqual(r, ['0=None'])
 
         r = _process_disk_caching_value(cmd, ['0=None', '1=ReadOnly'], is_os_disk=False)
         self.assertEqual(r, ['0=None', '1=ReadOnly'])
 
-        with self.assertRaises(CLIError) as err:
-            _process_disk_caching_value(cmd, 'foo', is_os_disk=True)
-        self.assertTrue("usage error: please use os disk caching value from None|ReadOnly|ReadWrite" in str(err.exception))
+        r = _process_disk_caching_value(cmd, ['0=none', '1=readOnly'], is_os_disk=False)
+        self.assertEqual(r, ['0=none', '1=readOnly'])
 
         with self.assertRaises(CLIError) as err:
             _process_disk_caching_value(cmd, ['0=None', '1=foo'], is_os_disk=False)

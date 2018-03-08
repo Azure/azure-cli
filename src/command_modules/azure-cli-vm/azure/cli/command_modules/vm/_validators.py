@@ -392,18 +392,18 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 def _process_disk_caching_value(cmd, disk_caching, is_os_disk):
     from azure.cli.core.profiles import ResourceType
     CachingTypes = cmd.get_models('CachingTypes', resource_type=ResourceType.MGMT_COMPUTE)
-    disk_caching_values = [x.value for x in CachingTypes]
-
-    invalid_caching_val_err = 'usage error: please use {} disk caching value from ' + '|'.join(disk_caching_values)
 
     if is_os_disk:
         if not disk_caching:
             return CachingTypes.read_write.value
-        elif disk_caching not in disk_caching_values:
-            raise CLIError(invalid_caching_val_err.format('os'))
+        # value check is done at arg-parse layer through enum choice list, so skipping here
         return disk_caching
 
     if disk_caching:
+        disk_caching_values = [x.value for x in CachingTypes]
+        disk_caching_values_lower = [x.value.lower() for x in CachingTypes]
+        invalid_caching_val_err = 'usage error: please use data disk caching value from ' + '|'.join(
+            disk_caching_values)
         using_luns = [x for x in disk_caching if '=' in x]
         if len(disk_caching) > 1:
             # verify if we have 2+ entries, all should have the format of '<lun>=<value>'
@@ -417,7 +417,7 @@ def _process_disk_caching_value(cmd, disk_caching, is_os_disk):
                     lun = int(lun)
                 except ValueError:
                     raise CLIError("usage error: LUN used in --data-disk-caching must be an integer")
-            if c not in disk_caching_values:
+            if c.lower() not in disk_caching_values_lower:
                 raise CLIError(invalid_caching_val_err.format('data'))
     return disk_caching
 
