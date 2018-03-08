@@ -950,8 +950,10 @@ class AzArgumentContext(ArgumentsContext):
             self.extra(name, arg_type=arg)
             expanded_arguments.append(name)
 
+        dest_option = ['--__{}'.format(dest.upper())]
         self.argument(dest,
                       arg_type=ignore_type,
+                      options_list=dest_option,
                       validator=get_complex_argument_processor(expanded_arguments, dest, model_type))
 
     def ignore(self, *args):
@@ -960,7 +962,8 @@ class AzArgumentContext(ArgumentsContext):
             return
 
         for arg in args:
-            super(AzArgumentContext, self).ignore(arg)
+            dest_option = ['--__{}'.format(arg.upper())]
+            super(AzArgumentContext, self).argument(arg, arg_type=ignore_type, options_list=dest_option)
 
     def extra(self, dest, arg_type=None, **kwargs):
         self._check_stale()

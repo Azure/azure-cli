@@ -663,11 +663,10 @@ def load_arguments(self, _):
         c.argument('enabled', arg_type=get_three_state_flag())
 
     with self.argument_context('network watcher show-topology') as c:
-        c.argument('network_watcher_name', ignore_type, options_list=['--watcher'])
-        c.argument('resource_group_name', ignore_type, options_list=['--watcher-resource-group'])
         c.extra('location')
 
     with self.argument_context('network watcher show-topology', arg_group='Target') as c:
+        c.ignore('network_watcher_name', 'resource_group_name')
         c.argument('target_resource_group_name', options_list=['--resource-group', '-g'], completer=get_resource_group_completion_list)
         c.argument('target_vnet', options_list=['--vnet'], help='Name or ID of the virtual network to target.')
         c.argument('target_subnet', options_list=['--subnet'], help='Name or ID of the subnet to target. If name is used, --vnet NAME must also be supplied.')
