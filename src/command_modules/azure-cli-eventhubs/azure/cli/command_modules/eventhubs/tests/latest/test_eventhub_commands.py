@@ -85,10 +85,10 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
 
         # Regeneratekeys - Primary
         self.cmd(
-            'eventhubs namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key-name {primary}')
+            'eventhubs namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {primary}')
 
         # Regeneratekeys - Secondary
-        self.cmd('eventhubs namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key-name {secondary}')
+        self.cmd('eventhubs namespace authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --name {authoname} --key {secondary}')
 
         # Delete Authorization Rule
         self.cmd('eventhubs namespace authorization-rule delete --resource-group {rg} --namespace-name {namespacename} --name {authoname}')
@@ -157,11 +157,11 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
         self.cmd('eventhubs eventhub authorization-rule keys list --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname}')
 
         # Regeneratekeys - Primary
-        regenrateprimarykeyresult = self.cmd('eventhubs eventhub authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname} --key-name {primary}')
+        regenrateprimarykeyresult = self.cmd('eventhubs eventhub authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname} --key {primary}')
         self.assertIsNotNone(regenrateprimarykeyresult)
 
         # Regeneratekeys - Secondary
-        regenratesecondarykeyresult = self.cmd('eventhubs eventhub authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname} --key-name {secondary}')
+        regenratesecondarykeyresult = self.cmd('eventhubs eventhub authorization-rule keys renew --resource-group {rg} --namespace-name {namespacename} --eventhub-name {eventhubname} --name {authoname} --key {secondary}')
         self.assertIsNotNone(regenratesecondarykeyresult)
 
         # Delete Eventhub AuthorizationRule
