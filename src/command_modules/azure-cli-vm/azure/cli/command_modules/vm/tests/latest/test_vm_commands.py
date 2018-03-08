@@ -410,6 +410,37 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk',
                  checks=self.check('powerState', 'VM running'))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_with_specialized_unmanaged_disk')
+    def test_vm_create_with_unmanaged_data_disks(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vm2': 'vm2'
+        })
+
+        # create a unmanaged bm with 2 unmanaged disks
+        vm_create_cmd = 'vm create -g {rg} -n vm1 --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password'
+        self.cmd(vm_create_cmd)
+        self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} --new --size-gb 1')
+        self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} --new --size-gb 2')
+        vm1_info = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        self.kwargs['disk_uri'] = vm1_info['storageProfile']['osDisk']['vhd']['uri']
+        self.kwargs['data_disk'] = vm1_info['storageProfile']['dataDisks'][0]['vhd']['uri']
+        self.kwargs['data_disk2'] = vm1_info['storageProfile']['dataDisks'][1]['vhd']['uri']
+
+        self.cmd('vm delete -g {rg} -n vm1 -y')
+
+        # create a vm by attaching the OS disk from the deleted VM
+        vm_create_cmd = ('vm create -g {rg} -n {vm2} --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk '
+                         '--attach-data-disks {data_disk} {data_disk2} --data-disk-caching 0=ReadWrite 1=ReadOnly')
+        self.cmd(vm_create_cmd)
+        self.cmd('vm show -g {rg} -n {vm2} -d', checks=[
+            self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
+            self.check('storageProfile.dataDisks[0].lun', 0),
+            self.check('storageProfile.dataDisks[1].caching', 'ReadOnly'),
+            self.check('storageProfile.dataDisks[1].lun', 1)
+        ])
+
 
 class VMAttachDisksOnCreate(ScenarioTest):
 
@@ -822,7 +853,7 @@ class VMCreateUbuntuScenarioTest(ScenarioTest):
             'ssh_key': TEST_SSH_KEY_PUB,
             'loc': resource_group_location
         })
-        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1')
+        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -832,10 +863,12 @@ class VMCreateUbuntuScenarioTest(ScenarioTest):
             self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', '{ssh_key}'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('storageProfile.dataDisks[0].lun', 0),
+            self.check('storageProfile.dataDisks[0].caching', 'ReadOnly'),
         ])
 
         # test for idempotency--no need to reverify, just ensure the command doesn't fail
-        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1')
+        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly  ')
 
 
 class VMMultiNicScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
