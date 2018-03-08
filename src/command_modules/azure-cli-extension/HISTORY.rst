@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.0.10
++++++++
+* Added check to warn user if used distro is different then the one stored in package source file, as this may lead into errors. 
+
 0.0.9
 ++++++
 * Added support for --pip-proxy parameter to az extension add/update commands.
