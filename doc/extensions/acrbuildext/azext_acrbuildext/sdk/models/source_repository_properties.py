@@ -12,23 +12,23 @@
 from msrest.serialization import Model
 
 
-class SourceRepositoryCreateParameters(Model):
-    """The properties for creating the source code repository configuration.
+class SourceRepositoryProperties(Model):
+    """The properties of the source code repository.
 
     :param source_control_type: The type of source control service. Possible
      values include: 'Github', 'VisualStudioTeamService'
     :type source_control_type: str or
      ~containerregistrybuild.models.SourceControlType
-    :param repository_url: The type of source control service.
+    :param repository_url: The full URL to the source code respository
     :type repository_url: str
-    :param source_control_auth_properties: The authorization properties for
-     accessing the source code repository.
-    :type source_control_auth_properties:
-     ~containerregistrybuild.models.SourceControlAuthInfo
     :param is_commit_trigger_enabled: The value of this property indicates
      whether the source control commit trigger is enabled or not. Default
      value: False .
     :type is_commit_trigger_enabled: bool
+    :param source_control_auth_properties: The authorization properties for
+     accessing the source code repository.
+    :type source_control_auth_properties:
+     ~containerregistrybuild.models.SourceControlAuthInfo
     """
 
     _validation = {
@@ -39,13 +39,13 @@ class SourceRepositoryCreateParameters(Model):
     _attribute_map = {
         'source_control_type': {'key': 'sourceControlType', 'type': 'str'},
         'repository_url': {'key': 'repositoryUrl', 'type': 'str'},
-        'source_control_auth_properties': {'key': 'sourceControlAuthProperties', 'type': 'SourceControlAuthInfo'},
         'is_commit_trigger_enabled': {'key': 'isCommitTriggerEnabled', 'type': 'bool'},
+        'source_control_auth_properties': {'key': 'sourceControlAuthProperties', 'type': 'SourceControlAuthInfo'},
     }
 
-    def __init__(self, source_control_type, repository_url, source_control_auth_properties=None, is_commit_trigger_enabled=False):
-        super(SourceRepositoryCreateParameters, self).__init__()
+    def __init__(self, source_control_type, repository_url, is_commit_trigger_enabled=False, source_control_auth_properties=None):
+        super(SourceRepositoryProperties, self).__init__()
         self.source_control_type = source_control_type
         self.repository_url = repository_url
-        self.source_control_auth_properties = source_control_auth_properties
         self.is_commit_trigger_enabled = is_commit_trigger_enabled
+        self.source_control_auth_properties = source_control_auth_properties

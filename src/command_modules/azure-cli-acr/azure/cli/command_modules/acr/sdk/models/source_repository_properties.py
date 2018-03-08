@@ -25,6 +25,10 @@ class SourceRepositoryProperties(Model):
      whether the source control commit trigger is enabled or not. Default
      value: False .
     :type is_commit_trigger_enabled: bool
+    :param source_control_auth_properties: The authorization properties for
+     accessing the source code repository.
+    :type source_control_auth_properties:
+     ~containerregistrybuild.models.SourceControlAuthInfo
     """
 
     _validation = {
@@ -36,10 +40,12 @@ class SourceRepositoryProperties(Model):
         'source_control_type': {'key': 'sourceControlType', 'type': 'str'},
         'repository_url': {'key': 'repositoryUrl', 'type': 'str'},
         'is_commit_trigger_enabled': {'key': 'isCommitTriggerEnabled', 'type': 'bool'},
+        'source_control_auth_properties': {'key': 'sourceControlAuthProperties', 'type': 'SourceControlAuthInfo'},
     }
 
-    def __init__(self, source_control_type, repository_url, is_commit_trigger_enabled=False):
+    def __init__(self, source_control_type, repository_url, is_commit_trigger_enabled=False, source_control_auth_properties=None):
         super(SourceRepositoryProperties, self).__init__()
         self.source_control_type = source_control_type
         self.repository_url = repository_url
         self.is_commit_trigger_enabled = is_commit_trigger_enabled
+        self.source_control_auth_properties = source_control_auth_properties

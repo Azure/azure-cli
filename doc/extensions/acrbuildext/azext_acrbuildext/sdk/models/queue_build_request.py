@@ -12,33 +12,28 @@
 from msrest.serialization import Model
 
 
-class BuildStepCreateParameters(Model):
-    """The base properties for creating any build step.
+class QueueBuildRequest(Model):
+    """The queue build request parameters.
 
     You probably want to use the sub-classes and not this class directly. Known
-    sub-classes are: DockerBuildStepCreateParameters
+    sub-classes are: BuildDefinitionBuildRequest, QuickBuildRequest
 
-    :param name: The unique name of the step.
-    :type name: str
     :param type: Constant filled by server.
     :type type: str
     """
 
     _validation = {
-        'name': {'required': True},
         'type': {'required': True},
     }
 
     _attribute_map = {
-        'name': {'key': 'name', 'type': 'str'},
         'type': {'key': 'type', 'type': 'str'},
     }
 
     _subtype_map = {
-        'type': {'Docker': 'DockerBuildStepCreateParameters'}
+        'type': {'BuildDefinition': 'BuildDefinitionBuildRequest', 'QuickBuild': 'QuickBuildRequest'}
     }
 
-    def __init__(self, name):
-        super(BuildStepCreateParameters, self).__init__()
-        self.name = name
+    def __init__(self):
+        super(QueueBuildRequest, self).__init__()
         self.type = None

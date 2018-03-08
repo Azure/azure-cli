@@ -9,14 +9,5 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .build_definitions_operations import BuildDefinitionsOperations
-from .builds_operations import BuildsOperations
-from .build_steps_operations import BuildStepsOperations
-from .registries_operations import RegistriesOperations
+VERSION = "2018-02-01-preview"
 
-__all__ = [
-    'BuildDefinitionsOperations',
-    'BuildsOperations',
-    'BuildStepsOperations',
-    'RegistriesOperations',
-]

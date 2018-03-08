@@ -9,14 +9,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .build_definitions_operations import BuildDefinitionsOperations
-from .builds_operations import BuildsOperations
-from .build_steps_operations import BuildStepsOperations
-from .registries_operations import RegistriesOperations
+from .container_registry_management_client import ContainerRegistryManagementClient
+from .version import VERSION
 
-__all__ = [
-    'BuildDefinitionsOperations',
-    'BuildsOperations',
-    'BuildStepsOperations',
-    'RegistriesOperations',
-]
+__all__ = ['ContainerRegistryManagementClient']
+
+__version__ = VERSION
+

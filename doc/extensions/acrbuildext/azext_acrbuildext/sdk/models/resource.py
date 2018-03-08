@@ -9,11 +9,11 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .resource import Resource
+from msrest.serialization import Model
 
 
-class BuildStep(Resource):
-    """Build step resource properties.
+class Resource(Model):
+    """An Azure resource.
 
     Variables are only populated by the server, and will be ignored when
     sending a request.
@@ -29,13 +29,6 @@ class BuildStep(Resource):
     :type location: str
     :param tags: The tags of the resource.
     :type tags: dict[str, str]
-    :ivar provisioning_state: The provisioning state of the build step.
-     Possible values include: 'Creating', 'Updating', 'Deleting', 'Succeeded',
-     'Failed', 'Canceled'
-    :vartype provisioning_state: str or
-     ~containerregistrybuild.models.ProvisioningState
-    :param build_step_type: Constant filled by server.
-    :type build_step_type: str
     """
 
     _validation = {
@@ -43,8 +36,6 @@ class BuildStep(Resource):
         'name': {'readonly': True},
         'type': {'readonly': True},
         'location': {'required': True},
-        'provisioning_state': {'readonly': True},
-        'build_step_type': {'required': True},
     }
 
     _attribute_map = {
@@ -53,11 +44,12 @@ class BuildStep(Resource):
         'type': {'key': 'type', 'type': 'str'},
         'location': {'key': 'location', 'type': 'str'},
         'tags': {'key': 'tags', 'type': '{str}'},
-        'provisioning_state': {'key': 'properties.provisioningState', 'type': 'str'},
-        'build_step_type': {'key': 'properties.type', 'type': 'str'},
     }
 
-    def __init__(self, location, build_step_type, tags=None):
-        super(BuildStep, self).__init__(location=location, tags=tags)
-        self.provisioning_state = None
-        self.build_step_type = build_step_type
+    def __init__(self, location, tags=None):
+        super(Resource, self).__init__()
+        self.id = None
+        self.name = None
+        self.type = None
+        self.location = location
+        self.tags = tags

@@ -9,19 +9,20 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from msrest.paging import Paged
+from msrest.serialization import Model
 
 
-class BuildBasePaged(Paged):
-    """
-    A paging container for iterating over a list of :class:`BuildBase <containerregistrybuild.models.BuildBase>` object
+class BuildDefinitionFilter(Model):
+    """The filter that can be used for listing build definitions.
+
+    :param alias: The alternative name for build definition.
+    :type alias: str
     """
 
     _attribute_map = {
-        'next_link': {'key': 'nextLink', 'type': 'str'},
-        'current_page': {'key': 'value', 'type': '[BuildBase]'}
+        'alias': {'key': 'alias', 'type': 'str'},
     }
 
-    def __init__(self, *args, **kwargs):
-
-        super(BuildBasePaged, self).__init__(*args, **kwargs)
+    def __init__(self, alias=None):
+        super(BuildDefinitionFilter, self).__init__()
+        self.alias = alias

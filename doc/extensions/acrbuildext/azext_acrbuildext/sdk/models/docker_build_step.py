@@ -9,12 +9,20 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .build_step_update_parameters import BuildStepUpdateParameters
+from .build_step_properties import BuildStepProperties
 
 
-class DockerBuildStepUpdateParameters(BuildStepUpdateParameters):
-    """The properties for updating a docker build step.
+class DockerBuildStep(BuildStepProperties):
+    """The Docker build step.
 
+    Variables are only populated by the server, and will be ignored when
+    sending a request.
+
+    :ivar provisioning_state: The provisioning state of the build step.
+     Possible values include: 'Creating', 'Updating', 'Deleting', 'Succeeded',
+     'Failed', 'Canceled'
+    :vartype provisioning_state: str or
+     ~containerregistrybuild.models.ProvisioningState
     :param type: Constant filled by server.
     :type type: str
     :param branch: The repository branch name.
@@ -37,10 +45,12 @@ class DockerBuildStepUpdateParameters(BuildStepUpdateParameters):
     """
 
     _validation = {
+        'provisioning_state': {'readonly': True},
         'type': {'required': True},
     }
 
     _attribute_map = {
+        'provisioning_state': {'key': 'provisioningState', 'type': 'str'},
         'type': {'key': 'type', 'type': 'str'},
         'branch': {'key': 'branch', 'type': 'str'},
         'image_name': {'key': 'imageName', 'type': 'str'},
@@ -51,7 +61,7 @@ class DockerBuildStepUpdateParameters(BuildStepUpdateParameters):
     }
 
     def __init__(self, branch=None, image_name=None, is_push_enabled=False, docker_file_path=None, context_path=None, build_arguments=None):
-        super(DockerBuildStepUpdateParameters, self).__init__()
+        super(DockerBuildStep, self).__init__()
         self.branch = branch
         self.image_name = image_name
         self.is_push_enabled = is_push_enabled

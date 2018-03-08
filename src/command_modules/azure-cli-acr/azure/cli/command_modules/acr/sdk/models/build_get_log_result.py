@@ -9,14 +9,20 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .build_definitions_operations import BuildDefinitionsOperations
-from .builds_operations import BuildsOperations
-from .build_steps_operations import BuildStepsOperations
-from .registries_operations import RegistriesOperations
+from msrest.serialization import Model
 
-__all__ = [
-    'BuildDefinitionsOperations',
-    'BuildsOperations',
-    'BuildStepsOperations',
-    'RegistriesOperations',
-]
+
+class BuildGetLogResult(Model):
+    """The result of get log link operation.
+
+    :param log_link: The link to logs for a azure container registry build.
+    :type log_link: str
+    """
+
+    _attribute_map = {
+        'log_link': {'key': 'logLink', 'type': 'str'},
+    }
+
+    def __init__(self, log_link=None):
+        super(BuildGetLogResult, self).__init__()
+        self.log_link = log_link

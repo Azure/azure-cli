@@ -9,37 +9,33 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .build_trigger import BuildTrigger
+from msrest.serialization import Model
 
 
-class ImageTrigger(BuildTrigger):
-    """A build trigger based on Image updates.
+class ImageDescriptor(Model):
+    """Properties that describes a Docker image.
 
-    :param id: The unique identifier of a trigger.
-    :type id: str
-    :param type: Constant filled by server.
-    :type type: str
     :param repository_name: Name of the repository.
     :type repository_name: str
     :param tag: The tag name.
     :type tag: str
+    :param digest: The image digest. Example: SHA256 based digest.
+    :type digest: str
     """
 
     _validation = {
-        'id': {'required': True},
-        'type': {'required': True},
         'repository_name': {'required': True},
+        'digest': {'required': True},
     }
 
     _attribute_map = {
-        'id': {'key': 'id', 'type': 'str'},
-        'type': {'key': 'type', 'type': 'str'},
         'repository_name': {'key': 'repositoryName', 'type': 'str'},
         'tag': {'key': 'tag', 'type': 'str'},
+        'digest': {'key': 'digest', 'type': 'str'},
     }
 
-    def __init__(self, id, repository_name, tag=None):
-        super(ImageTrigger, self).__init__(id=id)
+    def __init__(self, repository_name, digest, tag=None):
+        super(ImageDescriptor, self).__init__()
         self.repository_name = repository_name
         self.tag = tag
-        self.type = 'ImageTrigger'
+        self.digest = digest

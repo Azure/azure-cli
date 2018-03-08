@@ -9,14 +9,19 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .build_definitions_operations import BuildDefinitionsOperations
-from .builds_operations import BuildsOperations
-from .build_steps_operations import BuildStepsOperations
-from .registries_operations import RegistriesOperations
+from msrest.paging import Paged
 
-__all__ = [
-    'BuildDefinitionsOperations',
-    'BuildsOperations',
-    'BuildStepsOperations',
-    'RegistriesOperations',
-]
+
+class BuildPaged(Paged):
+    """
+    A paging container for iterating over a list of :class:`Build <containerregistrybuild.models.Build>` object
+    """
+
+    _attribute_map = {
+        'next_link': {'key': 'nextLink', 'type': 'str'},
+        'current_page': {'key': 'value', 'type': '[Build]'}
+    }
+
+    def __init__(self, *args, **kwargs):
+
+        super(BuildPaged, self).__init__(*args, **kwargs)
