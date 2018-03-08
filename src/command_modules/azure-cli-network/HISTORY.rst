@@ -5,8 +5,11 @@ Release History
 
 2.0.25
 ++++++
+* BREAKING CHANGE: `route-filter rule create`: The `--tags` parameter is no longer supported.
 * Support Autorest 3.0 based SDKs
 * Fix issues with update commands in `express-route`, `nsg rule`, `public-ip`, `traffic manager profile` and `vnet-gateway` where some parameters erroneously had default values.
+* `network watcher`: Added `connection-monitor` commands.
+* `network watcher show-topology`: Added support to target `--vnet` and `--subnet`.
 
 2.0.24
 ++++++

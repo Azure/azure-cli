@@ -2253,7 +2253,7 @@ helps['network watcher show-security-group-view'] = """
 
 helps['network watcher show-topology'] = """
     type: command
-    short-summary: Get the network topology of a resource group.
+    short-summary: Get the network topology of a resource group, virtual network or subnet.
     long-summary: For more information about using network topology visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-topology-cli
     parameters:
         - name: --resource-group -g
@@ -2266,6 +2266,28 @@ helps['network watcher show-topology'] = """
     examples:
         - name: Use show-topology to get the topology of resources within a resource group.
           text: az network watcher show-topology -g resourcegroupname
+"""
+
+helps['network watcher connection-monitor'] = """
+    type: group
+    short-summary: Manage connection monitoring.
+"""
+
+helps['network watcher connection-monitor create'] = """
+    type: command
+    short-summary: Create a connection monitor.
+    parameters:
+        - name: --source-resource
+          long-summary: >
+            Currently only Virtual Machines are supported.
+        - name: --dest-resource
+          long-summary: >
+            Currently only Virtual Machines are supported.
+"""
+
+helps['network watcher connection-monitor list'] = """
+    type: command
+    short-summary: List connection monitors for the given region.
 """
 
 helps['network watcher packet-capture'] = """
