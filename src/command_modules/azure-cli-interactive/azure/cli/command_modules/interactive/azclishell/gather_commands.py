@@ -7,9 +7,8 @@ import math
 import os
 import json
 
-import azclishell.configuration
-from azclishell.command_tree import CommandBranch, CommandHead
-from azclishell.util import get_window_dim
+from .command_tree import CommandBranch, CommandHead
+from .util import get_window_dim
 
 
 TOLERANCE = 10

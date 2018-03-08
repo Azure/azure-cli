@@ -6,21 +6,18 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 from prompt_toolkit.completion import Completer, Completion
-
-import azclishell.configuration
-from azclishell.argfinder import ArgsFinder
-from azclishell.command_tree import in_tree
-from azclishell.layout import get_scope
-from azclishell.util import parse_quotes
-
 from azure.cli.core.parser import AzCliCommandParser
+from . import configuration
+from .argfinder import ArgsFinder
+from .command_tree import in_tree
+from .util import parse_quotes
 
-SELECT_SYMBOL = azclishell.configuration.SELECT_SYMBOL
+SELECT_SYMBOL = configuration.SELECT_SYMBOL
 
 
 def initialize_command_table_attributes(completer):
-    from azclishell._dump_commands import FRESH_TABLE
-    completer.cmdtab = FRESH_TABLE(completer.shell_ctx).command_table
+    from ._dump_commands import FreshTable
+    completer.cmdtab = FreshTable(completer.shell_ctx).command_table
     if completer.cmdtab:
         completer.parser.load_command_table(completer.cmdtab)
         completer.argsfinder = ArgsFinder(completer.parser)
@@ -50,20 +47,7 @@ def dynamic_param_logic(text):
     return is_param, started_param, prefix, param
 
 
-def reformat_cmd(text):
-    """ reformat the text to be stripped of noise """
-    # remove az if there
-    text = text.replace('az', '')
-    # disregard defaulting symbols
-    if text and SELECT_SYMBOL['scope'] == text[0:2]:
-        text = text.replace(SELECT_SYMBOL['scope'], "")
-
-    if get_scope():
-        text = get_scope() + ' ' + text
-    return text
-
-
-def gen_dyn_completion(comp, started_param, prefix, text):
+def verify_dynamic_completion(comp, started_param, prefix, text):
     """ how to validate and generate completion for dynamic params """
     if len(comp.split()) > 1:
         completion = '\"' + comp + '\"'
@@ -124,7 +108,8 @@ class AzCompleter(Completer):
         self.global_parser = AzCliCommandParser(add_help=False)
         self.global_parser.add_argument_group('global', 'Global Arguments')
         self.parser = AzCliCommandParser(parents=[self.global_parser])
-        self.cmdtab = None
+        self.argsfinder = ArgsFinder(self.parser)
+        self.cmdtab = {}
 
     def validate_completion(self, param, words, text_before_cursor, check_double=True):
         """ validates that a param should be completed """
@@ -151,7 +136,7 @@ class AzCompleter(Completer):
         self.branch = self.command_tree
         self.curr_command = ''
         self._is_command = True
-        text = reformat_cmd(text)
+        text = self.reformat_cmd(text)
         if text.split():
 
             for comp in sort_completions(self.gen_cmd_and_param_completions(text)):
@@ -173,8 +158,7 @@ class AzCompleter(Completer):
             for choice in self.cmdtab[
                     self.curr_command].arguments[arg_name].choices:
                 if started_param:
-                    if choice.lower().startswith(prefix.lower())\
-                       and choice not in text.split():
+                    if choice.lower().startswith(prefix.lower()) and choice not in text.split():
                         yield Completion(choice, -len(prefix))
                 else:
                     yield Completion(choice, -len(prefix))
@@ -190,9 +174,10 @@ class AzCompleter(Completer):
                 for name in self.cmdtab[self.curr_command].arguments[arg].options_list:
                     if name == param:
                         return arg
+        return None
 
     def mute_parse_args(self, text):
-        """ mutes the parser error when parsing, the puts it back """
+        """ mutes the parser error when parsing, then puts it back """
         error = AzCliCommandParser.error
         AzCliCommandParser.error = error_pass
 
@@ -226,26 +211,25 @@ class AzCompleter(Completer):
                     try:
                         for comp in self.cmdtab[self.curr_command].arguments[arg_name].completer(
                                 prefix=prefix, action=None, parsed_args=parse_args):
-
-                            for comp in gen_dyn_completion(
+                            for completion in verify_dynamic_completion(
                                     comp, started_param, prefix, text):
-                                yield comp
+                                yield completion
                     except TypeError:
                         try:
                             for comp in self.cmdtab[self.curr_command].\
                                     arguments[arg_name].completer(prefix=prefix):
 
-                                for comp in gen_dyn_completion(
+                                for completion in verify_dynamic_completion(
                                         comp, started_param, prefix, text):
-                                    yield comp
+                                    yield completion
                         except TypeError:
                             try:
                                 for comp in self.cmdtab[self.curr_command].\
                                         arguments[arg_name].completer():
 
-                                    for comp in gen_dyn_completion(
+                                    for completion in verify_dynamic_completion(
                                             comp, started_param, prefix, text):
-                                        yield comp
+                                        yield completion
 
                             except TypeError:
                                 pass  # other completion method used
@@ -263,7 +247,7 @@ class AzCompleter(Completer):
                     yield Completion(com.data)
 
         # if space show current level commands
-        elif len(text.split()) > 0 and text[-1].isspace() and self._is_command:
+        elif text.split() and text[-1].isspace() and self._is_command:
             if self.branch is not self.command_tree:
                 for com in self.branch.children:
                     yield Completion(com.data)
@@ -291,7 +275,7 @@ class AzCompleter(Completer):
             if self.branch.has_child(word) and len(text) > mid_val and text[mid_val].isspace():
                 self.branch = self.branch.get_child(word, self.branch.children)
 
-        if len(text) > 0 and text[-1].isspace():
+        if text and text[-1].isspace():
             if in_tree(self.command_tree, temp_command):
                 self.curr_command = temp_command
             else:
@@ -330,7 +314,7 @@ class AzCompleter(Completer):
     def gen_global_param_completions(self, text):
         """ Global parameter stuff hard-coded in """
         txtspt = text.split()
-        if txtspt and len(txtspt) > 0:
+        if txtspt and txtspt:
             for param in self.global_param:
                 # for single dash global parameters
                 if txtspt[-1].startswith('-') \
@@ -365,3 +349,15 @@ class AzCompleter(Completer):
         """ if a parameter has a description """
         return param in self.param_description.keys() and \
             not self.param_description[param].isspace()
+
+    def reformat_cmd(self, text):
+        """ reformat the text to be stripped of noise """
+        # remove az if there
+        text = text.replace('az', '')
+        # disregard defaulting symbols
+        if text and SELECT_SYMBOL['scope'] == text[0:2]:
+            text = text.replace(SELECT_SYMBOL['scope'], "")
+
+        if self.shell_ctx.default_command:
+            text = self.shell_ctx.default_command + ' ' + text
+        return text
