@@ -283,7 +283,7 @@ def check_distro_consistency():
             current_linux_dist_name = None
             stored_linux_dist_name = None
             logger.debug('Linux distro check: An error occurred while checking linux distribution version source list consistency.')
-            logger.debug(err)        
+            logger.debug(err)
 
         if (current_linux_dist_name != stored_linux_dist_name):
             logger.warning("Linux distro check: Mismatch distribution name in %s file", LIST_FILE_PATH)
