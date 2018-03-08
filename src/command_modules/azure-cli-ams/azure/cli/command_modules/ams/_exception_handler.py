@@ -19,6 +19,6 @@ def build_exception_wrapper(status_code, message):
         if isinstance(ex, ApiErrorException) \
                 and ex.response is not None \
                 and ex.response.status_code == status_code:
-            raise CLIError(message)
+            raise CLIError(ex.message if ex.message else message)
         raise ex
     return build_exception

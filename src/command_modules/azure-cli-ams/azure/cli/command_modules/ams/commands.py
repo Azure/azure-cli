@@ -27,7 +27,7 @@ def load_command_table(self, _):
     
     with self.command_group('ams', ams_sdk) as g:        
         g.command('show', 'get')
-        g.command('list', 'list')
+        g.custom_command('list', 'list_mediaservices', custom_command_type=ams_custom, client_factory=get_mediaservices_client)
         g.custom_command('create', 'create_mediaservice', custom_command_type=ams_custom, client_factory=get_mediaservices_client, exception_handler=storage_account_not_found())
 
     with self.command_group('ams transform', ams_encoding_sdk) as g:        

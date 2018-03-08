@@ -5,6 +5,12 @@
 # --------------------------------------------------------------------------------------------
 
 import importlib
+import pytz
+import datetime
+import time
+
+def list_mediaservices(client, resource_group_name=None):
+    return client.list(resource_group_name) if resource_group_name else client.list_by_subscription()
 
 def create_mediaservice(client, resource_group_name, account_name, storage_account, location=None, tags=None):
 
@@ -61,13 +67,23 @@ def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_n
 
     ams = client.get(resource_group_name, account_name)
 
-    from azure.cli.command_modules.role.custom import (create_service_principal_for_rbac, create_role_assignment)
-    create_sp_result = create_service_principal_for_rbac(cmd, name=sp_name, password=sp_password, skip_assignment=True)
+    from azure.cli.command_modules.role.custom import (create_service_principal_for_rbac, create_role_assignment, show_service_principal)
+    from azure.cli.command_modules.role._client_factory import _graph_client_factory
+
+    sp_name = '{}-access-sp'.format(account_name) if sp_name is None else sp_name
+
+    query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format("http://" + sp_name)
+    aad_sps = list(_graph_client_factory(cmd.cli_ctx).service_principals.list(filter=query_exp))
+
+    if aad_sps:
+        key_name = '{}-{}'.format(account_name, datetime.datetime.now(pytz.utc).strftime('%Y-%m-%d-%H-%M-%S'))
+        #TODO: Generate password for the sp
+    else:
+        create_sp_result = create_service_principal_for_rbac(cmd, name=sp_name, password=sp_password, skip_assignment = True)
 
     # Workaround to allow 'create_service_principal_for_rbac' operation to
     # complete and continue with the 'create_role_assignment' operation
     # succesfully
-    import time
     time.sleep(15)
 
     create_rol_assignment_result = create_role_assignment(cmd, role, assignee=create_sp_result['appId'], scope=ams.id)
