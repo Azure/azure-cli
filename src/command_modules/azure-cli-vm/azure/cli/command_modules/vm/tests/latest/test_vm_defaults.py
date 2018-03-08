@@ -301,6 +301,7 @@ class TestVMImageDefaults(unittest.TestCase):
         ns.admin_username = 'admin123'
         ns.admin_password = 'verySecret!'
         ns.storage_sku = 'Premium_LRS'
+        ns.os_caching, ns.data_caching = None, None
         ns.os_type, ns.attach_os_disk, ns.storage_account, ns.storage_container_name, ns.use_unmanaged_disk = None, None, None, None, False
         _validate_vm_create_storage_profile(cmd, ns, False)
 

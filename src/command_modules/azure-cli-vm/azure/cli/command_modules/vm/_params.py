@@ -372,8 +372,9 @@ def load_arguments(self, _):
             c.argument('use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM')
             c.argument('data_disk_sizes_gb', nargs='+', type=int, help='space-separated empty managed data disk sizes in GB to create')
             c.ignore('image_data_disks', 'storage_account_type', 'public_ip_type', 'nsg_type', 'nic_type', 'vnet_type', 'load_balancer_type', 'app_gateway_type')
-            c.argument('os_caching', options_list=['--storage-caching', '--os-disk-caching'], help='Storage caching type for the VM OS disk.', arg_type=get_enum_type([CachingTypes.read_only.value, CachingTypes.read_write.value], default='ReadWrite'))
-            c.argument('data_caching', options_list=['--data-disk-caching'], help='Storage caching type for the VM data disk(s).', arg_type=get_enum_type(CachingTypes))
+            c.argument('os_caching', options_list=['--storage-caching', '--os-disk-caching'], help='Storage caching type for the VM OS disk. Default: ReadWrite', arg_type=get_enum_type(CachingTypes))
+            c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
+                       help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk")
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
