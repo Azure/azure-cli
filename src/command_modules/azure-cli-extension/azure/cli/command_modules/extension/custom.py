@@ -274,7 +274,7 @@ def get_lsb_release():
             desc = lsb[2]
             desc_split = desc.split('=')
             rel = desc_split[1]
-            return rel
+            return rel.strip()
     except Exception:  # pylint: disable=broad-except
         return None
 
