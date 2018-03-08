@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 import sys
 import os
-import platform
 import tempfile
 import shutil
 import zipfile
@@ -36,6 +35,7 @@ OUT_KEY_METADATA = 'metadata'
 
 IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
 LIST_FILE_PATH = os.path.join(os.sep, 'etc', 'apt', 'sources.list.d', 'azure-cli.list')
+LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'apt', 'lsb-release')
 
 
 def _run_pip(pip_exec_args):
@@ -267,30 +267,43 @@ def list_available_extensions(index_url=None):
     return get_index_extensions(index_url=index_url)
 
 
+def get_lsb_release():
+    try:
+        with open(LSB_RELEASE_FILE, 'r') as lr:
+            lsb = lr.readlines()
+            desc = lsb[2]
+            desc_split = desc.split('=')
+            rel = desc_split[1]
+            return rel
+    except Exception:  # pylint: disable=broad-except
+        return None
+
+
 def check_distro_consistency():
-    if not IS_WINDOWS:
-        try:
-            logger.debug('Linux distro check: Reading from: %s', LIST_FILE_PATH)
+    if IS_WINDOWS:
+        return
 
-            with open(LIST_FILE_PATH, 'r') as list_file:
-                package_source = list_file.read()
-                stored_linux_dist_name = package_source.split(" ")[3]
-                logger.debug('Linux distro check: Found in list file: %s', stored_linux_dist_name)
-                current_linux_dist_name = platform.linux_distribution()[2]
-                logger.debug('Linux distro check: Reported by API: %s', current_linux_dist_name)
+    try:
+        logger.debug('Linux distro check: Reading from: %s', LIST_FILE_PATH)
 
-        # pylint: disable=broad-except
-        except Exception as err:
-            current_linux_dist_name = None
-            stored_linux_dist_name = None
-            logger.debug('Linux distro check: An error occurred while checking \
-                linux distribution version source list consistency.')
-            logger.debug(err)
+        with open(LIST_FILE_PATH, 'r') as list_file:
+            package_source = list_file.read()
+            stored_linux_dist_name = package_source.split(" ")[3]
+            logger.debug('Linux distro check: Found in list file: %s', stored_linux_dist_name)
+            current_linux_dist_name = get_lsb_release()
+            logger.debug('Linux distro check: Reported by API: %s', current_linux_dist_name)
 
-        if current_linux_dist_name != stored_linux_dist_name:
-            logger.warning("Linux distro check: Mismatch distribution \
-                name in %s file", LIST_FILE_PATH)
-            logger.warning("Linux distro check: If command fails, install the appropriate package \
-                for your distribution or change the above file accordingly.")
-            logger.warning("Linux distro check: %s has '%s', current distro is '%s'",
-            LIST_FILE_PATH, stored_linux_dist_name, current_linux_dist_name)
+    except Exception as err:  # pylint: disable=broad-except
+        current_linux_dist_name = None
+        stored_linux_dist_name = None
+        logger.debug('Linux distro check: An error occurred while checking \
+            linux distribution version source list consistency.')
+        logger.debug(err)
+
+    if current_linux_dist_name != stored_linux_dist_name:
+        logger.warning("Linux distro check: Mismatch distribution \
+            name in %s file", LIST_FILE_PATH)
+        logger.warning("Linux distro check: If command fails, install the appropriate package \
+            for your distribution or change the above file accordingly.")
+        logger.warning("Linux distro check: %s has '%s', current distro is '%s'",
+                       LIST_FILE_PATH, stored_linux_dist_name, current_linux_dist_name)
