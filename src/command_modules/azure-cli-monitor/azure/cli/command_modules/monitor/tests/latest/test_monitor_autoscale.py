@@ -163,7 +163,7 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         import json
         import time
 
-        sleep_time = 2
+        sleep_time = 3
 
         self.kwargs.update({
             'vmss': 'vmss1'
@@ -201,9 +201,9 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
                 return False
 
         for schedule in [x for x in schedules if _is_default(x)]:
-            self.assertTrue(schedule['capacity']['default'] == str(value))
-            self.assertTrue(schedule['capacity']['minimum'] == str(value))
-            self.assertTrue(schedule['capacity']['maximum'] == str(value))
+            self.assertTrue(int(schedule['capacity']['default']) == value)
+            self.assertTrue(int(schedule['capacity']['minimum']) == value)
+            self.assertTrue(int(schedule['capacity']['maximum']) == value)
 
         # should delete the weekend profile and its matching default
         self.cmd('monitor autoscale profile delete -g {rg} --autoscale-name {vmss} -n weekend')
