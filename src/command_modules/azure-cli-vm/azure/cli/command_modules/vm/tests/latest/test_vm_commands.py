@@ -272,7 +272,8 @@ class VMVMSSWindowsLicenseTest(ScenarioTest):
         ])
 
 
-class VMCustomImageTest(ScenarioTest):
+# TODO: convert back to ScenarioTest when #5740 is fixed.
+class VMCustomImageTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image')
     def test_custom_image(self, resource_group):
@@ -329,7 +330,8 @@ class VMCustomImageTest(ScenarioTest):
         ])
 
 
-class VMImageWithPlanTest(ScenarioTest):
+# TODO: convert back to ScenarioTest when #5740 is fixed.
+class VMImageWithPlanTest(LiveScenarioTest):
 
     @ResourceGroupPreparer()
     def test_custom_image_with_plan(self, resource_group):
@@ -1148,7 +1150,8 @@ class VMCreateExistingIdsOptions(ScenarioTest):
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
 
-class VMCreateCustomIP(ScenarioTest):
+# TODO: convert back to ScenarioTest when #5741 is fixed.
+class VMCreateCustomIP(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_ip')
     def test_vm_create_custom_ip(self, resource_group):
@@ -1853,7 +1856,8 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
         ])
 
 
-class MSIScenarioTest(ScenarioTest):
+# TODO: convert back to ScenarioTest when #5741 is fixed.
+class MSIScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_msi')
     def test_vm_msi(self, resource_group):

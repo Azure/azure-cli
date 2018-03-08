@@ -24,6 +24,10 @@ def cf_application_security_groups(cli_ctx, _):
     return network_client_factory(cli_ctx).application_security_groups
 
 
+def cf_connection_monitor(cli_ctx, _):
+    return network_client_factory(cli_ctx).connection_monitors
+
+
 def cf_endpoint_services(cli_ctx, _):
     return network_client_factory(cli_ctx).available_endpoint_services
 
