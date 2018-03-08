@@ -18,6 +18,7 @@ from azure.cli.core.commands.validators import validate_parameter_set
 from azure.cli.core.profiles import ResourceType
 
 # PARAMETER VALIDATORS
+# pylint: disable=too-many-lines
 
 
 def get_asg_validator(loader, dest):
