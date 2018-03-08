@@ -88,6 +88,7 @@ DEPENDENCIES = [
     'azure-cli-storage',
     'azure-cli-vm',
     'azure-cli-servicefabric',
+	'azure-cli-servicebus',
     'azure-cli-eventhubs'
 ]
 

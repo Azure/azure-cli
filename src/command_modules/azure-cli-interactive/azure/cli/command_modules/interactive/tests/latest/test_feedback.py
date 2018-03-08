@@ -8,7 +8,7 @@ import datetime
 import unittest
 import tempfile
 
-import azclishell.frequency_heuristic as fh
+import azure.cli.command_modules.interactive.azclishell.frequency_heuristic as fh
 
 
 def _mock_update(_):
@@ -36,7 +36,7 @@ class FeedbackTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(FeedbackTest, self).__init__(*args, **kwargs)
         from azure.cli.testsdk import TestCli
-        from azclishell.app import AzInteractiveShell
+        from azure.cli.command_modules.interactive.azclishell.app import AzInteractiveShell
         self.norm_update = fh.update_frequency
         self.shell_ctx = AzInteractiveShell(TestCli(), None)
 

@@ -836,16 +836,19 @@ class WebappZipDeployScenarioTest(LiveScenarioTest):
 
 class WebappImplictIdentityTest(ScenarioTest):
     @ResourceGroupPreparer()
-    def test_assign_identity(self, resource_group):
+    def test_webapp_assign_system_identity(self, resource_group):
         scope = '/subscriptions/{}/resourcegroups/{}'.format(self.get_subscription_id(), resource_group)
         role = 'Reader'
         plan_name = self.create_random_name('web-msi-plan', 20)
         webapp_name = self.create_random_name('web-msi', 20)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan_name))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
-        guids = [uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D46667')]
+        guids = [uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D46668')]
         with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=guids, autospec=True):
-            result = self.cmd('webapp assign-identity -g {} -n {} --role {} --scope {}'.format(resource_group, webapp_name, role, scope)).get_output_in_json()
+            result = self.cmd('webapp identity assign -g {} -n {} --role {} --scope {}'.format(resource_group, webapp_name, role, scope)).get_output_in_json()
+            self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+                self.check('principalId', result['principalId'])
+            ])
         self.cmd('role assignment list -g {} --assignee {}'.format(resource_group, result['principalId']), checks=[
             JMESPathCheck('length([])', 1),
             JMESPathCheck('[0].properties.roleDefinitionName', role)

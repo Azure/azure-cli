@@ -9,7 +9,7 @@ from azure.cli.core import AzCommandsLoader
 
 
 def start_shell(cmd, style=None):
-    from azclishell.app import AzInteractiveShell
+    from .azclishell.app import AzInteractiveShell
     AzInteractiveShell(cmd.cli_ctx, style)()
 
 
@@ -34,7 +34,7 @@ class InteractiveCommandsLoader(AzCommandsLoader):
 
     def load_arguments(self, command):
 
-        from azclishell.color_styles import get_options as style_options
+        from azure.cli.command_modules.interactive.azclishell.color_styles import get_options as style_options
 
         with self.argument_context('interactive') as c:
             c.argument('style', options_list=['--style', '-s'], help='The colors of the shell.',

@@ -22,7 +22,7 @@ from azure.cli.command_modules.vm._validators import (
     validate_vmss_disk, validate_asg_names_or_ids)
 
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements, too-many-branches
 def load_arguments(self, _):
     from azure.mgmt.compute.models import CachingTypes, UpgradeMode
     from azure.mgmt.storage.models import SkuName
@@ -323,16 +323,21 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
 
-    for scope in ['vm assign-identity', 'vmss assign-identity']:
+    for scope in ['vm assign-identity', 'vmss assign-identity', 'vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             c.argument('assign_identity', options_list=['--identities'], nargs='*', help="the identities to assign")
             c.argument('port', type=int, help="The port to fetch AAD token. Default: 50342")
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 
-    for scope in ['vm remove-identity', 'vmss remove-identity']:
+    for scope in ['vm remove-identity', 'vmss remove-identity', 'vm identity remove', 'vmss identity remove']:
         with self.argument_context(scope) as c:
             c.argument('identities', nargs='+', help="space-separated user assigned identities to remove")
+            c.argument('vm_name', existing_vm_name)
+            c.argument('vmss_name', vmss_name_type)
+
+    for scope in ['vm identity show', 'vmss identity show']:
+        with self.argument_context(scope) as c:
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 
@@ -387,7 +392,7 @@ def load_arguments(self, _):
             c.argument('plan_publisher', help='plan publisher')
             c.argument('plan_promotion_code', help='plan promotion code')
 
-    for scope in ['vm create', 'vmss create', 'vm assign-identity', 'vmss assign-identity']:
+    for scope in ['vm create', 'vmss create', 'vm assign-identity', 'vmss assign-identity', 'vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
             c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group, help="Scope that the system assigned identity can access")

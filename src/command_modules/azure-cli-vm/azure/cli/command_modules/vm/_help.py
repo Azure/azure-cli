@@ -1182,21 +1182,41 @@ helps['vm wait'] = """
 {0}
 """.format(vm_ids_example.format('Wait until all VMs in a resource group are deleted.', 'vm wait --deleted'))
 
-helps['vm assign-identity'] = """
+helps['vm identity'] = """
+    type: group
+    short-summary: manage service identities of a VM
+"""
+
+helps['vm identity assign'] = """
     type: command
     short-summary: Enable managed service identity on a VM.
     long-summary: This is required to authenticate and interact with other Azure services using bearer tokens.
     examples:
         - name: Enable identity on a VM with the 'Reader' role.
-          text: az vm assign-identity -g MyResourceGroup -n MyVm --role Reader
+          text: az vm identity assign -g MyResourceGroup -n MyVm --role Reader
 """
 
-helps['vm remove-identity'] = """
+helps['vm identity remove'] = """
     type: command
     short-summary: (PREVIEW) Remove user assigned identities from a VM.
     examples:
         - name: Remove 2 identities which are in the same resource group with the VM
-          text: az vm remove-identity -g MyResourceGroup -n MyVm --identities readerId writerId
+          text: az vm identity remove -g MyResourceGroup -n MyVm --identities readerId writerId
+"""
+
+helps['vm identity show'] = """
+    type: command
+    short-summary: display VM's managed identity info.
+"""
+
+helps['vm assign-identity'] = """
+    type: command
+    short-summary: (Deprecated, please use 'az vm identity assign')
+"""
+
+helps['vm remove-identity'] = """
+    type: command
+    short-summary: (Deprecated, please use 'az vm identity remove')
 """
 
 helps['vm run-command'] = """
@@ -1214,21 +1234,41 @@ helps['vm run-command invoke'] = """
           text: az vm run-command invoke -g MyResourceGroup -n MyVm --command-id RunShellScript --scripts 'echo $0 $1' --parameters hello world
 """
 
-helps['vmss assign-identity'] = """
+helps['vmss identity'] = """
+    type: group
+    short-summary: manage service identities of a VM scaleset.
+"""
+
+helps['vmss identity assign'] = """
     type: command
     short-summary: Enable managed service identity on a VMSS.
     long-summary: This is required to authenticate and interact with other Azure services using bearer tokens.
     examples:
         - name: Enable identity on a VMSS with the 'Owner' role.
-          text: az vmss assign-identity -g MyResourceGroup -n MyVmss --role Owner
+          text: az vmss identity assign -g MyResourceGroup -n MyVmss --role Owner
 """
 
-helps['vmss remove-identity'] = """
+helps['vmss identity remove'] = """
     type: command
     short-summary: (PREVIEW) Remove user assigned identities from a VM scaleset.
     examples:
         - name: Remove 2 identities which are in the same resource group with the VM scaleset
-          text: az vmss remove-identity -g MyResourceGroup -n MyVm --identities readerId writerId
+          text: az vmss identity remove -g MyResourceGroup -n MyVm --identities readerId writerId
+"""
+
+helps['vmss identity show'] = """
+    type: command
+    short-summary: display VM scaleset's managed identity info.
+"""
+
+helps['vmss assign-identity'] = """
+    type: command
+    short-summary: (Deprecated, please use 'az vmss identity assign')
+"""
+
+helps['vmss remove-identity'] = """
+    type: command
+    short-summary: (Deprecated, please use 'az vmss identity remove')
 """
 
 helps['disk'] = """

@@ -8,6 +8,7 @@ from __future__ import print_function
 import collections
 import errno
 import json
+import os
 import os.path
 from copy import deepcopy
 from enum import Enum
@@ -32,6 +33,7 @@ _SUBSCRIPTION_NAME = 'name'
 _TENANT_ID = 'tenantId'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
+_CLOUD_SHELL_ID = 'cloudShellID'
 _SUBSCRIPTIONS = 'subscriptions'
 _INSTALLATION_ID = 'installationId'
 _ENVIRONMENT_NAME = 'environmentName'
@@ -101,6 +103,10 @@ def get_credential_types(cli_ctx):
         rbac = cli_ctx.cloud.endpoints.active_directory_graph_resource_id
 
     return CredentialType
+
+
+def _get_cloud_console_token_endpoint():
+    return os.environ.get('MSI_ENDPOINT')
 
 
 class Profile(object):
@@ -183,52 +189,6 @@ class Profile(object):
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
-    def find_subscriptions_in_cloud_console(self, tokens):
-        from datetime import datetime, timedelta
-        import jwt
-        arm_token = tokens[0]  # cloud shell gurantees that the 1st is for ARM
-        arm_token_decoded = jwt.decode(arm_token, verify=False, algorithms=['RS256'])
-        tenant = arm_token_decoded['tid']
-        user_id = arm_token_decoded['unique_name'].split('#')[-1]
-        subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
-        subscriptions = subscription_finder.find_from_raw_token(tenant, arm_token)
-        consolidated = self._normalize_properties(user_id, subscriptions, is_service_principal=False)
-        self._set_subscriptions(consolidated)
-
-        # construct token entries to cache
-        decoded_tokens = [arm_token_decoded]
-        for t in tokens[1:]:
-            decoded_tokens.append(jwt.decode(t, verify=False, algorithms=['RS256']))
-        final_tokens = []
-        # Note, setting expiration time at 2700 seconds is bit arbitrary, but should not matter
-        # as shell should update us with new ones every 10~15 minutes
-        for t in decoded_tokens:
-            final_tokens.append({
-                '_clientId': _CLIENT_ID,
-                'expiresIn': '2700',
-                'expiresOn': str(datetime.now() + timedelta(seconds=2700)),
-                'userId': t['unique_name'].split('#')[-1],
-                '_authority': self.cli_ctx.cloud.endpoints.active_directory.rstrip('/') + '/' + t['tid'],
-                'resource': t['aud'],
-                'isMRRT': True,
-                'accessToken': tokens[decoded_tokens.index(t)],
-                'tokenType': 'Bearer',
-            })
-
-        # merging with existing cached ones
-        for t in final_tokens:
-            cached_tokens = [entry for _, entry in self._creds_cache.adal_token_cache.read_items()]
-            to_delete = [c for c in cached_tokens if (c['_clientId'].lower() == t['_clientId'].lower() and
-                                                      c['resource'].lower() == t['resource'].lower() and
-                                                      c['_authority'].lower() == t['_authority'].lower() and
-                                                      c['userId'].lower() == t['userId'].lower())]
-            if to_delete:
-                self._creds_cache.adal_token_cache.remove(to_delete)
-        self._creds_cache.adal_token_cache.add(final_tokens)
-        self._creds_cache.persist_cached_creds()
-
-        return deepcopy(consolidated)
-
     def _normalize_properties(self, user, subscriptions, is_service_principal):
         consolidated = []
         for s in subscriptions:
@@ -285,6 +245,26 @@ class Profile(object):
             s[_SUBSCRIPTION_NAME] = "{}@{}".format(base_name, msi_port)
         # key-off subscription name to allow accounts with same id(but under different identities)
         self._set_subscriptions(consolidated, secondary_key_name=_SUBSCRIPTION_NAME)
+        return deepcopy(consolidated)
+
+    def find_subscriptions_in_cloud_console(self):
+        import jwt
+        token, _ = Profile.get_msi_token(self.cli_ctx.cloud.endpoints.active_directory_resource_id,
+                                         _get_cloud_console_token_endpoint(), identity_id=None, for_login=True)
+        logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
+        decode = jwt.decode(token, verify=False, algorithms=['RS256'])
+        tenant = decode['tid']
+
+        subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
+        subscriptions = subscription_finder.find_from_raw_token(tenant, token)
+        if not subscriptions:
+            raise CLIError('No subscriptions were found in the cloud shell')
+        user = decode.get('unique_name', 'N/A')
+
+        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=False)
+        for s in consolidated:
+            s[_USER_ENTITY][_CLOUD_SHELL_ID] = True
+        self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
@@ -430,6 +410,8 @@ class Profile(object):
             identity_id, msi_port = Profile._try_parse_for_msi_port(account[_SUBSCRIPTION_NAME])
             if msi_port is not None:
                 return Profile.get_msi_token(resource, msi_port, identity_id)
+            elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+                return Profile.get_msi_token(resource, _get_cloud_console_token_endpoint())
             elif user_type == _USER:
                 return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                  account[_TENANT_ID], resource)
@@ -466,6 +448,8 @@ class Profile(object):
         identity_id, msi_port = Profile._try_parse_for_msi_port(account[_SUBSCRIPTION_NAME])
         if msi_port is not None:
             creds = Profile.get_msi_token(resource, msi_port, identity_id)
+        elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+            creds = Profile.get_msi_token(resource, _get_cloud_console_token_endpoint())
         elif user_type == _USER:
             creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                               account[_TENANT_ID], resource)
@@ -590,7 +574,7 @@ class Profile(object):
         _User_assigned_Object_Id_Type = 'MSIObject'
         _User_assigned_Resource_Id_Type = 'MSIResource'
 
-        request_uri = 'http://localhost:{}/oauth2/token'.format(port)
+        request_uri = 'http://localhost:{}/oauth2/token'.format(port) if '://' not in str(port) else port
         payload = {
             'resource': resource
         }
@@ -609,7 +593,7 @@ class Profile(object):
                     payload.pop('client_id')
                     payload['object_id'] = identity_id
                     identity_id_type = _User_assigned_Object_Id_Type
-        else:
+        elif identity_id:
             parts = identity_id.split('-', 1)
             identity_id_type = parts[0]
             if parts[0] == _User_assigned_Resource_Id_Type:
