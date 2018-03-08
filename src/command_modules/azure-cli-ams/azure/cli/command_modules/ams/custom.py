@@ -8,6 +8,8 @@ import importlib
 import pytz
 import datetime
 import time
+from dateutil.relativedelta import relativedelta
+import uuid
 
 def list_mediaservices(client, resource_group_name=None):
     return client.list(resource_group_name) if resource_group_name else client.list_by_subscription()
@@ -67,35 +69,66 @@ def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_n
 
     ams = client.get(resource_group_name, account_name)
 
-    from azure.cli.command_modules.role.custom import (create_service_principal_for_rbac, create_role_assignment, show_service_principal)
+    from azure.cli.command_modules.role.custom import (create_service_principal_for_rbac, create_role_assignment, show_application, list_role_assignments)
     from azure.cli.command_modules.role._client_factory import _graph_client_factory
+    graph_client = _graph_client_factory(cmd.cli_ctx)
 
     sp_name = '{}-access-sp'.format(account_name) if sp_name is None else sp_name
+    sp_password = str(uuid.uuid4()) if sp_password is None else sp_password
+
+    app_id = None
+    tenant = None
 
     query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format("http://" + sp_name)
-    aad_sps = list(_graph_client_factory(cmd.cli_ctx).service_principals.list(filter=query_exp))
+    aad_sps = list(graph_client.service_principals.list(filter=query_exp))
 
     if aad_sps:
-        key_name = '{}-{}'.format(account_name, datetime.datetime.now(pytz.utc).strftime('%Y-%m-%d-%H-%M-%S'))
-        #TODO: Generate password for the sp
+
+        app_id = aad_sps[0].app_id
+
+        tenant = aad_sps[0].additional_properties['appOwnerTenantId']
+
+        app = show_application(graph_client.applications, aad_sps[0].app_id) # TODO: Refactor. Use passwordCredentials property
+
+        app_creds = list(graph_client.applications.list_password_credentials(app.object_id))
+
+        from azure.graphrbac.models import (PasswordCredential, ApplicationUpdateParameters)
+
+        start_date = datetime.datetime.now(pytz.utc)
+        end_date = start_date + relativedelta(1)  # TODO: Add configurable --years parameter
+
+        app_creds.append(PasswordCredential(start_date=start_date, end_date=end_date, key_id=str(uuid.uuid4()), value=sp_password))
+
+        graph_client.applications.update_password_credentials(app.object_id, app_creds)
+
     else:
         create_sp_result = create_service_principal_for_rbac(cmd, name=sp_name, password=sp_password, skip_assignment = True)
+        app_id = create_sp_result['appId']
+        tenant = create_sp_result['tenant']
 
     # Workaround to allow 'create_service_principal_for_rbac' operation to
     # complete and continue with the 'create_role_assignment' operation
     # succesfully
     time.sleep(15)
 
-    create_rol_assignment_result = create_role_assignment(cmd, role, assignee=create_sp_result['appId'], scope=ams.id)
+    # TODO: Check role assignments and assign or not the new role
 
+    assignments = list_role_assignments(cmd, assignee=app_id, show_all=True)
+
+    if assignments:
+        if len(list(filter(lambda x: x['properties']['roleDefinitionName'] == role, assignments))) == 0:
+            create_rol_assignment_result = create_role_assignment(cmd, role, assignee=app_id, scope=ams.id)
+    else:
+        create_rol_assignment_result = create_role_assignment(cmd, role, assignee=app_id, scope=ams.id)
+    
     result = {
         'SubscriptionId': client.config.subscription_id,
         'Region': ams.location,
         'ResourceGroup': resource_group_name,
         'AccountName': account_name,
-        'AadTenantId': create_sp_result['tenant'],
-        'AadClientId': create_sp_result['appId'],
-        'AadSecret': create_sp_result['password'],
+        'AadTenantId': tenant,
+        'AadClientId': app_id,
+        'AadSecret': sp_password,
         'ArmAadAudience': cmd.cli_ctx.cloud.endpoints.management,
         'AadEndpoint': cmd.cli_ctx.cloud.endpoints.active_directory,
         'ArmEndpoint': cmd.cli_ctx.cloud.endpoints.resource_manager
