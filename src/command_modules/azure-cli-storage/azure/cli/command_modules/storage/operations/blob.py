@@ -13,7 +13,8 @@ from azure.cli.command_modules.storage.util import (create_blob_service_from_sto
                                                     create_short_lived_share_sas,
                                                     create_short_lived_container_sas,
                                                     filter_none, collect_blobs, collect_files,
-                                                    mkdir_p, guess_content_type, normalize_blob_file_path)
+                                                    mkdir_p, guess_content_type, normalize_blob_file_path,
+                                                    check_precondition_success)
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url, make_encoded_file_url_and_params
 
 
@@ -168,18 +169,26 @@ def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  #
         for src, dst in source_files or []:
             results.append(_create_return_result(dst, guess_content_type(src, content_settings, t_content_settings)))
     else:
+        @check_precondition_success
+        def _upload_blob(*args, **kwargs):
+            return upload_blob(*args, **kwargs)
+
         for src, dst in source_files or []:
             logger.warning('uploading %s', src)
             guessed_content_settings = guess_content_type(src, content_settings, t_content_settings)
-            result = upload_blob(cmd, client, destination_container_name,
-                                 normalize_blob_file_path(destination_path, dst), src,
-                                 blob_type=blob_type, content_settings=guessed_content_settings, metadata=metadata,
-                                 validate_content=validate_content, maxsize_condition=maxsize_condition,
-                                 max_connections=max_connections, lease_id=lease_id,
-                                 progress_callback=progress_callback, if_modified_since=if_modified_since,
-                                 if_unmodified_since=if_unmodified_since, if_match=if_match,
-                                 if_none_match=if_none_match, timeout=timeout)
-            results.append(_create_return_result(dst, guessed_content_settings, result))
+
+            include, result = _upload_blob(cmd, client, destination_container_name,
+                                           normalize_blob_file_path(destination_path, dst), src,
+                                           blob_type=blob_type, content_settings=guessed_content_settings,
+                                           metadata=metadata, validate_content=validate_content,
+                                           maxsize_condition=maxsize_condition, max_connections=max_connections,
+                                           lease_id=lease_id, progress_callback=progress_callback,
+                                           if_modified_since=if_modified_since,
+                                           if_unmodified_since=if_unmodified_since, if_match=if_match,
+                                           if_none_match=if_none_match, timeout=timeout)
+            if include:
+                results.append(_create_return_result(dst, guessed_content_settings, result))
+
     return results
 
 
@@ -261,6 +270,7 @@ def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=Non
 def storage_blob_delete_batch(client, source, source_container_name, pattern=None, lease_id=None,
                               delete_snapshots=None, if_modified_since=None, if_unmodified_since=None, if_match=None,
                               if_none_match=None, timeout=None, dryrun=False):
+    @check_precondition_success
     def _delete_blob(blob_name):
         delete_blob_args = {
             'container_name': source_container_name,
@@ -273,8 +283,7 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
             'if_none_match': if_none_match,
             'timeout': timeout
         }
-        response = client.delete_blob(**delete_blob_args)
-        return response
+        return client.delete_blob(**delete_blob_args)
 
     source_blobs = list(collect_blobs(client, source_container_name, pattern))
 
@@ -289,7 +298,7 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
             logger.warning('  - %s', blob)
         return []
 
-    return [_delete_blob(blob) for blob in source_blobs]
+    return [result for include, result in (_delete_blob(blob) for blob in source_blobs) if include]
 
 
 def _copy_blob_to_blob_container(blob_service, source_blob_service, destination_container, destination_path,

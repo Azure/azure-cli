@@ -6,6 +6,7 @@ Release History
 2.0.27
 ++++++
 * Fix issue of missing endpoint suffix in batch copy command.
+* Blob batch commands no longer throw error upon failed precondition.
 * Support Autorest 3.0 based SDKs
 
 2.0.26
