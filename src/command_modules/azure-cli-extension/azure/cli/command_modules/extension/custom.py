@@ -279,13 +279,18 @@ def check_distro_consistency():
                 current_linux_dist_name = platform.linux_distribution()[2]
                 logger.debug('Linux distro check: Reported by API: %s', current_linux_dist_name)
 
+        # pylint: disable=broad-except
         except Exception as err:
             current_linux_dist_name = None
             stored_linux_dist_name = None
-            logger.debug('Linux distro check: An error occurred while checking linux distribution version source list consistency.')
+            logger.debug('Linux distro check: An error occurred while checking \
+                linux distribution version source list consistency.')
             logger.debug(err)
 
-        if (current_linux_dist_name != stored_linux_dist_name):
-            logger.warning("Linux distro check: Mismatch distribution name in %s file", LIST_FILE_PATH)
-            logger.warning("Linux distro check: If command fails, install the appropriate package for your distribution or change the above file accordingly.")
-            logger.warning("Linux distro check: %s has '%s', current distro is '%s'", LIST_FILE_PATH, stored_linux_dist_name, current_linux_dist_name)
+        if current_linux_dist_name != stored_linux_dist_name:
+            logger.warning("Linux distro check: Mismatch distribution \
+                name in %s file", LIST_FILE_PATH)
+            logger.warning("Linux distro check: If command fails, install the appropriate package \
+                for your distribution or change the above file accordingly.")
+            logger.warning("Linux distro check: %s has '%s', current distro is '%s'",
+            LIST_FILE_PATH, stored_linux_dist_name, current_linux_dist_name)
