@@ -14,7 +14,7 @@ from azure.cli.core.extension import extension_exists
 def handler(ctx, **kwargs):
     cmd = kwargs.get('command', None)
     if cmd and cmd.startswith('iot'):
-        if not extension_exists('azure_cli_iot_ext'):
+        if not extension_exists('azure-cli-iot-ext'):
             ran_before = ctx.config.getboolean('iot', 'first_run', fallback=False)
             if not ran_before:
                 extension_text = """
