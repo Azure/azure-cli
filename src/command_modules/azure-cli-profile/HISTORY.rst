@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.20
+++++++
+* enable login/logout commands in cloud shell
+
 2.0.19
 ++++++
 * Enable `az login` in from interactive mode.

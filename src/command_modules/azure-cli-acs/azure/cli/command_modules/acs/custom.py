@@ -989,7 +989,7 @@ def merge_kubernetes_configurations(existing_file, addition_file):
         existing['current-context'] = addition['current-context']
 
     with open(existing_file, 'w+') as stream:
-        yaml.dump(existing, stream, default_flow_style=True)
+        yaml.dump(existing, stream, default_flow_style=False)
 
     current_context = addition.get('current-context', 'UNKNOWN')
     msg = 'Merged "{}" as current context in {}'.format(current_context, existing_file)
