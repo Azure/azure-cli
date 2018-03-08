@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 
-import os
 import sys
 import struct
 import platform
@@ -18,8 +17,7 @@ def get_window_dim():
         return _size_36()
     elif platform.system() == 'Windows':
         return _size_windows()
-    else:
-        return _size_27()
+    return _size_27()
 
 
 def _size_27():
@@ -46,12 +44,11 @@ def _size_windows():
     # stderr handle is -12
     h = windll.kernel32.GetStdHandle(-12)
     csbi = create_string_buffer(22)
-    res = windll.kernel32.GetConsoleScreenBufferInfo(h, csbi)
-    if res:
-        (_, _, _, _, _, left, top, right, bottom, _, _) = struct.unpack("hhhhHhhhhhh", csbi.raw)
-        columns = right - left + 1
-        lines = bottom - top + 1
-        return lines, columns
+    windll.kernel32.GetConsoleScreenBufferInfo(h, csbi)
+    (_, _, _, _, _, left, top, right, bottom, _, _) = struct.unpack("hhhhHhhhhhh", csbi.raw)
+    columns = right - left + 1
+    lines = bottom - top + 1
+    return lines, columns
 
 
 def parse_quotes(cmd, quotes=True, string=True):
@@ -68,13 +65,11 @@ def parse_quotes(cmd, quotes=True, string=True):
         for arg in args:
             str_args.append(str(arg))
         return str_args
-    else:
-        return args
+    return args
 
 
 def get_os_clear_screen_word():
     """ keyword to clear the screen """
     if platform.system() == 'Windows':
         return 'cls'
-    else:
-        return 'clear'
+    return 'clear'

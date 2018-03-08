@@ -6,11 +6,10 @@ from __future__ import print_function
 
 import os
 
+from prompt_toolkit import prompt
+from six.moves import configparser
 from azure.cli.core._help import PRIVACY_STATEMENT
 
-from prompt_toolkit import prompt
-
-from six.moves import configparser
 
 SELECT_SYMBOL = {
     'outside': '#',
@@ -58,7 +57,7 @@ class Configuration(object):
     def __init__(self, cli_config, style=None):
         self.config = configparser.ConfigParser({
             'firsttime': 'yes',
-            'style': 'default'
+            'style': style if style else 'default'
         })
         self.cli_config = cli_config
         self.config.add_section('Help Files')
@@ -69,7 +68,6 @@ class Configuration(object):
         self.config.set('Layout', 'command_description', 'yes')
         self.config.set('Layout', 'param_description', 'yes')
         self.config.set('Layout', 'examples', 'yes')
-
         self.config_dir = os.getenv('AZURE_CONFIG_DIR') or os.path.expanduser(os.path.join('~', '.azure-shell'))
 
         if not os.path.exists(self.config_dir):

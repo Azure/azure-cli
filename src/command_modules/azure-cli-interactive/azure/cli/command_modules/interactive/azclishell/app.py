@@ -14,7 +14,6 @@ import sys
 from threading import Thread
 
 import jmespath
-import six
 from six.moves import configparser
 
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
@@ -22,35 +21,33 @@ from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.document import Document
 from prompt_toolkit.enums import DEFAULT_BUFFER
 from prompt_toolkit.filters import Always
-from prompt_toolkit.history import FileHistory, InMemoryHistory
+from prompt_toolkit.history import FileHistory
 from prompt_toolkit.interface import Application
 from prompt_toolkit.shortcuts import create_eventloop
 
-from azclishell import __version__
-from azclishell.az_completer import AzCompleter
-from azclishell.az_lexer import get_az_lexer, ExampleLexer, ToolbarLexer
-from azclishell.command_tree import in_tree
-from azclishell.configuration import Configuration, SELECT_SYMBOL
-from azclishell.frequency_heuristic import DISPLAY_TIME, frequency_heuristic
-from azclishell.gather_commands import add_new_lines, GatherCommands
-from azclishell.key_bindings import InteractiveKeyBindings
-from azclishell.layout import create_layout, create_tutorial_layout, set_scope, get_scope
-from azclishell.progress import progress_view
-import azclishell.telemetry as telemetry
-from azclishell.threads import LoadCommandTableThread
-from azclishell.util import get_window_dim, parse_quotes, get_os_clear_screen_word
+from knack.log import get_logger
+from knack.util import CLIError
 
-from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import ENV_ADDITIONAL_USER_AGENT
-from azure.cli.core.cloud import get_active_cloud_name
 from azure.cli.core._config import DEFAULTS_SECTION
 from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import _SUBSCRIPTION_NAME, Profile
 from azure.cli.core._session import ACCOUNT, CONFIG, SESSION
 from azure.cli.core.util import handle_exception
 
-from knack.log import get_logger
-from knack.util import CLIError
+from . import __version__
+from .az_completer import AzCompleter
+from .az_lexer import get_az_lexer, ExampleLexer, ToolbarLexer
+from .command_tree import in_tree
+from .configuration import Configuration, SELECT_SYMBOL
+from .frequency_heuristic import DISPLAY_TIME, frequency_heuristic
+from .gather_commands import add_new_lines, GatherCommands
+from .key_bindings import InteractiveKeyBindings
+from .layout import LayoutManager
+from .progress import progress_view
+from . import telemetry
+from .threads import LoadCommandTableThread
+from .util import get_window_dim, parse_quotes, get_os_clear_screen_word
 
 
 NOTIFICATIONS = ""
@@ -89,10 +86,10 @@ class AzInteractiveShell(object):
 
     def __init__(self, cli_ctx, style=None, completer=None,
                  lexer=None, history=None,
-                 app=None, input_custom=sys.stdin, output_custom=None,
+                 input_custom=sys.stdin, output_custom=None,
                  user_feedback=False, intermediate_sleep=.25, final_sleep=4):
 
-        from azclishell.color_styles import style_factory
+        from .color_styles import style_factory
 
         self.cli_ctx = cli_ctx
         self.config = Configuration(cli_ctx.config, style=style)
@@ -100,9 +97,9 @@ class AzInteractiveShell(object):
         self.styles = style or style_factory(self.config.get_style())
         self.lexer = lexer or get_az_lexer(self.config) if self.styles else None
         try:
-            from azclishell.gather_commands import GatherCommands
-            from azclishell.az_completer import AzCompleter
             self.completer = completer or AzCompleter(self, GatherCommands(self.config))
+            from .az_completer import initialize_command_table_attributes
+            initialize_command_table_attributes(self.completer)
         except IOError:  # if there is no cache
             self.completer = None
         self.history = history or FileHistory(os.path.join(self.config.config_dir, self.config.get_history()))
@@ -128,10 +125,11 @@ class AzInteractiveShell(object):
         self.spin_val = -1
         self.intermediate_sleep = intermediate_sleep
         self.final_sleep = final_sleep
+        self.command_table_thread = None
 
         # try to consolidate state information here...
-        # These came from key bindings...
-        self._section = 1
+        # Used by key bindings and layout
+        self.example_page = 1
         self.is_prompting = False
         self.is_example_repl = False
         self.is_showing_default = False
@@ -229,7 +227,7 @@ class AzInteractiveShell(object):
                 # default chops top off
                 example = '\n'.join(group[begin:]) + "\n"
                 while ((section_value - 1) * len_of_excerpt) > num_newline:
-                    self._section -= 1
+                    self.example_page -= 1
             page_number = '\n' + str(section_value) + "/" + str(int(math.ceil(num_newline / len_of_excerpt)))
 
         return example + page_number + ' CTRL+Y (^) CTRL+N (v)'
@@ -314,7 +312,7 @@ class AzInteractiveShell(object):
                         for part in example:
                             string_example += part
                     example = self._space_examples(
-                        self.completer.command_examples[cmdstp], rows, self._section)
+                        self.completer.command_examples[cmdstp], rows, self.example_page)
 
         if not any_documentation:
             self.description_docs = u''
@@ -331,10 +329,11 @@ class AzInteractiveShell(object):
 
     def create_application(self, full_layout=True):
         """ makes the application object and the buffers """
+        layout_manager = LayoutManager(self)
         if full_layout:
-            layout = create_layout(self, self.lexer, ExampleLexer, ToolbarLexer)
+            layout = layout_manager.create_layout(ExampleLexer, ToolbarLexer)
         else:
-            layout = create_tutorial_layout(self.lexer)
+            layout = layout_manager.create_tutorial_layout()
 
         buffers = {
             DEFAULT_BUFFER: Buffer(is_multiline=True),
@@ -384,7 +383,6 @@ class AzInteractiveShell(object):
 
     def set_scope(self, value):
         """ narrows the scopes the commands """
-        set_scope(value)
         if self.default_command:
             self.default_command += ' ' + value
         else:
@@ -468,7 +466,7 @@ class AzInteractiveShell(object):
 
         return cmd, continue_flag
 
-    # pylint: disable=too-many-branches
+    # pylint: disable=too-many-statements
     def _special_cases(self, cmd, outside):
         break_flag = False
         continue_flag = False
@@ -580,7 +578,6 @@ class AzInteractiveShell(object):
 
         if not default_split:
             self.default_command = ""
-            set_scope("", add=False)
             print('unscoping all', file=self.output)
 
             return continue_flag, cmd
@@ -607,7 +604,6 @@ class AzInteractiveShell(object):
 
                 if not self.default_command.strip():
                     self.default_command = self.default_command.strip()
-                set_scope(self.default_command, add=False)
                 print('unscoping: ' + value, file=self.output)
 
             elif SELECT_SYMBOL['unscope'] not in text:
@@ -628,7 +624,7 @@ class AzInteractiveShell(object):
         try:
             args = parse_quotes(cmd)
 
-            if len(args) > 0 and args[0] == 'feedback':
+            if args and args[0] == 'feedback':
                 self.config.set_feedback('yes')
                 self.user_feedback = False
 
@@ -639,10 +635,15 @@ class AzInteractiveShell(object):
             CONFIG.load(os.path.join(azure_folder, 'az.json'))
             SESSION.load(os.path.join(azure_folder, 'az.sess'), max_age=3600)
 
+            invocation = self.cli_ctx.invocation_cls(cli_ctx=self.cli_ctx,
+                                                     parser_cls=self.cli_ctx.parser_cls,
+                                                     commands_loader_cls=self.cli_ctx.commands_loader_cls,
+                                                     help_cls=self.cli_ctx.help_cls)
+
             if '--progress' in args:
                 args.remove('--progress')
                 execute_args = [args]
-                thread = Thread(target=self.app.execute, args=execute_args)
+                thread = Thread(target=invocation.execute, args=execute_args)
                 thread.daemon = True
                 thread.start()
                 self.threads.append(thread)
@@ -655,10 +656,6 @@ class AzInteractiveShell(object):
                 self.threads.append(thread)
                 result = None
             else:
-                invocation = self.cli_ctx.invocation_cls(cli_ctx=self.cli_ctx,
-                                                         parser_cls=self.cli_ctx.parser_cls,
-                                                         commands_loader_cls=self.cli_ctx.commands_loader_cls,
-                                                         help_cls=self.cli_ctx.help_cls)
                 result = invocation.execute(args)
 
             self.last_exit = 0
@@ -679,18 +676,20 @@ class AzInteractiveShell(object):
 
     def progress_patch(self, _=False):
         """ forces to use the Shell Progress """
-        from azclishell.progress import ShellProgressView
+        from .progress import ShellProgressView
         self.cli_ctx.progress_controller.init_progress(ShellProgressView())
         return self.cli_ctx.progress_controller
 
     def run(self):
         """ starts the REPL """
+        from .progress import ShellProgressView
+        self.cli_ctx.get_progress_controller().init_progress(ShellProgressView())
         self.cli_ctx.get_progress_controller = self.progress_patch
 
         self.command_table_thread = LoadCommandTableThread(restart_completer, self)
         self.command_table_thread.start()
 
-        from azclishell.configuration import SHELL_HELP
+        from .configuration import SHELL_HELP
         self.cli.buffers['symbols'].reset(
             initial_document=Document(u'{}'.format(SHELL_HELP)))
         # flush telemetry for new commands and send successful interactive mode entry event
