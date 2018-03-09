@@ -39,16 +39,17 @@ def load_arguments(self, _):
         cmp.argument('end_date', options_list=['--end-date', '-e'], type=get_datetime_type(), help='end date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
 
     with self.argument_context('consumption budget') as cb:
-        cb.argument('resource_group_name', options_list=['--resource-group-name', '-r'], action='store_true', help='get budget list for subscription by specific resource group name')
-        cb.argument('budget_name', options_list=['--budget-name', '-b'], help='get budget information by budget name')
-        cb.argument('category', options_list=['--category', '-c'], type=str, help='create budget with category')
-        cb.argument('amount', options_list=['--amount', '-a'], type=get_decimal_type(), help='create budget with amount')
-        cb.argument('time_grain', options_list=['--time_grain', '-t'], type=str, help='create budget with time grain')
-        cb.argument('start_date', options_list=['--start_date', '-s'], type=get_datetime_type(), help='create budget with start date of time period')
-        cb.argument('end_date', options_list=['--end_date', '-e'], type=get_datetime_type(), help='create budget with end date of time period')
-        cb.argument('resource_groups', options_list=['--resource-groups', '-g'], nargs='+', help='update budget with resource groups')
-        cb.argument('resources', options_list=['--resources', '-u'], nargs='+', help='update budget with resource(s) specified')
-        cb.argument('meters', options_list=['--meters', '-m'], nargs='+', help='update budget with meter(s) specified')
+        cb.argument('resource_group_name', options_list=['--resource-group-name', '-r'], type=str, help='specific resource group name of a budget')
+        cb.argument('budget_name', options_list=['--budget-name', '-b'], type=str, help='budget name of a budget')
+        cb.argument('category', options_list=['--category', '-c'], type=str, help='category can be cost or usage')
+        cb.argument('amount', options_list=['--amount', '-a'], type=get_decimal_type(), help='amount of a budget')
+        cb.argument('time_grain', options_list=['--time_grain', '-t'], type=str, help='time grain can be monthly, quarterly, or annually')
+        cb.argument('start_date', options_list=['--start_date', '-s'], type=get_datetime_type(), help='start date of time period of a budget')
+        cb.argument('end_date', options_list=['--end_date', '-e'], type=get_datetime_type(), help='end date of time period of a budget')
+        cb.argument('resource_groups', options_list=['--resource-groups', '-g'], nargs='+', help='resource groups specified as a filter')
+        cb.argument('resources', options_list=['--resources', '-u'], nargs='+', help='resource(s) specified as a filter')
+        cb.argument('meters', options_list=['--meters', '-m'], nargs='+', help='meter(s) specified as a filter')
+        cb.argument('notifications', options_list=['--notifications', '-n'], nargs='+', help='notifications used to send a budget')
 
-    with self.argument_context('consumption budget update') as cb:
-        cb.argument('e_tag', options_list=['--e-tag', '-x'], type=str, help='etag required when updating existing budget')
+    #with self.argument_context('consumption budget update') as cb:
+    #    cb.argument('e_tag', options_list=['--e-tag', '-x'], type=str, help='etag required when updating existing budget')

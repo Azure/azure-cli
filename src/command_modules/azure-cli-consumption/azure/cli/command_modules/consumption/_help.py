@@ -31,7 +31,7 @@ helps['consumption reservations details'] = """
 
 helps['consumption reservations details list'] = """
     type: command
-    short-summary: List reservations details by reservation order id and optionally by reservation id.
+    short-summary: List the details of a reservation by reservation order id and optionally by reservation id.
 """
 
 helps['consumption usage'] = """
@@ -46,49 +46,49 @@ helps['consumption usage list'] = """
 
 helps['consumption pricesheet'] = """
     type: group
-    short-summary: Inspect the price sheet by Azure subscription within a billing period.
+    short-summary: Inspect the price sheet of an Azure subscription within a billing period.
 """
 
 helps['consumption pricesheet show'] = """
     type: command
-    short-summary: Show the price sheet for Azure subscription within a billing period.
+    short-summary: Show the price sheet for an Azure subscription within a billing period.
 """
 
 helps['consumption marketplace'] = """
     type: group
-    short-summary: Inspect the marketplace by Azure subscription within a billing period.
+    short-summary: Inspect the marketplace usage data by an Azure subscription within a billing period.
 """
 
 helps['consumption marketplace list'] = """
     type: command
-    short-summary: Show the marketplace for Azure subscription within a billing period.
+    short-summary: Show the marketplace for an Azure subscription within a billing period.
 """
 
 helps['consumption budget'] = """
     type: group
-    short-summary: Offers ability to create, get, update, and delete budgets for Azure subscription.
+    short-summary: Manage budgets for an Azure subscription.
 """
 
 helps['consumption budget list'] = """
     type: command
-    short-summary: Lists budget for Azure subscription.
+    short-summary: Lists budgets for an Azure subscription.
 """
 
 helps['consumption budget show'] = """
     type: command
-    short-summary: Show budget for Azure subscription.
+    short-summary: Show budget for an Azure subscription.
 """
 
 helps['consumption budget create'] = """
     type: command
-    short-summary: Create a budget for Azure subscription.
+    short-summary: Create a budget for an Azure subscription.
 """
 
 helps['consumption budget update'] = """
     type: command
-    short-summary: Update a budget for Azure subscription.
+    short-summary: Update a budget for an Azure subscription.
 """
 helps['consumption budget delete'] = """
     type: command
-    short-summary: Delete a budget for Azure subscription.
+    short-summary: Delete a budget for an Azure subscription.
 """
