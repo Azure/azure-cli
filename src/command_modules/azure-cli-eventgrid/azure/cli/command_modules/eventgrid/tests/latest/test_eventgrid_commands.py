@@ -5,7 +5,7 @@
 
 # pylint: disable=line-too-long
 import unittest
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
 
 class EventGridTests(ScenarioTest):
@@ -142,16 +142,18 @@ class EventGridTests(ScenarioTest):
 
         self.cmd('az eventgrid event-subscription delete --resource-group {rg} --name {event_subscription_name}')
 
-    def test_create_event_subscriptions_to_resource(self):
+    @ResourceGroupPreparer(name_prefix='clieventgridrg')
+    @StorageAccountPreparer(name_prefix='clieventgrid')
+    def test_create_event_subscriptions_to_resource(self, resource_group, resource_group_location, storage_account):
         event_subscription_name = self.create_random_name(prefix='cli', length=40)
-        # Switch to real resource ID when running in the --live mode
-        # resource_id = '/subscriptions/55f3dcd4-cac7-43b4-990b-a139d62a1eb2/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsegblob'
-        resource_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/kalstest/providers/Microsoft.Storage/storageAccounts/kalsegblob'
 
         self.kwargs.update({
-            'resource_id': resource_id,
-            'event_subscription_name': event_subscription_name
+            'event_subscription_name': event_subscription_name,
+            'location': resource_group_location
         })
+
+        self.kwargs['resource_id'] = self.cmd('storage account create -g {rg} -n {sa} --sku Standard_LRS -l {location}').get_output_in_json()['id']
+        self.cmd('az storage account update -g {rg} -n {sa} --set kind=StorageV2')
 
         self.cmd('az eventgrid event-subscription create --resource-id {resource_id} --name {event_subscription_name} --endpoint https://requestb.in/18zmdhv1', checks=[
             self.check('type', 'Microsoft.EventGrid/eventSubscriptions'),

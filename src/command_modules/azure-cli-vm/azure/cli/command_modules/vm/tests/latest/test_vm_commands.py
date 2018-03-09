@@ -16,10 +16,11 @@ import uuid
 import six
 
 from knack.util import CLIError
-
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint, StorageAccountPreparer)
+    ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
+    StorageAccountPreparer)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -65,12 +66,8 @@ class VMUsageScenarioTest(ScenarioTest):
 
 class VMImageListThruServiceScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     def test_vm_images_list_thru_services(self):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 4096
-
         result = self.cmd('vm image list -l westus --publisher Canonical --offer Ubuntu_Snappy_Core -o tsv --all').output
         assert result.index('15.04') >= 0
 
@@ -168,12 +165,8 @@ class VMImageListOffersScenarioTest(ScenarioTest):
 
 class VMImageListPublishersScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     def test_vm_image_list_publishers(self):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 4096
-
         self.kwargs.update({
             'loc': 'westus'
         })
@@ -196,11 +189,8 @@ class VMImageListSkusScenarioTest(ScenarioTest):
         result = self.cmd("vm image list-skus --location {loc} -p {pub} --offer {offer} --query \"length([].id.contains(@, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/'))\"").get_output_in_json()
         self.assertTrue(result > 0)
 
+    @AllowLargeResponse()
     def test_list_skus_contains_zone_info(self):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 2048
         # we pick eastus2 as it is one of 3 regions so far with zone support
         self.kwargs['loc'] = 'eastus2'
         result = self.cmd('vm list-skus -otable -l {loc} -otable')
@@ -822,12 +812,8 @@ class VMMachineExtensionImageScenarioTest(ScenarioTest):
 
 class VMExtensionImageSearchScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     def test_vm_extension_image_search(self):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 4096
-
         # pick this specific name, so the search will be under one publisher. This avoids
         # the parallel searching behavior that causes incomplete VCR recordings.
         self.kwargs.update({
@@ -1597,12 +1583,8 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_linux_secrets')
+    @AllowLargeResponse()
     def test_vmss_create_linux_secrets(self, resource_group):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 2048
-
         self.kwargs.update({
             'loc': 'westus',
             'vmss': 'vmss1-name',
@@ -2502,7 +2484,6 @@ class VMOsDiskSwap(ScenarioTest):
             self.check('storageProfile.osDisk.managedDisk.id', backup_disk_id),
             self.check('storageProfile.osDisk.name', self.kwargs['backupDisk'])
         ])
-        pass
 # endregion
 
 
