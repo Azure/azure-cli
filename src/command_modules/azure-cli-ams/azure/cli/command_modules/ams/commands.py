@@ -25,14 +25,10 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.ams.custom#{}'
     )
     
-    with self.command_group('ams', ams_sdk) as g:        
+    with self.command_group('ams account', ams_sdk) as g:        
         g.command('show', 'get')
         g.custom_command('list', 'list_mediaservices', custom_command_type=ams_custom, client_factory=get_mediaservices_client)
         g.custom_command('create', 'create_mediaservice', custom_command_type=ams_custom, client_factory=get_mediaservices_client, exception_handler=storage_account_not_found())
-
-    with self.command_group('ams transform', ams_encoding_sdk) as g:        
-        g.command('list', 'list')
-        g.command('show', 'show')
 
     with self.command_group('ams storage', ams_sdk) as g:        
         g.custom_command('add', 'add_mediaservice_secondary_storage', custom_command_type=ams_custom, client_factory=get_mediaservices_client, exception_handler=storage_account_not_found())

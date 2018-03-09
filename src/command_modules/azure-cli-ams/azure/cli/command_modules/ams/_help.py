@@ -12,17 +12,22 @@ helps['ams'] = """
     short-summary: Manage Azure Media Services resources.
 """
 
-helps['ams create'] = """
+helps['ams account'] = """
+    type: group
+    short-summary: Manage Azure Media Services accounts.
+"""
+
+helps['ams account create'] = """
     type: command
     short-summary: Create an Azure Media Services account.
 """
 
-helps['ams list'] = """
+helps['ams account list'] = """
     type: command
     short-summary: List Azure Media Services accounts for the entire subscription.
 """
 
-helps['ams show'] = """
+helps['ams account show'] = """
     type: command
     short-summary: Show the details of an Azure Media Services account.
 """
