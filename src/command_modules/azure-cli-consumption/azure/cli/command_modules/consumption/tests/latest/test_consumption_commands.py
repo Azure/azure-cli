@@ -214,7 +214,7 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         output_budget = self.cmd('consumption budget create -b "costbudget" -c "cost" -a 100.0 -s "2018-02-01" -e "2018-10-01" -t "monthly"').get_output_in_json()
         self.assertTrue(output_budget)
         self._validate_budget(output_budget)
-        
+
     def test_consumption_budget_delete(self):
         output = self.cmd('consumption budget delete -b "costbudget"')
         self.assertTrue(output)
