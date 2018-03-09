@@ -202,17 +202,26 @@ def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=Non
     content_settings = guess_content_type(file_path, content_settings, t_content_settings)
 
     def upload_append_blob():
-        if not client.exists(container_name, blob_name):
+        check_blob_args = {
+            'container_name': container_name,
+            'blob_name': blob_name,
+            'lease_id': lease_id,
+            'if_modified_since': if_modified_since,
+            'if_unmodified_since': if_unmodified_since,
+            'if_match': if_match,
+            'if_none_match': if_none_match,
+            'timeout': timeout
+        }
+
+        if client.exists(container_name, blob_name):
+            # used to check for the preconditions as append_blob_from_path() cannot
+            client.get_blob_properties(**check_blob_args)
+        else:
             client.create_blob(
-                container_name=container_name,
-                blob_name=blob_name,
                 content_settings=content_settings,
                 metadata=metadata,
-                lease_id=lease_id,
-                if_modified_since=if_modified_since,
-                if_match=if_match,
-                if_none_match=if_none_match,
-                timeout=timeout)
+                **check_blob_args
+            )
 
         append_blob_args = {
             'container_name': container_name,
