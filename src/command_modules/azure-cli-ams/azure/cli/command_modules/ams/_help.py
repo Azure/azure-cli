@@ -59,7 +59,7 @@ helps['ams sp create'] = """
         - name: --account-name
           short-summary: The name of the Azure Media Services account within the resource group.
         - name: --name
-          short-summary: The name or app URI to associate the RBAC with. If not present, a name like '{amsaccountname}-access-sp' will be generated.
+          short-summary: The app name or app URI to associate the RBAC with. If not present, a name like '{amsaccountname}-access-sp' will be generated.
         - name: --password
           short-summary: The password used to log in. Also known as 'Client Secret'. If not present, a random secret will be generated.
         - name: --role
@@ -69,5 +69,5 @@ helps['ams sp create'] = """
     examples:
         - name: Create a service principal with password and configure its access to an Azure Media Services account. Output will be in xml format.
           text: >
-            az ams sp create -a {myamsaccount} -g {myresourcegroup} -n {mySpName} -password {mySpPassword} --role {rol}
+            az ams sp create -a {myamsaccount} -g {myresourcegroup} -n {mySpName} -password {mySpPassword} --role {rol} --xml
     """
