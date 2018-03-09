@@ -33,3 +33,4 @@ def load_arguments(self, _):
         c.argument('sp_password', password_arg_type, help="The password used to log in. Also known as 'Client Secret'. If not present, a random secret will be generated.")
         c.argument('role', completer=get_role_definition_name_completion_list)
         c.argument('xml', help='Enables xml output format.')
+        c.argument('years', type=int, default=None)

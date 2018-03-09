@@ -65,7 +65,7 @@ def create_or_update_mediaservice(client, resource_group_name, account_name, sto
 def _build_storage_account_id(subscription_id, resource_group_name, storage_account):
     return "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Storage/storageAccounts/{2}".format(subscription_id, resource_group_name, storage_account)
 
-def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_name, sp_name=None, role='Contributor', sp_password=None, xml=False):
+def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_name, sp_name=None, role='Contributor', sp_password=None, xml=False, years=None):
 
     ams = client.get(resource_group_name, account_name)
 
@@ -95,7 +95,7 @@ def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_n
         from azure.graphrbac.models import (PasswordCredential, ApplicationUpdateParameters)
 
         start_date = datetime.datetime.now(pytz.utc)
-        end_date = start_date + relativedelta(1)  # TODO: Add configurable --years parameter
+        end_date = start_date + relativedelta(years=years or 1)
 
         app_creds.append(PasswordCredential(start_date=start_date, end_date=end_date, key_id=str(uuid.uuid4()), value=sp_password))
 
