@@ -62,4 +62,4 @@ def validate_budget_parameters(namespace):
         raise CLIError("usage error: --parameters.time_grain can be 'Annually', 'Quarterly', or 'Monthly'.")
 
     if namespace.amount < 0:
-        raise CLIError("usage error: --parameters.time_period.amount must be greater than 0")
+        raise CLIError("usage error: --parameters.amount must be greater than 0")
