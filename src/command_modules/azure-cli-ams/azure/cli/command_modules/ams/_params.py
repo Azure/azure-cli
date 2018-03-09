@@ -28,8 +28,8 @@ def load_arguments(self, _):
         c.argument('storage_account', name_arg_type, help='The name of the secondary storage account to detach from the Azure Media Services account.')
 
     with self.argument_context('ams sp create') as c:
-        c.argument('account_name', account_name_arg_type, help='The name or app URI to associate the RBAC with. If not present, a name will be generated.')
-        c.argument('sp_name', name_arg_type, help='The name or app URI to associate the RBAC with. If not present, a name will be generated.')
-        c.argument('sp_password', password_arg_type, help='The password used to log in. If not present, a random password will be generated.')
+        c.argument('account_name', account_name_arg_type, help='The name of the Azure Media Services account within the resource group.')
+        c.argument('sp_name', name_arg_type, help='The app name or app URI to associate the RBAC with. If not present, a name will be generated.')
+        c.argument('sp_password', password_arg_type, help="The password used to log in. Also known as 'Client Secret'. If not present, a random secret will be generated.")
         c.argument('role', completer=get_role_definition_name_completion_list)
         c.argument('xml', help='Enables xml output format.')
