@@ -109,7 +109,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     if identity or msi:
         if in_cloud_console():
             return profile.find_subscriptions_in_cloud_console()
-        return profile.find_subscriptions_in_vm_with_msi(identity_port or msi_port, username)
+        return profile.find_subscriptions_in_vm_with_msi(identity_port or msi_port or 50342, username)
     elif in_cloud_console():  # tell users they might not need login
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
