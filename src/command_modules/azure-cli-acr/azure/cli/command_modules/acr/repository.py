@@ -345,7 +345,7 @@ def _parse_image_name(image, allow_digest=False):
 
     if allow_digest:
         raise CLIError("The name of the image to delete may include a tag in the"
-                       " format 'name:tag' or hash in the format 'name@hash'.")
+                       " format 'name:tag' or digest in the format 'name@digest'.")
     else:
         raise CLIError("The name of the image may include a tag in the format 'name:tag'.")
 

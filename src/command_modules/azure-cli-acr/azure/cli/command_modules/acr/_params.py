@@ -50,7 +50,7 @@ def load_arguments(self, _):
         c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
         c.argument('repository', help="The name of the repository to delete")
         c.argument('tag', help=argparse.SUPPRESS)
-        c.argument('image', help="The name of the image to delete. May include a tag in the format 'name:tag' or hash in the format 'name@hash'.")
+        c.argument('image', help="The name of the image to delete. May include a tag in the format 'name:tag' or digest in the format 'name@digest'.")
 
     with self.argument_context('acr repository untag') as c:
         c.argument('image', help="The name of the image to untag. May include a tag in the format 'name:tag'.")
