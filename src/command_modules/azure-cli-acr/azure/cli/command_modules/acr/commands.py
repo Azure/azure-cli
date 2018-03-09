@@ -64,6 +64,7 @@ def load_command_table(self, _):
         g.command('show-tags', 'acr_repository_show_tags')
         g.command('show-manifests', 'acr_repository_show_manifests')
         g.command('delete', 'acr_repository_delete')
+        g.command('untag', 'acr_repository_untag')
 
     with self.command_group('acr webhook', acr_webhook_util) as g:
         g.command('list', 'acr_webhook_list')
