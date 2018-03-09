@@ -116,7 +116,7 @@ def cli_consumption_create_budget(client, budget_name, category, amount, time_gr
     return client.create_or_update(budget_name, parameters)
 
 
-def update_budget(instance, category=None, amount=None, time_grain=None, start_date=None, end_date=None, resource_groups=None, resources=None, meters=None, notifications=None):  
+def update_budget(instance, category=None, amount=None, time_grain=None, start_date=None, end_date=None, resource_groups=None, resources=None, meters=None, notifications=None):
     if category:
         instance.category = category
     if amount:
