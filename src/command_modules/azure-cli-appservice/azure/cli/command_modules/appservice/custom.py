@@ -1247,20 +1247,27 @@ def clear_traffic_routing(cmd, resource_group_name, name):
     set_traffic_routing(cmd, resource_group_name, name, [])
 
 
-def get_streaming_log(cmd, resource_group_name, name, provider=None, slot=None):
+def get_streaming_log(cmd, resource_group_name, name, number_of_lines=None, provider=None,
+                      slot=None):
     scm_url = _get_scm_url(cmd, resource_group_name, name, slot)
     streaming_url = scm_url + '/logstream'
     import time
     if provider:
         streaming_url += ('/' + provider.lstrip('/'))
-
-    user, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name, slot)
-    t = threading.Thread(target=_get_log, args=(streaming_url, user, password))
-    t.daemon = True
-    t.start()
-
-    while True:
-        time.sleep(100)  # so that ctrl+c can stop the command
+    client = web_client_factory(cmd.cli_ctx)
+    user, password = _get_site_credential(cmd.cli_ctx, resource_group_name, name)
+    if number_of_lines:
+        webapp = client.web_apps.get(resource_group_name, name)
+        if not webapp.reserved:
+            raise CLIError('--number-of-lines is only supported for App Service on Linux apps')
+        url = scm_url + '/api/logs/docker'
+        _get_log(url, user, password, number_of_lines=number_of_lines)
+    else:
+        t = threading.Thread(target=_get_log, args=(streaming_url, user, password))
+        t.daemon = True
+        t.start()
+        while True:
+            time.sleep(100)  # so that ctrl+c can stop the command
 
 
 def download_historical_logs(cmd, resource_group_name, name, log_file=None, slot=None):
@@ -1277,7 +1284,7 @@ def _get_site_credential(cli_ctx, resource_group_name, name, slot=None):
     return (creds.publishing_user_name, creds.publishing_password)
 
 
-def _get_log(url, user_name, password, log_file=None):
+def _get_log(url, user_name, password, log_file=None, number_of_lines=None):
     import sys
     import certifi
     import urllib3
@@ -1305,6 +1312,9 @@ def _get_log(url, user_name, password, log_file=None):
                 if not data:
                     break
                 f.write(data)
+    elif number_of_lines:  # print last 'n' number of lines
+        api_str = r.read().decode(encoding='utf-8')
+        _print_site_logs(api_str, number_of_lines, 512000, http, headers)
     else:  # streaming
         std_encoding = sys.stdout.encoding
         for chunk in r.stream():
@@ -1314,6 +1324,47 @@ def _get_log(url, user_name, password, log_file=None):
                       .encode(std_encoding, errors='replace')
                       .decode(std_encoding, errors='replace'), end='')  # each line of log has CRLF.
     r.release_conn()
+
+
+def _print_site_logs(api_string, number_of_lines, byte_limit, http, headers):
+    import sys
+    import json
+    std_encoding = sys.stdout.encoding
+
+    data = json.loads(api_string)
+    data_length = len(data)
+
+    if data_length > 1:
+        logger.info('Will show last %i lines of logs per instance', number_of_lines)
+
+    for x in range(0, data_length):
+        href_str = data[x]['href']
+        size = data[x]['size']
+        logger.info('\nSite Instance #%i', x + 1)
+        logger.info('\nUsing endpoint: %s', href_str)
+        byte_limit_exceeded = (int(size) > byte_limit)
+        if byte_limit_exceeded:
+            headers.update({'Range': 'bytes=-512000'})  # only get the last 512kB
+
+        r = http.request(
+            'GET',
+            href_str,
+            headers=headers,
+            preload_content=False
+        )
+        lines = (r.data.decode(encoding='utf-8', errors='replace')
+                 .encode(std_encoding, errors='replace')
+                 .decode(std_encoding, errors='replace')
+                 .replace('\\n', '\n'))
+        lines_split = lines.splitlines()
+        lines_split_length = len(lines_split)
+        if byte_limit_exceeded:
+            if lines_split_length < number_of_lines:
+                logger.warning("Hit internal limit of %s bytes."
+                               "Please download to see full logs", byte_limit)
+        number_of_lines = min(number_of_lines, lines_split_length)
+        last_n_lines = ('\n'.join(lines_split[-(number_of_lines)::])).lstrip('\n')
+        print(last_n_lines)
 
 
 def upload_ssl_cert(cmd, resource_group_name, name, certificate_password, certificate_file):
