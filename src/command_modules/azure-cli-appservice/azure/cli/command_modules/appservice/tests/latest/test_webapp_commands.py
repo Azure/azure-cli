@@ -161,7 +161,7 @@ class WebappQuickCreateTest(ScenarioTest):
 
 
 # Test Framework is not able to handle binary file format, hence, only run live
-class AppServiceLogTest(LiveScenarioTest):
+class AppServiceLogTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_download_win_web_log(self, resource_group):
         import zipfile
@@ -819,7 +819,7 @@ class WebappUpdateTest(ScenarioTest):
                      JMESPathCheck('clientAffinityEnabled', False)])
 
 
-class WebappZipDeployScenarioTest(LiveScenarioTest):
+class WebappZipDeployScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_zipDeploy')
     def test_deploy_zip(self, resource_group):
         webapp_name = self.create_random_name('webapp-zipDeploy-test', 40)
@@ -829,9 +829,10 @@ class WebappZipDeployScenarioTest(LiveScenarioTest):
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).assert_with_checks([
             JMESPathCheck('status', 4),
-            JMESPathCheck('deployer', 'Zip-Push'),
-            JMESPathCheck('message', 'Created via zip push deployment'),
-            JMESPathCheck('complete', True)])
+            JMESPathCheck('deployer', 'Push-Deployer'),
+            JMESPathCheck('message', 'Created via a push deployment'),
+            JMESPathCheck('complete', True)
+        ])
 
 
 class WebappImplictIdentityTest(ScenarioTest):

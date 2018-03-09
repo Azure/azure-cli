@@ -4,17 +4,12 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 from datetime import datetime
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, record_only
 
 
 @record_only()
 class AzureConsumptionServiceScenarioTest(ScenarioTest):
-    def enable_large_payload(self, size=8192):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(
-            r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = size   # pylint: disable=protected-access
 
     def _validate_usage(self, usage, includeMeterDetails=False):
         self.assertIsNotNone(usage)
@@ -77,14 +72,14 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         else:
             self.assertIsNone(pricesheet['pricesheets'][0]['meterDetails'])
 
+    @AllowLargeResponse()
     def test_consumption_pricesheet_billing_period(self):
-        self.enable_large_payload()
         pricesheet = self.cmd('consumption pricesheet show -p 20171001').get_output_in_json()
         self.assertTrue(pricesheet)
         self._validate_pricesheet(pricesheet, False)
 
+    @AllowLargeResponse()
     def test_consumption_pricesheet(self):
-        self.enable_large_payload()
         pricesheet = self.cmd('consumption pricesheet show').get_output_in_json()
         self.assertTrue(pricesheet)
         self._validate_pricesheet(pricesheet, False)

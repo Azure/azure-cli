@@ -1287,7 +1287,6 @@ def _get_log(url, user_name, password, log_file=None):
     except ImportError:
         pass
 
-    std_encoding = sys.stdout.encoding
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
     headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     r = http.request(
@@ -1307,6 +1306,7 @@ def _get_log(url, user_name, password, log_file=None):
                     break
                 f.write(data)
     else:  # streaming
+        std_encoding = sys.stdout.encoding
         for chunk in r.stream():
             if chunk:
                 # Extra encode() and decode for stdout which does not surpport 'utf-8'
