@@ -19,6 +19,9 @@ def get_combined_validator(validators):
             password_validator(namespace)
             get_default_location_from_resource_group(cmd, namespace)
 
+        if verb == 'update':
+            storage_validator(namespace)
+
         validate_tags(namespace)
 
         for validator in validators:
