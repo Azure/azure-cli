@@ -65,10 +65,7 @@ def _server_update_custom_func(instance,
         instance.sku = None
 
     if storage_mb is not None:
-        if storage_mb > 1023 * 1024:
-            raise ValueError('The size of storage cannot exceed 1023GB.')
-        else:
-            instance.storage_profile.storage_mb = storage_mb
+        instance.storage_profile.storage_mb = storage_mb
 
     if backup_retention_days is not None:
         instance.storage_profile.backup_retention_days = backup_retention_days
