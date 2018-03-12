@@ -29,6 +29,8 @@ BuildRequires:  libffi-devel
 BuildRequires:  python-devel
 BuildRequires:  openssl-devel
 
+%global _python_bytecompile_errors_terminate_build 0
+
 %description
 A great cloud needs great tools; we're excited to introduce Azure CLI 2.0,
  our next generation multi-platform command line experience for Azure.
