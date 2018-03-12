@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.0.29
+++++++
+* Minor fixes. 
+
 2.0.28
 ++++++
 * vm/vmss create: support to attach unmanaged data disks and configure their caching modes 
