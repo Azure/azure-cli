@@ -211,9 +211,8 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
         if 'name' not in id_parts and 'resource_name' not in id_parts:
             # Only commands with a resource name are candidates for an id parameter
             return
-        if command.name.split()[-1] == 'create':
-            # Somewhat blunt hammer, but any create commands will not have an automatic id
-            # parameter
+        if command.name.split()[-1] in ['create', 'list']:
+            # Somewhat blunt hammer, but any create/list commands will not have an automatic id parameter
             return
 
         required_arguments = []

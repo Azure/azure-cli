@@ -16,7 +16,6 @@ except ImportError:
 
 
 VERSION = "2.0.28"
-
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
     'Intended Audience :: Developers',

@@ -12,6 +12,8 @@ Release History
 ++++++
 * Support Autorest 3.0 based SDKs
 * Support mechanism for a command module to suppress the loading of particular extensions.
+* Fix issue where a child resource list command would expose the `--ids` parameter for the parent resource.
+  With this change it is no longer necessary to manually prevent this behavior.
 
 2.0.28
 ++++++

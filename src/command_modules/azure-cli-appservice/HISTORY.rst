@@ -5,6 +5,7 @@ Release History
 0.1.29
 ++++++
 * webapp/functionapp: author managed identity commands `identity assign/show`, and deprecate `assign-identity`
+* BREAKING CHANGE: `webapp deployment slot list`, `webapp config appsettings list` no longer support `--ids`
 
 0.1.28
 ++++++
