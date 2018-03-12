@@ -26,7 +26,7 @@ from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
     job_details_cf, protection_container_refresh_operation_results_cf, backup_protection_containers_cf,
-    protected_items_cf)
+    protected_items_cf, resource_groups_cf)
 
 logger = get_logger(__name__)
 
@@ -38,9 +38,15 @@ password_offset = 33
 password_length = 15
 
 
-def create_vault(client, vault_name, region, resource_group_name):
+def create_vault(cmd, client, vault_name, resource_group_name, region=None):
     vault_sku = Sku(SkuName.standard)
     vault_properties = VaultProperties()
+    
+    # If region is not passed, create the vault in the same region as that of the resource group.
+    if not region:
+        vault_rg = resource_groups_cf(cmd.cli_ctx).get(resource_group_name)
+        region = vault_rg.location
+    
     vault = Vault(region, sku=vault_sku, properties=vault_properties)
     return client.create_or_update(resource_group_name, vault_name, vault)
 

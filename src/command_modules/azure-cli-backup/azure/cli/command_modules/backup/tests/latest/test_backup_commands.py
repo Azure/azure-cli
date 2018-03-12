@@ -7,7 +7,7 @@ import json
 from datetime import datetime, timedelta
 import unittest
 
-from azure.cli.testsdk import LiveScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
+from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
     StorageAccountPreparer
 from azure.mgmt.recoveryservices.models import StorageModelType
 
@@ -21,7 +21,7 @@ def _get_vm_version(vm_type):
         return 'Classic'
 
 
-class BackupTests(LiveScenarioTest, unittest.TestCase):
+class BackupTests(ScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()
@@ -76,18 +76,30 @@ class BackupTests(LiveScenarioTest, unittest.TestCase):
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
+        self.kwargs['vault4'] = self.create_random_name('clitest-vault', 50)
+        self.cmd('backup vault create -n {vault4} -g {rg}', checks=[
+            self.check('name', '{vault4}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('location', '{loc}'),
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        number_of_test_vaults = 4
+
         self.cmd('backup vault list', checks=[
-            self.check("length([?resourceGroup == '{rg}'])", 3),
+            self.check("length([?resourceGroup == '{rg}'])", number_of_test_vaults),
             self.check("length([?name == '{vault1}'])", 1),
             self.check("length([?name == '{vault2}'])", 1),
-            self.check("length([?name == '{vault3}'])", 1)
+            self.check("length([?name == '{vault3}'])", 1),
+            self.check("length([?name == '{vault4}'])", 1)
         ])
 
         self.cmd('backup vault list -g {rg}', checks=[
-            self.check("length(@)", 3),
+            self.check("length(@)", number_of_test_vaults),
             self.check("length([?name == '{vault1}'])", 1),
             self.check("length([?name == '{vault2}'])", 1),
-            self.check("length([?name == '{vault3}'])", 1)
+            self.check("length([?name == '{vault3}'])", 1),
+            self.check("length([?name == '{vault4}'])", 1)
         ])
 
         storage_model_types = [e.value for e in StorageModelType]
@@ -109,12 +121,13 @@ class BackupTests(LiveScenarioTest, unittest.TestCase):
             self.check('storageModelType', new_storage_model)
         ])
 
-        self.cmd('backup vault delete -n {vault3} -g {rg} -y')
+        self.cmd('backup vault delete -n {vault4} -g {rg} -y')
 
         self.cmd('backup vault list', checks=[
-            self.check("length([?resourceGroup == '{rg}'])", 2),
+            self.check("length([?resourceGroup == '{rg}'])", number_of_test_vaults-1),
             self.check("length([?name == '{vault1}'])", 1),
-            self.check("length([?name == '{vault2}'])", 1)
+            self.check("length([?name == '{vault2}'])", 1),
+            self.check("length([?name == '{vault3}'])", 1)
         ])
 
     @ResourceGroupPreparer()
