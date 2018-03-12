@@ -217,11 +217,7 @@ def upload_blob(cmd, client, container_name, blob_name, file_path, blob_type=Non
             # used to check for the preconditions as append_blob_from_path() cannot
             client.get_blob_properties(**check_blob_args)
         else:
-            client.create_blob(
-                content_settings=content_settings,
-                metadata=metadata,
-                **check_blob_args
-            )
+            client.create_blob(content_settings=content_settings, metadata=metadata, **check_blob_args)
 
         append_blob_args = {
             'container_name': container_name,
