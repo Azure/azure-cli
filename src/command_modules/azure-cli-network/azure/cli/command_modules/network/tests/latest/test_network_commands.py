@@ -1788,7 +1788,7 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
 
 
-class NetworkWatcherScenarioTest(LiveScenarioTest):
+class NetworkWatcherScenarioTest(ScenarioTest):
     import mock
 
     def _mock_thread_count():
@@ -1849,6 +1849,7 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
         self.cmd('vm extension set -g {rg} --vm-name {vm2} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
         self.cmd('vm create -g {rg} -n {vm3} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm3}')
         self.cmd('vm extension set -g {rg} --vm-name {vm3} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
+        time.sleep(10)
         self.cmd('network watcher connection-monitor create -n {cm} --source-resource {vm2} -g {rg} --dest-resource {vm3} --dest-port 80')
         self.cmd('network watcher connection-monitor list -l {loc}')
         self.cmd('network watcher connection-monitor show -l {loc} -n {cm}')
