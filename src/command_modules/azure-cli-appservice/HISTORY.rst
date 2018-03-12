@@ -5,6 +5,7 @@ Release History
 0.1.29
 ++++++
 * webapp/functionapp: author managed identity commands `identity assign/show`, and deprecate `assign-identity`
+* webapp: az webapp update supports httpsOnly
 
 0.1.28
 ++++++
