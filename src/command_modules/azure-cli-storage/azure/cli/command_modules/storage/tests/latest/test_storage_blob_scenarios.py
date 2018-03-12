@@ -314,6 +314,26 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
                                               account_info, container).get_output_in_json()), 1)
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_blob_append(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        container = self.create_container(account_info)
+
+        # create an append blob
+        local_file = self.create_temp_file(1)
+        blob_name = self.create_random_name(prefix='blob', length=24)
+
+        self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type append --if-none-match *', account_info,
+                         container, local_file, blob_name)
+        self.assertEqual(len(self.storage_cmd('storage blob list -c {}',
+                                              account_info, container).get_output_in_json()), 1)
+
+        # append if-none-match should throw exception
+        with self.assertRaises(Exception):
+            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type append --if-none-match *', account_info,
+                             container, local_file, blob_name)
+
 
 if __name__ == '__main__':
     unittest.main()

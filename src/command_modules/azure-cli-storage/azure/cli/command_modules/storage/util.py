@@ -217,7 +217,9 @@ def check_precondition_success(func):
         except AzureHttpError as ex:
             # Precondition failed error
             # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/412
-            if ex.status_code != 412:
+            # Not modified error
+            # https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/304
+            if ex.status_code not in [304, 412]:
                 raise
             from knack.log import get_logger
             logger = get_logger(__name__)
