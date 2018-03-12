@@ -13,7 +13,7 @@ def load_arguments(self, _):
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
     account_name_arg_type = CLIArgumentType(options_list=('--account-name', '-a'), metavar='ACCOUNT_NAME')
     storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='STORAGE_NAME')
-    password_arg_type = CLIArgumentType(options_list=('--password', '-p'), metavar='STORAGE_NAME')
+    password_arg_type = CLIArgumentType(options_list=('--password', '-p'), metavar='PASSWORD_NAME')
 
     with self.argument_context('ams account') as c:
         c.argument('account_name', name_arg_type,
@@ -45,3 +45,9 @@ def load_arguments(self, _):
         c.argument('role', completer=get_role_definition_name_completion_list)
         c.argument('xml', help='Enables xml output format.')
         c.argument('years', type=int, default=None)
+
+    with self.argument_context('ams transform') as c:
+        c.argument('account_name', account_name_arg_type,
+            help='The name of the Azure Media Services account within the resource group.')
+        c.argument('transform_name', name_arg_type,
+                   help='The name of the transform.')

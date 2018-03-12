@@ -33,6 +33,11 @@ helps['ams account show'] = """
     short-summary: Show the details of an Azure Media Services account.
 """
 
+helps['ams account delete'] = """
+    type: command
+    short-summary: Delete an Azure Media Services account.
+"""
+
 helps['ams storage'] = """
     type: group
     short-summary: Manage secondary storage for an Azure Media Services account.
@@ -74,3 +79,18 @@ helps['ams sp create'] = """
           text: >
             az ams sp create -a {myamsaccount} -g {myresourcegroup} -n {mySpName} -password {mySpPassword} --role {rol} --xml
     """
+
+helps['ams transform'] = """
+    type: group
+    short-summary: Manage transforms for an Azure Media Services account.
+"""
+
+helps['ams transform list'] = """
+    type: command
+    short-summary: List all the transforms of an Azure Media Services account.
+"""
+
+helps['ams transform show'] = """
+    type: command
+    short-summary: Show the details of a transform.
+"""
