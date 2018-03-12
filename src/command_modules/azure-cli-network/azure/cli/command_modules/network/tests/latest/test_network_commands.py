@@ -1804,7 +1804,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         self.kwargs['private-ip'] = '10.0.0.9'
         self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg} --private-ip-address {private-ip}')
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
-        
+
         self.cmd('network watcher show-topology -g {rg}')
         self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction inbound --local {private-ip}:22 --protocol tcp --remote 100.1.2.3:*')
         self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction outbound --local {private-ip}:* --protocol tcp --remote 100.1.2.3:80')
