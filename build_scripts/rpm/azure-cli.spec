@@ -56,8 +56,8 @@ do cd $d; %{buildroot}%{cli_lib_dir}/bin/python setup.py bdist_wheel -d $dist_di
 
 # Install the CLI
 all_modules=`find $dist_dir -name "*.whl"`
-%{buildroot}%{cli_lib_dir}/bin/pip install $all_modules
-%{buildroot}%{cli_lib_dir}/bin/pip install --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
+%{buildroot}%{cli_lib_dir}/bin/pip install --no-compile $all_modules
+%{buildroot}%{cli_lib_dir}/bin/pip install --no-compile --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg
 
 # Fix up %{buildroot} appearing in some files...
 for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" $d; done;
