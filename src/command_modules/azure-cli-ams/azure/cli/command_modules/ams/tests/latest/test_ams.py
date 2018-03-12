@@ -39,6 +39,8 @@ class AmsTests(ScenarioTest):
             self.check('resourceGroup', '{rg}')
         ])
 
+        self.cmd('az ams account delete -n {amsname} -g {rg}')
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     @StorageAccountPreparer(parameter_name='storage_account_for_update')

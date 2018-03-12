@@ -120,8 +120,6 @@ def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_n
     # succesfully
     time.sleep(15)
 
-    # TODO: Check role assignments and assign or not the new role
-
     assignments = list_role_assignments(cmd, assignee=app_id, show_all=True)
 
     if assignments:
