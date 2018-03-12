@@ -53,6 +53,12 @@ for setup_file in $(find src -name 'setup.py'); do
 done
 
 ##############################################
+# copy private packages
+if [ -z ./privates ]; then
+    cp ./privates/*.whl $output_dir
+fi
+
+##############################################
 # build test packages
 title 'Build Azure CLI tests package'
 
