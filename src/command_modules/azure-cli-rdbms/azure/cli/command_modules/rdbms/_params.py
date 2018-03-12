@@ -53,7 +53,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
 
     for scope in ['mysql', 'postgres']:
         with self.argument_context(scope) as c:
-            c.argument('name', options_list=['--sku'], required=True)
+            c.argument('name', options_list=['--sku-name'], required=True)
             c.argument('server_name', completer=server_completers[scope], options_list=['--server-name', '-s'], help='Name of the server.')
 
     for scope in ['mysql server', 'postgres server']:
