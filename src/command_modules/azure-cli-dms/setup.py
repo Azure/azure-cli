@@ -32,6 +32,7 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
+    'azure-mgmt-datamigration==0.1.0',
     'azure-cli-core',
     'pyOpenSSL'
 ]

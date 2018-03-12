@@ -3,8 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.help_files import helps
 
-def dms_client_factory(cli_ctx, _):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.mgmt.datamigration import DataMigrationServiceClient
-    return get_mgmt_service_client(cli_ctx, DataMigrationServiceClient)
+
+helps['dms'] = """
+    type: group
+    short-summary: Manage Azure Data Migration Service (DMS) instances.
+"""
+
+helps['dms task'] = """
+    type: group
+    short-summary: Manage Tasks for a DMS Project.
+"""
