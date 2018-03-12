@@ -214,9 +214,11 @@ def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
     return webapp
 
 
-def update_webapp(instance, client_affinity_enabled=None):
+def update_webapp(instance, client_affinity_enabled=None, https_only=None):
     if client_affinity_enabled is not None:
         instance.client_affinity_enabled = client_affinity_enabled == 'true'
+    if https_only is not None:
+        instance.https_only = https_only == 'true'
     return instance
 
 
