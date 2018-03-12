@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.18
+++++++
+* Completions kick in as soon as command table loading is done.
+
 0.3.17
 ++++++
 * Persist history across different sessions
