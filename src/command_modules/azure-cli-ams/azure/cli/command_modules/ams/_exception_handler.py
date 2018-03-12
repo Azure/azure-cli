@@ -3,13 +3,16 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
 def ams_resource_not_found(resource_name):
     bad_request_msg = "{}(s) not found. Please verify the resource(s), group or it's parent resources exist."
     ams_not_found_msg = bad_request_msg.format(resource_name)
     return build_exception_wrapper(404, ams_not_found_msg)
 
+
 def storage_account_not_found():
     return build_exception_wrapper(400, "Storage Account not found. Please verify the storage account exists.")
+
 
 def build_exception_wrapper(status_code, message):
     def build_exception(ex):

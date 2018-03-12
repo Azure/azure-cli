@@ -3,9 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=line-too-long, too-many-lines
+
 from knack.help_files import helps
 
-# pylint: disable=line-too-long, too-many-lines
 
 helps['ams'] = """
     type: group
@@ -44,7 +45,7 @@ helps['ams storage add'] = """
 
 helps['ams storage remove'] = """
     type: command
-    short-summary: Detach a secondary storage from an Azure Media Services account. 
+    short-summary: Detach a secondary storage from an Azure Media Services account.
 """
 
 helps['ams sp'] = """

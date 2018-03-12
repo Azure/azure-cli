@@ -3,10 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core import AzCommandsLoader
-from azure.cli.core.commands import CliCommandType
+# pylint: disable=unused-import
 
-import azure.cli.command_modules.ams._help  # pylint: disable=unused-import
+from azure.cli.core import AzCommandsLoader
+import azure.cli.command_modules.ams._help
+
 
 class MediaServicesCommandsLoader(AzCommandsLoader):
 
