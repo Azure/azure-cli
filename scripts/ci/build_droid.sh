@@ -30,16 +30,6 @@ cp $dp0/a01/dockerfiles/py36/Dockerfile artifacts/
 # Move other scripts for docker
 cp -R $dp0/a01/* artifacts/
 
-title 'Downloading applications'
-
-curl -L https://a01tools.blob.core.windows.net/droid/latest/linux/a01droid \
-     -o artifacts/docker_app/a01droid
-chmod +x artifacts/docker_app/a01droid
-
-curl -L https://a01tools.blob.core.windows.net/droid/latest/linux/a01dispatcher \
-     -o artifacts/docker_app/a01dispatcher 
-chmod +x artifacts/docker_app/a01dispatcher
-
 #############################################
 # for travis repo slug, remove the suffix to reveal the owner
 # - the offical repo will generate image: azurecli-test-Azure
