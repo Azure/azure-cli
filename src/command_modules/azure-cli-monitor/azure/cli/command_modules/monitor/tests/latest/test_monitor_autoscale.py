@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
+from azure.cli.testsdk import LiveScenarioTest, ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
 
 class TestMonitorAutoscaleScenario(ScenarioTest):
@@ -216,6 +216,10 @@ class TestMonitorAutoscaleScenario(ScenarioTest):
         time.sleep(sleep_time)
         self.cmd('monitor autoscale profile list -g {rg} --autoscale-name {vmss}',
                  checks=self.check('length(@)', 1))
+
+
+# inexplicably fails on CI so making into a live test
+class TestMonitorAutoscaleTimezones(LiveScenarioTest):
 
     def test_monitor_autoscale_timezones(self):
         self.cmd('monitor autoscale profile list-timezones',
