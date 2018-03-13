@@ -99,3 +99,8 @@ helps['ams transform create'] = """
     type: command
     short-summary: Create a transform.
 """
+
+helps['ams transform delete'] = """
+    type: command
+    short-summary: Delete a transform.
+"""

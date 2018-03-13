@@ -57,5 +57,6 @@ def load_command_table(self, _):
     with self.command_group('ams transform', ams_encoding_sdk) as g:
         g.command('show', 'get')
         g.command('list', 'list')
+        g.command('delete', 'delete')
         g.custom_command('create', 'create_transform', custom_command_type=ams_transform_custom,
                          client_factory=get_transforms_client)

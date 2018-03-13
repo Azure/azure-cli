@@ -138,3 +138,5 @@ class AmsTests(ScenarioTest):
 
         list = self.cmd('az ams transform list -a {amsname} -g {rg}').get_output_in_json()
         assert len(list) > 0
+
+        self.cmd('az ams transform delete -n {transformName} -a {amsname} -g {rg}')
