@@ -5,7 +5,7 @@
 
 from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.commands.parameters import (get_location_type, get_enum_type)
+from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type)
 from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
 
 from azure.mediav3.models import EncoderNamedPreset
@@ -26,6 +26,7 @@ def load_arguments(self, _):
     with self.argument_context('ams account create') as c:
         c.argument('storage_account', storage_account_arg_type,
                    help='The name of the primary storage account to attach to the Azure Media Services account.')
+        c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('ams storage') as c:
         c.argument('account_name', account_name_arg_type,
@@ -59,3 +60,5 @@ def load_arguments(self, _):
                    validator=get_default_location_from_resource_group)
         c.argument('preset_name', arg_type=get_enum_type(EncoderNamedPreset),
                    help='The name of the built in preset to use.')
+        c.argument('tags', arg_type=tags_type)
+        c.argument('description', help='Customer supplied description of the transform.')
