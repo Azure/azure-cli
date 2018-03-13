@@ -21,28 +21,32 @@ def load_command_table(self, _):
         exception_handler=ams_resource_not_found('Media Service')
     )
 
-    ams_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.ams.custom#{}'
+    ams_account_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.ams.operations.account#{}'
+    )
+
+    ams_sp_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.ams.operations.sp#{}'
     )
 
     with self.command_group('ams account', ams_sdk) as g:
         g.command('show', 'get')
         g.command('delete', 'delete')
-        g.custom_command('list', 'list_mediaservices', custom_command_type=ams_custom,
+        g.custom_command('list', 'list_mediaservices', custom_command_type=ams_account_custom,
                          client_factory=get_mediaservices_client)
-        g.custom_command('create', 'create_mediaservice', custom_command_type=ams_custom,
+        g.custom_command('create', 'create_mediaservice', custom_command_type=ams_account_custom,
                          client_factory=get_mediaservices_client,
                          exception_handler=storage_account_not_found())
 
     with self.command_group('ams storage', ams_sdk) as g:
-        g.custom_command('add', 'add_mediaservice_secondary_storage', custom_command_type=ams_custom,
+        g.custom_command('add', 'add_mediaservice_secondary_storage', custom_command_type=ams_account_custom,
                          client_factory=get_mediaservices_client,
                          exception_handler=storage_account_not_found())
-        g.custom_command('remove', 'remove_mediaservice_secondary_storage', custom_command_type=ams_custom,
+        g.custom_command('remove', 'remove_mediaservice_secondary_storage', custom_command_type=ams_account_custom,
                          client_factory=get_mediaservices_client)
 
     with self.command_group('ams sp', ams_sdk) as g:
-        g.custom_command('create', 'create_assign_sp_to_mediaservice', custom_command_type=ams_custom,
+        g.custom_command('create', 'create_assign_sp_to_mediaservice', custom_command_type=ams_sp_custom,
                          client_factory=get_mediaservices_client,
                          exception_handler=ams_resource_not_found('Media Service'))
 
