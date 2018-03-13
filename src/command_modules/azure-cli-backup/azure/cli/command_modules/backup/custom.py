@@ -41,12 +41,12 @@ password_length = 15
 def create_vault(cmd, client, vault_name, resource_group_name, region=None):
     vault_sku = Sku(SkuName.standard)
     vault_properties = VaultProperties()
-    
+
     # If region is not passed, create the vault in the same region as that of the resource group.
     if not region:
         vault_rg = resource_groups_cf(cmd.cli_ctx).get(resource_group_name)
         region = vault_rg.location
-    
+
     vault = Vault(region, sku=vault_sku, properties=vault_properties)
     return client.create_or_update(resource_group_name, vault_name, vault)
 

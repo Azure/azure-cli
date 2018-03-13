@@ -124,7 +124,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup vault delete -n {vault4} -g {rg} -y')
 
         self.cmd('backup vault list', checks=[
-            self.check("length([?resourceGroup == '{rg}'])", number_of_test_vaults-1),
+            self.check("length([?resourceGroup == '{rg}'])", number_of_test_vaults - 1),
             self.check("length([?name == '{vault1}'])", 1),
             self.check("length([?name == '{vault2}'])", 1),
             self.check("length([?name == '{vault3}'])", 1)
