@@ -29,6 +29,12 @@ def create_service(cmd, client, resource_group_name, service_name, virtual_subne
         group_name=resource_group_name,
         service_name=service_name)
 
+def delete_service(cmd, client, resource_group_name, service_name, delete_running_tasks=None):
+    return client.services.delete(
+        group_name=resource_group_name,
+        service_name=service_name,
+        delete_running_tasks=delete_running_tasks)
+
 def get_service(cmd, client, resource_group_name, service_name):
     return client.services.get(
         group_name=resource_group_name,
