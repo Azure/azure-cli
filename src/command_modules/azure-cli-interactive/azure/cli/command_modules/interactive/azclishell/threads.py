@@ -16,11 +16,9 @@ class LoadCommandTableThread(threading.Thread):
 
     def run(self):
         from ._dump_commands import FreshTable
-        from .az_completer import initialize_command_table_attributes
 
         try:
             FreshTable(self.shell).dump_command_table(self.shell)
         except KeyboardInterrupt:
             pass
-        self.initialize_function(self.shell)
-        initialize_command_table_attributes(self.shell.completer)
+        self.initialize_function()
