@@ -15,14 +15,6 @@ from .util import parse_quotes
 SELECT_SYMBOL = configuration.SELECT_SYMBOL
 
 
-def initialize_command_table_attributes(completer):
-    from ._dump_commands import FreshTable
-    completer.cmdtab = FreshTable(completer.shell_ctx).command_table
-    if completer.cmdtab:
-        completer.parser.load_command_table(completer.cmdtab)
-        completer.argsfinder = ArgsFinder(completer.parser)
-
-
 def error_pass(_, message):  # pylint: disable=unused-argument
     return
 
@@ -78,38 +70,70 @@ class AzCompleter(Completer):
     """ Completes Azure CLI commands """
 
     def __init__(self, shell_ctx, commands, global_params=True):
-        self.shell_ctx = shell_ctx
+        self.shell_ctx = None
+
         # dictionary of command to descriptions
-        self.command_description = commands.descrip
+        self.command_description = None
         # from a command to a list of parameters
-        self.command_parameters = commands.command_param
+        self.command_parameters = None
         # a list of all the possible parameters
-        self.completable_param = commands.completable_param
+        self.completable_param = None
         # the command tree
-        self.command_tree = commands.command_tree
+        self.command_tree = None
         # a dictionary of parameter (which is command + " " + parameter name)
         # to a description of what it does
-        self.param_description = commands.param_descript
+        self.param_description = None
         # a dictionary of command to examples of how to use it
-        self.command_examples = commands.command_example
+        self.command_examples = None
         # a dictionary of commands with parameters with multiple names (e.g. {'vm create':{-n: --name}})
-        self.same_param_doubles = commands.same_param_doubles or {}
+        self.same_param_doubles = {}
 
         self._is_command = True
 
-        self.branch = self.command_tree
+        self.branch = None
         self.curr_command = ""
 
-        self.global_param = commands.global_param if global_params else []
-        self.output_choices = commands.output_choices if global_params else []
-        self.output_options = commands.output_options if global_params else []
-        self.global_param_descriptions = commands.global_param_descriptions if global_params else []
+        self.global_param = []
+        self.output_choices = []
+        self.output_options = []
+        self.global_param_descriptions = []
 
         self.global_parser = AzCliCommandParser(add_help=False)
         self.global_parser.add_argument_group('global', 'Global Arguments')
         self.parser = AzCliCommandParser(parents=[self.global_parser])
         self.argsfinder = ArgsFinder(self.parser)
         self.cmdtab = {}
+
+        if commands:
+            self.start(shell_ctx, commands, global_params=global_params)
+
+    def __bool__(self):
+        return bool(self.shell_ctx)
+
+    def start(self, shell_ctx, commands, global_params=True):
+        self.shell_ctx = shell_ctx
+        self.command_description = commands.descrip
+        self.command_parameters = commands.command_param
+        self.completable_param = commands.completable_param
+        self.command_tree = commands.command_tree
+        self.param_description = commands.param_descript
+        self.command_examples = commands.command_example
+        self.same_param_doubles = commands.same_param_doubles or self.same_param_doubles
+
+        self.branch = self.command_tree
+
+        if global_params:
+            self.global_param = commands.global_param
+            self.output_choices = commands.output_choices
+            self.output_options = commands.output_options
+            self.global_param_descriptions = commands.global_param_descriptions
+
+    def initialize_command_table_attributes(self):
+        from ._dump_commands import FreshTable
+        self.cmdtab = FreshTable(self.shell_ctx).command_table
+        if self.cmdtab:
+            self.parser.load_command_table(self.cmdtab)
+            self.argsfinder = ArgsFinder(self.parser)
 
     def validate_completion(self, param, words, text_before_cursor, check_double=True):
         """ validates that a param should be completed """
