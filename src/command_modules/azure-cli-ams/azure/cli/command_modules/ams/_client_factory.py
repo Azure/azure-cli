@@ -37,3 +37,7 @@ def _graph_client_factory(cli_ctx, **_):
                                        base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     configure_common_settings(cli_ctx, client)
     return client
+
+
+def get_transforms_client(cli_ctx, *_):
+    return cf_media(cli_ctx).transforms

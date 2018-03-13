@@ -102,3 +102,39 @@ class AmsTests(ScenarioTest):
             self.check('ResourceGroup', '{rg}'),
             self.check('AccountName', '{amsname}')
         ])
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_transform(self, resource_group, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+            self.check('name', '{amsname}'),
+            self.check('location', 'West US 2')
+        ])
+
+        transformName = self.create_random_name(prefix='tra', length=10)
+
+        self.kwargs.update({
+            'transformName': transformName,
+            'presetName': 'AACGoodQualityAudio'
+        })
+
+        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --preset-name {presetName} -l {location}', checks=[
+            self.check('name', '{transformName}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.cmd('az ams transform show -a {amsname} -n {transformName} -g {rg}', checks=[
+            self.check('name', '{transformName}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        list = self.cmd('az ams transform list -a {amsname} -g {rg}').get_output_in_json()
+        assert len(list) > 0

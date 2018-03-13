@@ -281,4 +281,3 @@ def _assign_role(cmd, role, sp_oid, scope):
                     logger.warning('role assignment response headers: %s\n',
                                    ex.response.headers)  # pylint: disable=no-member
                 raise
-

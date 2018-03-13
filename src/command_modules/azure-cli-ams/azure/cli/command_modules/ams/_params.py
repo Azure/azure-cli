@@ -5,8 +5,10 @@
 
 from knack.arguments import CLIArgumentType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.commands.parameters import get_location_type
+from azure.cli.core.commands.parameters import (get_location_type, get_enum_type)
 from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
+
+from azure.mediav3.models import EncoderNamedPreset
 
 
 def load_arguments(self, _):
@@ -51,3 +53,9 @@ def load_arguments(self, _):
                    help='The name of the Azure Media Services account within the resource group.')
         c.argument('transform_name', name_arg_type,
                    help='The name of the transform.')
+
+    with self.argument_context('ams transform create') as c:
+        c.argument('location', arg_type=get_location_type(self.cli_ctx),
+                   validator=get_default_location_from_resource_group)
+        c.argument('preset_name', arg_type=get_enum_type(EncoderNamedPreset),
+                   help='The name of the built in preset to use.')

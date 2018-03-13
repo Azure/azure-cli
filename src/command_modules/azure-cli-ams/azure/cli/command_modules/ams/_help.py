@@ -94,3 +94,8 @@ helps['ams transform show'] = """
     type: command
     short-summary: Show the details of a transform.
 """
+
+helps['ams transform create'] = """
+    type: command
+    short-summary: Create a transform.
+"""

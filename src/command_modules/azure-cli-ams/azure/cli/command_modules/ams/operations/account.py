@@ -4,6 +4,7 @@
 # license information.
 # --------------------------------------------------------------------------------------------
 
+
 def list_mediaservices(client, resource_group_name=None):
     return client.list(resource_group_name) if resource_group_name else client.list_by_subscription()
 
@@ -12,7 +13,6 @@ def create_mediaservice(client, resource_group_name, account_name, storage_accou
     storage_account_id = _build_storage_account_id(client.config.subscription_id,
                                                    resource_group_name,
                                                    storage_account)
-
     from azure.mediav3.models import StorageAccount
     storage_account_primary = StorageAccount('Primary', storage_account_id)
 
@@ -25,7 +25,6 @@ def add_mediaservice_secondary_storage(client, resource_group_name, account_name
     storage_account_id = _build_storage_account_id(client.config.subscription_id,
                                                    resource_group_name,
                                                    storage_account)
-
     ams = client.get(resource_group_name, account_name)
 
     storage_accounts_filtered = list(filter(lambda s: storage_account in s.id, ams.storage_accounts))
