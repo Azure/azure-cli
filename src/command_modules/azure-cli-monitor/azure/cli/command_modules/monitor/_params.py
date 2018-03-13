@@ -102,7 +102,7 @@ def load_arguments(self, _):
         c.argument('interval', arg_group='Time')
         c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*', validator=process_metric_aggregation)
         c.argument('metricnames', options_list=['--metrics'], nargs='+', help='Space-separated list of metric names to retrieve.', validator=validate_metric_names)
-        c.ignore('timespan', 'result_type', 'top', 'orderby')
+        c.ignore('timespan', 'result_type')
     # endregion
 
     # region Autoscale
