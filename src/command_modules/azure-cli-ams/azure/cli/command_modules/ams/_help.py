@@ -104,3 +104,23 @@ helps['ams transform delete'] = """
     type: command
     short-summary: Delete a transform.
 """
+
+helps['ams transform update'] = """
+    type: command
+    short-summary: Update the details of a transform.
+"""
+
+helps['ams transform output'] = """
+    type: group
+    short-summary: Manage transform outputs for an Azure Media Services account.
+"""
+
+helps['ams transform output add'] = """
+    type: command
+    short-summary: Add an output to an existing transform.
+"""
+
+helps['ams transform output remove'] = """
+    type: command
+    short-summary: Remove an output from an existing transform.
+"""

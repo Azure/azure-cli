@@ -60,3 +60,11 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.custom_command('create', 'create_transform', custom_command_type=ams_transform_custom,
                          client_factory=get_transforms_client)
+        g.custom_command('update', 'update_transform', custom_command_type=ams_transform_custom,
+                         client_factory=get_transforms_client)
+
+    with self.command_group('ams transform output', ams_encoding_sdk) as g:
+        g.custom_command('add', 'add_transform_output', custom_command_type=ams_transform_custom,
+                         client_factory=get_transforms_client)
+        g.custom_command('remove', 'remove_transform_output', custom_command_type=ams_transform_custom,
+                         client_factory=get_transforms_client)

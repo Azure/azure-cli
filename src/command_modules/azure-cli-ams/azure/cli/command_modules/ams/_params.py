@@ -25,7 +25,8 @@ def load_arguments(self, _):
 
     with self.argument_context('ams account create') as c:
         c.argument('storage_account', storage_account_arg_type,
-                   help='The name of the primary storage account to attach to the Azure Media Services account.')
+                   help="""The name of the primary storage account to attach to the Azure Media Services account.
+                   Blob only accounts are not allowed as primary.""")
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('ams storage') as c:
@@ -62,3 +63,13 @@ def load_arguments(self, _):
                    help='The name of the built in preset to use.')
         c.argument('tags', arg_type=tags_type)
         c.argument('description', help='Customer supplied description of the transform.')
+
+    with self.argument_context('ams transform update') as c:
+        c.argument('tags', arg_type=tags_type)
+        c.argument('description', help='Customer supplied description of the transform.')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx),
+                   validator=get_default_location_from_resource_group)
+
+    with self.argument_context('ams transform output') as c:
+        c.argument('preset_name', arg_type=get_enum_type(EncoderNamedPreset),
+                   help='The name of the built in preset to use.')
