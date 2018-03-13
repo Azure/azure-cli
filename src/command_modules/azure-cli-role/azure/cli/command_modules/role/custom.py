@@ -670,15 +670,8 @@ def show_service_principal(client, identifier):
 
 def delete_service_principal(cmd, identifier):
     client = _graph_client_factory(cmd.cli_ctx)
-    sp = client.service_principals.get(_resolve_service_principal(client.service_principals, identifier))
-    app_object_id = None
-
-    # see whether we need to delete the application if it is in the same tenant
-    if sp.service_principal_names:
-        result = list(client.applications.list(
-            filter="identifierUris/any(s:s eq '{}')".format(sp.service_principal_names[0])))
-        if result:
-            app_object_id = result[0].object_id
+    sp_object_id = _resolve_service_principal(client.service_principals, identifier)
+    app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
 
     assignments = list_role_assignments(cmd, assignee=identifier, show_all=True)
     if assignments:
@@ -688,7 +681,66 @@ def delete_service_principal(cmd, identifier):
     if app_object_id:  # delete the application, and AAD service will automatically clean up the SP
         client.applications.delete(app_object_id)
     else:
-        client.service_principals.delete(sp.object_id)
+        client.service_principals.delete(sp_object_id)
+
+
+def _get_app_object_id_from_sp_object_id(client, sp_object_id):
+    sp = client.service_principals.get(sp_object_id)
+    app_object_id = None
+
+    # see whether we need to delete the application if it is in the same tenant
+    if sp.service_principal_names:
+        result = list(client.applications.list(
+            filter="identifierUris/any(s:s eq '{}')".format(sp.service_principal_names[0])))
+        if result:
+            app_object_id = result[0].object_id
+    return app_object_id
+
+
+def list_service_principal_credentials(cmd, identifier, cert=False):
+    client = _graph_client_factory(cmd.cli_ctx)
+    sp_object_id = _resolve_service_principal(client.service_principals, identifier)
+    app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
+    if cert:
+        sp_creds = list(client.service_principals.list_key_credentials(sp_object_id))
+        app_creds = list(client.applications.list_key_credentials(app_object_id))
+    else:
+        sp_creds = list(client.service_principals.list_password_credentials(sp_object_id))
+        app_creds = list(client.applications.list_password_credentials(app_object_id))
+
+    return app_creds + sp_creds
+
+
+def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
+    client = _graph_client_factory(cmd.cli_ctx)
+    sp_object_id = _resolve_service_principal(client.service_principals, identifier)
+    if cert:
+        result = list(client.service_principals.list_key_credentials(sp_object_id))
+    else:
+        result = list(client.service_principals.list_password_credentials(sp_object_id))
+
+    to_delete = next((x for x in result if x.key_id == key_id), None)
+
+    if to_delete:
+        result.remove(to_delete)
+        if cert:
+            return client.service_principals.update_key_credentials(sp_object_id, result)
+        return client.service_principals.update_password_credentials(sp_object_id, result)
+    else:
+        app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
+        if cert:
+            result = list(client.applications.list_key_credentials(app_object_id))
+        else:
+            result = list(client.applications.list_password_credentials(app_object_id))
+        to_delete = next((x for x in result if x.key_id == key_id), None)
+        if to_delete:
+            result.remove(to_delete)
+            if cert:
+                return client.applications.update_key_credentials(app_object_id, result)
+            return client.applications.update_password_credentials(app_object_id, result)
+
+    raise CLIError("'{}' does't exist in the service principal of '{}' or associated application".format(
+        key_id, identifier))
 
 
 def _resolve_service_principal(client, identifier):
