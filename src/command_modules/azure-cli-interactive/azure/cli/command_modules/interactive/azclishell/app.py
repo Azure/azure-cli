@@ -100,8 +100,7 @@ class AzInteractiveShell(object):
         os.environ[ENV_ADDITIONAL_USER_AGENT] = 'AZURECLISHELL/' + __version__
 
         # OH WHAT FUN TO FIGURE OUT WHAT THESE ARE!
-        self.cli = self.create_interface()
-        self.refresh_cli = False
+        self._cli = None
         self.layout = None
         self.description_docs = u''
         self.param_docs = u''
@@ -144,6 +143,13 @@ class AzInteractiveShell(object):
         self.cli_ctx.data["az_interactive_active"] = True
         self.run()
         self.cli_ctx.data["az_interactive_active"] = False
+
+    @property
+    def cli(self):
+        """ Makes the interface or refreshes it """
+        if self._cli is None:
+            self._cli = self.create_interface()
+        return self._cli
 
     def handle_cd(self, cmd):
         """changes dir """
@@ -190,7 +196,7 @@ class AzInteractiveShell(object):
         if not self.completer:
             self.completer.start(self, GatherCommands(self.config))
         self.completer.initialize_command_table_attributes()
-        self.cli = self.create_interface()
+        self._cli = self.create_interface()
 
     def _space_examples(self, list_examples, rows, section_value):
         """ makes the example text """
