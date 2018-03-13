@@ -33,7 +33,7 @@ def _get_test_cmd():
     return cmd
 
 
-def _mock_resource_client(cli_ctx, client_type):
+def _mock_resource_client(cli_ctx, client_type, **kwargs):
     client = mock.MagicMock()
     if client_type is ResourceType.MGMT_NETWORK:
         def _mock_list(rg):
@@ -88,7 +88,7 @@ def _mock_resource_client(cli_ctx, client_type):
     return client
 
 
-def _mock_network_client_with_existing_subnet(*_):
+def _mock_network_client_with_existing_subnet(*_, **kwargs):
     client = mock.MagicMock()
 
     def _mock_list(rg):
