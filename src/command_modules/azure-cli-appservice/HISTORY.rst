@@ -5,6 +5,7 @@ Release History
 0.1.30
 ++++++
 * webapp: az webapp update supports httpsOnly
+* webapp/functionapp:  slot support for identity assign & identity show=======
 
 0.1.29
 ++++++
