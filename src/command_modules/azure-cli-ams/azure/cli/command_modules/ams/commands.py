@@ -33,7 +33,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_mediaservice', custom_command_type=ams_custom,
                          client_factory=get_mediaservices_client,
                          exception_handler=storage_account_not_found())
-        
+
     with self.command_group('ams storage', ams_sdk) as g:
         g.custom_command('add', 'add_mediaservice_secondary_storage', custom_command_type=ams_custom,
                          client_factory=get_mediaservices_client,

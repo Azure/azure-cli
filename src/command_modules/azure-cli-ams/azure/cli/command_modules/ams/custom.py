@@ -7,12 +7,10 @@
 import importlib
 import datetime
 import time
-import uuid
+
 import re
 from dateutil.relativedelta import relativedelta
 import pytz
-
-from ._client_factory import (_graph_client_factory, _auth_client_factory)
 
 from knack.util import CLIError, todict
 from knack.log import get_logger
@@ -22,7 +20,11 @@ from azure.graphrbac.models.graph_error import GraphErrorException
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ServicePrincipalCreateParameters)
 
+from ._client_factory import (_graph_client_factory, _auth_client_factory)
+from ._utils import (_gen_guid, _is_guid)
+
 logger = get_logger(__name__)
+
 
 def list_mediaservices(client, resource_group_name=None):
     return client.list(resource_group_name) if resource_group_name else client.list_by_subscription()
@@ -126,21 +128,20 @@ def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_n
         app_object_id = _get_application_object_id(graph_client.applications, app_id)
 
         _update_password_credentials(graph_client, app_object_id, sp_password,
-                                     years, start_date, end_date)
+                                     start_date, end_date)
     else:
         aad_application = create_application(graph_client.applications,
-                                        display_name=app_display_name,
-                                        homepage=sp_name,
-                                        identifier_uris=[sp_name],
-                                        available_to_other_tenants=False,
-                                        password=sp_password,
-                                        start_date=start_date,
-                                        end_date=end_date)
+                                             display_name=app_display_name,
+                                             homepage=sp_name,
+                                             identifier_uris=[sp_name],
+                                             available_to_other_tenants=False,
+                                             password=sp_password,
+                                             start_date=start_date,
+                                             end_date=end_date)
 
         app_id = aad_application.app_id
 
         sp_oid = _create_service_principal(graph_client, name=sp_name,
-                                           password=sp_password, years=years,
                                            app_id=app_id)
 
     assignments = list_role_assignments(cmd, sp_oid)
@@ -170,7 +171,7 @@ def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_n
     return format_xml_fn(result) if xml else result
 
 
-def _update_password_credentials(client, app_object_id, sp_password, years, start_date, end_date):
+def _update_password_credentials(client, app_object_id, sp_password, start_date, end_date):
     app_creds = list(client.applications.list_password_credentials(app_object_id))
     app_creds.append(_build_password_credential(sp_password, start_date, end_date))
     client.applications.update_password_credentials(app_object_id, app_creds)
@@ -194,8 +195,7 @@ def list_role_assignments(cmd, assignee_object_id):
     assignments_client = factory.role_assignments
     definitions_client = factory.role_definitions
 
-    assignments = _search_role_assignments(assignments_client, definitions_client,
-                                           assignee_object_id)
+    assignments = _search_role_assignments(assignments_client, assignee_object_id)
 
     results = todict(assignments) if assignments else []
 
@@ -267,10 +267,6 @@ def _resolve_role_id(role, scope, definitions_client):
     return role_id
 
 
-def _gen_guid():
-    return uuid.uuid4()
-
-
 def _get_object_stubs(graph_client, assignees):
     from azure.graphrbac.models import GetObjectsParameters
     params = GetObjectsParameters(include_directory_object_references=True, object_ids=assignees)
@@ -287,8 +283,7 @@ def _build_password_credential(password, start_date, end_date):
 
 
 def _create_service_principal(
-        graph_client, name, password, years, app_id):
-    sp_oid = None
+        graph_client, name, app_id):
     _RETRY_TIMES = 36
     # retry till server replication is done
     for l in range(0, _RETRY_TIMES):
@@ -303,8 +298,7 @@ def _create_service_principal(
             else:
                 logger.warning(
                     "Creating service principal failed for appid '%s'. Trace followed:\n%s",
-                    name, ex.response.headers if hasattr(ex,
-                                                         'response') else ex)  # pylint: disable=no-member
+                    name, ex.response.headers if hasattr(ex, 'response') else ex)   # pylint: disable=no-member
                 raise
 
     return aad_sp.object_id
@@ -332,11 +326,9 @@ def create_application(client, display_name, homepage, identifier_uris,
         raise
 
 
-def _search_role_assignments(assignments_client, definitions_client,
-                             assignee_object_id):
+def _search_role_assignments(assignments_client, assignee_object_id):
     f = "principalId eq '{}'".format(assignee_object_id)
     assignments = list(assignments_client.list(filter=f))
-
     return assignments
 
 
@@ -346,25 +338,16 @@ def _assign_role(cmd, role, sp_oid, scope):
         try:
             _create_role_assignment(cmd.cli_ctx, role, sp_oid, scope)
             break
-        except Exception as ex:
+        except Exception as ex:  # pylint: disable=broad-except
             if l < _RETRY_TIMES and ' does not exist in the directory ' in str(ex):
                 time.sleep(5)
                 logger.warning('Retrying role assignment creation: %s/%s', l + 1,
-                                _RETRY_TIMES)
+                               _RETRY_TIMES)
                 continue
             else:
                 # dump out history for diagnoses
                 logger.warning('Role assignment creation failed.\n')
                 if getattr(ex, 'response', None) is not None:
                     logger.warning('role assignment response headers: %s\n',
-                                    ex.response.headers)  # pylint: disable=no-member
-            raise
-
-
-def _is_guid(guid):
-    try:
-        uuid.UUID(guid)
-        return True
-    except ValueError:
-        pass
-    return False
+                                   ex.response.headers)  # pylint: disable=no-member
+                raise

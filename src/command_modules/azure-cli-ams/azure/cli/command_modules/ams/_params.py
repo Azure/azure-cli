@@ -48,6 +48,6 @@ def load_arguments(self, _):
 
     with self.argument_context('ams transform') as c:
         c.argument('account_name', account_name_arg_type,
-            help='The name of the Azure Media Services account within the resource group.')
+                   help='The name of the Azure Media Services account within the resource group.')
         c.argument('transform_name', name_arg_type,
                    help='The name of the transform.')
