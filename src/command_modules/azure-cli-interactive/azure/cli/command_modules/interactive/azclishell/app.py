@@ -89,8 +89,8 @@ class AzInteractiveShell(object):
         self.cli_ctx = cli_ctx
         self.config = Configuration(cli_ctx.config, style=style)
         self.config.set_style(style)
-        self.styles = style or style_factory(self.config.get_style())
-        self.lexer = lexer or get_az_lexer(self.config) if self.styles else None
+        self.style = style_factory(self.config.get_style())
+        self.lexer = lexer or get_az_lexer(self.config) if self.style else None
         try:
             self.completer = completer or AzCompleter(self, GatherCommands(self.config))
             self.completer.initialize_command_table_attributes()
@@ -354,7 +354,7 @@ class AzInteractiveShell(object):
 
         return Application(
             mouse_support=False,
-            style=self.styles,
+            style=self.style,
             buffer=writing_buffer,
             on_input_timeout=self.on_input_timeout,
             key_bindings_registry=InteractiveKeyBindings(self).registry,
