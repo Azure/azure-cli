@@ -70,38 +70,24 @@ def marketplace_list_output(result):
     return result
 
 
-def budget_list_output(result):
-    result.amount = str(result.amount)
-    if result.current_spend:
-        result.current_spend.amount = str(result.current_spend.amount)
-    return result
-
-
-def budget_show_output(result):
-    result.amount = str(result.amount)
-    if result.current_spend:
-        result.current_spend.amount = str(result.current_spend.amount)
-    return result
-
-
-def budget_create_update_output(result):
-    result.amount = str(result.amount)
-    if result.current_spend:
-        result.current_spend.amount = str(result.current_spend.amount)
-    return result
-
-
 def transform_marketplace_list_output(result):
     return [marketplace_list_output(item) for item in result]
 
 
+def budget_output(result):
+    result.amount = str(result.amount)
+    if result.current_spend:
+        result.current_spend.amount = str(result.current_spend.amount)
+    return result
+
+
 def transform_budget_list_output(result):
-    return [budget_list_output(item) for item in result]
+    return [budget_output(item) for item in result]
 
 
 def transform_budget_show_output(result):
-    return budget_show_output(result)
+    return budget_output(result)
 
 
 def transform_budget_create_update_output(result):
-    return budget_create_update_output(result)
+    return budget_output(result)
