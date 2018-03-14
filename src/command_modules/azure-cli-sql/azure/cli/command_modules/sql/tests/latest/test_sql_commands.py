@@ -5,6 +5,8 @@
 
 import time
 
+from azure_devtools.scenario_tests import AllowLargeResponse
+
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError
@@ -1380,12 +1382,9 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerCapabilityScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
     def test_sql_capabilities(self):
         location = 'westus'
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 2048
         # New capabilities are added quite frequently and the state of each capability depends
         # on your subscription. So it's not a good idea to make strict checks against exactly
         # which capabilities are returned. The idea is to just check the overall structure.

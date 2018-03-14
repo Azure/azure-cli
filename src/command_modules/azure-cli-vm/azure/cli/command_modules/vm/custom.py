@@ -25,6 +25,7 @@ from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import sdk_no_wait
 
 from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
@@ -249,7 +250,7 @@ def _show_missing_access_warning(resource_group, name, command):
 class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
         super(ExtensionUpdateLongRunningOperation, self).__call__(poller)
-        # That said, we surppress the output. Operation failures will still
+        # That said, we suppress the output. Operation failures will still
         # be caught through the base class
         return None
 
@@ -283,7 +284,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
         disk.zones = zone
 
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.disks.create_or_update(resource_group_name, disk_name, disk, raw=no_wait)
+    return sdk_no_wait(no_wait, client.disks.create_or_update, resource_group_name, disk_name, disk)
 
 
 def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds):
@@ -405,6 +406,16 @@ def update_snapshot(cmd, instance, sku=None):
 
 
 # region VirtualMachines Identity
+def show_vm_identity(cmd, resource_group_name, vm_name):
+    client = _compute_client_factory(cmd.cli_ctx)
+    return client.virtual_machines.get(resource_group_name, vm_name).identity
+
+
+def show_vmss_identity(cmd, resource_group_name, vm_name):
+    client = _compute_client_factory(cmd.cli_ctx)
+    return client.virtual_machine_scale_sets.get(resource_group_name, vm_name).identity
+
+
 def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, identity_role='Contributor',
                        identity_role_id=None, identity_scope=None, port=None):
     VirtualMachineIdentity, ResourceIdentityType = cmd.get_models('VirtualMachineIdentity', 'ResourceIdentityType')
@@ -644,11 +655,11 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
     # creates the VM deployment
     if no_wait:
-        return client.create_or_update(
-            resource_group_name, deployment_name, properties, raw=no_wait)
+        return sdk_no_wait(no_wait, client.create_or_update,
+                           resource_group_name, deployment_name, properties)
     else:
-        LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
-            resource_group_name, deployment_name, properties, raw=no_wait))
+        LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
+                                                      resource_group_name, deployment_name, properties))
     vm = get_vm_details(cmd, resource_group_name, vm_name)
     if assign_identity is not None:
         if enable_local_identity and not identity_scope:
@@ -669,8 +680,10 @@ def get_vm(cmd, resource_group_name, vm_name, expand=None):
 
 def get_vm_details(cmd, resource_group_name, vm_name):
     from msrestazure.tools import parse_resource_id
+    from azure.cli.command_modules.vm._vm_utils import get_target_network_api
     result = get_instance_view(cmd, resource_group_name, vm_name)
-    network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
+    network_client = get_mgmt_service_client(
+        cmd.cli_ctx, ResourceType.MGMT_NETWORK, api_version=get_target_network_api(cmd.cli_ctx))
     public_ips = []
     fqdns = []
     private_ips = []
@@ -850,10 +863,10 @@ def set_vm(cmd, instance, lro_operation=None, no_wait=False):
     instance.resources = None  # Issue: https://github.com/Azure/autorest/issues/934
     client = _compute_client_factory(cmd.cli_ctx)
     parsed_id = _parse_rg_name(instance.id)
-    poller = client.virtual_machines.create_or_update(
-        resource_group_name=parsed_id[0],
-        vm_name=parsed_id[1],
-        parameters=instance, raw=no_wait)
+    poller = sdk_no_wait(no_wait, client.virtual_machines.create_or_update,
+                         resource_group_name=parsed_id[0],
+                         vm_name=parsed_id[1],
+                         parameters=instance)
     if lro_operation:
         return lro_operation(poller)
 
@@ -878,8 +891,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, no_wait=False, **
             disk_name = os_disk
         vm.storage_profile.os_disk.managed_disk.id = disk_id
         vm.storage_profile.os_disk.name = disk_name
-    return _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update(
-        resource_group_name, vm_name, raw=no_wait, **kwargs)
+    return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
+                       resource_group_name, vm_name, **kwargs)
 # endregion
 
 
@@ -945,11 +958,11 @@ def create_av_set(cmd, availability_set_name, resource_group_name,
         return client.validate(resource_group_name, deployment_name, properties)
 
     if no_wait:
-        return client.create_or_update(
-            resource_group_name, deployment_name, properties, raw=no_wait)
+        return sdk_no_wait(no_wait, client.create_or_update,
+                           resource_group_name, deployment_name, properties)
 
-    LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
-        resource_group_name, deployment_name, properties, raw=no_wait))
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
+                                                  resource_group_name, deployment_name, properties))
     compute_client = _compute_client_factory(cmd.cli_ctx)
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
 # endregion
@@ -1568,10 +1581,8 @@ def _update_linux_access_extension(cmd, vm_instance, resource_group_name, protec
                                   type_handler_version=version,
                                   settings={},
                                   auto_upgrade_minor_version=auto_upgrade)
-    return client.virtual_machine_extensions.create_or_update(resource_group_name,
-                                                              vm_instance.name,
-                                                              instance_name, ext,
-                                                              raw=no_wait)
+    return sdk_no_wait(no_wait, client.virtual_machine_extensions.create_or_update,
+                       resource_group_name, vm_instance.name, instance_name, ext)
 
 
 def _set_linux_user(cmd, vm_instance, resource_group_name, username,
@@ -1616,9 +1627,8 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
                                   auto_upgrade_minor_version=auto_upgrade)
 
     if no_wait:
-        return client.virtual_machine_extensions.create_or_update(resource_group_name,
-                                                                  vm_instance.name,
-                                                                  instance_name, ext, raw=no_wait)
+        return sdk_no_wait(no_wait, client.virtual_machine_extensions.create_or_update,
+                           resource_group_name, vm_instance.name, instance_name, ext)
     poller = client.virtual_machine_extensions.create_or_update(resource_group_name,
                                                                 vm_instance.name,
                                                                 instance_name, ext)
@@ -2000,11 +2010,11 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
         log_pprint_template(parameters)
-        return client.validate(resource_group_name, deployment_name, properties, raw=no_wait)
+        return sdk_no_wait(no_wait, client.validate, resource_group_name, deployment_name, properties)
 
     # creates the VMSS deployment
     deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
-        client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait))
+        sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
     if assign_identity is not None:
         vmss_info = get_vmss(cmd, resource_group_name, vmss_name)
         if enable_local_identity and not identity_scope:
@@ -2034,21 +2044,21 @@ def _build_identities_info(identities):
 def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids and len(instance_ids) == 1:
-        return client.virtual_machine_scale_set_vms.deallocate(resource_group_name, vm_scale_set_name, instance_ids[0],
-                                                               raw=no_wait)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.deallocate,
+                           resource_group_name, vm_scale_set_name, instance_ids[0])
 
-    return client.virtual_machine_scale_sets.deallocate(resource_group_name, vm_scale_set_name,
-                                                        instance_ids=instance_ids, raw=no_wait)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.deallocate,
+                       resource_group_name, vm_scale_set_name, instance_ids=instance_ids)
 
 
 def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if len(instance_ids) == 1:
-        return client.virtual_machine_scale_set_vms.delete(resource_group_name, vm_scale_set_name, instance_ids[0],
-                                                           raw=no_wait)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.delete,
+                           resource_group_name, vm_scale_set_name, instance_ids[0])
 
-    return client.virtual_machine_scale_sets.delete_instances(resource_group_name, vm_scale_set_name, instance_ids,
-                                                              raw=no_wait)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.delete_instances,
+                       resource_group_name, vm_scale_set_name, instance_ids)
 
 
 def get_vmss(cmd, resource_group_name, name):
@@ -2127,18 +2137,18 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
 def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id:
-        return client.virtual_machine_scale_set_vms.reimage(resource_group_name, vm_scale_set_name, instance_id,
-                                                            raw=no_wait)
-    return client.virtual_machine_scale_sets.reimage(resource_group_name, vm_scale_set_name, raw=no_wait)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.reimage,
+                           resource_group_name, vm_scale_set_name, instance_id)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.reimage, resource_group_name, vm_scale_set_name)
 
 
 def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids and len(instance_ids) == 1:
-        return client.virtual_machine_scale_set_vms.restart(resource_group_name, vm_scale_set_name, instance_ids[0],
-                                                            raw=no_wait)
-    return client.virtual_machine_scale_sets.restart(resource_group_name, vm_scale_set_name, instance_ids=instance_ids,
-                                                     raw=no_wait)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.restart,
+                           resource_group_name, vm_scale_set_name, instance_ids[0])
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.restart, resource_group_name, vm_scale_set_name,
+                       instance_ids=instance_ids)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -2152,15 +2162,13 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
     else:
         vmss.sku.capacity = new_capacity
     vmss_new = VirtualMachineScaleSet(vmss.location, sku=vmss.sku)
-    return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
-                                                              vm_scale_set_name,
-                                                              vmss_new,
-                                                              raw=no_wait)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
+                       resource_group_name, vm_scale_set_name, vmss_new)
 
 
 def set_vmss(cmd, resource_group_name, name, no_wait=False, **kwargs):
-    return _compute_client_factory(cmd.cli_ctx).virtual_machine_scale_sets.create_or_update(
-        resource_group_name, name, raw=no_wait, **kwargs)
+    return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machine_scale_sets.create_or_update,
+                       resource_group_name, name, **kwargs)
 
 
 def show_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
@@ -2173,29 +2181,27 @@ def show_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
 def start_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids and len(instance_ids) == 1:
-        return client.virtual_machine_scale_set_vms.start(resource_group_name, vm_scale_set_name, instance_ids[0],
-                                                          raw=no_wait)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.start,
+                           resource_group_name, vm_scale_set_name, instance_ids[0])
 
-    return client.virtual_machine_scale_sets.start(resource_group_name, vm_scale_set_name, instance_ids=instance_ids,
-                                                   raw=no_wait)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.start,
+                       resource_group_name, vm_scale_set_name, instance_ids=instance_ids)
 
 
 def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids and len(instance_ids) == 1:
-        return client.virtual_machine_scale_set_vms.power_off(resource_group_name, vm_scale_set_name,
-                                                              instance_ids[0], raw=no_wait)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.power_off,
+                           resource_group_name, vm_scale_set_name, instance_ids[0])
 
-    return client.virtual_machine_scale_sets.power_off(resource_group_name, vm_scale_set_name,
-                                                       instance_ids=instance_ids, raw=no_wait)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.power_off, resource_group_name, vm_scale_set_name,
+                       instance_ids=instance_ids)
 
 
 def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machine_scale_sets.update_instances(resource_group_name,
-                                                              vm_scale_set_name,
-                                                              instance_ids,
-                                                              raw=no_wait)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.update_instances,
+                       resource_group_name, vm_scale_set_name, instance_ids)
 # endregion
 
 

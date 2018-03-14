@@ -2,7 +2,7 @@
 
 ## Set up environment ##
 
-1. Inside a Python virtual environment, run "pip install sphinx"
+1. Inside a Python virtual environment, run "pip install sphinx==1.6.7"
 2. If Az isn't set up in this virtual environment, run "python scripts\dev_setup.py" from azure-cli
 
 ## Run Sphinx ##

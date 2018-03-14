@@ -37,8 +37,8 @@ batchai_server_sdk = CliCommandType(
 def load_command_table(self, _):
 
     with self.command_group('batchai cluster', batchai_cluster_sdk, client_factory=cluster_client_factory) as g:
-        g.custom_command('create', 'create_cluster', client_factory=batchai_client_factory, no_wait_param='raw')
-        g.command('delete', 'delete', confirmation=True, no_wait_param='raw')
+        g.custom_command('create', 'create_cluster', client_factory=batchai_client_factory, supports_no_wait=True)
+        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.command('show', 'get')
         g.custom_command('list', 'list_clusters', table_transformer=cluster_list_table_format)
         g.command('list-nodes', 'list_remote_login_information', table_transformer=remote_login_table_format)
@@ -46,9 +46,9 @@ def load_command_table(self, _):
         g.custom_command('auto-scale', 'set_cluster_auto_scale_parameters')
 
     with self.command_group('batchai job', batchai_job_sdk, client_factory=job_client_factory) as g:
-        g.custom_command('create', 'create_job', client_factory=batchai_client_factory, no_wait_param='raw')
-        g.command('delete', 'delete', confirmation=True, no_wait_param='raw')
-        g.command('terminate', 'terminate', no_wait_param='raw')
+        g.custom_command('create', 'create_job', client_factory=batchai_client_factory, supports_no_wait=True)
+        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
+        g.command('terminate', 'terminate', supports_no_wait=True)
         g.command('show', 'get')
         g.custom_command('list', 'list_jobs', table_transformer=job_list_table_format)
         g.command('list-nodes', 'list_remote_login_information', table_transformer=remote_login_table_format)
@@ -56,7 +56,7 @@ def load_command_table(self, _):
         g.custom_command('stream-file', 'tail_file')
 
     with self.command_group('batchai file-server', batchai_server_sdk, client_factory=file_server_client_factory) as g:
-        g.custom_command('create', 'create_file_server', no_wait_param='raw')
-        g.command('delete', 'delete', confirmation=True, no_wait_param='raw')
+        g.custom_command('create', 'create_file_server', supports_no_wait=True)
+        g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
         g.command('show', 'get')
         g.custom_command('list', 'list_file_servers', table_transformer=file_server_table_format)

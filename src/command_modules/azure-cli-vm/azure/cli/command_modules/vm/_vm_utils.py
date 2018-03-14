@@ -15,6 +15,18 @@ logger = get_logger(__name__)
 MSI_LOCAL_ID = '[system]'
 
 
+def get_target_network_api(cli_ctx):
+    """ Since most compute calls don't need advanced network functionality, we can target a supported, but not
+        necessarily latest, network API version is order to avoid having to re-record every test that uses VM create
+        (which there are a lot) whenever NRP bumps their API version (which is often)!
+    """
+    from azure.cli.core.profiles import get_api_version, ResourceType
+    version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
+    if cli_ctx.cloud.profile == 'latest':
+        version = '2018-01-01'
+    return version
+
+
 def read_content_if_is_file(string_or_file):
     content = string_or_file
     if os.path.exists(string_or_file):

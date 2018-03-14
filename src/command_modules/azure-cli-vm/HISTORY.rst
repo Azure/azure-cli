@@ -2,9 +2,22 @@
 
 Release History
 ===============
+
+2.0.29
+++++++
+* Minor fixes. 
+
+2.0.28
+++++++
+* vm/vmss create: support to attach unmanaged data disks and configure their caching modes 
+* vm/vmss: author managed identity commands `identity assign/remove/show`, and deprecate `assign-identity/remove-identity`
+* vmss create: default priority to None
+* Support Autorest 3.0 based SDKs
+
 2.0.27
 ++++++
 * vmss instance update: support attach/detach disks on an individual instance
+* Support Autorest 3.0 based SDKs
 
 2.0.26
 ++++++

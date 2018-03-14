@@ -187,8 +187,8 @@ def discover_tests(args):
             test_file_path = mod_data['base_path'] + '.' + file_name
             try:
                 module = import_module(test_file_path)
-            except ImportError:
-                display('Unable to import {}'.format(test_file_path))
+            except ImportError as ex:
+                display('Unable to import {}. Reason: {}'.format(test_file_path, ex))
                 continue
             module_dict = module.__dict__
             classes = {}

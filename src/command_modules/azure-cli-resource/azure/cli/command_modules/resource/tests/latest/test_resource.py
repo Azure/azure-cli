@@ -8,6 +8,7 @@ import os
 import time
 import unittest
 
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name
 from azure.cli.core.util import get_file_json
 
@@ -59,12 +60,8 @@ class ResourceGroupNoWaitScenarioTest(ScenarioTest):
 class ResourceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_resource_scenario', location='southcentralus')
+    @AllowLargeResponse()
     def test_resource_scenario(self, resource_group, resource_group_location):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 4096
-
         self.kwargs.update({
             'loc': resource_group_location,
             'vnet': self.create_random_name('vnet-', 30),
@@ -348,7 +345,8 @@ class DeploymentNoWaitTest(ScenarioTest):
                  checks=self.check('properties.provisioningState', 'Succeeded'))
 
 
-class DeploymentThruUriTest(ScenarioTest):
+# TODO: convert back to ScenarioTest when #5740 is fixed.
+class DeploymentThruUriTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_deployment_uri')
     def test_group_deployment_thru_uri(self, resource_group):
@@ -404,7 +402,8 @@ class FeatureScenarioTest(ScenarioTest):
         self.cmd('feature show --namespace Microsoft.Network -n AllowLBPreview')
 
 
-class PolicyScenarioTest(ScenarioTest):
+# TODO: convert back to ScenarioTest when #5741 is fixed.
+class PolicyScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
     def test_resource_policy(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))

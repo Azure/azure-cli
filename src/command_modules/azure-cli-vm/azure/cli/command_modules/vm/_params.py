@@ -22,7 +22,7 @@ from azure.cli.command_modules.vm._validators import (
     validate_vmss_disk, validate_asg_names_or_ids)
 
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements, too-many-branches
 def load_arguments(self, _):
     from azure.mgmt.compute.models import CachingTypes, UpgradeMode
     from azure.mgmt.storage.models import SkuName
@@ -269,7 +269,7 @@ def load_arguments(self, _):
         c.argument('health_probe', help='(Preview) probe name from the existing load balancer, mainly used for rolling upgrade')
         c.argument('vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
         c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
-        c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default='Regular'),
+        c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default=None),
                    help="(PREVIEW)Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
@@ -323,16 +323,21 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
 
-    for scope in ['vm assign-identity', 'vmss assign-identity']:
+    for scope in ['vm assign-identity', 'vmss assign-identity', 'vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             c.argument('assign_identity', options_list=['--identities'], nargs='*', help="the identities to assign")
             c.argument('port', type=int, help="The port to fetch AAD token. Default: 50342")
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 
-    for scope in ['vm remove-identity', 'vmss remove-identity']:
+    for scope in ['vm remove-identity', 'vmss remove-identity', 'vm identity remove', 'vmss identity remove']:
         with self.argument_context(scope) as c:
             c.argument('identities', nargs='+', help="space-separated user assigned identities to remove")
+            c.argument('vm_name', existing_vm_name)
+            c.argument('vmss_name', vmss_name_type)
+
+    for scope in ['vm identity show', 'vmss identity show']:
+        with self.argument_context(scope) as c:
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 
@@ -367,8 +372,9 @@ def load_arguments(self, _):
             c.argument('use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM')
             c.argument('data_disk_sizes_gb', nargs='+', type=int, help='space-separated empty managed data disk sizes in GB to create')
             c.ignore('image_data_disks', 'storage_account_type', 'public_ip_type', 'nsg_type', 'nic_type', 'vnet_type', 'load_balancer_type', 'app_gateway_type')
-            c.argument('os_caching', options_list=['--storage-caching', '--os-disk-caching'], help='Storage caching type for the VM OS disk.', arg_type=get_enum_type([CachingTypes.read_only.value, CachingTypes.read_write.value], default='ReadWrite'))
-            c.argument('data_caching', options_list=['--data-disk-caching'], help='Storage caching type for the VM data disk(s).', arg_type=get_enum_type(CachingTypes))
+            c.argument('os_caching', options_list=['--storage-caching', '--os-disk-caching'], help='Storage caching type for the VM OS disk. Default: ReadWrite', arg_type=get_enum_type(CachingTypes))
+            c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
+                       help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk")
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
@@ -387,7 +393,7 @@ def load_arguments(self, _):
             c.argument('plan_publisher', help='plan publisher')
             c.argument('plan_promotion_code', help='plan promotion code')
 
-    for scope in ['vm create', 'vmss create', 'vm assign-identity', 'vmss assign-identity']:
+    for scope in ['vm create', 'vmss create', 'vm assign-identity', 'vmss assign-identity', 'vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
             c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group, help="Scope that the system assigned identity can access")

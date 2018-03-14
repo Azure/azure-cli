@@ -4,17 +4,11 @@
 # --------------------------------------------------------------------------------------------
 import uuid
 import mock
+
 from azure.cli.testsdk import ScenarioTest
 
 
 class RoleScenarioTest(ScenarioTest):
-
-    def enable_large_payload(self, size=8192):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(
-            r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = size   # pylint: disable=protected-access
 
     def get_guid_gen_patch(self, guids, test_seam='azure.cli.command_modules.role.custom._gen_guid'):
         should_fix = self.in_recording or not (self.in_recording or self.is_live)

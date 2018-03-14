@@ -3,6 +3,16 @@
 Release History
 ===============
 
+
+2.0.30
+++++++
+* Minor fixes
+
+2.0.29
+++++++
+* Support Autorest 3.0 based SDKs
+* Support mechanism for a command module to suppress the loading of particular extensions.
+
 2.0.28
 ++++++
 * Fix issue that required extension to use `client_arg_name` keyword argument. This is no longer necessary.

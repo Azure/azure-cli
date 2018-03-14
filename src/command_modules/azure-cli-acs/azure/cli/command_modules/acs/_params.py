@@ -187,6 +187,16 @@ def load_arguments(self, _):
     with self.argument_context('aks upgrade') as c:
         c.argument('kubernetes_version', completer=get_k8s_upgrades_completion_list)
 
+    with self.argument_context('aks upgrade-connector') as c:
+        c.argument('aci_resource_group')
+        c.argument('chart_url', default=aci_connector_chart_url)
+        c.argument('client_secret')
+        c.argument('connector_name', validator=validate_connector_name)
+        c.argument('image_tag')
+        c.argument('location')
+        c.argument('os_type', get_enum_type(aci_connector_os_type))
+        c.argument('service_principal')
+
 
 def _get_default_install_location(exe_name):
     system = platform.system()
