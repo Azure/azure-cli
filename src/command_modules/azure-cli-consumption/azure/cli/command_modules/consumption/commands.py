@@ -43,19 +43,20 @@ def load_command_table(self, _):
 
     with self.command_group('consumption marketplace') as p:
         p.custom_command('list', 'cli_consumption_list_marketplace', transform=transform_marketplace_list_output,
-                         exception_handler=consumption_exception_handler, client_factory=marketplace_mgmt_client_factory)
+                         exception_handler=consumption_exception_handler, validator=validate_both_start_end_dates, client_factory=marketplace_mgmt_client_factory)
 
     with self.command_group('consumption budget') as p:
         p.custom_command('list', 'cli_consumption_list_budgets', transform=transform_budget_list_output,
-                         exception_handler=consumption_exception_handler, client_factory=budget_mgmt_client_factory)
+                         exception_handler=consumption_exception_handler, validator=None, client_factory=budget_mgmt_client_factory)
 
         p.custom_command('show', 'cli_consumption_show_budget', transform=transform_budget_show_output,
-                         exception_handler=consumption_exception_handler, client_factory=budget_mgmt_client_factory)
+                         exception_handler=consumption_exception_handler, validator=None, client_factory=budget_mgmt_client_factory)
 
         p.custom_command('create', 'cli_consumption_create_budget', transform=transform_budget_create_update_output,
                          exception_handler=consumption_exception_handler, validator=validate_budget_parameters, client_factory=budget_mgmt_client_factory)
 
-        p.generic_update_command('update', custom_func_name='update_budget')
+        p.custom_command('update', 'cli_consumption_update_budget', transform=transform_budget_create_update_output,
+                         exception_handler=consumption_exception_handler, validator=validate_budget_parameters, client_factory=budget_mgmt_client_factory)
 
-        p.custom_command('delete', 'cli_consumption_delete_budget',
+        p.custom_command('delete', 'cli_consumption_delete_budget', transform=None,
                          exception_handler=consumption_exception_handler, client_factory=budget_mgmt_client_factory)
