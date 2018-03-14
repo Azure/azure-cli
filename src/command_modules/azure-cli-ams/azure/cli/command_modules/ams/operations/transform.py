@@ -14,7 +14,7 @@ def create_transform(client, account_name, resource_group_name, transform_name, 
     return client.create_or_update(resource_group_name, account_name, transform_name, transform_parameters)
 
 
-def add_transform_output(client, account_name, resource_group_name, transform_name, preset_name):
+def add_transform_output(cmd, client, account_name, resource_group_name, transform_name, preset_name):
     from azure.mediav3.models import (TransformOutput, BuiltInStandardEncoderPreset)
 
     transform = client.get(resource_group_name, account_name, transform_name)

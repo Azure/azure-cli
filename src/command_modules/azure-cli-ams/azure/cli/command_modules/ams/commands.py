@@ -21,6 +21,11 @@ def load_command_table(self, _):
         exception_handler=ams_resource_not_found('Media Service')
     )
 
+    ams_asset_sdk = CliCommandType(
+        operations_tmpl='azure.mediav3.operations#AssetsOperations.{}',
+        client_factory=cf_media
+    )
+
     ams_account_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.ams.operations.account#{}'
     )
@@ -68,3 +73,7 @@ def load_command_table(self, _):
                          client_factory=get_transforms_client)
         g.custom_command('remove', 'remove_transform_output', custom_command_type=ams_transform_custom,
                          client_factory=get_transforms_client)
+
+    with self.command_group('ams asset', ams_asset_sdk) as g:
+        g.command('show', 'get')
+        g.command('list', 'list')

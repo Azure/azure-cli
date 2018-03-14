@@ -19,6 +19,7 @@ from .operations.jobs_operations import JobsOperations
 from .operations.operations import Operations
 from .operations.mediaservices_operations import MediaservicesOperations
 from .operations.providers_operations import ProvidersOperations
+from .operations.assets_operations import AssetsOperations
 from . import models
 
 
@@ -70,6 +71,8 @@ class AzureMediaServices(object):
     :vartype mediaservices: encoding.operations.MediaservicesOperations
     :ivar providers: Providers operations
     :vartype providers: encoding.operations.ProvidersOperations
+    :ivar assets: Assets operations
+    :vartype assets: assets.operations.AssetsOperations
 
     :param credentials: Credentials needed for the client to connect to Azure.
     :type credentials: :mod:`A msrestazure Credentials
@@ -99,4 +102,6 @@ class AzureMediaServices(object):
         self.mediaservices = MediaservicesOperations(
             self._client, self.config, self._serialize, self._deserialize)
         self.providers = ProvidersOperations(
+            self._client, self.config, self._serialize, self._deserialize)
+        self.assets = AssetsOperations(
             self._client, self.config, self._serialize, self._deserialize)

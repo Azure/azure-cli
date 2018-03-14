@@ -67,9 +67,14 @@ def load_arguments(self, _):
     with self.argument_context('ams transform update') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('description', help='Customer supplied description of the transform.')
-        c.argument('location', arg_type=get_location_type(self.cli_ctx),
-                   validator=get_default_location_from_resource_group)
+        c.argument('location', arg_type=get_location_type(self.cli_ctx))
 
     with self.argument_context('ams transform output') as c:
         c.argument('preset_name', arg_type=get_enum_type(EncoderNamedPreset),
                    help='The name of the built in preset to use.')
+
+    with self.argument_context('ams asset') as c:
+        c.argument('account_name', account_name_arg_type,
+                   help='The name of the Azure Media Services account within the resource group.')
+        c.argument('asset_name', name_arg_type,
+                   help='The name of the asset.')

@@ -82,6 +82,11 @@ from .check_name_availability_input import CheckNameAvailabilityInput
 from .subscription_media_service_collection import SubscriptionMediaServiceCollection
 from .transform_paged import TransformPaged
 from .job_paged import JobPaged
+from .list_container_sas_input import ListContainerSasInput
+from .asset_paged import AssetPaged
+from .asset_container_sas import AssetContainerSas
+from .asset_storage_encryption_key import AssetStorageEncryptionKey
+from .asset import Asset
 from .azure_media_services_enums import (
     AacAudioProfile,
     StretchMode,
@@ -107,6 +112,8 @@ from .azure_media_services_enums import (
     JobRetry,
     JobState,
     StorageAccountType,
+    AssetStorageEncryptionFormat,
+    AssetContainerPermission,
 )
 
 __all__ = [
@@ -206,4 +213,11 @@ __all__ = [
     'JobRetry',
     'JobState',
     'StorageAccountType',
+    'AssetContainerPermission',
+    'AssetStorageEncryptionFormat',
+    'AssetPaged',
+    'ListContainerSasInput',
+    'Asset',
+    'AssetStorageEncryptionKey',
+    'AssetContainerSas',
 ]

@@ -15,6 +15,7 @@ from .jobs_operations import JobsOperations
 from .operations import Operations
 from .mediaservices_operations import MediaservicesOperations
 from .providers_operations import ProvidersOperations
+from .assets_operations import AssetsOperations
 
 __all__ = [
     'TransformsOperations',
@@ -22,4 +23,5 @@ __all__ = [
     'Operations',
     'MediaservicesOperations',
     'ProvidersOperations',
+    'AssetsOperations',
 ]

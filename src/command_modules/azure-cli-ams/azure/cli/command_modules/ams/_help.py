@@ -124,3 +124,18 @@ helps['ams transform output remove'] = """
     type: command
     short-summary: Remove an output from an existing transform.
 """
+
+helps['ams asset'] = """
+    type: group
+    short-summary: Manage assets for an Azure Media Services account.
+"""
+
+helps['ams asset show'] = """
+    type: command
+    short-summary: Show the details of an asset.
+"""
+
+helps['ams asset list'] = """
+    type: command
+    short-summary: List all the assets of an Azure Media Services account.
+"""

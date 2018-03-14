@@ -22,7 +22,7 @@ class AssetsOperations(object):
     :param client: Client for service requests.
     :param config: Configuration of service client.
     :param serializer: An object model serializer.
-    :param deserializer: An objec model deserializer.
+    :param deserializer: An object model deserializer.
     :ivar api_version: The API version. Constant value: "2018-02-01-privatepreview".
     """
 
@@ -38,12 +38,16 @@ class AssetsOperations(object):
         self.config = config
 
     def list(
-            self, filter=None, top=None, orderby=None, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, account_name, filter=None, top=None, orderby=None, custom_headers=None, raw=False, **operation_config):
         """List Assets.
 
         List Assets in the Media Services account with optional filtering and
         ordering.
 
+        :param resource_group_name: The resource group name.
+        :type resource_group_name: str
+        :param account_name: The Media Services account name.
+        :type account_name: str
         :param filter: Restricts the set of items returned.
         :type filter: str
         :param top: Specifies a non-negative integer n that limits the number
@@ -66,11 +70,11 @@ class AssetsOperations(object):
 
             if not next_link:
                 # Construct URL
-                url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets'
+                url = url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/assets'
                 path_format_arguments = {
                     'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
-                    'resourceGroupName': self._serialize.url("self.config.resource_group_name", self.config.resource_group_name, 'str'),
-                    'accountName': self._serialize.url("self.config.account_name", self.config.account_name, 'str')
+                    'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
+                    'accountName': self._serialize.url("account_name", account_name, 'str')
                 }
                 url = self._client.format_url(url, **path_format_arguments)
 
@@ -119,11 +123,15 @@ class AssetsOperations(object):
         return deserialized
 
     def get(
-            self, asset_name, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, account_name, asset_name, custom_headers=None, raw=False, **operation_config):
         """Get an Asset.
 
         Get the details of an Asset in the Media Services account.
 
+        :param resource_group_name: The resource group name.
+        :type resource_group_name: str
+        :param account_name: The Media Services account name.
+        :type account_name: str
         :param asset_name: The Asset name.
         :type asset_name: str
         :param dict custom_headers: headers that will be added to the request
@@ -139,8 +147,8 @@ class AssetsOperations(object):
         url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}'
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
-            'resourceGroupName': self._serialize.url("self.config.resource_group_name", self.config.resource_group_name, 'str'),
-            'accountName': self._serialize.url("self.config.account_name", self.config.account_name, 'str'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
+            'accountName': self._serialize.url("account_name", account_name, 'str'),
             'assetName': self._serialize.url("asset_name", asset_name, 'str')
         }
         url = self._client.format_url(url, **path_format_arguments)
@@ -178,11 +186,15 @@ class AssetsOperations(object):
         return deserialized
 
     def create_or_update(
-            self, asset_name, parameters, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, account_name, asset_name, parameters, custom_headers=None, raw=False, **operation_config):
         """Create or update an Asset.
 
         Creates or updates an Asset in the Media Services account.
 
+        :param resource_group_name: The resource group name.
+        :type resource_group_name: str
+        :param account_name: The Media Services account name.
+        :type account_name: str
         :param asset_name: The Asset name.
         :type asset_name: str
         :param parameters: The request parameters.
@@ -200,8 +212,8 @@ class AssetsOperations(object):
         url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}'
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
-            'resourceGroupName': self._serialize.url("self.config.resource_group_name", self.config.resource_group_name, 'str'),
-            'accountName': self._serialize.url("self.config.account_name", self.config.account_name, 'str'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
+            'accountName': self._serialize.url("account_name", account_name, 'str'),
             'assetName': self._serialize.url("asset_name", asset_name, 'str')
         }
         url = self._client.format_url(url, **path_format_arguments)
@@ -245,11 +257,15 @@ class AssetsOperations(object):
         return deserialized
 
     def delete(
-            self, asset_name, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, account_name, asset_name, custom_headers=None, raw=False, **operation_config):
         """Delete an Asset.
 
         Deletes an Asset in the Media Services account.
 
+        :param resource_group_name: The resource group name.
+        :type resource_group_name: str
+        :param account_name: The Media Services account name.
+        :type account_name: str
         :param asset_name: The Asset name.
         :type asset_name: str
         :param dict custom_headers: headers that will be added to the request
@@ -265,8 +281,8 @@ class AssetsOperations(object):
         url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}'
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
-            'resourceGroupName': self._serialize.url("self.config.resource_group_name", self.config.resource_group_name, 'str'),
-            'accountName': self._serialize.url("self.config.account_name", self.config.account_name, 'str'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
+            'accountName': self._serialize.url("account_name", account_name, 'str'),
             'assetName': self._serialize.url("asset_name", asset_name, 'str')
         }
         url = self._client.format_url(url, **path_format_arguments)
@@ -297,11 +313,15 @@ class AssetsOperations(object):
             return client_raw_response
 
     def update(
-            self, asset_name, parameters, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, account_name, asset_name, parameters, custom_headers=None, raw=False, **operation_config):
         """Update an Asset.
 
         Updates an existing Asset in the Media Services account.
 
+        :param resource_group_name: The resource group name.
+        :type resource_group_name: str
+        :param account_name: The Media Services account name.
+        :type account_name: str
         :param asset_name: The Asset name.
         :type asset_name: str
         :param parameters: The request parameters.
@@ -319,8 +339,8 @@ class AssetsOperations(object):
         url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}'
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
-            'resourceGroupName': self._serialize.url("self.config.resource_group_name", self.config.resource_group_name, 'str'),
-            'accountName': self._serialize.url("self.config.account_name", self.config.account_name, 'str'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
+            'accountName': self._serialize.url("account_name", account_name, 'str'),
             'assetName': self._serialize.url("asset_name", asset_name, 'str')
         }
         url = self._client.format_url(url, **path_format_arguments)
@@ -362,12 +382,16 @@ class AssetsOperations(object):
         return deserialized
 
     def list_container_sas(
-            self, asset_name, permissions=None, expiry_time=None, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, account_name, asset_name, permissions=None, expiry_time=None, custom_headers=None, raw=False, **operation_config):
         """List the Asset URLs.
 
         Lists the Asset SAS URLs used for uploading and downloading Asset
         content.
 
+        :param resource_group_name: The resource group name.
+        :type resource_group_name: str
+        :param account_name: The Media Services account name.
+        :type account_name: str
         :param asset_name: The Asset name.
         :type asset_name: str
         :param permissions: The permissions to set on the SAS URL. Possible
@@ -391,8 +415,8 @@ class AssetsOperations(object):
         url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}/listContainerSas'
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
-            'resourceGroupName': self._serialize.url("self.config.resource_group_name", self.config.resource_group_name, 'str'),
-            'accountName': self._serialize.url("self.config.account_name", self.config.account_name, 'str'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
+            'accountName': self._serialize.url("account_name", account_name, 'str'),
             'assetName': self._serialize.url("asset_name", asset_name, 'str')
         }
         url = self._client.format_url(url, **path_format_arguments)
@@ -434,12 +458,16 @@ class AssetsOperations(object):
         return deserialized
 
     def get_encryption_key(
-            self, asset_name, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, account_name, asset_name, custom_headers=None, raw=False, **operation_config):
         """Gets the Asset storage key.
 
         Gets the Asset storage encryption keys used to decrypt content created
         by version 2 of the Media Services API.
 
+        :param resource_group_name: The resource group name.
+        :type resource_group_name: str
+        :param account_name: The Media Services account name.
+        :type account_name: str
         :param asset_name: The Asset name.
         :type asset_name: str
         :param dict custom_headers: headers that will be added to the request
@@ -456,8 +484,8 @@ class AssetsOperations(object):
         url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}/getEncryptionKey'
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
-            'resourceGroupName': self._serialize.url("self.config.resource_group_name", self.config.resource_group_name, 'str'),
-            'accountName': self._serialize.url("self.config.account_name", self.config.account_name, 'str'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
+            'accountName': self._serialize.url("account_name", account_name, 'str'),
             'assetName': self._serialize.url("asset_name", asset_name, 'str')
         }
         url = self._client.format_url(url, **path_format_arguments)
