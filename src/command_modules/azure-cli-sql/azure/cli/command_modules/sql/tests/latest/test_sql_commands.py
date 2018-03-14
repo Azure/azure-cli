@@ -2178,19 +2178,13 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
         s2 = ServerInfo(server_name_2, resource_group_2, resource_group_location_2)
 
-        failover_group_name = "clifgtest"
+        failover_group_name = "fgclitest201"
         database_name = "db1"
 
         server2_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}".format(
             get_subscription_id(self.cli_ctx),
             resource_group_2,
             server_name_2)
-
-        database_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}".format(
-            get_subscription_id(self.cli_ctx),
-            resource_group_1,
-            server_name_1,
-            database_name)
 
         # Create database on primary server
         self.cmd('sql db create -g {} --server {} --name {}'
@@ -2201,7 +2195,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  ])
 
         # Create Failover Group
-        self.cmd('sql failover-group create -n {} -g {} -s {} --partner-resource-group-name {} --partner-server-name {} --failover-policy Automatic --grace-period-with-data-loss 120'
+        self.cmd('sql failover-group create -n {} -g {} -s {} --partner-resource-group {} --partner-server {} --failover-policy Automatic --grace-period 120'
                  .format(failover_group_name, s1.group, s1.name, s2.group, s2.name),
                  checks=[
                      JMESPathCheck('name', failover_group_name),
@@ -2234,29 +2228,14 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('length(databases)', 0)
                  ])
 
-        # Add database to failover group
-        self.cmd('sql failover-group add-databases -g {} -s {} -n {} --databases {}'
-                 .format(s1.group, s1.name, failover_group_name, database_name),
-                 checks=[
-                     JMESPathCheck('name', failover_group_name),
-                     JMESPathCheck('length(databases)', 1),
-                     JMESPathCheck('databases[0]', database_id)
-                 ])
-
-        # Check if database is created on partner side and is part of failover group
-        self.cmd('sql db list -g {} -s {}'
-                 .format(s2.group, s2.name),
-                 checks=[
-                     JMESPathCheck('length(@)', 2)
-                 ])
-
         # Update properties of Failover Group
-        self.cmd('sql failover-group update -g {} -s {} -n {} --grace-period-with-data-loss 180'
-                 .format(s1.group, s1.name, failover_group_name),
+        self.cmd('sql failover-group update -g {} -s {} -n {} --grace-period 180 --add-db {}'
+                 .format(s1.group, s1.name, failover_group_name, database_name),
                  checks=[
                      JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
                      JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
                      JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 1)
                  ])
 
         # Check if properties got propagated to secondary server
@@ -2271,8 +2250,15 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('length(databases)', 1)
                  ])
 
+        # Check if database is created on partner side
+        self.cmd('sql db list -g {} -s {}'
+                 .format(s2.group, s2.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 2)
+                 ])
+
         # Failover failover group (planned failover)
-        self.cmd('sql failover-group failover -g {} -s {} -n {}'
+        self.cmd('sql failover-group set-primary -g {} -s {} -n {}'
                  .format(s2.group, s2.name, failover_group_name))
 
         # If you are running tests in record mode uncomment the line below
@@ -2295,7 +2281,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  ])
 
         # Fail back to original server (forced failover)
-        self.cmd('sql failover-group failover -g {} -s {} -n {} --allow-data-loss'
+        self.cmd('sql failover-group set-primary -g {} -s {} -n {} --allow-data-loss'
                  .format(s1.group, s1.name, failover_group_name))
 
         # If you are running tests in record mode uncomment the line below
@@ -2318,10 +2304,12 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  ])
 
         # Remove database from failover group
-        self.cmd('sql failover-group remove-databases -g {} -s {} -n {} --databases {}'
+        self.cmd('sql failover-group update -g {} -s {} -n {} --remove-db {}'
                  .format(s1.group, s1.name, failover_group_name, database_name),
                  checks=[
-                     JMESPathCheck('name', failover_group_name),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
                      JMESPathCheck('length(databases)', 0)
                  ])
 

@@ -1017,30 +1017,42 @@ def elastic_pool_list_capabilities(
 ###############################################
 #              sql failover-group             #
 ###############################################
+# pylint: disable=too-few-public-methods
+class FailoverPolicyType(Enum):
+    automatic = 'Automatic'
+    manual = 'Manual'
+
+
 def failover_group_create(
         cmd,
         client,
         resource_group_name,
         server_name,
         failover_group_name,
-        partner_server_name,
-        partner_resource_group_name=None,
-        failover_policy="Automatic",
-        grace_period_with_data_loss=60,
-        allow_read_only_failover_to_primary=False):
+        partner_server,
+        partner_resource_group=None,
+        failover_policy=FailoverPolicyType.automatic.value,
+        grace_period=60,
+        add_db=None):
 
     # Build the partner server id
     partner_server_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}".format(
         quote(get_subscription_id(cmd.cli_ctx)),
-        quote(partner_resource_group_name or resource_group_name),
-        quote(partner_server_name))
+        quote(partner_resource_group or resource_group_name),
+        quote(partner_server))
 
     partner_server = PartnerInfo(id=partner_server_id)
 
-    # Calculate the failover policy of read only endpoint
-    read_only_failover_policy = "Disabled"
-    if allow_read_only_failover_to_primary:
-        read_only_failover_policy = "Enabled"
+    if add_db is None:
+        add_db = []
+
+    databases = _get_list_of_databases_for_fg(
+        get_subscription_id(cmd.cli_ctx),
+        resource_group_name,
+        server_name,
+        [],
+        add_db,
+        [])
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
@@ -1048,21 +1060,24 @@ def failover_group_create(
         failover_group_name=failover_group_name,
         parameters=FailoverGroup(
             partner_servers=[partner_server],
+            databases=databases,
             read_write_endpoint=FailoverGroupReadWriteEndpoint(
                 failover_policy=failover_policy,
-                failover_with_data_loss_grace_period_minutes=grace_period_with_data_loss),
+                failover_with_data_loss_grace_period_minutes=grace_period),
             read_only_endpoint=FailoverGroupReadOnlyEndpoint(
-                failover_policy=read_only_failover_policy)))
+                failover_policy="Disabled")))
 
 
 def failover_group_update(
+        cmd,
         client,
         resource_group_name,
         server_name,
         failover_group_name,
         failover_policy=None,
-        grace_period_with_data_loss=None,
-        allow_read_only_failover_to_primary=None):
+        grace_period=None,
+        add_db=None,
+        remove_db=None):
 
     failover_group = client.get(
         resource_group_name=resource_group_name,
@@ -1072,19 +1087,25 @@ def failover_group_update(
     if failover_policy is None:
         failover_policy = failover_group.read_write_endpoint.failover_policy
 
-    if grace_period_with_data_loss is None:
-        grace_period_with_data_loss = failover_group.read_write_endpoint.failover_with_data_loss_grace_period_minutes
+    if grace_period is None:
+        grace_period = failover_group.read_write_endpoint.failover_with_data_loss_grace_period_minutes
 
     if failover_policy == 'Manual':
-        grace_period_with_data_loss = None
+        grace_period = None
 
-    if allow_read_only_failover_to_primary is None:
-        read_only_failover_policy = failover_group.read_only_endpoint.failover_policy
-    else:
-        if allow_read_only_failover_to_primary:
-            read_only_failover_policy = 'Enabled'
-        else:
-            read_only_failover_policy = 'Disabled'
+    if add_db is None:
+        add_db = []
+
+    if remove_db is None:
+        remove_db = []
+
+    databases = _get_list_of_databases_for_fg(
+        get_subscription_id(cmd.cli_ctx),
+        resource_group_name,
+        server_name,
+        failover_group.databases,
+        add_db,
+        remove_db)
 
     return client.create_or_update(
         resource_group_name=resource_group_name,
@@ -1092,76 +1113,37 @@ def failover_group_update(
         failover_group_name=failover_group_name,
         parameters=FailoverGroup(
             partner_servers=failover_group.partner_servers,
-            databases=failover_group.databases,
+            databases=databases,
             read_write_endpoint=FailoverGroupReadWriteEndpoint(
                 failover_policy=failover_policy,
-                failover_with_data_loss_grace_period_minutes=grace_period_with_data_loss),
+                failover_with_data_loss_grace_period_minutes=grace_period),
             read_only_endpoint=FailoverGroupReadOnlyEndpoint(
-                failover_policy=read_only_failover_policy)))
+                failover_policy=failover_group.read_only_endpoint.failover_policy)))
 
 
-def failover_group_add_databases(
-        cmd,
-        client,
+def _get_list_of_databases_for_fg(
+        subscription_id,
         resource_group_name,
         server_name,
-        failover_group_name,
-        databases):
+        databases_in_fg,
+        add_db,
+        remove_db):
 
-    failover_group = client.get(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        failover_group_name=failover_group_name)
-
-    databases_ids = ["/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}".format(
-        quote(get_subscription_id(cmd.cli_ctx)),
+    add_db_ids = ["/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}".format(
+        quote(subscription_id),
         quote(resource_group_name),
         quote(server_name),
-        quote(d)) for d in databases]
+        quote(d)) for d in add_db]
 
-    databases_in_fg = list(set(failover_group.databases) | set(databases_ids))
-
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        failover_group_name=failover_group_name,
-        parameters=FailoverGroup(
-            partner_servers=failover_group.partner_servers,
-            read_write_endpoint=failover_group.read_write_endpoint,
-            read_only_endpoint=failover_group.read_only_endpoint,
-            databases=databases_in_fg))
-
-
-def failover_group_remove_databases(
-        cmd,
-        client,
-        resource_group_name,
-        server_name,
-        failover_group_name,
-        databases):
-
-    databases_ids = ["/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}".format(
-        quote(get_subscription_id(cmd.cli_ctx)),
+    remove_db_ids = ["/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}".format(
+        quote(subscription_id),
         quote(resource_group_name),
         quote(server_name),
-        quote(d)) for d in databases]
+        quote(d)) for d in remove_db]
 
-    failover_group = client.get(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        failover_group_name=failover_group_name)
+    databases = list((set(databases_in_fg) | set(add_db_ids)) - set(remove_db_ids))
 
-    databases_in_fg = list(set(failover_group.databases) - set(databases_ids))
-
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        failover_group_name=failover_group_name,
-        parameters=FailoverGroup(
-            partner_servers=failover_group.partner_servers,
-            read_write_endpoint=failover_group.read_write_endpoint,
-            read_only_endpoint=failover_group.read_only_endpoint,
-            databases=databases_in_fg))
+    return databases
 
 
 def failover_group_failover(
@@ -1170,6 +1152,14 @@ def failover_group_failover(
         server_name,
         failover_group_name,
         allow_data_loss=False):
+
+    failover_group = client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        failover_group_name=failover_group_name)
+
+    if failover_group.replication_role == "Primary":
+        return
 
     # Choose which failover method to use
     if allow_data_loss:

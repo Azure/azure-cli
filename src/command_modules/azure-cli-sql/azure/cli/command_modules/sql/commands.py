@@ -174,9 +174,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'failover_group_create')
         g.custom_command('update', 'failover_group_update')
         g.command('delete', 'delete')
-        g.custom_command('add-databases', 'failover_group_add_databases')
-        g.custom_command('remove-databases', 'failover_group_remove_databases')
-        g.custom_command('failover', 'failover_group_failover')
+        g.custom_command('set-primary', 'failover_group_failover')
 
     ###############################################
     #                sql server                   #

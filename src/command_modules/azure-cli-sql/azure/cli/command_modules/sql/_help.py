@@ -299,15 +299,7 @@ helps['sql failover-group update'] = """
     type: command
     short-summary: Updates the parameters of the failover group.
 """
-helps['sql failover-group add-databases'] = """
-    type: command
-    short-summary: Adds provided list of databases to the failover group.
-"""
-helps['sql failover-group remove-databases'] = """
-    type: command
-    short-summary: Removes provided list of databases from failover group.
-"""
-helps['sql failover-group failover'] = """
+helps['sql failover-group set-primary'] = """
     type: command
     short-summary: Executes a failover of a failover group.
 """
