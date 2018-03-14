@@ -81,5 +81,6 @@ def load_command_table(self, _):
     with self.command_group('ams asset', ams_asset_sdk) as g:
         g.command('show', 'get')
         g.command('list', 'list')
+        g.command('delete', 'delete')
         g.custom_command('create', 'create_asset', custom_command_type=ams_asset_custom,
                          client_factory=get_assets_client)

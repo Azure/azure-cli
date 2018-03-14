@@ -183,3 +183,5 @@ class AmsTests(ScenarioTest):
 
         list = self.cmd('az ams asset list -a {amsname} -g {rg}').get_output_in_json()
         assert len(list) > 0
+
+        self.cmd('az ams asset delete -n {assetName} -a {amsname} -g {rg}')

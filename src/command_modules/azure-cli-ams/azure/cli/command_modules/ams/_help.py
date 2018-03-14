@@ -139,3 +139,13 @@ helps['ams asset list'] = """
     type: command
     short-summary: List all the assets of an Azure Media Services account.
 """
+
+helps['ams asset create'] = """
+    type: command
+    short-summary: Create an asset.
+"""
+
+helps['ams asset delete'] = """
+    type: command
+    short-summary: Delete an asset.
+"""
