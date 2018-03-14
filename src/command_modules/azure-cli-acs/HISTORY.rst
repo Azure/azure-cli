@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.29
+++++++
+* use TLSv1 in Cloud Shell / PS to avoid a certificate verification error for `az aks install-cli`
+
 2.0.28
 ++++++
 * Support Autorest 3.0 based SDKs
