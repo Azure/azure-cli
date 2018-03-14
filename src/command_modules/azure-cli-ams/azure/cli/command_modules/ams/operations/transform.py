@@ -39,8 +39,8 @@ def remove_transform_output(client, account_name, resource_group_name, transform
 def update_transform(client, account_name, resource_group_name, transform_name, location=None, description=None, tags=None):
     transform = client.get(resource_group_name, account_name, transform_name)
 
-    transform.location = location
-    transform.description = description
-    transform.tags = tags
+    transform.location = transform.location if location is None else location
+    transform.description = transform.description if description is None else description
+    transform.tags = transform.tags if tags is None else tags
 
     return client.create_or_update(resource_group_name, account_name, transform_name, transform)
