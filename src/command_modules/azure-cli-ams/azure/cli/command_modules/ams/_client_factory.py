@@ -41,3 +41,7 @@ def _graph_client_factory(cli_ctx, **_):
 
 def get_transforms_client(cli_ctx, *_):
     return cf_media(cli_ctx).transforms
+
+
+def get_assets_client(cli_ctx, *_):
+    return cf_media(cli_ctx).assets

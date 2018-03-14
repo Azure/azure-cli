@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from ._client_factory import (cf_media, get_mediaservices_client, get_transforms_client)
+from ._client_factory import (cf_media, get_mediaservices_client, get_transforms_client, get_assets_client)
 from ._exception_handler import (ams_resource_not_found, storage_account_not_found)
 
 
@@ -36,6 +36,10 @@ def load_command_table(self, _):
 
     ams_transform_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.ams.operations.transform#{}'
+    )
+
+    ams_asset_custom = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.ams.operations.asset#{}'
     )
 
     with self.command_group('ams account', ams_sdk) as g:
@@ -77,3 +81,5 @@ def load_command_table(self, _):
     with self.command_group('ams asset', ams_asset_sdk) as g:
         g.command('show', 'get')
         g.command('list', 'list')
+        g.custom_command('create', 'create_asset', custom_command_type=ams_asset_custom,
+                         client_factory=get_assets_client)

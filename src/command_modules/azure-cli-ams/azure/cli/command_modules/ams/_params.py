@@ -76,5 +76,9 @@ def load_arguments(self, _):
     with self.argument_context('ams asset') as c:
         c.argument('account_name', account_name_arg_type,
                    help='The name of the Azure Media Services account within the resource group.')
-        c.argument('asset_name', name_arg_type,
-                   help='The name of the asset.')
+        c.argument('asset_name', name_arg_type, help='The name of the asset.')
+
+    with self.argument_context('ams asset create') as c:
+        c.argument('alternate_id', help='The alternate id of the asset.')
+        c.argument('description', help='The asset description.')
+        c.argument('asset_name', name_arg_type, help='The name of the asset.')

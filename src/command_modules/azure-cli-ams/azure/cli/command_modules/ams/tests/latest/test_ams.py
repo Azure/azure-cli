@@ -140,3 +140,46 @@ class AmsTests(ScenarioTest):
         assert len(list) > 0
 
         self.cmd('az ams transform delete -n {transformName} -a {amsname} -g {rg}')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_asset(self, resource_group, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+            self.check('name', '{amsname}'),
+            self.check('location', 'West US 2')
+        ])
+
+        assetName = self.create_random_name(prefix='asset', length=12)
+        alternateId = self.create_random_name(prefix='aid', length=12)
+        description = self.create_random_name(prefix='desc', length=12)
+
+        self.kwargs.update({
+            'assetName': assetName,
+            'alternateId': alternateId,
+            'description': description
+        })
+
+        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg} -a {amsname} --description {description} --alternate-id {alternateId}', checks=[
+            self.check('name', '{assetName}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('alternateId', '{alternateId}'),
+            self.check('description', '{description}')
+        ])
+
+        self.cmd('az ams asset show -a {amsname} -n {assetName} -g {rg}', checks=[
+            self.check('name', '{assetName}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('alternateId', '{alternateId}'),
+            self.check('description', '{description}')
+        ])
+
+        list = self.cmd('az ams asset list -a {amsname} -g {rg}').get_output_in_json()
+        assert len(list) > 0
