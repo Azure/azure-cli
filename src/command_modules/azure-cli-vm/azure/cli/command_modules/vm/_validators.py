@@ -538,7 +538,8 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
 def _subnet_capacity_check(subnet_mask, vmss_instance_count):
     mask = int(subnet_mask)
     # '2' are the reserved broadcasting addresses
-    return ((1 << (32 - mask)) - 2) > vmss_instance_count
+    # factor of 1.5 so we have the leeway for over-provision
+    return ((1 << (32 - mask)) - 2) > int(vmss_instance_count * 1.5)
 
 
 def _validate_vmss_create_subnet(namespace):

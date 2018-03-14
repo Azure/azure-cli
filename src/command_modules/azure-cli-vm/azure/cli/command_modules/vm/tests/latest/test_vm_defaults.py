@@ -187,7 +187,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         ns.app_gateway_subnet_address_prefix = '10.0.1.0/22'
         ns.instance_count = 1000
         _validate_vmss_create_subnet(ns)
-        self.assertEqual('10.0.0.0/22', ns.subnet_address_prefix)
+        self.assertEqual('10.0.0.0/21', ns.subnet_address_prefix)
 
     def test_new_subnet_size_for_small_vmss(self):
         ns = argparse.Namespace()
