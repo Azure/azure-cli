@@ -852,7 +852,7 @@ def _find_property(instance, path):
 def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
     import time
     from azure.mgmt.authorization import AuthorizationManagementClient
-    from azure.mgmt.authorization.models import RoleAssignmentProperties
+    from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
     from msrestazure.azure_exceptions import CloudError
 
     # get
@@ -865,14 +865,15 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
 
         identity_role_id = resolve_role_id(cli_ctx, identity_role, identity_scope)
         assignments_client = get_mgmt_service_client(cli_ctx, AuthorizationManagementClient).role_assignments
-        properties = RoleAssignmentProperties(identity_role_id, principal_id)
+        parameters = RoleAssignmentCreateParameters(role_definition_id=identity_role_id, principal_id=principal_id)
 
         logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
         retry_times = 36
-        assignment_id = _gen_guid()
+        assignment_name = _gen_guid()
         for l in range(0, retry_times):
             try:
-                assignments_client.create(identity_scope, assignment_id, properties)
+                assignments_client.create(scope=identity_scope, role_assignment_name=assignment_name,
+                                          parameters=parameters)
                 break
             except CloudError as ex:
                 if 'role assignment already exists' in ex.message:

@@ -73,7 +73,7 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
         self.cli_ctx = TestCli()
         self.name_replacer = GeneralNameReplacer()
         self.kwargs = {}
-
+        self.test_guid_count = 0
         default_recording_processors = [
             SubscriptionRecordingProcessor(MOCKED_SUBSCRIPTION_ID),
             OAuthRequestResponsesFilter(),
@@ -130,6 +130,21 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
             return name
 
         return moniker
+
+    # Use this helper to make playback work when guids are created and used in request urls, e.g. role assignment or AAD
+    # service principals. For usages, in test code, patch the "guid-gen" routine to this one, e.g.
+    # with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid)
+    def create_guid(self):
+        import uuid
+        self.test_guid_count += 1
+        moniker = '88888888-0000-0000-0000-00000000' + ("%0.4X" % self.test_guid_count)
+
+        if self.in_recording:
+            name = uuid.uuid4()
+            self.name_replacer.register_name_pair(str(name), moniker)
+            return name
+
+        return uuid.UUID(moniker)
 
     def cmd(self, command, checks=None, expect_failure=False):
         command = self._apply_kwargs(command)

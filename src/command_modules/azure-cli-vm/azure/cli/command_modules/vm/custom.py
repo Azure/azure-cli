@@ -629,7 +629,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         role_assignment_guid = None
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
-            master_template.add_resource(build_msi_role_assignment(cmd, vm_name, vm_id, identity_role_id,
+            master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope))
         master_template.add_resource(build_vm_msi_extension(cmd, vm_name, location, role_assignment_guid, _MSI_PORT,
                                                             os_type.lower() != 'windows', _MSI_EXTENSION_VERSION))
@@ -1973,7 +1973,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
             assign_identity)
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
-            master_template.add_resource(build_msi_role_assignment(cmd, vmss_name, vmss_id, identity_role_id,
+            master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope, False))
         # pylint: disable=line-too-long
         msi_extention_type = 'ManagedIdentityExtensionFor' + ('Windows' if os_type.lower() == 'windows' else 'Linux')

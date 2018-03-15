@@ -175,6 +175,12 @@ helps['role definition create'] = """
                         "Microsoft.Insights/alertRules/*",
                         "Microsoft.Support/*"
                     ],
+                    "DataActions": [
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
+                    ],
+                    "NotDataActions": [
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
+                    ],
                     "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
                 }'
         - name: Create a role from a file containing a JSON description.
@@ -214,6 +220,12 @@ helps['role definition update'] = """
                         "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
                         "Microsoft.Insights/alertRules/*",
                         "Microsoft.Support/*"
+                    ],
+                    "DataActions": [
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
+                    ],
+                    "NotDataActions": [
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
                     ],
                     "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
                 }'

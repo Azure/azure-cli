@@ -89,6 +89,7 @@ def load_arguments(self, _):
 
     with self.argument_context('webapp update') as c:
         c.argument('client_affinity_enabled', help="Enables sending session affinity cookies.", arg_type=get_three_state_flag(return_label=True))
+        c.argument('https_only', help="Redirect all traffic made to an app using HTTP to HTTPS.", arg_type=get_three_state_flag(return_label=True))
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true', help='Enable viewing the log stream immediately after launching the web app')
     with self.argument_context('webapp delete') as c:
