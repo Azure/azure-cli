@@ -239,9 +239,12 @@ class ProviderOperationTest(ScenarioTest):
             self.check('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
             self.check('type', 'Microsoft.Authorization/providerOperations')
         ])
-        self.cmd('provider operation show --namespace microsoft.compute --api-version 2015-07-01', checks=[
+        self.cmd('provider operation show --namespace microsoft.compute', checks=[
             self.check('id', '/providers/Microsoft.Authorization/providerOperations/Microsoft.Compute'),
             self.check('type', 'Microsoft.Authorization/providerOperations')
+        ])
+        self.cmd('provider operation show --namespace microsoft.storage', checks=[
+            self.check("resourceTypes|[?name=='storageAccounts/blobServices/containers/blobs']|[0].operations[0].isDataAction", True),
         ])
 
 
