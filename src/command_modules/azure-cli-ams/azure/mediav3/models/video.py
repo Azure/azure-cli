@@ -31,10 +31,10 @@ class Video(Codec):
     :type key_frame_interval: timedelta
     :param stretch_mode: Gets or sets the Resolution Mode. Possible values
      include: 'None', 'AutoSize', 'AutoFit'
-    :type stretch_mode: str or ~encoding.models.StretchMode
+    :type stretch_mode: str or ~accounts.models.StretchMode
     :param sync_mode: Gets or sets the Video Sync Mode. Possible values
      include: 'Auto', 'Passthrough', 'Cfr', 'Vfr', 'Drop'
-    :type sync_mode: str or ~encoding.models.VideoSyncMode
+    :type sync_mode: str or ~accounts.models.VideoSyncMode
     """
 
     _validation = {

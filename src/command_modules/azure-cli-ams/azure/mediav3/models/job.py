@@ -30,20 +30,20 @@ class Job(Model):
     :ivar state: The current state of the job. Possible values include:
      'Canceled', 'Canceling', 'Error', 'Finished', 'Processing', 'Queued',
      'Scheduled'
-    :vartype state: str or ~encoding.models.JobState
+    :vartype state: str or ~accounts.models.JobState
     :param description: The customer supplied description of the Job.
     :type description: str
     :param input: The inputs for the Job.
-    :type input: ~encoding.models.JobInput
+    :type input: ~accounts.models.JobInput
     :ivar last_modified: The date and time when the Job was last updated.
     :vartype last_modified: datetime
     :param outputs: The outputs for the Job.
-    :type outputs: list[~encoding.models.JobOutput]
+    :type outputs: list[~accounts.models.JobOutput]
     :param priority: Priority with which the job should be processed.  Higher
      priority jobs are processed before lower priority jobs if there is
      resource contention. If not set, the default is normal. Possible values
      include: 'Low', 'Normal', 'High'
-    :type priority: str or ~encoding.models.Priority
+    :type priority: str or ~accounts.models.Priority
     """
 
     _validation = {

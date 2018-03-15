@@ -22,7 +22,7 @@ class JobsOperations(object):
     :param client: Client for service requests.
     :param config: Configuration of service client.
     :param serializer: An object model serializer.
-    :param deserializer: An objec model deserializer.
+    :param deserializer: An object model deserializer.
     :ivar api_version: The API version. Constant value: "2018-02-01-privatepreview".
     """
 
@@ -65,14 +65,14 @@ class JobsOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: An iterator like instance of Job
-        :rtype: ~encoding.models.JobPaged[~encoding.models.Job]
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :rtype: ~accounts.models.JobPaged[~accounts.models.Job]
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         def internal_paging(next_link=None, raw=False):
 
             if not next_link:
                 # Construct URL
-                url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs'
+                url = self.list.metadata['url']
                 path_format_arguments = {
                     'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
                     'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -124,6 +124,7 @@ class JobsOperations(object):
             return client_raw_response
 
         return deserialized
+    list.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs'}
 
     def get(
             self, resource_group_name, account_name, transform_name, job_name, custom_headers=None, raw=False, **operation_config):
@@ -145,11 +146,11 @@ class JobsOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: Job or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.Job or ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :rtype: ~accounts.models.Job or ~msrest.pipeline.ClientRawResponse
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs/{jobName}'
+        url = self.get.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -190,6 +191,7 @@ class JobsOperations(object):
             return client_raw_response
 
         return deserialized
+    get.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs/{jobName}'}
 
     def create_or_update(
             self, resource_group_name, account_name, transform_name, job_name, parameters, custom_headers=None, raw=False, **operation_config):
@@ -206,18 +208,18 @@ class JobsOperations(object):
         :param job_name: The Job name.
         :type job_name: str
         :param parameters:
-        :type parameters: ~encoding.models.Job
+        :type parameters: ~accounts.models.Job
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: Job or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.Job or ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :rtype: ~accounts.models.Job or ~msrest.pipeline.ClientRawResponse
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs/{jobName}'
+        url = self.create_or_update.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -262,6 +264,7 @@ class JobsOperations(object):
             return client_raw_response
 
         return deserialized
+    create_or_update.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs/{jobName}'}
 
     def delete(
             self, resource_group_name, account_name, transform_name, job_name, custom_headers=None, raw=False, **operation_config):
@@ -284,10 +287,10 @@ class JobsOperations(object):
          overrides<msrest:optionsforoperations>`.
         :return: None or ClientRawResponse if raw=true
         :rtype: None or ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs/{jobName}'
+        url = self.delete.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -321,6 +324,7 @@ class JobsOperations(object):
         if raw:
             client_raw_response = ClientRawResponse(None, response)
             return client_raw_response
+    delete.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs/{jobName}'}
 
     def cancel_job(
             self, resource_group_name, account_name, transform_name, job_name, custom_headers=None, raw=False, **operation_config):
@@ -343,10 +347,10 @@ class JobsOperations(object):
          overrides<msrest:optionsforoperations>`.
         :return: None or ClientRawResponse if raw=true
         :rtype: None or ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs/{jobName}/cancelJob'
+        url = self.cancel_job.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -380,3 +384,4 @@ class JobsOperations(object):
         if raw:
             client_raw_response = ClientRawResponse(None, response)
             return client_raw_response
+    cancel_job.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}/jobs/{jobName}/cancelJob'}

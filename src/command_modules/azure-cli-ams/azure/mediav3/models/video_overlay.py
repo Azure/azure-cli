@@ -44,7 +44,7 @@ class VideoOverlay(Overlay):
     :type odatatype: str
     :param position: Gets or sets the area in the video where the overlay is
      applied.
-    :type position: ~encoding.models.Rectangle
+    :type position: ~accounts.models.Rectangle
     :param opacity: Gets or sets the opacity of the overlay.
     :type opacity: float
     :param preserve_aspect_ratio: Gets or sets a value indicating whether the
@@ -53,7 +53,7 @@ class VideoOverlay(Overlay):
     :type preserve_aspect_ratio: bool
     :param crop_rectangle: Gets or sets the optional rectangle to crop the
      video overlay.
-    :type crop_rectangle: ~encoding.models.Rectangle
+    :type crop_rectangle: ~accounts.models.Rectangle
     """
 
     _validation = {

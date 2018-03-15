@@ -22,7 +22,7 @@ class TransformsOperations(object):
     :param client: Client for service requests.
     :param config: Configuration of service client.
     :param serializer: An object model serializer.
-    :param deserializer: An objec model deserializer.
+    :param deserializer: An object model deserializer.
     :ivar api_version: The API version. Constant value: "2018-02-01-privatepreview".
     """
 
@@ -63,14 +63,14 @@ class TransformsOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: An iterator like instance of Transform
-        :rtype: ~encoding.models.TransformPaged[~encoding.models.Transform]
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :rtype: ~accounts.models.TransformPaged[~accounts.models.Transform]
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         def internal_paging(next_link=None, raw=False):
 
             if not next_link:
                 # Construct URL
-                url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms'
+                url = self.list.metadata['url']
                 path_format_arguments = {
                     'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
                     'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -121,6 +121,7 @@ class TransformsOperations(object):
             return client_raw_response
 
         return deserialized
+    list.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms'}
 
     def get(
             self, resource_group_name, account_name, transform_name, custom_headers=None, raw=False, **operation_config):
@@ -140,12 +141,12 @@ class TransformsOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: Transform or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.Transform or
+        :rtype: ~accounts.models.Transform or
          ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}'
+        url = self.get.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -185,6 +186,7 @@ class TransformsOperations(object):
             return client_raw_response
 
         return deserialized
+    get.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}'}
 
     def create_or_update(
             self, resource_group_name, account_name, transform_name, parameters, custom_headers=None, raw=False, **operation_config):
@@ -199,19 +201,19 @@ class TransformsOperations(object):
         :param transform_name: The Transform name.
         :type transform_name: str
         :param parameters:
-        :type parameters: ~encoding.models.Transform
+        :type parameters: ~accounts.models.Transform
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: Transform or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.Transform or
+        :rtype: ~accounts.models.Transform or
          ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}'
+        url = self.create_or_update.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -257,6 +259,7 @@ class TransformsOperations(object):
             return client_raw_response
 
         return deserialized
+    create_or_update.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}'}
 
     def delete(
             self, resource_group_name, account_name, transform_name, custom_headers=None, raw=False, **operation_config):
@@ -277,10 +280,10 @@ class TransformsOperations(object):
          overrides<msrest:optionsforoperations>`.
         :return: None or ClientRawResponse if raw=true
         :rtype: None or ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}'
+        url = self.delete.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -313,6 +316,7 @@ class TransformsOperations(object):
         if raw:
             client_raw_response = ClientRawResponse(None, response)
             return client_raw_response
+    delete.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}'}
 
     def update(
             self, resource_group_name, account_name, transform_name, parameters, custom_headers=None, raw=False, **operation_config):
@@ -327,19 +331,19 @@ class TransformsOperations(object):
         :param transform_name: The Transform name.
         :type transform_name: str
         :param parameters:
-        :type parameters: ~encoding.models.Transform
+        :type parameters: ~accounts.models.Transform
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: Transform or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.Transform or
+        :rtype: ~accounts.models.Transform or
          ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}'
+        url = self.update.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -383,3 +387,4 @@ class TransformsOperations(object):
             return client_raw_response
 
         return deserialized
+    update.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/transforms/{transformName}'}

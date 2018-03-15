@@ -13,6 +13,27 @@
 from enum import Enum
 
 
+class StorageAccountType(Enum):
+
+    primary = "Primary"
+    secondary = "Secondary"
+
+
+class AssetStorageEncryptionFormat(Enum):
+
+    none = "None"
+    media_storage_client_encryption = "MediaStorageClientEncryption"
+    static_common_encryption = "StaticCommonEncryption"
+    static_envelope_encryption = "StaticEnvelopeEncryption"
+
+
+class AssetContainerPermission(Enum):
+
+    read = "Read"
+    read_write = "ReadWrite"
+    read_write_delete = "ReadWriteDelete"
+
+
 class AacAudioProfile(Enum):
 
     aac_lc = "AacLc"
@@ -189,24 +210,3 @@ class JobState(Enum):
     processing = "Processing"
     queued = "Queued"
     scheduled = "Scheduled"
-
-
-class StorageAccountType(Enum):
-
-    primary = "Primary"
-    secondary = "Secondary"
-
-
-class AssetStorageEncryptionFormat(Enum):
-
-    none = "None"
-    media_storage_client_encryption = "MediaStorageClientEncryption"
-    static_common_encryption = "StaticCommonEncryption"
-    static_envelope_encryption = "StaticEnvelopeEncryption"
-
-
-class AssetContainerPermission(Enum):
-
-    read = "Read"
-    read_write = "ReadWrite"
-    read_write_delete = "ReadWriteDelete"

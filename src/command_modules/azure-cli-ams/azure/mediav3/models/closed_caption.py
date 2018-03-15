@@ -28,10 +28,10 @@ class ClosedCaption(Codec):
     :type input_file: str
     :param output_type: Gets or sets the closed caption output type. Possible
      values include: 'SideCar', 'Stream', 'Embedded'
-    :type output_type: str or ~encoding.models.ClosedCaptionType
+    :type output_type: str or ~accounts.models.ClosedCaptionType
     :param format: Gets or sets the Closed Caption output format. Possible
      values include: 'Ttml', 'WebVtt'
-    :type format: str or ~encoding.models.ClosedCaptionFormat
+    :type format: str or ~accounts.models.ClosedCaptionFormat
     """
 
     _validation = {

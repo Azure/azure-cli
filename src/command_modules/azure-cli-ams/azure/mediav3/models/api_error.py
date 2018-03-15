@@ -18,7 +18,7 @@ class ApiError(Model):
     """The error properties.
 
     :param error: The error properties.
-    :type error: ~encoding.models.ODataError
+    :type error: ~accounts.models.ODataError
     """
 
     _attribute_map = {

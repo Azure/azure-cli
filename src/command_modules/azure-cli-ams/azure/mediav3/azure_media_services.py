@@ -14,12 +14,12 @@ from msrest.service_client import ServiceClient
 from msrest import Serializer, Deserializer
 from msrestazure import AzureConfiguration
 from .version import VERSION
-from .operations.transforms_operations import TransformsOperations
-from .operations.jobs_operations import JobsOperations
 from .operations.operations import Operations
 from .operations.mediaservices_operations import MediaservicesOperations
 from .operations.providers_operations import ProvidersOperations
 from .operations.assets_operations import AssetsOperations
+from .operations.transforms_operations import TransformsOperations
+from .operations.jobs_operations import JobsOperations
 from . import models
 
 
@@ -44,7 +44,7 @@ class AzureMediaServicesConfiguration(AzureConfiguration):
         if subscription_id is None:
             raise ValueError("Parameter 'subscription_id' must not be None.")
         if not base_url:
-            base_url = ''
+            base_url = 'http://localhost'
 
         super(AzureMediaServicesConfiguration, self).__init__(base_url)
 
@@ -61,18 +61,18 @@ class AzureMediaServices(object):
     :ivar config: Configuration for client.
     :vartype config: AzureMediaServicesConfiguration
 
-    :ivar transforms: Transforms operations
-    :vartype transforms: encoding.operations.TransformsOperations
-    :ivar jobs: Jobs operations
-    :vartype jobs: encoding.operations.JobsOperations
     :ivar operations: Operations operations
-    :vartype operations: encoding.operations.Operations
+    :vartype operations: accounts.operations.Operations
     :ivar mediaservices: Mediaservices operations
-    :vartype mediaservices: encoding.operations.MediaservicesOperations
+    :vartype mediaservices: accounts.operations.MediaservicesOperations
     :ivar providers: Providers operations
-    :vartype providers: encoding.operations.ProvidersOperations
+    :vartype providers: accounts.operations.ProvidersOperations
     :ivar assets: Assets operations
-    :vartype assets: assets.operations.AssetsOperations
+    :vartype assets: accounts.operations.AssetsOperations
+    :ivar transforms: Transforms operations
+    :vartype transforms: accounts.operations.TransformsOperations
+    :ivar jobs: Jobs operations
+    :vartype jobs: accounts.operations.JobsOperations
 
     :param credentials: Credentials needed for the client to connect to Azure.
     :type credentials: :mod:`A msrestazure Credentials
@@ -93,10 +93,6 @@ class AzureMediaServices(object):
         self._serialize = Serializer(client_models)
         self._deserialize = Deserializer(client_models)
 
-        self.transforms = TransformsOperations(
-            self._client, self.config, self._serialize, self._deserialize)
-        self.jobs = JobsOperations(
-            self._client, self.config, self._serialize, self._deserialize)
         self.operations = Operations(
             self._client, self.config, self._serialize, self._deserialize)
         self.mediaservices = MediaservicesOperations(
@@ -104,4 +100,8 @@ class AzureMediaServices(object):
         self.providers = ProvidersOperations(
             self._client, self.config, self._serialize, self._deserialize)
         self.assets = AssetsOperations(
+            self._client, self.config, self._serialize, self._deserialize)
+        self.transforms = TransformsOperations(
+            self._client, self.config, self._serialize, self._deserialize)
+        self.jobs = JobsOperations(
             self._client, self.config, self._serialize, self._deserialize)

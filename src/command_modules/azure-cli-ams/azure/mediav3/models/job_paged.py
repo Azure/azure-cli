@@ -15,7 +15,7 @@ from msrest.paging import Paged
 
 class JobPaged(Paged):
     """
-    A paging container for iterating over a list of :class:`Job <encoding.models.Job>` object
+    A paging container for iterating over a list of :class:`Job <accounts.models.Job>` object
     """
 
     _attribute_map = {

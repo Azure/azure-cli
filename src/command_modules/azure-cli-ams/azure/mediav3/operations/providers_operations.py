@@ -22,7 +22,7 @@ class ProvidersOperations(object):
     :param client: Client for service requests.
     :param config: Configuration of service client.
     :param serializer: An object model serializer.
-    :param deserializer: An objec model deserializer.
+    :param deserializer: An object model deserializer.
     :ivar api_version: The API version. Constant value: "2018-02-01-privatepreview".
     """
 
@@ -55,14 +55,14 @@ class ProvidersOperations(object):
          overrides<msrest:optionsforoperations>`.
         :return: EntityNameAvailabilityCheckOutput or ClientRawResponse if
          raw=true
-        :rtype: ~encoding.models.EntityNameAvailabilityCheckOutput or
+        :rtype: ~accounts.models.EntityNameAvailabilityCheckOutput or
          ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         parameters = models.CheckNameAvailabilityInput(name=name, type=type)
 
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/providers/Microsoft.Media/checkNameAvailability'
+        url = self.check_name_availability.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str')
         }
@@ -103,3 +103,4 @@ class ProvidersOperations(object):
             return client_raw_response
 
         return deserialized
+    check_name_availability.metadata = {'url': '/subscriptions/{subscriptionId}/providers/Microsoft.Media/checkNameAvailability'}

@@ -63,14 +63,14 @@ class AssetsOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: An iterator like instance of Asset
-        :rtype: ~encoding.models.AssetPaged[~encoding.models.Asset]
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :rtype: ~accounts.models.AssetPaged[~accounts.models.Asset]
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         def internal_paging(next_link=None, raw=False):
 
             if not next_link:
                 # Construct URL
-                url = url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/assets'
+                url = self.list.metadata['url']
                 path_format_arguments = {
                     'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
                     'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -121,6 +121,7 @@ class AssetsOperations(object):
             return client_raw_response
 
         return deserialized
+    list.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets'}
 
     def get(
             self, resource_group_name, account_name, asset_name, custom_headers=None, raw=False, **operation_config):
@@ -140,11 +141,11 @@ class AssetsOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: Asset or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.Asset or ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :rtype: ~accounts.models.Asset or ~msrest.pipeline.ClientRawResponse
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}'
+        url = self.get.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -184,6 +185,7 @@ class AssetsOperations(object):
             return client_raw_response
 
         return deserialized
+    get.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}'}
 
     def create_or_update(
             self, resource_group_name, account_name, asset_name, parameters, custom_headers=None, raw=False, **operation_config):
@@ -198,18 +200,18 @@ class AssetsOperations(object):
         :param asset_name: The Asset name.
         :type asset_name: str
         :param parameters: The request parameters.
-        :type parameters: ~encoding.models.Asset
+        :type parameters: ~accounts.models.Asset
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: Asset or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.Asset or ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :rtype: ~accounts.models.Asset or ~msrest.pipeline.ClientRawResponse
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}'
+        url = self.create_or_update.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -255,6 +257,7 @@ class AssetsOperations(object):
             return client_raw_response
 
         return deserialized
+    create_or_update.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}'}
 
     def delete(
             self, resource_group_name, account_name, asset_name, custom_headers=None, raw=False, **operation_config):
@@ -275,10 +278,10 @@ class AssetsOperations(object):
          overrides<msrest:optionsforoperations>`.
         :return: None or ClientRawResponse if raw=true
         :rtype: None or ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}'
+        url = self.delete.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -311,6 +314,7 @@ class AssetsOperations(object):
         if raw:
             client_raw_response = ClientRawResponse(None, response)
             return client_raw_response
+    delete.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}'}
 
     def update(
             self, resource_group_name, account_name, asset_name, parameters, custom_headers=None, raw=False, **operation_config):
@@ -325,18 +329,18 @@ class AssetsOperations(object):
         :param asset_name: The Asset name.
         :type asset_name: str
         :param parameters: The request parameters.
-        :type parameters: ~encoding.models.Asset
+        :type parameters: ~accounts.models.Asset
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: Asset or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.Asset or ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :rtype: ~accounts.models.Asset or ~msrest.pipeline.ClientRawResponse
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}'
+        url = self.update.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -380,6 +384,7 @@ class AssetsOperations(object):
             return client_raw_response
 
         return deserialized
+    update.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}'}
 
     def list_container_sas(
             self, resource_group_name, account_name, asset_name, permissions=None, expiry_time=None, custom_headers=None, raw=False, **operation_config):
@@ -396,7 +401,7 @@ class AssetsOperations(object):
         :type asset_name: str
         :param permissions: The permissions to set on the SAS URL. Possible
          values include: 'Read', 'ReadWrite', 'ReadWriteDelete'
-        :type permissions: str or ~encoding.models.AssetContainerPermission
+        :type permissions: str or ~accounts.models.AssetContainerPermission
         :param expiry_time: The SAS URL expiry time.
         :type expiry_time: datetime
         :param dict custom_headers: headers that will be added to the request
@@ -405,14 +410,14 @@ class AssetsOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: AssetContainerSas or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.AssetContainerSas or
+        :rtype: ~accounts.models.AssetContainerSas or
          ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         parameters = models.ListContainerSasInput(permissions=permissions, expiry_time=expiry_time)
 
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}/listContainerSas'
+        url = self.list_container_sas.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -456,6 +461,7 @@ class AssetsOperations(object):
             return client_raw_response
 
         return deserialized
+    list_container_sas.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}/listContainerSas'}
 
     def get_encryption_key(
             self, resource_group_name, account_name, asset_name, custom_headers=None, raw=False, **operation_config):
@@ -476,12 +482,12 @@ class AssetsOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: AssetStorageEncryptionKey or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.AssetStorageEncryptionKey or
+        :rtype: ~accounts.models.AssetStorageEncryptionKey or
          ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}/getEncryptionKey'
+        url = self.get_encryption_key.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -521,3 +527,4 @@ class AssetsOperations(object):
             return client_raw_response
 
         return deserialized
+    get_encryption_key.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaServices/{accountName}/assets/{assetName}/getEncryptionKey'}

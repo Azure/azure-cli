@@ -24,7 +24,7 @@ class ODataError(Model):
      property in error).
     :type target: str
     :param details: The error details.
-    :type details: list[~encoding.models.ODataError]
+    :type details: list[~accounts.models.ODataError]
     """
 
     _attribute_map = {

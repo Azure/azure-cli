@@ -26,7 +26,7 @@ class AudioStream(StreamSelection):
     :param stream_selection_mode: Gets the stream selection mode. Possible
      values include: 'SelectionNotSet', 'SelectHighestBitrateStream',
      'SelectLowestBitrateStream', 'SelectAllStreams'
-    :type stream_selection_mode: str or ~encoding.models.StreamSelectionMode
+    :type stream_selection_mode: str or ~accounts.models.StreamSelectionMode
     :param odatatype: Constant filled by server.
     :type odatatype: str
     :param language_tag: Gets or sets the Audio Language Tag.

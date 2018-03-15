@@ -22,7 +22,7 @@ class MediaservicesOperations(object):
     :param client: Client for service requests.
     :param config: Configuration of service client.
     :param serializer: An object model serializer.
-    :param deserializer: An objec model deserializer.
+    :param deserializer: An object model deserializer.
     :ivar api_version: The API version. Constant value: "2018-02-01-privatepreview".
     """
 
@@ -51,12 +51,12 @@ class MediaservicesOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: MediaServiceCollection or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.MediaServiceCollection or
+        :rtype: ~accounts.models.MediaServiceCollection or
          ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices'
+        url = self.list.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str')
@@ -94,6 +94,7 @@ class MediaservicesOperations(object):
             return client_raw_response
 
         return deserialized
+    list.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices'}
 
     def get(
             self, resource_group_name, account_name, custom_headers=None, raw=False, **operation_config):
@@ -111,12 +112,12 @@ class MediaservicesOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: MediaService or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.MediaService or
+        :rtype: ~accounts.models.MediaService or
          ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}'
+        url = self.get.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -155,6 +156,7 @@ class MediaservicesOperations(object):
             return client_raw_response
 
         return deserialized
+    get.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}'}
 
     def create_or_update(
             self, resource_group_name, account_name, parameters, custom_headers=None, raw=False, **operation_config):
@@ -167,19 +169,19 @@ class MediaservicesOperations(object):
         :param account_name: The Media Services account name.
         :type account_name: str
         :param parameters: The request parameters.
-        :type parameters: ~encoding.models.MediaService
+        :type parameters: ~accounts.models.MediaService
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: MediaService or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.MediaService or
+        :rtype: ~accounts.models.MediaService or
          ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}'
+        url = self.create_or_update.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -224,6 +226,7 @@ class MediaservicesOperations(object):
             return client_raw_response
 
         return deserialized
+    create_or_update.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}'}
 
     def delete(
             self, resource_group_name, account_name, custom_headers=None, raw=False, **operation_config):
@@ -242,10 +245,10 @@ class MediaservicesOperations(object):
          overrides<msrest:optionsforoperations>`.
         :return: None or ClientRawResponse if raw=true
         :rtype: None or ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}'
+        url = self.delete.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -277,6 +280,7 @@ class MediaservicesOperations(object):
         if raw:
             client_raw_response = ClientRawResponse(None, response)
             return client_raw_response
+    delete.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}'}
 
     def update(
             self, resource_group_name, account_name, parameters, custom_headers=None, raw=False, **operation_config):
@@ -289,19 +293,19 @@ class MediaservicesOperations(object):
         :param account_name: The Media Services account name.
         :type account_name: str
         :param parameters: The request parameters.
-        :type parameters: ~encoding.models.MediaService
+        :type parameters: ~accounts.models.MediaService
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: MediaService or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.MediaService or
+        :rtype: ~accounts.models.MediaService or
          ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}'
+        url = self.update.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -344,6 +348,7 @@ class MediaservicesOperations(object):
             return client_raw_response
 
         return deserialized
+    update.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}'}
 
     def sync_storage_keys(
             self, resource_group_name, account_name, id=None, custom_headers=None, raw=False, **operation_config):
@@ -365,12 +370,12 @@ class MediaservicesOperations(object):
          overrides<msrest:optionsforoperations>`.
         :return: None or ClientRawResponse if raw=true
         :rtype: None or ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         parameters = models.SyncStorageKeysInput(id=id)
 
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/syncStorageKeys'
+        url = self.sync_storage_keys.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -406,6 +411,7 @@ class MediaservicesOperations(object):
         if raw:
             client_raw_response = ClientRawResponse(None, response)
             return client_raw_response
+    sync_storage_keys.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/syncStorageKeys'}
 
     def list_by_subscription(
             self, custom_headers=None, raw=False, **operation_config):
@@ -420,12 +426,12 @@ class MediaservicesOperations(object):
          overrides<msrest:optionsforoperations>`.
         :return: SubscriptionMediaServiceCollection or ClientRawResponse if
          raw=true
-        :rtype: ~encoding.models.SubscriptionMediaServiceCollection or
+        :rtype: ~accounts.models.SubscriptionMediaServiceCollection or
          ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/providers/Microsoft.Media/mediaservices'
+        url = self.list_by_subscription.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str')
         }
@@ -462,6 +468,7 @@ class MediaservicesOperations(object):
             return client_raw_response
 
         return deserialized
+    list_by_subscription.metadata = {'url': '/subscriptions/{subscriptionId}/providers/Microsoft.Media/mediaservices'}
 
     def get_by_subscription(
             self, account_name, custom_headers=None, raw=False, **operation_config):
@@ -477,12 +484,12 @@ class MediaservicesOperations(object):
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
         :return: SubscriptionMediaService or ClientRawResponse if raw=true
-        :rtype: ~encoding.models.SubscriptionMediaService or
+        :rtype: ~accounts.models.SubscriptionMediaService or
          ~msrest.pipeline.ClientRawResponse
-        :raises: :class:`ApiErrorException<encoding.models.ApiErrorException>`
+        :raises: :class:`ApiErrorException<accounts.models.ApiErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/providers/Microsoft.Media/mediaservices/{accountName}'
+        url = self.get_by_subscription.metadata['url']
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'accountName': self._serialize.url("account_name", account_name, 'str')
@@ -520,3 +527,4 @@ class MediaservicesOperations(object):
             return client_raw_response
 
         return deserialized
+    get_by_subscription.metadata = {'url': '/subscriptions/{subscriptionId}/providers/Microsoft.Media/mediaservices/{accountName}'}

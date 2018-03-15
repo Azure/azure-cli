@@ -19,15 +19,15 @@ class TransformOutput(Model):
     :param on_error: Describes what to do if the output fails with the rest of
      the other outputs. The default is stop the rest of the outputs. Possible
      values include: 'StopProcessingJob', 'ContinueJob'
-    :type on_error: str or ~encoding.models.OnErrorType
+    :type on_error: str or ~accounts.models.OnErrorType
     :param relative_priority: Sets the relative priority of the
      TransformOutputs within a Transform. This gives a hint to the system that
      one TransformOutput is higher priority than another in the same Transform.
      The default is normal. Possible values include: 'Low', 'Normal', 'High'
-    :type relative_priority: str or ~encoding.models.Priority
+    :type relative_priority: str or ~accounts.models.Priority
     :param preset: Preset that describes the Media Processor operation that
      will be used to generate the output.
-    :type preset: ~encoding.models.Preset
+    :type preset: ~accounts.models.Preset
     """
 
     _validation = {

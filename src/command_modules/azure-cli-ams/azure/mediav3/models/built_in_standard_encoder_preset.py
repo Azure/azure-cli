@@ -22,7 +22,7 @@ class BuiltInStandardEncoderPreset(Preset):
      values include: 'AdaptiveStreaming', 'ContentAdaptiveMultipleBitrateMP4',
      'AACGoodQualityAudio', 'H264MultipleBitrate1080p',
      'H264MultipleBitrate720p'
-    :type preset_name: str or ~encoding.models.EncoderNamedPreset
+    :type preset_name: str or ~accounts.models.EncoderNamedPreset
     """
 
     _validation = {

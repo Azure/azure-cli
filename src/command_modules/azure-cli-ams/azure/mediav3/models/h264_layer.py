@@ -46,7 +46,7 @@ class H264Layer(VideoLayer):
     :param profile: Gets or sets the video profile for this layer. Possible
      values include: 'Auto', 'Baseline', 'Main', 'High', 'High10', 'High422',
      'High444'
-    :type profile: str or ~encoding.models.H264VideoProfile
+    :type profile: str or ~accounts.models.H264VideoProfile
     :param level: Gets or sets the video level for this layer.
     :type level: str
     :param buffer_window: Gets or sets the VBV buffer Window length.
@@ -56,7 +56,7 @@ class H264Layer(VideoLayer):
     :type reference_frames: int
     :param entropy_mode: Gets or sets the entropy mode to be used for this
      layer. Possible values include: 'Cabac', 'Cavlc'
-    :type entropy_mode: str or ~encoding.models.EntropyMode
+    :type entropy_mode: str or ~accounts.models.EntropyMode
     """
 
     _validation = {

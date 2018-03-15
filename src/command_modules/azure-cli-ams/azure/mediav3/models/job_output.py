@@ -24,10 +24,10 @@ class JobOutput(Model):
 
     :ivar error: If the JobOutput is in the error state, it contains the
      details of the error.
-    :vartype error: ~encoding.models.JobError
+    :vartype error: ~accounts.models.JobError
     :ivar state: State of the JobOutput. Possible values include: 'Canceled',
      'Canceling', 'Error', 'Finished', 'Processing', 'Queued', 'Scheduled'
-    :vartype state: str or ~encoding.models.JobState
+    :vartype state: str or ~accounts.models.JobState
     :ivar progress: If the JobOutput is in the processing state, it contains
      the percentage of the job completed from 0 to 100 percent.
     :vartype progress: int

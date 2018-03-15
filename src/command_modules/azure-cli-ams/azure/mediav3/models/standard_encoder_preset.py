@@ -19,13 +19,13 @@ class StandardEncoderPreset(Preset):
     :param odatatype: Constant filled by server.
     :type odatatype: str
     :param streams: Gets the Stream definitions for this source.
-    :type streams: list[~encoding.models.StreamSelection]
+    :type streams: list[~accounts.models.StreamSelection]
     :param filters: Gets or sets the filters for the preset.
-    :type filters: ~encoding.models.Filters
+    :type filters: ~accounts.models.Filters
     :param codecs: Gets the list of codecs to use.
-    :type codecs: list[~encoding.models.Codec]
+    :type codecs: list[~accounts.models.Codec]
     :param formats: Gets the list of outputs.
-    :type formats: list[~encoding.models.Format]
+    :type formats: list[~accounts.models.Format]
     """
 
     _validation = {

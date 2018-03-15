@@ -28,21 +28,21 @@ class H264Video(Video):
     :type key_frame_interval: timedelta
     :param stretch_mode: Gets or sets the Resolution Mode. Possible values
      include: 'None', 'AutoSize', 'AutoFit'
-    :type stretch_mode: str or ~encoding.models.StretchMode
+    :type stretch_mode: str or ~accounts.models.StretchMode
     :param sync_mode: Gets or sets the Video Sync Mode. Possible values
      include: 'Auto', 'Passthrough', 'Cfr', 'Vfr', 'Drop'
-    :type sync_mode: str or ~encoding.models.VideoSyncMode
+    :type sync_mode: str or ~accounts.models.VideoSyncMode
     :param scene_change_detection: Gets or sets a value indicating whether to
      use scene change detection during encoding
     :type scene_change_detection: bool
     :param rate_control_mode: Gets or sets the video rate control mode.
      Possible values include: 'ABR', 'CBR'
-    :type rate_control_mode: str or ~encoding.models.H264RateControlMode
+    :type rate_control_mode: str or ~accounts.models.H264RateControlMode
     :param complexity: Gets or sets the encoder complexity mode used for all
      layers. Possible values include: 'Speed', 'Balanced', 'Quality'
-    :type complexity: str or ~encoding.models.H264Complexity
+    :type complexity: str or ~accounts.models.H264Complexity
     :param layers: Gets the layers for the video.
-    :type layers: list[~encoding.models.H264Layer]
+    :type layers: list[~accounts.models.H264Layer]
     """
 
     _validation = {

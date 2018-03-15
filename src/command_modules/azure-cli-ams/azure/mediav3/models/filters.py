@@ -20,28 +20,28 @@ class Filters(Model):
      align jagged-edge audio and video.
     :type pad: bool
     :param deinterlace: Gets or sets the default de-interlacing settings.
-    :type deinterlace: ~encoding.models.Deinterlace
+    :type deinterlace: ~accounts.models.Deinterlace
     :param rotation: Gets or sets the rotation if any to be applied to the
      video. Possible values include: 'Auto', 'None', 'Rotate0', 'Rotate90',
      'Rotate180', 'Rotate270'
-    :type rotation: str or ~encoding.models.Rotation
+    :type rotation: str or ~accounts.models.Rotation
     :param adjust_loudness: Gets or sets the loudness correction mode.
      Possible values include: 'None', 'Auto', 'Manual'
-    :type adjust_loudness: str or ~encoding.models.LoudnessAdjustment
+    :type adjust_loudness: str or ~accounts.models.LoudnessAdjustment
     :param loudness_in_db: Gets or sets the Loudness specified in decibels
      (Applicable for the case of AdjustLoudness.Manual
     :type loudness_in_db: float
     :param flip: Gets or sets whether the video needs to be flipped. Possible
      values include: 'None', 'Horizontal', 'Vertical'
-    :type flip: str or ~encoding.models.Flip
+    :type flip: str or ~accounts.models.Flip
     :param crop: Gets or sets the co-ordinates of the video to be cropped.
-    :type crop: ~encoding.models.Rectangle
+    :type crop: ~accounts.models.Rectangle
     :param video_overlay: Gets or sets the details of the video overlay to
      apply if any.
-    :type video_overlay: ~encoding.models.VideoOverlay
+    :type video_overlay: ~accounts.models.VideoOverlay
     :param audio_overlay: Gets or sets the details of the audio overlay to
      apply if any.
-    :type audio_overlay: ~encoding.models.AudioOverlay
+    :type audio_overlay: ~accounts.models.AudioOverlay
     """
 
     _attribute_map = {

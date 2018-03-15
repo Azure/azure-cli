@@ -30,7 +30,7 @@ class MultiBitrateFormat(Format):
      used and give examples.
     :type manifest_filename: str
     :param output_files: Gets the list of output files.
-    :type output_files: list[~encoding.models.OutputFile]
+    :type output_files: list[~accounts.models.OutputFile]
     """
 
     _validation = {

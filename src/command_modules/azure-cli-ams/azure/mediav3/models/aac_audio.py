@@ -28,7 +28,7 @@ class AacAudio(Audio):
     :type bitrate: int
     :param profile: Gets or sets the audio profile. Possible values include:
      'AacLc', 'HeAacV1', 'HeAacV2'
-    :type profile: str or ~encoding.models.AacAudioProfile
+    :type profile: str or ~accounts.models.AacAudioProfile
     """
 
     _validation = {

@@ -24,7 +24,7 @@ class StorageAccount(Model):
     :type id: str
     :param type: The type of the storage account. Possible values include:
      'Primary', 'Secondary'
-    :type type: str or ~encoding.models.StorageAccountType
+    :type type: str or ~accounts.models.StorageAccountType
     """
 
     _validation = {

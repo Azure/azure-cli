@@ -15,7 +15,7 @@ from msrest.paging import Paged
 
 class AssetPaged(Paged):
     """
-    A paging container for iterating over a list of :class:`Asset <encoding.models.Asset>` object
+    A paging container for iterating over a list of :class:`Asset <accounts.models.Asset>` object
     """
 
     _attribute_map = {

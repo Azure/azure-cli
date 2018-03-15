@@ -23,7 +23,7 @@ class JobInputs(JobInput):
     :param odatatype: Constant filled by server.
     :type odatatype: str
     :param inputs: List of Job inputs.
-    :type inputs: list[~encoding.models.JobInput]
+    :type inputs: list[~accounts.models.JobInput]
     """
 
     _validation = {

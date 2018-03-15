@@ -30,7 +30,7 @@ class DDPlusAudio(Audio):
     :type lf_eon: bool
     :param ac_mode: Gets or sets the AC mode. Possible values include:
      'ACMOD20', 'ACMOD32'
-    :type ac_mode: str or ~encoding.models.DDPlusACMode
+    :type ac_mode: str or ~accounts.models.DDPlusACMode
     """
 
     _validation = {

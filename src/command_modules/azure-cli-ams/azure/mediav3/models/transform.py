@@ -37,7 +37,7 @@ class Transform(Model):
      updated.
     :vartype last_modified: datetime
     :param outputs: The outputs for the Transform.
-    :type outputs: list[~encoding.models.TransformOutput]
+    :type outputs: list[~accounts.models.TransformOutput]
     """
 
     _validation = {

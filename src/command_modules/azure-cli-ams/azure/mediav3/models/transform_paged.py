@@ -15,7 +15,7 @@ from msrest.paging import Paged
 
 class TransformPaged(Paged):
     """
-    A paging container for iterating over a list of :class:`Transform <encoding.models.Transform>` object
+    A paging container for iterating over a list of :class:`Transform <accounts.models.Transform>` object
     """
 
     _attribute_map = {

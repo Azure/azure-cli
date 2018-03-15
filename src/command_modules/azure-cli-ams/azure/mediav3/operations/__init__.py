@@ -10,18 +10,18 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .transforms_operations import TransformsOperations
-from .jobs_operations import JobsOperations
 from .operations import Operations
 from .mediaservices_operations import MediaservicesOperations
 from .providers_operations import ProvidersOperations
 from .assets_operations import AssetsOperations
+from .transforms_operations import TransformsOperations
+from .jobs_operations import JobsOperations
 
 __all__ = [
-    'TransformsOperations',
-    'JobsOperations',
     'Operations',
     'MediaservicesOperations',
     'ProvidersOperations',
     'AssetsOperations',
+    'TransformsOperations',
+    'JobsOperations',
 ]

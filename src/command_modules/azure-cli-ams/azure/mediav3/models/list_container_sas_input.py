@@ -18,7 +18,7 @@ class ListContainerSasInput(Model):
 
     :param permissions: The permissions to set on the SAS URL. Possible values
      include: 'Read', 'ReadWrite', 'ReadWriteDelete'
-    :type permissions: str or ~encoding.models.AssetContainerPermission
+    :type permissions: str or ~accounts.models.AssetContainerPermission
     :param expiry_time: The SAS URL expiry time.
     :type expiry_time: datetime
     """

@@ -19,7 +19,7 @@ class Operation(Model):
     :param name: The operation name.
     :type name: str
     :param display: The operation display name.
-    :type display: ~encoding.models.OperationDisplay
+    :type display: ~accounts.models.OperationDisplay
     """
 
     _validation = {

@@ -46,7 +46,7 @@ class Asset(Model):
      'MediaStorageClientEncryption', 'StaticCommonEncryption',
      'StaticEnvelopeEncryption'
     :type storage_encryption_format: str or
-     ~encoding.models.AssetStorageEncryptionFormat
+     ~accounts.models.AssetStorageEncryptionFormat
     :param storage_encryption_key: The Base64 encoded key for the Asset
      storage encryption.
     :type storage_encryption_key: str

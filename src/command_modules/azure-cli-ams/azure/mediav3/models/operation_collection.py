@@ -17,7 +17,7 @@ class OperationCollection(Model):
     """A collection of operations.
 
     :param value: A collection of operations.
-    :type value: list[~encoding.models.Operation]
+    :type value: list[~accounts.models.Operation]
     :param odatanext_link: A link to the next page of the collection (when the
      collection contains too many results to return in one response).
     :type odatanext_link: str

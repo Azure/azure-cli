@@ -32,7 +32,7 @@ class MediaService(Model):
     :ivar media_service_id: The Media Services account ID.
     :vartype media_service_id: str
     :param storage_accounts: The storage accounts for this resource.
-    :type storage_accounts: list[~encoding.models.StorageAccount]
+    :type storage_accounts: list[~accounts.models.StorageAccount]
     """
 
     _validation = {

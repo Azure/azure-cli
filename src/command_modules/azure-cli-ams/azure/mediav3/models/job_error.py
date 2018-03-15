@@ -23,21 +23,21 @@ class JobError(Model):
      'ServiceError', 'ServiceTransientError', 'DownloadNotAccessible',
      'DownloadTransientError', 'UploadNotAccessible', 'UploadTransientError',
      'ConfigurationUnsupported', 'ContentMalformed', 'ContentUnsupported'
-    :vartype code: str or ~encoding.models.JobErrorCode
+    :vartype code: str or ~accounts.models.JobErrorCode
     :ivar message: A human-readable language-dependent representation of the
      error.
     :vartype message: str
     :ivar category: Category to help caller categorize the error. Possible
      values include: 'Service', 'Download', 'Upload', 'Configuration',
      'Content'
-    :vartype category: str or ~encoding.models.JobErrorCategory
+    :vartype category: str or ~accounts.models.JobErrorCategory
     :ivar retry: Indication that the job may be retried. If retry is
      unsuccessful, please contact support. Possible values include:
      'DoNotRetry', 'MayRetry'
-    :vartype retry: str or ~encoding.models.JobRetry
+    :vartype retry: str or ~accounts.models.JobRetry
     :ivar details: An array of details about specific errors that led to this
      reported error.
-    :vartype details: list[~encoding.models.JobErrorDetail]
+    :vartype details: list[~accounts.models.JobErrorDetail]
     """
 
     _validation = {

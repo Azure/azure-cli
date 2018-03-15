@@ -18,10 +18,10 @@ class Deinterlace(Model):
 
     :param parity: Gets or sets the parity to use. Possible values include:
      'Auto', 'TopFieldFirst', 'BottomFieldFirst'
-    :type parity: str or ~encoding.models.DeinterlaceParity
+    :type parity: str or ~accounts.models.DeinterlaceParity
     :param mode: Gets or sets the deinterlace Mode. Possible values include:
      'Off', 'AutoPixelAdaptive'
-    :type mode: str or ~encoding.models.DeinterlaceMode
+    :type mode: str or ~accounts.models.DeinterlaceMode
     """
 
     _attribute_map = {

@@ -29,10 +29,10 @@ class JpgImage(Image):
     :type key_frame_interval: timedelta
     :param stretch_mode: Gets or sets the Resolution Mode. Possible values
      include: 'None', 'AutoSize', 'AutoFit'
-    :type stretch_mode: str or ~encoding.models.StretchMode
+    :type stretch_mode: str or ~accounts.models.StretchMode
     :param sync_mode: Gets or sets the Video Sync Mode. Possible values
      include: 'Auto', 'Passthrough', 'Cfr', 'Vfr', 'Drop'
-    :type sync_mode: str or ~encoding.models.VideoSyncMode
+    :type sync_mode: str or ~accounts.models.VideoSyncMode
     :param start: Gets or sets the start position in the input from where to
      generate the thumbnails. Can be either absolute duration (e.g: PT05S) or
      relative value (e.g: 100%) Can also be a value like {Best} to select the
@@ -46,7 +46,7 @@ class JpgImage(Image):
      (e.g: 100%)
     :type range: str
     :param layers: Gets the list of layers.
-    :type layers: list[~encoding.models.JpgLayer]
+    :type layers: list[~accounts.models.JpgLayer]
     """
 
     _validation = {

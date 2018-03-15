@@ -4,85 +4,62 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from ._client_factory import (cf_media, get_mediaservices_client, get_transforms_client, get_assets_client)
+from ._client_factory import (get_mediaservices_client, get_transforms_client,
+                              get_assets_client)
 from ._exception_handler import (build_exception_wrapper)
 
 
 def load_command_table(self, _):
-    ams_sdk = CliCommandType(
-        operations_tmpl='azure.mediav3.operations#MediaservicesOperations.{}',
-        client_factory=cf_media,
-        exception_handler=build_exception_wrapper()
-    )
+    def get_sdk(operation, client_factory):
+        return CliCommandType(
+            operations_tmpl='azure.mediav3.operations#{}Operations.'.format(operation) + '{}',
+            client_factory=client_factory,
+            exception_handler=build_exception_wrapper()
+        )
 
-    ams_encoding_sdk = CliCommandType(
-        operations_tmpl='azure.mediav3.operations#TransformsOperations.{}',
-        client_factory=cf_media,
-        exception_handler=build_exception_wrapper()
-    )
+    def get_custom_sdk(custom_module, client_factory):
+        return CliCommandType(
+            operations_tmpl='azure.cli.command_modules.ams.operations.{}#'.format(custom_module) + '{}',
+            client_factory=client_factory,
+            exception_handler=build_exception_wrapper()
+        )
 
-    ams_asset_sdk = CliCommandType(
-        operations_tmpl='azure.mediav3.operations#AssetsOperations.{}',
-        client_factory=cf_media,
-        exception_handler=build_exception_wrapper()
-    )
-
-    ams_account_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.ams.operations.account#{}',
-        exception_handler=build_exception_wrapper()
-    )
-
-    ams_sp_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.ams.operations.sp#{}',
-        exception_handler=build_exception_wrapper()
-    )
-
-    ams_transform_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.ams.operations.transform#{}',
-        exception_handler=build_exception_wrapper()
-    )
-
-    ams_asset_custom = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.ams.operations.asset#{}',
-        exception_handler=build_exception_wrapper()
-    )
-
-    with self.command_group('ams account', ams_sdk) as g:
+    with self.command_group('ams account', get_sdk('Mediaservices', get_mediaservices_client)) as g:
         g.command('show', 'get')
         g.command('delete', 'delete')
-        g.custom_command('list', 'list_mediaservices', custom_command_type=ams_account_custom,
-                         client_factory=get_mediaservices_client)
-        g.custom_command('create', 'create_mediaservice', custom_command_type=ams_account_custom,
-                         client_factory=get_mediaservices_client)
+        g.custom_command('list', 'list_mediaservices',
+                         custom_command_type=get_custom_sdk('account', get_mediaservices_client))
+        g.custom_command('create', 'create_mediaservice',
+                         custom_command_type=get_custom_sdk('account', get_mediaservices_client))
 
-    with self.command_group('ams storage', ams_sdk) as g:
-        g.custom_command('add', 'add_mediaservice_secondary_storage', custom_command_type=ams_account_custom,
-                         client_factory=get_mediaservices_client)
-        g.custom_command('remove', 'remove_mediaservice_secondary_storage', custom_command_type=ams_account_custom,
-                         client_factory=get_mediaservices_client)
+    with self.command_group('ams storage', get_sdk('Mediaservices', get_mediaservices_client)) as g:
+        g.custom_command('add', 'add_mediaservice_secondary_storage',
+                         custom_command_type=get_custom_sdk('account', get_mediaservices_client))
+        g.custom_command('remove', 'remove_mediaservice_secondary_storage',
+                         custom_command_type=get_custom_sdk('account', get_mediaservices_client))
 
-    with self.command_group('ams sp', ams_sdk) as g:
-        g.custom_command('create', 'create_assign_sp_to_mediaservice', custom_command_type=ams_sp_custom,
-                         client_factory=get_mediaservices_client)
+    with self.command_group('ams sp', get_sdk('Mediaservices', get_mediaservices_client)) as g:
+        g.custom_command('create', 'create_assign_sp_to_mediaservice',
+                         custom_command_type=get_custom_sdk('sp', get_mediaservices_client))
 
-    with self.command_group('ams transform', ams_encoding_sdk) as g:
+    with self.command_group('ams transform', get_sdk('Transforms', get_transforms_client)) as g:
         g.command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
-        g.custom_command('create', 'create_transform', custom_command_type=ams_transform_custom,
-                         client_factory=get_transforms_client)
-        g.custom_command('update', 'update_transform', custom_command_type=ams_transform_custom,
-                         client_factory=get_transforms_client)
+        g.custom_command('create', 'create_transform',
+                         custom_command_type=get_custom_sdk('transform', get_transforms_client))
+        g.custom_command('update', 'update_transform',
+                         custom_command_type=get_custom_sdk('transform', get_transforms_client))
 
-    with self.command_group('ams transform output', ams_encoding_sdk) as g:
-        g.custom_command('add', 'add_transform_output', custom_command_type=ams_transform_custom,
-                         client_factory=get_transforms_client)
-        g.custom_command('remove', 'remove_transform_output', custom_command_type=ams_transform_custom,
-                         client_factory=get_transforms_client)
+    with self.command_group('ams transform output', get_sdk('Transforms', get_mediaservices_client)) as g:
+        g.custom_command('add', 'add_transform_output',
+                         custom_command_type=get_custom_sdk('transform', get_transforms_client))
+        g.custom_command('remove', 'remove_transform_output',
+                         custom_command_type=get_custom_sdk('transform', get_transforms_client))
 
-    with self.command_group('ams asset', ams_asset_sdk) as g:
+    with self.command_group('ams asset', get_sdk('Assets', get_assets_client)) as g:
         g.command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
-        g.custom_command('create', 'create_asset', custom_command_type=ams_asset_custom,
-                         client_factory=get_assets_client)
+        g.custom_command('create', 'create_asset',
+                         custom_command_type=get_custom_sdk('asset', get_assets_client))
