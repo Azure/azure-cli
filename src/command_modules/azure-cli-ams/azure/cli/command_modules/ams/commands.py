@@ -5,11 +5,11 @@
 
 from azure.cli.core.commands import CliCommandType
 from ._client_factory import (get_mediaservices_client, get_transforms_client,
-                              get_assets_client)
+                              get_assets_client, get_jobs_client)
 from ._exception_handler import (build_exception_wrapper)
 
 
-def load_command_table(self, _):
+def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-statements
     def get_sdk(operation, client_factory):
         return CliCommandType(
             operations_tmpl='azure.mediav3.operations#{}Operations.'.format(operation) + '{}',
@@ -63,3 +63,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.custom_command('create', 'create_asset',
                          custom_command_type=get_custom_sdk('asset', get_assets_client))
+
+    with self.command_group('ams job', get_sdk('Jobs', get_jobs_client)) as g:
+        g.custom_command('create', 'create_job',
+                         custom_command_type=get_custom_sdk('job', get_jobs_client))

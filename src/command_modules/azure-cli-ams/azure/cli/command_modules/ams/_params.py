@@ -8,14 +8,15 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type)
 from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
 
-from azure.mediav3.models import EncoderNamedPreset
+from azure.mediav3.models import (EncoderNamedPreset, Priority)
 
 
-def load_arguments(self, _):
+def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
     account_name_arg_type = CLIArgumentType(options_list=('--account-name', '-a'), metavar='ACCOUNT_NAME')
     storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='STORAGE_NAME')
     password_arg_type = CLIArgumentType(options_list=('--password', '-p'), metavar='PASSWORD_NAME')
+    transform_name_arg_type = CLIArgumentType(options_list=('--transform-name', '-t'), metavar='TRANSFORM_NAME')
 
     with self.argument_context('ams account') as c:
         c.argument('account_name', name_arg_type,
@@ -82,3 +83,21 @@ def load_arguments(self, _):
         c.argument('alternate_id', help='The alternate id of the asset.')
         c.argument('description', help='The asset description.')
         c.argument('asset_name', name_arg_type, help='The name of the asset.')
+
+    with self.argument_context('ams job') as c:
+        c.argument('account_name', account_name_arg_type,
+                   help='The name of the Azure Media Services account within the resource group.')
+        c.argument('transform_name', transform_name_arg_type, help='The name of the transform.')
+        c.argument('job_name', name_arg_type, help='The name of the job.')
+
+    with self.argument_context('ams job create') as c:
+        c.argument('priority', arg_type=get_enum_type(Priority),
+                   help='The priority with which the job should be processed.')
+        c.argument('description', help='The job description.')
+        c.argument('input_asset_name', help='The name of the input asset.')
+        c.argument('output_asset_name', help='The name of the output asset.')
+        c.argument('base_uri', help="""Base uri for http job input. It will be concatenated with provided file names.
+                                If no base uri is given,
+                                then the provided file list is assumed to be fully qualified uris.""")
+        c.argument('files', help="""List of files. It can be used to tell the service to only use
+                                the files specified from the input asset.""")

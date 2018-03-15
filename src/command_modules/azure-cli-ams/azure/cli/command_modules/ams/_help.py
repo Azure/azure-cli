@@ -149,3 +149,13 @@ helps['ams asset delete'] = """
     type: command
     short-summary: Delete an asset.
 """
+
+helps['ams job'] = """
+    type: group
+    short-summary: Manage jobs for a transform.
+"""
+
+helps['ams job create'] = """
+    type: command
+    short-summary: Create a job.
+"""

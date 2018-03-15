@@ -45,3 +45,7 @@ def get_transforms_client(cli_ctx, *_):
 
 def get_assets_client(cli_ctx, *_):
     return cf_media(cli_ctx).assets
+
+
+def get_jobs_client(cli_ctx, *_):
+    return cf_media(cli_ctx).jobs

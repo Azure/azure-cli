@@ -185,3 +185,57 @@ class AmsTests(ScenarioTest):
         assert len(list) > 0
 
         self.cmd('az ams asset delete -n {assetName} -a {amsname} -g {rg}')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_job(self, resource_group, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+            self.check('name', '{amsname}'),
+            self.check('location', 'West US 2')
+        ])
+
+        assetName = self.create_random_name(prefix='asset', length=12)
+
+        self.kwargs.update({
+            'assetName': assetName
+        })
+
+        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg} -a {amsname}', checks=[
+            self.check('name', '{assetName}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        transformName = self.create_random_name(prefix='tra', length=10)
+
+        self.kwargs.update({
+            'transformName': transformName,
+            'presetName': 'AACGoodQualityAudio'
+        })
+
+        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --preset-name {presetName} -l {location}', checks=[
+            self.check('name', '{transformName}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        jobName = self.create_random_name(prefix='job', length=10)
+
+        self.kwargs.update({
+            'jobName': jobName,
+            'description': 'some description',
+            'priority': 'High'
+        })
+
+        self.cmd('az ams job create -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {assetName} --output-asset-name {assetName} --description {description} --priority {priority}', checks=[
+            self.check('name', '{jobName}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('description', '{description}'),
+            self.check('priority', '{priority}')
+        ])
