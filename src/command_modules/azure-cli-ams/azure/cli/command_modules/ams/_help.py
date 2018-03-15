@@ -169,3 +169,13 @@ helps['ams job show'] = """
     type: command
     short-summary: Show the details of a job.
 """
+
+helps['ams job delete'] = """
+    type: command
+    short-summary: Delete a job.
+"""
+
+helps['ams job cancel'] = """
+    type: command
+    short-summary: Cancel a job.
+"""

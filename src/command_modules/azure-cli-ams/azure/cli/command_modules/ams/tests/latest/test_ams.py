@@ -247,3 +247,14 @@ class AmsTests(ScenarioTest):
 
         list = self.cmd('az ams job list -a {amsname} -g {rg} -t {transformName}').get_output_in_json()
         assert len(list) > 0
+
+        self.cmd('az ams job cancel -n {jobName} -a {amsname} -g {rg} -t {transformName}')
+
+        self.cmd('az ams job show -a {amsname} -n {jobName} -g {rg} -t {transformName}', checks=[
+            self.check('name', '{assetName}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('priority', '{priority}'),
+            self.check('state', 'Canceled')
+        ])
+
+        self.cmd('az ams job delete -n {jobName} -a {amsname} -g {rg} -t {transformName}')
