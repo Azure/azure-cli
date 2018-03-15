@@ -131,6 +131,9 @@ class ScenarioTest(ReplayableTest, CheckerMixin, unittest.TestCase):
 
         return moniker
 
+    # Use this helper to make playback work when guids are created and used in request urls, e.g. role assignment or AAD
+    # service principals. For usages, in test code, patch the "guid-gen" routine to this one, e.g.
+    # with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid)
     def create_guid(self):
         import uuid
         self.test_guid_count += 1
