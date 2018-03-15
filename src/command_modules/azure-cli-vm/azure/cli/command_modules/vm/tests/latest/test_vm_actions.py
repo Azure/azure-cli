@@ -242,6 +242,7 @@ class TestActions(unittest.TestCase):
         np_mock.instance_count = 1000
         np_mock.app_gateway_type = 'new'
         np_mock.app_gateway_subnet_address_prefix = None
+        np_mock.disable_overprovision = None
         _validate_vmss_create_subnet(np_mock)
         self.assertEqual(np_mock.app_gateway_subnet_address_prefix, '10.0.8.0/24')
 

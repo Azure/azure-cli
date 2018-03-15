@@ -206,7 +206,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         self.assertEqual('10.0.0.0/22', ns.subnet_address_prefix)
 
     def test_new_subnet_size_for_small_vmss(self):
-        ns = argparse.Namespace()
+        ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.vnet_type = 'new'
         ns.vnet_address_prefix = '10.0.0.0/16'
         ns.subnet_address_prefix = None
