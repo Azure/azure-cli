@@ -309,7 +309,7 @@ def load_command_table(self, _):
         g.custom_command('import', 'import_zone')
         g.custom_command('export', 'export_zone')
         g.custom_command('create', 'create_dns_zone', client_factory=cf_dns_mgmt_zones)
-        g.generic_update_command('update')
+        g.generic_update_command('update', custom_func_name='update_dns_zone')
 
     with self.command_group('network dns record-set') as g:
         g.custom_command('list', 'list_dns_record_set', client_factory=cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output)
