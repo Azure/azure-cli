@@ -40,6 +40,11 @@ def get_service(cmd, client, resource_group_name, service_name):
         group_name=resource_group_name,
         service_name=service_name)
 
+def list_services(cmd, client, resource_group_name=None):
+    list_func = client.services.list_by_resource_group(group_name=resource_group_name) \
+        if resource_group_name else client.services.list()
+    return list_func
+
 # endregion
 
 # region Tasks

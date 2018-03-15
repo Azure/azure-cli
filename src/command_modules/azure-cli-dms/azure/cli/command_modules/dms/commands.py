@@ -24,6 +24,8 @@ def load_command_table(self, _):
         g.custom_command('check-name-availability', 'check_service_name_availability', client_factory=dms_client_factory)
         g.custom_command('check-status', 'check_service_status', client_factory=dms_client_factory)
         g.custom_command('create', 'create_service', client_factory=dms_client_factory)
+        g.custom_command('delete', 'delete_service', client_factory=dms_client_factory)
+        g.custom_command('list', 'list_services', client_factory=dms_client_factory)
         g.custom_command('show', 'get_service', client_factory=dms_client_factory)
 
     with self.command_group('dms task', dms_tasks_sdk) as g:
