@@ -21,7 +21,7 @@ helps['consumption reservations summaries'] = """
 """
 helps['consumption reservations summaries list'] = """
     type: command
-    short-summary: List reservations summaries for daily or monthly by reservation order Id and optionally by reservation id.
+    short-summary: List reservations summaries for daily or monthly by order Id or reservation id.
 """
 
 helps['consumption reservations details'] = """
@@ -31,7 +31,7 @@ helps['consumption reservations details'] = """
 
 helps['consumption reservations details list'] = """
     type: command
-    short-summary: List the details of a reservation by reservation order id and optionally by reservation id.
+    short-summary: List the details of a reservation by order id or reservation id.
 """
 
 helps['consumption usage'] = """
@@ -56,7 +56,7 @@ helps['consumption pricesheet show'] = """
 
 helps['consumption marketplace'] = """
     type: group
-    short-summary: Inspect the marketplace usage data by an Azure subscription within a billing period.
+    short-summary: Inspect the marketplace usage data of an Azure subscription within a billing period.
 """
 
 helps['consumption marketplace list'] = """
@@ -71,7 +71,7 @@ helps['consumption budget'] = """
 
 helps['consumption budget list'] = """
     type: command
-    short-summary: Lists budgets for an Azure subscription.
+    short-summary: List budgets for an Azure subscription.
 """
 
 helps['consumption budget show'] = """
