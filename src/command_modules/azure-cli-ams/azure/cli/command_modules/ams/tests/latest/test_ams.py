@@ -236,6 +236,14 @@ class AmsTests(ScenarioTest):
         self.cmd('az ams job create -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {assetName} --output-asset-name {assetName} --description {description} --priority {priority}', checks=[
             self.check('name', '{jobName}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('description', '{description}'),
             self.check('priority', '{priority}')
         ])
+
+        self.cmd('az ams job show -a {amsname} -n {jobName} -g {rg} -t {transformName}', checks=[
+            self.check('name', '{assetName}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('priority', '{priority}')
+        ])
+
+        list = self.cmd('az ams job list -a {amsname} -g {rg} -t {transformName}').get_output_in_json()
+        assert len(list) > 0

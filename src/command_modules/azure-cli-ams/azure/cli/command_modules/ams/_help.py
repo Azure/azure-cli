@@ -159,3 +159,13 @@ helps['ams job create'] = """
     type: command
     short-summary: Create a job.
 """
+
+helps['ams job list'] = """
+    type: command
+    short-summary: List all the jobs of a transform within an Azure Media Services account.
+"""
+
+helps['ams job show'] = """
+    type: command
+    short-summary: Show the details of a job.
+"""
