@@ -5,7 +5,7 @@ Release History
 
 2.0.29
 ++++++
-* use TLSv1 in Cloud Shell / PS to avoid a certificate verification error for `az aks install-cli`
+* fix a certificate verification error for `az aks install-cli` in Cloud Shell / PS
 
 2.0.28
 ++++++
