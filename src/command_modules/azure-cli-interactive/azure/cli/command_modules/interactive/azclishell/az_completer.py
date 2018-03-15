@@ -268,13 +268,13 @@ class AzCompleter(Completer):
         if not text.split() and self._is_command:
             if self.branch.children is not None:
                 for com in self.branch.children:
-                    yield Completion(com.data)
+                    yield Completion(com)
 
         # if space show current level commands
         elif text.split() and text[-1].isspace() and self._is_command:
             if self.branch is not self.command_tree:
                 for com in self.branch.children:
-                    yield Completion(com.data)
+                    yield Completion(com)
 
     def yield_param_completion(self, param, last_word):
         """ yields a parameter """
@@ -297,7 +297,7 @@ class AzCompleter(Completer):
             mid_val = text.find(word) + len(word)
             # moving down command tree
             if self.branch.has_child(word) and len(text) > mid_val and text[mid_val].isspace():
-                self.branch = self.branch.get_child(word, self.branch.children)
+                self.branch = self.branch.get_child(word)
 
         if text and text[-1].isspace():
             if in_tree(self.command_tree, temp_command):
@@ -327,9 +327,9 @@ class AzCompleter(Completer):
 
         if self.branch.children and self._is_command:  # all underneath commands
             for kid in self.branch.children:
-                if self.validate_completion(kid.data, txtspt[-1], text, False):
+                if self.validate_completion(kid, txtspt[-1], text, False):
                     yield Completion(
-                        str(kid.data), -len(txtspt[-1]))
+                        str(kid), -len(txtspt[-1]))
         elif self._is_command and self.curr_command.strip() in self.command_parameters:
             for param in self.command_parameters[self.curr_command.strip()]:
                 if param.startswith('--'):

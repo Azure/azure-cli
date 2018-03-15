@@ -15,26 +15,17 @@ class TreeTest(unittest.TestCase):
         tree = CommandTree(data=None)
         self.assertFalse(tree.has_child(""))
         with self.assertRaises(ValueError):
-            tree.get_child("nothing", tree.children)
+            tree.get_child("nothing")
         tree.add_child(CommandBranch("Kid1"))
         self.assertTrue(tree.has_child("Kid1"))
         self.assertFalse(tree.has_child("Kid2"))
         self.assertFalse(
-            isinstance(tree.get_child("Kid1", tree.children), six.string_types)
+            isinstance(tree.get_child("Kid1"), six.string_types)
         )
         self.assertTrue(
-            isinstance(tree.get_child("Kid1", tree.children), CommandTree)
+            isinstance(tree.get_child("Kid1"), CommandTree)
         )
 
-    def test_subbranch(self):
-        tree3 = CommandBranch("Again")
-        tree2 = CommandBranch("World")
-        tree2.add_child(tree3)
-        tree1 = CommandBranch("Hello")
-        tree1.add_child(tree2)
-        tree = CommandHead()
-        tree.add_child(tree1)
-        self.assertEqual(tree.get_subbranch("Hello"), ["World", "Again"])
 
     def test_in_tree(self):
         # tests in tree
@@ -47,10 +38,10 @@ class TreeTest(unittest.TestCase):
         tree1.add_child(tree2)
         tree = CommandHead()
         tree.add_child(tree1)
-        self.assertTrue(in_tree(tree3, 'Again'))
-        self.assertTrue(in_tree(tree2, 'World Again'))
-        self.assertTrue(in_tree(tree1, 'Hello World Again'))
-        self.assertTrue(in_tree(tree1, 'Hello World CB1'))
+        self.assertTrue(in_tree(tree2, 'Again'))
+        self.assertTrue(in_tree(tree2, 'CB1'))
+        self.assertTrue(in_tree(tree1, 'World Again'))
+        self.assertTrue(in_tree(tree1, 'World CB1'))
 
         self.assertFalse(in_tree(tree1, 'World Hello CB1'))
         self.assertFalse(in_tree(tree, 'World Hello CB1'))

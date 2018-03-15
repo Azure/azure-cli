@@ -18,7 +18,7 @@ def get_az_lexer(config):
             commands = GatherCommands(config)
             tokens = {
                 'root': [
-                    (words(tuple(kid.data for kid in commands.command_tree.children),
+                    (words(tuple(kid for kid in commands.command_tree.children),
                            prefix=r'\b',
                            suffix=r'\b'),
                      Keyword),  # top level commands
