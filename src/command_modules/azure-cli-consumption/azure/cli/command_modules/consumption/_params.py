@@ -50,3 +50,6 @@ def load_arguments(self, _):
         cb.argument('resources', options_list=['--resources', '-u'], nargs='+', help='resource(s) specified as a filter')
         cb.argument('meters', options_list=['--meters', '-m'], nargs='+', help='meter(s) specified as a filter')
         cb.argument('notifications', options_list=['--notifications', '-n'], nargs='+', help='notifications used to send a budget')
+    
+    with self.argument_context('consumption budget update') as cbu:
+        cbu.argument('e_tag', options_list=['--e_tag', '-x'], type=str, help='etag required when updating existing budget')
