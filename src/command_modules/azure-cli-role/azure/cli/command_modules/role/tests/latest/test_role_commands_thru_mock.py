@@ -12,14 +12,16 @@ import mock
 from azure.cli.testsdk import TestCli
 
 from azure.mgmt.authorization.models import RoleDefinition, RoleAssignmentCreateParameters
-from azure.graphrbac.models import Application, ServicePrincipal, GraphErrorException, ApplicationUpdateParameters
+from azure.graphrbac.models import (Application, ServicePrincipal, GraphErrorException,
+                                    ApplicationUpdateParameters, GetObjectsParameters)
 from azure.cli.command_modules.role.custom import (create_role_definition,
                                                    update_role_definition,
                                                    create_service_principal_for_rbac,
                                                    reset_service_principal_credential,
                                                    update_application, _try_x509_pem,
                                                    delete_service_principal_credential,
-                                                   list_service_principal_credentials)
+                                                   list_service_principal_credentials,
+                                                   update_application, _get_object_stubs)
 
 from knack.util import CLIError
 
@@ -426,6 +428,25 @@ class TestRoleMocked(unittest.TestCase):
         graph_client.service_principals.list.assert_called_once()
         graph_client.service_principals.list_key_credentials.assert_called_once()
         graph_client.service_principals.update_key_credentials.assert_called_once_with(test_sp_object_id, [])
+
+    def test_get_object_stubs(self):
+        graph_client = mock.MagicMock()
+        assignees = [i for i in range(2001)]
+        graph_client.objects.get_objects_by_object_ids.return_value = []
+
+        # action
+        _get_object_stubs(graph_client, assignees)
+
+        # assert
+        # we get called with right args
+        self.assertEqual(graph_client.objects.get_objects_by_object_ids.call_count, 3)
+        object_groups = []
+        for i in range(0, 2001, 1000):
+            object_groups.append([i for i in range(i, min(i + 1000, 2001))])
+
+        for call, group in zip(graph_client.objects.get_objects_by_object_ids.call_args_list, object_groups):
+            args, _ = call
+            self.assertEqual(args[0].object_ids, group)
 
 
 class FakedError(object):  # pylint: disable=too-few-public-methods
