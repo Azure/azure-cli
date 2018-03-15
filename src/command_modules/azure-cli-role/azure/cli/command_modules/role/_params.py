@@ -100,6 +100,7 @@ def load_arguments(self, _):
         c.argument('role', help='role name or id', completer=get_role_definition_name_completion_list)
         c.argument('show_all', options_list=['--all'], action='store_true', help='show all assignments under the current subscription')
         c.argument('include_inherited', action='store_true', help='include assignments applied on parent scopes')
+        c.argument('can_delegate', action='store_true', help='when set, the assignee will be able to create further role assignments to the same role')
         c.argument('assignee', help='represent a user, group, or service principal. supported format: object id, user sign-in name, or service principal name')
         c.argument('assignee_object_id', help="assignee's graph object id, such as the 'principal id' from a managed service identity. Use this instead of '--assignee' to bypass graph permission issues")
         c.argument('ids', nargs='+', help='space-separated role assignment ids')

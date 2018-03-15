@@ -11,7 +11,7 @@ import mock
 
 from azure.cli.testsdk import TestCli
 
-from azure.mgmt.authorization.models import RoleDefinition, RoleDefinitionProperties
+from azure.mgmt.authorization.models import RoleDefinition, RoleAssignmentCreateParameters
 from azure.graphrbac.models import Application, ServicePrincipal, GraphErrorException, ApplicationUpdateParameters
 from azure.cli.command_modules.role.custom import (create_role_definition,
                                                    update_role_definition,
@@ -53,7 +53,7 @@ class TestRoleMocked(unittest.TestCase):
             self.create_def_invoked = True
             uuid.UUID(str(role_definition_id))  # as long as no exception, it means a generated uuid
             self.assertEqual(self.default_scope, scope)
-            self.assertEqual(role_definition.properties.role_name, self.role_logical_name)
+            self.assertEqual(role_definition.role_name, self.role_logical_name)
 
         faked_role_client = mock.MagicMock()
         client_mock.return_value = faked_role_client
@@ -80,14 +80,16 @@ class TestRoleMocked(unittest.TestCase):
             self.update_def_invoked = True
             self.assertEqual(role_definition_id, test_role_id)
             self.assertEqual(self.default_scope, scope)
-            self.assertEqual(role_definition.properties.role_name, self.role_logical_name)
+            self.assertEqual(role_definition.role_name, self.role_logical_name)
 
         faked_role_client = mock.MagicMock()
         client_mock.return_value = faked_role_client
         faked_role_client.role_definitions.create_or_update = _update_def
         faked_role_client.config.subscription_id = self.subscription_id
-        faked_role_client.role_definitions.list.return_value = [RoleDefinition(name=test_role_id,
-                                                                               properties=RoleDefinitionProperties(role_name=self.role_logical_name))]
+
+        test_def = RoleDefinition(role_name=self.role_logical_name)
+        test_def.name = test_role_id
+        faked_role_client.role_definitions.list.return_value = [test_def]
 
         _, role_definition_file = tempfile.mkstemp()
         with open(role_definition_file, 'w') as f:

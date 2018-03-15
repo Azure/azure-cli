@@ -21,8 +21,7 @@ from azure.graphrbac.models.graph_error import GraphErrorException
 
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
-from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
-                                             RoleDefinitionProperties)
+from azure.mgmt.authorization.models import RoleAssignmentCreateParameters, Permission, RoleDefinition
 
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     ApplicationUpdateParameters,
@@ -82,7 +81,7 @@ def _create_update_role_definition(cli_ctx, role_definition, for_update):
             raise CLIError('Please provide the unique logic name of an existing role')
         role_definition['name'] = matched[0].name
         # ensure correct logical name and guid name. For update we accept both
-        role_name = matched[0].properties.role_name
+        role_name = matched[0].role_name
         role_id = matched[0].name
     else:
         role_id = _gen_guid()
@@ -91,18 +90,19 @@ def _create_update_role_definition(cli_ctx, role_definition, for_update):
         raise CLIError("please provide 'assignableScopes'")
 
     permission = Permission(actions=role_definition.get('actions', None),
-                            not_actions=role_definition.get('notActions', None))
-    properties = RoleDefinitionProperties(role_name=role_name,
-                                          description=role_definition.get('description', None),
-                                          type=_CUSTOM_RULE,
-                                          assignable_scopes=role_definition['assignableScopes'],
-                                          permissions=[permission])
+                            not_actions=role_definition.get('notActions', None),
+                            data_actions=role_definition.get('dataActions', None),
+                            not_data_actions=role_definition.get('notDataActions', None))
 
-    definition = RoleDefinition(name=role_id, properties=properties)
+    role_definition = RoleDefinition(role_name=role_name,
+                                     description=role_definition.get('description', None),
+                                     role_type=_CUSTOM_RULE,
+                                     assignable_scopes=role_definition['assignableScopes'],
+                                     permissions=[permission])
 
     return definitions_client.create_or_update(role_definition_id=role_id,
-                                               scope=properties.assignable_scopes[0],
-                                               role_definition=definition)
+                                               scope=role_definition.assignable_scopes[0],
+                                               role_definition=role_definition)
 
 
 def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
@@ -118,17 +118,18 @@ def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
 def _search_role_definitions(definitions_client, name, scope, custom_role_only=False):
     roles = list(definitions_client.list(scope))
     if name:
-        roles = [r for r in roles if r.name == name or r.properties.role_name == name]
+        roles = [r for r in roles if r.name == name or r.role_name == name]
     if custom_role_only:
-        roles = [r for r in roles if r.properties.type == _CUSTOM_RULE]
+        roles = [r for r in roles if r.role_type == _CUSTOM_RULE]
     return roles
 
 
-def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None, scope=None):
+def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None,
+                           scope=None):
     if bool(assignee) == bool(assignee_object_id):
         raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
-    return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id,
-                                   resource_group_name, scope, resolve_assignee=(not assignee_object_id))
+    return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id, resource_group_name, scope,
+                                   resolve_assignee=(not assignee_object_id))
 
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
@@ -142,10 +143,11 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
-    properties = RoleAssignmentProperties(role_id, object_id)
+    parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
     assignment_name = _gen_guid()
     custom_headers = None
-    return assignments_client.create(scope, assignment_name, properties,
+    return assignments_client.create(scope=scope, role_assignment_name=assignment_name,
+                                     parameters=parameters,
                                      custom_headers=custom_headers)
 
 
@@ -185,22 +187,22 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     # 2. fill in role names
     role_defs = list(definitions_client.list(
         scope=scope or ('/subscriptions/' + definitions_client.config.subscription_id)))
-    role_dics = {i.id: i.properties.role_name for i in role_defs}
+    role_dics = {i.id: i.role_name for i in role_defs}
     for i in results:
-        if role_dics.get(i['properties']['roleDefinitionId']):
-            i['properties']['roleDefinitionName'] = role_dics[i['properties']['roleDefinitionId']]
+        if role_dics.get(i['roleDefinitionId']):
+            i['roleDefinitionName'] = role_dics[i['roleDefinitionId']]
 
     # fill in principal names
-    principal_ids = set(i['properties']['principalId'] for i in results if i['properties']['principalId'])
+    principal_ids = set(i['principalId'] for i in results if i['principalId'])
     if principal_ids:
         try:
             principals = _get_object_stubs(graph_client, principal_ids)
             principal_dics = {i.object_id: _get_displayable_name(i) for i in principals}
 
-            for i in [r for r in results if not r['properties'].get('principalName')]:
-                i['properties']['principalName'] = ''
-                if principal_dics.get(i['properties']['principalId']):
-                    i['properties']['principalName'] = principal_dics[i['properties']['principalId']]
+            for i in [r for r in results if not r.get('principalName')]:
+                i['principalName'] = ''
+                if principal_dics.get(i['principalId']):
+                    i['principalName'] = principal_dics[i['principalId']]
         except (CloudError, GraphErrorException) as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
@@ -256,7 +258,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
     # pylint: disable=too-many-nested-blocks, too-many-statements
     result = []
     start_events, end_events, offline_events, client = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
-    role_defs = {d.id: [d.properties.role_name, d.id.split('/')[-1]] for d in list_role_definitions(cmd)}
+    role_defs = {d.id: [d.role_name, d.id.split('/')[-1]] for d in list_role_definitions(cmd)}
 
     for op_id in start_events:
         e = end_events.get(op_id, None)
@@ -341,40 +343,40 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
 
 
 def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
-    co_admins = auth_client.classic_administrators.list('2015-06-01')  # known swagger bug on api-version handling
-    co_admins = [x for x in co_admins if x.properties.email_address]
+    co_admins = auth_client.classic_administrators.list()  # known swagger bug on api-version handling
+    co_admins = [x for x in co_admins if x.email_address]
     graph_client = _graph_client_factory(cli_ctx)
     if assignee:  # apply assignee filter if applicable
         if _is_guid(assignee):
-            result = _get_object_stubs(graph_client, [assignee])
-            if not result:
-                return []
-            assignee = _get_displayable_name(result[0]).lower()
-
-        co_admins = [x for x in co_admins if assignee == x.properties.email_address.lower()]
+            try:
+                result = _get_object_stubs(graph_client, [assignee])
+                if not result:
+                    return []
+                assignee = _get_displayable_name(result[0]).lower()
+            except ValueError:
+                pass
+        co_admins = [x for x in co_admins if assignee == x.email_address.lower()]
 
     if not co_admins:
         return []
 
     result, users = [], []
     for i in range(0, len(co_admins), 10):  # graph allows up to 10 query filters, so split into chunks here
-        upn_queries = ["userPrincipalName eq '{}'".format(x.properties.email_address) for x in co_admins[i:i + 10]]
+        upn_queries = ["userPrincipalName eq '{}'".format(x.email_address) for x in co_admins[i:i + 10]]
         temp = list(list_users(graph_client.users, query_filter=' or '.join(upn_queries)))
         users += temp
     upns = {u.user_principal_name: u.object_id for u in users}
     for admin in co_admins:
         na_text = 'NA(classic admins)'
-        email = admin.properties.email_address
+        email = admin.email_address
         result.append({
             'id': na_text,
             'name': na_text,
-            'properties': {
-                'principalId': upns.get(email),
-                'principalName': email,
-                'roleDefinitionName': admin.properties.role,
-                'roleDefinitionId': 'NA(classic admin role)',
-                'scope': '/subscriptions/' + auth_client.config.subscription_id
-            }
+            'principalId': upns.get(email),
+            'principalName': email,
+            'roleDefinitionName': admin.role,
+            'roleDefinitionId': 'NA(classic admin role)',
+            'scope': '/subscriptions/' + auth_client.config.subscription_id
         })
     return result
 
@@ -434,13 +436,13 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
     if assignments:
         assignments = [a for a in assignments if (
             not scope or
-            include_inherited and re.match(a.properties.scope, scope, re.I) or
-            a.properties.scope.lower() == scope.lower()
+            include_inherited and re.match(a.scope, scope, re.I) or
+            a.scope.lower() == scope.lower()
         )]
 
         if role:
             role_id = _resolve_role_id(role, scope, definitions_client)
-            assignments = [i for i in assignments if i.properties.role_definition_id == role_id]
+            assignments = [i for i in assignments if i.role_definition_id == role_id]
 
     return assignments
 
@@ -1136,12 +1138,12 @@ def _is_guid(guid):
     return False
 
 
-# for injecting test seams to produce predicatable role assignment id for playback
-def _gen_guid():
-    return uuid.uuid4()
-
-
 def _get_object_stubs(graph_client, assignees):
     from azure.graphrbac.models import GetObjectsParameters
     params = GetObjectsParameters(include_directory_object_references=True, object_ids=assignees)
     return list(graph_client.objects.get_objects_by_object_ids(params))
+
+
+# for injecting test seams to produce predicatable role assignment id for playback
+def _gen_guid():
+    return uuid.uuid4()

@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.21
+++++++
+* role assignments: (breaking change)list/show output has "properties" removed to align with SDK
+* role definition: support `dataActions` and `notDataActions`
 
 2.0.20
 ++++++
