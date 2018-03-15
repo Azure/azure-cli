@@ -6,7 +6,7 @@
 import unittest
 import mock
 
-from azure.cli.command_modules.profile.custom import list_subscriptions, get_access_token
+from azure.cli.command_modules.profile.custom import list_subscriptions, get_access_token, login
 from azure.cli.testsdk import TestCli
 
 
@@ -55,3 +55,22 @@ class ProfileCommandTest(unittest.TestCase):
         # assert it takes customized resource, subscription
         get_access_token(cmd, subscription='foosub', resource='foores')
         get_raw_token_mcok.assert_called_with(mock.ANY, 'foores', 'foosub')
+
+    @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
+    def test_get_login(self, profile_mock):
+        def test_login(msi_port, identity_id=None):
+            if msi_port == 50342:
+                return []
+            else:
+                raise ValueError("default port is not set")
+
+        # mock the instance
+        profile_instance = mock.MagicMock()
+        profile_instance.find_subscriptions_in_vm_with_msi = test_login
+        # mock the constructor
+        profile_mock.return_value = profile_instance
+        # action
+        cmd = mock.MagicMock()
+        login(cmd, identity=True)
+
+        # once we are here, we are good

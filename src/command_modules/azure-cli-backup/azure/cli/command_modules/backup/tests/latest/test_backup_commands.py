@@ -7,7 +7,7 @@ import json
 from datetime import datetime, timedelta
 import unittest
 
-from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
+from azure.cli.testsdk import LiveScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
     StorageAccountPreparer
 from azure.mgmt.recoveryservices.models import StorageModelType
 
@@ -21,7 +21,7 @@ def _get_vm_version(vm_type):
         return 'Classic'
 
 
-class BackupTests(ScenarioTest, unittest.TestCase):
+class BackupTests(LiveScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer()
     @VaultPreparer()
     @VMPreparer()

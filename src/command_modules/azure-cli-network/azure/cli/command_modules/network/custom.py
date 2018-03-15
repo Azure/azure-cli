@@ -2315,10 +2315,40 @@ def configure_network_watcher(cmd, client, locations, resource_group_name=None, 
     return client.list_all()
 
 
-def show_topology_watcher(cmd, client, resource_group_name, network_watcher_name, target_resource_group_name):  # pylint: disable=unused-argument
-    return client.get_topology(resource_group_name=resource_group_name,
-                               network_watcher_name=network_watcher_name,
-                               target_resource_group_name=target_resource_group_name)
+def create_nw_connection_monitor(cmd, client, connection_monitor_name, watcher_rg, watcher_name,  # pylint: disable=unused-argument
+                                 source_resource, resource_group_name=None, source_port=None, location=None,
+                                 dest_resource=None, dest_port=None, dest_address=None,
+                                 tags=None, do_not_start=None, monitoring_interval=60):
+    ConnectionMonitor, ConnectionMonitorSource, ConnectionMonitorDestination = cmd.get_models(
+        'ConnectionMonitor', 'ConnectionMonitorSource', 'ConnectionMonitorDestination')
+    connection_monitor = ConnectionMonitor(
+        location=location,
+        tags=tags,
+        source=ConnectionMonitorSource(
+            resource_id=source_resource,
+            port=source_port
+        ),
+        destination=ConnectionMonitorDestination(
+            resource_id=dest_resource,
+            port=dest_port,
+            address=dest_address
+        ),
+        auto_start=not do_not_start,
+        monitoring_interval_in_seconds=monitoring_interval)
+    return client.create_or_update(watcher_rg, watcher_name, connection_monitor_name, connection_monitor)
+
+
+def show_topology_watcher(cmd, client, resource_group_name, network_watcher_name, target_resource_group_name=None,
+                          target_vnet=None, target_subnet=None):  # pylint: disable=unused-argument
+    TopologyParameters = cmd.get_models('TopologyParameters')
+    return client.get_topology(
+        resource_group_name=resource_group_name,
+        network_watcher_name=network_watcher_name,
+        parameters=TopologyParameters(
+            target_resource_group_name=target_resource_group_name,
+            target_virtual_network=target_vnet,
+            target_subnet=target_subnet
+        ))
 
 
 def check_nw_connectivity(cmd, client, watcher_rg, watcher_name, source_resource, source_port=None,
@@ -2513,11 +2543,11 @@ def list_route_filters(client, resource_group_name=None):
 
 
 def create_route_filter_rule(cmd, client, resource_group_name, route_filter_name, rule_name, access, communities,
-                             location=None, tags=None):
+                             location=None):
     RouteFilterRule = cmd.get_models('RouteFilterRule')
     return client.create_or_update(resource_group_name, route_filter_name, rule_name,
                                    RouteFilterRule(access=access, communities=communities,
-                                                   location=location, tags=tags))
+                                                   location=location))
 
 # endregion
 

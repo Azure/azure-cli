@@ -13,6 +13,8 @@ import datetime
 import unittest
 import mock
 
+from azure_devtools.scenario_tests import AllowLargeResponse
+
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 from .role_scenario_test import RoleScenarioTest
 
@@ -199,11 +201,11 @@ class RoleCreateScenarioTest(RoleScenarioTest):
 class RoleAssignmentScenarioTest(RoleScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_role_assign')
+    @AllowLargeResponse()
     def test_role_assignment_e2e(self, resource_group):
         if self.run_under_service_principal():
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
-        self.enable_large_payload()
         user = self.create_random_name('testuser', 15)
         self.kwargs.update({
             'upn': user + '@azuresdkteam.onmicrosoft.com',
@@ -257,11 +259,11 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
     @ResourceGroupPreparer(name_prefix='cli_role_audit')
+    @AllowLargeResponse()
     def test_role_assignment_audits(self, resource_group):
         if self.run_under_service_principal():
             return  # this test delete users which are beyond a SP's capacity, so quit...
 
-        self.enable_large_payload()
         user = self.create_random_name('testuser', 15)
         self.kwargs.update({
             'upn': user + '@azuresdkteam.onmicrosoft.com',
@@ -295,8 +297,8 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
 class RoleAssignmentListScenarioTest(RoleScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_assignments_for_coadmins')
+    @AllowLargeResponse()
     def test_assignments_for_co_admins(self, resource_group):
-        self.enable_large_payload()
 
         result = self.cmd('role assignment list --include-classic-administrator').get_output_in_json()
         self.assertTrue([x for x in result if x['properties']['roleDefinitionName'] in ['CoAdministrator', 'AccountAdministrator']])

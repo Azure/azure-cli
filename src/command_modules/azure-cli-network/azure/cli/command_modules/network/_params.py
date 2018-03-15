@@ -636,6 +636,28 @@ def load_arguments(self, _):
         c.ignore('watcher_rg')
         c.ignore('watcher_name')
 
+    with self.argument_context('network watcher connection-monitor') as c:
+        c.argument('network_watcher_name', arg_type=ignore_type, options_list=['--__NETWORK_WATCHER_NAME'])
+        c.argument('connection_monitor_name', name_arg_type, help='Connection monitor name.')
+
+    with self.argument_context('network watcher connection-monitor create') as c:
+        c.argument('monitoring_interval', help='Monitoring interval in seconds.', type=int)
+        c.argument('do_not_start', action='store_true', help='Create the connection monitor but do not start it immediately.')
+        c.argument('source_resource', help='Name or ID of the resource from which to originate traffic.')
+        c.argument('source_port', help='Port number from which to originate traffic.')
+        c.ignore('location')
+
+    with self.argument_context('network watcher connection-monitor', arg_group='Destination') as c:
+        c.argument('dest_resource', help='Name of ID of the resource to receive traffic.')
+        c.argument('dest_port', help='Port number on which to receive traffic.')
+        c.argument('dest_address', help='The IP address or URI at which to receive traffic.')
+
+    nw_validator = get_network_watcher_from_location(remove=True, watcher_name='network_watcher_name', rg_name='resource_group_name')
+    for scope in ['list', 'show', 'start', 'stop', 'delete', 'query']:
+        with self.argument_context('network watcher connection-monitor {}'.format(scope)) as c:
+            c.extra('location', get_location_type(self.cli_ctx), required=True)
+            c.argument('resource_group_name', arg_type=ignore_type, validator=nw_validator)
+
     with self.argument_context('network watcher configure') as c:
         c.argument('locations', get_location_type(self.cli_ctx), options_list=['--locations', '-l'], nargs='+')
         c.argument('enabled', arg_type=get_three_state_flag())
@@ -643,8 +665,12 @@ def load_arguments(self, _):
     with self.argument_context('network watcher show-topology') as c:
         c.argument('network_watcher_name', ignore_type, options_list=['--watcher'])
         c.argument('resource_group_name', ignore_type, options_list=['--watcher-resource-group'])
-        c.argument('target_resource_group_name', options_list=['--resource-group', '-g'], completer=get_resource_group_completion_list)
         c.extra('location')
+
+    with self.argument_context('network watcher show-topology', arg_group='Target') as c:
+        c.argument('target_resource_group_name', options_list=['--resource-group', '-g'], completer=get_resource_group_completion_list)
+        c.argument('target_vnet', options_list=['--vnet'], help='Name or ID of the virtual network to target.')
+        c.argument('target_subnet', options_list=['--subnet'], help='Name or ID of the subnet to target. If name is used, --vnet NAME must also be supplied.')
 
     with self.argument_context('network watcher create') as c:
         c.argument('location', validator=get_default_location_from_resource_group)

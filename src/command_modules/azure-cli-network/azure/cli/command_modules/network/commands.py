@@ -20,7 +20,7 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_network_gateways, cf_traffic_manager_mgmt_endpoints,
     cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
-    cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups)
+    cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups, cf_connection_monitor)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -38,9 +38,10 @@ from azure.cli.command_modules.network._validators import (
     process_ag_rule_create_namespace, process_ag_ssl_policy_set_namespace, process_ag_url_path_map_create_namespace,
     process_ag_url_path_map_rule_create_namespace, process_auth_create_namespace, process_nic_create_namespace,
     process_lb_create_namespace, process_lb_frontend_ip_namespace, process_local_gateway_create_namespace,
-    process_nw_flow_log_set_namespace, process_nw_flow_log_show_namespace, process_nw_packet_capture_create_namespace,
-    process_nw_test_connectivity_namespace, process_nw_topology_namespace, process_nw_troubleshooting_start_namespace,
-    process_nw_troubleshooting_show_namespace, process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
+    process_nw_cm_create_namespace, process_nw_flow_log_set_namespace, process_nw_flow_log_show_namespace,
+    process_nw_packet_capture_create_namespace, process_nw_test_connectivity_namespace, process_nw_topology_namespace,
+    process_nw_troubleshooting_start_namespace, process_nw_troubleshooting_show_namespace,
+    process_public_ip_create_namespace, process_tm_endpoint_create_namespace,
     process_vnet_create_namespace, process_vnet_gateway_create_namespace, process_vnet_gateway_update_namespace,
     process_vpn_connection_create_namespace, process_route_table_create_namespace)
 
@@ -188,6 +189,11 @@ def load_command_table(self, _):
     network_watcher_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.network_watchers_operations#NetworkWatchersOperations.{}',
         client_factory=cf_network_watcher
+    )
+
+    network_watcher_cm_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations.connection_monitors_operations#ConnectionMonitorsOperations.{}',
+        client_factory=cf_connection_monitor
     )
 
     network_watcher_pc_sdk = CliCommandType(
@@ -485,6 +491,15 @@ def load_command_table(self, _):
         g.custom_command('show-next-hop', 'show_nw_next_hop', client_factory=cf_network_watcher)
         g.custom_command('show-security-group-view', 'show_nw_security_view', client_factory=cf_network_watcher)
         g.custom_command('show-topology', 'show_topology_watcher', validator=process_nw_topology_namespace)
+
+    with self.command_group('network watcher connection-monitor', network_watcher_cm_sdk, client_factory=cf_connection_monitor, min_api='2018-01-01') as g:
+        g.custom_command('create', 'create_nw_connection_monitor', validator=process_nw_cm_create_namespace)
+        g.command('delete', 'delete')
+        g.command('show', 'get')
+        g.command('stop', 'stop')
+        g.command('start', 'start')
+        g.command('query', 'query')
+        g.command('list', 'list')
 
     with self.command_group('network watcher packet-capture', network_watcher_pc_sdk, min_api='2016-09-01') as g:
         g.custom_command('create', 'create_nw_packet_capture', client_factory=cf_packet_capture, validator=process_nw_packet_capture_create_namespace)

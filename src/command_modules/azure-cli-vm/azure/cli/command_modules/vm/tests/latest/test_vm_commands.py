@@ -16,10 +16,11 @@ import uuid
 import six
 
 from knack.util import CLIError
-
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType
 from azure.cli.testsdk import (
-    ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint, StorageAccountPreparer)
+    ScenarioTest, ResourceGroupPreparer, LiveScenarioTest, api_version_constraint,
+    StorageAccountPreparer)
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -65,12 +66,8 @@ class VMUsageScenarioTest(ScenarioTest):
 
 class VMImageListThruServiceScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     def test_vm_images_list_thru_services(self):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 4096
-
         result = self.cmd('vm image list -l westus --publisher Canonical --offer Ubuntu_Snappy_Core -o tsv --all').output
         assert result.index('15.04') >= 0
 
@@ -168,12 +165,8 @@ class VMImageListOffersScenarioTest(ScenarioTest):
 
 class VMImageListPublishersScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     def test_vm_image_list_publishers(self):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 4096
-
         self.kwargs.update({
             'loc': 'westus'
         })
@@ -196,11 +189,8 @@ class VMImageListSkusScenarioTest(ScenarioTest):
         result = self.cmd("vm image list-skus --location {loc} -p {pub} --offer {offer} --query \"length([].id.contains(@, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/'))\"").get_output_in_json()
         self.assertTrue(result > 0)
 
+    @AllowLargeResponse()
     def test_list_skus_contains_zone_info(self):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 2048
         # we pick eastus2 as it is one of 3 regions so far with zone support
         self.kwargs['loc'] = 'eastus2'
         result = self.cmd('vm list-skus -otable -l {loc} -otable')
@@ -272,7 +262,8 @@ class VMVMSSWindowsLicenseTest(ScenarioTest):
         ])
 
 
-class VMCustomImageTest(ScenarioTest):
+# TODO: convert back to ScenarioTest when #5740 is fixed.
+class VMCustomImageTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image')
     def test_custom_image(self, resource_group):
@@ -329,7 +320,8 @@ class VMCustomImageTest(ScenarioTest):
         ])
 
 
-class VMImageWithPlanTest(ScenarioTest):
+# TODO: convert back to ScenarioTest when #5740 is fixed.
+class VMImageWithPlanTest(LiveScenarioTest):
 
     @ResourceGroupPreparer()
     def test_custom_image_with_plan(self, resource_group):
@@ -409,6 +401,37 @@ class VMCreateWithSpecializedUnmanagedDiskTest(ScenarioTest):
         # create a vm by attaching the OS disk from the deleted VM
         self.cmd('vm create -g {rg} -n vm2 --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk',
                  checks=self.check('powerState', 'VM running'))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_with_specialized_unmanaged_disk')
+    def test_vm_create_with_unmanaged_data_disks(self, resource_group):
+
+        self.kwargs.update({
+            'vm': 'vm1',
+            'vm2': 'vm2'
+        })
+
+        # create a unmanaged bm with 2 unmanaged disks
+        vm_create_cmd = 'vm create -g {rg} -n vm1 --image debian --use-unmanaged-disk --admin-username ubuntu --admin-password testPassword0 --authentication-type password'
+        self.cmd(vm_create_cmd)
+        self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} --new --size-gb 1')
+        self.cmd('vm unmanaged-disk attach -g {rg} --vm-name {vm} --new --size-gb 2')
+        vm1_info = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+        self.kwargs['disk_uri'] = vm1_info['storageProfile']['osDisk']['vhd']['uri']
+        self.kwargs['data_disk'] = vm1_info['storageProfile']['dataDisks'][0]['vhd']['uri']
+        self.kwargs['data_disk2'] = vm1_info['storageProfile']['dataDisks'][1]['vhd']['uri']
+
+        self.cmd('vm delete -g {rg} -n vm1 -y')
+
+        # create a vm by attaching the OS disk from the deleted VM
+        vm_create_cmd = ('vm create -g {rg} -n {vm2} --attach-os-disk {disk_uri} --os-type linux --use-unmanaged-disk '
+                         '--attach-data-disks {data_disk} {data_disk2} --data-disk-caching 0=ReadWrite 1=ReadOnly')
+        self.cmd(vm_create_cmd)
+        self.cmd('vm show -g {rg} -n {vm2} -d', checks=[
+            self.check('storageProfile.dataDisks[0].caching', 'ReadWrite'),
+            self.check('storageProfile.dataDisks[0].lun', 0),
+            self.check('storageProfile.dataDisks[1].caching', 'ReadOnly'),
+            self.check('storageProfile.dataDisks[1].lun', 1)
+        ])
 
 
 class VMAttachDisksOnCreate(ScenarioTest):
@@ -789,12 +812,8 @@ class VMMachineExtensionImageScenarioTest(ScenarioTest):
 
 class VMExtensionImageSearchScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse()
     def test_vm_extension_image_search(self):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 4096
-
         # pick this specific name, so the search will be under one publisher. This avoids
         # the parallel searching behavior that causes incomplete VCR recordings.
         self.kwargs.update({
@@ -822,7 +841,7 @@ class VMCreateUbuntuScenarioTest(ScenarioTest):
             'ssh_key': TEST_SSH_KEY_PUB,
             'loc': resource_group_location
         })
-        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1')
+        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly')
 
         self.cmd('vm show -g {rg} -n {vm}', checks=[
             self.check('provisioningState', 'Succeeded'),
@@ -832,10 +851,12 @@ class VMCreateUbuntuScenarioTest(ScenarioTest):
             self.check('osProfile.linuxConfiguration.ssh.publicKeys[0].keyData', '{ssh_key}'),
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Premium_LRS'),
             self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
+            self.check('storageProfile.dataDisks[0].lun', 0),
+            self.check('storageProfile.dataDisks[0].caching', 'ReadOnly'),
         ])
 
         # test for idempotency--no need to reverify, just ensure the command doesn't fail
-        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1')
+        self.cmd('vm create --resource-group {rg} --admin-username {username} --name {vm} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' --location {loc} --data-disk-sizes-gb 1 --data-disk-caching ReadOnly  ')
 
 
 class VMMultiNicScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
@@ -1115,7 +1136,8 @@ class VMCreateExistingIdsOptions(ScenarioTest):
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
 
-class VMCreateCustomIP(ScenarioTest):
+# TODO: convert back to ScenarioTest when #5741 is fixed.
+class VMCreateCustomIP(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_ip')
     def test_vm_create_custom_ip(self, resource_group):
@@ -1561,12 +1583,8 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
 class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_linux_secrets')
+    @AllowLargeResponse()
     def test_vmss_create_linux_secrets(self, resource_group):
-        from azure_devtools.scenario_tests import LargeResponseBodyProcessor
-        large_resp_body = next((r for r in self.recording_processors if isinstance(r, LargeResponseBodyProcessor)), None)
-        if large_resp_body:
-            large_resp_body._max_response_body = 2048
-
         self.kwargs.update({
             'loc': 'westus',
             'vmss': 'vmss1-name',
@@ -1820,7 +1838,8 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
         ])
 
 
-class MSIScenarioTest(ScenarioTest):
+# TODO: convert back to ScenarioTest when #5741 is fixed.
+class MSIScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_msi')
     def test_vm_msi(self, resource_group):
@@ -2465,7 +2484,6 @@ class VMOsDiskSwap(ScenarioTest):
             self.check('storageProfile.osDisk.managedDisk.id', backup_disk_id),
             self.check('storageProfile.osDisk.name', self.kwargs['backupDisk'])
         ])
-        pass
 # endregion
 
 

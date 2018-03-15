@@ -76,11 +76,6 @@ def space_toolbar(settings_items, empty_space):
     return settings, empty_space
 
 
-def restart_completer(shell_ctx):
-    shell_ctx.completer = AzCompleter(shell_ctx, GatherCommands(shell_ctx.config))
-    shell_ctx.refresh_cli = True
-
-
 # pylint: disable=too-many-instance-attributes
 class AzInteractiveShell(object):
 
@@ -94,25 +89,22 @@ class AzInteractiveShell(object):
         self.cli_ctx = cli_ctx
         self.config = Configuration(cli_ctx.config, style=style)
         self.config.set_style(style)
-        self.styles = style or style_factory(self.config.get_style())
-        self.lexer = lexer or get_az_lexer(self.config) if self.styles else None
+        self.style = style_factory(self.config.get_style())
+        self.lexer = lexer or get_az_lexer(self.config) if self.style else None
         try:
             self.completer = completer or AzCompleter(self, GatherCommands(self.config))
-            from .az_completer import initialize_command_table_attributes
-            initialize_command_table_attributes(self.completer)
+            self.completer.initialize_command_table_attributes()
         except IOError:  # if there is no cache
-            self.completer = None
+            self.completer = AzCompleter(self, None)
         self.history = history or FileHistory(os.path.join(self.config.config_dir, self.config.get_history()))
         os.environ[ENV_ADDITIONAL_USER_AGENT] = 'AZURECLISHELL/' + __version__
 
         # OH WHAT FUN TO FIGURE OUT WHAT THESE ARE!
         self._cli = None
-        self.refresh_cli = False
         self.layout = None
         self.description_docs = u''
         self.param_docs = u''
         self.example_docs = u''
-        self._env = os.environ
         self.last = None
         self.last_exit = 0
         self.user_feedback = user_feedback
@@ -155,9 +147,8 @@ class AzInteractiveShell(object):
     @property
     def cli(self):
         """ Makes the interface or refreshes it """
-        if self._cli is None or self.refresh_cli:
+        if self._cli is None:
             self._cli = self.create_interface()
-            self.refresh_cli = False
         return self._cli
 
     def handle_cd(self, cmd):
@@ -200,6 +191,12 @@ class AzInteractiveShell(object):
                 u'{}'.format(self.config_default if self.config_default else 'No Default Values')))
         self._update_toolbar()
         cli.request_redraw()
+
+    def restart_completer(self):
+        if not self.completer:
+            self.completer.start(self, GatherCommands(self.config))
+        self.completer.initialize_command_table_attributes()
+        self._cli = self.create_interface()
 
     def _space_examples(self, list_examples, rows, section_value):
         """ makes the example text """
@@ -357,7 +354,7 @@ class AzInteractiveShell(object):
 
         return Application(
             mouse_support=False,
-            style=self.styles,
+            style=self.style,
             buffer=writing_buffer,
             on_input_timeout=self.on_input_timeout,
             key_bindings_registry=InteractiveKeyBindings(self).registry,
@@ -686,7 +683,7 @@ class AzInteractiveShell(object):
         self.cli_ctx.get_progress_controller().init_progress(ShellProgressView())
         self.cli_ctx.get_progress_controller = self.progress_patch
 
-        self.command_table_thread = LoadCommandTableThread(restart_completer, self)
+        self.command_table_thread = LoadCommandTableThread(self.restart_completer, self)
         self.command_table_thread.start()
 
         from .configuration import SHELL_HELP

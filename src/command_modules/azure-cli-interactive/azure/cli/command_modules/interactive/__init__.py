@@ -26,13 +26,13 @@ class InteractiveCommandsLoader(AzCommandsLoader):
     def __init__(self, cli_ctx=None):
         super(InteractiveCommandsLoader, self).__init__(cli_ctx=cli_ctx)
 
-    def load_command_table(self, args):
+    def load_command_table(self, _):
 
         with self.command_group('', operations_tmpl='azure.cli.command_modules.interactive#{}') as g:
             g.command('interactive', 'start_shell')
         return self.command_table
 
-    def load_arguments(self, command):
+    def load_arguments(self, _):
 
         from azure.cli.command_modules.interactive.azclishell.color_styles import get_options as style_options
 

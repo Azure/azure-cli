@@ -130,8 +130,6 @@ helps['lab vm claim'] = """
             type: command
             short-summary: Claim a virtual machine from the Lab.
             parameters:
-                - name: --ids
-                  short-summary: Space-separated list of VM IDs to claim.
                 - name: --resource-group -g
                   short-summary: Name of lab's resource group.
                 - name: --lab-name

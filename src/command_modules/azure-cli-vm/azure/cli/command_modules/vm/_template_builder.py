@@ -10,6 +10,8 @@ from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 
+from azure.cli.command_modules.vm._vm_utils import get_target_network_api
+
 
 # pylint: disable=too-few-public-methods
 class StorageProfile(Enum):
@@ -80,7 +82,7 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         public_ip_properties['dnsSettings'] = {'domainNameLabel': dns_name}
 
     public_ip = {
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_NETWORK),
+        'apiVersion': get_target_network_api(cmd.cli_ctx),
         'type': 'Microsoft.Network/publicIPAddresses',
         'name': name,
         'location': location,
@@ -405,13 +407,27 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                       data_caching, storage_sku, attach_data_disks=None):
     lun = 0
+
+    # handle 2 kinds of values
+    # 1 "--data-disk-caching <value>": all disks will be applied
+    # 2 "--data-disk-caching 1=<value> 2=<value>": apply based on lun, the rest will use server side default
+    default_caching, individual_disk_cachings = None, {}
+    if data_caching:
+        if len(data_caching) == 1 and '=' not in data_caching[0]:
+            default_caching = data_caching[0]
+        else:
+            for x in data_caching:
+                temp, caching = x.split('=', 1)
+                temp = int(temp)
+                individual_disk_cachings[temp] = caching
+
     if image_data_disks:
         profile['dataDisks'] = profile.get('dataDisks') or []
         for image_data_disk in image_data_disks or []:
             profile['dataDisks'].append({
                 'lun': image_data_disk.lun,
                 'createOption': "fromImage",
-                'caching': data_caching,
+                'caching': default_caching or individual_disk_cachings.get(image_data_disk.lun),
                 'managedDisk': {'storageAccountType': storage_sku}
             })
             lun = lun + 1
@@ -424,7 +440,7 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                 'lun': lun,
                 'createOption': "empty",
                 'diskSizeGB': int(size),
-                'caching': data_caching,
+                'caching': default_caching or individual_disk_cachings.get(lun),
                 'managedDisk': {'storageAccountType': storage_sku}
             })
             lun = lun + 1
@@ -436,7 +452,7 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
             disk_entry = {
                 'lun': lun,
                 'createOption': 'attach',
-                'caching': data_caching,
+                'caching': default_caching or individual_disk_cachings.get(lun),
             }
             if is_valid_resource_id(d):
                 disk_entry['managedDisk'] = {'id': d}
@@ -604,7 +620,7 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_NETWORK),
+        'apiVersion': get_target_network_api(cmd.cli_ctx),
         'dependsOn': [],
         'properties': lb_properties
     }
