@@ -311,7 +311,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
             result.append(entry)
 
     # Fill in logical user/sp names as guid principal-id not readable
-    principal_ids = [x['principalId'] for x in result if x['principalId']]
+    principal_ids = set([x['principalId'] for x in result if x['principalId']])
     if principal_ids:
         graph_client = _graph_client_factory(cmd.cli_ctx)
         stubs = _get_object_stubs(graph_client, principal_ids)
@@ -1201,8 +1201,12 @@ def _is_guid(guid):
 
 def _get_object_stubs(graph_client, assignees):
     from azure.graphrbac.models import GetObjectsParameters
-    params = GetObjectsParameters(include_directory_object_references=True, object_ids=assignees)
-    return list(graph_client.objects.get_objects_by_object_ids(params))
+    result = []
+    assignees = list(assignees)  # callers could pass in a set
+    for i in range(0, len(assignees), 1000):
+        params = GetObjectsParameters(include_directory_object_references=True, object_ids=assignees[i:i + 1000])
+        result += list(graph_client.objects.get_objects_by_object_ids(params))
+    return result
 
 
 # for injecting test seams to produce predicatable role assignment id for playback
