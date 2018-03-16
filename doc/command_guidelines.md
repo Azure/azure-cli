@@ -10,20 +10,18 @@ If in doubt, ask!
 
 - Be consistent with POSIX tools (support piping, work with grep, awk, jq, etc.)
 - Support tab completion for parameter names and values (e.g. resource names)
-- Commands must follow a "[noun] [noun] [verb]" pattern
-- For nouns that only support a single verb, the command should be named as a single hyphenated verb-noun pair
 - All commands, command group and arguments must have descriptions
 - You must provide command examples for non-trivial commands
 - All commands must support all output types (json, tsv, table)
 - Provide custom table outputs for commands that don't provide table output automatically
-- Commands must return an object or dictionary (do not string, Boolean, etc. types)
-- Use `stdout` and `stderr` appropriately.
-- Command output must go to stdout, everything else to stderr (log/status/errors).
+- Commands must return an object, dictionary or `None` (do not string, Boolean, etc. types)
+- Command output must go to `stdout`, everything else to `stderr` (log/status/errors).
 - Log to `logger.error()` or `logger.warning()` for user messages; do not use the `print()` function
 - Use the appropriate logging level for printing strings. e.g. `logging.info(“Upload of myfile.txt successful”)` NOT `return “Upload successful”`.
 
-## Command Naming and Behavior Guidance
+## Command Naming and Behavior
 
+- Commands must follow a "[noun] [noun] [verb]" pattern
 - Multi-word subgroups should be hyphenated
 e.g. `foo-resource` instead of `fooresource`
 - All command names should contain a verb
@@ -33,7 +31,48 @@ e.g. `database show` and `database get` instead of `show-database` and `get-data
 - If a command subgroup would only have a single command, move it into the parent command group and hyphenate the name. This is common for commands which exist only to pull down cataloging information.
 e.g. `database list-sku-definitions` instead of `database sku-definitions list`
 - Avoid command subgroups that have no commands. This often happens at the first level of a command branch.
-e.g. `keyvault create` instead of `keyvault vault create` (where `keyvault` only has subgroups and adds unnecessary depth to the tree).
+e.g. `keyvault create` instead of `keyvault vault create` (where `keyvault` only has subgroups and adds unnecessary depth to the tree).<details>
+  <summary>Click for a full example</summary>
+  <p>
+  KeyVault has secrets, certificates, etc that exist within a vault. The existing (preferred) CLI structure looks like:	
+
+    ```	
+    Group	
+        az keyvault: Safeguard and maintain control of keys, secrets, and certificates.	
+        
+    Subgroups:	
+        certificate  : Manage certificates.	
+        key          : Manage keys.	
+        secret       : Manage secrets.	
+        
+    Commands:	
+        create       : Create a key vault.	
+        delete       : Delete a key vault.	
+        delete-policy: Delete security policy settings for a Key Vault.	
+        list         : List key vaults.	
+        list-deleted : Gets information about the deleted vaults in a subscription.	
+        purge        : Permanently deletes the specified vault.	
+        recover      : Recover a key vault.	
+        set-policy   : Update security policy settings for a Key Vault.	
+        show         : Show details of a key vault.	
+        update       : Update the properties of a key vault.	
+    ```	
+        
+    To create a vault, you simply use `az keyvault create ...`. An alternative would be to place the vault commands into a separate subgroup, like this:	
+    ```	
+    Group	
+        az keyvault: Safeguard and maintain control of keys, secrets, and certificates.	
+        
+    Subgroups:	
+        certificate  : Manage certificates.	
+        key          : Manage keys.	
+        secret       : Manage secrets.	
+        vault        : Manage vaults.	
+    ```	
+        
+    Now, to create a vault, you have to use `az keyvault vault create ...` which is overly verbose adds unnecessary depth to the tree. The preferred style makes the command use more convenient and intuitive.
+</p>
+</details>
 
 ## Standard Command Types
 
@@ -51,7 +90,6 @@ The following are standard names and behavioral descriptions for CRUD commands c
 For commands that don't conform to one of the above-listed standard command patterns, use the following guidance.
 
 - (*) Don't use single word verbs if they could cause confusion with the standard command types. For example, don't use `get` or `new` as these sound functionally the same as `show` and `create` respectively, leading to confusion as to what the expected behavior should be.
-e.g. `new`, `get`
 - (*) Descriptive, hyphenated command names are often a better option than single verbs.
 
 ## Coding Practices
