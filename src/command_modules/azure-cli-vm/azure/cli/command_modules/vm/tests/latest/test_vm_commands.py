@@ -1790,6 +1790,14 @@ class VMSSCreateIdempotentTest(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk')
         self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk')
 
+        # still 1 vnet and 1 subnet inside
+        self.cmd('network vnet list -g {rg}', checks=[
+            self.check('length([])', 1),
+            self.check('[0].name', self.kwargs['vmss'] + 'VNET'),
+            self.check('[0].subnets[0].addressPrefix', '10.0.0.0/24'),
+            self.check('length([0].subnets)', 1),
+        ])
+
 
 class VMSSILBTest(ScenarioTest):
 
