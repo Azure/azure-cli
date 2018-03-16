@@ -33,7 +33,7 @@ Azure CLI translates user inputs into Azure Python SDK calls which communicate w
 
 ### Recording tests for the first time
 
-After the test is executed, a recording file will be generated at `recording/<api_profile_name>/<test_name>.yaml`. The recording file will be created no matter the test pass or not. The behavior makes it easy for you to find issues when a test fails. To re-record the test, you can either delete the existing recording and re-run the test, or simply re-run the test using the `--live` flag (ex: `azdev test --module example --live`.
+After the test is executed, a recording file will be generated at `recording/<api_profile_name>/<test_name>.yaml`. The recording file will be created no matter the test pass or not. The behavior makes it easy for you to find issues when a test fails. To re-record the test, you can either delete the existing recording and re-run the test, or simply re-run the test using the `--live` flag (ex: `azdev test example_test --live`.
 
 It is a good practice to add recording file to the local git cache, which makes it easy to diff the different versions of recording to detect issues or changes.
 
