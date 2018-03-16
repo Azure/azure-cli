@@ -675,6 +675,10 @@ helps['network asg create'] = """
     parameters:
         - name: --name -n
           short-summary: Name of the new application security group resource.
+    examples:
+        - name: Create a typical ASG
+          text: >
+            az network asg create -g MyGroup -n MyAppSecGroup
 """
 
 helps['network asg delete'] = """
@@ -2178,7 +2182,7 @@ helps['network watcher troubleshooting show'] = """
     long-summary: For more information on configuring troubleshooting, visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-troubleshoot-manage-cli
     examples:
         - name: Show the results or status of a troubleshooting operation
-          text: az network watcher troubleshooting show  --resource MyResourceName --resource-group MyResourceGroup --resource-type vnetGateway
+          text: az network watcher troubleshooting show --resource MyResourceName --resource-group MyResourceGroup --resource-type vnetGateway
 """
 
 helps['network watcher test-ip-flow'] = """
@@ -2405,6 +2409,31 @@ helps['network watcher packet-capture stop'] = """
         - name: Stop a running packet capture session.
           text: az network watcher packet-capture stop --location westus -n MyPacketCapture
 """
+
+helps['network watcher packet-capture show'] = """
+    type: command
+    long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    examples:
+        - name: Show a packet capture session.
+          text: az network watcher packet-capture show --location myresourcegroup -n mypacketcapture
+"""
+
+helps['network watcher packet-capture show-status'] = """
+    type: command
+    long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    examples:
+        - name: Show the status of a packet capture session.
+          text: az network watcher packet-capture show-status --location myresourcegroup -n mypacketcapture
+"""
+
+helps['network watcher packet-capture stop'] = """
+    type: command
+    long-summary: For more information about configuring packet capture visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    examples:
+        - name: Stop a running packet capture session.
+          text: az network watcher packet-capture stop --location myresourcegroup -n mypacketcapture
+"""
+
 
 helps['network watcher flow-log'] = """
     type: group
