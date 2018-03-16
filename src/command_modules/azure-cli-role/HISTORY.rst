@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.21
 ++++++
+* ad sp: new commands to manage credentials "az ad sp credential reset/list/delete"
 * role assignments: (breaking change)list/show output has "properties" removed to align with SDK
 * role definition: support `dataActions` and `notDataActions`
 
