@@ -9,7 +9,7 @@ from prompt_toolkit.completion import Completer, Completion
 from azure.cli.core.parser import AzCliCommandParser
 from . import configuration
 from .argfinder import ArgsFinder
-from .command_tree import in_tree
+from .command_tree import in_tree, get_sub_tree
 from .util import parse_quotes
 
 SELECT_SYMBOL = configuration.SELECT_SYMBOL
@@ -161,6 +161,7 @@ class AzCompleter(Completer):
         self.curr_command = ''
         self._is_command = True
         text = self.reformat_cmd(text)
+
         if text.split():
 
             for comp in sort_completions(self.gen_cmd_and_param_completions(text)):
@@ -283,47 +284,22 @@ class AzCompleter(Completer):
 
     def gen_cmd_and_param_completions(self, text):
         """ generates command and parameter completions """
-        temp_command = ''
         txtspt = text.split()
 
-        for word in txtspt:
-            if word.startswith("-"):
-                self._is_command = False
+        subtree, current_command, is_command = get_sub_tree(self.command_tree, txtspt)
+        self._is_command = is_command
 
-            # building what the command is
-            elif self._is_command:
-                temp_command += ' ' + str(word) if temp_command else str(word)
-
-            mid_val = text.find(word) + len(word)
-            # moving down command tree
-            if self.branch.has_child(word) and len(text) > mid_val and text[mid_val].isspace():
-                self.branch = self.branch.get_child(word)
-
-        if text and text[-1].isspace():
-            if in_tree(self.command_tree, temp_command.split()):
-                self.curr_command = temp_command
-            else:
-                self._is_command = False
-        else:
-            self.curr_command = temp_command
+        self.curr_command = current_command
 
         last_word = txtspt[-1]
-        # this is for single char parameters
-        if last_word.startswith("-") and not last_word.startswith("--"):
-            self._is_command = False
-            if self.curr_command in self.command_parameters:
-                for param in self.command_parameters[self.curr_command]:
-                    if self.validate_completion(param, last_word, text) and\
-                            not param.startswith("--"):
-                        yield self.yield_param_completion(param, last_word)
 
-        elif last_word.startswith("--"):  # for regular parameters
-            self._is_command = False
-
-            if self.curr_command in self.command_parameters:  # Everything should, map to empty list
-                for param in self.command_parameters[self.curr_command]:
-                    if self.validate_completion(param, last_word, text):
-                        yield self.yield_param_completion(param, last_word)
+        for param in self.command_parameters.get(self.curr_command, []):
+            if not self.validate_completion(param, last_word, text):
+                continue
+            full_param = last_word.startswith("--") and param.startswith("--")
+            char_param = not last_word.startswith("--") and not param.startswith("--")
+            if full_param or char_param:
+                yield self.yield_param_completion(param, last_word)
 
         if self.branch.children and self._is_command:  # all underneath commands
             for kid in self.branch.children:
