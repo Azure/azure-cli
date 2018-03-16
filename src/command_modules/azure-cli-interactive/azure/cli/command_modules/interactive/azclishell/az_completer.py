@@ -283,7 +283,7 @@ class AzCompleter(Completer):
 
     def gen_cmd_and_param_completions(self, text):
         """ generates command and parameter completions """
-        temp_command = str('')
+        temp_command = ''
         txtspt = text.split()
 
         for word in txtspt:
@@ -300,7 +300,7 @@ class AzCompleter(Completer):
                 self.branch = self.branch.get_child(word)
 
         if text and text[-1].isspace():
-            if in_tree(self.command_tree, temp_command):
+            if in_tree(self.command_tree, temp_command.split()):
                 self.curr_command = temp_command
             else:
                 self._is_command = False

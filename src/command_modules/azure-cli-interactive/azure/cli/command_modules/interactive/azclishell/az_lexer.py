@@ -27,7 +27,7 @@ def get_az_lexer(config):
                            suffix=r'\b'),
                      Keyword.Declaration),  # all other commands
                     (words(tuple(param for param in commands.completable_param + commands.global_param),
-                           prefix=r'',
+                           prefix=r'\B',
                            suffix=r'\b'),
                      Name.Class),  # parameters
                     (r'.', Keyword),  # all else
@@ -35,13 +35,8 @@ def get_az_lexer(config):
                 ]
             }
         except IOError:  # if there is no cache
-            tokens = {
-                'root': [
-                    (r' .', Number),
-                    (r'.', Number),
-                ]
-            }
-    return AzLexer
+            pass
+    return AzLexer if AzLexer.tokens else None
 
 
 class ExampleLexer(RegexLexer):

@@ -60,14 +60,21 @@ def generate_tree(commands):
     return node
 
 
-def in_tree(tree, cmd):
+def in_tree(tree, cmd_args):
     """ if a command is in the tree """
-    data = cmd.split(' ')
-    if not data:
+    if not cmd_args:
         return True
     try:
-        for datum in data:
+        for datum in cmd_args:
             tree = tree.get_child(datum)
     except ValueError:
         return False
     return True
+
+def get_sub_tree(tree, cmd_args):
+    for arg in cmd_args:
+        if tree.has_child(arg):
+            tree = tree.get_child(arg)
+        else:
+            return None
+    return tree

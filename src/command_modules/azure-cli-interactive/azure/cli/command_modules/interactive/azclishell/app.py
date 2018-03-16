@@ -90,7 +90,7 @@ class AzInteractiveShell(object):
         self.config = Configuration(cli_ctx.config, style=style)
         self.config.set_style(style)
         self.style = style_factory(self.config.get_style())
-        self.lexer = lexer or get_az_lexer(self.config) if self.style else None
+        self.lexer = lexer or get_az_lexer(self.config)
         try:
             self.completer = completer or AzCompleter(self, GatherCommands(self.config))
             self.completer.initialize_command_table_attributes()
@@ -196,6 +196,8 @@ class AzInteractiveShell(object):
         if not self.completer:
             self.completer.start(self, GatherCommands(self.config))
         self.completer.initialize_command_table_attributes()
+        if not self.lexer:
+            self.lexer = get_az_lexer(self.config)
         self._cli = self.create_interface()
 
     def _space_examples(self, list_examples, rows, section_value):
@@ -585,12 +587,10 @@ class AzInteractiveShell(object):
             else:
                 value = default_split[0]
 
-            if self.default_command:
-                tree_val = self.default_command + " " + value
-            else:
-                tree_val = value
+            tree_path = self.default_command.split()
+            tree_path.append(value)
 
-            if in_tree(self.completer.command_tree, tree_val.strip()):
+            if in_tree(self.completer.command_tree, tree_path):
                 self.set_scope(value)
                 print("defaulting: " + value, file=self.output)
                 cmd = cmd.replace(SELECT_SYMBOL['scope'], '')
