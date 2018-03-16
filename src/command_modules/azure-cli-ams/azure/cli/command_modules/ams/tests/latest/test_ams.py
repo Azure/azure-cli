@@ -229,18 +229,17 @@ class AmsTests(ScenarioTest):
 
         self.kwargs.update({
             'jobName': jobName,
-            'description': 'some description',
             'priority': 'High'
         })
 
-        self.cmd('az ams job create -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {assetName} --output-asset-name {assetName} --description {description} --priority {priority}', checks=[
+        self.cmd('az ams job create -t {transformName} -a {amsname} -g {rg} -n {jobName} --input-asset-name {assetName} --output-asset-name {assetName} --priority {priority}', checks=[
             self.check('name', '{jobName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('priority', '{priority}')
         ])
 
         self.cmd('az ams job show -a {amsname} -n {jobName} -g {rg} -t {transformName}', checks=[
-            self.check('name', '{assetName}'),
+            self.check('name', '{jobName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('priority', '{priority}')
         ])
@@ -251,7 +250,7 @@ class AmsTests(ScenarioTest):
         self.cmd('az ams job cancel -n {jobName} -a {amsname} -g {rg} -t {transformName}')
 
         self.cmd('az ams job show -a {amsname} -n {jobName} -g {rg} -t {transformName}', checks=[
-            self.check('name', '{assetName}'),
+            self.check('name', '{jobName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('priority', '{priority}'),
             self.check('state', 'Canceled')
