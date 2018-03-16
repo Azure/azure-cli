@@ -503,7 +503,8 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
                     if s.name.lower() == 'gatewaysubnet':
                         return False
                     subnet_mask = s.address_prefix.split('/')[-1]
-                    return _subnet_capacity_check(subnet_mask, namespace.instance_count)
+                    return _subnet_capacity_check(subnet_mask, namespace.instance_count,
+                                                  not namespace.disable_overprovision)
 
                 result = next((s for s in vnet_match.subnets if _check_subnet(s)), None)
             if not result:
@@ -535,10 +536,12 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
     logger.debug('no suitable subnet found. One will be created.')
 
 
-def _subnet_capacity_check(subnet_mask, vmss_instance_count):
+def _subnet_capacity_check(subnet_mask, vmss_instance_count, over_provision):
     mask = int(subnet_mask)
     # '2' are the reserved broadcasting addresses
-    return ((1 << (32 - mask)) - 2) > vmss_instance_count
+    # '*1.5' so we have enough leeway for over-provision
+    factor = 1.5 if over_provision else 1
+    return ((1 << (32 - mask)) - 2) > int(vmss_instance_count * factor)
 
 
 def _validate_vmss_create_subnet(namespace):
@@ -547,7 +550,7 @@ def _validate_vmss_create_subnet(namespace):
             cidr = namespace.vnet_address_prefix.split('/', 1)[0]
             i = 0
             for i in range(24, 16, -1):
-                if _subnet_capacity_check(i, namespace.instance_count):
+                if _subnet_capacity_check(i, namespace.instance_count, not namespace.disable_overprovision):
                     break
             if i < 16:
                 err = "instance count '{}' is out of range of 2^16 subnet size'"
