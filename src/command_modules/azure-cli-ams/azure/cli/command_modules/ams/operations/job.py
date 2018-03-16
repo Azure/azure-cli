@@ -13,6 +13,8 @@ def create_job(client, resource_group_name, account_name, transform_name, job_na
                description=None, priority=None, files=None, base_uri=None):
     from azure.mediav3.models import (Job, JobInputAsset, JobInputHttp, JobOutputAsset)
 
+    files = files if files is None else list(files.split(','))
+
     if input_asset_name:
         job_input = JobInputAsset(asset_name=input_asset_name, files=files)
     else:
@@ -22,8 +24,9 @@ def create_job(client, resource_group_name, account_name, transform_name, job_na
         else:
             job_input = JobInputHttp(files=files, base_uri=base_uri)
 
-    job_output = JobOutputAsset(asset_name=output_asset_name)
+    output_assets = list(output_asset_name.split(','))
+    job_outputs = list(map(lambda x: JobOutputAsset(asset_name=x), output_assets))
 
-    job = Job(input=job_input, outputs=[job_output], description=description, priority=priority)
+    job = Job(input=job_input, outputs=job_outputs, description=description, priority=priority)
 
     return client.create_or_update(resource_group_name, account_name, transform_name, job_name, job)

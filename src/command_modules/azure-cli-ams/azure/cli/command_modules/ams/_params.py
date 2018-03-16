@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from knack.arguments import CLIArgumentType
+
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type)
 from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
@@ -95,9 +96,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The priority with which the job should be processed.')
         c.argument('description', help='The job description.')
         c.argument('input_asset_name', help='The name of the input asset.')
-        c.argument('output_asset_name', help='The name of the output asset.')
+        c.argument('output_asset_name', help="""The name of the output asset.
+                                Output asset names must be comma-separated and must not contain any spaces.""")
         c.argument('base_uri', help="""Base uri for http job input. It will be concatenated with provided file names.
                                 If no base uri is given,
                                 then the provided file list is assumed to be fully qualified uris.""")
         c.argument('files', help="""List of files. It can be used to tell the service to only use
-                                the files specified from the input asset.""")
+                                the files specified from the input asset.
+                                File names must be comma-separated and must not contain any spaces.""")
