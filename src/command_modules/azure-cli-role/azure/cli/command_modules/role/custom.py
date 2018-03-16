@@ -727,7 +727,7 @@ def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
 
     to_delete = next((x for x in result if x.key_id == key_id), None)
 
-    # we will try to delete the creds at service principal level, if nout found, we try application level
+    # we will try to delete the creds at service principal level, if not found, we try application level
 
     if to_delete:
         result.remove(to_delete)
@@ -748,7 +748,7 @@ def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
                     return client.applications.update_key_credentials(app_object_id, result)
                 return client.applications.update_password_credentials(app_object_id, result)
 
-    raise CLIError("'{}' does't exist in the service principal of '{}' or associated application".format(
+    raise CLIError("'{}' doesn't exist in the service principal of '{}' or associated application".format(
         key_id, identifier))
 
 
