@@ -18,19 +18,23 @@ The document provides instructions and guidelines on how to author individual co
 
 [7. Supporting the IDs Parameter](#supporting-the-ids-parameter)
 
-[8. Generic Update Commands](#generic-update-commands)
 
-[9. Custom Table Formats](#custom-table-formats)
+[8. Supporting Name or ID Parameters](#supporting-name-or-id-parameters)
+
+[9. Generic Update Commands](#generic-update-commands)
 
 [10. Tab Completion (bash only)](#tab-completion)
 
-[11. Validators](#validators)
+[11. Custom Table Formats](#custom-table-formats)
 
-[12. Registering Flag Arguments](#registering-flags)
+[12. Validators](#validators)
+
 
 [13. Registering Enum Arguments](#registering-enums)
 
 [14. Preventing particular extensions from being loading](#extension-suppression)
+
+[15. Preventing particular extensions from being loading](#extension-suppression)
 
 Authoring Commands
 =============================
@@ -445,6 +449,55 @@ Any of these keys could be supplied as a value for `id_part`, thought typically 
 
 A couple things to note:
 - Currently, `--ids` is not exposed for any command that is called 'create', even if it is configured properly.
+- `--ids` is intended to be the ID of the resource the command group is about. Thus, it needs to be suppressed on `list` commands for child resources. This simplest way to do this:
+```Python
+with self.argument_context('parent child') as c:
+  c.argument('parent_name', id_part=None)  # This should ALWAYS be the id_part that was 'name'.
+  c.argument('child_name', ...)
+```
+
+## Supporting Name or ID Parameters
+
+Often times, the service needs references to supporting resources like storage accounts, key vault, etc. Typically, services require the ARM ID of these resources. The CLI pattern is to accept the ARM ID for this resource OR the name of the resource, assuming the resource is in the same subscription and resource group as the main resource.
+
+DO NOT:
+- Expose an ID parameter like `--storage-account-id`. 
+- Add parameters like `--storage-account-resource-group` to indicate the resource group for the secondary resource. The user should supply the ARM ID in this instance.
+
+DO:
+- Call the parameter `--storage-account` and indicate in the help text that it accepts the "Name or ID of the storage account."
+- Add logic similar to the following to a validator or custom command to process the name or ID logic:
+
+**Custom Command**
+```Python
+def my_command(cmd, resource_group_name, foo_name, storage_account):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if not is_valid_resource_id(storage_account):
+        storage_account = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Storage', type='storageAccounts',
+            name=storage_account
+        )
+```
+
+**Validator**
+```Python
+def validate_storage_name_or_id(cmd, namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.storage_account:
+        if not is_valid_resource_id(namespace.storage_account):
+            namespace.storage_account = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Storage', type='storageAccounts',
+                name=namespace.storage_account
+            )
+```
+
+
 
 ## Generic Update Commands
 
