@@ -962,8 +962,7 @@ class AzArgumentContext(ArgumentsContext):
             return
 
         for arg in args:
-            dest_option = ['--__{}'.format(arg.upper())]
-            super(AzArgumentContext, self).argument(arg, arg_type=ignore_type, options_list=dest_option)
+            super(AzArgumentContext, self).ignore(arg)
 
     def extra(self, dest, arg_type=None, **kwargs):
         self._check_stale()
