@@ -159,7 +159,7 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
 def _get_sku_object(cmd, sku):
     if cmd.supported_api_version(min_api='2017-03-30'):
         DiskSku = cmd.get_models('DiskSku')
-        return DiskSku(sku)
+        return DiskSku(name=sku)
     return sku
 
 
@@ -230,7 +230,7 @@ def _parse_rg_name(strid):
 
 def _set_sku(cmd, instance, sku):
     if cmd.supported_api_version(min_api='2017-03-30'):
-        instance.sku = cmd.get_models('DiskSku')(sku)
+        instance.sku = cmd.get_models('DiskSku')(name=sku)
     else:
         instance.account_type = sku
 
@@ -273,14 +273,14 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
     else:
         option = DiskCreateOption.empty
 
-    creation_data = CreationData(option, source_uri=source_blob_uri,
+    creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
                                  image_reference=None,
                                  source_resource_id=source_disk or source_snapshot,
                                  storage_account_id=source_storage_account_id)
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('usage error: --size-gb required to create an empty disk')
-    disk = Disk(location, creation_data, (tags or {}), _get_sku_object(cmd, sku), disk_size_gb=size_gb)
+    disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}), sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
     if zone:
         disk.zones = zone
 
@@ -320,32 +320,32 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
 
     if source_virtual_machine:
         location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-        image = Image(location, source_virtual_machine=SubResource(source_virtual_machine))
+        image = Image(location=location, source_virtual_machine=SubResource(id=source_virtual_machine))
     else:
         os_disk = ImageOSDisk(os_type=os_type,
                               os_state=OperatingSystemStateTypes.generalized,
-                              snapshot=SubResource(os_snapshot) if os_snapshot else None,
-                              managed_disk=SubResource(os_disk) if os_disk else None,
+                              snapshot=SubResource(id=os_snapshot) if os_snapshot else None,
+                              managed_disk=SubResource(id=os_disk) if os_disk else None,
                               blob_uri=os_blob_uri)
         all_data_disks = []
         lun = 0
         if data_blob_uris:
             for d in data_blob_uris:
-                all_data_disks.append(ImageDataDisk(lun, blob_uri=d))
+                all_data_disks.append(ImageDataDisk(lun=lun, blob_uri=d))
                 lun += 1
         if data_snapshots:
             for d in data_snapshots:
-                all_data_disks.append(ImageDataDisk(lun, snapshot=SubResource(d)))
+                all_data_disks.append(ImageDataDisk(lun=lun, snapshot=SubResource(id=d)))
                 lun += 1
         if data_disks:
             for d in data_disks:
-                all_data_disks.append(ImageDataDisk(lun, managed_disk=SubResource(d)))
+                all_data_disks.append(ImageDataDisk(lun=lun, managed_disk=SubResource(id=d)))
                 lun += 1
 
         image_storage_profile = image_storage_profile = ImageStorageProfile(os_disk=os_disk, data_disks=all_data_disks)
         location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
         # pylint disable=no-member
-        image = Image(location, storage_profile=image_storage_profile, tags=(tags or {}))
+        image = Image(location=location, storage_profile=image_storage_profile, tags=(tags or {}))
 
     client = _compute_client_factory(cmd.cli_ctx)
     return client.images.create_or_update(resource_group_name, name, image)
@@ -375,7 +375,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     else:
         option = DiskCreateOption.empty
 
-    creation_data = CreationData(option, source_uri=source_blob_uri,
+    creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
                                  image_reference=None,
                                  source_resource_id=source_disk or source_snapshot,
                                  storage_account_id=source_storage_account_id)
@@ -383,7 +383,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
 
-    snapshot = Snapshot(location, creation_data, (tags or {}), _get_sku_object(cmd, sku), disk_size_gb=size_gb)
+    snapshot = Snapshot(location=location, creation_data=creation_data, tags=(tags or {}), sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
     client = _compute_client_factory(cmd.cli_ctx)
     return client.snapshots.create_or_update(resource_group_name, snapshot_name, snapshot)
 
@@ -477,10 +477,10 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
                storage_container='vhds', overwrite=True):
     VirtualMachineCaptureParameters = cmd.get_models('VirtualMachineCaptureParameters')
     client = _compute_client_factory(cmd.cli_ctx)
-    parameter = VirtualMachineCaptureParameters(vhd_name_prefix, storage_container, overwrite)
-    poller = client.virtual_machines.capture(resource_group_name, vm_name, parameter)
-    result = LongRunningOperation(cmd.cli_ctx)(poller)
-    print(json.dumps(result.output, indent=2))  # pylint: disable=no-member
+    parameter = VirtualMachineCaptureParameters(vhd_prefix=vhd_name_prefix,
+                                                destination_container_name=storage_container,
+                                                overwrite_vhds=overwrite)
+    return client.virtual_machines.capture(resource_group_name, vm_name, parameter)
 
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches
@@ -1005,9 +1005,9 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
 
     DiagnosticsProfile, BootDiagnostics = cmd.get_models('DiagnosticsProfile', 'BootDiagnostics')
 
-    boot_diag = BootDiagnostics(True, storage_uri)
+    boot_diag = BootDiagnostics(enabled=True, storage_uri=storage_uri)
     if vm.diagnostics_profile is None:
-        vm.diagnostics_profile = DiagnosticsProfile(boot_diag)
+        vm.diagnostics_profile = DiagnosticsProfile(boot_diagnostics=boot_diag)
     else:
         vm.diagnostics_profile.boot_diagnostics = boot_diag
 
@@ -1143,13 +1143,13 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk,
     if new:
         if not size_gb:
             raise CLIError('usage error: --size-gb required to create an empty disk for attach')
-        data_disk = DataDisk(lun, DiskCreateOption.empty,
+        data_disk = DataDisk(lun=lun, create_option=DiskCreateOption.empty,
                              name=parse_resource_id(disk)['name'],
                              disk_size_gb=size_gb, caching=caching,
                              managed_disk=ManagedDiskParameters(storage_account_type=sku))
     else:
         params = ManagedDiskParameters(id=disk, storage_account_type=sku)
-        data_disk = DataDisk(lun, DiskCreateOption.attach, managed_disk=params, caching=caching)
+        data_disk = DataDisk(lun=lun, create_option=DiskCreateOption.attach, managed_disk=params, caching=caching)
 
     vm.storage_profile.data_disks.append(data_disk)
     set_vm(cmd, vm)
@@ -1185,7 +1185,7 @@ def set_extension(
     VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
     instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name)
     version = _normalize_extension_version(cmd.cli_ctx, publisher, vm_extension_name, version, vm.location)
-    ext = VirtualMachineExtension(vm.location,
+    ext = VirtualMachineExtension(location=vm.location,
                                   publisher=publisher,
                                   virtual_machine_extension_type=vm_extension_name,
                                   protected_settings=protected_settings,
@@ -1345,7 +1345,7 @@ def _build_nic_list(cmd, nic_ids):
         for nic_id in nic_ids:
             rg, name = _parse_rg_name(nic_id)
             nic = network_client.network_interfaces.get(rg, name)
-            nic_list.append(NetworkInterfaceReference(nic.id, False))
+            nic_list.append(NetworkInterfaceReference(id=nic.id, primary=False))
     return nic_list
 
 
@@ -1380,7 +1380,7 @@ def _update_vm_nics(cmd, vm, nics, primary_nic):
 
     network_profile = getattr(vm, 'network_profile', None)
     if network_profile is None:
-        vm.network_profile = NetworkProfile(nics)
+        vm.network_profile = NetworkProfile(network_interfaces=nics)
     else:
         network_profile.network_interfaces = nics
 
@@ -1405,7 +1405,7 @@ def run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=No
             auto_arg_name_num += 1
             n = 'arg{}'.format(auto_arg_name_num)
             v = p
-        run_command_input_parameters.append(RunCommandInputParameter(n, v))
+        run_command_input_parameters.append(RunCommandInputParameter(name=n, value=v))
 
     client = _compute_client_factory(cmd.cli_ctx)
     return client.virtual_machines.run_command(resource_group_name, vm_name,
@@ -1480,7 +1480,7 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
     if vault_secret_group:
         vault_secret_group.vault_certificates.append(vault_cert)
     else:
-        vault_secret_group = VaultSecretGroup(source_vault=SubResource(keyvault), vault_certificates=[vault_cert])
+        vault_secret_group = VaultSecretGroup(source_vault=SubResource(id=keyvault), vault_certificates=[vault_cert])
         vm.os_profile.secrets.append(vault_secret_group)
     vm = set_vm(cmd, vm)
     return vm.os_profile.secrets
@@ -1544,7 +1544,7 @@ def attach_unmanaged_data_disk(cmd, resource_group_name, vm_name, new=False, vhd
 
     if lun is None:
         lun = _get_disk_lun(vm.storage_profile.data_disks)
-    disk = DataDisk(lun=lun, vhd=VirtualHardDisk(vhd_uri), name=disk_name,
+    disk = DataDisk(lun=lun, vhd=VirtualHardDisk(uri=vhd_uri), name=disk_name,
                     create_option=create_option,
                     caching=caching, disk_size_gb=size_gb if new else None)
     if vm.storage_profile.data_disks is None:
@@ -1575,7 +1575,7 @@ def _update_linux_access_extension(cmd, vm_instance, resource_group_name, protec
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
         vm_instance.resources, _LINUX_ACCESS_EXT)
 
-    ext = VirtualMachineExtension(vm_instance.location,  # pylint: disable=no-member
+    ext = VirtualMachineExtension(location=vm_instance.location,  # pylint: disable=no-member
                                   publisher=publisher,
                                   virtual_machine_extension_type=_LINUX_ACCESS_EXT,
                                   protected_settings=protected_settings,
@@ -1619,7 +1619,7 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
                                                  _WINDOWS_ACCESS_EXT,
                                                  _ACCESS_EXT_HANDLER_NAME)
 
-    ext = VirtualMachineExtension(vm_instance.location,  # pylint: disable=no-member
+    ext = VirtualMachineExtension(location=vm_instance.location,  # pylint: disable=no-member
                                   publisher=publisher,
                                   virtual_machine_extension_type=_WINDOWS_ACCESS_EXT,
                                   protected_settings={'Password': password},
@@ -2162,7 +2162,7 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
         return
     else:
         vmss.sku.capacity = new_capacity
-    vmss_new = VirtualMachineScaleSet(vmss.location, sku=vmss.sku)
+    vmss_new = VirtualMachineScaleSet(location=vmss.location, sku=vmss.sku)
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
                        resource_group_name, vm_scale_set_name, vmss_new)
 
@@ -2254,10 +2254,10 @@ def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_g
             luns = [d.lun for d in data_disks]
             lun = max(luns) + 1 if luns else 0
         if existing_disk is None:
-            data_disk = DataDisk(lun, DiskCreateOptionTypes.empty,
+            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.empty,
                                  disk_size_gb=size_gb, caching=caching)
         else:
-            data_disk = DataDisk(lun, DiskCreateOptionTypes.attach,
+            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.attach,
                                  managed_disk=ManagedDiskParameters(id=existing_disk), caching=caching)
 
         data_disks.append(data_disk)
@@ -2368,7 +2368,7 @@ def set_vmss_extension(
                                           auto_upgrade_minor_version=(not no_auto_upgrade))
 
     if not vmss.virtual_machine_profile.extension_profile:
-        vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile([])
+        vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])
     vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
 
     return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
