@@ -9,7 +9,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type)
 from azure.cli.command_modules.role._completers import get_role_definition_name_completion_list
 
-from azure.mediav3.models import (EncoderNamedPreset, Priority)
+from azure.mediav3.models import (EncoderNamedPreset, Priority, AssetContainerPermission)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
@@ -18,6 +18,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='STORAGE_NAME')
     password_arg_type = CLIArgumentType(options_list=('--password', '-p'), metavar='PASSWORD_NAME')
     transform_name_arg_type = CLIArgumentType(options_list=('--transform-name', '-t'), metavar='TRANSFORM_NAME')
+    expiry_arg_type = CLIArgumentType(options_list=('--expiry'), metavar='EXPIRY_TIME')
 
     with self.argument_context('ams account') as c:
         c.argument('account_name', name_arg_type,
@@ -84,6 +85,11 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('alternate_id', help='The alternate id of the asset.')
         c.argument('description', help='The asset description.')
         c.argument('asset_name', name_arg_type, help='The name of the asset.')
+
+    with self.argument_context('ams asset get-sas-urls') as c:
+        c.argument('permissions', arg_type=get_enum_type(AssetContainerPermission),
+                  help='The permissions to set on the SAS URL.')
+        c.argument('expiry_time', expiry_arg_type, help="Specifies the UTC datetime (Y-m-d'T'H:M'Z') at which the SAS becomes invalid.")
 
     with self.argument_context('ams job') as c:
         c.argument('account_name', account_name_arg_type,

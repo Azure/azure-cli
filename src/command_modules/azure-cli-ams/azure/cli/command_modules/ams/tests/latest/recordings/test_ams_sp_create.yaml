@@ -10,22 +10,22 @@ interactions:
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
           msrest_azure/0.4.22 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 16 Mar 2018 02:28:17 GMT']
+      date: ['Fri, 16 Mar 2018 17:01:27 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1120']
     status: {code: 201, message: Created}
 - request:
     body: '{"sku": {"name": "Standard_LRS"}, "kind": "Storage", "location": "westus",
@@ -38,25 +38,25 @@ interactions:
       Content-Length: ['125']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.29]
+          msrest_azure/0.4.22 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2017-10-01
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002?api-version=2017-10-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
       content-type: [text/plain; charset=utf-8]
-      date: ['Fri, 16 Mar 2018 02:28:20 GMT']
+      date: ['Fri, 16 Mar 2018 17:01:28 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/c203ba53-5e8e-46e1-8831-7c1297d27cf6?monitor=true&api-version=2017-10-01']
+      location: ['https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/d662f7f8-8f49-4d03-8c07-5ee48f4aea07?monitor=true&api-version=2017-10-01']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
           Microsoft-HTTPAPI/2.0']
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-subscription-writes: ['1132']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -67,17 +67,17 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.29]
+          msrest_azure/0.4.22 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/c203ba53-5e8e-46e1-8831-7c1297d27cf6?monitor=true&api-version=2017-10-01
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Storage/locations/westus/asyncoperations/d662f7f8-8f49-4d03-8c07-5ee48f4aea07?monitor=true&api-version=2017-10-01
   response:
-    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"trustedDirectories":["479473dc-cfef-474c-ba12-cba2854af0f6"],"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-03-16T02:28:20.6867535Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-03-16T02:28:20.6867535Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-03-16T02:28:20.6555003Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'}
+    body: {string: '{"sku":{"name":"Standard_LRS","tier":"Standard"},"kind":"Storage","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002","name":"clitest000002","type":"Microsoft.Storage/storageAccounts","location":"westus","tags":{},"properties":{"networkAcls":{"bypass":"AzureServices","virtualNetworkRules":[],"ipRules":[],"defaultAction":"Allow"},"trustedDirectories":["479473dc-cfef-474c-ba12-cba2854af0f6"],"supportsHttpsTrafficOnly":false,"encryption":{"services":{"file":{"enabled":true,"lastEnabledTime":"2018-03-16T17:01:29.4306758Z"},"blob":{"enabled":true,"lastEnabledTime":"2018-03-16T17:01:29.4306758Z"}},"keySource":"Microsoft.Storage"},"provisioningState":"Succeeded","creationTime":"2018-03-16T17:01:29.3994328Z","primaryEndpoints":{"blob":"https://clitest000002.blob.core.windows.net/","queue":"https://clitest000002.queue.core.windows.net/","table":"https://clitest000002.table.core.windows.net/","file":"https://clitest000002.file.core.windows.net/"},"primaryLocation":"westus","statusOfPrimary":"available"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['1231']
       content-type: [application/json]
-      date: ['Fri, 16 Mar 2018 02:28:39 GMT']
+      date: ['Fri, 16 Mar 2018 17:01:47 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
@@ -97,17 +97,17 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.29]
+          msrest_azure/0.4.22 azure-mgmt-storage/1.5.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-10-01
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2017-10-01
   response:
-    body: {string: '{"keys":[{"keyName":"key1","value":"ShWXRDzgR2G2ZkfEma1ZjEKUrfxkTpev+WbWLLyvH9Fr2MMSIjoBrbMVDdZJYf5hLQcqfY9PQwn7FaAQwR3itw==","permissions":"FULL"},{"keyName":"key2","value":"2ypqBe/dRJ4tQgMbZgBhIGKlMaisTXL1oQvIx17TJaicscFTocR/YCUB1fRVZkNpywbpw+obEQABxqC2YK1JHQ==","permissions":"FULL"}]}'}
+    body: {string: '{"keys":[{"keyName":"key1","value":"8l+twU6rYGFhOKKFrh9EOmruwrZwpWOD0pDSx0KZMdhunME9UlSKmpnvBH1jQqwgFNxzUx0bq+uzxbhGuLG1Bg==","permissions":"FULL"},{"keyName":"key2","value":"Hj4xGkiptjUGkLzglLb8M5mgAq2kiROVGeRk76eaRsMp2GisJXr8gj5J0Cz0HsWbybeZu6TTfr9eCIgE6htMrw==","permissions":"FULL"}]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['288']
       content-type: [application/json]
-      date: ['Fri, 16 Mar 2018 02:28:41 GMT']
+      date: ['Fri, 16 Mar 2018 17:01:48 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: ['Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0
@@ -116,7 +116,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1123']
     status: {code: 200, message: OK}
 - request:
     body: 'b''b\''{"location": "westus2", "properties": {"storageAccounts": [{"id":
@@ -131,28 +131,28 @@ interactions:
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
           msrest_azure/0.4.22 azuremediaservices/2018-02-01-privatepreview Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-02-01-privatepreview
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-02-01-privatepreview
   response:
     body: {string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\"\
         ,\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"West US 2\",\"\
-        tags\":null,\"properties\":{\r\n    \"mediaServiceId\":\"0f644b57-2850-4402-8dc8-6cb4dc1b0ffc\"\
+        tags\":null,\"properties\":{\r\n    \"mediaServiceId\":\"17da5713-74bf-4b59-a2aa-0ebc2defee66\"\
         ,\"storageAccounts\":[\r\n      {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\"\
         ,\"type\":\"Primary\"\r\n      }\r\n    ]\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['677']
       content-type: [application/json; odata.metadata=minimal]
-      date: ['Fri, 16 Mar 2018 02:28:46 GMT']
+      date: ['Fri, 16 Mar 2018 17:01:51 GMT']
       expires: ['-1']
       odata-version: ['4.0']
       pragma: [no-cache]
       server: [Microsoft-IIS/8.5]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-subscription-writes: ['1131']
       x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
@@ -165,21 +165,21 @@ interactions:
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
           msrest_azure/0.4.22 azuremediaservices/2018-02-01-privatepreview Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-02-01-privatepreview
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003?api-version=2018-02-01-privatepreview
   response:
     body: {string: "{\r\n  \"name\":\"ams000003\",\"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Media/mediaservices/ams000003\"\
         ,\"type\":\"Microsoft.Media/mediaservices\",\"location\":\"West US 2\",\"\
-        tags\":null,\"properties\":{\r\n    \"mediaServiceId\":\"0f644b57-2850-4402-8dc8-6cb4dc1b0ffc\"\
+        tags\":null,\"properties\":{\r\n    \"mediaServiceId\":\"17da5713-74bf-4b59-a2aa-0ebc2defee66\"\
         ,\"storageAccounts\":[\r\n      {\r\n        \"id\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002\"\
         ,\"type\":\"Primary\"\r\n      }\r\n    ]\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['677']
       content-type: [application/json; odata.metadata=minimal]
-      date: ['Fri, 16 Mar 2018 02:28:49 GMT']
+      date: ['Fri, 16 Mar 2018 17:01:52 GMT']
       expires: ['-1']
       odata-version: ['4.0']
       pragma: [no-cache]
@@ -200,7 +200,7 @@ interactions:
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
           msrest_azure/0.4.22 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?$filter=servicePrincipalNames%2Fany%28x%3Ax%20eq%20%27http%3A%2F%2Fspn000004%27%29&api-version=1.6
@@ -212,13 +212,13 @@ interactions:
       content-length: ['166']
       content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
       dataserviceversion: [3.0;]
-      date: ['Fri, 16 Mar 2018 02:28:50 GMT']
-      duration: ['1884833']
+      date: ['Fri, 16 Mar 2018 17:01:53 GMT']
+      duration: ['1900430']
       expires: ['-1']
-      ocp-aad-diagnostics-server-name: [Cw7PncdasTLmBmr1LGvjLNznBnZ59gaE9lED84dnGek=]
-      ocp-aad-session-key: [ndji0m9J1FkV5vNLx5kk6W1F1rnPJldL9lSVlePBm6i_9uWjGfELuq_VlYuD27JsH0Dnj3nSmK4oybSijSD8Q4vNP3_QRs0BjLchdvii7EQGSO77hdmm9NuvOyi3UEFQYe958PX7aQKms0S85SLI4Q.OY3iDiLbj0feGkkmBCils8RuzGlA_C3aZYw63vFJX2c]
+      ocp-aad-diagnostics-server-name: [4gwQrBtXks5dVi0aRt0zGhLTOtYc/KnLaBj5AQs9ou4=]
+      ocp-aad-session-key: [eT9LjtJjY7yrx8Js7HZ-TY0M1dSNIwJHHsNN2HEq9wtuedx2HnvQtEk7cQi49xWiJHV1C6fDUXI86lvQ_oX5htCDGe1bOgbfNV02RHDpaZWKge6ClTVwIq8I2R5zMNa25M8NwtU9Zz5fVPfLR_h8IA.ENfNhVhJcwZ6nfaD-b4Fm3TqvahjyEYrkN-Y_xTevdY]
       pragma: [no-cache]
-      request-id: [5ca9d912-cb20-4ec9-9f8e-5e45f75375f5]
+      request-id: [c41ff949-a74b-4424-a9d8-e4697565cd0b]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
@@ -229,8 +229,8 @@ interactions:
 - request:
     body: 'b''b\''{"availableToOtherTenants": false, "displayName": "spn000004", "homepage":
       "http://spn000004", "identifierUris": ["http://spn000004"], "passwordCredentials":
-      [{"startDate": "2018-03-16T02:28:49.419006Z", "endDate": "2019-03-16T02:28:49.419006Z",
-      "keyId": "6244999d-cd24-4f09-ab7f-76376a50eab8", "value": "spp000005"}]}\'''''
+      [{"startDate": "2018-03-16T17:01:52.030958Z", "endDate": "2019-03-16T17:01:52.030958Z",
+      "keyId": "c2f8d395-d627-4290-ad8d-49427aec834a", "value": "spp000005"}]}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -240,31 +240,31 @@ interactions:
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
           msrest_azure/0.4.22 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: POST
     uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/applications?api-version=1.6
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.Application/@Element","odata.type":"Microsoft.DirectoryServices.Application","objectType":"Application","objectId":"87e1ee6b-11dd-48b5-8c42-a9bd734650dd","deletionTimestamp":null,"acceptMappedClaims":null,"addIns":[],"appId":"959678ec-6b7b-48a7-a322-93b5c1bf4fd5","appRoles":[],"availableToOtherTenants":false,"displayName":"spn000004","errorUrl":null,"groupMembershipClaims":null,"homepage":"http://spn000004","identifierUris":["http://spn000004"],"informationalUrls":{"termsOfService":null,"support":null,"privacy":null,"marketing":null},"isDeviceOnlyAuthSupported":null,"keyCredentials":[],"knownClientApplications":[],"logoutUrl":null,"logo@odata.mediaContentType":"application/json;odata=minimalmetadata;
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.Application/@Element","odata.type":"Microsoft.DirectoryServices.Application","objectType":"Application","objectId":"a419645c-e4ed-4a70-9b42-abe14288a53a","deletionTimestamp":null,"acceptMappedClaims":null,"addIns":[],"appId":"32823e84-31ee-459b-9b27-b967851603b8","appRoles":[],"availableToOtherTenants":false,"displayName":"spn000004","errorUrl":null,"groupMembershipClaims":null,"homepage":"http://spn000004","identifierUris":["http://spn000004"],"informationalUrls":{"termsOfService":null,"support":null,"privacy":null,"marketing":null},"isDeviceOnlyAuthSupported":null,"keyCredentials":[],"knownClientApplications":[],"logoutUrl":null,"logo@odata.mediaContentType":"application/json;odata=minimalmetadata;
         charset=utf-8","logoUrl":null,"oauth2AllowIdTokenImplicitFlow":false,"oauth2AllowImplicitFlow":false,"oauth2AllowUrlPathMatching":false,"oauth2Permissions":[{"adminConsentDescription":"Allow
         the application to access spn000004 on behalf of the signed-in user.","adminConsentDisplayName":"Access
-        spn000004","id":"41f9d1a4-9845-435c-b9b6-e54628262efa","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        spn000004","id":"190f2945-d6ca-42e2-8d0a-d989c8d730ac","isEnabled":true,"type":"User","userConsentDescription":"Allow
         the application to access spn000004 on your behalf.","userConsentDisplayName":"Access
-        spn000004","value":"user_impersonation"}],"oauth2RequirePostResponse":false,"optionalClaims":null,"parentalControlSettings":{"countriesBlockedForMinors":[],"legalAgeGroupRule":"Allow"},"passwordCredentials":[{"customKeyIdentifier":null,"endDate":"2019-03-16T02:28:49.419006Z","keyId":"6244999d-cd24-4f09-ab7f-76376a50eab8","startDate":"2018-03-16T02:28:49.419006Z","value":null}],"publicClient":null,"recordConsentConditions":null,"replyUrls":[],"requiredResourceAccess":[],"samlMetadataUrl":null,"tokenEncryptionKeyId":null}'}
+        spn000004","value":"user_impersonation"}],"oauth2RequirePostResponse":false,"optionalClaims":null,"parentalControlSettings":{"countriesBlockedForMinors":[],"legalAgeGroupRule":"Allow"},"passwordCredentials":[{"customKeyIdentifier":null,"endDate":"2019-03-16T17:01:52.030958Z","keyId":"c2f8d395-d627-4290-ad8d-49427aec834a","startDate":"2018-03-16T17:01:52.030958Z","value":null}],"publicClient":null,"recordConsentConditions":null,"replyUrls":[],"requiredResourceAccess":[],"samlMetadataUrl":null,"tokenEncryptionKeyId":null}'}
     headers:
       access-control-allow-origin: ['*']
       cache-control: [no-cache]
       content-length: ['1878']
       content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
       dataserviceversion: [3.0;]
-      date: ['Fri, 16 Mar 2018 02:28:50 GMT']
-      duration: ['6589888']
+      date: ['Fri, 16 Mar 2018 17:01:55 GMT']
+      duration: ['6492902']
       expires: ['-1']
-      location: ['https://graph.windows.net/00000000-0000-0000-0000-000000000000/directoryObjects/87e1ee6b-11dd-48b5-8c42-a9bd734650dd/Microsoft.DirectoryServices.Application']
-      ocp-aad-diagnostics-server-name: [m9WUaBuJWWN8jTTxvaqUkzVAeQ7QyDcmFQANzJzN5CM=]
-      ocp-aad-session-key: [ZHABvc3URjoueUAkYIDFX4CDLaC1gH106Msrcua4g0u7CTRGZps8JGYtYN9JED3SaNF8i_dHCamKV8o4VCtGoDt6aGSLsOzwI2d-eCWm9l_AvnOFoEatLVzhjx0cJJQPAi5h9j8EkSKiCbwmCcYRfw.grV3B-Msb30frAQhEMVKBt4cffs0mv1YsEyLdlhiR14]
+      location: ['https://graph.windows.net/00000000-0000-0000-0000-000000000000/directoryObjects/a419645c-e4ed-4a70-9b42-abe14288a53a/Microsoft.DirectoryServices.Application']
+      ocp-aad-diagnostics-server-name: [mkefrB4RMzoU8cRuSYCOVVk1ldj6JhOeUuQxmnzjHc4=]
+      ocp-aad-session-key: [ivgCrPFhGwHn6w2fXTbqaeW2yR15OvX6tUfYRIppGnCj2pXvnzIdYl5MMYH40jjmaGKiTodUSi7264ImofHfspYK6EtoqjKSLtemB4fi4v2D6XMEp7KkBatZ8vdrzgTWstR_Li6MwilC4D0BKks7Kw.1nGUFjydktw9lbRpaT8pXqRr-dJGvL_fPut_mSnuV0w]
       pragma: [no-cache]
-      request-id: [7143df1a-6ef3-4a16-9cbc-4d34e1e6fbe0]
+      request-id: [14c5140b-247d-4f46-846e-7fd94284db29]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
@@ -273,7 +273,7 @@ interactions:
       x-powered-by: [ASP.NET, ASP.NET]
     status: {code: 201, message: Created}
 - request:
-    body: '{"appId": "959678ec-6b7b-48a7-a322-93b5c1bf4fd5", "accountEnabled": true}'
+    body: '{"appId": "32823e84-31ee-459b-9b27-b967851603b8", "accountEnabled": true}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -283,30 +283,30 @@ interactions:
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
           msrest_azure/0.4.22 graphrbacmanagementclient/0.31.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: POST
     uri: https://graph.windows.net/00000000-0000-0000-0000-000000000000/servicePrincipals?api-version=1.6
   response:
-    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal/@Element","odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"48e73373-cd40-4f2c-a4f2-59141ffe8361","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"spn000004","appId":"959678ec-6b7b-48a7-a322-93b5c1bf4fd5","appOwnerTenantId":"479473dc-cfef-474c-ba12-cba2854af0f6","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"spn000004","errorUrl":null,"homepage":"http://spn000004","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
+    body: {string: '{"odata.metadata":"https://graph.windows.net/00000000-0000-0000-0000-000000000000/$metadata#directoryObjects/Microsoft.DirectoryServices.ServicePrincipal/@Element","odata.type":"Microsoft.DirectoryServices.ServicePrincipal","objectType":"ServicePrincipal","objectId":"d84787a0-06cd-440a-af3e-fe61f1953f2b","deletionTimestamp":null,"accountEnabled":true,"addIns":[],"alternativeNames":[],"appDisplayName":"spn000004","appId":"32823e84-31ee-459b-9b27-b967851603b8","appOwnerTenantId":"479473dc-cfef-474c-ba12-cba2854af0f6","appRoleAssignmentRequired":false,"appRoles":[],"displayName":"spn000004","errorUrl":null,"homepage":"http://spn000004","keyCredentials":[],"logoutUrl":null,"oauth2Permissions":[{"adminConsentDescription":"Allow
         the application to access spn000004 on behalf of the signed-in user.","adminConsentDisplayName":"Access
-        spn000004","id":"41f9d1a4-9845-435c-b9b6-e54628262efa","isEnabled":true,"type":"User","userConsentDescription":"Allow
+        spn000004","id":"190f2945-d6ca-42e2-8d0a-d989c8d730ac","isEnabled":true,"type":"User","userConsentDescription":"Allow
         the application to access spn000004 on your behalf.","userConsentDisplayName":"Access
-        spn000004","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"MediaSouthWorksDirectory","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["959678ec-6b7b-48a7-a322-93b5c1bf4fd5","http://spn000004"],"servicePrincipalType":"Application","tags":[],"tokenEncryptionKeyId":null}'}
+        spn000004","value":"user_impersonation"}],"passwordCredentials":[],"preferredTokenSigningKeyThumbprint":null,"publisherName":"MediaSouthWorksDirectory","replyUrls":[],"samlMetadataUrl":null,"servicePrincipalNames":["32823e84-31ee-459b-9b27-b967851603b8","http://spn000004"],"servicePrincipalType":"Application","tags":[],"tokenEncryptionKeyId":null}'}
     headers:
       access-control-allow-origin: ['*']
       cache-control: [no-cache]
       content-length: ['1398']
       content-type: [application/json; odata=minimalmetadata; streaming=true; charset=utf-8]
       dataserviceversion: [3.0;]
-      date: ['Fri, 16 Mar 2018 02:28:51 GMT']
-      duration: ['4855823']
+      date: ['Fri, 16 Mar 2018 17:01:56 GMT']
+      duration: ['5829629']
       expires: ['-1']
-      location: ['https://graph.windows.net/00000000-0000-0000-0000-000000000000/directoryObjects/48e73373-cd40-4f2c-a4f2-59141ffe8361/Microsoft.DirectoryServices.ServicePrincipal']
-      ocp-aad-diagnostics-server-name: [BZxBQGZq6Fop2S61otC1It1OG7czCt09h85PRPm5rp4=]
-      ocp-aad-session-key: [xOusyBFlIovBQOZnFPuXb8gSg_5SesQcu3EtWc2FyNyz2K2Fe0T3mN6o0t-PuCGU-6sNqvn3Q5LU-Vw0RtV6BG6rCm-FqZsPMptGsIHba5bPF22IG2b8JOfVDudyzUkJMqYiQVHFONr6T-b-J46WhA.wHKIfPiHPJhu7XBLcDLguwccQwMvn8tKN1PaNUTJ97Q]
+      location: ['https://graph.windows.net/00000000-0000-0000-0000-000000000000/directoryObjects/d84787a0-06cd-440a-af3e-fe61f1953f2b/Microsoft.DirectoryServices.ServicePrincipal']
+      ocp-aad-diagnostics-server-name: [Ma2LaKb79/2GntcjfamrawcAX6S0AXZp5gioDwbfPXM=]
+      ocp-aad-session-key: [fKwIk17-Zf4pnvyNGRSB4TxIyCEnkL75FmP076dMTkliW5s0PMqaPMiT_Ym_m-6Xhl4Ov12vSYVO0Z1XzBW-cYHoW2mCPz90GRDOqPJzrJYqqIBSfe6ms_Trz5VzmiJvk371X2fyIlpTqVHbD2ow2g.xAu0_Gz4bQDSVsbJ_myHhgNs5ag2_w8R6jeMA_x_SRA]
       pragma: [no-cache]
-      request-id: [4fe90def-079f-4ec0-914e-e75880861ea4]
+      request-id: [3174a19c-ff97-4abe-be6b-b3ecead2d3fb]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
@@ -324,17 +324,17 @@ interactions:
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
           msrest_azure/0.4.22 authorizationmanagementclient/0.30.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments?$filter=principalId%20eq%20%2748e73373-cd40-4f2c-a4f2-59141ffe8361%27&api-version=2015-07-01
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments?$filter=principalId%20eq%20%27d84787a0-06cd-440a-af3e-fe61f1953f2b%27&api-version=2015-07-01
   response:
     body: {string: '{"value":[]}'}
     headers:
       cache-control: [no-cache]
       content-length: ['12']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 16 Mar 2018 02:28:52 GMT']
+      date: ['Fri, 16 Mar 2018 17:01:57 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -356,10 +356,10 @@ interactions:
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
           msrest_azure/0.4.22 authorizationmanagementclient/0.30.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Owner%27&api-version=2015-07-01
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Owner%27&api-version=2015-07-01
   response:
     body: {string: '{"value":[{"properties":{"roleName":"Owner","type":"BuiltInRole","description":"Lets
         you manage everything, including access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":[]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-05-31T23:14:00.9179619Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635","type":"Microsoft.Authorization/roleDefinitions","name":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}]}'}
@@ -367,7 +367,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['579']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 16 Mar 2018 02:28:53 GMT']
+      date: ['Fri, 16 Mar 2018 17:01:58 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -381,7 +381,7 @@ interactions:
     status: {code: 200, message: OK}
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
-      "principalId": "48e73373-cd40-4f2c-a4f2-59141ffe8361"}}'
+      "principalId": "d84787a0-06cd-440a-af3e-fe61f1953f2b"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -391,25 +391,25 @@ interactions:
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
           msrest_azure/0.4.22 authorizationmanagementclient/0.30.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/148ee508-53f1-4c58-9231-b0bd1e977e5b?api-version=2015-07-01
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/5de27a44-1fc5-4dda-aaa3-329e227e0af3?api-version=2015-07-01
   response:
-    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal 48e73373cd404f2ca4f259141ffe8361
+    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal d84787a006cd440aaf3efe61f1953f2b
         does not exist in the directory 479473dc-cfef-474c-ba12-cba2854af0f6."}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['163']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 16 Mar 2018 02:28:55 GMT']
+      date: ['Fri, 16 Mar 2018 17:02:03 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       set-cookie: [x-ms-gateway-slice=productionb; path=/; secure; HttpOnly]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1122']
       x-powered-by: [ASP.NET]
     status: {code: 400, message: Bad Request}
 - request:
@@ -422,10 +422,10 @@ interactions:
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
           msrest_azure/0.4.22 authorizationmanagementclient/0.30.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Owner%27&api-version=2015-07-01
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Owner%27&api-version=2015-07-01
   response:
     body: {string: '{"value":[{"properties":{"roleName":"Owner","type":"BuiltInRole","description":"Lets
         you manage everything, including access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":[]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-05-31T23:14:00.9179619Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635","type":"Microsoft.Authorization/roleDefinitions","name":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}]}'}
@@ -433,7 +433,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['579']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 16 Mar 2018 02:29:03 GMT']
+      date: ['Fri, 16 Mar 2018 17:02:09 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -447,7 +447,7 @@ interactions:
     status: {code: 200, message: OK}
 - request:
     body: '{"properties": {"roleDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
-      "principalId": "48e73373-cd40-4f2c-a4f2-59141ffe8361"}}'
+      "principalId": "d84787a0-06cd-440a-af3e-fe61f1953f2b"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -457,157 +457,25 @@ interactions:
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
           msrest_azure/0.4.22 authorizationmanagementclient/0.30.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/47ae15f1-d03f-4ac2-952c-0399f4f80709?api-version=2015-07-01
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/8c5efe0e-96c5-4024-9991-16a5a2d7cdf9?api-version=2015-07-01
   response:
-    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal 48e73373cd404f2ca4f259141ffe8361
-        does not exist in the directory 479473dc-cfef-474c-ba12-cba2854af0f6."}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['163']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 16 Mar 2018 02:29:04 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [x-ms-gateway-slice=productionb; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
-      x-powered-by: [ASP.NET]
-    status: {code: 400, message: Bad Request}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams sp create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 authorizationmanagementclient/0.30.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Owner%27&api-version=2015-07-01
-  response:
-    body: {string: '{"value":[{"properties":{"roleName":"Owner","type":"BuiltInRole","description":"Lets
-        you manage everything, including access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":[]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-05-31T23:14:00.9179619Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635","type":"Microsoft.Authorization/roleDefinitions","name":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}]}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['579']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 16 Mar 2018 02:29:10 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [x-ms-gateway-slice=productionb; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-request-charge: ['1']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: '{"properties": {"roleDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
-      "principalId": "48e73373-cd40-4f2c-a4f2-59141ffe8361"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams sp create]
-      Connection: [keep-alive]
-      Content-Length: ['233']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 authorizationmanagementclient/0.30.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/a3fd2d48-02fb-4392-93cc-80133c8b7660?api-version=2015-07-01
-  response:
-    body: {string: '{"error":{"code":"PrincipalNotFound","message":"Principal 48e73373cd404f2ca4f259141ffe8361
-        does not exist in the directory 479473dc-cfef-474c-ba12-cba2854af0f6."}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['163']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 16 Mar 2018 02:29:13 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [x-ms-gateway-slice=productionb; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
-      x-powered-by: [ASP.NET]
-    status: {code: 400, message: Bad Request}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams sp create]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 authorizationmanagementclient/0.30.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions?$filter=roleName%20eq%20%27Owner%27&api-version=2015-07-01
-  response:
-    body: {string: '{"value":[{"properties":{"roleName":"Owner","type":"BuiltInRole","description":"Lets
-        you manage everything, including access to resources.","assignableScopes":["/"],"permissions":[{"actions":["*"],"notActions":[]}],"createdOn":"0001-01-01T08:00:00.0000000Z","updatedOn":"2016-05-31T23:14:00.9179619Z","createdBy":null,"updatedBy":null},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635","type":"Microsoft.Authorization/roleDefinitions","name":"8e3af657-a8ff-443c-a75c-2fe8c4bcb635"}]}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['579']
-      content-type: [application/json; charset=utf-8]
-      date: ['Fri, 16 Mar 2018 02:29:19 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      set-cookie: [x-ms-gateway-slice=productionb; path=/; secure; HttpOnly]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-content-type-options: [nosniff]
-      x-ms-request-charge: ['1']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: '{"properties": {"roleDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635",
-      "principalId": "48e73373-cd40-4f2c-a4f2-59141ffe8361"}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [ams sp create]
-      Connection: [keep-alive]
-      Content-Length: ['233']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.22 authorizationmanagementclient/0.30.0 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/e176e004-982b-49fa-ab4a-9c1765ecfca8?api-version=2015-07-01
-  response:
-    body: {string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635","principalId":"48e73373-cd40-4f2c-a4f2-59141ffe8361","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","createdOn":"2018-03-16T02:29:20.7441660Z","updatedOn":"2018-03-16T02:29:20.7441660Z","createdBy":null,"updatedBy":"9c251169-a6e5-46a1-a3dd-a488a71bfb3a"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/e176e004-982b-49fa-ab4a-9c1765ecfca8","type":"Microsoft.Authorization/roleAssignments","name":"e176e004-982b-49fa-ab4a-9c1765ecfca8"}'}
+    body: {string: '{"properties":{"roleDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleDefinitions/8e3af657-a8ff-443c-a75c-2fe8c4bcb635","principalId":"d84787a0-06cd-440a-af3e-fe61f1953f2b","scope":"/subscriptions/00000000-0000-0000-0000-000000000000","createdOn":"2018-03-16T17:02:10.2674901Z","updatedOn":"2018-03-16T17:02:10.2674901Z","createdBy":null,"updatedBy":"9c251169-a6e5-46a1-a3dd-a488a71bfb3a"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/roleAssignments/8c5efe0e-96c5-4024-9991-16a5a2d7cdf9","type":"Microsoft.Authorization/roleAssignments","name":"8c5efe0e-96c5-4024-9991-16a5a2d7cdf9"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['686']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 16 Mar 2018 02:29:22 GMT']
+      date: ['Fri, 16 Mar 2018 17:02:13 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       set-cookie: [x-ms-gateway-slice=productionb; path=/; secure; HttpOnly]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
-      x-ms-request-charge: ['3']
+      x-ms-ratelimit-remaining-subscription-writes: ['1121']
+      x-ms-request-charge: ['4']
       x-powered-by: [ASP.NET]
     status: {code: 201, message: Created}
 - request:
@@ -621,21 +489,21 @@ interactions:
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
           msrest_azure/0.4.22 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.29]
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
+    uri: https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 16 Mar 2018 02:29:24 GMT']
+      date: ['Fri, 16 Mar 2018 17:02:14 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdLSDRXNVZLSzRXS1M3NTVSWjVRSzNXVE0zVFhaS0w1VldYU3w3QzI5NDY3MkIzRDBBQjUyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://brazilus.management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdJUjY3TUFPU1RTWFhFTUFLUk5WMjNIUTJNNjVPQ1VNWEpZRnw4N0ZENDU4QThCREQ2QTYzLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+      x-ms-ratelimit-remaining-subscription-writes: ['1130']
     status: {code: 202, message: Accepted}
 version: 1

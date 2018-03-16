@@ -150,6 +150,11 @@ helps['ams asset delete'] = """
     short-summary: Delete an asset.
 """
 
+helps['ams asset get-sas-urls'] = """
+    type: command
+    short-summary: Lists the asset SAS URLs used for uploading and downloading asset content.
+"""
+
 helps['ams job'] = """
     type: group
     short-summary: Manage jobs for a transform.
