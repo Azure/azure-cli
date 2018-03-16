@@ -23,13 +23,9 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 from azure.mgmt.authorization.models import RoleAssignmentCreateParameters, Permission, RoleDefinition
 
-from azure.graphrbac.models import (ApplicationCreateParameters,
-                                    ApplicationUpdateParameters,
-                                    PasswordCredential,
-                                    KeyCredential,
-                                    UserCreateParameters,
-                                    PasswordProfile,
-                                    ServicePrincipalCreateParameters)
+from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, PasswordCredential,
+                                    KeyCredential, UserCreateParameters, PasswordProfile,
+                                    ServicePrincipalCreateParameters, RequiredResourceAccess, ResourceAccess)
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 
@@ -545,23 +541,40 @@ def list_groups(client, display_name=None, query_filter=None):
     return client.list(filter=(' and ').join(sub_filters))
 
 
-def create_application(client, display_name, homepage, identifier_uris,
+def create_application(client, display_name, homepage=None, identifier_uris=None,
                        available_to_other_tenants=False, password=None, reply_urls=None,
-                       key_value=None, key_type=None, key_usage=None, start_date=None,
-                       end_date=None):
-    password_creds, key_creds = _build_application_creds(password, key_value, key_type,
-                                                         key_usage, start_date, end_date)
+                       key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
+                       oauth2_allow_implicit_flow=None, required_resource_accesses=None, native_app=None):
+    key_creds, password_creds, required_accesses = None, None, None
+    if native_app:
+        if identifier_uris:
+            raise CLIError("'--identifier-uris' is not required for creating a native application")
+        identifier_uris = ['http://{}'.format(_gen_guid())]  # we will create a temporary one and remove it later
+    else:
+        if not identifier_uris:
+            raise CLIError("'--identifier-uris' is required for creating an application")
+        password_creds, key_creds = _build_application_creds(password, key_value, key_type,
+                                                             key_usage, start_date, end_date)
 
-    app_create_param = ApplicationCreateParameters(available_to_other_tenants,
+    # TODO: add a sample!!!, and move it to validator
+    for k, v in (required_resource_accesses or {}).items():
+        accesses = [ResourceAccess(k2, v2) for k2, v2 in (v or {}).items()]
+        if required_accesses is None:
+            required_accesses = []
+        required_accesses.append(RequiredResourceAccess(k, accesses))
+
+    app_patch_param = ApplicationCreateParameters(available_to_other_tenants,
                                                    display_name,
                                                    identifier_uris,
                                                    homepage=homepage,
                                                    reply_urls=reply_urls,
                                                    key_credentials=key_creds,
-                                                   password_credentials=password_creds)
+                                                   password_credentials=password_creds,
+                                                   oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
+                                                   required_resource_access=required_accesses)
 
     try:
-        return client.create(app_create_param)
+        result = client.create(app_patch_param)
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
             link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
@@ -569,10 +582,20 @@ def create_application(client, display_name, homepage, identifier_uris,
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
 
+    if native_app:
+        ApplicationUpdateParameters._attribute_map['public_client'] = {'key': 'publicClient', 'type': 'bool'}
+        app_patch_param = ApplicationUpdateParameters(identifier_uris=[])
+        setattr(app_patch_param, 'public_client', True)
+        client.patch(result.object_id, app_patch_param)
+        result = client.get(result.object_id)
+
+    return result
+
 
 def update_application(client, identifier, display_name=None, homepage=None,
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
-                       key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None):
+                       key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
+                       oauth2_allow_implicit_flow=None, required_resource_accesses=None, public_client=None):
     object_id = _resolve_application(client, identifier)
 
     password_creds, key_creds = None, None
@@ -587,6 +610,12 @@ def update_application(client, identifier, display_name=None, homepage=None,
                                                   password_credentials=password_creds,
                                                   available_to_other_tenants=available_to_other_tenants)
     return client.patch(object_id, app_patch_param)
+
+
+# AAD graph doesn't have the API to create a native app, aka public client, recommended hack is
+# to create a confidential app first, then convert to a native
+def _convert_to_native_application(client):
+    pass
 
 
 def show_application(client, identifier):
