@@ -22,6 +22,7 @@ GLOBAL_PARAM_DESCRIPTIONS = {
 OUTPUT_CHOICES = ['json', 'tsv', 'table', 'jsonc']
 OUTPUT_OPTIONS = ['--output', '-o']
 GLOBAL_PARAM = list(GLOBAL_PARAM_DESCRIPTIONS.keys())
+# GLOBAL_PARAM_DOUBLES = 
 
 
 def _get_window_columns():
@@ -81,7 +82,7 @@ class GatherCommands(object):
         self.command_tree = CommandHead()
         self.param_descript = {}
         self.completer = None
-        self.same_param_doubles = {}
+        self.command_param_info = {}
 
         self.global_param_descriptions = GLOBAL_PARAM_DESCRIPTIONS
         self.output_choices = OUTPUT_CHOICES
@@ -135,7 +136,6 @@ class GatherCommands(object):
                         add_new_lines(example[1], line_min=int(cols) - 2 * TOLERANCE)])
                 self.command_example[command] = examples
 
-            all_params = []
             command_params = data[command].get('parameters', {})
             for param in command_params:
                 if command_params[param]['help'] and \
@@ -152,13 +152,11 @@ class GatherCommands(object):
                                 line_min=int(cols) - 2 * TOLERANCE)
                         if par not in self.completable_param:
                             self.completable_param.append(par)
-                        all_params.append(par)
                     if len(param_aliases) > 1:
-                        param_list = self.same_param_doubles.get(command, [])
-                        param_list.append(param_aliases)
-                        self.same_param_doubles[command] = param_list
-
-            self.command_param[command] = all_params
+                        param_doubles = self.command_param_info.get(command, {})
+                        for alias in param_aliases:
+                            param_doubles[alias] = param_aliases
+                        self.command_param_info[command] = param_doubles
 
 
     def get_all_subcommands(self):

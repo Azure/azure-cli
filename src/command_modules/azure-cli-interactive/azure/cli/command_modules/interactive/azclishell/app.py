@@ -297,7 +297,7 @@ class AzInteractiveShell(object):
                 cmdstp = command.rstrip()
                 any_documentation = True
 
-                if word in self.completer.command_parameters[cmdstp] and self.completer.has_description(
+                if word in self.completer.command_param_info[cmdstp] and self.completer.has_description(
                         cmdstp + " " + word):
                     param_descrip = word + ":\n" + \
                         self.completer.param_description.get(cmdstp + " " + word, '')

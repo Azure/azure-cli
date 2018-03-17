@@ -74,8 +74,6 @@ class AzCompleter(Completer):
 
         # dictionary of command to descriptions
         self.command_description = None
-        # from a command to a list of parameters
-        self.command_parameters = None
         # a list of all the possible parameters
         self.completable_param = None
         # the command tree
@@ -86,7 +84,7 @@ class AzCompleter(Completer):
         # a dictionary of command to examples of how to use it
         self.command_examples = None
         # a dictionary of commands with parameters with multiple names (e.g. {'vm create':{-n: --name}})
-        self.same_param_doubles = {}
+        self.command_param_info = {}
 
         self._is_command = True
 
@@ -113,12 +111,11 @@ class AzCompleter(Completer):
     def start(self, shell_ctx, commands, global_params=True):
         self.shell_ctx = shell_ctx
         self.command_description = commands.descrip
-        self.command_parameters = commands.command_param
         self.completable_param = commands.completable_param
         self.command_tree = commands.command_tree
         self.param_description = commands.param_descript
         self.command_examples = commands.command_example
-        self.same_param_doubles = commands.same_param_doubles or self.same_param_doubles
+        self.command_param_info = commands.command_param_info or self.command_param_info
 
         self.branch = self.command_tree
 
@@ -135,25 +132,22 @@ class AzCompleter(Completer):
             self.parser.load_command_table(self.cmdtab)
             self.argsfinder = ArgsFinder(self.parser)
 
-    def validate_completion(self, param, words, text_before_cursor, check_double=True):
+    def validate_param_completion(self, param, unfinished_word, leftover_args, check_double=True):
         """ validates that a param should be completed """
-        # validates the position of the parameter
-        position = param.lower().startswith(words.lower()) and not text_before_cursor[-1].isspace()
-        # cancels parameters that are already in the in line
-        canceling_positions = param.lower() != words.lower() and param not in text_before_cursor.split()
+        # validates param starts with unfinished word
+        completes = self.validate_completion(param, unfinished_word)
 
-        found_double = True
-        # checks for aliasing of parameters
+        # checks for parameters already in the line as well as aliases
+        no_doubles = True
+        command_doubles = self.command_param_info.get(self.curr_command, {})
+        for alias in command_doubles.get(param, []):
+            if alias in leftover_args:
+                no_doubles = False
 
-        if check_double:
-            for double_sets in self.same_param_doubles.get(self.curr_command, []):
-                # if the parameter is in any of the sets
-                if param in double_sets:
-                    # if any of the other aliases are in the line already
-                    found_double = not any(
-                        alias in text_before_cursor.split() and alias != param for alias in double_sets)
+        return completes and no_doubles
 
-        return position and canceling_positions and found_double
+    def validate_completion(self, completion, unfinished_word):
+        return completion.lower().startswith(unfinished_word.lower())
 
     def get_completions(self, document, complete_event):
         text = document.text_before_cursor
@@ -162,20 +156,15 @@ class AzCompleter(Completer):
         self._is_command = True
         text = self.reformat_cmd(text)
 
-        if text.split():
+        for comp in sort_completions(self.gen_cmd_and_param_completions(text)):
+            yield comp
 
-            for comp in sort_completions(self.gen_cmd_and_param_completions(text)):
-                yield comp
-
-        for cmd in sort_completions(self.gen_cmd_completions(text)):
-            yield cmd
+        for param in sort_completions(self.gen_global_param_completions(text)):
+            yield param
 
         if self.cmdtab:
             for val in sort_completions(self.gen_dynamic_completions(text)):
                 yield val
-
-        for param in sort_completions(self.gen_global_param_completions(text)):
-            yield param
 
     def gen_enum_completions(self, arg_name, text, started_param, prefix):
         """ generates dynamic enumeration completions """
@@ -263,20 +252,6 @@ class AzCompleter(Completer):
         except Exception:  # pylint: disable=broad-except
             pass
 
-    def gen_cmd_completions(self, text):
-        """ whether is a space or no text typed, send the current branch """
-        # if nothing, so first level commands
-        if not text.split() and self._is_command:
-            if self.branch.children is not None:
-                for com in self.branch.children:
-                    yield Completion(com)
-
-        # if space show current level commands
-        elif text.split() and text[-1].isspace() and self._is_command:
-            if self.branch is not self.command_tree:
-                for com in self.branch.children:
-                    yield Completion(com)
-
     def yield_param_completion(self, param, last_word):
         """ yields a parameter """
         return Completion(param, -len(last_word), display_meta=self.param_description.get(
@@ -285,31 +260,31 @@ class AzCompleter(Completer):
     def gen_cmd_and_param_completions(self, text):
         """ generates command and parameter completions """
         txtspt = text.split()
+        new_word = text and text[-1].isspace()
+        last_word = ''
+        if not new_word and txtspt:
+            last_word = txtspt[-1]
+            txtspt = txtspt[:-1]
 
-        subtree, current_command, is_command = get_sub_tree(self.command_tree, txtspt)
-        self._is_command = is_command
+        subtree, current_command, leftover_args = get_sub_tree(self.command_tree, txtspt)
+
+        self._is_command = subtree.children
 
         self.curr_command = current_command
 
-        last_word = txtspt[-1]
-
-        for param in self.command_parameters.get(self.curr_command, []):
-            if not self.validate_completion(param, last_word, text):
-                continue
-            full_param = last_word.startswith("--") and param.startswith("--")
-            char_param = not last_word.startswith("--") and not param.startswith("--")
-            if full_param or char_param:
-                yield self.yield_param_completion(param, last_word)
-
-        if self.branch.children and self._is_command:  # all underneath commands
-            for kid in self.branch.children:
-                if self.validate_completion(kid, txtspt[-1], text, False):
-                    yield Completion(
-                        str(kid), -len(txtspt[-1]))
-        elif self._is_command and self.curr_command.strip() in self.command_parameters:
-            for param in self.command_parameters[self.curr_command.strip()]:
-                if param.startswith('--'):
-                    yield self.yield_param_completion(param, '')
+        if not self._is_command:
+            for param in self.command_param_info.get(self.curr_command, []):
+                if not self.validate_param_completion(param, last_word, leftover_args):
+                    continue
+                full_param = last_word.startswith("--") and param.startswith("--")
+                char_param = last_word.startswith("-") and not param.startswith("--")
+                new_param = new_word and not leftover_args and param.startswith("--")
+                if full_param or char_param or new_param:
+                    yield self.yield_param_completion(param, last_word)
+        else:
+            for kid in subtree.children:
+                if self.validate_completion(kid, last_word):
+                    yield Completion(kid, -len(last_word))
 
     def gen_global_param_completions(self, text):
         """ Global parameter stuff hard-coded in """
@@ -320,13 +295,13 @@ class AzCompleter(Completer):
                 if txtspt[-1].startswith('-') \
                         and not txtspt[-1].startswith('--') and \
                         param.startswith('-') and not param.startswith('--') and\
-                        self.validate_completion(param, txtspt[-1], text, check_double=False):
+                        self.validate_param_completion(param, txtspt[-1], text, check_double=False):
                     yield Completion(
                         param, -len(txtspt[-1]),
                         display_meta=self.global_param_descriptions[param])
                 # for double dash global parameters
                 elif txtspt[-1].startswith('--') and \
-                        self.validate_completion(param, txtspt[-1], text, check_double=False):
+                        self.validate_param_completion(param, txtspt[-1], text, check_double=False):
                     yield Completion(
                         param, -len(txtspt[-1]),
                         display_meta=self.global_param_descriptions[param])
@@ -338,12 +313,12 @@ class AzCompleter(Completer):
             if len(txtspt) > 1 and\
                     txtspt[-2] in self.output_options:
                 for opt in self.output_choices:
-                    if self.validate_completion(opt, txtspt[-1], text, check_double=False):
+                    if self.validate_param_completion(opt, txtspt[-1], text, check_double=False):
                         yield Completion(opt, -len(txtspt[-1]))
 
     def is_completable(self, symbol):
         """ whether the word can be completed as a command or parameter """
-        return symbol in self.command_parameters or symbol in self.param_description.keys()
+        return symbol in self.command_param_info or symbol in self.param_description.keys()
 
     def has_description(self, param):
         """ if a parameter has a description """

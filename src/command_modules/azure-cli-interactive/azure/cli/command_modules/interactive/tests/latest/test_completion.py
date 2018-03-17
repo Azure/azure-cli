@@ -25,7 +25,7 @@ class _Commands():
     """ mock model for testing completer """
     def __init__(self, descrip=None, completable=None, command_param=None,
                  completable_param=None, command_tree=None, param_descript=None,
-                 command_example=None, same_param_doubles=None):
+                 command_example=None, command_param_info=None):
         self.descrip = descrip
         self.completable = completable
         com_par = {}
@@ -37,7 +37,7 @@ class _Commands():
         self.command_tree = command_tree
         self.param_descript = param_descript
         self.command_example = command_example
-        self.same_param_doubles = same_param_doubles
+        self.command_param_info = command_param_info
 
 
 class CompletionTest(unittest.TestCase):
@@ -110,7 +110,7 @@ class CompletionTest(unittest.TestCase):
             "create --funtimes": "There is no work life balance, it's just your life",
             "create --fun": "There is no work life balance, it's just your life"
         }
-        same_param_doubles = {
+        command_param_info = {
             "create": [set(["-f", "--funtimes", '--fun']), set(['--unhap', '-u'])]
         }
         command_description = {
@@ -122,7 +122,7 @@ class CompletionTest(unittest.TestCase):
             command_param=command_param,
             completable_param=completable_param,
             param_descript=param_descript,
-            same_param_doubles=same_param_doubles,
+            command_param_info=command_param_info,
             descrip=command_description
         )
         self.completer = _build_completer(commands, global_params=False)
@@ -146,7 +146,7 @@ class CompletionTest(unittest.TestCase):
             "create -f": "There is no work life balance, it's just your life",
             "create --funtimes": "There is no work life balance, it's just your life"
         }
-        same_param_doubles = {
+        command_param_info = {
             "create": [set(["-f", "--funtimes", '--fun'])]
         }
         command_description = {
@@ -158,7 +158,7 @@ class CompletionTest(unittest.TestCase):
             command_param=command_param,
             completable_param=completable_param,
             param_descript=param_descript,
-            same_param_doubles=same_param_doubles,
+            command_param_info=command_param_info,
             descrip=command_description
         )
         self.completer = _build_completer(commands, global_params=False)

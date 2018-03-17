@@ -73,11 +73,12 @@ def in_tree(tree, cmd_args):
 
 def get_sub_tree(tree, cmd_args):
     current_command = []
-    is_command = True
+    leftover_args = []
+
     for arg in cmd_args:
         if tree.has_child(arg):
             current_command.append(arg)
             tree = tree.get_child(arg)
         else:
-            is_command = False
-    return tree, ' '.join(current_command), is_command
+            leftover_args.append(arg)
+    return tree, ' '.join(current_command), leftover_args
