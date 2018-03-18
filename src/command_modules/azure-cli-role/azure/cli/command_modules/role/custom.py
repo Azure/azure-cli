@@ -556,12 +556,8 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
         password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                              key_usage, start_date, end_date)
 
-    # TODO: add a sample!!!, and move it to validator
-    for k, v in (required_resource_accesses or {}).items():
-        accesses = [ResourceAccess(k2, v2) for k2, v2 in (v or {}).items()]
-        if required_accesses is None:
-            required_accesses = []
-        required_accesses.append(RequiredResourceAccess(k, accesses))
+    if required_resource_accesses:
+        required_accesses = _build_application_accesses(required_resource_accesses)
 
     app_patch_param = ApplicationCreateParameters(available_to_other_tenants,
                                                    display_name,
@@ -583,7 +579,10 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
         raise
 
     if native_app:
-        ApplicationUpdateParameters._attribute_map['public_client'] = {'key': 'publicClient', 'type': 'bool'}
+        # AAD graph doesn't have the API to create a native app, aka public client, recommended hack is
+        # to create a confidential app first, then convert to a native
+        if 'public_client' not in ApplicationUpdateParameters._attribute_map:
+            ApplicationUpdateParameters._attribute_map['public_client'] = {'key': 'publicClient', 'type': 'bool'}
         app_patch_param = ApplicationUpdateParameters(identifier_uris=[])
         setattr(app_patch_param, 'public_client', True)
         client.patch(result.object_id, app_patch_param)
@@ -595,13 +594,17 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
 def update_application(client, identifier, display_name=None, homepage=None,
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
-                       oauth2_allow_implicit_flow=None, required_resource_accesses=None, public_client=None):
+                       oauth2_allow_implicit_flow=None, required_resource_accesses=None):
     object_id = _resolve_application(client, identifier)
 
-    password_creds, key_creds = None, None
+    password_creds, key_creds, required_accesses = None, None, None
     if any([key_value, key_type, key_usage, start_date, end_date]):
         password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                              key_usage, start_date, end_date)
+
+    if required_resource_accesses:
+        required_accesses = _build_application_accesses(required_resource_accesses)
+
     app_patch_param = ApplicationUpdateParameters(display_name=display_name,
                                                   homepage=homepage,
                                                   identifier_uris=identifier_uris,
@@ -612,10 +615,15 @@ def update_application(client, identifier, display_name=None, homepage=None,
     return client.patch(object_id, app_patch_param)
 
 
-# AAD graph doesn't have the API to create a native app, aka public client, recommended hack is
-# to create a confidential app first, then convert to a native
-def _convert_to_native_application(client):
-    pass
+def _build_application_accesses(required_resource_accesses):
+    required_accesses  = None
+    for x in required_resource_accesses:
+        accesses = [ResourceAccess(id=y['id'], type=y['type']) for y in x['resourceAccess']]
+        if required_accesses is None:
+            required_accesses = []
+        required_accesses.append(RequiredResourceAccess(resource_app_id=x['resourceAppId'],
+                                                        resource_access=accesses))
+    return required_accesses
 
 
 def show_application(client, identifier):

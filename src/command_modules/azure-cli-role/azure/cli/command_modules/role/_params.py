@@ -35,7 +35,9 @@ def load_arguments(self, _):
         c.argument('key_usage', help='the usage of the key credentials associated with the application.', arg_type=get_enum_type(['Sign', 'Verify'], default='Verify'))
         c.argument('password', help="app password, aka 'client secret'"),
         c.argument('oauth2_allow_implicit_flow', arg_type=get_three_state_flag(), help='whether to allow implicit grant flow for OAuth2')
-        c.argument('required_resource_accesses', type=validate_file_or_dict)
+        c.argument('required_resource_accesses', type=validate_file_or_dict,
+                   help="resource scopes and roles and application requires access to, in json string of '[{\"resourceAppId\": \"<appid>\", "
+                   "\"resourceAccess\": [{\"id\": \"<resource id>\", \"type\": \"Scope\"}]}]'")
         c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
 
     with self.argument_context('ad sp') as c:
