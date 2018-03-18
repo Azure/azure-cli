@@ -103,7 +103,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_user', client_factory=get_graph_client_users, doc_string_source='azure.graphrbac.models#UserCreateParameters')
 
     with self.command_group('ad group', role_group_sdk) as g:
-        g.command('create', 'create')
+        g.custom_command('create', 'create_group', client_factory=get_graph_client_groups)
         g.command('delete', 'delete')
         g.command('show', 'get', exception_handler=empty_on_404)
         g.command('get-member-groups', 'get_member_groups')

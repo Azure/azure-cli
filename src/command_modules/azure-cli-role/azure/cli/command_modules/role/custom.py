@@ -25,7 +25,8 @@ from azure.mgmt.authorization.models import RoleAssignmentCreateParameters, Perm
 
 from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, PasswordCredential,
                                     KeyCredential, UserCreateParameters, PasswordProfile,
-                                    ServicePrincipalCreateParameters, RequiredResourceAccess, ResourceAccess)
+                                    ServicePrincipalCreateParameters, RequiredResourceAccess,
+                                    ResourceAccess, GroupCreateParameters)
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 
@@ -525,8 +526,13 @@ def create_user(client, user_principal_name, display_name, password,
                                  display_name=display_name, mail_nickname=mail_nickname,
                                  immutable_id=immutable_id,
                                  password_profile=PasswordProfile(
-                                     password, force_change_password_next_login))
+                                     password=password,
+                                     force_change_password_next_login=force_change_password_next_login))
     return client.create(param)
+
+
+def create_group(client, display_name, mail_nickname):
+    return client.create(GroupCreateParameters(display_name=display_name,mail_nickname=mail_nickname))
 
 
 def list_groups(client, display_name=None, query_filter=None):
@@ -559,15 +565,15 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
     if required_resource_accesses:
         required_accesses = _build_application_accesses(required_resource_accesses)
 
-    app_patch_param = ApplicationCreateParameters(available_to_other_tenants,
-                                                   display_name,
-                                                   identifier_uris,
-                                                   homepage=homepage,
-                                                   reply_urls=reply_urls,
-                                                   key_credentials=key_creds,
-                                                   password_credentials=password_creds,
-                                                   oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
-                                                   required_resource_access=required_accesses)
+    app_patch_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
+                                                  display_name=display_name,
+                                                  identifier_uris=identifier_uris,
+                                                  homepage=homepage,
+                                                  reply_urls=reply_urls,
+                                                  key_credentials=key_creds,
+                                                  password_credentials=password_creds,
+                                                  oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
+                                                  required_resource_access=required_accesses)
 
     try:
         result = client.create(app_patch_param)
@@ -669,10 +675,12 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     password_creds = None
     key_creds = None
     if password:
-        password_creds = [PasswordCredential(start_date, end_date, str(_gen_guid()), password)]
+        password_creds = [PasswordCredential(start_date= start_date, end_date=end_date,
+                                             key_id=str(_gen_guid()), value=password)]
     elif key_value:
-        key_creds = [KeyCredential(start_date, end_date, key_value, str(_gen_guid()),
-                                   key_usage, key_type)]
+        key_creds = [KeyCredential(start_date=start_date, end_date=end_date,
+                                   key_id=str(_gen_guid()), value=key_value, 
+                                   usage=key_usage, type=key_type)]
 
     return (password_creds, key_creds)
 

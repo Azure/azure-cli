@@ -3,9 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import json
-
+import mock
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest
-
 
 class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
 
@@ -44,9 +44,10 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
 class ApplicationSetScenarioTest(ScenarioTest):
 
     def test_application_set_scenario(self):
+        name = self.create_random_name(prefix='cli-graph', length=14)
         self.kwargs.update({
-            'app': 'http://azureclitest-graph',
-            'name': 'azureclitest'
+            'app': 'http://' + name,
+            'name': name
         })
 
         # crerate app through general option
@@ -73,28 +74,32 @@ class ApplicationSetScenarioTest(ScenarioTest):
                  checks=self.is_empty())
 
 
-class CreateForRbacScenarioTest(LiveScenarioTest):
-
+class CreateForRbacScenarioTest(ScenarioTest):
+    
+    @AllowLargeResponse()
     def test_revoke_sp_for_rbac(self):
-        self.kwargs['name'] = 'http://azurecli-test-revoke'
-        self.cmd('ad sp create-for-rbac -n {name}')
+        name = self.create_random_name(prefix='cli-graph', length=14)
+        self.kwargs['name'] = 'http://' + name
 
-        self.cmd('ad sp list --spn {name}')
+        with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
+            self.cmd('ad sp create-for-rbac -n {name}')
 
-        self.cmd('ad app list --identifier-uri {name}')
+            self.cmd('ad sp list --spn {name}')
 
-        result = self.cmd('role assignment list --assignee {name}').get_output_in_json()
-        object_id = result[0]['properties']['principalId']
+            self.cmd('ad app list --identifier-uri {name}')
 
-        self.cmd('ad sp delete --id {name}')
+            result = self.cmd('role assignment list --assignee {name}').get_output_in_json()
+            object_id = result[0]['principalId']
 
-        result2 = self.cmd('role assignment list --all').get_output_in_json()
-        self.assertFalse([a for a in result2 if a['id'] == object_id])
+            self.cmd('ad sp delete --id {name}')
 
-        self.cmd('ad sp list --spn {name}',
-                 checks=self.check('length([])', 0))
-        self.cmd('ad app list --identifier-uri {name}',
-                 checks=self.check('length([])', 0))
+            result2 = self.cmd('role assignment list --all').get_output_in_json()
+            self.assertFalse([a for a in result2 if a['id'] == object_id])
+
+            self.cmd('ad sp list --spn {name}',
+                     checks=self.check('length([])', 0))
+            self.cmd('ad app list --identifier-uri {name}',
+                     checks=self.check('length([])', 0))
 
 
 class GraphGroupScenarioTest(ScenarioTest):
