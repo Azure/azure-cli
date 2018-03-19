@@ -2289,16 +2289,14 @@ class VMSSDiskEncryptionTest(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss} --image win2016datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789!')
         self.cmd('vmss encryption enable -g {rg} -n {vmss} --disk-encryption-keyvault {vault}')
         self.cmd('vmss update-instances -g {rg} -n {vmss}  --instance-ids "*"')
-        self.cmd('vmss encryption show -g {rg} -n {vmss}',
-                 checks=self.check('[0].disks[0].statuses[0].code', 'EncryptionState/encrypted'))
+        self.cmd('vmss encryption show -g {rg} -n {vmss}', checks=self.check('[0].disks[0].statuses[0].code', 'EncryptionState/encrypted'))
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'EnableEncryption'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
         ])
         self.cmd('vmss encryption disable -g {rg} -n {vmss}')
         self.cmd('vmss update-instances -g {rg} -n {vmss}  --instance-ids "*"')
-        self.cmd('vmss encryption show -g {rg} -n {vmss}',
-                 checks=self.check('[0].disks[0].statuses[0].code', 'EncryptionState/notEncrypted'))
+        self.cmd('vmss encryption show -g {rg} -n {vmss}', checks=self.check('[0].disks[0].statuses[0].code', 'EncryptionState/notEncrypted'))
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'DisableEncryption'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')

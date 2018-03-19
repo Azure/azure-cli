@@ -514,7 +514,6 @@ def _show_post_action_message(resource_group_name, vmss_name, maunal_mode, enabl
     logger.warning(msg)
 
 
-
 def show_vmss_encryption_status(cmd, resource_group_name, vmss_name):
     client = _compute_client_factory(cmd.cli_ctx)
     vm_instances = list(client.virtual_machine_scale_set_vms.list(resource_group_name, vmss_name,
@@ -529,10 +528,11 @@ def show_vmss_encryption_status(cmd, resource_group_name, vmss_name):
             'disks': disk_infos
         }
         for div in view.disks:
-            d = {}
-            d['name'], d['encryptionSettings'] = div.name, div.encryption_settings
-            d['statuses'] = [x for x in (div.statuses or []) if (x.code or '').startswith('EncryptionState')]
-            disk_infos.append(d)
+            disk_infos.append({
+                'name': div.name,
+                'encryptionSettings': div.encryption_settings,
+                'statuses': [x for x in (div.statuses or []) if (x.code or '').startswith('EncryptionState')]
+            })
 
         result.append(vm_enc_info)
     return result
