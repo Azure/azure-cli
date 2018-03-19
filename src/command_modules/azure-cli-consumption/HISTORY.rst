@@ -2,6 +2,11 @@
 
 Release History
 ===============
+0.2.3
++++++
+* Added commands：consumption budget and consumption marketplace.
+* consumption pricesheet list: Added support for --top filter
+
 0.2.2
 +++++
 * Added new commands for pricesheet API. Also, updated the existing Usage Details and Reservation Details API request format.
