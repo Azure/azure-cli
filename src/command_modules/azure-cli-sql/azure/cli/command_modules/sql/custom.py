@@ -228,7 +228,7 @@ def db_create(
 
     # Verify edition
     edition = kwargs.get('edition')  # kwags['edition'] throws KeyError if not in dictionary
-    if edition and edition.lower() == DatabaseEdition.data_warehouse.value.lower():
+    if edition and edition.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be created with the command'
                        ' `az sql dw create`.')
 
@@ -556,7 +556,7 @@ def pad_sas_key(
         storage_key):
     # Import/Export API requires that "?" precede SAS key as an argument.
     # Add ? prefix if it wasn't included.
-    if storage_key_type.lower() == StorageKeyType.shared_access_key.value.lower():
+    if storage_key_type.lower() == StorageKeyType.shared_access_key.value.lower():  # pylint: disable=no-member
         if storage_key[0] != '?':
             storage_key = '?' + storage_key
     return storage_key
@@ -590,7 +590,7 @@ def db_update(
         zone_redundant=None):
 
     # Verify edition
-    if instance.edition.lower() == DatabaseEdition.data_warehouse.value.lower():
+    if instance.edition.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
                        ' `az sql dw update`.')
 
@@ -774,7 +774,7 @@ def db_audit_policy_update(
     # Apply state
     if state:
         instance.state = BlobAuditingPolicyState[state.lower()]
-    enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()
+    enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()  # pylint: disable=no-member
 
     # Set storage-related properties
     _db_security_policy_update(
@@ -812,7 +812,7 @@ def db_threat_detection_policy_update(
     # Apply state
     if state:
         instance.state = SecurityAlertPolicyState[state.lower()]
-    enabled = instance.state.value.lower() == SecurityAlertPolicyState.enabled.value.lower()
+    enabled = instance.state.value.lower() == SecurityAlertPolicyState.enabled.value.lower()  # pylint: disable=no-member
 
     # Set storage-related properties
     _db_security_policy_update(

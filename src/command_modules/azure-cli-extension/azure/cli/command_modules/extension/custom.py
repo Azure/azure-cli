@@ -10,10 +10,10 @@ import zipfile
 import traceback
 import hashlib
 from subprocess import check_output, STDOUT, CalledProcessError
-import requests
-from wheel.install import WHEEL_INFO_RE
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
+import requests
+from wheel.install import WHEEL_INFO_RE
 from knack.log import get_logger
 
 from azure.cli.core.util import CLIError

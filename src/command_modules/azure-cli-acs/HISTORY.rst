@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.0.30
+++++++
+* Minor fixes
+
 2.0.29
 ++++++
 * fix a certificate verification error for `az aks install-cli` in Cloud Shell / PS
