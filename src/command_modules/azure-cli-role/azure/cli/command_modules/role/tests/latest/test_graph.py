@@ -7,6 +7,7 @@ import mock
 from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest
 
+
 class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
 
     def test_sp_create_scenario(self):
@@ -39,6 +40,47 @@ class ServicePrincipalExpressCreateScenarioTest(ScenarioTest):
                  checks=self.is_empty())
         self.cmd('ad app list --identifier-uri {app_id_uri}',
                  checks=self.is_empty())
+
+    def test_native_app_create_scenario(self):
+        self.kwargs = {
+            'native_app_name': self.create_random_name('cli-native-', 20),
+            'required_access': json.dumps([
+                {
+                    "resourceAppId": "00000002-0000-0000-c000-000000000000",
+                    "resourceAccess": [
+                        {
+                            "id": "5778995a-e1bf-45b8-affa-663a9f3f4d04",
+                            "type": "Scope"
+                        }
+                    ]
+                }]),
+            'required_access2': json.dumps([
+                {
+                    "resourceAppId": "00000002-0000-0000-c000-000000000000",
+                    "resourceAccess": [
+                        {
+                            "id": "311a71cc-e848-46a1-bdf8-97ff7156d8e6",
+                            "type": "Scope"
+                        }
+                    ]
+                }
+            ])
+        }
+        result = self.cmd("ad app create --display-name {native_app_name} --native-app --required-resource-accesses '{required_access}'", checks=[
+            self.check('additionalProperties.publicClient', True),
+            self.check('additionalProperties.requiredResourceAccess|[0].resourceAccess|[0].id',
+                       '5778995a-e1bf-45b8-affa-663a9f3f4d04')
+        ]).get_output_in_json()
+        self.kwargs['id'] = result['appId']
+        try:
+            self.cmd("ad app update --id {id} --required-resource-accesses '{required_access2}'")
+            self.cmd('ad app show --id {id}', checks=[
+                self.check('additionalProperties.publicClient', True),
+                self.check('additionalProperties.requiredResourceAccess|[0].resourceAccess|[0].id',
+                           '311a71cc-e848-46a1-bdf8-97ff7156d8e6')
+            ])
+        except Exception:
+            self.cmd('ad app delete --id {id}')
 
 
 class ApplicationSetScenarioTest(ScenarioTest):
@@ -75,7 +117,7 @@ class ApplicationSetScenarioTest(ScenarioTest):
 
 
 class CreateForRbacScenarioTest(ScenarioTest):
-    
+
     @AllowLargeResponse()
     def test_revoke_sp_for_rbac(self):
         name = self.create_random_name(prefix='cli-graph', length=14)
@@ -168,5 +210,9 @@ class GraphGroupScenarioTest(ScenarioTest):
             self.cmd('ad group list',
                      checks=self.check("length([?displayName=='{group}'])", 0))
         finally:
-            self.cmd('ad user delete --upn-or-object-id {user1_id}')
-            self.cmd('ad user delete --upn-or-object-id {user2_id}')
+            try:
+                self.cmd('ad user delete --upn-or-object-id {user1_id}')
+                self.cmd('ad user delete --upn-or-object-id {user2_id}')
+                self.cmd('ad group delete -g {group}')
+            except Exception:
+                pass

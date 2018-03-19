@@ -113,4 +113,4 @@ def load_command_table(self, _):
         g.command('list', 'get_group_members')
         g.command('add', 'add_member')
         g.command('remove', 'remove_member')
-        g.command('check', 'is_member_of')
+        g.custom_command('check', 'check_group_membership', client_factory=get_graph_client_groups)
