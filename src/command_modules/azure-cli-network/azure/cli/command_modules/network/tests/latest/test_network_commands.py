@@ -1858,7 +1858,7 @@ class NetworkWatcherScenarioTest(ScenarioTest):
         try:
             self.cmd('network watcher connection-monitor stop -l {loc} -n {cm}')
             self.cmd('network watcher connection-monitor start -l {loc} -n {cm}')
-        except AssertionError:
+        except CLIError:
             pass
         self.cmd('network watcher connection-monitor query -l {loc} -n {cm}')
         self.cmd('network watcher connection-monitor delete -l {loc} -n {cm}')
