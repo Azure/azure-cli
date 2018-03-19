@@ -18,19 +18,21 @@ The document provides instructions and guidelines on how to author individual co
 
 [7. Supporting the IDs Parameter](#supporting-the-ids-parameter)
 
-[8. Generic Update Commands](#generic-update-commands)
+[8. Supporting Name or ID Parameters](#supporting-name-or-id-parameters)
 
-[9. Custom Table Formats](#custom-table-formats)
+[9. Generic Update Commands](#generic-update-commands)
 
-[10. Tab Completion (bash only)](#tab-completion)
+[10. Custom Table Formats](#custom-table-formats)
 
-[11. Validators](#validators)
+[11. Tab Completion (bash only)](#tab-completion)
 
-[12. Registering Flag Arguments](#registering-flags)
+[12. Validators](#validators)
 
-[13. Registering Enum Arguments](#registering-enums)
+[13. Registering Flag Arguments](#registering-flags)
 
-[14. Preventing particular extensions from being loading](#extension-suppression)
+[14. Registering Enum Arguments](#registering-enums)
+
+[15. Preventing particular extensions from being loading](#extension-suppression)
 
 Authoring Commands
 =============================
@@ -445,6 +447,54 @@ Any of these keys could be supplied as a value for `id_part`, thought typically 
 
 A couple things to note:
 - Currently, `--ids` is not exposed for any command that is called 'create', even if it is configured properly.
+- `--ids` is intended to be the ID of the resource the command group is about. Thus, it needs to be suppressed on `list` commands for child resources. This simplest way to do this:
+```Python
+with self.argument_context('parent child') as c:
+  c.argument('parent_name', id_part=None)  # This should ALWAYS be the id_part that was 'name'.
+  c.argument('child_name', ...)
+```
+
+## Supporting Name or ID Parameters
+
+Often times, the service needs references to supporting resources like storage accounts, key vault, etc. Typically, services require the ARM ID of these resources. The CLI pattern is to accept the ARM ID for this resource OR the name of the resource, assuming the resource is in the same subscription and resource group as the main resource.
+
+DO NOT:
+- Expose an ID parameter like `--storage-account-id`. 
+- Add parameters like `--storage-account-resource-group` to indicate the resource group for the secondary resource. The user should supply the ARM ID in this instance.
+
+DO:
+- Call the parameter `--storage-account` and indicate in the help text that it accepts the "Name or ID of the storage account."
+- Add logic similar to the following to a validator or custom command to process the name or ID logic:
+
+**Custom Command**
+```Python
+def my_command(cmd, resource_group_name, foo_name, storage_account):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if not is_valid_resource_id(storage_account):
+        storage_account = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=resource_group_name,
+            namespace='Microsoft.Storage', type='storageAccounts',
+            name=storage_account
+        )
+```
+
+**Validator**
+```Python
+def validate_storage_name_or_id(cmd, namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
+    if namespace.storage_account:
+        if not is_valid_resource_id(namespace.storage_account):
+            namespace.storage_account = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Storage', type='storageAccounts',
+                name=namespace.storage_account
+            )
+```
+
 
 ## Generic Update Commands
 
@@ -463,6 +513,8 @@ Since most generic update commands can be reflected from the SDK, the simplest f
 with self.command_group('test', test_sdk) as g:
   g.generic_update_command('update')
 ```
+
+However, most commonly, the `custom_func_name` and `custom_func_type` kwargs will be used to expose convenience arguments in addition to the generic arguments.
 
 - `name` - The name of the command. Most commonly 'update'.
 - `getter_name` - The name of the method which will be used to retrieve the object instance. If the method is named `get` (which is the case for most SDKs), this can be omitted.
@@ -499,6 +551,34 @@ if custom_function:
     instance = custom_function(...) # apply custom logic
 instance = _process_generic_updates(...) # apply generic updates, which will overwrite custom logic in the event of a conflict
 return setter(instance)  # update the instance and return the result
+```
+
+**Generic Update for PATCH-based Services**
+
+`generic_update_command` was designed to simulate PATCH-like behavior for services that are backed only by a PUT API endpoint. For services that have actual PATCH-based update endpoints, the CLI's `update` command should still leverage `generic_update_command` in order to provide consistency among commands. The following guidelines should be helpful:
+
+- You'll probably need to specify the `setter_name` since it will likely be `update` instead of `create_or_update` (the default). 
+- You will HAVE TO supply `custom_func_name` and `custom_func_type`. Consider the following example:
+```Python
+def my_custom_foo_update(instance, prop1=None, prop2=None, complex_prop1=None, complex_prop2=None):
+   from my_foo_sdk import FooUpdateParameters, ComplexProperty
+
+   # (1) instantiate the update parameters object. Generally, you can pass simple parameters
+   # as-is and the service will correctly interpret this.
+   parameters = FooUpdateParameters(
+     prop1=prop1,
+     prop2=prop2)
+     
+   # (2) complex objects must also have PATCH-like behavior, and often services do not
+   # correctly support this. You may need to fill these objects with the existing
+   # values if they are not being updated
+   parameters.complex_prop = ComplexProperty(
+     complex_prop1=complex_prop1 or instance.complex_prop.complex_prop1,
+     complex_prop2=complex_prop2 or instance.complex_prop.complex_prop2
+   )
+   # (3) instead of returning the instance object as you do with a PUT-based generic update,
+   # return the update parameters object.
+   return parameters
 ```
 
 ## Custom Table Formats
