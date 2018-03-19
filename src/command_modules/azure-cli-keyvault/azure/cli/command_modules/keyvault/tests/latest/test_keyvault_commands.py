@@ -356,7 +356,7 @@ class KeyVaultCertificateIssuerScenarioTest(ScenarioTest):
             self.check('organizationDetails.id', 'TestOrg'),
             self.check('credentials.accountId', 'test_account')
         ])
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(CLIError):
             self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name notexist --organization-id TestOrg --account-id test_account')
         self.cmd('keyvault certificate issuer update --vault-name {kv} --issuer-name issuer1 --account-id ""', checks=[
             self.check('provider', 'Test'),
@@ -417,11 +417,11 @@ class KeyVaultPendingCertificateScenarioTest(ScenarioTest):
         ])
         # we do not have a way of actually getting a certificate that would pass this test so
         # we simply ensure that the payload successfully serializes and is received by the server
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(CLIError):
             self.cmd('keyvault certificate pending merge --vault-name {kv} -n pending-cert --file "{fake_cert_path}"')
         self.cmd('keyvault certificate pending delete --vault-name {kv} -n pending-cert')
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(CLIError):
             self.cmd('keyvault certificate pending show --vault-name {kv} -n pending-cert')
 
 

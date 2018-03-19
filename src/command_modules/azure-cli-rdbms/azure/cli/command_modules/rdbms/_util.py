@@ -23,10 +23,12 @@ class RdbmsArgumentContext(AzArgumentContext):  # pylint: disable=too-few-public
             return
 
         self.validators.append(arg.settings['validator'])
+        dest_option = ['--__{}'.format(dest.upper())]
         if dest == 'parameters':
             from .validators import get_combined_validator
             self.argument(dest,
                           arg_type=ignore_type,
+                          options_list=dest_option,
                           validator=get_combined_validator(self.validators))
         else:
-            self.argument(dest, arg_type=ignore_type, validator=None)
+            self.argument(dest, options_list=dest_option, arg_type=ignore_type, validator=None)
