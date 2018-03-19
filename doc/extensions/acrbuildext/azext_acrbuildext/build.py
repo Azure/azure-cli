@@ -221,7 +221,7 @@ def acr_queue(cmd,
             _check_local_docker_file(source_location, docker_file_path)
 
             source_location = _upload_source_code(
-                client_registries, registry_name, resource_group_name, source_location)
+                client_registries, registry_name, resource_group_name, source_location, docker_file_path)
         else:
             raise CLIError(
                 "'--source-location' should be a local directory path or remote url.")
@@ -280,12 +280,12 @@ def _check_remote_source_code(source_location):
 
     lower_source_location = source_location.lower()
 
-    # git 
+    # git
     if lower_source_location.startswith("git@") or lower_source_location.startswith("git://"):
         return source_location
 
     # http
-    if lower_source_location.startswith("https://") or lower_source_location.startswith("http://") or lower_source_location.startswith("github.com/"): 
+    if lower_source_location.startswith("https://") or lower_source_location.startswith("http://") or lower_source_location.startswith("github.com/"):
         if re.search(r"\.git(?:#.+)?$", lower_source_location):
             # git url must contain ".git"
             return source_location
@@ -332,7 +332,7 @@ def _check_image_name(image_name):
     return image_name
 
 
-def _upload_source_code(client, registry_name, resource_group_name, source_location):
+def _upload_source_code(client, registry_name, resource_group_name, source_location, docker_file_path):
 
     tar_file_path = os.path.join(tempfile.gettempdir(),
                                  "source_archive_{}.tar.gz".format(hash(os.times())))
@@ -352,6 +352,12 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
         def _filter_file(tarinfo):
 
             if ignore_list is None:
+                return tarinfo
+
+            # always include docker file
+            # file path comparision is case-sensitive 
+            if tarinfo.name == docker_file_path:
+                logger.debug(".dockerignore: skip checking '{}'".format(docker_file_path))
                 return tarinfo
 
             for item in ignore_list:
