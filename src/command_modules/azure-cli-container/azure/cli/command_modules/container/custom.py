@@ -10,14 +10,18 @@ import threading
 import time
 import sys
 import websocket
-import termios
-import fcntl
+import platform
+try:
+    import termios
+    import fcntl
+    import tty
+    import signal
+except ImportError:
+    #Exec connections currently not available for Windows
+    pass
 import struct
 import select
 import errno
-import signal
-import ssl
-import tty
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
@@ -123,7 +127,8 @@ def create_container(client,
                             image_registry_credentials=image_registry_credentials,
                             volumes=volumes or None)
 
-    return client.create_or_update(resource_group_name, name, cgroup)
+    raw_response = client.create_or_update(resource_group_name, name, cgroup, raw=True)
+    return raw_response.output
 
 
 # pylint: disable=inconsistent-return-statements
@@ -242,11 +247,15 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 def container_exec(cmd, resource_group_name, name, container_name=None, exec_command=None, terminal_row_size=None, terminal_col_size=None):
     """Start exec for a container. """
     
+    if platform.system() is "Windows":
+        print("The container exec operation is currently not supported for Windows.")
+        return
+
     start_container_client = cf_start_container(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
     container_group = container_group_client.get(resource_group_name, name)
 
-    # Set defaults for rows and cols
+    # Set defaults for rows and cols size
     if terminal_row_size is None:
         terminal_row_size = 24
     
@@ -259,12 +268,9 @@ def container_exec(cmd, resource_group_name, name, container_name=None, exec_com
 
     terminal_size = ContainerExecRequestTerminalSize(rows=terminal_row_size, cols=terminal_col_size)
 
-    t = start_container_client.launch_exec(resource_group_name, name, container_name, exec_command, terminal_size)
+    execContainerResponse = start_container_client.launch_exec(resource_group_name, name, container_name, exec_command, terminal_size)
 
-    _start_exec_pipe(t.web_socket_uri, t.password)
-
-
-    print(t)
+    _start_exec_pipe(execContainerResponse.web_socket_uri, execContainerResponse.password)
 
 
 def _pty_size():
@@ -277,7 +283,6 @@ def _pty_size():
 
 def _resize(ws):
     rows, cols = _pty_size()
-    print("rows: ", rows, "cols: ", cols)
 
 def _start_exec_pipe(web_socket_uri, password):
     print(web_socket_uri)
