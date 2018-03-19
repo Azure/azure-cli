@@ -280,7 +280,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('usage error: --size-gb required to create an empty disk')
-    disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}), sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
+    disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
+                sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
     if zone:
         disk.zones = zone
 
@@ -383,7 +384,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
 
-    snapshot = Snapshot(location=location, creation_data=creation_data, tags=(tags or {}), sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
+    snapshot = Snapshot(location=location, creation_data=creation_data, tags=(tags or {}),
+                        sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
     client = _compute_client_factory(cmd.cli_ctx)
     return client.snapshots.create_or_update(resource_group_name, snapshot_name, snapshot)
 
