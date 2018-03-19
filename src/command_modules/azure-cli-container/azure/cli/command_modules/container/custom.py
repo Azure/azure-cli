@@ -285,8 +285,6 @@ def _resize(ws):
     rows, cols = _pty_size()
 
 def _start_exec_pipe(web_socket_uri, password):
-    print(web_socket_uri)
-    print(password)
     ws = websocket.create_connection(web_socket_uri)
     _resize(ws)
     oldtty = termios.tcgetattr(sys.stdin)
@@ -304,7 +302,7 @@ def _start_exec_pipe(web_socket_uri, password):
 
         rows, cols = _pty_size()
 
-        ws.send(password + "[[EOM]]")
+        ws.send(password)
 
         while True:
             try:
