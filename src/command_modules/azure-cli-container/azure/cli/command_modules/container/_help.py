@@ -57,6 +57,11 @@ helps['container logs'] = """
     short-summary: Examine the logs for a container in a container group.
 """
 
+helps['container exec'] = """
+    type: command
+    short-summary: Exec command for a container in a container group.
+"""
+
 helps['container attach'] = """
     type: command
     short-summary: Attach local standard output and error streams to a container in a container group.

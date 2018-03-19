@@ -9,12 +9,21 @@ import shlex
 import threading
 import time
 import sys
+import websocket
+import termios
+import fcntl
+import struct
+import select
+import errno
+import signal
+import ssl
+import tty
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
-                                                 ResourceRequirements, Volume, VolumeMount)
-from ._client_factory import cf_container_groups, cf_container_logs
+                                                 ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize)
+from ._client_factory import cf_container_groups, cf_container_logs, cf_start_container
 
 
 ACR_SERVER_SUFFIX = '.azurecr.io/'
@@ -230,6 +239,94 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
             stream_target=_stream_logs,
             stream_args=(logs_client, resource_group_name, name, container_name, container_group.restart_policy))
 
+def container_exec(cmd, resource_group_name, name, container_name=None, exec_command=None, terminal_row_size=None, terminal_col_size=None):
+    """Start exec for a container. """
+    
+    start_container_client = cf_start_container(cmd.cli_ctx)
+    container_group_client = cf_container_groups(cmd.cli_ctx)
+    container_group = container_group_client.get(resource_group_name, name)
+
+    # Set defaults for rows and cols
+    if terminal_row_size is None:
+        terminal_row_size = 24
+    
+    if terminal_col_size is None:
+        terminal_col_size = 80
+
+    # If container name is not present, use the first container.
+    if container_name is None:
+        container_name = container_group.containers[0].name
+
+    terminal_size = ContainerExecRequestTerminalSize(rows=terminal_row_size, cols=terminal_col_size)
+
+    t = start_container_client.launch_exec(resource_group_name, name, container_name, exec_command, terminal_size)
+
+    _start_exec_pipe(t.web_socket_uri, t.password)
+
+
+    print(t)
+
+
+def _pty_size():
+    rows, cols = 24, 80
+    fmt = 'HH'
+    buffer = struct.pack(fmt, 0, 0)
+    result = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, buffer)
+    rows, cols = struct.unpack(fmt, result)
+    return rows, cols
+
+def _resize(ws):
+    rows, cols = _pty_size()
+    print("rows: ", rows, "cols: ", cols)
+
+def _start_exec_pipe(web_socket_uri, password):
+    print(web_socket_uri)
+    print(password)
+    ws = websocket.create_connection(web_socket_uri)
+    _resize(ws)
+    oldtty = termios.tcgetattr(sys.stdin)
+    old_handler = signal.getsignal(signal.SIGWINCH)
+
+
+    def on_term_resize(signum, frame):
+        _resize(ws)
+
+    signal.signal(signal.SIGWINCH, on_term_resize)
+
+    try:
+        tty.setraw(sys.stdin.fileno())
+        tty.setcbreak(sys.stdin.fileno())
+
+        rows, cols = _pty_size()
+
+        ws.send(password + "[[EOM]]")
+
+        while True:
+            try:
+                r, w, e = select.select([ws.sock, sys.stdin], [], [])
+                if ws.sock in r:
+                    data = ws.recv()
+                    if not data:
+                        break
+                    sys.stdout.write(data)
+                    sys.stdout.flush()
+                if sys.stdin in r:
+                    x = sys.stdin.read(1)
+                    if x == "exit":
+                        break
+                    if len(x) == 0:
+                        break
+                    ws.send(x)
+            except (select.error, IOError) as e:
+                if e.args and e.args[0] == errno.EINTR:
+                    pass
+                else:
+                    raise
+    except websocket.WebSocketException:
+        raise
+    finally:
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
+        signal.signal(signal.SIGWINCH, old_handler)
 
 def attach_to_container(cmd, resource_group_name, name, container_name=None):
     """Attach to a container. """

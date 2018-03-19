@@ -68,8 +68,14 @@ def load_arguments(self, _):
         c.argument('azure_file_volume_mount_path', validator=validate_volume_mount_path, help='The path within the container where the volume should be mounted. Must not contain colon (:).')
 
     with self.argument_context('container logs') as c:
-        c.argument('container_name', help='The container name to tail the logs. If omitted, the first container in the container group will be chosen')
+        c.argument('container_name', help='The container name to get the logs. If omitted, the first container in the container group will be chosen')
         c.argument('follow', help='Indicate to stream the tailing logs', action='store_true')
+
+    with self.argument_context('container exec') as c:
+        c.argument('container_name', help='The container name to exec the command. If omitted, the first container in the container group will be chosen')
+        c.argument('exec_command', help='The container to exec to.')
+        c.argument('terminal_row_size', help='The size for the terminal rows.')
+        c.argument('terminal_col_size', help='The size for the terminal columns.')
 
     with self.argument_context('container attach') as c:
         c.argument('container_name', help='The container to attach to. If omitted, the first container in the container group will be chosen')
