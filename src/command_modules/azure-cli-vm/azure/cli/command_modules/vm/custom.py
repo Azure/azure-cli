@@ -14,7 +14,8 @@ try:
 except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 
-from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
+# the urlopen is imported for automation purpose
+from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
 
 from knack.log import get_logger
 from knack.util import CLIError
