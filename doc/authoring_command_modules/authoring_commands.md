@@ -18,21 +18,19 @@ The document provides instructions and guidelines on how to author individual co
 
 [7. Supporting the IDs Parameter](#supporting-the-ids-parameter)
 
-
 [8. Supporting Name or ID Parameters](#supporting-name-or-id-parameters)
 
 [9. Generic Update Commands](#generic-update-commands)
 
-[10. Tab Completion (bash only)](#tab-completion)
+[10. Custom Table Formats](#custom-table-formats)
 
-[11. Custom Table Formats](#custom-table-formats)
+[11. Tab Completion (bash only)](#tab-completion)
 
 [12. Validators](#validators)
 
+[13. Registering Flag Arguments](#registering-flags)
 
-[13. Registering Enum Arguments](#registering-enums)
-
-[14. Preventing particular extensions from being loading](#extension-suppression)
+[14. Registering Enum Arguments](#registering-enums)
 
 [15. Preventing particular extensions from being loading](#extension-suppression)
 
@@ -498,7 +496,6 @@ def validate_storage_name_or_id(cmd, namespace):
 ```
 
 
-
 ## Generic Update Commands
 
 The update commands within the CLI expose a set of generic update arguments: `--add`, `--remove` and `--set`. This allows the user to manipulate objects in a consistent way that may not have long option flags supported by the command. The method which exposes these arguments is `AzCommandGroup.generic_update_command` in the `azure.cli.core.commands` package. The signature of this method is:
@@ -516,6 +513,8 @@ Since most generic update commands can be reflected from the SDK, the simplest f
 with self.command_group('test', test_sdk) as g:
   g.generic_update_command('update')
 ```
+
+However, most commonly, the `custom_func_name` and `custom_func_type` kwargs will be used to expose convenience arguments in addition to the generic arguments.
 
 - `name` - The name of the command. Most commonly 'update'.
 - `getter_name` - The name of the method which will be used to retrieve the object instance. If the method is named `get` (which is the case for most SDKs), this can be omitted.
@@ -552,6 +551,34 @@ if custom_function:
     instance = custom_function(...) # apply custom logic
 instance = _process_generic_updates(...) # apply generic updates, which will overwrite custom logic in the event of a conflict
 return setter(instance)  # update the instance and return the result
+```
+
+**Generic Update for PATCH-based Services**
+
+`generic_update_command` was designed to simulate PATCH-like behavior for services that are backed only by a PUT API endpoint. For services that have actual PATCH-based update endpoints, the CLI's `update` command should still leverage `generic_update_command` in order to provide consistency among commands. The following guidelines should be helpful:
+
+- You'll probably need to specify the `setter_name` since it will likely be `update` instead of `create_or_update` (the default). 
+- You will HAVE TO supply `custom_func_name` and `custom_func_type`. Consider the following example:
+```Python
+def my_custom_foo_update(instance, prop1=None, prop2=None, complex_prop1=None, complex_prop2=None):
+   from my_foo_sdk import FooUpdateParameters, ComplexProperty
+
+   # (1) instantiate the update parameters object. Generally, you can pass simple parameters
+   # as-is and the service will correctly interpret this.
+   parameters = FooUpdateParameters(
+     prop1=prop1,
+     prop2=prop2)
+     
+   # (2) complex objects must also have PATCH-like behavior, and often services do not
+   # correctly support this. You may need to fill these objects with the existing
+   # values if they are not being updated
+   parameters.complex_prop = ComplexProperty(
+     complex_prop1=complex_prop1 or instance.complex_prop.complex_prop1,
+     complex_prop2=complex_prop2 or instance.complex_prop.complex_prop2
+   )
+   # (3) instead of returning the instance object as you do with a PUT-based generic update,
+   # return the update parameters object.
+   return parameters
 ```
 
 ## Custom Table Formats
