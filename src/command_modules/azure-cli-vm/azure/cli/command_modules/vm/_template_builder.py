@@ -10,6 +10,8 @@ from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 
+from azure.cli.command_modules.vm._vm_utils import get_target_network_api
+
 
 # pylint: disable=too-few-public-methods
 class StorageProfile(Enum):
@@ -80,7 +82,7 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         public_ip_properties['dnsSettings'] = {'domainNameLabel': dns_name}
 
     public_ip = {
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_NETWORK),
+        'apiVersion': get_target_network_api(cmd.cli_ctx),
         'type': 'Microsoft.Network/publicIPAddresses',
         'name': name,
         'location': location,
@@ -206,11 +208,9 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None,
     return vnet
 
 
-def build_msi_role_assignment(cmd, vm_vmss_name, vm_vmss_resource_id, role_definition_id,
+def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition_id,
                               role_assignment_guid, identity_scope, is_vm=True):
     from msrestazure.tools import parse_resource_id
-    from azure.mgmt.authorization import AuthorizationManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     result = parse_resource_id(identity_scope)
     if result.get('type'):  # is a resource id?
         name = '{}/Microsoft.Authorization/{}'.format(result['name'], role_assignment_guid)
@@ -221,11 +221,10 @@ def build_msi_role_assignment(cmd, vm_vmss_name, vm_vmss_resource_id, role_defin
 
     # pylint: disable=line-too-long
     msi_rp_api_version = '2015-08-31-PREVIEW'
-    authorization_api_version = get_mgmt_service_client(cmd.cli_ctx, AuthorizationManagementClient).api_version
     return {
         'name': name,
         'type': assignment_type,
-        'apiVersion': authorization_api_version,
+        'apiVersion': '2015-07-01',  # the minimum api-version to create the assignment
         'dependsOn': [
             'Microsoft.Compute/{}/{}'.format('virtualMachines' if is_vm else 'virtualMachineScaleSets', vm_vmss_name)
         ],
@@ -618,7 +617,7 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_NETWORK),
+        'apiVersion': get_target_network_api(cmd.cli_ctx),
         'dependsOn': [],
         'properties': lb_properties
     }

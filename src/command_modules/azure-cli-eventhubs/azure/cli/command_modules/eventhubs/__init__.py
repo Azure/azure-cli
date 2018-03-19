@@ -15,12 +15,14 @@ class EventhubCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core import ModExtensionSuppress
-        # Suppress eventhubs up to and including version 0.0.1
-        super(EventhubCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                     suppress_extension=ModExtensionSuppress(__name__, 'eventhubs', '0.0.1', reason='These commands are now in the CLI.', recommend_remove=True))
         from azure.cli.core.commands import CliCommandType
         eventhub_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.eventhubs.custom#{}')
-        super(EventhubCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=eventhub_custom, min_profile="2017-03-10-profile")
+        super(EventhubCommandsLoader, self).__init__(cli_ctx=cli_ctx,
+                                                     custom_command_type=eventhub_custom,
+                                                     min_profile='2017-03-10-profile',
+                                                     suppress_extension=ModExtensionSuppress(__name__, 'eventhubs', '0.0.1',
+                                                                                             reason='These commands are now in the CLI.',
+                                                                                             recommend_remove=True))
 
     def load_command_table(self, args):
         from azure.cli.command_modules.eventhubs.commands import load_command_table

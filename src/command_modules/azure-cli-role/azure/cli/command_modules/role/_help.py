@@ -57,7 +57,27 @@ helps['ad sp create-for-rbac'] = """
           text: az ad sp create-for-rbac --keyvault MyVault --cert CertName
     """
 
+helps['ad sp credential'] = """
+    type: group
+    short-summary: manage a service principal's credentials.
+"""
+
+helps['ad sp credential list'] = """
+    type: command
+    short-summary: list a service principal's credentials.
+"""
+
+helps['ad sp credential delete'] = """
+    type: command
+    short-summary: delete a service principal's credential.
+"""
+
 helps['ad sp reset-credentials'] = """
+    type: command
+    short-summary: (Deprecated, use "az ad sp credential reset")
+"""
+
+helps['ad sp credential reset'] = """
     type: command
     short-summary: Reset a service principal credential.
     long-summary: Use upon expiration of the service principal's credentials, or in the event that login credentials are lost.
@@ -175,6 +195,12 @@ helps['role definition create'] = """
                         "Microsoft.Insights/alertRules/*",
                         "Microsoft.Support/*"
                     ],
+                    "DataActions": [
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
+                    ],
+                    "NotDataActions": [
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
+                    ],
                     "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
                 }'
         - name: Create a role from a file containing a JSON description.
@@ -214,6 +240,12 @@ helps['role definition update'] = """
                         "Microsoft.Resources/subscriptions/resourceGroups/resources/read",
                         "Microsoft.Insights/alertRules/*",
                         "Microsoft.Support/*"
+                    ],
+                    "DataActions": [
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
+                    ],
+                    "NotDataActions": [
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
                     ],
                     "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
                 }'

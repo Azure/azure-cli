@@ -374,10 +374,6 @@ def validate_encryption_services(cmd, namespace):
 
 def validate_encryption_source(cmd, namespace):
     ns = vars(namespace)
-    if namespace.encryption_key_source:
-        allowed_options = ['Microsoft.Storage', 'Microsoft.Keyvault']
-        if namespace.encryption_key_source not in allowed_options:
-            raise ValueError('--encryption-key-source allows to values: {}'.format(', '.join(allowed_options)))
 
     key_name = ns.pop('encryption_key_name', None)
     key_version = ns.pop('encryption_key_version', None)

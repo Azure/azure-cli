@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.0.30
+++++++
+* Minor fixes
+
+2.0.29
+++++++
+* fix a certificate verification error for `az aks install-cli` in Cloud Shell / PS
+
 2.0.28
 ++++++
 * Support Autorest 3.0 based SDKs

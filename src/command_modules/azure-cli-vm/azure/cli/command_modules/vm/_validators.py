@@ -13,7 +13,7 @@ from knack.util import CLIError
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import hash_string
-from azure.cli.command_modules.vm._vm_utils import check_existence
+from azure.cli.command_modules.vm._vm_utils import check_existence, get_target_network_api
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
 
@@ -503,7 +503,8 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
                     if s.name.lower() == 'gatewaysubnet':
                         return False
                     subnet_mask = s.address_prefix.split('/')[-1]
-                    return _subnet_capacity_check(subnet_mask, namespace.instance_count)
+                    return _subnet_capacity_check(subnet_mask, namespace.instance_count,
+                                                  not namespace.disable_overprovision)
 
                 result = next((s for s in vnet_match.subnets if _check_subnet(s)), None)
             if not result:
@@ -535,10 +536,12 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
     logger.debug('no suitable subnet found. One will be created.')
 
 
-def _subnet_capacity_check(subnet_mask, vmss_instance_count):
+def _subnet_capacity_check(subnet_mask, vmss_instance_count, over_provision):
     mask = int(subnet_mask)
     # '2' are the reserved broadcasting addresses
-    return ((1 << (32 - mask)) - 2) > vmss_instance_count
+    # '*1.5' so we have enough leeway for over-provision
+    factor = 1.5 if over_provision else 1
+    return ((1 << (32 - mask)) - 2) > int(vmss_instance_count * factor)
 
 
 def _validate_vmss_create_subnet(namespace):
@@ -547,7 +550,7 @@ def _validate_vmss_create_subnet(namespace):
             cidr = namespace.vnet_address_prefix.split('/', 1)[0]
             i = 0
             for i in range(24, 16, -1):
-                if _subnet_capacity_check(i, namespace.instance_count):
+                if _subnet_capacity_check(i, namespace.instance_count, not namespace.disable_overprovision):
                     break
             if i < 16:
                 err = "instance count '{}' is out of range of 2^16 subnet size'"
@@ -1003,7 +1006,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
 def get_network_client(cli_ctx):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK, api_version=get_target_network_api(cli_ctx))
 
 
 def get_network_lb(cli_ctx, resource_group_name, lb_name):

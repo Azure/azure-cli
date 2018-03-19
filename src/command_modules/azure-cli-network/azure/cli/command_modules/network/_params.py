@@ -25,7 +25,7 @@ from azure.cli.command_modules.network._validators import \
      validate_private_ip_address,
      get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_network_watcher_from_vm, get_network_watcher_from_location,
-     get_asg_validator, validate_ip_tags)
+     get_asg_validator, get_vnet_validator, validate_ip_tags)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.mgmt.trafficmanager.models import MonitorProtocol
 from azure.cli.command_modules.network._completers import (
@@ -42,13 +42,13 @@ def load_arguments(self, _):
      ExpressRouteCircuitPeeringType, ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, IPAllocationMethod,
      IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName,
      RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
-     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType) = self.get_models(
+     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType, ZoneType) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'AuthenticationMethod', 'Direction',
          'ExpressRouteCircuitPeeringType', 'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier', 'IPAllocationMethod',
          'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName',
          'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
-         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType')
+         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'ZoneType')
 
     default_existing = 'If only one exists, omit to use as default.'
 
@@ -315,15 +315,9 @@ def load_arguments(self, _):
         c.argument('zone_name', name_arg_type)
         c.ignore('location')
 
-        # TODO: remove when feature ready
-        c.ignore('zone_type')
-        c.ignore('registration_vnets')
-        c.ignore('resolution_vnets')
-
-        # TODO: Uncomment when feature is ready
-        # c.argument('zone_type', help='Type of DNS zone to create.', arg_type=get_enum_type(ZoneType))
-        # c.argument('registration_vnets', arg_group='Private Zone', nargs='+', help='Space-separated names or IDs of virtual networks that register hostnames in this DNS zone.', validator=get_vnet_validator('registration_vnets'))
-        # c.argument('resolution_vnets', arg_group='Private Zone', nargs='+', help='Space-separated names or IDs of virtual networks that resolve records in this DNS zone.', validator=get_vnet_validator('resolution_vnets'))
+        c.argument('zone_type', help='Type of DNS zone to create.', arg_type=get_enum_type(ZoneType))
+        c.argument('registration_vnets', arg_group='Private Zone', nargs='+', help='Space-separated names or IDs of virtual networks that register hostnames in this DNS zone.', validator=get_vnet_validator('registration_vnets'))
+        c.argument('resolution_vnets', arg_group='Private Zone', nargs='+', help='Space-separated names or IDs of virtual networks that resolve records in this DNS zone.', validator=get_vnet_validator('resolution_vnets'))
 
     with self.argument_context('network dns zone import') as c:
         c.argument('file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
@@ -669,11 +663,10 @@ def load_arguments(self, _):
         c.argument('enabled', arg_type=get_three_state_flag())
 
     with self.argument_context('network watcher show-topology') as c:
-        c.argument('network_watcher_name', ignore_type, options_list=['--watcher'])
-        c.argument('resource_group_name', ignore_type, options_list=['--watcher-resource-group'])
         c.extra('location')
 
     with self.argument_context('network watcher show-topology', arg_group='Target') as c:
+        c.ignore('network_watcher_name', 'resource_group_name')
         c.argument('target_resource_group_name', options_list=['--resource-group', '-g'], completer=get_resource_group_completion_list)
         c.argument('target_vnet', options_list=['--vnet'], help='Name or ID of the virtual network to target.')
         c.argument('target_subnet', options_list=['--subnet'], help='Name or ID of the subnet to target. If name is used, --vnet NAME must also be supplied.')

@@ -24,15 +24,14 @@ import threading
 import time
 import uuid
 import webbrowser
-import yaml
-import dateutil.parser
-from dateutil.relativedelta import relativedelta
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
+import yaml
+import dateutil.parser
+from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError
-
 from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.command_modules.acs import acs_client, proxy
@@ -47,7 +46,7 @@ from azure.graphrbac.models import (ApplicationCreateParameters,
                                     KeyCredential,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters)
-from azure.mgmt.authorization.models import RoleAssignmentProperties
+from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
 from azure.mgmt.containerservice.models import ContainerServiceAgentPoolProfile
 from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
@@ -234,8 +233,11 @@ def acs_install_cli(cmd, client, resource_group, name, install_location=None, cl
 
 
 def _ssl_context():
-    if sys.version_info < (3, 4):
-        return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
+        try:
+            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
+        except AttributeError:
+            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
 
     return ssl.create_default_context()
 
@@ -1181,10 +1183,10 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
-    properties = RoleAssignmentProperties(role_id, object_id)
+    parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
     assignment_name = uuid.uuid4()
     custom_headers = None
-    return assignments_client.create(scope, assignment_name, properties, custom_headers=custom_headers)
+    return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
 
 
 def _build_role_scope(resource_group_name, scope, subscription_id):

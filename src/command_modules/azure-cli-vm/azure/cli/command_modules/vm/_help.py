@@ -259,8 +259,6 @@ helps['vmss get-instance-view'] = """
     type: command
     short-summary: View an instance of a VMSS.
     parameters:
-        - name: --ids
-          short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
         - name: --instance-id
           short-summary: A VM instance ID or "*" to list instance view for all VMs in a scale set.
 
@@ -275,8 +273,6 @@ helps['vmss reimage'] = """
     type: command
     short-summary: Reimage VMs within a VMSS.
     parameters:
-        - name: --ids
-          short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
         - name: --instance-id
           short-summary: VM instance ID. If missing, reimage all instances.
 """
@@ -298,8 +294,6 @@ helps['vmss show'] = """
     type: command
     short-summary: Get details on VMs within a VMSS.
     parameters:
-        - name: --ids
-          short-summary: One or more VM scale sets or specific VM instance IDs. If provided, do not also use `--instance-id`.
         - name: --instance-id
           short-summary: VM instance ID. If missing, show the VMSS.
 """
@@ -817,7 +811,7 @@ helps['vm image show'] = """
             az vm image show -l westus -f CentOS -p OpenLogic --s 7.3 --version {latest}
 """
 
-helps['vm image accept-term'] = """
+helps['vm image accept-terms'] = """
     type: command
     short-summary: Accept Azure Marketplace term so that the image can be used to create VMs
 """

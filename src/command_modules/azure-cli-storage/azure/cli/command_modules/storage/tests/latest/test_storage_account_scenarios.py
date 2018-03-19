@@ -20,31 +20,39 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             'vnet': 'vnet1',
             'subnet': 'subnet1'
         }
-        self.cmd('storage account create -g {rg} -n {acc} --bypass Metrics --default-action Deny'.format(**kwargs), checks=[
-            JMESPathCheck('networkRuleSet.bypass', 'Metrics'),
-            JMESPathCheck('networkRuleSet.defaultAction', 'Deny')
-        ])
-        self.cmd('storage account update -g {rg} -n {acc} --bypass Logging --default-action Allow'.format(**kwargs), checks=[
-            JMESPathCheck('networkRuleSet.bypass', 'Logging'),
-            JMESPathCheck('networkRuleSet.defaultAction', 'Allow')
-        ])
-        self.cmd('storage account update -g {rg} -n {acc} --set networkRuleSet.default_action=deny'.format(**kwargs), checks=[
-            JMESPathCheck('networkRuleSet.bypass', 'Logging'),
-            JMESPathCheck('networkRuleSet.defaultAction', 'Deny')
-        ])
+        self.cmd('storage account create -g {rg} -n {acc} --bypass Metrics --default-action Deny'.format(**kwargs),
+                 checks=[
+                     JMESPathCheck('networkRuleSet.bypass', 'Metrics'),
+                     JMESPathCheck('networkRuleSet.defaultAction', 'Deny')])
+        self.cmd('storage account update -g {rg} -n {acc} --bypass Logging --default-action Allow'.format(**kwargs),
+                 checks=[
+                     JMESPathCheck('networkRuleSet.bypass', 'Logging'),
+                     JMESPathCheck('networkRuleSet.defaultAction', 'Allow')])
+        self.cmd('storage account update -g {rg} -n {acc} --set networkRuleSet.default_action=deny'.format(**kwargs),
+                 checks=[
+                     JMESPathCheck('networkRuleSet.bypass', 'Logging'),
+                     JMESPathCheck('networkRuleSet.defaultAction', 'Deny')])
 
         self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name {subnet}'.format(**kwargs))
-        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage'.format(**kwargs))
+        self.cmd(
+            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --service-endpoints Microsoft.Storage'.format(
+                **kwargs))
 
         self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
-        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.2.0.0/24'.format(**kwargs))
-        self.cmd('storage account network-rule add -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(**kwargs))
+        self.cmd(
+            'storage account network-rule add -g {rg} --account-name {acc} --ip-address 25.2.0.0/24'.format(**kwargs))
+        self.cmd(
+            'storage account network-rule add -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(
+                **kwargs))
         self.cmd('storage account network-rule list -g {rg} --account-name {acc}'.format(**kwargs), checks=[
             JMESPathCheck('length(ipRules)', 2),
             JMESPathCheck('length(virtualNetworkRules)', 1)
         ])
-        self.cmd('storage account network-rule remove -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
-        self.cmd('storage account network-rule remove -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(**kwargs))
+        self.cmd(
+            'storage account network-rule remove -g {rg} --account-name {acc} --ip-address 25.1.2.3'.format(**kwargs))
+        self.cmd(
+            'storage account network-rule remove -g {rg} --account-name {acc} --vnet-name {vnet} --subnet {subnet}'.format(
+                **kwargs))
         self.cmd('storage account network-rule list -g {rg} --account-name {acc}'.format(**kwargs), checks=[
             JMESPathCheck('length(ipRules)', 1),
             JMESPathCheck('length(virtualNetworkRules)', 0)
@@ -122,7 +130,6 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
     @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2017-10-01')
     @ResourceGroupPreparer(parameter_name_for_location='location', location='southcentralus')
     def test_create_storage_account_v2(self, resource_group, location):
-
         self.kwargs.update({
             'name': self.create_random_name(prefix='cli', length=24),
             'loc': location
@@ -222,10 +229,35 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az account list-locations',
                  checks=[JMESPathCheck("[?name=='westus'].displayName | [0]", 'West US')])
 
+    @ResourceGroupPreparer(location='southcentralus')
+    @StorageAccountPreparer(location='southcentralus')
+    def test_customer_managed_key(self, resource_group, storage_account):
+        self.kwargs = {'rg': resource_group, 'sa': storage_account, 'vt': self.create_random_name('clitest', 24)}
+
+        self.kwargs['vid'] = self.cmd('az keyvault create -n {vt} -g {rg} '
+                                      '-otsv --query id').output.rstrip('\n')
+        self.kwargs['vtn'] = self.cmd('az keyvault show -n {vt} -g {rg} '
+                                      '-otsv --query properties.vaultUri').output.strip('\n')
+        self.kwargs['ver'] = self.cmd("az keyvault key create -n testkey -p software --vault-name {vt} "
+                                      "-otsv --query 'key.kid'").output.rsplit('/', 1)[1].rstrip('\n')
+        self.kwargs['oid'] = self.cmd("az storage account update -n {sa} -g {rg} --assign-identity "
+                                      "-otsv --query 'identity.principalId'").output.strip('\n')
+
+        self.cmd('az keyvault set-policy -n {vt} --object-id {oid} -g {rg} '
+                 '--key-permissions get wrapKey unwrapKey recover')
+        self.cmd('az keyvault update -n {vt} -g {rg} --set properties.enableSoftDelete=true')
+        self.cmd('az resource update --id {vid} --set properties.enablePurgeProtection=true')
+        self.cmd('az storage account update -n {sa} -g {rg} '
+                 '--encryption-key-source Microsoft.Keyvault '
+                 '--encryption-key-vault {vtn} '
+                 '--encryption-key-name testkey '
+                 '--encryption-key-version {ver} ')
+
 
 @api_version_constraint(ResourceType.MGMT_STORAGE, max_api='2016-01-01')
 class StorageAccountTestsForStack(StorageScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer(parameter_name_for_location='location', name_prefix='cli_test_storage_stack_scenario', location='local', dev_setting_location='local')
+    @ResourceGroupPreparer(parameter_name_for_location='location', name_prefix='cli_test_storage_stack_scenario',
+                           location='local', dev_setting_location='local')
     def test_create_storage_account_stack(self, resource_group, location):
         name = self.create_random_name(prefix='cli', length=24)
 
@@ -252,8 +284,8 @@ class StorageAccountTestsForStack(StorageScenarioMixin, ScenarioTest):
 
         self.cmd('storage account show-connection-string -g {} -n {} --protocol http'.format(
             resource_group, name), checks=[
-                JMESPathCheck("contains(connectionString, 'https')", False),
-                JMESPathCheck("contains(connectionString, '{}')".format(name), True)])
+            JMESPathCheck("contains(connectionString, 'https')", False),
+            JMESPathCheck("contains(connectionString, '{}')".format(name), True)])
 
         self.cmd('storage account delete -g {} -n {} --yes'.format(resource_group, name))
         self.cmd('storage account check-name --name {}'.format(name),
@@ -262,7 +294,8 @@ class StorageAccountTestsForStack(StorageScenarioMixin, ScenarioTest):
     def test_show_usage_stack(self):
         self.cmd('storage account show-usage', checks=JMESPathCheck('name.value', 'StorageAccounts'))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_storage_stack_scenario', location='local', dev_setting_location='local')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_stack_scenario', location='local',
+                           dev_setting_location='local')
     @StorageAccountPreparer(location='local')
     def test_logging_operations_stack(self, resource_group, storage_account):
         connection_string = self.cmd(
@@ -282,7 +315,8 @@ class StorageAccountTestsForStack(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('blob.retentionPolicy.days', 1)
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_storage_stack_scenario', location='local', dev_setting_location='local')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_stack_scenario', location='local',
+                           dev_setting_location='local')
     @StorageAccountPreparer(location='local', parameter_name='account_1')
     @StorageAccountPreparer(location='local', parameter_name='account_2')
     def test_list_storage_accounts_stack(self, account_1, account_2):
@@ -291,7 +325,8 @@ class StorageAccountTestsForStack(StorageScenarioMixin, ScenarioTest):
         assert next(acc for acc in accounts_list if acc['name'] == account_1)
         assert next(acc for acc in accounts_list if acc['name'] == account_2)
 
-    @ResourceGroupPreparer(name_prefix='cli_test_storage_stack_scenario', location='local', dev_setting_location='local')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_stack_scenario', location='local',
+                           dev_setting_location='local')
     @StorageAccountPreparer(location='local')
     def test_renew_account_key_stack(self, resource_group, storage_account):
         original_keys = self.cmd('storage account keys list -g {} -n {}'
@@ -315,7 +350,8 @@ class StorageAccountTestsForStack(StorageScenarioMixin, ScenarioTest):
         assert renewed_keys[0] == original_keys[0]
         assert renewed_keys[1] != original_keys[1]
 
-    @ResourceGroupPreparer(name_prefix='cli_test_storage_stack_scenario', location='local', dev_setting_location='local')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_stack_scenario', location='local',
+                           dev_setting_location='local')
     @StorageAccountPreparer(location='local')
     def test_create_account_sas_stack(self, storage_account):
         sas = self.cmd('storage account generate-sas --resource-types o --services b '

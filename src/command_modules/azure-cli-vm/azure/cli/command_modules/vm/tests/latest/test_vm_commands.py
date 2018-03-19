@@ -1790,6 +1790,14 @@ class VMSSCreateIdempotentTest(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk')
         self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1!  --image UbuntuLTS --use-unmanaged-disk')
 
+        # still 1 vnet and 1 subnet inside
+        self.cmd('network vnet list -g {rg}', checks=[
+            self.check('length([])', 1),
+            self.check('[0].name', self.kwargs['vmss'] + 'VNET'),
+            self.check('[0].subnets[0].addressPrefix', '10.0.0.0/24'),
+            self.check('length([0].subnets)', 1),
+        ])
+
 
 class VMSSILBTest(ScenarioTest):
 
@@ -1839,7 +1847,7 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
 
 
 # TODO: convert back to ScenarioTest when #5741 is fixed.
-class MSIScenarioTest(LiveScenarioTest):
+class MSIScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_msi')
     def test_vm_msi(self, resource_group):
@@ -1854,11 +1862,7 @@ class MSIScenarioTest(LiveScenarioTest):
             'sub': subscription_id
         })
 
-        # Fixing the role assignment guids so test can run under playback. The assignments will
-        # be auto-deleted when the RG gets recycled, so the same ids can be reused.
-        guids = [uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D41732'),
-                 uuid.UUID('13ECC8E1-A3AA-40CE-95E9-1313957D6CF3')]
-        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=guids, autospec=True):
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
             # create a linux vm with default configuration
             self.cmd('vm create -g {rg} -n {vm1} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope}', checks=[
                 self.check('identity.role', 'Contributor'),
@@ -1913,12 +1917,7 @@ class MSIScenarioTest(LiveScenarioTest):
             'vmss3': 'vmss3',
             'sub': subscription_id
         })
-        # Fixing the role assignment guids so test can run under playback. The assignments will
-        # be auto-deleted when the RG gets recycled, so the same ids can be reused.
-        guids = [uuid.UUID('CD58500A-F421-4815-B5C1-A36A1E16C148'),
-                 uuid.UUID('CD58500A-F421-4815-B5C1-A36A1E16C147'),
-                 uuid.UUID('CD58500A-F421-4815-B5C1-A36A1E16C140')]
-        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=guids, autospec=True):
+        with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
             # create linux vm with default configuration
             self.cmd('vmss create -g {rg} -n {vmss1} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope}', checks=[
                 self.check('vmss.identity.role', 'Contributor'),
@@ -2010,17 +2009,15 @@ class MSIScenarioTest(LiveScenarioTest):
         ])
 
         self.cmd('vmss create -g {rg} -n {vmss2} --image debian --admin-username admin123 --admin-password PasswordPassword1!')
-        # skip playing back till the test issue gets addressed https://github.com/Azure/azure-cli/issues/4016
-        if self.is_live:
-            self.cmd('vmss identity assign -g {rg} -n {vmss2}', checks=[
-                self.check('scope', None),
-                self.check('port', 50342)
-            ])
+        self.cmd('vmss identity assign -g {rg} -n {vmss2}', checks=[
+            self.check('scope', None),
+            self.check('port', 50342)
+        ])
 
-            self.cmd('vmss extension list -g {rg} --vmss-name {vmss2}', checks=[
-                self.check('[0].type', 'ManagedIdentityExtensionForLinux'),
-                self.check('[0].settings.port', 50342)
-            ])
+        self.cmd('vmss extension list -g {rg} --vmss-name {vmss2}', checks=[
+            self.check('[0].type', 'ManagedIdentityExtensionForLinux'),
+            self.check('[0].settings.port', 50342)
+        ])
 
     @ResourceGroupPreparer(random_name_length=20, location='westcentralus')
     def test_vm_explicit_msi(self, resource_group):

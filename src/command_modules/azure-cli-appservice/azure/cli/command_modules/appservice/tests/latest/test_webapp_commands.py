@@ -852,7 +852,7 @@ class WebappImplictIdentityTest(ScenarioTest):
             ])
         self.cmd('role assignment list -g {} --assignee {}'.format(resource_group, result['principalId']), checks=[
             JMESPathCheck('length([])', 1),
-            JMESPathCheck('[0].properties.roleDefinitionName', role)
+            JMESPathCheck('[0].roleDefinitionName', role)
         ])
 
 

@@ -838,17 +838,14 @@ def unregister_provider(cmd, resource_provider_namespace, wait=False):
     _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=False, wait=wait)
 
 
-def list_provider_operations(cmd, api_version=None):
-    api_version = api_version or _get_auth_provider_latest_api_version(cmd.cli_ctx)
+def list_provider_operations(cmd):
     auth_client = _authorization_management_client(cmd.cli_ctx)
-    return auth_client.provider_operations_metadata.list(api_version)
+    return auth_client.provider_operations_metadata.list()
 
 
-def show_provider_operations(cmd, resource_provider_namespace, api_version=None):
-    api_version = api_version or _get_auth_provider_latest_api_version(cmd.cli_ctx)
-
+def show_provider_operations(cmd, resource_provider_namespace):
     auth_client = _authorization_management_client(cmd.cli_ctx)
-    return auth_client.provider_operations_metadata.get(resource_provider_namespace, api_version)
+    return auth_client.provider_operations_metadata.get(resource_provider_namespace)
 
 
 def move_resource(cmd, ids, destination_group, destination_subscription_id=None):

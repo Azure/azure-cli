@@ -186,10 +186,6 @@ class TestEncryptionValidators(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             validate_encryption_source(MockCmd(self.cli),
-                                       Namespace(encryption_key_source='Notanoption', _cmd=MockCmd(self.cli)))
-
-        with self.assertRaises(ValueError):
-            validate_encryption_source(MockCmd(self.cli),
                                        Namespace(encryption_key_source='Microsoft.Keyvault', _cmd=MockCmd(self.cli)))
 
         with self.assertRaises(ValueError):

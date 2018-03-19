@@ -15,14 +15,14 @@ from ._client_factory import (_auth_client_factory, _graph_client_factory)
 
 
 def transform_definition_list(result):
-    return [OrderedDict([('Name', r['properties']['roleName']), ('Type', r['properties']['type']),
-                         ('Description', r['properties']['description'])]) for r in result]
+    return [OrderedDict([('Name', r['roleName']), ('Type', r['type']),
+                         ('Description', r['description'])]) for r in result]
 
 
 def transform_assignment_list(result):
-    return [OrderedDict([('Principal', r['properties']['principalName']),
-                         ('Role', r['properties']['roleDefinitionName']),
-                         ('Scope', r['properties']['scope'])]) for r in result]
+    return [OrderedDict([('Principal', r['principalName']),
+                         ('Role', r['roleDefinitionName']),
+                         ('Scope', r['scope'])]) for r in result]
 
 
 def get_role_definition_op(operation_name):
@@ -91,7 +91,10 @@ def load_command_table(self, _):
     # RBAC related
     with self.command_group('ad sp') as g:
         g.custom_command('create-for-rbac', 'create_service_principal_for_rbac')
-        g.custom_command('reset-credentials', 'reset_service_principal_credential')
+        g.custom_command('reset-credentials', 'reset_service_principal_credential', deprecate_info='ad sp credential reset')
+        g.custom_command('credential reset', 'reset_service_principal_credential')
+        g.custom_command('credential list', 'list_service_principal_credentials')
+        g.custom_command('credential delete', 'delete_service_principal_credential')
 
     with self.command_group('ad user', role_users_sdk) as g:
         g.command('delete', 'delete')

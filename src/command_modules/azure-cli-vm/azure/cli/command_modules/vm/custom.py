@@ -14,7 +14,8 @@ try:
 except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 
-from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
+# the urlopen is imported for automation purpose
+from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -629,7 +630,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         role_assignment_guid = None
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
-            master_template.add_resource(build_msi_role_assignment(cmd, vm_name, vm_id, identity_role_id,
+            master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope))
         master_template.add_resource(build_vm_msi_extension(cmd, vm_name, location, role_assignment_guid, _MSI_PORT,
                                                             os_type.lower() != 'windows', _MSI_EXTENSION_VERSION))
@@ -680,8 +681,10 @@ def get_vm(cmd, resource_group_name, vm_name, expand=None):
 
 def get_vm_details(cmd, resource_group_name, vm_name):
     from msrestazure.tools import parse_resource_id
+    from azure.cli.command_modules.vm._vm_utils import get_target_network_api
     result = get_instance_view(cmd, resource_group_name, vm_name)
-    network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
+    network_client = get_mgmt_service_client(
+        cmd.cli_ctx, ResourceType.MGMT_NETWORK, api_version=get_target_network_api(cmd.cli_ctx))
     public_ips = []
     fqdns = []
     private_ips = []
@@ -1971,7 +1974,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
             assign_identity)
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
-            master_template.add_resource(build_msi_role_assignment(cmd, vmss_name, vmss_id, identity_role_id,
+            master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope, False))
         # pylint: disable=line-too-long
         msi_extention_type = 'ManagedIdentityExtensionFor' + ('Windows' if os_type.lower() == 'windows' else 'Linux')

@@ -1788,7 +1788,7 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
 
 
-class NetworkWatcherScenarioTest(LiveScenarioTest):
+class NetworkWatcherScenarioTest(ScenarioTest):
     import mock
 
     def _mock_thread_count():
@@ -1801,11 +1801,13 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
         self.cmd('network watcher list')
 
     def _network_watcher_vm(self):
-        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg}')
+        self.kwargs['private-ip'] = '10.0.0.9'
+        self.cmd('vm create -g {rg} -n {vm} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {nsg} --private-ip-address {private-ip}')
         self.cmd('vm extension set -g {rg} --vm-name {vm} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
+
         self.cmd('network watcher show-topology -g {rg}')
-        self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction inbound --local 10.0.0.4:22 --protocol tcp --remote 100.1.2.3:*')
-        self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction outbound --local 10.0.0.4:* --protocol tcp --remote 100.1.2.3:80')
+        self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction inbound --local {private-ip}:22 --protocol tcp --remote 100.1.2.3:*')
+        self.cmd('network watcher test-ip-flow -g {rg} --vm {vm} --direction outbound --local {private-ip}:* --protocol tcp --remote 100.1.2.3:80')
         self.cmd('network watcher show-security-group-view -g {rg} --vm {vm}')
         self.cmd('network watcher show-next-hop -g {rg} --vm {vm} --source-ip 123.4.5.6 --dest-ip 10.0.0.6')
         self.cmd('network watcher test-connectivity -g {rg} --source-resource {vm} --dest-address www.microsoft.com --dest-port 80')
@@ -1849,11 +1851,15 @@ class NetworkWatcherScenarioTest(LiveScenarioTest):
         self.cmd('vm extension set -g {rg} --vm-name {vm2} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
         self.cmd('vm create -g {rg} -n {vm3} --image UbuntuLTS --authentication-type password --admin-username deploy --admin-password PassPass10!) --nsg {vm3}')
         self.cmd('vm extension set -g {rg} --vm-name {vm3} -n NetworkWatcherAgentLinux --publisher Microsoft.Azure.NetworkWatcher')
+        time.sleep(20)
         self.cmd('network watcher connection-monitor create -n {cm} --source-resource {vm2} -g {rg} --dest-resource {vm3} --dest-port 80')
         self.cmd('network watcher connection-monitor list -l {loc}')
         self.cmd('network watcher connection-monitor show -l {loc} -n {cm}')
-        self.cmd('network watcher connection-monitor stop -l {loc} -n {cm}')
-        self.cmd('network watcher connection-monitor start -l {loc} -n {cm}')
+        try:
+            self.cmd('network watcher connection-monitor stop -l {loc} -n {cm}')
+            self.cmd('network watcher connection-monitor start -l {loc} -n {cm}')
+        except CLIError:
+            pass
         self.cmd('network watcher connection-monitor query -l {loc} -n {cm}')
         self.cmd('network watcher connection-monitor delete -l {loc} -n {cm}')
 
