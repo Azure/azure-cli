@@ -5,7 +5,9 @@ Release History
 
 0.1.4
 +++++
-* Minor fixes.
+* `metrics list`: Added support for `--top`, `--orderby` and `--namespace`. [Closes #5785](https://github.com/Azure/azure-cli/issues/5785)
+* `metrics list`: Accepts a space-separated list of metrics to retrieve. [Fixes #4529](https://github.com/Azure/azure-cli/issues/5785)
+* `metrics list-definitions`: Added support for `--namespace`. [Closes #5785](https://github.com/Azure/azure-cli/issues/5785)
 
 0.1.3
 +++++

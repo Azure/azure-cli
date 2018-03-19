@@ -29,7 +29,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-monitor==0.4.0',
+    'azure-mgmt-monitor==0.5.0',
     'azure-mgmt-resource==1.2.1'
 ]
 
