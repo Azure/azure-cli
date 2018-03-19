@@ -18,7 +18,7 @@ class TestMonitorActivityLogAlert(ScenarioTest):
         self.kwargs['name'] = name
 
         # TODO: Re-enable more specific checking when #5155 is addressed.
-        # with self.assertRaises(AssertionError) as cm:
+        # with self.assertRaises(CLIError) as cm:
         #     self.cmd('az monitor activity-log alert create -n {} -g {}'.format(name, resource_group))
         # self.assertEqual('The activity log alert {} already exists in resource group {}.'.format(name, resource_group),
         #                  str(cm.exception))
@@ -129,7 +129,7 @@ class TestMonitorActivityLogAlert(ScenarioTest):
         self.cmd('az monitor activity-log alert delete -n {} -g {}'.format(name, resource_group))
 
         # show
-        # with self.assertRaises(AssertionError):
+        # with self.assertRaises(CLIError):
         #     self.cmd('az monitor activity-log alert show -n {} -g {}'.format(name, resource_group))
         self.cmd('az monitor activity-log alert show -n {} -g {}'.format(name, resource_group), expect_failure=True)
 
