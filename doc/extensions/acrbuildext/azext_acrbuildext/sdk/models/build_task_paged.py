@@ -12,16 +12,16 @@
 from msrest.paging import Paged
 
 
-class BuildDefinitionPaged(Paged):
+class BuildTaskPaged(Paged):
     """
-    A paging container for iterating over a list of :class:`BuildDefinition <containerregistrybuild.models.BuildDefinition>` object
+    A paging container for iterating over a list of :class:`BuildTask <containerregistrybuild.models.BuildTask>` object
     """
 
     _attribute_map = {
         'next_link': {'key': 'nextLink', 'type': 'str'},
-        'current_page': {'key': 'value', 'type': '[BuildDefinition]'}
+        'current_page': {'key': 'value', 'type': '[BuildTask]'}
     }
 
     def __init__(self, *args, **kwargs):
 
-        super(BuildDefinitionPaged, self).__init__(*args, **kwargs)
+        super(BuildTaskPaged, self).__init__(*args, **kwargs)

@@ -9,88 +9,92 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .source_control_auth_info import SourceControlAuthInfo
-from .source_repository_properties import SourceRepositoryProperties
-from .platform_properties import PlatformProperties
-from .build_definition import BuildDefinition
-from .build_definition_filter import BuildDefinitionFilter
-from .source_repository_update_parameters import SourceRepositoryUpdateParameters
-from .build_definition_update_parameters import BuildDefinitionUpdateParameters
 from .image_descriptor import ImageDescriptor
+from .platform_properties import PlatformProperties
 from .build import Build
 from .build_filter import BuildFilter
 from .build_update_parameters import BuildUpdateParameters
 from .build_get_log_result import BuildGetLogResult
 from .build_step_properties import BuildStepProperties
 from .build_step import BuildStep
+from .build_step_properties_update_parameters import BuildStepPropertiesUpdateParameters
 from .build_step_update_parameters import BuildStepUpdateParameters
 from .build_argument import BuildArgument
-from .build_argument_list import BuildArgumentList
-from .base_image_dependency import BaseImageDependency
-from .base_image_dependency_list import BaseImageDependencyList
+from .source_control_auth_info import SourceControlAuthInfo
+from .source_repository_properties import SourceRepositoryProperties
+from .build_task import BuildTask
+from .build_task_filter import BuildTaskFilter
+from .source_repository_update_parameters import SourceRepositoryUpdateParameters
+from .build_task_update_parameters import BuildTaskUpdateParameters
 from .queue_build_request import QueueBuildRequest
 from .source_upload_definition import SourceUploadDefinition
 from .resource import Resource
+from .proxy_resource import ProxyResource
 from .error_body_properties import ErrorBodyProperties
 from .error_body import ErrorBody
 from .error import Error, ErrorException
+from .base_image_dependency import BaseImageDependency
 from .docker_build_step import DockerBuildStep
-from .build_definition_build_request import BuildDefinitionBuildRequest
+from .docker_build_step_update_parameters import DockerBuildStepUpdateParameters
+from .build_task_build_request import BuildTaskBuildRequest
 from .quick_build_request import QuickBuildRequest
-from .build_definition_paged import BuildDefinitionPaged
 from .build_paged import BuildPaged
 from .build_step_paged import BuildStepPaged
+from .build_argument_paged import BuildArgumentPaged
+from .build_task_paged import BuildTaskPaged
 from .container_registry_management_client_enums import (
-    ProvisioningState,
-    BuildDefinitionStatus,
-    SourceControlType,
-    TokenType,
-    OsType,
     BuildStatus,
     BuildType,
-    BuildStepType,
+    OsType,
+    ProvisioningState,
+    BuildTaskStatus,
+    SourceControlType,
+    TokenType,
     BaseImageDependencyType,
+    BaseImageTriggerType,
 )
 
 __all__ = [
-    'SourceControlAuthInfo',
-    'SourceRepositoryProperties',
-    'PlatformProperties',
-    'BuildDefinition',
-    'BuildDefinitionFilter',
-    'SourceRepositoryUpdateParameters',
-    'BuildDefinitionUpdateParameters',
     'ImageDescriptor',
+    'PlatformProperties',
     'Build',
     'BuildFilter',
     'BuildUpdateParameters',
     'BuildGetLogResult',
     'BuildStepProperties',
     'BuildStep',
+    'BuildStepPropertiesUpdateParameters',
     'BuildStepUpdateParameters',
     'BuildArgument',
-    'BuildArgumentList',
-    'BaseImageDependency',
-    'BaseImageDependencyList',
+    'SourceControlAuthInfo',
+    'SourceRepositoryProperties',
+    'BuildTask',
+    'BuildTaskFilter',
+    'SourceRepositoryUpdateParameters',
+    'BuildTaskUpdateParameters',
     'QueueBuildRequest',
     'SourceUploadDefinition',
     'Resource',
+    'ProxyResource',
     'ErrorBodyProperties',
     'ErrorBody',
     'Error', 'ErrorException',
+    'BaseImageDependency',
     'DockerBuildStep',
-    'BuildDefinitionBuildRequest',
+    'DockerBuildStepUpdateParameters',
+    'BuildTaskBuildRequest',
     'QuickBuildRequest',
-    'BuildDefinitionPaged',
     'BuildPaged',
     'BuildStepPaged',
-    'ProvisioningState',
-    'BuildDefinitionStatus',
-    'SourceControlType',
-    'TokenType',
-    'OsType',
+    'BuildArgumentPaged',
+    'BuildTaskPaged',
     'BuildStatus',
     'BuildType',
-    'BuildStepType',
+    'OsType',
+    'ProvisioningState',
+    'BuildTaskStatus',
+    'SourceControlType',
+    'TokenType',
     'BaseImageDependencyType',
+    'BaseImageTriggerType',
 ]

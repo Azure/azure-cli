@@ -16,7 +16,7 @@ class QueueBuildRequest(Model):
     """The queue build request parameters.
 
     You probably want to use the sub-classes and not this class directly. Known
-    sub-classes are: BuildDefinitionBuildRequest, QuickBuildRequest
+    sub-classes are: BuildTaskBuildRequest, QuickBuildRequest
 
     :param type: Constant filled by server.
     :type type: str
@@ -31,7 +31,7 @@ class QueueBuildRequest(Model):
     }
 
     _subtype_map = {
-        'type': {'BuildDefinition': 'BuildDefinitionBuildRequest', 'QuickBuild': 'QuickBuildRequest'}
+        'type': {'BuildTask': 'BuildTaskBuildRequest', 'QuickBuild': 'QuickBuildRequest'}
     }
 
     def __init__(self):

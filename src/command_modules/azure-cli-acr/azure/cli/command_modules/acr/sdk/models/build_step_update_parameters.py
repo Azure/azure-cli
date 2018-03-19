@@ -15,17 +15,14 @@ from msrest.serialization import Model
 class BuildStepUpdateParameters(Model):
     """The parameters for updating a build step.
 
-    Variables are only populated by the server, and will be ignored when
-    sending a request.
-
-    :ivar type: The type of the step. Possible values include: 'Docker'
-    :vartype type: str or ~containerregistrybuild.models.BuildStepType
+    :param type: Constant filled by server.
+    :type type: str
     :param tags: The ARM resource tags.
     :type tags: dict[str, str]
     """
 
     _validation = {
-        'type': {'readonly': True},
+        'type': {'required': True},
     }
 
     _attribute_map = {
@@ -33,7 +30,7 @@ class BuildStepUpdateParameters(Model):
         'tags': {'key': 'tags', 'type': '{str}'},
     }
 
-    def __init__(self, tags=None):
+    def __init__(self, type, tags=None):
         super(BuildStepUpdateParameters, self).__init__()
-        self.type = None
+        self.type = type
         self.tags = tags

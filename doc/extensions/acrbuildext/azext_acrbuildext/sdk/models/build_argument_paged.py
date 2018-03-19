@@ -9,25 +9,19 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from msrest.serialization import Model
+from msrest.paging import Paged
 
 
-class BuildArgumentList(Model):
-    """BuildArgumentList.
-
-    :param value: The collection value.
-    :type value: list[~containerregistrybuild.models.BuildArgument]
-    :param next_link: The URI that can be used to request the next set of
-     paged results.
-    :type next_link: str
+class BuildArgumentPaged(Paged):
+    """
+    A paging container for iterating over a list of :class:`BuildArgument <containerregistrybuild.models.BuildArgument>` object
     """
 
     _attribute_map = {
-        'value': {'key': 'value', 'type': '[BuildArgument]'},
         'next_link': {'key': 'nextLink', 'type': 'str'},
+        'current_page': {'key': 'value', 'type': '[BuildArgument]'}
     }
 
-    def __init__(self, value=None, next_link=None):
-        super(BuildArgumentList, self).__init__()
-        self.value = value
-        self.next_link = next_link
+    def __init__(self, *args, **kwargs):
+
+        super(BuildArgumentPaged, self).__init__(*args, **kwargs)

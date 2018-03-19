@@ -9,14 +9,14 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .build_definitions_operations import BuildDefinitionsOperations
 from .builds_operations import BuildsOperations
 from .build_steps_operations import BuildStepsOperations
+from .build_tasks_operations import BuildTasksOperations
 from .registries_operations import RegistriesOperations
 
 __all__ = [
-    'BuildDefinitionsOperations',
     'BuildsOperations',
     'BuildStepsOperations',
+    'BuildTasksOperations',
     'RegistriesOperations',
 ]

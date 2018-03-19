@@ -9,31 +9,30 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from msrest.serialization import Model
+from .queue_build_request import QueueBuildRequest
 
 
-class QueueBuildRequest(Model):
-    """The queue build request parameters.
-
-    You probably want to use the sub-classes and not this class directly. Known
-    sub-classes are: BuildTaskBuildRequest, QuickBuildRequest
+class BuildTaskBuildRequest(QueueBuildRequest):
+    """The queue build parameters based on a build task.
 
     :param type: Constant filled by server.
     :type type: str
+    :param build_task_name: The name of build task against which build has to
+     be queued.
+    :type build_task_name: str
     """
 
     _validation = {
         'type': {'required': True},
+        'build_task_name': {'required': True},
     }
 
     _attribute_map = {
         'type': {'key': 'type', 'type': 'str'},
+        'build_task_name': {'key': 'buildTaskName', 'type': 'str'},
     }
 
-    _subtype_map = {
-        'type': {'BuildTask': 'BuildTaskBuildRequest', 'QuickBuild': 'QuickBuildRequest'}
-    }
-
-    def __init__(self):
-        super(QueueBuildRequest, self).__init__()
-        self.type = None
+    def __init__(self, build_task_name):
+        super(BuildTaskBuildRequest, self).__init__()
+        self.build_task_name = build_task_name
+        self.type = 'BuildTask'

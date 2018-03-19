@@ -12,10 +12,10 @@
 from msrest.serialization import Model
 
 
-class BuildDefinitionFilter(Model):
-    """The filter that can be used for listing build definitions.
+class BuildTaskFilter(Model):
+    """The filter that can be used for listing build tasks.
 
-    :param alias: The alternative name for build definition.
+    :param alias: The alternative name for build task.
     :type alias: str
     """
 
@@ -24,5 +24,5 @@ class BuildDefinitionFilter(Model):
     }
 
     def __init__(self, alias=None):
-        super(BuildDefinitionFilter, self).__init__()
+        super(BuildTaskFilter, self).__init__()
         self.alias = alias

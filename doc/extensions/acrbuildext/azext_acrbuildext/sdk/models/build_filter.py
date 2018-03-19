@@ -33,9 +33,9 @@ class BuildFilter(Model):
     :param is_archive_enabled: The value that indicates whether archiving is
      enabled or not.
     :type is_archive_enabled: bool
-    :param build_definition_name: The name of the build definition that the
-     build corresponds to.
-    :type build_definition_name: str
+    :param build_task_name: The name of the build task that the build
+     corresponds to.
+    :type build_task_name: str
     """
 
     _attribute_map = {
@@ -46,10 +46,10 @@ class BuildFilter(Model):
         'finish_time': {'key': 'finishTime', 'type': 'iso-8601'},
         'output_image_names': {'key': 'outputImageNames', 'type': '[str]'},
         'is_archive_enabled': {'key': 'isArchiveEnabled', 'type': 'bool'},
-        'build_definition_name': {'key': 'buildDefinitionName', 'type': 'str'},
+        'build_task_name': {'key': 'buildTaskName', 'type': 'str'},
     }
 
-    def __init__(self, build_id=None, build_type=None, status=None, create_time=None, finish_time=None, output_image_names=None, is_archive_enabled=None, build_definition_name=None):
+    def __init__(self, build_id=None, build_type=None, status=None, create_time=None, finish_time=None, output_image_names=None, is_archive_enabled=None, build_task_name=None):
         super(BuildFilter, self).__init__()
         self.build_id = build_id
         self.build_type = build_type
@@ -58,4 +58,4 @@ class BuildFilter(Model):
         self.finish_time = finish_time
         self.output_image_names = output_image_names
         self.is_archive_enabled = is_archive_enabled
-        self.build_definition_name = build_definition_name
+        self.build_task_name = build_task_name
