@@ -11,14 +11,17 @@ import traceback
 import hashlib
 from subprocess import check_output, STDOUT, CalledProcessError
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
+from collections import OrderedDict
 
 import requests
 from wheel.install import WHEEL_INFO_RE
+from pkg_resources import parse_version
+
 from knack.log import get_logger
 
 from azure.cli.core.util import CLIError
 from azure.cli.core.extension import (extension_exists, get_extension_path, get_extensions,
-                                      get_extension, ext_compat_with_cli,
+                                      get_extension, ext_compat_with_cli, EXT_METADATA_ISPREVIEW,
                                       WheelExtension, ExtensionNotInstalledException)
 from azure.cli.core.telemetry import set_extension_management_detail
 
@@ -200,6 +203,11 @@ def add_extension(source=None, extension_name=None, index_url=None, yes=None,  #
             raise CLIError("No matching extensions for '{}'. Use --debug for more information.".format(extension_name))
     _add_whl_ext(source, ext_sha256=ext_sha256, pip_extra_index_urls=pip_extra_index_urls, pip_proxy=pip_proxy)
     _augment_telemetry_with_ext_info(extension_name)
+    try:
+        if extension_name and get_extension(extension_name).preview:
+            logger.warning("The installed extension '%s' is in preview.", extension_name)
+    except ExtensionNotInstalledException:
+        pass
 
 
 def remove_extension(extension_name):
@@ -263,8 +271,28 @@ def update_extension(extension_name, index_url=None, pip_extra_index_urls=None, 
         raise CLIError(e)
 
 
-def list_available_extensions(index_url=None):
-    return get_index_extensions(index_url=index_url)
+def list_available_extensions(index_url=None, show_details=False):
+    index_data = get_index_extensions(index_url=index_url)
+    if show_details:
+        return index_data
+    installed_extensions = get_extensions()
+    installed_extension_names = [e.name for e in installed_extensions]
+    results = []
+    for name, items in OrderedDict(sorted(index_data.items())).items():
+        latest = sorted(items, key=lambda c: parse_version(c['metadata']['version']), reverse=True)[0]
+        installed = False
+        if name in installed_extension_names:
+            installed = True
+            if parse_version(latest['metadata']['version']) > parse_version(get_extension(name).version):
+                installed = str(True) + ' (upgrade available)'
+        results.append({
+            'name': name,
+            'version': latest['metadata']['version'],
+            'summary': latest['metadata']['summary'],
+            'preview': latest['metadata'].get(EXT_METADATA_ISPREVIEW, False),
+            'installed': installed
+        })
+    return results
 
 
 def get_lsb_release():
@@ -296,14 +324,14 @@ def check_distro_consistency():
     except Exception as err:  # pylint: disable=broad-except
         current_linux_dist_name = None
         stored_linux_dist_name = None
-        logger.debug('Linux distro check: An error occurred while checking \
-linux distribution version source list consistency.')
+        logger.debug('Linux distro check: An error occurred while checking '
+                     'linux distribution version source list consistency.')
         logger.debug(err)
 
     if current_linux_dist_name != stored_linux_dist_name:
-        logger.warning("Linux distro check: Mismatch distribution \
-name in %s file", LIST_FILE_PATH)
-        logger.warning("Linux distro check: If command fails, install the appropriate package \
-for your distribution or change the above file accordingly.")
+        logger.warning("Linux distro check: Mismatch distribution "
+                       "name in %s file", LIST_FILE_PATH)
+        logger.warning("Linux distro check: If command fails, install the appropriate package "
+                       "for your distribution or change the above file accordingly.")
         logger.warning("Linux distro check: %s has '%s', current distro is '%s'",
                        LIST_FILE_PATH, stored_linux_dist_name, current_linux_dist_name)
