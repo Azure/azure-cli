@@ -28,3 +28,9 @@ def load_arguments(self, _):
     with self.argument_context('consumption pricesheet show') as cps:
         cps.argument('include_meter_details', options_list=['--include-meter-details', '-m'], action='store_true', help='include meter details in the price sheet')
         cps.argument('billing_period_name', options_list=['--billing-period-name', '-p'], help='name of a specific billing period to get the price sheet')
+
+    with self.argument_context('consumption marketplace list') as cmp:
+        cmp.argument('billing_period_name', options_list=['--billing-period-name', '-p'], help='name of a specific billing period to get the marketplace')
+        cmp.argument('top', options_list=['--top', '-t'], type=int, help='maximum number of items to return. Accepted range for this value is 1 - 1000')
+        cmp.argument('start_date', options_list=['--start-date', '-s'], type=get_datetime_type(), help='start date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')
+        cmp.argument('end_date', options_list=['--end-date', '-e'], type=get_datetime_type(), help='end date (in UTC Y-m-d) of the usages. Both start date and end date need to be supplied or neither')

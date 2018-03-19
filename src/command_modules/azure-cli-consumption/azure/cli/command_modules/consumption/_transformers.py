@@ -61,3 +61,14 @@ def pricesheet_show_properties(result):
 def transform_pricesheet_show_output(result):
     result.pricesheets = [pricesheet_show_properties(item) for item in result.pricesheets]
     return result
+
+
+def marketplace_list_output(result):
+    result.pretax_cost = str(result.pretax_cost)
+    result.consumed_quantity = str(result.consumed_quantity)
+    result.resource_rate = str(result.resource_rate)
+    return result
+
+
+def transform_marketplace_list_output(result):
+    return [marketplace_list_output(item) for item in result]
