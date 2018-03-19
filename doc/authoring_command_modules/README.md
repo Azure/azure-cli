@@ -7,6 +7,8 @@ The document provides instructions and guidelines on how to author command modul
 
 **Command Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_command_modules/authoring_commands.md
 
+**Command Guidelines**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/command_guidelines.md
+
 **Help Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_help.md
 
 **Test Authoring**:<br>https://github.com/Azure/azure-cli/blob/dev/doc/authoring_tests.md
