@@ -3,6 +3,10 @@
 Release History
 ===============
 
+1.0.0
++++++
+* General availability release with new business model API version 2017-12-01.
+
 0.1.1
 ++++++
 * Minor changes.
