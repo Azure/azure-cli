@@ -523,7 +523,6 @@ def show_vmss_encryption_status(cmd, resource_group_name, vmss_name):
         view = instance.instance_view
         disk_infos = []
         vm_enc_info = {
-            'name': '',
             'id': instance.id,
             'disks': disk_infos
         }
