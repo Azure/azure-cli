@@ -242,6 +242,28 @@ class VMGeneralizeScenarioTest(ScenarioTest):
             self.check('sourceVirtualMachine.id', vm['id'])
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_generalize_vm')
+    def test_vm_capture_zone_resilient_image(self, resource_group):
+
+        self.kwargs.update({
+            'loc': 'francecentral',
+            'vm': 'vm-generalize'
+        })
+
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu --image centos --admin-password testPassword0 --authentication-type password')
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        # Should be able to generalize the VM after it has been stopped
+        self.cmd('vm generalize -g {rg} -n {vm}', checks=self.is_empty())
+        vm = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+
+        time.sleep(60)
+        # capture to a custom image
+        self.kwargs['image'] = 'myImage2'
+        self.cmd('image create -g {rg} -n {image} --source {vm} --zone-resilient', checks=[
+            self.check('name', '{image}'),
+            self.check('sourceVirtualMachine.id', vm['id'])
+        ])
+
 
 class VMVMSSWindowsLicenseTest(ScenarioTest):
 
