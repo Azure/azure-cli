@@ -305,7 +305,7 @@ class AzInteractiveShell(object):
             if param in self.completer.command_param_info[command] and self.completer.has_description(
                     command + " " + param):
                 param_descrip = ''.join([
-                    param, ":", os.linesep, self.completer.param_description.get(command + " " + param, '')])
+                    param, ":", '\n', self.completer.param_description.get(command + " " + param, '')])
 
             if command in self.completer.command_examples:
                 string_example = []

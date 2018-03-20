@@ -33,15 +33,17 @@ class CompletionTest(unittest.TestCase):
             self.assertEqual(completion.start_position, start_position)
         self.assertFalse(expected_completions)
 
-    def init_test_completer(self):
+    def init_completer(self):
         with mock.patch.object(Configuration, 'get_help_files', lambda _: 'help_dump_test.json'):
             with mock.patch.object(Configuration, 'get_config_dir', lambda _: TEST_DIR):
+                print(TEST_DIR)
                 shell_ctx = AzInteractiveShell(TestCli(), None)
                 self.completer = shell_ctx.completer
+                print(self.completer.command_tree.children)
 
     def test_command_completion(self):
         # tests some azure commands
-        self.init_test_completer()
+        self.init_completer()
 
         # initial completions
         doc = Document(u' ')
@@ -75,7 +77,7 @@ class CompletionTest(unittest.TestCase):
 
     def test_param_completion(self):
         # tests some azure params
-        self.init_test_completer()
+        self.init_completer()
 
         # 'az -h'
         doc = Document(u'-')
