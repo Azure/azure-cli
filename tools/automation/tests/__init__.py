@@ -24,11 +24,11 @@ TEST_INDEX_FILE = 'testIndex.json'
 def extract_module_name(path):
     mod_name_regex = re.compile(r'azure-cli-([^/\\]*)')
     ext_name_regex = re.compile(r'.*(azext_[^/\\]+).*')
-
+    display('\n extract module name: ' + path)
     try:
         return re.search(mod_name_regex, path).group(1)
     except AttributeError:
-        return  re.search(ext_name_regex, path).group(1)
+        return re.search(ext_name_regex, path).group(1)
 
 
 def execute(args):
