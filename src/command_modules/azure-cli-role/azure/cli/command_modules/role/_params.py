@@ -36,8 +36,7 @@ def load_arguments(self, _):
         c.argument('password', help="app password, aka 'client secret'")
         c.argument('oauth2_allow_implicit_flow', arg_type=get_three_state_flag(), help='whether to allow implicit grant flow for OAuth2')
         c.argument('required_resource_accesses', type=validate_file_or_dict,
-                   help="resource scopes and roles the application requires access to, in manifest json string of '[{\"resourceAppId\": \"<appid>\", "
-                   "\"resourceAccess\": [{\"id\": \"<resource id>\", \"type\": \"Scope\"}]}]'")
+                   help="resource scopes and roles the application requires access to. Should be in manifest json format. See examples below for details")
         c.argument('native_app', arg_type=get_three_state_flag(), help="an application which can be installed on a user's device or computer")
 
     with self.argument_context('ad') as c:

@@ -257,9 +257,23 @@ helps['ad'] = """
     type: group
     short-summary: Manage Azure Active Directory Graph entities needed for Role Based Access Control
 """
-helps['ad app'] = """
-    type: group
-    short-summary: Manage Azure Active Directory applications.
+helps['ad app create'] = """
+    type: command
+    short-summary: Create web application, web API or native
+    examples:
+        - name: Create a native application with delegated permission of "access the AAD directory as the signed-in user
+          text: |
+                az ad app create --display-name my-native --native-app --requiredResourceAccess @manifest.json
+                ("manifest.json" contains the following content)
+                [{
+                    "resourceAppId": "00000002-0000-0000-c000-000000000000",
+                    "resourceAccess": [
+                        {
+                            "id": "a42657d6-7f20-40e3-b6f0-cee03008a62a",
+                            "type": "Scope"
+                        }
+                   ]
+                }]
 """
 helps['ad group'] = """
     type: group
