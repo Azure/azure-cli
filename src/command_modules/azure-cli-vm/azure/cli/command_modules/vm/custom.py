@@ -482,7 +482,9 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
     parameter = VirtualMachineCaptureParameters(vhd_prefix=vhd_name_prefix,
                                                 destination_container_name=storage_container,
                                                 overwrite_vhds=overwrite)
-    return client.virtual_machines.capture(resource_group_name, vm_name, parameter)
+    poller = client.virtual_machines.capture(resource_group_name, vm_name, parameter)
+    result = LongRunningOperation(cmd.cli_ctx)(poller)
+    print(json.dumps(result.output, indent=2))  # pylint: disable=no-member
 
 
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches
