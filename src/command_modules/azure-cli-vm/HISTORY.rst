@@ -2,9 +2,10 @@
 
 Release History
 ===============
+
 2.0.29
 ++++++
-Minor change
+* BC: `az vm extension delete` no longer returns output as expected for a `delete` command.
 
 2.0.28
 ++++++
