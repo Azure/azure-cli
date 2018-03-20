@@ -119,7 +119,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         cmd.get_models('VirtualMachineExtension', 'DiskEncryptionSettings', 'KeyVaultSecretReference',
                        'KeyVaultKeyReference', 'SubResource')
 
-    ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
+    ext = VirtualMachineExtension(location=vm.location,  # pylint: disable=no-member
                                   publisher=extension['publisher'],
                                   virtual_machine_extension_type=extension['name'],
                                   protected_settings=private_config,
@@ -145,12 +145,12 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
 
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     secret_ref = KeyVaultSecretReference(secret_url=status_url,
-                                         source_vault=SubResource(disk_encryption_keyvault))
+                                         source_vault=SubResource(id=disk_encryption_keyvault))
 
     key_encryption_key_obj = None
     if key_encryption_key:
-        key_encryption_key_obj = KeyVaultKeyReference(key_encryption_key,
-                                                      SubResource(key_encryption_keyvault))
+        key_encryption_key_obj = KeyVaultKeyReference(key_url=key_encryption_key,
+                                                      source_vault=SubResource(id=key_encryption_keyvault))
 
     disk_encryption_settings = DiskEncryptionSettings(disk_encryption_key=secret_ref,
                                                       key_encryption_key=key_encryption_key_obj,
@@ -219,7 +219,7 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
     VirtualMachineExtension, DiskEncryptionSettings = cmd.get_models(
         'VirtualMachineExtension', 'DiskEncryptionSettings')
 
-    ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
+    ext = VirtualMachineExtension(location=vm.location,  # pylint: disable=no-member
                                   publisher=extension['publisher'],
                                   virtual_machine_extension_type=extension['name'],
                                   type_handler_version=extension['version'],
@@ -453,7 +453,7 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
                                           auto_upgrade_minor_version=True,
                                           force_update_tag=uuid.uuid4())
     if not vmss.virtual_machine_profile.extension_profile:
-        vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile([])
+        vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])
     vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
     poller = compute_client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
     LongRunningOperation(cmd.cli_ctx)(poller)

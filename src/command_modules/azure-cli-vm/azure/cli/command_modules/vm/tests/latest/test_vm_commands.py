@@ -778,8 +778,7 @@ class VMExtensionScenarioTest(ScenarioTest):
                 self.check('name', '{ext}'),
                 self.check('resourceGroup', '{rg}')
             ])
-            self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}',
-                     checks=[self.check('status', 'Succeeded')])
+            self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
         finally:
             os.remove(config_file)
 
