@@ -30,6 +30,31 @@ class CommandTree(object):
         """ whether this has a child """
         return self.children.get(name, None) is not None
 
+    def in_tree(self, cmd_args):
+        """ if a command is in the tree """
+        if not cmd_args:
+            return True
+        tree = self
+        try:
+            for datum in cmd_args:
+                tree = tree.get_child(datum)
+        except ValueError:
+            return False
+        return True
+
+    def get_sub_tree(self, cmd_args):
+        current_command = []
+        leftover_args = []
+
+        tree = self
+        for arg in cmd_args:
+            if tree.has_child(arg):
+                current_command.append(arg)
+                tree = tree.get_child(arg)
+            else:
+                leftover_args.append(arg)
+        return tree, ' '.join(current_command), leftover_args
+
 
 class CommandHead(CommandTree):
     """ represents the head of the tree, no data"""
@@ -42,44 +67,3 @@ class CommandBranch(CommandTree):
     """ represents a branch of the tree """
     def __init__(self, data, children=None):
         CommandTree.__init__(self, data, children=children)
-
-
-def generate_tree(commands):
-    """ short cut to make a tree """
-    data = commands.split()[::-1]
-    first = True
-    prev = None
-    node = None
-    for kid in data:
-        node = CommandTree(kid)
-        if first:
-            first = False
-            prev = node
-        else:
-            node.add_child(prev)
-    return node
-
-
-def in_tree(tree, cmd_args):
-    """ if a command is in the tree """
-    if not cmd_args:
-        return True
-    try:
-        for datum in cmd_args:
-            tree = tree.get_child(datum)
-    except ValueError:
-        return False
-    return True
-
-
-def get_sub_tree(tree, cmd_args):
-    current_command = []
-    leftover_args = []
-
-    for arg in cmd_args:
-        if tree.has_child(arg):
-            current_command.append(arg)
-            tree = tree.get_child(arg)
-        else:
-            leftover_args.append(arg)
-    return tree, ' '.join(current_command), leftover_args

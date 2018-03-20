@@ -38,7 +38,6 @@ from azure.cli.core.util import handle_exception
 from . import __version__
 from .az_completer import AzCompleter
 from .az_lexer import get_az_lexer, ExampleLexer, ToolbarLexer
-from .command_tree import in_tree
 from .configuration import Configuration, SELECT_SYMBOL
 from .frequency_heuristic import DISPLAY_TIME, frequency_heuristic
 from .gather_commands import add_new_lines, GatherCommands
@@ -175,7 +174,7 @@ class AzInteractiveShell(object):
         if self.default_command:
             text = self.default_command + ' ' + text
 
-        param_info, example = self.generate_help_text(text)
+        param_info, example = self.generate_help_text()
 
         self.param_docs = u'{}'.format(param_info)
         self.example_docs = u'{}'.format(example)
@@ -279,45 +278,44 @@ class AzInteractiveShell(object):
         ]
         return settings_items
 
-    def generate_help_text(self, text):
+    def generate_help_text(self):
         """ generates the help text based on commands typed """
-        command = param_descrip = example = ""
-        any_documentation = False
-        is_command = True
+        param_descrip = example = ""
+        self.description_docs = u''
+
         rows, _ = get_window_dim()
         rows = int(rows)
         if not self.completer:
             return param_descrip, example
 
-        for word in text.split():
-            if word.startswith("-"):
-                # any parameter
-                is_command = False
-            if is_command:
-                command += str(word) + " "
+        param_args = self.completer.leftover_args
+        last_word = self.completer.unfinished_word
+        command = self.completer.current_command
+        new_command = ' '.join([command, last_word]).strip()
+        if not self.completer.complete_command and new_command in self.completer.command_param_info:
+            command = new_command
 
-            if self.completer and self.completer.is_completable(command.rstrip()):
-                cmdstp = command.rstrip()
-                any_documentation = True
+        param = param_args[-1] if param_args else ''
+        param = last_word if last_word.startswith('-') else param
 
-                if word in self.completer.command_param_info[cmdstp] and self.completer.has_description(
-                        cmdstp + " " + word):
-                    param_descrip = word + ":\n" + \
-                        self.completer.param_description.get(cmdstp + " " + word, '')
+        if self.completer and command in self.completer.command_param_info:
+            self.description_docs = u'{}'.format(
+                self.completer.command_description[command])
 
-                self.description_docs = u'{}'.format(
-                    self.completer.command_description[cmdstp])
+            if param in self.completer.command_param_info[command] and self.completer.has_description(
+                    command + " " + param):
+                param_descrip = ''.join([
+                    param, ":", os.linesep, self.completer.param_description.get(command + " " + param, '')])
 
-                if cmdstp in self.completer.command_examples:
-                    string_example = ""
-                    for example in self.completer.command_examples[cmdstp]:
-                        for part in example:
-                            string_example += part
-                    example = self._space_examples(
-                        self.completer.command_examples[cmdstp], rows, self.example_page)
+            if command in self.completer.command_examples:
+                string_example = []
+                for example in self.completer.command_examples[command]:
+                    for part in example:
+                        string_example.append(part)
+                ''.join(string_example)
+                example = self._space_examples(
+                    self.completer.command_examples[command], rows, self.example_page)
 
-        if not any_documentation:
-            self.description_docs = u''
         return param_descrip, example
 
     def _update_default_info(self):
@@ -593,7 +591,7 @@ class AzInteractiveShell(object):
             tree_path = self.default_command.split()
             tree_path.append(value)
 
-            if in_tree(self.completer.command_tree, tree_path):
+            if self.completer.command_tree.in_tree(tree_path):
                 self.set_scope(value)
                 print("defaulting: " + value, file=self.output)
                 cmd = cmd.replace(SELECT_SYMBOL['scope'], '')

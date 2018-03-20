@@ -7,7 +7,9 @@ import os
 import unittest
 import mock
 
+from azure.cli.testsdk import TestCli
 from azure.cli.command_modules.interactive.azclishell.configuration import Configuration
+from azure.cli.command_modules.interactive.azclishell.app import AzInteractiveShell
 
 from prompt_toolkit.document import Document
 
@@ -34,20 +36,17 @@ class CompletionTest(unittest.TestCase):
     def init_test_completer(self):
         with mock.patch.object(Configuration, 'get_help_files', lambda _: 'help_dump_test.json'):
             with mock.patch.object(Configuration, 'get_config_dir', lambda _: TEST_DIR):
-                from azure.cli.testsdk import TestCli
-                from azure.cli.command_modules.interactive.azclishell.app import AzInteractiveShell
-                # with mock.patch.object(AzInteractiveShell, 'create_interface', lambda _: None):
                 shell_ctx = AzInteractiveShell(TestCli(), None)
                 self.completer = shell_ctx.completer
 
-    def test_azure_command_completion(self):
+    def test_command_completion(self):
         # tests some azure commands
         self.init_test_completer()
 
         # initial completions
         doc = Document(u' ')
         gen = self.completer.get_completions(doc, None)
-        completions = set(['exit', 'quit', 'storage', 'vm'])
+        completions = set(['exit', 'quit', 'storage', 'vm', 'vmss'])
         self.verify_completions(gen, completions, 0)
 
         # start command
@@ -74,8 +73,7 @@ class CompletionTest(unittest.TestCase):
         completions = set(['vm', 'vmss'])
         self.verify_completions(gen, completions, -2)
 
-
-    def test_azure_param_completion(self):
+    def test_param_completion(self):
         # tests some azure params
         self.init_test_completer()
 

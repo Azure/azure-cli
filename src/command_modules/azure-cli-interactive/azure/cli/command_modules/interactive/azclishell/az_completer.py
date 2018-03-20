@@ -10,7 +10,6 @@ from prompt_toolkit.completion import Completer, Completion
 from azure.cli.core.parser import AzCliCommandParser
 from . import configuration
 from .argfinder import ArgsFinder
-from .command_tree import get_sub_tree
 from .util import parse_quotes
 
 SELECT_SYMBOL = configuration.SELECT_SYMBOL
@@ -142,7 +141,7 @@ class AzCompleter(Completer):
             self.unfinished_word = text_split[-1]
             text_split = text_split[:-1]
 
-        self.subtree, self.current_command, self.leftover_args = get_sub_tree(self.command_tree, text_split)
+        self.subtree, self.current_command, self.leftover_args = self.command_tree.get_sub_tree(text_split)
         self.complete_command = not self.subtree.children
 
         for comp in sort_completions(self.gen_cmd_and_param_completions()):
@@ -258,7 +257,7 @@ class AzCompleter(Completer):
 
     def is_completable(self, symbol):
         """ whether the word can be completed as a command or parameter """
-        return symbol in self.command_param_info or symbol in self.param_description.keys()
+        return symbol in self.command_description or symbol in self.param_description
 
     def has_description(self, param):
         """ if a parameter has a description """
