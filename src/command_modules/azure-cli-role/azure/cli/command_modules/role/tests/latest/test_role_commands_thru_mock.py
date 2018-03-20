@@ -122,7 +122,7 @@ class TestRoleMocked(unittest.TestCase):
         test_app_id = 'app_id_123'
         app = Application(app_id=test_app_id)
         faked_graph_client.applications.create.return_value = app
-        sp = ServicePrincipal(object_id='does not matter')
+        sp = ServicePrincipal()
         faked_graph_client.service_principals.create.return_value = sp
 
         # action
@@ -163,7 +163,7 @@ class TestRoleMocked(unittest.TestCase):
 
         name = 'mysp'
         faked_graph_client.applications.create.side_effect = mock_app_create
-        sp = ServicePrincipal(object_id='does not matter')
+        sp = ServicePrincipal()
         faked_graph_client.service_principals.create.return_value = sp
 
         # action
