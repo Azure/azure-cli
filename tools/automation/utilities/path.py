@@ -139,6 +139,8 @@ def filter_user_selected_modules_with_tests(user_input_modules=None, profile=Non
     if user_input_modules is not None:
         selected_modules = set(user_input_modules)
         extra = selected_modules - set([name for name, _, _ in existing_modules])
+        # don't count extensions as extras
+        extra = [x for x in extra if not x.startswith('azext_')]
         if any(extra):
             print('ERROR: These modules do not exist: {}.'.format(', '.join(extra)))
             return None

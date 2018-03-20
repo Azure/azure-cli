@@ -24,15 +24,14 @@ import threading
 import time
 import uuid
 import webbrowser
-import yaml
-import dateutil.parser
-from dateutil.relativedelta import relativedelta
 from six.moves.urllib.request import urlopen  # pylint: disable=import-error
 from six.moves.urllib.error import URLError  # pylint: disable=import-error
 
+import yaml
+import dateutil.parser
+from dateutil.relativedelta import relativedelta
 from knack.log import get_logger
 from knack.util import CLIError
-
 from msrestazure.azure_exceptions import CloudError
 
 from azure.cli.command_modules.acs import acs_client, proxy
@@ -41,13 +40,13 @@ from azure.cli.core._environment import get_config_dir
 from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.keys import is_valid_ssh_rsa_public_key
-from azure.cli.core.util import shell_safe_json_parse, truncate_text
+from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, truncate_text, sdk_no_wait
 from azure.graphrbac.models import (ApplicationCreateParameters,
                                     PasswordCredential,
                                     KeyCredential,
                                     ServicePrincipalCreateParameters,
                                     GetObjectsParameters)
-from azure.mgmt.authorization.models import RoleAssignmentProperties
+from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
 from azure.mgmt.containerservice.models import ContainerServiceAgentPoolProfile
 from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile
 from azure.mgmt.containerservice.models import ContainerServiceOrchestratorTypes
@@ -234,8 +233,11 @@ def acs_install_cli(cmd, client, resource_group, name, install_location=None, cl
 
 
 def _ssl_context():
-    if sys.version_info < (3, 4):
-        return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
+    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
+        try:
+            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
+        except AttributeError:
+            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
 
     return ssl.create_default_context()
 
@@ -314,6 +316,22 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None):
 def k8s_install_connector(cmd, client, name, resource_group_name, connector_name,
                           location=None, service_principal=None, client_secret=None,
                           chart_url=None, os_type='Linux', image_tag=None, aci_resource_group=None):
+    _k8s_install_or_upgrade_connector("install", cmd, client, name, resource_group_name, connector_name,
+                                      location, service_principal, client_secret, chart_url, os_type,
+                                      image_tag, aci_resource_group)
+
+
+def k8s_upgrade_connector(cmd, client, name, resource_group_name, connector_name,
+                          location=None, service_principal=None, client_secret=None,
+                          chart_url=None, os_type='Linux', image_tag=None, aci_resource_group=None):
+    _k8s_install_or_upgrade_connector("upgrade", cmd, client, name, resource_group_name, connector_name,
+                                      location, service_principal, client_secret, chart_url, os_type,
+                                      image_tag, aci_resource_group)
+
+
+def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_group_name, connector_name,
+                                      location, service_principal, client_secret, chart_url, os_type,
+                                      image_tag, aci_resource_group):
     from subprocess import PIPE, Popen
     helm_not_installed = 'Helm not detected, please verify if it is installed.'
     node_prefix = 'virtual-kubelet-' + connector_name.lower()
@@ -348,20 +366,20 @@ def k8s_install_connector(cmd, client, name, resource_group_name, connector_name
     _, _, tenant_id = profile.get_login_credentials()
     # Check if we want the linux connector
     if os_type.lower() in ['linux', 'both']:
-        _helm_install_aci_connector(image_tag, url_chart, connector_name, service_principal, client_secret,
-                                    subscription_id, tenant_id, rgkaci.name, location,
-                                    node_prefix + '-linux', 'Linux')
+        _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
+                                               client_secret, subscription_id, tenant_id, rgkaci.name, location,
+                                               node_prefix + '-linux', 'Linux')
 
     # Check if we want the windows connector
     if os_type.lower() in ['windows', 'both']:
-        _helm_install_aci_connector(image_tag, url_chart, connector_name, service_principal, client_secret,
-                                    subscription_id, tenant_id, rgkaci.name, location,
-                                    node_prefix + '-win', 'Windows')
+        _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
+                                               client_secret, subscription_id, tenant_id, rgkaci.name, location,
+                                               node_prefix + '-win', 'Windows')
 
 
-def _helm_install_aci_connector(image_tag, url_chart, connector_name, service_principal,
-                                client_secret, subscription_id, tenant_id, aci_resource_group,
-                                aci_region, node_name, os_type):
+def _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
+                                           client_secret, subscription_id, tenant_id, aci_resource_group,
+                                           aci_region, node_name, os_type):
     node_taint = 'azure.com/aci'
     helm_release_name = connector_name.lower() + "-" + os_type.lower()
     logger.warning("Deploying the ACI connector for '%s' using Helm", os_type)
@@ -379,7 +397,10 @@ def _helm_install_aci_connector(image_tag, url_chart, connector_name, service_pr
         if tenant_id:
             values += ",env.azureTenantId=" + tenant_id
 
-        subprocess.call(["helm", "install", url_chart, "--name", helm_release_name, "--set", values])
+        if helm_cmd == "install":
+            subprocess.call(["helm", "install", url_chart, "--name", helm_release_name, "--set", values])
+        elif helm_cmd == "upgrade":
+            subprocess.call(["helm", "upgrade", helm_release_name, url_chart, "--set", values])
     except subprocess.CalledProcessError as err:
         raise CLIError('Could not deploy the ACI connector Chart: {}'.format(err))
 
@@ -881,7 +902,7 @@ def _invoke_deployment(cli_ctx, resource_group_name, deployment_name, template, 
         logger.info(json.dumps(template, indent=2))
         logger.info('==== END TEMPLATE ====')
         return smc.validate(resource_group_name, deployment_name, properties)
-    return smc.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
+    return sdk_no_wait(no_wait, smc.create_or_update, resource_group_name, deployment_name, properties)
 
 
 def k8s_get_credentials(cmd, client, name, resource_group_name,
@@ -970,7 +991,7 @@ def merge_kubernetes_configurations(existing_file, addition_file):
         existing['current-context'] = addition['current-context']
 
     with open(existing_file, 'w+') as stream:
-        yaml.dump(existing, stream, default_flow_style=True)
+        yaml.dump(existing, stream, default_flow_style=False)
 
     current_context = addition.get('current-context', 'UNKNOWN')
     msg = 'Merged "{}" as current context in {}'.format(current_context, existing_file)
@@ -1162,10 +1183,10 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
-    properties = RoleAssignmentProperties(role_id, object_id)
+    parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
     assignment_name = uuid.uuid4()
     custom_headers = None
-    return assignments_client.create(scope, assignment_name, properties, custom_headers=custom_headers)
+    return assignments_client.create(scope, assignment_name, parameters, custom_headers=custom_headers)
 
 
 def _build_role_scope(resource_group_name, scope, subscription_id):
@@ -1231,6 +1252,9 @@ def _update_dict(dict1, dict2):
 
 
 def aks_browse(cmd, client, resource_group_name, name, disable_browser=False):
+    if in_cloud_console():
+        raise CLIError('This command requires a web browser, which is not supported in Azure Cloud Shell.')
+
     if not which('kubectl'):
         raise CLIError('Can not find kubectl executable in PATH')
 
@@ -1325,8 +1349,8 @@ def aks_create(cmd, client, resource_group_name, name, ssh_key_value,  # pylint:
     retry_exception = Exception(None)
     for _ in range(0, max_retry):
         try:
-            return client.create_or_update(
-                resource_group_name=resource_group_name, resource_name=name, parameters=mc, raw=no_wait)
+            return sdk_no_wait(no_wait, client.create_or_update,
+                               resource_group_name=resource_group_name, resource_name=name, parameters=mc)
         except CloudError as ex:
             retry_exception = ex
             if 'not found in Active Directory tenant' in ex.message:
@@ -1374,7 +1398,7 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, no_wait=False)
     # null out the service principal because otherwise validation complains
     instance.service_principal_profile = None
 
-    return client.create_or_update(resource_group_name, name, instance, raw=no_wait)
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
 def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_wait=False, **kwargs):  # pylint: disable=unused-argument
@@ -1384,7 +1408,7 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
     # null out the service principal because otherwise validation complains
     instance.service_principal_profile = None
 
-    return client.create_or_update(resource_group_name, name, instance, raw=no_wait)
+    return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
 
 def _ensure_aks_service_principal(cli_ctx,

@@ -5,18 +5,20 @@
 
 import unittest
 import six
+import mock
 
-import azclishell.command_tree as tree
-from azclishell.az_completer import AzCompleter
+from azure.cli.command_modules.interactive.azclishell import command_tree as tree
+from azure.cli.command_modules.interactive.azclishell.az_completer import AzCompleter
 from prompt_toolkit.document import Document
 from prompt_toolkit.completion import Completion
 
 
 def _build_completer(commands, global_params):
     from azure.cli.testsdk import TestCli
-    from azclishell.app import AzInteractiveShell
-    shell_ctx = AzInteractiveShell(TestCli(), None)
-    return AzCompleter(shell_ctx, commands, global_params)
+    from azure.cli.command_modules.interactive.azclishell.app import AzInteractiveShell
+    with mock.patch.object(AzInteractiveShell, 'create_interface', lambda _: None):
+        shell_ctx = AzInteractiveShell(TestCli(), None)
+        return AzCompleter(shell_ctx, commands, global_params)
 
 
 class _Commands():

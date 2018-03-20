@@ -18,6 +18,7 @@ from azure.cli.command_modules.acr.repository import (
     acr_repository_show_tags,
     acr_repository_show_manifests,
     acr_repository_delete,
+    acr_repository_untag,
     _get_authorization_header,
     _get_pagination_params,
     _get_manifest_v2_header
@@ -143,20 +144,58 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_validate_managed_registry.return_value = 'testregistry', None
 
         # Delete repository
-        acr_repository_delete(cmd, 'testregistry', 'testrepository', yes=True)
+        acr_repository_delete(cmd,
+                              registry_name='testregistry',
+                              repository='testrepository',
+                              yes=True)
         mock_requests_delete.assert_called_with(
             'https://testregistry.azurecr.io/v2/_acr/testrepository/repository',
             headers=_get_authorization_header('username', 'password'),
             verify=mock.ANY)
 
-        # Delete tag
+        # Delete image by tag
+        acr_repository_delete(cmd,
+                              registry_name='testregistry',
+                              image='testrepository:testtag',
+                              yes=True)
+        expected_get_headers = _get_authorization_header('username', 'password')
+        expected_get_headers.update(_get_manifest_v2_header())
+        mock_requests_get.assert_called_with(
+            'https://testregistry.azurecr.io/v2/testrepository/manifests/testtag',
+            headers=expected_get_headers,
+            verify=mock.ANY)
+        mock_requests_delete.assert_called_with(
+            'https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+            headers=_get_authorization_header('username', 'password'),
+            verify=mock.ANY)
+
+        # Delete image by manifest digest
+        acr_repository_delete(cmd,
+                              registry_name='testregistry',
+                              image='testrepository@sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+                              yes=True)
+        mock_requests_delete.assert_called_with(
+            'https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',
+            headers=_get_authorization_header('username', 'password'),
+            verify=mock.ANY)
+
+        # Untag image
+        acr_repository_untag(cmd,
+                             registry_name='testregistry',
+                             image='testrepository:testtag')
+        mock_requests_delete.assert_called_with(
+            'https://testregistry.azurecr.io/v2/_acr/testrepository/tags/testtag',
+            headers=_get_authorization_header('username', 'password'),
+            verify=mock.ANY)
+
+        # Delete tag (deprecating)
         acr_repository_delete(cmd, 'testregistry', 'testrepository', tag='testtag', yes=True)
         mock_requests_delete.assert_called_with(
             'https://testregistry.azurecr.io/v2/_acr/testrepository/tags/testtag',
             headers=_get_authorization_header('username', 'password'),
             verify=mock.ANY)
 
-        # Delete manifest with tag
+        # Delete manifest with tag (deprecating)
         acr_repository_delete(cmd, 'testregistry', 'testrepository', tag='testtag', manifest='', yes=True)
         expected_get_headers = _get_authorization_header('username', 'password')
         expected_get_headers.update(_get_manifest_v2_header())
@@ -169,7 +208,7 @@ class AcrMockCommandsTests(unittest.TestCase):
             headers=_get_authorization_header('username', 'password'),
             verify=mock.ANY)
 
-        # Delete manifest with digest
+        # Delete manifest with digest (deprecating)
         acr_repository_delete(cmd, 'testregistry', 'testrepository', manifest='sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7', yes=True)
         mock_requests_delete.assert_called_with(
             'https://testregistry.azurecr.io/v2/testrepository/manifests/sha256:c5515758d4c5e1e838e9cd307f6c6a0d620b5e07e6f927b07d05f6d12a1ac8d7',

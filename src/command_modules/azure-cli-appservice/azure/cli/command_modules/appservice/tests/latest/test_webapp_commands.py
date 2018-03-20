@@ -161,7 +161,7 @@ class WebappQuickCreateTest(ScenarioTest):
 
 
 # Test Framework is not able to handle binary file format, hence, only run live
-class AppServiceLogTest(LiveScenarioTest):
+class AppServiceLogTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_download_win_web_log(self, resource_group):
         import zipfile
@@ -819,7 +819,7 @@ class WebappUpdateTest(ScenarioTest):
                      JMESPathCheck('clientAffinityEnabled', False)])
 
 
-class WebappZipDeployScenarioTest(LiveScenarioTest):
+class WebappZipDeployScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_zipDeploy')
     def test_deploy_zip(self, resource_group):
         webapp_name = self.create_random_name('webapp-zipDeploy-test', 40)
@@ -829,26 +829,30 @@ class WebappZipDeployScenarioTest(LiveScenarioTest):
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
         self.cmd('webapp deployment source config-zip -g {} -n {} --src "{}"'.format(resource_group, webapp_name, zip_file)).assert_with_checks([
             JMESPathCheck('status', 4),
-            JMESPathCheck('deployer', 'Zip-Push'),
-            JMESPathCheck('message', 'Created via zip push deployment'),
-            JMESPathCheck('complete', True)])
+            JMESPathCheck('deployer', 'Push-Deployer'),
+            JMESPathCheck('message', 'Created via a push deployment'),
+            JMESPathCheck('complete', True)
+        ])
 
 
 class WebappImplictIdentityTest(ScenarioTest):
     @ResourceGroupPreparer()
-    def test_assign_identity(self, resource_group):
+    def test_webapp_assign_system_identity(self, resource_group):
         scope = '/subscriptions/{}/resourcegroups/{}'.format(self.get_subscription_id(), resource_group)
         role = 'Reader'
         plan_name = self.create_random_name('web-msi-plan', 20)
         webapp_name = self.create_random_name('web-msi', 20)
         self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan_name))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
-        guids = [uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D46667')]
+        guids = [uuid.UUID('88DAAF5A-EA86-4A68-9D45-477538D46668')]
         with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=guids, autospec=True):
-            result = self.cmd('webapp assign-identity -g {} -n {} --role {} --scope {}'.format(resource_group, webapp_name, role, scope)).get_output_in_json()
+            result = self.cmd('webapp identity assign -g {} -n {} --role {} --scope {}'.format(resource_group, webapp_name, role, scope)).get_output_in_json()
+            self.cmd('webapp identity show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+                self.check('principalId', result['principalId'])
+            ])
         self.cmd('role assignment list -g {} --assignee {}'.format(resource_group, result['principalId']), checks=[
             JMESPathCheck('length([])', 1),
-            JMESPathCheck('[0].properties.roleDefinitionName', role)
+            JMESPathCheck('[0].roleDefinitionName', role)
         ])
 
 

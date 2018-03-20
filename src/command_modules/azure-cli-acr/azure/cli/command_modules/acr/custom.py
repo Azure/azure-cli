@@ -59,6 +59,9 @@ def acr_create(cmd,
     admin_user_enabled = admin_enabled == 'true'
 
     if sku == SkuName.classic.value:
+        logger.warning(
+            "Due to the planned deprecation of the Classic registry SKU, we recommend using "
+            "Basic, Standard, or Premium for all new registries. See https://aka.ms/acr/skus for details.")
         if storage_account_name is None:
             storage_account_name = random_storage_account_name(cmd.cli_ctx, registry_name)
             logger.warning(
@@ -104,17 +107,7 @@ def acr_create(cmd,
                 deployment_name)
         )
 
-    registry = client.get(resource_group_name, registry_name)
-    logger.warning('\nCreate a new service principal and assign access:')
-    logger.warning(
-        '  az ad sp create-for-rbac --scopes %s --role Owner --password <password>',
-        registry.id)  # pylint: disable=no-member
-    logger.warning('\nUse an existing service principal and assign access:')
-    logger.warning(
-        '  az role assignment create --scope %s --role Owner --assignee <app-id>',
-        registry.id)  # pylint: disable=no-member
-
-    return registry
+    return client.get(resource_group_name, registry_name)
 
 
 def acr_delete(cmd, client, registry_name, resource_group_name=None):

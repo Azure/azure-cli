@@ -8,6 +8,7 @@ from __future__ import print_function
 import collections
 import errno
 import json
+import os
 import os.path
 from copy import deepcopy
 from enum import Enum
@@ -32,6 +33,7 @@ _SUBSCRIPTION_NAME = 'name'
 _TENANT_ID = 'tenantId'
 _USER_ENTITY = 'user'
 _USER_NAME = 'name'
+_CLOUD_SHELL_ID = 'cloudShellID'
 _SUBSCRIPTIONS = 'subscriptions'
 _INSTALLATION_ID = 'installationId'
 _ENVIRONMENT_NAME = 'environmentName'
@@ -103,15 +105,31 @@ def get_credential_types(cli_ctx):
     return CredentialType
 
 
+def _get_cloud_console_token_endpoint():
+    return os.environ.get('MSI_ENDPOINT')
+
+
 class Profile(object):
 
-    def __init__(self, storage=None, auth_ctx_factory=None, async_persist=True, cli_ctx=None):
+    _global_creds_cache = None
+
+    def __init__(self, storage=None, auth_ctx_factory=None, use_global_creds_cache=True,
+                 async_persist=True, cli_ctx=None):
         from azure.cli.core import get_default_cli
 
         self.cli_ctx = cli_ctx or get_default_cli()
         self._storage = storage or ACCOUNT
         self.auth_ctx_factory = auth_ctx_factory or _AUTH_CTX_FACTORY
-        self._creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
+
+        if use_global_creds_cache:
+            # for perf, use global cache
+            if not Profile._global_creds_cache:
+                Profile._global_creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory,
+                                                         async_persist=async_persist)
+            self._creds_cache = Profile._global_creds_cache
+        else:
+            self._creds_cache = CredsCache(self.cli_ctx, self.auth_ctx_factory, async_persist=async_persist)
+
         self._management_resource_uri = self.cli_ctx.cloud.endpoints.management
         self._ad_resource_uri = self.cli_ctx.cloud.endpoints.active_directory_resource_id
         self._msi_creds = None
@@ -171,7 +189,7 @@ class Profile(object):
         # use deepcopy as we don't want to persist these changes to file.
         return deepcopy(consolidated)
 
-    def find_subscriptions_in_cloud_console(self, tokens):
+    def find_subscriptions_in_cloud_console_thru_raw_token(self, tokens):
         from datetime import datetime, timedelta
         import jwt
         arm_token = tokens[0]  # cloud shell gurantees that the 1st is for ARM
@@ -273,6 +291,26 @@ class Profile(object):
             s[_SUBSCRIPTION_NAME] = "{}@{}".format(base_name, msi_port)
         # key-off subscription name to allow accounts with same id(but under different identities)
         self._set_subscriptions(consolidated, secondary_key_name=_SUBSCRIPTION_NAME)
+        return deepcopy(consolidated)
+
+    def find_subscriptions_in_cloud_console(self):
+        import jwt
+        token, _ = Profile.get_msi_token(self.cli_ctx.cloud.endpoints.active_directory_resource_id,
+                                         _get_cloud_console_token_endpoint(), identity_id=None, for_login=True)
+        logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
+        decode = jwt.decode(token, verify=False, algorithms=['RS256'])
+        tenant = decode['tid']
+
+        subscription_finder = SubscriptionFinder(self.cli_ctx, self.auth_ctx_factory, None)
+        subscriptions = subscription_finder.find_from_raw_token(tenant, token)
+        if not subscriptions:
+            raise CLIError('No subscriptions were found in the cloud shell')
+        user = decode.get('unique_name', 'N/A')
+
+        consolidated = self._normalize_properties(user, subscriptions, is_service_principal=False)
+        for s in consolidated:
+            s[_USER_ENTITY][_CLOUD_SHELL_ID] = True
+        self._set_subscriptions(consolidated)
         return deepcopy(consolidated)
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
@@ -418,6 +456,8 @@ class Profile(object):
             identity_id, msi_port = Profile._try_parse_for_msi_port(account[_SUBSCRIPTION_NAME])
             if msi_port is not None:
                 return Profile.get_msi_token(resource, msi_port, identity_id)
+            # elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+            #     return Profile.get_msi_token(resource, _get_cloud_console_token_endpoint())
             elif user_type == _USER:
                 return self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                                  account[_TENANT_ID], resource)
@@ -454,6 +494,8 @@ class Profile(object):
         identity_id, msi_port = Profile._try_parse_for_msi_port(account[_SUBSCRIPTION_NAME])
         if msi_port is not None:
             creds = Profile.get_msi_token(resource, msi_port, identity_id)
+        # elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
+        #     creds = Profile.get_msi_token(resource, _get_cloud_console_token_endpoint())
         elif user_type == _USER:
             creds = self._creds_cache.retrieve_token_for_user(username_or_sp_id,
                                                               account[_TENANT_ID], resource)
@@ -578,7 +620,7 @@ class Profile(object):
         _User_assigned_Object_Id_Type = 'MSIObject'
         _User_assigned_Resource_Id_Type = 'MSIResource'
 
-        request_uri = 'http://localhost:{}/oauth2/token'.format(port)
+        request_uri = 'http://localhost:{}/oauth2/token'.format(port) if '://' not in str(port) else port
         payload = {
             'resource': resource
         }
@@ -592,12 +634,12 @@ class Profile(object):
             else:  # try to sniff it
                 payload['client_id'] = identity_id
                 identity_id_type = _User_Assigned_Client_Id_type
-                result = requests.post(request_uri, data=payload, headers={'Metadata': 'true'})
+                result = requests.get(request_uri, params=payload, headers={'Metadata': 'true'})
                 if result.status_code != 200:
                     payload.pop('client_id')
                     payload['object_id'] = identity_id
                     identity_id_type = _User_assigned_Object_Id_Type
-        else:
+        elif identity_id:
             parts = identity_id.split('-', 1)
             identity_id_type = parts[0]
             if parts[0] == _User_assigned_Resource_Id_Type:
@@ -612,7 +654,7 @@ class Profile(object):
         while True:
             err = None
             try:
-                result = requests.post(request_uri, data=payload, headers={'Metadata': 'true'})
+                result = requests.get(request_uri, params=payload, headers={'Metadata': 'true'})
                 logger.debug("MSI: Retrieving a token from %s, with payload %s", request_uri, payload)
                 if result.status_code != 200:
                     err = result.text

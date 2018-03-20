@@ -47,7 +47,7 @@ def load_arguments(self, _):
         c.argument('skip_assignment', arg_type=get_three_state_flag(), help='do not create default assignment')
         c.argument('show_auth_for_sdk', options_list='--sdk-auth', help='output result in compatible with Azure SDK auth file', arg_type=get_three_state_flag())
 
-    for item in ['create-for-rbac', 'reset-credentials']:
+    for item in ['create-for-rbac', 'reset-credentials', 'ad sp']:
         with self.argument_context('ad sp {}'.format(item)) as c:
             c.argument('name', name_arg_type)
             c.argument('cert', arg_group='Credential', validator=validate_cert)
@@ -56,6 +56,7 @@ def load_arguments(self, _):
             c.argument('create_cert', action='store_true', arg_group='Credential')
             c.argument('keyvault', arg_group='Credential')
             c.argument('append', action='store_true', help='Append the new credential instead of overwriting.')
+            c.argument('cert', action='store_true')
 
     with self.argument_context('ad') as c:
         c.argument('display_name', help='object\'s display name or its prefix')
@@ -100,6 +101,7 @@ def load_arguments(self, _):
         c.argument('role', help='role name or id', completer=get_role_definition_name_completion_list)
         c.argument('show_all', options_list=['--all'], action='store_true', help='show all assignments under the current subscription')
         c.argument('include_inherited', action='store_true', help='include assignments applied on parent scopes')
+        c.argument('can_delegate', action='store_true', help='when set, the assignee will be able to create further role assignments to the same role')
         c.argument('assignee', help='represent a user, group, or service principal. supported format: object id, user sign-in name, or service principal name')
         c.argument('assignee_object_id', help="assignee's graph object id, such as the 'principal id' from a managed service identity. Use this instead of '--assignee' to bypass graph permission issues")
         c.argument('ids', nargs='+', help='space-separated role assignment ids')

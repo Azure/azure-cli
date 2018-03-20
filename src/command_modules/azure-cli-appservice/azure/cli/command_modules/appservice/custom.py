@@ -214,9 +214,11 @@ def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
     return webapp
 
 
-def update_webapp(instance, client_affinity_enabled=None):
+def update_webapp(instance, client_affinity_enabled=None, https_only=None):
     if client_affinity_enabled is not None:
         instance.client_affinity_enabled = client_affinity_enabled == 'true'
+    if https_only is not None:
+        instance.https_only = https_only == 'true'
     return instance
 
 
@@ -241,21 +243,23 @@ def _list_app(cli_ctx, resource_group_name=None):
     return result
 
 
-def assign_identity(cmd, resource_group_name, name, role='Contributor', scope=None, disable_msi=False):
-    client = web_client_factory(cmd.cli_ctx)
-
+def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=None, scope=None, disable_msi=False):
     def getter():
-        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
         webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
-        poller = client.web_apps.create_or_update(resource_group_name, name, webapp)
+        poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
     from azure.cli.core.commands.arm import assign_identity as _assign_identity
     webapp = _assign_identity(cmd.cli_ctx, getter, setter, role, scope)
-    update_app_settings(cmd, resource_group_name, name, ['WEBSITE_DISABLE_MSI={}'.format(disable_msi)])
+    update_app_settings(cmd, resource_group_name, name, ['WEBSITE_DISABLE_MSI={}'.format(disable_msi)], slot)
     return webapp.identity
+
+
+def show_identity(cmd, resource_group_name, name, slot=None):
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot).identity
 
 
 def get_auth_settings(cmd, resource_group_name, name, slot=None):
@@ -1283,7 +1287,6 @@ def _get_log(url, user_name, password, log_file=None):
     except ImportError:
         pass
 
-    std_encoding = sys.stdout.encoding
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
     headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     r = http.request(
@@ -1303,6 +1306,7 @@ def _get_log(url, user_name, password, log_file=None):
                     break
                 f.write(data)
     else:  # streaming
+        std_encoding = sys.stdout.encoding
         for chunk in r.stream():
             if chunk:
                 # Extra encode() and decode for stdout which does not surpport 'utf-8'

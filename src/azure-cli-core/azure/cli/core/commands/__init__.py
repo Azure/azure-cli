@@ -30,7 +30,7 @@ CLI_COMMON_KWARGS = ['min_api', 'max_api', 'resource_type', 'operation_group',
                      'custom_command_type', 'command_type']
 
 CLI_COMMAND_KWARGS = ['transform', 'table_transformer', 'confirmation', 'exception_handler',
-                      'client_factory', 'operations_tmpl', 'no_wait_param', 'validator',
+                      'client_factory', 'operations_tmpl', 'no_wait_param', 'supports_no_wait', 'validator',
                       'client_arg_name', 'doc_string_source', 'deprecate_info'] + CLI_COMMON_KWARGS
 CLI_PARAM_KWARGS = \
     ['id_part', 'completer', 'validator', 'options_list', 'configured_default', 'arg_group', 'arg_type'] \
@@ -121,6 +121,7 @@ class AzCliCommand(CLICommand):
         self.loader = loader
         self.command_source = None
         self.no_wait_param = kwargs.get('no_wait_param', None)
+        self.supports_no_wait = kwargs.get('supports_no_wait', False)
         self.exception_handler = kwargs.get('exception_handler', None)
         self.confirmation = kwargs.get('confirmation', False)
         self.command_kwargs = kwargs
@@ -148,10 +149,14 @@ class AzCliCommand(CLICommand):
         super(AzCliCommand, self).load_arguments()
         if self.arguments_loader:
             cmd_args = self.arguments_loader()
-            if self.no_wait_param:
+            if self.supports_no_wait or self.no_wait_param:
+                if self.supports_no_wait:
+                    no_wait_param_dest = 'no_wait'
+                elif self.no_wait_param:
+                    no_wait_param_dest = self.no_wait_param
                 cmd_args.append(
-                    (self.no_wait_param,
-                     CLICommandArgument(self.no_wait_param, options_list=['--no-wait'], action='store_true',
+                    (no_wait_param_dest,
+                     CLICommandArgument(no_wait_param_dest, options_list=['--no-wait'], action='store_true',
                                         help='Do not wait for the long-running operation to finish.')))
             self.arguments.update(cmd_args)
 
@@ -197,7 +202,7 @@ class AzCliCommand(CLICommand):
 # pylint: disable=too-few-public-methods
 class AzCliCommandInvoker(CommandInvoker):
 
-    # pylint: disable=too-many-statements,too-many-locals
+    # pylint: disable=too-many-statements,too-many-locals,too-many-branches
     def execute(self, args):
         from knack.events import (EVENT_INVOKER_PRE_CMD_TBL_CREATE, EVENT_INVOKER_POST_CMD_TBL_CREATE,
                                   EVENT_INVOKER_CMD_TBL_LOADED, EVENT_INVOKER_PRE_PARSE_ARGS,
@@ -283,7 +288,6 @@ class AzCliCommandInvoker(CommandInvoker):
         # with an event. Would need to be customized via inheritance.
         results = []
         for expanded_arg in _explode_list_args(parsed_args):
-
             cmd = expanded_arg.func
             if hasattr(expanded_arg, 'cmd'):
                 expanded_arg.cmd = cmd
@@ -313,8 +317,9 @@ class AzCliCommandInvoker(CommandInvoker):
 
             try:
                 result = cmd(params)
-                no_wait_param = cmd.no_wait_param
-                if no_wait_param and getattr(expanded_arg, no_wait_param, False):
+                if cmd.supports_no_wait and getattr(expanded_arg, 'no_wait', False):
+                    result = None
+                elif cmd.no_wait_param and getattr(expanded_arg, cmd.no_wait_param, False):
                     result = None
 
                 # TODO: Not sure how to make this actually work with the TRANSFORM event...
@@ -515,9 +520,9 @@ class LongRunningOperation(object):  # pylint: disable=too-few-public-methods
 class DeploymentOutputLongRunningOperation(LongRunningOperation):
     def __call__(self, result):
         from msrest.pipeline import ClientRawResponse
-        from msrestazure.azure_operation import AzureOperationPoller
+        from azure.cli.core.util import poller_classes
 
-        if isinstance(result, AzureOperationPoller):
+        if isinstance(result, poller_classes()):
             # most deployment operations return a poller
             result = super(DeploymentOutputLongRunningOperation, self).__call__(result)
             outputs = result.properties.outputs
@@ -612,9 +617,9 @@ def _is_paged(obj):
 
 def _is_poller(obj):
     # Since loading msrest is expensive, we avoid it until we have to
-    if obj.__class__.__name__ == 'AzureOperationPoller':
-        from msrestazure.azure_operation import AzureOperationPoller
-        return isinstance(obj, AzureOperationPoller)
+    if obj.__class__.__name__ in ['AzureOperationPoller', 'LROPoller']:
+        from azure.cli.core.util import poller_classes
+        return isinstance(obj, poller_classes())
     return False
 
 
@@ -696,8 +701,9 @@ class AzCommandGroup(CommandGroup):
             - confirmation: Prompt prior to the action being executed. This is useful if the action
                             would cause a loss of data. (bool)
             - exception_handler: Exception handler for handling non-standard exceptions (function)
-            - no_wait_param: The name of a boolean parameter that will be exposed as `--no-wait` to skip long-running
-              operation polling. (string)
+            - supports_no_wait: The command supports no wait. (bool)
+            - no_wait_param: [deprecated] The name of a boolean parameter that will be exposed as `--no-wait`
+              to skip long-running operation polling. (string)
             - transform: Transform function for transforming the output of the command (function)
             - table_transformer: Transform function or JMESPath query to be applied to table output to create a
                                  better output format for tables. (function or string)
@@ -727,8 +733,9 @@ class AzCommandGroup(CommandGroup):
             - confirmation: Prompt prior to the action being executed. This is useful if the action
                             would cause a loss of data. (bool)
             - exception_handler: Exception handler for handling non-standard exceptions (function)
-            - no_wait_param: The name of a boolean parameter that will be exposed as `--no-wait` to skip long
-              running operation polling. (string)
+            - supports_no_wait: The command supports no wait. (bool)
+            - no_wait_param: [deprecated] The name of a boolean parameter that will be exposed as `--no-wait`
+              to skip long running operation polling. (string)
             - transform: Transform function for transforming the output of the command (function)
             - table_transformer: Transform function or JMESPath query to be applied to table output to create a
                                  better output format for tables. (function or string)
@@ -943,8 +950,10 @@ class AzArgumentContext(ArgumentsContext):
             self.extra(name, arg_type=arg)
             expanded_arguments.append(name)
 
+        dest_option = ['--__{}'.format(dest.upper())]
         self.argument(dest,
                       arg_type=ignore_type,
+                      options_list=dest_option,
                       validator=get_complex_argument_processor(expanded_arguments, dest, model_type))
 
     def ignore(self, *args):

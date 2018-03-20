@@ -3,6 +3,21 @@
 Release History
 ===============
 
+2.0.30
+++++++
+* Minor fixes
+
+2.0.29
+++++++
+* fix a certificate verification error for `az aks install-cli` in Cloud Shell / PS
+
+2.0.28
+++++++
+* Support Autorest 3.0 based SDKs
+* warn the user that `az aks browse` won't work in Azure Cloud Shell
+* add `aks upgrade-connector` command to upgrade an existing connector
+* `kubectl` config files are more readable block-style YAML
+
 2.0.27
 ++++++
 * use the virtual-kubelet-for-aks helm chart for `aks install-connector` by default

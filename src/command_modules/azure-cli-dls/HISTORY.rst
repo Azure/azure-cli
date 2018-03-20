@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.0.20
+++++++
+* Updated the ADLS version to latest.
+
 0.0.19
 ++++++
 * Update for CLI core changes.

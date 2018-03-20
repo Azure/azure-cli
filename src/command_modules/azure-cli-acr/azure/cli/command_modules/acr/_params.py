@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+import argparse
+
 from azure.cli.core.commands.parameters import (
     resource_group_name_type,
     get_location_type,
@@ -44,10 +46,14 @@ def load_arguments(self, _):
         c.argument('admin_enabled', help='Indicates whether the admin user is enabled', choices=['true', 'false'])
 
     with self.argument_context('acr repository delete') as c:
-        c.argument('manifest', nargs='?', required=False, const='', default=None, help='The sha256 based digest of manifest to delete')
+        c.argument('manifest', nargs='?', required=False, const='', default=None, help=argparse.SUPPRESS)
         c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
-        c.argument('repository', help='The name of the repository to delete.')
-        c.argument('tag', help='The name of tag to delete')
+        c.argument('repository', help="The name of the repository to delete")
+        c.argument('tag', help=argparse.SUPPRESS)
+        c.argument('image', help="The name of the image to delete. May include a tag in the format 'name:tag' or digest in the format 'name@digest'.")
+
+    with self.argument_context('acr repository untag') as c:
+        c.argument('image', help="The name of the image to untag. May include a tag in the format 'name:tag'.")
 
     with self.argument_context('acr repository show-manifests') as c:
         c.argument('repository', help='The repository to obtain manifests from.')

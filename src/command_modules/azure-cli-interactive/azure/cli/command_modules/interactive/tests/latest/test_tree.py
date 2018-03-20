@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import six
-from azclishell.command_tree import CommandBranch, CommandHead, CommandTree, in_tree
 import unittest
+from azure.cli.command_modules.interactive.azclishell.command_tree import \
+    CommandBranch, CommandHead, CommandTree, in_tree
 
 
 class TreeTest(unittest.TestCase):

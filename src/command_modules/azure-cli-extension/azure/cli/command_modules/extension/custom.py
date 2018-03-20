@@ -10,10 +10,10 @@ import zipfile
 import traceback
 import hashlib
 from subprocess import check_output, STDOUT, CalledProcessError
-import requests
-from wheel.install import WHEEL_INFO_RE
 from six.moves.urllib.parse import urlparse  # pylint: disable=import-error
 
+import requests
+from wheel.install import WHEEL_INFO_RE
 from knack.log import get_logger
 
 from azure.cli.core.util import CLIError
@@ -32,6 +32,10 @@ OUT_KEY_NAME = 'name'
 OUT_KEY_VERSION = 'version'
 OUT_KEY_TYPE = 'extensionType'
 OUT_KEY_METADATA = 'metadata'
+
+IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
+LIST_FILE_PATH = os.path.join(os.sep, 'etc', 'apt', 'sources.list.d', 'azure-cli.list')
+LSB_RELEASE_FILE = os.path.join(os.sep, 'etc', 'lsb-release')
 
 
 def _run_pip(pip_exec_args):
@@ -136,6 +140,8 @@ def _add_whl_ext(source, ext_sha256=None, pip_extra_index_urls=None, pip_proxy=N
     except CLIError as e:
         raise e
     logger.debug('Validation successful on %s', ext_file)
+    # Check for distro consistency
+    check_distro_consistency()
     # Install with pip
     extension_path = get_extension_path(extension_name)
     pip_args = ['install', '--target', extension_path, ext_file]
@@ -259,3 +265,45 @@ def update_extension(extension_name, index_url=None, pip_extra_index_urls=None, 
 
 def list_available_extensions(index_url=None):
     return get_index_extensions(index_url=index_url)
+
+
+def get_lsb_release():
+    try:
+        with open(LSB_RELEASE_FILE, 'r') as lr:
+            lsb = lr.readlines()
+            desc = lsb[2]
+            desc_split = desc.split('=')
+            rel = desc_split[1]
+            return rel.strip()
+    except Exception:  # pylint: disable=broad-except
+        return None
+
+
+def check_distro_consistency():
+    if IS_WINDOWS:
+        return
+
+    try:
+        logger.debug('Linux distro check: Reading from: %s', LIST_FILE_PATH)
+
+        with open(LIST_FILE_PATH, 'r') as list_file:
+            package_source = list_file.read()
+            stored_linux_dist_name = package_source.split(" ")[3]
+            logger.debug('Linux distro check: Found in list file: %s', stored_linux_dist_name)
+            current_linux_dist_name = get_lsb_release()
+            logger.debug('Linux distro check: Reported by API: %s', current_linux_dist_name)
+
+    except Exception as err:  # pylint: disable=broad-except
+        current_linux_dist_name = None
+        stored_linux_dist_name = None
+        logger.debug('Linux distro check: An error occurred while checking \
+linux distribution version source list consistency.')
+        logger.debug(err)
+
+    if current_linux_dist_name != stored_linux_dist_name:
+        logger.warning("Linux distro check: Mismatch distribution \
+name in %s file", LIST_FILE_PATH)
+        logger.warning("Linux distro check: If command fails, install the appropriate package \
+for your distribution or change the above file accordingly.")
+        logger.warning("Linux distro check: %s has '%s', current distro is '%s'",
+                       LIST_FILE_PATH, stored_linux_dist_name, current_linux_dist_name)
