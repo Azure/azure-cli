@@ -96,7 +96,7 @@ def create_environment(client, resource_group_name, lab_name, name, arm_template
     environment_deployment_properties = EnvironmentDeploymentProperties(arm_template, parameters)
     dtl_environment = DtlEnvironment(tags=tags,
                                      deployment_properties=environment_deployment_properties)
-    
+
     return client.create_or_update(resource_group_name, lab_name, user_name, name, dtl_environment)
 
 
