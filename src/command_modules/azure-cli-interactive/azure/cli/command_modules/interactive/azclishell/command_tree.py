@@ -71,6 +71,7 @@ def in_tree(tree, cmd_args):
         return False
     return True
 
+
 def get_sub_tree(tree, cmd_args):
     current_command = []
     leftover_args = []

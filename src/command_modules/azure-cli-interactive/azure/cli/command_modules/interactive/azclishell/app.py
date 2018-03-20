@@ -90,13 +90,15 @@ class AzInteractiveShell(object):
         self.config = Configuration(cli_ctx.config, style=style)
         self.config.set_style(style)
         self.style = style_factory(self.config.get_style())
-        self.lexer = lexer or get_az_lexer(self.config)
         try:
-            self.completer = completer or AzCompleter(self, GatherCommands(self.config))
+            gathered_commands = GatherCommands(self.config)
+            self.completer = completer or AzCompleter(self, gathered_commands)
             self.completer.initialize_command_table_attributes()
+            self.lexer = lexer or get_az_lexer(gathered_commands)
         except IOError:  # if there is no cache
             self.completer = AzCompleter(self, None)
-        self.history = history or FileHistory(os.path.join(self.config.config_dir, self.config.get_history()))
+            self.lexer = None
+        self.history = history or FileHistory(os.path.join(self.config.get_config_dir(), self.config.get_history()))
         os.environ[ENV_ADDITIONAL_USER_AGENT] = 'AZURECLISHELL/' + __version__
 
         # OH WHAT FUN TO FIGURE OUT WHAT THESE ARE!
@@ -193,12 +195,13 @@ class AzInteractiveShell(object):
         cli.request_redraw()
 
     def restart_completer(self):
+        command_info = GatherCommands(self.config)
         if not self.completer:
-            self.completer.start(self, GatherCommands(self.config))
+            self.completer.start(self, command_info)
         self.completer.initialize_command_table_attributes()
         if not self.lexer:
-            self.lexer = get_az_lexer(self.config)
-        self._cli = self.create_interface()
+            self.lexer = get_az_lexer(command_info)
+        self._cli = None
 
     def _space_examples(self, list_examples, rows, section_value):
         """ makes the example text """
@@ -610,7 +613,7 @@ class AzInteractiveShell(object):
         return continue_flag, cmd
 
     def reset_history(self):
-        history_file_path = os.path.join(self.config.config_dir, self.config.get_history())
+        history_file_path = os.path.join(self.config.get_config_dir(), self.config.get_history())
         os.remove(history_file_path)
         self.history = FileHistory(history_file_path)
         self.cli.buffers[DEFAULT_BUFFER].history = self.history

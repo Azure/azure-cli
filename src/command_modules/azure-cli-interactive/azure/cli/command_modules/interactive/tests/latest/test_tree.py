@@ -26,7 +26,6 @@ class TreeTest(unittest.TestCase):
             isinstance(tree.get_child("Kid1"), CommandTree)
         )
 
-
     def test_in_tree(self):
         # tests in tree
         tree4 = CommandBranch("CB1")

@@ -22,7 +22,6 @@ GLOBAL_PARAM_DESCRIPTIONS = {
 OUTPUT_CHOICES = ['json', 'tsv', 'table', 'jsonc']
 OUTPUT_OPTIONS = ['--output', '-o']
 GLOBAL_PARAM = list(GLOBAL_PARAM_DESCRIPTIONS.keys())
-# GLOBAL_PARAM_DOUBLES = 
 
 
 def _get_window_columns():
@@ -108,7 +107,7 @@ class GatherCommands(object):
     def _gather_from_files(self, config):
         """ gathers from the files in a way that is convienent to use """
         command_file = config.get_help_files()
-        cache_path = os.path.join(config.config_dir, 'cache')
+        cache_path = os.path.join(config.get_config_dir(), 'cache')
         cols = _get_window_columns()
 
         with open(os.path.join(cache_path, command_file), 'r') as help_file:
@@ -152,12 +151,11 @@ class GatherCommands(object):
                                 line_min=int(cols) - 2 * TOLERANCE)
                         if par not in self.completable_param:
                             self.completable_param.append(par)
-                    if len(param_aliases) > 1:
-                        param_doubles = self.command_param_info.get(command, {})
-                        for alias in param_aliases:
-                            param_doubles[alias] = param_aliases
-                        self.command_param_info[command] = param_doubles
 
+                    param_doubles = self.command_param_info.get(command, {})
+                    for alias in param_aliases:
+                        param_doubles[alias] = param_aliases
+                    self.command_param_info[command] = param_doubles
 
     def get_all_subcommands(self):
         """ returns all the subcommands """

@@ -5,17 +5,14 @@
 from pygments.lexer import RegexLexer, words
 from pygments.token import Name, Keyword, Operator, Number
 
-from .gather_commands import GatherCommands
 
-
-def get_az_lexer(config):
+def get_az_lexer(commands):
 
     class AzLexer(RegexLexer):
         """
         A custom lexer for Azure CLI
         """
         try:
-            commands = GatherCommands(config)
             tokens = {
                 'root': [
                     (words(tuple(kid for kid in commands.command_tree.children),
