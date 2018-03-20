@@ -86,7 +86,7 @@ def claim_vm(cmd, client, lab_name=None, name=None, resource_group_name=None):
 
 # pylint: disable=too-many-locals, unused-argument
 def create_environment(client, resource_group_name, lab_name, name, arm_template, parameters=None,
-                       artifact_source_name=None, user_name=None, tags=None):
+                       artifact_source_name=None, user_name="@me", tags=None):
     """ Command to create an environment the Azure DevTest Lab """
 
     from azure.mgmt.devtestlabs.models.environment_deployment_properties \
@@ -96,7 +96,7 @@ def create_environment(client, resource_group_name, lab_name, name, arm_template
     environment_deployment_properties = EnvironmentDeploymentProperties(arm_template, parameters)
     dtl_environment = DtlEnvironment(tags=tags,
                                      deployment_properties=environment_deployment_properties)
-
+    
     return client.create_or_update(resource_group_name, lab_name, user_name, name, dtl_environment)
 
 
