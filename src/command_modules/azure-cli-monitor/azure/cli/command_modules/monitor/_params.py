@@ -84,12 +84,15 @@ def load_arguments(self, _):
     # endregion
 
     # region Metrics
+    with self.argument_context('monitor metrics') as c:
+        c.argument('metricnamespace', options_list=['--namespace'], help='Namespace to query metric definitions for.')
+
     with self.argument_context('monitor metrics list-definitions') as c:
         c.resource_parameter_context('resource_uri', arg_group='Target Resource')
 
     with self.argument_context('monitor metrics list') as c:
         from .validators import (process_metric_timespan, process_metric_aggregation, process_metric_result_type,
-                                 process_metric_dimension)
+                                 process_metric_dimension, validate_metric_names)
         from azure.mgmt.monitor.models.monitor_management_client_enums import AggregationType
         c.resource_parameter_context('resource_uri', arg_group='Target Resource')
         c.extra('start_time', options_list=['--start-time'], validator=process_metric_timespan, arg_group='Time')
@@ -98,7 +101,8 @@ def load_arguments(self, _):
         c.extra('dimension', options_list=['--dimension'], nargs='*', validator=process_metric_dimension)
         c.argument('interval', arg_group='Time')
         c.argument('aggregation', arg_type=get_enum_type(t for t in AggregationType if t.name != 'none'), nargs='*', validator=process_metric_aggregation)
-        c.ignore('timespan', 'result_type', 'top', 'orderby')
+        c.argument('metricnames', options_list=['--metrics'], nargs='+', help='Space-separated list of metric names to retrieve.', validator=validate_metric_names)
+        c.ignore('timespan', 'result_type')
     # endregion
 
     # region Autoscale

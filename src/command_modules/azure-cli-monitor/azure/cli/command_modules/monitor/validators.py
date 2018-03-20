@@ -254,6 +254,11 @@ def process_metric_dimension(namespace):
     ns['filter'] = ' and '.join("{} eq '*'".format(d) for d in dimensions)
 
 
+def validate_metric_names(namespace):
+    if namespace.metricnames:
+        namespace.metricnames = ','.join(namespace.metricnames)
+
+
 def process_webhook_prop(namespace):
     if not isinstance(namespace.webhook_properties, list):
         return
