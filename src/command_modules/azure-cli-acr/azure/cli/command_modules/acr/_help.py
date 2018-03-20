@@ -11,6 +11,17 @@ helps['acr'] = """
     short-summary: Manage Azure Container Registries.
     """
 
+# TODO: bindu update the help and samples after we finalize the commands.
+helps['acr build'] = """
+    type: command
+    short-summary: Queues a new build based on the specified parameters.
+    """
+
+helps['acr build show-logs'] = """
+    type: command
+    short-summary: Shows logs for a particular build.
+    """
+
 helps['acr credential'] = """
     type: group
     short-summary: Manage login credentials for Azure Container Registries.

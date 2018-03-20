@@ -87,3 +87,14 @@ def load_arguments(self, _):
 
     with self.argument_context('acr replication create') as c:
         c.argument('replication_name', help='The name of the replication. Default to the location name.', completer=None)
+
+    with self.argument_context('acr build') as c:
+        c.argument('build_id', help='The unique build identifier.')
+        c.argument('image_name', options_list=['--image', '-t'], help="The image repository and optionally a tag in the 'repository:tag' format.")
+        c.argument('source_location', options_list=['--context', '-c'], help="The local source code directory path (eg, './src') or the url to a git repository (eg, 'https://github.com/docker/rootfs.git') or a remote tarball (eg, 'http://server/context.tar.gz').")
+        c.argument('docker_file_path', options_list=['--file', '-f'], help="The relative path of the the docker file to the source code root folder (Default is 'Dockerfile').")
+        c.argument('timeout', help='The build timeout in seconds.')
+        c.argument('build_args', nargs='+', help='The space-separated build arguments in a format of <name>=<value>.')
+        c.argument('secret_build_args', nargs='+', help='The space-separated secret build arguments in a format of <name>=<value>.')
+        c.argument('no_logs', options_list=['--no-logs'], action='store_true', help='Do not show logs after successfully queuing the build.')
+        
