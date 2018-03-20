@@ -232,7 +232,8 @@ class VMGeneralizeScenarioTest(ScenarioTest):
         # Should be able to generalize the VM after it has been stopped
         self.cmd('vm generalize -g {rg} -n {vm}', checks=self.is_empty())
         vm = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
-        self.cmd('vm capture -g {rg} -n {vm} --vhd-name-prefix vmtest')
+        self.cmd('vm capture -g {rg} -n {vm} --vhd-name-prefix vmtest',
+                 checks=self.is_empty())
 
         # capture to a custom image
         self.kwargs['image'] = 'myImage'
