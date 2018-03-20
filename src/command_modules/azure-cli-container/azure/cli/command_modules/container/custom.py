@@ -17,7 +17,7 @@ try:
     import tty
     import signal
 except ImportError:
-    #Exec connections currently not available for Windows
+    # Exec connections currently not available for Windows
     pass
 import struct
 import select
@@ -244,9 +244,10 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
             stream_target=_stream_logs,
             stream_args=(logs_client, resource_group_name, name, container_name, container_group.restart_policy))
 
+
 def container_exec(cmd, resource_group_name, name, container_name=None, exec_command=None, terminal_row_size=None, terminal_col_size=None):
     """Start exec for a container. """
-    
+
     if platform.system() is "Windows":
         print("The container exec operation is currently not supported for Windows.")
         return
@@ -258,7 +259,7 @@ def container_exec(cmd, resource_group_name, name, container_name=None, exec_com
     # Set defaults for rows and cols size
     if terminal_row_size is None:
         terminal_row_size = 24
-    
+
     if terminal_col_size is None:
         terminal_col_size = 80
 
@@ -281,15 +282,16 @@ def _pty_size():
     rows, cols = struct.unpack(fmt, result)
     return rows, cols
 
+
 def _resize(ws):
     rows, cols = _pty_size()
+
 
 def _start_exec_pipe(web_socket_uri, password):
     ws = websocket.create_connection(web_socket_uri)
     _resize(ws)
     oldtty = termios.tcgetattr(sys.stdin)
     old_handler = signal.getsignal(signal.SIGWINCH)
-
 
     def on_term_resize(signum, frame):
         _resize(ws)
@@ -330,6 +332,7 @@ def _start_exec_pipe(web_socket_uri, password):
     finally:
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
         signal.signal(signal.SIGWINCH, old_handler)
+
 
 def attach_to_container(cmd, resource_group_name, name, container_name=None):
     """Attach to a container. """
