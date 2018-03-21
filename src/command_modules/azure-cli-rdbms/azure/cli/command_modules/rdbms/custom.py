@@ -21,28 +21,34 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
     parameters = None
     if provider == 'Microsoft.DBForMySQL':
         from azure.mgmt.rdbms import mysql
-        parameters = mysql.models.ServerForCreate(sku=mysql.models.Sku(name=sku_name),
-                                                  properties=mysql.models.ServerPropertiesForDefaultCreate(administrator_login=administrator_login,
-                                                                                                           administrator_login_password=administrator_login_password,
-                                                                                                           version=version,
-                                                                                                           ssl_enforcement=ssl_enforcement,
-                                                                                                           storage_profile=mysql.models.StorageProfile(backup_retention_days=backup_retention,
-                                                                                                                                                       geo_redundant_backup=geo_redundant_backup,
-                                                                                                                                                       storage_mb=storage_size)),
-                                                  location=location,
-                                                  tags=tags)
+        parameters = mysql.models.ServerForCreate(
+            sku=mysql.models.Sku(name=sku_name),
+            properties=mysql.models.ServerPropertiesForDefaultCreate(
+                administrator_login=administrator_login,
+                administrator_login_password=administrator_login_password,
+                version=version,
+                ssl_enforcement=ssl_enforcement,
+                storage_profile=mysql.models.StorageProfile(
+                    backup_retention_days=backup_retention,
+                    geo_redundant_backup=geo_redundant_backup,
+                    storage_mb=storage_size)),
+            location=location,
+            tags=tags)
     elif provider == 'Microsoft.DBforPostgreSQL':
         from azure.mgmt.rdbms import postgresql
-        parameters = postgresql.models.ServerForCreate(sku=postgresql.models.Sku(name=sku_name),
-                                                       properties=postgresql.models.ServerPropertiesForDefaultCreate(administrator_login=administrator_login,
-                                                                                                                     administrator_login_password=administrator_login_password,
-                                                                                                                     version=version,
-                                                                                                                     ssl_enforcement=ssl_enforcement,
-                                                                                                                     storage_profile=postgresql.models.StorageProfile(backup_retention_days=backup_retention,
-                                                                                                                                                                      geo_redundant_backup=geo_redundant_backup,
-                                                                                                                                                                      storage_mb=storage_size)),
-                                                       location=location,
-                                                       tags=tags)
+        parameters = postgresql.models.ServerForCreate(
+            sku=postgresql.models.Sku(name=sku_name),
+            properties=postgresql.models.ServerPropertiesForDefaultCreate(
+                administrator_login=administrator_login,
+                administrator_login_password=administrator_login_password,
+                version=version,
+                ssl_enforcement=ssl_enforcement,
+                storage_profile=postgresql.models.StorageProfile(
+                    backup_retention_days=backup_retention,
+                    geo_redundant_backup=geo_redundant_backup,
+                    storage_mb=storage_size)),
+            location=location,
+            tags=tags)
 
     return client.create(resource_group_name, server_name, parameters)
 
@@ -63,11 +69,12 @@ def _server_restore(cmd, client, resource_group_name, server_name, source_server
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
             provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
-            source_server = resource_id(subscription=get_subscription_id(cmd.cli_ctx),
-                                        resource_group=resource_group_name,
-                                        namespace=provider,
-                                        type='servers',
-                                        name=source_server)
+            source_server = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=resource_group_name,
+                namespace=provider,
+                type='servers',
+                name=source_server)
         else:
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
 
