@@ -37,7 +37,8 @@ class AzCompleter(Completer):
     """ Completes Azure CLI commands """
 
     def __init__(self, shell_ctx, commands, global_params=True):
-        self.shell_ctx = None
+        self.shell_ctx = shell_ctx
+        self.started = False
 
         # dictionary of command to descriptions
         self.command_description = None
@@ -72,13 +73,13 @@ class AzCompleter(Completer):
         self.cmdtab = {}
 
         if commands:
-            self.start(shell_ctx, commands, global_params=global_params)
+            self.start(commands, global_params=global_params)
 
     def __bool__(self):
-        return bool(self.shell_ctx)
+        return self.started
 
-    def start(self, shell_ctx, commands, global_params=True):
-        self.shell_ctx = shell_ctx
+    def start(self, commands, global_params=True):
+        self.started = True
         self.command_description = commands.descrip
         self.completable_param = commands.completable_param
         self.command_tree = commands.command_tree
@@ -132,6 +133,9 @@ class AzCompleter(Completer):
             yield Completion(completion, -len(self.unfinished_word))
 
     def get_completions(self, document, complete_event):
+        if not self.started:
+            return
+
         text = document.text_before_cursor
         text = self.reformat_cmd(text)
         text_split = text.split()

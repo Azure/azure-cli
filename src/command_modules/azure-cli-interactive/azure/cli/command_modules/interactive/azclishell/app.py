@@ -196,7 +196,7 @@ class AzInteractiveShell(object):
     def restart_completer(self):
         command_info = GatherCommands(self.config)
         if not self.completer:
-            self.completer.start(self, command_info)
+            self.completer.start(command_info)
         self.completer.initialize_command_table_attributes()
         if not self.lexer:
             self.lexer = get_az_lexer(command_info)
