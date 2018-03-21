@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.21
+++++++
+* minor fixes
+
 2.0.20
 ++++++
 * az login: use `--identity` and deprecate `--msi`
