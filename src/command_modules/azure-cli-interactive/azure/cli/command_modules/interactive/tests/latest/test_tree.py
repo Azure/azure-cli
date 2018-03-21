@@ -66,10 +66,10 @@ class CommandTreeTest(unittest.TestCase):
         self.assertEqual(leftover_args, [])
 
         tree, current_command, leftover_args = self.command_tree.get_sub_tree(
-            ['storage', 'account', 'create', '--name', 'willie'])
+            ['storage', 'account', 'create', '--name', 'MyStorageAccount'])
         self.assertEqual(tree.data, 'create')
         self.assertEqual(current_command, 'storage account create')
-        self.assertEqual(leftover_args, ['--name', 'willie'])
+        self.assertEqual(leftover_args, ['--name', 'MyStorageAccount'])
 
 
 if __name__ == '__main__':
