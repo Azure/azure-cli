@@ -19,6 +19,6 @@ class LoadCommandTableThread(threading.Thread):
 
         try:
             FreshTable(self.shell).dump_command_table(self.shell)
+            self.initialize_function()
         except KeyboardInterrupt:
             pass
-        self.initialize_function()

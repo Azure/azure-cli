@@ -7,6 +7,7 @@ import unittest
 import six
 import os
 import json
+import mock
 from azure.cli.command_modules.interactive.azclishell.util import parse_quotes
 from azure.cli.command_modules.interactive.azclishell.gather_commands import GatherCommands
 
@@ -15,15 +16,13 @@ def pass_gather(*_):
     pass
 
 
-GatherCommands._gather_from_files = pass_gather
-
-
 # pylint: disable=too-few-public-methods
 class MockValues(object):
     def __init__(self):
         self.result = None
 
 
+@mock.patch.object(GatherCommands, '_gather_from_files', pass_gather)
 class QueryInjection(unittest.TestCase):
     """ tests using the query gesture for the interactive mode """
     def __init__(self, *args, **kwargs):
