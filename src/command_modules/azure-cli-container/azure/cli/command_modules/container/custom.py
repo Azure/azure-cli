@@ -5,23 +5,14 @@
 
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,unused-argument
 
+import errno
+import platform
+import select
 import shlex
+import sys
 import threading
 import time
-import sys
 import websocket
-import platform
-try:
-    import termios
-    import fcntl
-    import tty
-    import signal
-except ImportError:
-    # Exec connections currently not available for Windows
-    pass
-import struct
-import select
-import errno
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
@@ -33,6 +24,7 @@ from ._client_factory import cf_container_groups, cf_container_logs, cf_start_co
 ACR_SERVER_SUFFIX = '.azurecr.io/'
 AZURE_FILE_VOLUME_NAME = 'azurefile'
 SECRETS_VOLUME_NAME = 'secrets'
+WINDOWS_OS_NAME = 'Windows'
 
 
 def list_containers(client, resource_group_name=None):
@@ -248,7 +240,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 def container_exec(cmd, resource_group_name, name, container_name=None, exec_command=None, terminal_row_size=None, terminal_col_size=None):
     """Start exec for a container. """
 
-    if platform.system() is "Windows":
+    if platform.system() is WINDOWS_OS_NAME:
         print("The container exec operation is currently not supported for Windows.")
         return
 
@@ -274,36 +266,9 @@ def container_exec(cmd, resource_group_name, name, container_name=None, exec_com
     _start_exec_pipe(execContainerResponse.web_socket_uri, execContainerResponse.password)
 
 
-def _pty_size():
-    rows, cols = 24, 80
-    fmt = 'HH'
-    buffer = struct.pack(fmt, 0, 0)
-    result = fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, buffer)
-    rows, cols = struct.unpack(fmt, result)
-    return rows, cols
-
-
-def _resize(ws):
-    rows, cols = _pty_size()
-
-
 def _start_exec_pipe(web_socket_uri, password):
     ws = websocket.create_connection(web_socket_uri)
-    _resize(ws)
-    oldtty = termios.tcgetattr(sys.stdin)
-    old_handler = signal.getsignal(signal.SIGWINCH)
-
-    def on_term_resize(signum, frame):
-        _resize(ws)
-
-    signal.signal(signal.SIGWINCH, on_term_resize)
-
     try:
-        tty.setraw(sys.stdin.fileno())
-        tty.setcbreak(sys.stdin.fileno())
-
-        rows, cols = _pty_size()
-
         ws.send(password)
 
         while True:
@@ -317,9 +282,7 @@ def _start_exec_pipe(web_socket_uri, password):
                     sys.stdout.flush()
                 if sys.stdin in r:
                     x = sys.stdin.read(1)
-                    if x == "exit":
-                        break
-                    if len(x) == 0:
+                    if not x:
                         break
                     ws.send(x)
             except (select.error, IOError) as e:
@@ -328,10 +291,7 @@ def _start_exec_pipe(web_socket_uri, password):
                 else:
                     raise
     except websocket.WebSocketException:
-        raise
-    finally:
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
-        signal.signal(signal.SIGWINCH, old_handler)
+        print("Connection Ended.")
 
 
 def attach_to_container(cmd, resource_group_name, name, container_name=None):
