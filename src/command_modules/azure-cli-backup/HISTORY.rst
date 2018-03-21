@@ -3,8 +3,8 @@
 Release History
 ===============
 
-unreleased
-++++++++++
+1.1.0
++++++
 * Added new command 'az backup protection isenabled-for-vm'. This command can be used to check if a VM is backed up by any vault in the subscription.
 * Enabled --ids for vault_name and resource_group parameters.
 * 'name' parameters now accept the name format as output from the show commands.
