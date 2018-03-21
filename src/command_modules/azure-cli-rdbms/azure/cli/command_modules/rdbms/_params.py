@@ -6,7 +6,6 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands.parameters import get_resource_name_completion_list, tags_type, get_location_type, get_enum_type   # pylint: disable=line-too-long
-from azure.mgmt.rdbms import mysql, postgresql
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator
 
 
