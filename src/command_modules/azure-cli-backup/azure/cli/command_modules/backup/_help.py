@@ -140,7 +140,7 @@ helps['backup protection'] = """
             short-summary: Manage protection of your items, enable protection or disable it, or take on-demand backups.
             """
 
-helps['backup protection isenabled-for-vm'] = """
+helps['backup protection check-vm'] = """
             type: command
             short-summary: Find out whether the virtual machine is protected or not. If protected, it returns the recovery services vault ID, otherwise it returns empty.
             """

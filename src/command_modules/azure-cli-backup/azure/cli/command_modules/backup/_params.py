@@ -11,8 +11,9 @@ from knack.arguments import CLIArgumentType
 
 import azure.cli.core.commands.arm  # pylint: disable=unused-import
 from azure.cli.core.commands.parameters import \
-    (get_resource_name_completion_list, file_type, get_location_type, get_three_state_flag,
+    (get_resource_name_completion_list, file_type, get_three_state_flag,
      get_enum_type)
+from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.command_modules.backup._validators import \
     (datetime_type)
 
@@ -40,7 +41,7 @@ def load_arguments(self, _):
     # Vault
     with self.argument_context('backup vault') as c:
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
-        c.argument('region', get_location_type(self.cli_ctx))
+        c.argument('location', validator=get_default_location_from_resource_group)
 
     with self.argument_context('backup vault backup-properties set') as c:
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant']), help='Sets backup storage properties for a Recovery Services vault.')
@@ -53,6 +54,9 @@ def load_arguments(self, _):
     with self.argument_context('backup container show') as c:
         c.argument('name', container_name_type, options_list=['--name', '-n'], help='Name of the container. You can use the backup container list command to get the name of a container.')
 
+    with self.argument_context('backup container list') as c:
+        c.argument('vault_name', vault_name_type, id_part=None)
+
     # Item
     with self.argument_context('backup item') as c:
         c.argument('vault_name', vault_name_type, id_part='name')
@@ -61,10 +65,13 @@ def load_arguments(self, _):
     with self.argument_context('backup item show') as c:
         c.argument('name', item_name_type, options_list=['--name', '-n'], help='Name of the backed up item. You can use the backup item list command to get the name of a backed up item.')
 
-    # TODO: Need to use item.id
+    # TODO: Need to use item.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
     with self.argument_context('backup item set-policy') as c:
         c.argument('item_name', item_name_type, options_list=['--name', '-n'], id_part='name', help='Name of the backed up item. You can use the backup item list command to get the name of a backed up item.')
         c.argument('policy_name', policy_name_type, help='Name of the Backup policy. You can use the backup policy list command to get the name of a backup policy.')
+
+    with self.argument_context('backup item list') as c:
+        c.argument('vault_name', vault_name_type, id_part=None)
 
     # Policy
     with self.argument_context('backup policy') as c:
@@ -77,14 +84,18 @@ def load_arguments(self, _):
     with self.argument_context('backup policy set') as c:
         c.argument('policy', type=file_type, help='JSON encoded policy definition. Use the show command with JSON output to obtain a policy object. Modify the values using a file editor and pass the object.', completer=FilesCompleter())
 
+    with self.argument_context('backup policy list') as c:
+        c.argument('vault_name', vault_name_type, id_part=None)
+
     # Recovery Point
-    # TODO: Need to use item.id
+    # TODO: Need to use item.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
     with self.argument_context('backup recoverypoint') as c:
         c.argument('vault_name', vault_name_type, id_part='name')
         c.argument('container_name', container_name_type)
         c.argument('item_name', item_name_type)
 
     with self.argument_context('backup recoverypoint list') as c:
+        c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')
         c.argument('end_date', type=datetime_type, help='The end date of the range in UTC (d-m-Y).')
 
@@ -97,7 +108,7 @@ def load_arguments(self, _):
         c.argument('vm', help='Name or ID of the Virtual Machine to be protected.')
         c.argument('policy_name', policy_name_type)
 
-    # TODO: Need to use item.id
+    # TODO: Need to use item.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
     for command in ['backup-now', 'disable']:
         with self.argument_context('backup protection ' + command) as c:
             c.argument('container_name', container_name_type)
@@ -109,11 +120,11 @@ def load_arguments(self, _):
     with self.argument_context('backup protection disable') as c:
         c.argument('delete_backup_data', arg_type=get_three_state_flag(), help='Option to delete existing backed up data in the Recovery services vault.')
 
-    with self.argument_context('backup protection isenabled-for-vm') as c:
+    with self.argument_context('backup protection check-vm') as c:
         c.argument('vm_id', help='ID of the virtual machine to be checked for protection.')
 
     # Restore
-    # TODO: Need to use recovery_point.id
+    # TODO: Need to use recovery_point.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
     with self.argument_context('backup restore') as c:
         c.argument('vault_name', vault_name_type, id_part='name')
         c.argument('container_name', container_name_type)
@@ -128,12 +139,13 @@ def load_arguments(self, _):
     with self.argument_context('backup job') as c:
         c.argument('vault_name', vault_name_type, id_part='name')
 
-    # TODO: Need to use job.id
+    # TODO: Need to use job.id once https://github.com/Azure/msrestazure-for-python/issues/80 is fixed.
     for command in ['show', 'stop', 'wait']:
         with self.argument_context('backup job ' + command) as c:
             c.argument('name', job_name_type, help='Name of the job. You can use the backup job list command to get the name of a job.')
 
     with self.argument_context('backup job list') as c:
+        c.argument('vault_name', vault_name_type, id_part=None)
         c.argument('status', arg_type=get_enum_type(['Cancelled', 'Completed', 'CompletedWithWarnings', 'Failed', 'InProgress']), help='Status of the Job.')
         c.argument('operation', arg_type=get_enum_type(['Backup', 'ConfigureBackup', 'DeleteBackupData', 'DisableBackup', 'Restore']), help='User initiated operation.')
         c.argument('start_date', type=datetime_type, help='The start date of the range in UTC (d-m-Y).')

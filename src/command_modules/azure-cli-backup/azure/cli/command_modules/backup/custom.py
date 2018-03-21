@@ -38,16 +38,11 @@ password_offset = 33
 password_length = 15
 
 
-def create_vault(cmd, client, vault_name, resource_group_name, region=None):
+def create_vault(cmd, client, vault_name, resource_group_name, location):
     vault_sku = Sku(SkuName.standard)
     vault_properties = VaultProperties()
 
-    # If region is not passed, create the vault in the same region as that of the resource group.
-    if not region:
-        vault_rg = resource_groups_cf(cmd.cli_ctx).get(resource_group_name)
-        region = vault_rg.location
-
-    vault = Vault(region, sku=vault_sku, properties=vault_properties)
+    vault = Vault(location, sku=vault_sku, properties=vault_properties)
     return client.create_or_update(resource_group_name, vault_name, vault)
 
 
@@ -194,7 +189,7 @@ def show_item(cmd, client, resource_group_name, vault_name, container_name, name
               item_type="VM"):
     items = list_items(cmd, client, resource_group_name, vault_name, container_name, container_type, item_type)
 
-    if ";" in name:
+    if _is_native_name(name):
         filtered_items = [item for item in items if item.name == name]
     else:
         filtered_items = [item for item in items if item.properties.friendly_name == name]
@@ -211,7 +206,7 @@ def list_items(cmd, client, resource_group_name, vault_name, container_name=None
     items = client.list(vault_name, resource_group_name, filter_string)
     paged_items = _get_list_from_paged_response(items)
     if container_name:
-        if ";" in container_name:
+        if _is_native_name(container_name):
             container_uri = container_name
         else:
             container = show_container(backup_protection_containers_cf(cmd.cli_ctx),
@@ -497,6 +492,9 @@ def wait_for_job(client, resource_group_name, vault_name, name, timeout=None):
 
 # Client Utilities
 
+def _is_native_name(name):
+    return ";" in name
+
 
 def _get_containers(client, container_type, status, resource_group_name, vault_name, container_name=None):
     filter_dict = {
@@ -504,14 +502,14 @@ def _get_containers(client, container_type, status, resource_group_name, vault_n
         'status': status
     }
 
-    if container_name and ";" not in container_name:
+    if container_name and not _is_native_name(container_name):
         filter_dict['friendlyName'] = container_name
     filter_string = _get_filter_string(filter_dict)
 
     paged_containers = client.list(vault_name, resource_group_name, filter_string)
     containers = _get_list_from_paged_response(paged_containers)
 
-    if container_name and ";" in container_name:
+    if container_name and _is_native_name(container_name):
         return [container for container in containers if container.name == container_name]
 
     return containers
