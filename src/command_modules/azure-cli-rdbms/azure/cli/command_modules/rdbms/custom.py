@@ -14,11 +14,56 @@ from ._client_factory import get_mysql_management_client, get_postgresql_managem
 SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 
 
+def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_wait=False,
+                   location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
+                   geo_redundant_backup=None, ssl_enforcement=None, storage_size=None, tags=None, version=None):
+    provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
+    parameters = None
+    if provider == 'Microsoft.DBForMySQL':
+        import azure.mgmt.rdbms.mysql.models
+        parameters = azure.mgmt.rdbms.mysql.models.ServerForCreate()
+        parameters.sku = azure.mgmt.rdbms.mysql.models.Sku()
+        parameters.properties = azure.mgmt.rdbms.mysql.models.ServerPropertiesForDefaultCreate()
+        parameters.properties.storage_profile = azure.mgmt.rdbms.mysql.models.StorageProfile()
+    elif (provider == 'Microsoft.DBforPostgreSQL'):
+        import azure.mgmt.rdbms.postgresql.models
+        parameters = azure.mgmt.rdbms.postgresql.models.ServerForCreate()
+        parameters.sku = azure.mgmt.rdbms.postgresql.models.Sku()
+        parameters.properties = azure.mgmt.rdbms.postgresql.models.ServerPropertiesForDefaultCreate()
+        parameters.properties.storage_profile = azure.mgmt.rdbms.postgresql.models.StorageProfile()
+
+    parameters.location = location
+    parameters.tags = tags
+    parameters.sku.name = sku_name
+    parameters.properties.version = version
+    parameters.properties.ssl_enforcement = ssl_enforcement
+    parameters.properties.storage_profile.backup_retention_days = backup_retention
+    parameters.properties.storage_profile.geo_redundant_backup = geo_redundant_backup
+    parameters.properties.storage_profile.storage_mb = storage_size
+    parameters.properties.administrator_login = administrator_login
+    parameters.properties.administrator_login_password = administrator_login_password
+
+    return client.create(resource_group_name, server_name, parameters)
+
+
 # Need to replace source server name with source server id, so customer server restore function
 # The parameter list should be the same as that in factory to use the ParametersContext
 # arguments and validators
-def _server_restore(cmd, client, resource_group_name, server_name, parameters, no_wait=False, **kwargs):
-    source_server = kwargs['source_server_id']
+def _server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, no_wait=False):
+    provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
+    parameters = None
+    if provider == 'Microsoft.DBForMySQL':
+        import azure.mgmt.rdbms.mysql.models
+        parameters = azure.mgmt.rdbms.mysql.models.ServerForCreate()
+        # parameters.sku = azure.mgmt.rdbms.mysql.models.Sku()
+        parameters.properties = azure.mgmt.rdbms.mysql.models.ServerPropertiesForRestore()
+        # parameters.properties.storage_profile = azure.mgmt.rdbms.mysql.models.StorageProfile()
+    elif (provider == 'Microsoft.DBforPostgreSQL'):
+        import azure.mgmt.rdbms.postgresql.models
+        parameters = azure.mgmt.rdbms.postgresql.models.ServerForCreate()
+        # parameters.sku = azure.mgmt.rdbms.postgresql.models.Sku()
+        parameters.properties = azure.mgmt.rdbms.postgresql.models.ServerPropertiesForRestore()
+        # parameters.properties.storage_profile = azure.mgmt.rdbms.postgresql.models.StorageProfile()
 
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
@@ -32,6 +77,7 @@ def _server_restore(cmd, client, resource_group_name, server_name, parameters, n
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
 
     parameters.properties.source_server_id = source_server
+    parameters.properties.restore_point_in_time = restore_point_in_time
 
     # Here is a workaround that we don't support cross-region restore currently,
     # so the location must be set as the same as source server (not the resource group)
@@ -65,10 +111,7 @@ def _server_update_custom_func(instance,
         instance.sku = None
 
     if storage_mb is not None:
-        if storage_mb > 1023 * 1024:
-            raise ValueError('The size of storage cannot exceed 1023GB.')
-        else:
-            instance.storage_profile.storage_mb = storage_mb
+        instance.storage_profile.storage_mb = storage_mb
 
     if backup_retention_days is not None:
         instance.storage_profile.backup_retention_days = backup_retention_days
