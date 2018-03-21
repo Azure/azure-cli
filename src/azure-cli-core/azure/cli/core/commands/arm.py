@@ -278,6 +278,20 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
         command_loaded_handler(command)
 
 
+def register_global_subscription_parameter(cli_ctx):
+    import knack.events as events
+
+    def add_subscription_parameter(_, arg_group):
+        arg_group.add_argument('--subscription', dest='_subscription', help='Subscription ID.')
+
+    def parse_subscription_parameter(cli_ctx, args, **kwargs):
+        subscription_id = getattr(args, '_subscription', None)
+        cli_ctx.data['subscription_id'] = subscription_id
+
+    cli_ctx.register_event(events.EVENT_PARSER_GLOBAL_CREATE, add_subscription_parameter)
+    cli_ctx.register_event(events.EVENT_INVOKER_POST_PARSE_ARGS, parse_subscription_parameter)
+
+
 add_usage = '--add property.listProperty <key=value, string or JSON string>'
 set_usage = '--set property1.property2=<value>'
 remove_usage = '--remove property.list <indexToRemove> OR --remove propertyToRemove'
