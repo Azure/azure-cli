@@ -93,8 +93,10 @@ class ConditionAction(argparse.Action):
         threshold = int(values[-3])
         aggregation = get_aggregation_map()[values[-2].lower()]
         window = period_type(values[-1])
-        metric = RuleMetricDataSource(None, metric_name)  # target URI will be filled in later
-        condition = ThresholdRuleCondition(operator, threshold, metric, window, aggregation)
+        metric = RuleMetricDataSource(resource_uri=None, metric_name=metric_name)  # target URI will be filled in later
+        condition = ThresholdRuleCondition(
+            operator=operator, threshold=threshold, data_source=metric,
+            window_size=window, time_aggregation=aggregation)
         namespace.condition = condition
 
 
@@ -117,7 +119,7 @@ class AlertAddAction(argparse._AppendAction):
                 properties = dict(x.split('=', 1) for x in values[2:])
             except ValueError:
                 raise CLIError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
-            return RuleWebhookAction(uri, properties)
+            return RuleWebhookAction(service_uri=uri, properties=properties)
 
         raise CLIError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
 
@@ -156,7 +158,7 @@ class AutoscaleAddAction(argparse._AppendAction):
                 properties = dict(x.split('=', 1) for x in values[2:])
             except ValueError:
                 raise CLIError('usage error: {} webhook URI [KEY=VALUE ...]'.format(option_string))
-            return WebhookNotification(uri, properties)
+            return WebhookNotification(service_uri=uri, properties=properties)
 
         raise CLIError('usage error: {} TYPE KEY [ARGS]'.format(option_string))
 
@@ -245,7 +247,7 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
         try:
             super(MultiObjectsDeserializeAction, self).__call__(parser,
                                                                 namespace,
-                                                                self.get_deserializer(type_name)(*type_properties),
+                                                                self.deserialize_object(type_name, type_properties),
                                                                 option_string)
         except KeyError:
             raise ValueError('usage error: the type "{}" is not recognizable.'.format(type_name))
@@ -257,11 +259,22 @@ class MultiObjectsDeserializeAction(argparse._AppendAction):  # pylint: disable=
                 'usage error: Failed to parse "{}" as object of type "{}". {}'.format(
                     ' '.join(values), type_name, str(ex)))
 
-    def get_deserializer(self, type_name):
+    def deserialize_object(self, type_name, type_properties):
         raise NotImplementedError()
 
 
 class ActionGroupReceiverParameterAction(MultiObjectsDeserializeAction):
-    def get_deserializer(self, type_name):
+    def deserialize_object(self, type_name, type_properties):
         from azure.mgmt.monitor.models import EmailReceiver, SmsReceiver, WebhookReceiver
-        return {'email': EmailReceiver, 'sms': SmsReceiver, 'webhook': WebhookReceiver}[type_name]
+        if type_name == 'email':
+            return EmailReceiver(name=type_properties[0], email_address=type_properties[1])
+        elif type_name == 'sms':
+            return SmsReceiver(
+                name=type_properties[0],
+                country_code=type_properties[1],
+                phone_number=type_properties[2]
+            )
+        elif type_name == 'webhook':
+            return WebhookReceiver(name=type_properties[0], service_uri=type_properties[1])
+        else:
+            raise ValueError('usage error: the type "{}" is not recognizable.'.format(type_name))

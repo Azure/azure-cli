@@ -2,9 +2,11 @@
 
 Release History
 ===============
+
 2.0.29
 ++++++
-Minor change
+vmss: report better encryption status through disk instance view
+* BC: `az vm extension delete` no longer returns output as expected for a `delete` command.
 
 2.0.28
 ++++++
