@@ -17,29 +17,6 @@ logger = get_logger(__name__)
 
 
 # pylint: disable=line-too-long
-def get_account(client, resource_group_name, account_name):
-    """Get a Location Based Services Account.
-
-    :param resource_group_name: The name of the Azure Resource Group.
-    :type resource_group_name: str
-    :param account_name: The name of the Location Based Services Account.
-    :type account_name: str
-    :return: LocationBasedServicesAccount
-    :rtype:
-     ~azure.mgmt.locationbasedservices.models.LocationBasedServicesAccount
-    :raises:
-     :class:`ErrorException<azure.mgmt.locationbasedservices.models.ErrorException>`
-     or :class:`ErrorException<knack.util.CLIError>`
-    """
-    # Retrieve ClientRawResponse from get call
-    out = client.get(resource_group_name, account_name, raw=True)
-    # Handle 404 error
-    if out.response.status_code == 404:
-        raise CLIError("The resource 'Microsoft.LocationBasedServices/accounts/" + account_name +
-                       "' under resource group '" + resource_group_name + "' was not found.")
-    return out.output
-
-
 def create_account(client, resource_group_name, account_name, sku_name='S0', tags=None, agree=None):
     """Create a Location Based Services Account. A Location Based
     Services Account holds the keys which allow access to the Location

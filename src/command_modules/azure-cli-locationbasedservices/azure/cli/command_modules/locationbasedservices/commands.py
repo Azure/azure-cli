@@ -15,13 +15,12 @@ def load_command_table(self, _):
         operations_tmpl='azure.cli.command_modules.locationbasedservices.custom#{}')
 
     with self.command_group('locationbasedservices account', mgmt_type) as g:
-        g.custom_command('show', 'get_account')
+        g.command('show', 'get')
         g.custom_command('list', 'list_accounts')
         g.custom_command('create', 'create_account')
         g.command('delete', 'delete')
         g.generic_update_command('update',
-                                 getter_name='get_account',
-                                 getter_type=custom_type,
+                                 getter_name='get',
                                  setter_arg_name='location_based_services_account_create_parameters',
                                  custom_func_name='generic_update_account')
 
