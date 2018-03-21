@@ -55,15 +55,11 @@ def _server_restore(cmd, client, resource_group_name, server_name, source_server
     if provider == 'Microsoft.DBForMySQL':
         import azure.mgmt.rdbms.mysql.models
         parameters = azure.mgmt.rdbms.mysql.models.ServerForCreate()
-        # parameters.sku = azure.mgmt.rdbms.mysql.models.Sku()
         parameters.properties = azure.mgmt.rdbms.mysql.models.ServerPropertiesForRestore()
-        # parameters.properties.storage_profile = azure.mgmt.rdbms.mysql.models.StorageProfile()
     elif (provider == 'Microsoft.DBforPostgreSQL'):
         import azure.mgmt.rdbms.postgresql.models
         parameters = azure.mgmt.rdbms.postgresql.models.ServerForCreate()
-        # parameters.sku = azure.mgmt.rdbms.postgresql.models.Sku()
         parameters.properties = azure.mgmt.rdbms.postgresql.models.ServerPropertiesForRestore()
-        # parameters.properties.storage_profile = azure.mgmt.rdbms.postgresql.models.StorageProfile()
 
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
