@@ -11,8 +11,6 @@ def load_command_table(self, _):
     mgmt_type = CliCommandType(
         operations_tmpl='azure.mgmt.locationbasedservices.operations.accounts_operations#AccountsOperations.{}',
         client_factory=cf_accounts)
-    custom_type = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.locationbasedservices.custom#{}')
 
     with self.command_group('locationbasedservices account', mgmt_type) as g:
         g.command('show', 'get')

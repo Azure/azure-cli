@@ -42,15 +42,6 @@ def load_arguments(self, _):
         c.argument('tags',
                    arg_type=tags_type)
 
-    with self.argument_context('locationbasedservices account create') as c:
-        c.argument('agree',
-                   options_list=['--agree-to-the-preview-terms'],
-                   help='You agree to the Preview Terms. Ignore prompt for confirmation.',
-                   action='store_true')
-
-    with self.argument_context('locationbasedservices account update') as c:
-        c.ignore('agree')
-
     # Prevent --ids argument in keys with id_part=None
     with self.argument_context('locationbasedservices account keys') as c:
         c.argument('account_name',

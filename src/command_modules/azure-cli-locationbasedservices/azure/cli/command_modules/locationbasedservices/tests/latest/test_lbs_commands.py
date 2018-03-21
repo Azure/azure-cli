@@ -29,8 +29,7 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
 
         # Test 'az locationbasedservices account create'.
         # Test to create a LocationBasedServices account.
-        account = self.cmd('az locationbasedservices account create -n {name} -g {rg} --sku {sku} ' +
-                           '--agree-to-the-preview-terms',
+        account = self.cmd('az locationbasedservices account create -n {name} -g {rg} --sku {sku}',
                            checks=[
                                self.check('name', '{name}'),
                                self.check('resourceGroup', '{rg}'),
@@ -40,8 +39,7 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
 
         # Call create again, expect to get the same account.
         account_duplicated = self.cmd(
-            'az locationbasedservices account create -n {name} -g {rg} --sku {sku} ' +
-            '--agree-to-the-preview-terms').get_output_in_json()
+            'az locationbasedservices account create -n {name} -g {rg} --sku {sku}').get_output_in_json()
         self.assertEqual(account, account_duplicated)
 
         # Test 'az locationbasedservices account update'
@@ -85,10 +83,8 @@ class LocationBasedServicesScenarioTests(ScenarioTest):
         ])
 
         # Create two new accounts (One in separate resource group).
-        self.cmd('az locationbasedservices account create -n {name1} -g {rg1} --sku {sku} ' +
-                 '--agree-to-the-preview-terms')
-        self.cmd('az locationbasedservices account create -n {name2} -g {rg} --sku {sku} ' +
-                 '--agree-to-the-preview-terms')
+        self.cmd('az locationbasedservices account create -n {name1} -g {rg1} --sku {sku}')
+        self.cmd('az locationbasedservices account create -n {name2} -g {rg} --sku {sku}')
         # Check that list command now shows two accounts in one resource group, and one in another.
         self.cmd('az locationbasedservices account list -g {rg}', checks=[
             self.check('length(@)', 2),
