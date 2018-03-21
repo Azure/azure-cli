@@ -95,8 +95,6 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
           identity=False, identity_port=None,
           msi=False, msi_port=None):  # will remove msi_xxx in a future release
     """Log in to access Azure subscriptions"""
-    # import os
-    # import re
     from adal.adal_error import AdalError
     import requests
 
