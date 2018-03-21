@@ -82,10 +82,13 @@ def load_arguments(self, _):
     # endregion
 
     # region Snapshots
-    with self.argument_context('snapshot') as c:
+    with self.argument_context('snapshot', resource_type=ResourceType.MGMT_COMPUTE, operation_group='snapshots') as c:
         c.argument('snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
         c.argument('name', arg_type=name_arg_type)
-        c.argument('sku', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'Standard_ZRS']))
+        if self.supported_api_version(min_api='2018-04-01', operation_group='snapshots'):
+            c.argument('sku', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'Standard_ZRS']))
+        else:
+            c.argument('sku', arg_type=disk_sku)
     # endregion
 
     # region Images
