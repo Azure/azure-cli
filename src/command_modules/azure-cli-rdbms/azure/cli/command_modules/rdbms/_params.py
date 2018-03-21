@@ -17,7 +17,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         'postgres': get_resource_name_completion_list('Microsoft.DBForPostgreSQL/servers')
     }
 
-    def _complex_params(command_group, engine):
+    def _complex_params(command_group):
         with self.argument_context('{} server create'.format(command_group)) as c:
             c.argument('sku_name', options_list=['--sku-name'], required=True)
 
@@ -42,8 +42,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} server wait'.format(command_group)) as c:
             c.ignore('created', 'deleted', 'updated')
 
-    _complex_params('mysql', mysql)
-    _complex_params('postgres', postgresql)
+    _complex_params('mysql')
+    _complex_params('postgres')
 
     for scope in ['mysql', 'postgres']:
         with self.argument_context(scope) as c:

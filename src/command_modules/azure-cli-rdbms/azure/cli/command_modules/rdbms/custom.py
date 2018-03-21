@@ -25,7 +25,7 @@ def _server_create(cmd, client, resource_group_name, server_name, sku_name, no_w
         parameters.sku = azure.mgmt.rdbms.mysql.models.Sku()
         parameters.properties = azure.mgmt.rdbms.mysql.models.ServerPropertiesForDefaultCreate()
         parameters.properties.storage_profile = azure.mgmt.rdbms.mysql.models.StorageProfile()
-    elif (provider == 'Microsoft.DBforPostgreSQL'):
+    elif provider == 'Microsoft.DBforPostgreSQL':
         import azure.mgmt.rdbms.postgresql.models
         parameters = azure.mgmt.rdbms.postgresql.models.ServerForCreate()
         parameters.sku = azure.mgmt.rdbms.postgresql.models.Sku()
@@ -56,7 +56,7 @@ def _server_restore(cmd, client, resource_group_name, server_name, source_server
         import azure.mgmt.rdbms.mysql.models
         parameters = azure.mgmt.rdbms.mysql.models.ServerForCreate()
         parameters.properties = azure.mgmt.rdbms.mysql.models.ServerPropertiesForRestore()
-    elif (provider == 'Microsoft.DBforPostgreSQL'):
+    elif provider == 'Microsoft.DBforPostgreSQL':
         import azure.mgmt.rdbms.postgresql.models
         parameters = azure.mgmt.rdbms.postgresql.models.ServerForCreate()
         parameters.properties = azure.mgmt.rdbms.postgresql.models.ServerPropertiesForRestore()
