@@ -282,15 +282,16 @@ class RoleAssignmentScenarioTest(RoleScenarioTest):
                     now = datetime.datetime.utcnow()
                     start_time = '{}-{}-{}T{}:{}:{}Z'.format(now.year, now.month, now.day - 1, now.hour,
                                                              now.minute, now.second)
-                    time.sleep(15)
-                    self.cmd('role assignment list-changelogs --start-time {}'.format(start_time))
+                    time.sleep(60)
+                    result = self.cmd('role assignment list-changelogs --start-time {}'.format(start_time)).get_output_in_json()
                 else:
                     # NOTE: get the time range from the recording file and use them below for playback
-                    start_time, end_time = '2018-03-11T18:43:08Z', '2018-03-12T18:46:29Z'
+                    start_time, end_time = '2018-03-19T17:58:13Z', '2018-03-20T17:59:13Z'
                     result = self.cmd('role assignment list-changelogs --start-time {} --end-time {}'.format(
-                        start_time, end_time)).get_output_in_json()
-                    self.assertTrue([x for x in result if (resource_group in x['scope'] and
-                                                           x['principalName'] == self.kwargs['upn'])])
+                                      start_time, end_time)).get_output_in_json()
+
+                self.assertTrue([x for x in result if (resource_group in x['scope'] and
+                                                       x['principalName'] == self.kwargs['upn'])])
             finally:
                 self.cmd('ad user delete --upn-or-object-id {upn}')
 
