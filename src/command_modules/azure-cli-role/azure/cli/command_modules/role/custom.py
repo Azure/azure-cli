@@ -590,8 +590,8 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
         raise
 
     if native_app:
-        # AAD graph doesn't have the API to create a native app, aka public client, recommended hack is
-        # to create a confidential app first, then convert to a native
+        # AAD graph doesn't have the API to create a native app, aka public client, the recommended hack is
+        # to create a web app first, then convert to a native one
         # pylint: disable=protected-access
         if 'public_client' not in ApplicationUpdateParameters._attribute_map:
             ApplicationUpdateParameters._attribute_map['public_client'] = {'key': 'publicClient', 'type': 'bool'}

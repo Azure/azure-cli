@@ -259,7 +259,7 @@ helps['ad'] = """
 """
 helps['ad app create'] = """
     type: command
-    short-summary: Create web application, web API or native
+    short-summary: Create a web application, web API or native application
     examples:
         - name: Create a native application with delegated permission of "access the AAD directory as the signed-in user
           text: |
