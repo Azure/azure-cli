@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.0
++++++
+* Release with new business model GA API version 2017-12-01.
+
 0.1.1
 ++++++
 * Minor changes.
