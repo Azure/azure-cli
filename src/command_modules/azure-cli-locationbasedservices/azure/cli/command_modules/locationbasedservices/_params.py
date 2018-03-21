@@ -12,7 +12,7 @@ from azure.cli.core.commands.parameters import (
     tags_type)
 
 from azure.cli.command_modules.locationbasedservices.validators import validate_account_name
-from azure.mgmt.locationbasedservices.models.client_enums import KeyType
+from azure.mgmt.locationbasedservices.models.location_based_services_management_client_enums import KeyType
 
 
 def load_arguments(self, _):
