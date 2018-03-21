@@ -77,7 +77,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         self.kwargs['vault4'] = self.create_random_name('clitest-vault', 50)
-        self.cmd('backup vault create -n {vault4} -g {rg}', checks=[
+        self.cmd('backup vault create -n {vault4} -g {rg} -l {loc}', checks=[
             self.check('name', '{vault4}'),
             self.check('resourceGroup', '{rg}'),
             self.check('location', '{loc}'),
