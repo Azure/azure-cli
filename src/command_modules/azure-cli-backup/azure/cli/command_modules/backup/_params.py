@@ -109,6 +109,9 @@ def load_arguments(self, _):
     with self.argument_context('backup protection disable') as c:
         c.argument('delete_backup_data', arg_type=get_three_state_flag(), help='Option to delete existing backed up data in the Recovery services vault.')
 
+    with self.argument_context('backup protection isenabled-for-vm') as c:
+        c.argument('vm_id', help='ID of the virtual machine to be checked for protection.')
+
     # Restore
     # TODO: Need to use recovery_point.id
     with self.argument_context('backup restore') as c:

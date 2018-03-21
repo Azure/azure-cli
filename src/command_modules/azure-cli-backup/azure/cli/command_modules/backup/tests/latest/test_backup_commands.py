@@ -152,6 +152,17 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('resourceGroup', '{rg}')
         ]).get_output_in_json()
 
+        self.kwargs['container_name'] = container_json['name']
+
+        self.cmd('backup container show -n {container_name} -v {vault} -g {rg}', checks=[
+            self.check('properties.friendlyName', '{vm1}'),
+            self.check('properties.healthStatus', 'Healthy'),
+            self.check('properties.registrationStatus', 'Registered'),
+            self.check('properties.resourceGroup', '{rg}'),
+            self.check('name', '{container_name}'),
+            self.check('resourceGroup', '{rg}')
+        ]).get_output_in_json()
+
         vm1_json = self.cmd('vm show -n {vm1} -g {rg}').get_output_in_json()
 
         self.assertIn(vault_name.lower(), container_json['id'].lower())
@@ -260,7 +271,32 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vm1.lower(), item1_json['properties']['virtualMachineId'].lower())
         self.assertIn(self.kwargs['default'].lower(), item1_json['properties']['policyId'].lower())
 
+        self.kwargs['container1_fullname'] = self.cmd('backup container show -n {vm1} -v {vault} -g {rg} --query name').get_output_in_json()
+
+        self.cmd('backup item show -g {rg} -v {vault} -c {container1_fullname} -n {vm1}', checks=[
+            self.check('properties.friendlyName', '{vm1}'),
+            self.check('properties.healthStatus', 'Passed'),
+            self.check('properties.protectionState', 'IRPending'),
+            self.check('properties.protectionStatus', 'Healthy'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        self.kwargs['item1_fullname'] = item1_json['name']
+
+        self.cmd('backup item show -g {rg} -v {vault} -c {container1_fullname} -n {item1_fullname}', checks=[
+            self.check('properties.friendlyName', '{vm1}'),
+            self.check('properties.healthStatus', 'Passed'),
+            self.check('properties.protectionState', 'IRPending'),
+            self.check('properties.protectionStatus', 'Healthy'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
         self.cmd('backup item list -g {rg} -v {vault} -c {container1}', checks=[
+            self.check("length(@)", 1),
+            self.check("length([?properties.friendlyName == '{vm1}'])", 1)
+        ])
+
+        self.cmd('backup item list -g {rg} -v {vault} -c {container1_fullname}', checks=[
             self.check("length(@)", 1),
             self.check("length([?properties.friendlyName == '{vm1}'])", 1)
         ])
@@ -327,12 +363,24 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'vault': vault_name,
             'vm': vm_name
         })
+
+        self.kwargs['vm_id'] = self.cmd('vm show -g {rg} -n {vm} --query id').get_output_in_json()
+
+        isenabled_check = self.cmd('backup protection isenabled-for-vm --vm-id {vm_id}').output
+        self.assertTrue(isenabled_check == '')
+
         self.cmd('backup protection enable-for-vm -g {rg} -v {vault} --vm {vm} -p DefaultPolicy', checks=[
             self.check("properties.entityFriendlyName", '{vm}'),
             self.check("properties.operation", "ConfigureBackup"),
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
+
+        vault_id = self.cmd('backup vault show -g {rg} -n {vault} --query id').get_output_in_json()
+
+        vault_id_check = self.cmd('backup protection isenabled-for-vm --vm-id {vm_id}').get_output_in_json()
+        self.assertIsNotNone(vault_id_check)
+        self.assertTrue(vault_id.lower() == vault_id_check.lower())
 
         self.cmd('backup protection disable -g {rg} -v {vault} -c {vm} -i {vm} --yes', checks=[
             self.check("properties.entityFriendlyName", '{vm}'),
@@ -356,6 +404,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup container list -v {vault} -g {rg}',
                  checks=self.check("length(@)", 0))
+
+        isenabled_check = self.cmd('backup protection isenabled-for-vm --vm-id {vm_id}').output
+        self.assertTrue(isenabled_check == '')
 
     @ResourceGroupPreparer()
     @VaultPreparer()
