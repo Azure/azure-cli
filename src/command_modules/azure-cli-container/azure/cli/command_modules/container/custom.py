@@ -29,6 +29,7 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
 from ._client_factory import cf_container_groups, cf_container_logs, cf_start_container
 
 logger = get_logger(__name__)
+WINDOWS_NAME = 'Windows'
 ACR_SERVER_SUFFIX = '.azurecr.io/'
 AZURE_FILE_VOLUME_NAME = 'azurefile'
 SECRETS_VOLUME_NAME = 'secrets'
@@ -247,7 +248,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 def container_exec(cmd, resource_group_name, name, container_name=None, exec_command=None, terminal_row_size=20, terminal_col_size=80):
     """Start exec for a container. """
 
-    if platform.system() is "Windows":
+    if platform.system() is WINDOWS_NAME:
         logger.warning("The container exec operation is currently not supported for Windows.")
         return
 
@@ -255,18 +256,18 @@ def container_exec(cmd, resource_group_name, name, container_name=None, exec_com
     container_group_client = cf_container_groups(cmd.cli_ctx)
     container_group = container_group_client.get(resource_group_name, name)
 
-    if len(container_group.containers) > 1 and container_name is None:
-        logger.error("Must specify the container name for container groups with more than one container.")
+    if container_name is None and len(container_group.containers) == 1:
+        # If only one container in container group, use that container.
+        if container_name is None:
+            container_name = container_group.containers[0].name
 
-    # If only one container in container group, use that container.
-    if container_name is None:
-        container_name = container_group.containers[0].name
+        terminal_size = ContainerExecRequestTerminalSize(rows=terminal_row_size, cols=terminal_col_size)
 
-    terminal_size = ContainerExecRequestTerminalSize(rows=terminal_row_size, cols=terminal_col_size)
+        execContainerResponse = start_container_client.launch_exec(resource_group_name, name, container_name, exec_command, terminal_size)
 
-    execContainerResponse = start_container_client.launch_exec(resource_group_name, name, container_name, exec_command, terminal_size)
-
-    _start_exec_pipe(execContainerResponse.web_socket_uri, execContainerResponse.password)
+        _start_exec_pipe(execContainerResponse.web_socket_uri, execContainerResponse.password)
+    else:
+        raise CLIError('--container-name required when container group has more than one container.')
 
 
 def _start_exec_pipe(web_socket_uri, password):
@@ -281,18 +282,8 @@ def _start_exec_pipe(web_socket_uri, password):
         ws.send(password)
         while True:
             try:
-                r, _, _ = select.select([ws.sock, sys.stdin], [], [])
-                if ws.sock in r:
-                    data = ws.recv()
-                    if not data:
-                        break
-                    sys.stdout.write(data)
-                    sys.stdout.flush()
-                if sys.stdin in r:
-                    x = sys.stdin.read(1)
-                    if not x:
-                        break
-                    ws.send(x)
+                if not _cycle_exec_pipe(ws):
+                    break
             except (select.error, IOError) as e:
                 if e.args and e.args[0] == errno.EINTR:
                     pass
@@ -303,6 +294,22 @@ def _start_exec_pipe(web_socket_uri, password):
     finally:
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
         signal.signal(signal.SIGWINCH, old_handler)
+
+
+def _cycle_exec_pipe(ws):
+    r, _, _ = select.select([ws.sock, sys.stdin], [], [])
+    if ws.sock in r:
+        data = ws.recv()
+        if not data:
+            return False
+        sys.stdout.write(data)
+        sys.stdout.flush()
+    if sys.stdin in r:
+        x = sys.stdin.read(1)
+        if not x:
+            return True
+        ws.send(x)
+    return True
 
 
 def attach_to_container(cmd, resource_group_name, name, container_name=None):
