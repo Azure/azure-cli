@@ -14,7 +14,7 @@ class RdbmsCommandsLoader(AzCommandsLoader):
         from azure.cli.core import ModExtensionSuppress
         from azure.cli.core.commands import CliCommandType
         from azure.cli.command_modules.rdbms._util import RdbmsArgumentContext
-        
+
         rdbms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.rdbms.custom#{}')
         super(RdbmsCommandsLoader, self).__init__(
             cli_ctx=cli_ctx,
