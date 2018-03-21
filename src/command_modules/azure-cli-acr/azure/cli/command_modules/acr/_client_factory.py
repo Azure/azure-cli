@@ -44,3 +44,6 @@ def cf_acr_webhooks(cli_ctx, *_):
 
 def cf_acr_builds(cli_ctx, *_):
     return get_acr_build_client(cli_ctx).builds
+
+def cf_acr_build_tasks(cli_ctx, *_):
+    return get_acr_build_client(cli_ctx).build_tasks

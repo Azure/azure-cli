@@ -191,6 +191,67 @@ def arm_deploy_template_existing_storage(cli_ctx,
         get_arm_service_client(cli_ctx).deployments, resource_group_name, deployment_name, properties)
 
 
+def arm_deploy_template_build_task_create(
+    cli_ctx,
+    build_task_name,
+    registry_name,
+    registry_location,
+    resource_group_name,
+    source_location,     
+    source_branch,         
+    image_name,
+    docker_file_path,
+    git_access_token,
+    os_type,
+    cpu,
+    deployment_name=None):
+    """Deploys ARM template to create a build task.
+    :param str resource_group_name: The name of resource group
+    :param str registry_name: The name of container registry
+    :param str location: The name of location
+    :param str sku: The SKU of the container registry
+    :param str storage_account_name: The name of storage account
+    :param bool admin_user_enabled: Enable admin user
+    :param str deployment_name: The name of the deployment
+    """
+    from azure.mgmt.resource.resources.models import DeploymentProperties
+    from azure.cli.core.util import get_file_json
+    import os
+    import random
+
+    # TODO ankheman remove hard-coded values
+    parameters = {
+        'registryName': {'value': registry_name},
+        'buildTaskName': {'value': build_task_name},
+        'buildTaskLocation': {'value': registry_location},
+        'buildTaskApiVersion': {'value': "2018-02-01-preview"},
+        'buildTaskAlias': {'value': build_task_name + "dummyAlias"},
+        'status': {'value': "enabled"},
+        'osType': {'value':os_type},
+        'cpu': {'value': int(cpu)},
+        'sourceControlType': {'value': "Github"},
+        'sourceControlRepositoryUrl': {'value': source_location},
+        'isCommitTriggerEnabled': {'value': True},
+        'sourceControlAuthTokenType': {'value': "pat"},
+        'sourceControlAuthToken': {'value': git_access_token},
+        'sourceControlRefreshToken': {'value': ""},
+        'sourceControlAuthScope': {'value': "repo"},
+        'sourceControlAuthExpiresIn': {'value': 1313141},
+        'stepName': {'value': build_task_name + "dummyStepName"},
+        'dockerFilePath': {'value': docker_file_path},
+        'SourceControlBranch': {'value': source_branch},
+        'imageName': {'value': image_name},
+        'isPushEnabled': {'value': True},
+    }
+
+    file_path = os.path.join(os.path.dirname(__file__), 'template_build_task_create.json')
+    template = get_file_json(file_path)
+    properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
+
+    return _arm_deploy_template(
+        get_arm_service_client(cli_ctx).deployments, resource_group_name, deployment_name, properties)
+
+
 def _arm_deploy_template(deployments_client,
                          resource_group_name,
                          deployment_name,

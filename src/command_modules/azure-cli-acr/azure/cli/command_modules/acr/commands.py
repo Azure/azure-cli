@@ -7,7 +7,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._format import output_format
-from ._client_factory import cf_acr_registries, cf_acr_replications, cf_acr_webhooks, cf_acr_builds
+from ._client_factory import cf_acr_registries, cf_acr_replications, cf_acr_webhooks, cf_acr_builds, cf_acr_build_tasks
 
 
 def load_command_table(self, _):
@@ -45,6 +45,11 @@ def load_command_table(self, _):
         client_factory=cf_acr_builds
     )
 
+    acr_build_task_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.build_task#{}',    
+        client_factory=cf_acr_build_tasks
+    )
+
     with self.command_group('acr', acr_custom_util) as g:
         g.command('check-name', 'acr_check_name', table_transformer=None)
         g.command('list', 'acr_list')
@@ -59,6 +64,10 @@ def load_command_table(self, _):
                                  custom_func_name='acr_update_custom',
                                  custom_func_type=acr_custom_util,
                                  client_factory=cf_acr_registries)
+
+    with self.command_group('acr build-task', acr_build_task_util) as g:
+            g.command('create', 'acr_build_task_create')
+            g.command('show', 'acr_build_task_show')
 
     with self.command_group('acr build', acr_build_util) as g:
             g.command('show-logs', 'acr_build_show_logs')

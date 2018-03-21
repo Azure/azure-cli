@@ -10,6 +10,19 @@ helps['acr'] = """
     type: group
     short-summary: Manage Azure Container Registries.
     """
+helps['acr build-task create'] = """
+    type: command
+    short-summary: Creates a new build task with specified parameters.
+    """
+
+helps['acr build-task show'] = """
+    type: command
+    short-summary: Get the properties of a specified build task.
+    examples:
+        - name: Get the details of a build task.
+          text: >
+            az acr build-task show -n MyBuildTask -r MyRegistry
+    """
 
 # TODO: bindu update the help and samples after we finalize the commands.
 helps['acr build'] = """
