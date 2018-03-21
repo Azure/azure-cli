@@ -26,7 +26,7 @@ from azure.cli.command_modules.backup._client_factory import (
     vaults_cf, backup_protected_items_cf, protection_policies_cf, virtual_machines_cf, recovery_points_cf,
     protection_containers_cf, backup_protectable_items_cf, resources_cf, backup_operation_statuses_cf,
     job_details_cf, protection_container_refresh_operation_results_cf, backup_protection_containers_cf,
-    protected_items_cf, resource_groups_cf)
+    protected_items_cf)
 
 logger = get_logger(__name__)
 
@@ -38,7 +38,7 @@ password_offset = 33
 password_length = 15
 
 
-def create_vault(cmd, client, vault_name, resource_group_name, location):
+def create_vault(client, vault_name, resource_group_name, location):
     vault_sku = Sku(SkuName.standard)
     vault_properties = VaultProperties()
 
@@ -491,6 +491,7 @@ def wait_for_job(client, resource_group_name, vault_name, name, timeout=None):
     return job_details
 
 # Client Utilities
+
 
 def _is_native_name(name):
     return ";" in name
