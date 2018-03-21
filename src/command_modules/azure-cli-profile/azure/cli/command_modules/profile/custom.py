@@ -116,16 +116,6 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     elif in_cloud_console():  # tell users they might not need login
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 
-    # if in_cloud_console():
-    #     console_tokens = os.environ.get('AZURE_CONSOLE_TOKENS', None)
-    #     if console_tokens:
-    #         return profile.find_subscriptions_in_cloud_console_thru_raw_token(re.split(';|,', console_tokens))
-    #     logger.warning(_CLOUD_CONSOLE_WARNING_TEMPLATE, 'login')
-    #     return
-
-    # if identity or msi:
-    #     return profile.find_subscriptions_in_vm_with_msi(identity_port or msi_port or 50342, username)
-
     if username:
         if not password:
             try:
@@ -165,9 +155,6 @@ def logout(cmd, username=None):
     """Log out to remove access to Azure subscriptions"""
     if in_cloud_console():
         logger.warning(_CLOUD_CONSOLE_LOGOUT_WARNING)
-    # if in_cloud_console():
-    #     logger.warning(_CLOUD_CONSOLE_WARNING_TEMPLATE, 'logout')
-    #     return
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     if not username:
