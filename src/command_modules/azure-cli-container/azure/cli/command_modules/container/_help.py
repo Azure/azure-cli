@@ -59,7 +59,11 @@ helps['container logs'] = """
 
 helps['container exec'] = """
     type: command
-    short-summary: Exec command for a container in a container group.
+    short-summary: Execute a command from within a running container of a container group.
+    long-summary: The most common use case is to open an interactive bash shell. See examples below. This command is currently not supported for Windows machines.
+    examples:
+        - name: Stream a shell from within an nginx container.
+          text: az container exec -g MyResourceGroup --name mynginx --container-name nginx --exec-command "/bin/bash"
 """
 
 helps['container attach'] = """

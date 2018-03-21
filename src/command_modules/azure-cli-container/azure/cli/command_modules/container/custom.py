@@ -9,10 +9,18 @@ import errno
 import platform
 import select
 import shlex
+import signal
 import sys
 import threading
 import time
+try:
+    import termios
+    import tty
+except ImportError:
+    # Not supported for Windows machines.
+    pass
 import websocket
+from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
@@ -20,11 +28,10 @@ from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, Con
                                                  ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize)
 from ._client_factory import cf_container_groups, cf_container_logs, cf_start_container
 
-
+logger = get_logger(__name__)
 ACR_SERVER_SUFFIX = '.azurecr.io/'
 AZURE_FILE_VOLUME_NAME = 'azurefile'
 SECRETS_VOLUME_NAME = 'secrets'
-WINDOWS_OS_NAME = 'Windows'
 
 
 def list_containers(client, resource_group_name=None):
@@ -237,25 +244,21 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
             stream_args=(logs_client, resource_group_name, name, container_name, container_group.restart_policy))
 
 
-def container_exec(cmd, resource_group_name, name, container_name=None, exec_command=None, terminal_row_size=None, terminal_col_size=None):
+def container_exec(cmd, resource_group_name, name, container_name=None, exec_command=None, terminal_row_size=20, terminal_col_size=80):
     """Start exec for a container. """
 
-    if platform.system() is WINDOWS_OS_NAME:
-        print("The container exec operation is currently not supported for Windows.")
+    if platform.system() is "Windows":
+        logger.warning("The container exec operation is currently not supported for Windows.")
         return
 
     start_container_client = cf_start_container(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
     container_group = container_group_client.get(resource_group_name, name)
 
-    # Set defaults for rows and cols size
-    if terminal_row_size is None:
-        terminal_row_size = 24
+    if len(container_group.containers) > 1 and container_name is None:
+        logger.error("Must specify the container name for container groups with more than one container.")
 
-    if terminal_col_size is None:
-        terminal_col_size = 80
-
-    # If container name is not present, use the first container.
+    # If only one container in container group, use that container.
     if container_name is None:
         container_name = container_group.containers[0].name
 
@@ -268,12 +271,17 @@ def container_exec(cmd, resource_group_name, name, container_name=None, exec_com
 
 def _start_exec_pipe(web_socket_uri, password):
     ws = websocket.create_connection(web_socket_uri)
-    try:
-        ws.send(password)
 
+    oldtty = termios.tcgetattr(sys.stdin)
+    old_handler = signal.getsignal(signal.SIGWINCH)
+
+    try:
+        tty.setraw(sys.stdin.fileno())
+        tty.setcbreak(sys.stdin.fileno())
+        ws.send(password)
         while True:
             try:
-                r, w, e = select.select([ws.sock, sys.stdin], [], [])
+                r, _, _ = select.select([ws.sock, sys.stdin], [], [])
                 if ws.sock in r:
                     data = ws.recv()
                     if not data:
@@ -291,7 +299,10 @@ def _start_exec_pipe(web_socket_uri, password):
                 else:
                     raise
     except websocket.WebSocketException:
-        print("Connection Ended.")
+        pass
+    finally:
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldtty)
+        signal.signal(signal.SIGWINCH, old_handler)
 
 
 def attach_to_container(cmd, resource_group_name, name, container_name=None):
