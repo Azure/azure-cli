@@ -4,8 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import LongRunningOperation
-from ._utils import arm_deploy_template_build_task_create
-from ._utils import validate_managed_registry
+from ._utils import (
+    arm_deploy_template_build_task_create,
+    validate_managed_registry
+)
 from .build import _check_image_name
 
 BUILD_TASKS_NOT_SUPPORTED = 'Build Tasks are only supported for managed registries.'
@@ -13,16 +15,17 @@ BUILD_TASKS_NOT_SUPPORTED = 'Build Tasks are only supported for managed registri
 
 def acr_build_task_create(
     cmd,
+    client,
     build_task_name,
     registry_name,
-    source_location,            
+    context,            
     source_branch,  
     image_name,
-    docker_file_path,
     git_access_token,
     resource_group_name=None,
+    docker_file_path='Dockerfile',
     os_type="Linux",
-    cpu=2):
+    cpu=1):
     
     registry, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
@@ -34,7 +37,7 @@ def acr_build_task_create(
                 registry_name,
                 registry.location,
                 resource_group_name,
-                source_location,
+                context,
                 source_branch,              
                 _check_image_name(image_name),
                 docker_file_path,
@@ -42,6 +45,7 @@ def acr_build_task_create(
                 os_type,
                 cpu)
         )
+    return client.get(resource_group_name, registry_name, build_task_name)
 
 def acr_build_task_show(
     cmd,

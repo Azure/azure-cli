@@ -47,6 +47,7 @@ def load_command_table(self, _):
 
     acr_build_task_util = CliCommandType(
         operations_tmpl='azure.cli.command_modules.acr.build_task#{}',    
+        table_transformer=output_format,
         client_factory=cf_acr_build_tasks
     )
 
