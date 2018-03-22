@@ -3,13 +3,10 @@
 Release History
 ===============
 
-0.1.21
-++++++
-* Allow table output for createing and updating a container group.
-
 0.1.20
 ++++++
 * Add 'az container exec' command that allows for exec commands in a container for a running container group.
+* Allow table output for creating and updating a container group.
 
 0.1.19
 ++++++
