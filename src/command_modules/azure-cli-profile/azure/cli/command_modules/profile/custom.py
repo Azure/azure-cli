@@ -10,6 +10,7 @@ from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 
 from azure.cli.core._profile import Profile
+from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import in_cloud_console
 
 logger = get_logger(__name__)
@@ -46,9 +47,10 @@ def list_subscriptions(cmd, all=False, refresh=False):  # pylint: disable=redefi
 
 
 # pylint: disable=inconsistent-return-statements
-def show_subscription(cmd, subscription=None, show_auth_for_sdk=None):
+def show_subscription(cmd, show_auth_for_sdk=None):
     import json
     profile = Profile(cli_ctx=cmd.cli_ctx)
+    subscription = get_subscription_id(cmd.cli_ctx)
     if not show_auth_for_sdk:
         return profile.get_subscription(subscription)
 

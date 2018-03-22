@@ -51,7 +51,7 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('username', help='account user, if missing, logout the current active account')
 
         with self.argument_context('account') as c:
-            c.argument('subscription', options_list=('--subscription', '-s'), help='Name or ID of subscription.', completer=get_subscription_id_list)
+            c.argument('subscription', options_list=('--subscription', '-s'), arg_group='', help='Name or ID of subscription.', completer=get_subscription_id_list)
 
         with self.argument_context('account list') as c:
             c.argument('all', help="List all subscriptions, rather just 'Enabled' ones", action='store_true')
