@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.20
+++++++
+* Add 'az container exec' command that allows for exec commands in a container for a running container group.
+
 0.1.19
 ++++++
 * Add '--secrets' and '--secrets-mount-path' options to 'az container create' for using secrets in ACI

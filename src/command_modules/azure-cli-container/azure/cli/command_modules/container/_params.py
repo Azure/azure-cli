@@ -71,5 +71,11 @@ def load_arguments(self, _):
         c.argument('container_name', help='The container name to tail the logs. If omitted, the first container in the container group will be chosen')
         c.argument('follow', help='Indicate to stream the tailing logs', action='store_true')
 
+    with self.argument_context('container exec') as c:
+        c.argument('container_name', help='The container name where to execute the command. Can be ommitted for container groups with only one container.')
+        c.argument('exec_command', help='The command to run from within the container')
+        c.argument('terminal_row_size', help='The row size for the command output')
+        c.argument('terminal_col_size', help='The col size for the command output')
+
     with self.argument_context('container attach') as c:
         c.argument('container_name', help='The container to attach to. If omitted, the first container in the container group will be chosen')
