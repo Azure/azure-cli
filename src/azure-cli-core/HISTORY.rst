@@ -6,7 +6,7 @@ Release History
 
 2.0.30
 ++++++
-* Minor fixes
+* Show message for extensions marked as preview on -h.
 
 2.0.29
 ++++++
