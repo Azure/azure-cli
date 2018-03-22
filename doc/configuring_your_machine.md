@@ -16,7 +16,8 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
   ```
   #### OSX/Ubuntu (bash)
   ```Shell
-  python –m venv <clone root>/env
+  # Note you may need to install the 'virtualenv' package with 'pip install virtualenv' or 'apt-get install python3-venv'
+  python -m venv <clone root>/env
   ```
 4.  Activate the env virtual environment by running:
 
