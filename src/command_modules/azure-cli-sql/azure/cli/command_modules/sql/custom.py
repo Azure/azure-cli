@@ -1032,7 +1032,7 @@ def failover_group_create(
         partner_server,
         partner_resource_group=None,
         failover_policy=FailoverPolicyType.automatic.value,
-        grace_period=60,
+        grace_period=1,
         add_db=None):
 
     # Build the partner server id
@@ -1054,6 +1054,9 @@ def failover_group_create(
         add_db,
         [])
 
+    # Convert grace period from hours to minutes
+    grace_period = int(grace_period) * 60
+
     return client.create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
@@ -1070,27 +1073,22 @@ def failover_group_create(
 
 def failover_group_update(
         cmd,
-        client,
+        instance,
         resource_group_name,
         server_name,
-        failover_group_name,
         failover_policy=None,
         grace_period=None,
         add_db=None,
         remove_db=None):
 
-    failover_group = client.get(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        failover_group_name=failover_group_name)
+    if failover_policy is not None:
+        instance.read_write_endpoint.failover_policy = failover_policy
 
-    if failover_policy is None:
-        failover_policy = failover_group.read_write_endpoint.failover_policy
+    if grace_period is not None:
+        grace_period = int(grace_period) * 60
+        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
 
-    if grace_period is None:
-        grace_period = failover_group.read_write_endpoint.failover_with_data_loss_grace_period_minutes
-
-    if failover_policy == 'Manual':
+    if instance.read_write_endpoint.failover_policy == 'Manual':
         grace_period = None
 
     if add_db is None:
@@ -1103,22 +1101,13 @@ def failover_group_update(
         get_subscription_id(cmd.cli_ctx),
         resource_group_name,
         server_name,
-        failover_group.databases,
+        instance.databases,
         add_db,
         remove_db)
 
-    return client.create_or_update(
-        resource_group_name=resource_group_name,
-        server_name=server_name,
-        failover_group_name=failover_group_name,
-        parameters=FailoverGroup(
-            partner_servers=failover_group.partner_servers,
-            databases=databases,
-            read_write_endpoint=FailoverGroupReadWriteEndpoint(
-                failover_policy=failover_policy,
-                failover_with_data_loss_grace_period_minutes=grace_period),
-            read_only_endpoint=FailoverGroupReadOnlyEndpoint(
-                failover_policy=failover_group.read_only_endpoint.failover_policy)))
+    instance.databases = databases
+
+    return instance
 
 
 def _get_list_of_databases_for_fg(
@@ -1141,7 +1130,8 @@ def _get_list_of_databases_for_fg(
         quote(server_name),
         quote(d)) for d in remove_db]
 
-    databases = list((set(databases_in_fg) | set(add_db_ids)) - set(remove_db_ids))
+    databases = list((set(map(str.lower, databases_in_fg)) |
+                      set(map(str.lower, add_db_ids))) - set(map(str.lower, remove_db_ids)))
 
     return databases
 

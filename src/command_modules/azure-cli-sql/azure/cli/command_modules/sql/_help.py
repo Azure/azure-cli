@@ -297,11 +297,11 @@ helps['sql failover-group create'] = """
 """
 helps['sql failover-group update'] = """
     type: command
-    short-summary: Updates the parameters of the failover group.
+    short-summary: Updates the failover group.
 """
 helps['sql failover-group set-primary'] = """
     type: command
-    short-summary: Executes a failover of a failover group.
+    short-summary: Set the primary of the failover group by failing over all databases from the current primary server.
 """
 helps['sql server'] = """
     type: group

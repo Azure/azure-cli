@@ -172,7 +172,7 @@ def load_command_table(self, _):
         g.command('show', 'get')
         g.command('list', 'list_by_server')
         g.custom_command('create', 'failover_group_create')
-        g.custom_command('update', 'failover_group_update')
+        g.generic_update_command('update', custom_func_name='failover_group_update')
         g.command('delete', 'delete')
         g.custom_command('set-primary', 'failover_group_failover')
 

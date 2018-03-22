@@ -609,7 +609,7 @@ def load_arguments(self, _):
         c.argument('failover_policy', help="The failover policy of the Failover Group",
                    arg_type=get_enum_type(FailoverPolicyType))
         c.argument('grace_period',
-                   help='Interval before automatic failover is initiated '
+                   help='Interval in hours before automatic failover is initiated '
                         'if an outage occurs on the primary server. '
                         'This indicates that Azure SQL Database will not initiate '
                         'automatic failover before the grace period expires. '
@@ -619,6 +619,9 @@ def load_arguments(self, _):
                    help='List of databases to add to Failover Group')
         c.argument('remove_db', nargs='+',
                    help='List of databases to remove from Failover Group')
+        c.argument('allow-data-loss',
+                   help='Complete the failover even if doing so may result in data loss. '
+                        'This will allow the failover to proceed even if a primary database is unavailable.')
 
     ###############################################
     #                sql server                   #
