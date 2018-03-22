@@ -12,7 +12,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import (
-    get_location_type, get_resource_name_completion_list, tags_type,
+    get_location_type, get_resource_name_completion_list, tags_type, get_three_state_flag,
     file_type, get_enum_type, zone_type, zones_type)
 from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
@@ -82,10 +82,13 @@ def load_arguments(self, _):
     # endregion
 
     # region Snapshots
-    with self.argument_context('snapshot') as c:
+    with self.argument_context('snapshot', resource_type=ResourceType.MGMT_COMPUTE, operation_group='snapshots') as c:
         c.argument('snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
         c.argument('name', arg_type=name_arg_type)
-        c.argument('sku', arg_type=disk_sku)
+        if self.supported_api_version(min_api='2018-04-01', operation_group='snapshots'):
+            c.argument('sku', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'Standard_ZRS']))
+        else:
+            c.argument('sku', arg_type=disk_sku)
     # endregion
 
     # region Images
@@ -98,6 +101,8 @@ def load_arguments(self, _):
         c.argument('name', arg_type=name_arg_type, help='new image name')
         c.argument('source', help='OS disk source from the same region, including a virtual machine ID or name, OS disk blob URI, managed OS disk ID or name, or OS snapshot ID or name')
         c.argument('data_disk_sources', nargs='+', help='Space-separated list of data disk sources, including unmanaged blob URI, managed disk ID or name, or snapshot ID or name')
+        c.argument('zone_resilient', min_api='2017-12-01', arg_type=get_three_state_flag(), help='Specifies whether an image is zone resilient or not. '
+                   'Default is false. Zone resilient images can be created only in regions that provide Zone Redundant Storage')
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
     # endregion
 

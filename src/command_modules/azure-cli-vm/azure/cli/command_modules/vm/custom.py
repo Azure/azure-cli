@@ -315,13 +315,15 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
                  source_virtual_machine=None,
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
-                 os_disk=None, data_disks=None, tags=None):
+                 os_disk=None, data_disks=None, tags=None, zone_resilient=None):
     ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource, OperatingSystemStateTypes = cmd.get_models(
         'ImageOSDisk', 'ImageDataDisk', 'ImageStorageProfile', 'Image', 'SubResource', 'OperatingSystemStateTypes')
 
     if source_virtual_machine:
         location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-        image = Image(location=location, source_virtual_machine=SubResource(id=source_virtual_machine))
+        image_storage_profile = None if zone_resilient is None else ImageStorageProfile(zone_resilient=zone_resilient)
+        image = Image(location=location, source_virtual_machine=SubResource(id=source_virtual_machine),
+                      storage_profile=image_storage_profile, tags=(tags or {}))
     else:
         os_disk = ImageOSDisk(os_type=os_type,
                               os_state=OperatingSystemStateTypes.generalized,
@@ -343,7 +345,9 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
                 all_data_disks.append(ImageDataDisk(lun=lun, managed_disk=SubResource(id=d)))
                 lun += 1
 
-        image_storage_profile = image_storage_profile = ImageStorageProfile(os_disk=os_disk, data_disks=all_data_disks)
+        image_storage_profile = ImageStorageProfile(os_disk=os_disk, data_disks=all_data_disks)
+        if zone_resilient is not None:
+            image_storage_profile.zone_resilient = zone_resilient
         location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
         # pylint disable=no-member
         image = Image(location=location, storage_profile=image_storage_profile, tags=(tags or {}))

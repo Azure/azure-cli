@@ -223,11 +223,10 @@ class VMGeneralizeScenarioTest(ScenarioTest):
     def test_vm_generalize(self, resource_group):
 
         self.kwargs.update({
-            'loc': 'westus',
             'vm': 'vm-generalize'
         })
 
-        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 --authentication-type password --use-unmanaged-disk')
+        self.cmd('vm create -g {rg} -n {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 --authentication-type password --use-unmanaged-disk')
         self.cmd('vm stop -g {rg} -n {vm}')
         # Should be able to generalize the VM after it has been stopped
         self.cmd('vm generalize -g {rg} -n {vm}', checks=self.is_empty())
@@ -239,7 +238,30 @@ class VMGeneralizeScenarioTest(ScenarioTest):
         self.kwargs['image'] = 'myImage'
         self.cmd('image create -g {rg} -n {image} --source {vm}', checks=[
             self.check('name', '{image}'),
-            self.check('sourceVirtualMachine.id', vm['id'])
+            self.check('sourceVirtualMachine.id', vm['id']),
+            self.check('storageProfile.zoneResilient', None)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_generalize_vm')
+    def test_vm_capture_zone_resilient_image(self, resource_group):
+
+        self.kwargs.update({
+            'loc': 'francecentral',
+            'vm': 'vm-generalize'
+        })
+
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu --image centos --admin-password testPassword0 --authentication-type password')
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        # Should be able to generalize the VM after it has been stopped
+        self.cmd('vm generalize -g {rg} -n {vm}', checks=self.is_empty())
+        vm = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+
+        # capture to a custom image
+        self.kwargs['image'] = 'myImage2'
+        self.cmd('image create -g {rg} -n {image} --source {vm} --zone-resilient -l {loc}', checks=[
+            self.check('name', '{image}'),
+            self.check('sourceVirtualMachine.id', vm['id']),
+            self.check('storageProfile.zoneResilient', True)
         ])
 
 
