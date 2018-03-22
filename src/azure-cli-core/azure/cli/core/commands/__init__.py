@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-many-lines
 from __future__ import print_function
 
 import datetime
@@ -35,6 +36,11 @@ CLI_COMMAND_KWARGS = ['transform', 'table_transformer', 'confirmation', 'excepti
 CLI_PARAM_KWARGS = \
     ['id_part', 'completer', 'validator', 'options_list', 'configured_default', 'arg_group', 'arg_type'] \
     + CLI_COMMON_KWARGS + ARGPARSE_SUPPORTED_KWARGS
+
+CLI_POSITIONAL_PARAM_KWARGS = \
+    ['completer', 'validator', 'configured_default', 'arg_type',
+     'dest', 'default', 'type', 'help', 'metavar', 'action', 'nargs'] \
+    + CLI_COMMAND_KWARGS  # specify which argparse kwargs are supported
 
 CONFIRM_PARAM_NAME = 'yes'
 
@@ -365,6 +371,25 @@ class AzCliCommandInvoker(CommandInvoker):
         if 'ns' in arg_list:
             kwargs['ns'] = ns
         return kwargs
+
+    def _rudimentary_get_command(self, args):  # pylint: disable=no-self-use
+        """ Rudimentary parsing to get the command """
+        nouns = []
+        command_names = self.commands_loader.command_table.keys()
+        for arg in args:
+            if arg[0] != '-':
+                nouns.append(arg)
+            else:
+                break
+
+        def _find_args(args):
+            search = ' '.join(args)
+            return next((x for x in command_names if x.startswith(search)), False)
+
+        # since the command name may be immediately followed by a positional arg, strip those off
+        while nouns and not _find_args(nouns):
+            del nouns[-1]
+        return ' '.join(nouns)
 
     def _validate_cmd_level(self, ns, cmd_validator):  # pylint: disable=no-self-use
         if cmd_validator:
@@ -892,6 +917,38 @@ class AzArgumentContext(ArgumentsContext):
             return
 
         merged_kwargs = self._flatten_kwargs(kwargs, arg_type)
+        resource_type = merged_kwargs.get('resource_type', None)
+        min_api = merged_kwargs.get('min_api', None)
+        max_api = merged_kwargs.get('max_api', None)
+        operation_group = merged_kwargs.get('operation_group', None)
+        if self.command_loader.supported_api_version(resource_type=resource_type,
+                                                     min_api=min_api,
+                                                     max_api=max_api,
+                                                     operation_group=operation_group):
+            super(AzArgumentContext, self).argument(dest, **merged_kwargs)
+        else:
+            super(AzArgumentContext, self).argument(dest, arg_type=ignore_type)
+
+    def positional(self, dest, arg_type=None, **kwargs):
+        self._check_stale()
+        if not self._applicable():
+            return
+
+        if self.scope not in self.command_loader.command_table:
+            raise ValueError("command authoring error: positional argument '{}' cannot be registered to a group-level "
+                             "scope '{}'. It must be registered to a specific command.".format(dest, self.scope))
+
+        # Ensure max of 1 positional per command
+        command_args = self.command_loader.argument_registry.arguments[self.scope]
+        positional_args = {k: v for k, v in command_args.items() if not v.settings['options_list']}
+        if positional_args:
+            raise CLIError("command authoring error: commands may have, at most, one positional argument. '{}' already "
+                           "has positional argument: {}.".format(self.scope, ' '.join(positional_args.keys())))
+
+        merged_kwargs = self._flatten_kwargs(kwargs, arg_type)
+        merged_kwargs = {k: v for k, v in merged_kwargs.items() if k in CLI_POSITIONAL_PARAM_KWARGS}
+        merged_kwargs['options_list'] = []
+
         resource_type = merged_kwargs.get('resource_type', None)
         min_api = merged_kwargs.get('min_api', None)
         max_api = merged_kwargs.get('max_api', None)
