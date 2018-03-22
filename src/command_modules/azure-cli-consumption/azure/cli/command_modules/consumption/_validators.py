@@ -30,7 +30,7 @@ def validate_both_start_end_dates(namespace):
         raise CLIError("usage error: Both --start-date and --end-date need to be supplied or neither.")
 
 
-def validate_reservations_summaries(namespace):
+def validate_reservation_summary(namespace):
     """lowercase the data grain for comparison"""
     data_grain = namespace.grain.lower()
     if data_grain != 'daily' and data_grain != 'monthly':

@@ -20,7 +20,7 @@ def transform_usage_list_output(result):
     return [transform_usage_output(item) for item in result]
 
 
-def reservation_summaries_output(result):
+def reservation_summary_output(result):
 
     result.reserved_hours = str(result.reserved_hours)
     result.usage_date = result.usage_date.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -31,11 +31,11 @@ def reservation_summaries_output(result):
     return result
 
 
-def transform_reservation_summaries_list_output(result):
-    return [reservation_summaries_output(item) for item in result]
+def transform_reservation_summary_list_output(result):
+    return [reservation_summary_output(item) for item in result]
 
 
-def reservation_details_output(result):
+def reservation_detail_output(result):
 
     result.reserved_hours = str(result.reserved_hours)
     result.usage_date = result.usage_date.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -44,8 +44,8 @@ def reservation_details_output(result):
     return result
 
 
-def transform_reservation_details_list_output(result):
-    return [reservation_details_output(item) for item in result]
+def transform_reservation_detail_list_output(result):
+    return [reservation_detail_output(item) for item in result]
 
 
 def pricesheet_show_properties(result):

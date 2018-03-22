@@ -14,11 +14,11 @@ def usage_details_mgmt_client_factory(cli_ctx, kwargs):
     return cf_consumption(cli_ctx, **kwargs).usage_details
 
 
-def reservations_summaries_mgmt_client_factory(cli_ctx, kwargs):
+def reservation_summary_mgmt_client_factory(cli_ctx, kwargs):
     return cf_consumption(cli_ctx, **kwargs).reservations_summaries
 
 
-def reservations_details_mgmt_client_factory(cli_ctx, kwargs):
+def reservation_detail_mgmt_client_factory(cli_ctx, kwargs):
     return cf_consumption(cli_ctx, **kwargs).reservations_details
 
 
