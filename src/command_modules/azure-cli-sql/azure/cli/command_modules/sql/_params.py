@@ -602,7 +602,7 @@ def load_arguments(self, _):
     #####
     with self.argument_context('sql elastic-pool op') as c:
         c.argument('elastic_pool_name',
-                   options_list=['--elastic-pool', '-ep'],
+                   options_list=['--elastic-pool'],
                    required=True,
                    help='Name of the Azure SQL Elastic Pool.')
 
