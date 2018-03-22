@@ -3,6 +3,14 @@
 Release History
 ===============
 
+2.0.30
+++++++
+* Fix issue of upload file with size between 195GB and 200GB
+
+2.0.29
+++++++
+* Minor fixes.
+
 2.0.28
 ++++++
 * Fix problems with append blob uploads ignoring condition parameters.
