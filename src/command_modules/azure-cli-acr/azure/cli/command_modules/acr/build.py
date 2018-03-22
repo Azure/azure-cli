@@ -57,7 +57,7 @@ def acr_build_show_logs(cmd,
     account_name, endpoint_suffix, container_name, blob_name, sas_token = _get_blob_info(log_file_sas)
 
     byte_size = 1024*4
-    timeout_in_minutes = 10
+    timeout_in_minutes = 30
     timeout_in_seconds = timeout_in_minutes * 60
 
     _stream_logs(byte_size, timeout_in_seconds,
