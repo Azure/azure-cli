@@ -34,11 +34,11 @@ def _add_headers(client):
     client.default_headers['User-Agent'] = ' '.join(agents)
 
 
-def _get_url_connection(url_collection, account_name):
+def _get_url_connection(url_collection, document_endpoint):
     if url_collection:
         return url_collection
-    elif account_name:
-        return 'https://{}.documents.azure.com:443'.format(account_name)
+    elif document_endpoint:
+        return document_endpoint
 
     return None
 
@@ -53,13 +53,18 @@ def cf_cosmosdb_document(cli_ctx, kwargs):
         key = kwargs.pop('db_account_key', None)
         url_connection = kwargs.pop('db_url_connection', None)
         resource_group = kwargs.pop('db_resource_group_name', None)
+        document_endpoint = kwargs.pop('db_document_endpoint', None)
 
         if name and resource_group and not key:
             # if resource group name is provided find key
             keys = cf_cosmosdb(cli_ctx).database_accounts.list_keys(resource_group, name)
             key = keys.primary_master_key
 
-        url_connection = _get_url_connection(url_connection, name)
+        if name and resource_group and not document_endpoint:
+            database_account = cf_cosmosdb(cli_ctx).database_accounts.get(resource_group, name)
+            document_endpoint = database_account.document_endpoint
+
+        url_connection = _get_url_connection(url_connection, document_endpoint)
 
         if not key and not url_connection:
             raise CLIError(NO_CREDENTIALS_ERROR_MESSAGE)
