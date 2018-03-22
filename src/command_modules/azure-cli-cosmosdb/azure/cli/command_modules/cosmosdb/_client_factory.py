@@ -44,7 +44,6 @@ def cf_cosmosdb_document(cli_ctx, kwargs):
         key = kwargs.pop('db_account_key', None)
         url_connection = kwargs.pop('db_url_connection', None)
         resource_group = kwargs.pop('db_resource_group_name', None)
-        document_endpoint = None
 
         if name and resource_group and not key:
             # if resource group name is provided find key
