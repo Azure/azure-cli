@@ -11,11 +11,6 @@ helps['acr'] = """
     short-summary: Manage Azure Container Registries.
     """
 
-helps['acr build show-logs'] = """
-    type: command
-    short-summary: Shows logs for a particular build.
-    """
-
 helps['acr credential'] = """
     type: group
     short-summary: Manage login credentials for Azure Container Registries.
@@ -356,9 +351,41 @@ helps['acr build-task delete'] = """
             az acr build-task delete -n MyBuildTask -r MyRegistry
 """
 
+helps['acr build-task list-builds'] = """
+    type: command
+    short-summary: List all of the builds for a build task.
+    examples:
+        - name: List builds for a build task and show the results in a table.
+          text: >
+            az acr build-task list-builds -n MyBuildTask -r MyRegistry -o table
+"""
+
+helps['acr build-task queue-build'] = """
+    type: command
+    short-summary: Queue a build with specified parameters in a build task.
+    examples:
+        - name: Queue a build with specified parameters in a build task.
+          text: >
+            az acr build-task queue-build -n MyBuildTask -r MyRegistry
+"""
+
+helps['acr build-task show-logs'] = """
+    type: command
+    short-summary: Show logs for a build on a build task.
+    examples:
+        - name: Show logs for a build on a build task.
+          text: >
+            az acr build-task show-logs --build-id buildId -r MyRegistry
+"""
+
 # help for build
 # TODO: bindu update the help and samples after we finalize the commands.
 helps['acr build'] = """
     type: command
     short-summary: Queues a new build based on the specified parameters.
+"""
+
+helps['acr build show-logs'] = """
+    type: command
+    short-summary: Shows logs for a particular build.
 """

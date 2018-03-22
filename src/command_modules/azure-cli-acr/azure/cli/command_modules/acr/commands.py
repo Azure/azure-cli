@@ -109,6 +109,9 @@ def load_command_table(self, _):
             g.command('show', 'acr_build_task_show')
             g.command('list', 'acr_build_task_list')
             g.command('delete', 'acr_build_task_delete')
+            g.command('list-builds', 'acr_build_task_list_builds')
+            g.command('queue-build', 'acr_build_task_queue_build')
+            g.command('show-logs', 'acr_build_task_show_logs')
 
     with self.command_group('acr build', acr_build_util) as g:
             g.command('show-logs', 'acr_build_show_logs')

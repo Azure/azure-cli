@@ -18,14 +18,14 @@ def acr_build_task_create(
     client,
     build_task_name,
     registry_name,
-    context,            
-    source_branch,  
+    source_location,            
     image_name,
     git_access_token,
-    resource_group_name=None,
+    source_branch="master",  
     docker_file_path='Dockerfile',
     os_type="Linux",
-    cpu=1):
+    cpu=1,
+    resource_group_name=None):
     
     registry, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
@@ -37,7 +37,7 @@ def acr_build_task_create(
                 registry_name,
                 registry.location,
                 resource_group_name,
-                context,
+                source_location,
                 source_branch,              
                 _check_image_name(image_name),
                 docker_file_path,
@@ -46,6 +46,7 @@ def acr_build_task_create(
                 cpu)
         )
     return client.get(resource_group_name, registry_name, build_task_name)
+
 
 def acr_build_task_show(
     cmd,
@@ -58,6 +59,7 @@ def acr_build_task_show(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
     return client.get(resource_group_name, registry_name, build_task_name)
 
+
 def acr_build_task_list(
     cmd,
     client,
@@ -68,6 +70,7 @@ def acr_build_task_list(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
     return client.list(resource_group_name, registry_name)
 
+
 def acr_build_task_delete(
     cmd,
     client,
@@ -77,3 +80,58 @@ def acr_build_task_delete(
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
     return client.delete(resource_group_name, registry_name, build_task_name)
+
+
+def acr_build_task_list_builds(
+    cmd,
+    client,
+    build_task_name,
+    registry_name,
+    resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
+
+    from ._client_factory import cf_acr_builds
+    client_builds = cf_acr_builds(cmd.cli_ctx)
+    filter_str = "BuildTaskName eq '{}'".format(build_task_name)
+    return client_builds.list(resource_group_name, registry_name, filter=filter_str)
+
+
+def acr_build_task_queue_build(
+    cmd,
+    client,
+    build_task_name,
+    registry_name,
+    resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
+
+    from ._client_factory import cf_acr_build_registries
+    client_registries = cf_acr_build_registries(cmd.cli_ctx)
+    buildRequest = {
+        "type": "BuildTask",
+        "buildTaskName": build_task_name
+    }
+    return client_registries.queue_build(resource_group_name, registry_name, buildRequest)
+
+
+def acr_build_task_show_logs(
+    cmd,
+    client,
+    registry_name,
+    build_id,
+    resource_group_name=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
+
+    from ._client_factory import cf_acr_builds
+    from .build import acr_build_show_logs
+    client_builds = cf_acr_builds(cmd.cli_ctx)
+    
+    return acr_build_show_logs(
+        cmd,
+        client_builds,
+        registry_name,
+        build_id,
+        resource_group_name
+    )
