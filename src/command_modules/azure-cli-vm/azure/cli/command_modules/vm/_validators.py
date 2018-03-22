@@ -928,6 +928,10 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
         balancer_type = 'loadBalancer' if namespace.instance_count <= INSTANCE_THRESHOLD \
             else 'applicationGateway'
         logger.debug("defaulting to '%s' because instance count <= %s", balancer_type, INSTANCE_THRESHOLD)
+        if balancer_type == 'applicationGateway':
+            logger.warning("In a future release of CLI, for scalesets with 100+ instances, the default balancer "
+                           "will be Standard Load Balancer instead of Application Gateway. Use '--app-gateway' to "
+                           "continue using applicaiton gateways")
     elif namespace.load_balancer:
         balancer_type = 'loadBalancer'
     elif namespace.application_gateway:
