@@ -4,7 +4,7 @@ Release History
 ===============
 2.0.21
 ++++++
-* minor fixes
+* az login: warn on using --identity-port/--msi-port as they become useless with imds support
 
 2.0.20
 ++++++

@@ -101,7 +101,11 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     # quick argument usage check
     if (any([password, service_principal, tenant, allow_no_subscriptions]) and
             any([identity, msi])):
-        raise CLIError("usage error: '--identity/--identity-port' are not applicable with other arguments")
+        raise CLIError("usage error: '--identity' is not applicable with other arguments")
+
+    if msi_port or identity_port:
+        logger.warning("'--msi-port/--identity-port' is no longer required to login using managed identity."
+                       " This flag will be removed in a future release of CLI.")
 
     interactive = False
 
@@ -110,7 +114,7 @@ def login(cmd, username=None, password=None, service_principal=None, tenant=None
     if identity or msi:
         if in_cloud_console():
             return profile.find_subscriptions_in_cloud_console()
-        return profile.find_subscriptions_in_vm_with_msi(identity_port or msi_port or 50342, username)
+        return profile.find_subscriptions_in_vm_with_msi(username)
     elif in_cloud_console():  # tell users they might not need login
         logger.warning(_CLOUD_CONSOLE_LOGIN_WARNING)
 

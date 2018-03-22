@@ -58,19 +58,20 @@ class ProfileCommandTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.profile.custom.Profile', autospec=True)
     def test_get_login(self, profile_mock):
+        invoked = []
+
         def test_login(msi_port, identity_id=None):
-            if msi_port == 50342:
-                return []
-            else:
-                raise ValueError("default port is not set")
+            invoked.append(True)
 
         # mock the instance
         profile_instance = mock.MagicMock()
         profile_instance.find_subscriptions_in_vm_with_msi = test_login
         # mock the constructor
         profile_mock.return_value = profile_instance
+
         # action
         cmd = mock.MagicMock()
         login(cmd, identity=True)
 
-        # once we are here, we are good
+        # assert
+        self.assertTrue(invoked)
