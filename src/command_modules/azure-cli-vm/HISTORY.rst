@@ -5,6 +5,7 @@ Release History
 
 2.0.29
 ++++++
+* `vmss create`: warn on upcoming breaking changes on default balancer for scaleset with 100+ instances
 * vm snapshot/image: support zone resilient
 * vmss: report better encryption status through disk instance view
 * BC: `az vm extension delete` no longer returns output as expected for a `delete` command.
