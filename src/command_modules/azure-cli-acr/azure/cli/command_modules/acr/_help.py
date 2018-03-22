@@ -10,25 +10,6 @@ helps['acr'] = """
     type: group
     short-summary: Manage Azure Container Registries.
     """
-helps['acr build-task create'] = """
-    type: command
-    short-summary: Creates a new build task with specified parameters.
-    """
-
-helps['acr build-task show'] = """
-    type: command
-    short-summary: Get the properties of a specified build task.
-    examples:
-        - name: Get the details of a build task.
-          text: >
-            az acr build-task show -n MyBuildTask -r MyRegistry
-    """
-
-# TODO: bindu update the help and samples after we finalize the commands.
-helps['acr build'] = """
-    type: command
-    short-summary: Queues a new build based on the specified parameters.
-    """
 
 helps['acr build show-logs'] = """
     type: command
@@ -340,4 +321,44 @@ helps['acr replication update'] = """
         - name: Update tags for a replication
           text: >
             az acr replication update -n MyReplication -r MyRegistry --tags key1=value1 key2=value2
+"""
+
+# help for build-task
+helps['acr build-task create'] = """
+    type: command
+    short-summary: Creates a new build task with specified parameters.
+"""
+
+helps['acr build-task show'] = """
+    type: command
+    short-summary: Get the properties of a specified build task.
+    examples:
+        - name: Get the details of a build task.
+          text: >
+            az acr build-task show -n MyBuildTask -r MyRegistry
+"""
+
+helps['acr build-task list'] = """
+    type: command
+    short-summary: List all of the build tasks for a container registry.
+    examples:
+        - name: List build tasks and show the results in a table.
+          text: >
+            az acr build-task list -r MyRegistry -o table
+"""
+
+helps['acr build-task delete'] = """
+    type: command
+    short-summary: Delete a build task from a container registry.
+    examples:
+        - name: Delete a build task from a container registry.
+          text: >
+            az acr build-task delete -n MyBuildTask -r MyRegistry
+"""
+
+# help for build
+# TODO: bindu update the help and samples after we finalize the commands.
+helps['acr build'] = """
+    type: command
+    short-summary: Queues a new build based on the specified parameters.
 """

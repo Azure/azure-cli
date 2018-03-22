@@ -65,14 +65,6 @@ def load_command_table(self, _):
                                  custom_func_type=acr_custom_util,
                                  client_factory=cf_acr_registries)
 
-    with self.command_group('acr build-task', acr_build_task_util) as g:
-            g.command('create', 'acr_build_task_create')
-            g.command('show', 'acr_build_task_show')
-
-    with self.command_group('acr build', acr_build_util) as g:
-            g.command('show-logs', 'acr_build_show_logs')
-            g.command('', 'acr_queue') # TODO: it should be moved to acr command group once we can integrate the full sdk.
-
     with self.command_group('acr credential', acr_cred_util) as g:
         g.command('show', 'acr_credential_show', exception_handler=empty_on_404)
         g.command('renew', 'acr_credential_renew')
@@ -110,3 +102,13 @@ def load_command_table(self, _):
                                  custom_func_name='acr_replication_update_custom',
                                  custom_func_type=acr_replication_util,
                                  client_factory=cf_acr_replications)
+
+    with self.command_group('acr build-task', acr_build_task_util) as g:
+            g.command('create', 'acr_build_task_create')
+            g.command('show', 'acr_build_task_show')
+            g.command('list', 'acr_build_task_list')
+            g.command('delete', 'acr_build_task_delete')
+
+    with self.command_group('acr build', acr_build_util) as g:
+            g.command('show-logs', 'acr_build_show_logs')
+            g.command('', 'acr_queue') # TODO: it should be moved to acr command group once we can integrate the full sdk.
