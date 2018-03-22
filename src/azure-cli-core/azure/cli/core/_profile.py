@@ -272,8 +272,7 @@ class Profile(object):
 
     def find_subscriptions_in_cloud_console(self):
         import jwt
-        token_entry = self._get_token_from_cloud_shell(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
-        token = token_entry['access_token']
+        _, token, _ = self._get_token_from_cloud_shell(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, verify=False, algorithms=['RS256'])
         tenant = decode['tid']
@@ -297,7 +296,8 @@ class Profile(object):
             'resource': resource
         }
         result = requests.get(request_uri, params=payload, headers={'Metadata': 'true'})
-        return json.loads(result.content.decode())
+        token_entry = json.loads(result.content.decode())
+        return (token_entry['token_type'], token_entry['access_token'], token_entry)
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
 
