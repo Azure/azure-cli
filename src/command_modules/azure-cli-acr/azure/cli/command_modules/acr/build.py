@@ -270,13 +270,13 @@ def acr_queue(cmd,
 
         size = os.path.getsize(tar_file_path)
         unit = ""
-        for S in ['Bytes', 'KB', 'MB', 'GB']:
+        for S in ['Bytes', 'KiB', 'MiB', 'GiB']:
             if size < 1024:
                 unit = S
                 break
             size = size / 1024.0
         if unit == "":
-            unit = "GB"
+            unit = "GiB"
 
         print("Sending build context ({0: .3f} {1}) to ACR Build as Id: {2}".format(
             size, unit, result.build_id))
