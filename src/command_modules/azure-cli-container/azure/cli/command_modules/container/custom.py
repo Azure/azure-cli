@@ -6,6 +6,11 @@
 # pylint: disable=too-few-public-methods,too-many-arguments,no-self-use,too-many-locals,line-too-long,unused-argument
 
 import errno
+try:
+    import msvcrt
+except ImportError:
+    # Not supported for Linux machines.
+    pass
 import platform
 import select
 import shlex
@@ -248,10 +253,6 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
 def container_exec(cmd, resource_group_name, name, container_name=None, exec_command=None, terminal_row_size=20, terminal_col_size=80):
     """Start exec for a container. """
 
-    if platform.system() is WINDOWS_NAME:
-        logger.warning("The container exec operation is currently not supported for Windows.")
-        return
-
     start_container_client = cf_start_container(cmd.cli_ctx)
     container_group_client = cf_container_groups(cmd.cli_ctx)
     container_group = container_group_client.get(resource_group_name, name)
@@ -265,9 +266,38 @@ def container_exec(cmd, resource_group_name, name, container_name=None, exec_com
 
         execContainerResponse = start_container_client.launch_exec(resource_group_name, name, container_name, exec_command, terminal_size)
 
-        _start_exec_pipe(execContainerResponse.web_socket_uri, execContainerResponse.password)
+        if platform.system() is WINDOWS_NAME:
+            _start_exec_pipe_win(execContainerResponse.web_socket_uri, execContainerResponse.password)
+        else:
+            _start_exec_pipe(execContainerResponse.web_socket_uri, execContainerResponse.password)
+
     else:
         raise CLIError('--container-name required when container group has more than one container.')
+
+
+def _start_exec_pipe_win(web_socket_uri, password):
+
+    def _on_ws_open(ws):
+        ws.send(password)
+        t = threading.Thread(target=_capture_stdin, args=[ws])
+        t.daemon = True
+        t.start()
+
+    ws = websocket.WebSocketApp(web_socket_uri, on_open=_on_ws_open, on_message=_on_ws_msg)
+
+    ws.run_forever()
+
+
+def _on_ws_msg(ws, msg):
+    sys.stdout.write(msg)
+    sys.stdout.flush()
+
+
+def _capture_stdin(ws):
+    while True:
+        if msvcrt.kbhit:
+            x = msvcrt.getch()
+            ws.send(x)
 
 
 def _start_exec_pipe(web_socket_uri, password):
