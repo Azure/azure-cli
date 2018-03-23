@@ -5,6 +5,9 @@ Release History
 0.2.3
 +++++
 * Added new commands for marketplace.
+* Renamed commands for reservation summary and detail.
+* Updated options list for reservation and pricesheet.
+* Breaking change.
 
 0.2.2
 +++++
