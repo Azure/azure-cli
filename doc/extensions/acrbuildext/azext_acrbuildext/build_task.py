@@ -85,23 +85,28 @@ def acr_build_task_delete(
 def acr_build_task_list_builds(
     cmd,
     client,
-    build_task_name,
     registry_name,
+    build_task_name=None,
     resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
 
     from ._client_factory import cf_acr_builds
-    client_builds = cf_acr_builds(cmd.cli_ctx)
-    filter_str = "BuildTaskName eq '{}'".format(build_task_name)
-    return client_builds.list(resource_group_name, registry_name, filter=filter_str)
+    client_builds = cf_acr_builds(cmd.cli_ctx)\
+
+    if build_task_name is None:        
+        return client_builds.list(resource_group_name, registry_name)        
+    else:
+        filter_str = "BuildTaskName eq '{}'".format(build_task_name)
+        return client_builds.list(resource_group_name, registry_name, filter=filter_str)
 
 
-def acr_build_task_queue_build(
+def acr_build_task_run(
     cmd,
     client,
     build_task_name,
     registry_name,
+    no_logs=False,
     resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
@@ -112,18 +117,36 @@ def acr_build_task_queue_build(
         "type": "BuildTask",
         "buildTaskName": build_task_name
     }
-    return client_registries.queue_build(resource_group_name, registry_name, buildRequest)
+
+    queued_build = LongRunningOperation(cmd.cli_ctx)(
+        client_registries.queue_build(resource_group_name, registry_name, buildRequest))        
+    if no_logs:
+        return queued_build
+    else:
+        if queued_build:
+            build_id = queued_build.build_id
+            print("Queued a build with build-id: {}.".format(build_id))
+            print("Starting to stream the logs...")
+            acr_build_task_logs(cmd, client, registry_name, build_id)
 
 
-def acr_build_task_show_logs(
+def acr_build_task_logs(
     cmd,
     client,
     registry_name,
-    build_id,
+    build_id=None,
     resource_group_name=None):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, BUILD_TASKS_NOT_SUPPORTED)
 
+    if build_id is None:     
+        # show logs for the last build
+        builds_paged = acr_build_task_list_builds(cmd, client, registry_name)
+        if builds_paged:
+            builds = builds_paged.get(0)
+            if builds:
+                build_id = builds[0].build_id
+            
     from ._client_factory import cf_acr_builds
     from .build import acr_build_show_logs
     client_builds = cf_acr_builds(cmd.cli_ctx)

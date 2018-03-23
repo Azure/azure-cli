@@ -41,8 +41,8 @@ class AcrBuildCommandsLoader(AzCommandsLoader):
             g.command('list', 'acr_build_task_list')
             g.command('delete', 'acr_build_task_delete')
             g.command('list-builds', 'acr_build_task_list_builds')
-            g.command('queue-build', 'acr_build_task_queue_build')
-            g.command('show-logs', 'acr_build_task_show_logs')
+            g.command('run', 'acr_build_task_run')
+            g.command('logs', 'acr_build_task_logs')
         return self.command_table
 
     def load_arguments(self, _):
@@ -67,6 +67,7 @@ class AcrBuildCommandsLoader(AzCommandsLoader):
             c.argument('git_access_token', help="The git access token for configuring webhook.")
             c.argument('os_type', options_list=['--os'], help="The platform OS that has to be used for build task.")
             c.argument('cpu', help="The number of cpu cores to use for running builds.")
+            c.argument('no_logs', action='store_true', help="Do not show build logs.")
 
         with self.argument_context('acr build-task create') as c:
             c.argument('build_task_name', completer=None)

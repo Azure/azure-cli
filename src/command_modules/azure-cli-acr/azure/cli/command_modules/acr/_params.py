@@ -111,8 +111,7 @@ def load_arguments(self, _):
         c.argument('git_access_token', help="The git access token for configuring webhook.")
         c.argument('os_type', options_list=['--os'], help="The platform OS that has to be used for build task.")
         c.argument('cpu', help="The number of cpu cores to use for running builds.")
+        c.argument('no_logs', action='store_true', help="Do not show build logs.")
 
     with self.argument_context('acr build-task create') as c:
         c.argument('build_task_name', completer=None)
-
-        

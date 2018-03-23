@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from .sdk.operations.builds_operations import BuildsOperations
 
 
 def get_arm_service_client(cli_ctx):
