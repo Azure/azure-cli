@@ -4,6 +4,8 @@ description: |
  A great cloud needs great tools; we're excited to introduce Azure CLI 2.0, our
  next generation multi-platform command line experience for Azure.
 version: "release"
+version-script: |
+ grep VERSION src/azure-cli/setup.py | head -n 1 | cut -d'"' -f2
 confinement: classic
 grade: stable
 apps:
