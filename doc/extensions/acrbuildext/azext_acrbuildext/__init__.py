@@ -7,6 +7,7 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list
 )
+import azext_acrbuildext._help  # pylint: disable=unused-import
 from ._constants import (
     REGISTRY_RESOURCE_TYPE,
     BUILD_TASK_RESOURCE_TYPE
@@ -27,7 +28,7 @@ class AcrBuildCommandsLoader(AzCommandsLoader):
         )
 
         acr_build_task_util = CliCommandType(
-            operations_tmpl='azure.cli.command_modules.acr.build_task#{}',    
+            operations_tmpl='azext_acrbuildext.build_task#{}',    
             client_factory=cf_acr_build_tasks
         )
 
