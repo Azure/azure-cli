@@ -37,8 +37,6 @@ from ._client_factory import cf_acr_registries
 
 logger = get_logger(__name__)
 
-FILE = ""
-
 def acr_build_show_logs(cmd,
                         client,
                         registry_name,
@@ -210,6 +208,9 @@ def acr_queue(cmd,
     resource_group_name = get_resource_group_name_by_registry_name(
         cmd.cli_ctx, registry_name, resource_group_name)
 
+    tar_file_path = os.path.join(tempfile.gettempdir(),
+                                 "source_archive_{}.tar.gz".format(hash(os.times())))
+
     client_registries = cf_acr_registries(cmd.cli_ctx)
 
     if docker_file_path is None:
@@ -223,7 +224,7 @@ def acr_queue(cmd,
             _check_local_docker_file(source_location, docker_file_path)
 
             source_location = _upload_source_code(
-                client_registries, registry_name, resource_group_name, source_location)
+                client_registries, registry_name, resource_group_name, source_location, tar_file_path)
         else:
             raise CLIError(
                 "'--source-location' should be a local directory path or remote url.")
@@ -265,25 +266,27 @@ def acr_queue(cmd,
         result = LongRunningOperation(cmd.cli_ctx)(client_registries.queue_build(
             build_request=build_request, resource_group_name=resource_group_name, registry_name=registry_name))
 
+        size = os.path.getsize(tar_file_path)
+        unit = ""
+        for S in ['Bytes', 'KB', 'MB']:
+            if size < 1024:
+                unit = S
+                break
+            size = size / 1024.0
+        if unit == "": unit = "MB"
+                
+        print("Sending build context ({0: .3f} {1}) to ACR Build as Id: {2}".format(
+            size, unit, result.build_id))
+
         if no_logs == False:
-            size = os.path.getsize(FILE)
-            unit = ""
-            for S in ['Bytes', 'KB', 'MB']:
-                if size < 1024:
-                    unit = S
-                    break
-                size = size / 1024.0
-            if unit == "" or (unit == "MB" and size > 500):
-                raise Exception("Build context too large. Request declined.")
-            print ("Sending build context ({0: .3f} {1}) to ACR Build as Id: {2}".format(size, unit, result.build_id))
             return acr_build_show_logs(cmd, client, registry_name, result.build_id, resource_group_name)
     except Exception as err:
         raise CLIError(err)
     finally:
-        if os.path.exists(FILE):
+        if os.path.exists(tar_file_path):
             logger.debug(
-                "Starting to delete the archived source code from '{}'.".format(FILE))
-            os.remove(FILE)
+                "Starting to delete the archived source code from '{}'.".format(tar_file_path))
+            os.remove(tar_file_path)
 
 def _check_local_docker_file(source_location, docker_file_path):
     if not os.path.isfile(os.path.join(source_location, docker_file_path)):
@@ -346,13 +349,7 @@ def _check_image_name(image_name):
     return image_name
 
 
-def _upload_source_code(client, registry_name, resource_group_name, source_location):
-
-    tar_file_path = os.path.join(tempfile.gettempdir(),
-                                 "source_archive_{}.tar.gz".format(hash(os.times())))
-    global FILE
-    FILE = tar_file_path
-
+def _upload_source_code(client, registry_name, resource_group_name, source_location, tar_file_path):
     try:
         logger.debug(
             "Starting to acquire the access token to upload the source code.")
