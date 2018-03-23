@@ -1158,7 +1158,7 @@ class VMCreateExistingIdsOptions(ScenarioTest):
 
 
 # TODO: convert back to ScenarioTest when #5741 is fixed.
-class VMCreateCustomIP(ScenarioTest):
+class VMCreateCustomIP(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_ip')
     def test_vm_create_custom_ip(self, resource_group):
