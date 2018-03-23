@@ -1142,9 +1142,11 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     password_creds = None
     key_creds = None
     if password:
-        password_creds = [PasswordCredential(start_date, end_date, str(uuid.uuid4()), password)]
+        password_creds = [PasswordCredential(start_date=start_date, end_date=end_date,
+                                             key_id=str(uuid.uuid4()), value=password)]
     elif key_value:
-        key_creds = [KeyCredential(start_date, end_date, key_value, str(uuid.uuid4()), key_usage, key_type)]
+        key_creds = [KeyCredential(start_date=start_date, end_date=end_date, value=key_value,
+                                   key_id=str(uuid.uuid4()), usage=key_usage, type=key_type)]
 
     return (password_creds, key_creds)
 
