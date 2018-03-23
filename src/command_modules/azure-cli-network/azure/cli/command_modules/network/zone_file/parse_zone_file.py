@@ -167,7 +167,7 @@ def _tokenize_line(line, quote_strings=False, infer_name=True):
             elif quote:
                 # in quotes
                 tokbuf += c
-            
+
             else:
                 tokbuf = ''
         elif c == '\\':
