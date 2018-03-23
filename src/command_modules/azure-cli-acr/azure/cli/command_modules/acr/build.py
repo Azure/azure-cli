@@ -37,6 +37,7 @@ from ._client_factory import cf_acr_registries
 
 logger = get_logger(__name__)
 
+
 def acr_build_show_logs(cmd,
                         client,
                         registry_name,
@@ -54,7 +55,8 @@ def acr_build_show_logs(cmd,
     if not log_file_sas:
         return 'No logs found.'
 
-    account_name, endpoint_suffix, container_name, blob_name, sas_token = _get_blob_info(log_file_sas)
+    account_name, endpoint_suffix, container_name, blob_name, sas_token = _get_blob_info(
+        log_file_sas)
 
     byte_size = 1024*4
     timeout_in_minutes = 10
@@ -196,7 +198,7 @@ def _get_blob_info(blob_sas_url):
 def acr_queue(cmd,
               client,
               registry_name,
-              source_location,              
+              source_location,
               image_name=None,
               docker_file_path=None,
               resource_group_name=None,
@@ -257,7 +259,7 @@ def acr_queue(cmd,
         build_request = QuickBuildRequest(
             source_location=source_location,
             platform=platform,
-            docker_file_path = docker_file_path,            
+            docker_file_path=docker_file_path,
             image_name=image_name,
             is_push_enabled=is_push_enabled,
             timeout=timeout,
@@ -268,13 +270,14 @@ def acr_queue(cmd,
 
         size = os.path.getsize(tar_file_path)
         unit = ""
-        for S in ['Bytes', 'KB', 'MB']:
+        for S in ['Bytes', 'KB', 'MB', 'GB']:
             if size < 1024:
                 unit = S
                 break
             size = size / 1024.0
-        if unit == "": unit = "MB"
-                
+        if unit == "":
+            unit = "GB"
+
         print("Sending build context ({0: .3f} {1}) to ACR Build as Id: {2}".format(
             size, unit, result.build_id))
 
@@ -288,21 +291,23 @@ def acr_queue(cmd,
                 "Starting to delete the archived source code from '{}'.".format(tar_file_path))
             os.remove(tar_file_path)
 
+
 def _check_local_docker_file(source_location, docker_file_path):
     if not os.path.isfile(os.path.join(source_location, docker_file_path)):
-        raise CLIError("Unable to find '{}' in '{}'.".format(docker_file_path, source_location))
+        raise CLIError("Unable to find '{}' in '{}'.".format(
+            docker_file_path, source_location))
 
 
 def _check_remote_source_code(source_location):
 
     lower_source_location = source_location.lower()
 
-    # git 
+    # git
     if lower_source_location.startswith("git@") or lower_source_location.startswith("git://"):
         return source_location
 
     # http
-    if lower_source_location.startswith("https://") or lower_source_location.startswith("http://") or lower_source_location.startswith("github.com/"): 
+    if lower_source_location.startswith("https://") or lower_source_location.startswith("http://") or lower_source_location.startswith("github.com/"):
         if re.search(r"\.git(?:#.+)?$", lower_source_location):
             # git url must contain ".git"
             return source_location
@@ -313,7 +318,8 @@ def _check_remote_source_code(source_location):
             else:
                 raise CLIError("'{}' doesn't exist.".format(source_location))
 
-    raise CLIError("'{}' is not a valid remote url for git or tarball.".format(source_location))
+    raise CLIError(
+        "'{}' is not a valid remote url for git or tarball.".format(source_location))
 
 
 def _check_image_name(image_name):
