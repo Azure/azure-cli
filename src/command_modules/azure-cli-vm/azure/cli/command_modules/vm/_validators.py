@@ -633,6 +633,11 @@ def _validate_vm_create_public_ip(cmd, namespace):
         namespace.public_ip_type = 'new'
         logger.debug('new public IP address will be created')
 
+    if namespace.public_ip_sku == 'Standard':
+        namespace.public_ip_address_allocation = 'Static'  # Or error out and use enums
+
+    # TODO: validate misuse other pip properties
+
 
 def _validate_vmss_create_public_ip(cmd, namespace):
     if namespace.load_balancer_type is None and namespace.app_gateway_type is None:
