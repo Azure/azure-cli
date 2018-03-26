@@ -6,6 +6,7 @@ Release History
 2.0.30
 ++++++
 * Minor fixes
+* aks created spn will be valid for 5 years
 
 2.0.29
 ++++++
