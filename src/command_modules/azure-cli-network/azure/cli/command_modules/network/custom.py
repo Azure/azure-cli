@@ -1172,7 +1172,6 @@ def add_dns_txt_record(cmd, resource_group_name, zone_name, record_set_name, val
     record = TxtRecord(value=value)
     record_type = 'txt'
     long_text = ''.join(x for x in record.value)
-    long_text = long_text.replace('\\', '')
     original_len = len(long_text)
     record.value = []
     while len(long_text) > 255:
