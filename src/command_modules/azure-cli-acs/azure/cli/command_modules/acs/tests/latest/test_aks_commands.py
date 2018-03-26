@@ -9,6 +9,7 @@ import unittest
 
 from azure.cli.testsdk import (
     ResourceGroupPreparer, RoleBasedServicePrincipalPreparer, ScenarioTest)
+from azure_devtools.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk.checkers import StringContainCheck
 
 # flake8: noqa
@@ -150,6 +151,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus')
     @RoleBasedServicePrincipalPreparer()
+    @AllowLargeResponse()
     def test_aks_create_with_upgrade(self, resource_group, resource_group_location, sp_name, sp_password):
         # kwargs for string formatting
         self.kwargs.update({

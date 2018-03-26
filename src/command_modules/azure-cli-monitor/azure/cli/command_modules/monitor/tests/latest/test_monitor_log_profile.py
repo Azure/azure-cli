@@ -6,7 +6,7 @@
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
 
 
-class TestActionGroupScenarios(ScenarioTest):
+class TestLogProfileScenarios(ScenarioTest):
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer(location='southcentralus')
     def test_monitor_create_log_profile(self, resource_group, storage_account):

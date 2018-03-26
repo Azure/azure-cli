@@ -31,11 +31,9 @@ from azure.cli.testsdk import TestCli
 
 NetworkProfile, StorageProfile, DataDisk, OSDisk, OperatingSystemTypes, InstanceViewStatus, \
     VirtualMachineExtensionInstanceView, VirtualMachineExtension, ImageReference, DiskCreateOptionTypes, \
-    VirtualMachineScaleSetVMProfile, VirtualMachineScaleSetOSProfile, LinuxConfiguration, \
     CachingTypes = get_sdk(TestCli(), ResourceType.MGMT_COMPUTE, 'NetworkProfile', 'StorageProfile', 'DataDisk', 'OSDisk',
                            'OperatingSystemTypes', 'InstanceViewStatus', 'VirtualMachineExtensionInstanceView',
                            'VirtualMachineExtension', 'ImageReference', 'DiskCreateOptionTypes',
-                           'VirtualMachineScaleSetVMProfile', 'VirtualMachineScaleSetOSProfile', 'LinuxConfiguration',
                            'CachingTypes',
                            mod='models', operation_group='virtual_machines')  # FIXME split into loading by RT
 
@@ -245,7 +243,7 @@ class TestVmCustom(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._get_keyvault_key_url', autospec=True)
     def test_enable_encryption_error_cases_handling(self, mock_get_keyvault_key_url, mock_compute_client_factory):
         faked_keyvault = '/subscriptions/01234567-1bf0-4dda-aec3-cb9272f09590/resourceGroups/rg1/providers/Microsoft.KeyVault/vaults/v1'
-        os_disk = OSDisk(None, OperatingSystemTypes.linux)
+        os_disk = OSDisk(create_option=None, os_type=OperatingSystemTypes.linux)
         existing_disk = DataDisk(lun=1, vhd='https://someuri', name='d1', create_option=DiskCreateOptionTypes.empty)
         vm = FakedVM(None, [existing_disk], os_disk=os_disk)
         cmd = _get_test_cmd()
@@ -271,11 +269,11 @@ class TestVmCustom(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.vm.disk_encryption.set_vm', autospec=True)
     @mock.patch('azure.cli.command_modules.vm.disk_encryption._compute_client_factory', autospec=True)
     def test_disable_encryption_error_cases_handling(self, mock_compute_client_factory, mock_vm_set):  # pylint: disable=unused-argument
-        os_disk = OSDisk(None, OperatingSystemTypes.linux)
+        os_disk = OSDisk(create_option=None, os_type=OperatingSystemTypes.linux)
         existing_disk = DataDisk(lun=1, vhd='https://someuri', name='d1', create_option=DiskCreateOptionTypes.empty)
         vm = FakedVM(None, [existing_disk], os_disk=os_disk)
         cmd = _get_test_cmd()
-        vm_extension = VirtualMachineExtension('westus',
+        vm_extension = VirtualMachineExtension(location='westus',
                                                settings={'SequenceVersion': 1},
                                                instance_view=VirtualMachineExtensionInstanceView(
                                                    statuses=[InstanceViewStatus(message='Encryption completed successfully')],
@@ -303,44 +301,44 @@ class TestVmCustom(unittest.TestCase):
         decrypt_vm(cmd, 'rg1', 'vm1', 'DATA')
 
     def test_encryption_distro_check(self):
-        image = ImageReference(None, 'canonical', 'ubuntuserver', '16.04.0-LTS')
+        image = ImageReference(id=None, publisher='canonical', offer='ubuntuserver', sku='16.04.0-LTS')
         result, msg = _check_encrypt_is_supported(image, 'data')
         self.assertTrue(result)
         self.assertEqual(None, msg)
 
-        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2n')
+        image = ImageReference(id=None, publisher='OpenLogic', offer='CentOS', sku='7.2n')
         result, msg = _check_encrypt_is_supported(image, 'data')
         self.assertTrue(result)
         self.assertEqual(None, msg)
 
-        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2')
+        image = ImageReference(id=None, publisher='OpenLogic', offer='CentOS', sku='7.2')
         result, msg = _check_encrypt_is_supported(image, 'all')
         self.assertFalse(result)
         self.assertEqual(msg,
                          "Encryption might fail as current VM uses a distro not in the known list, which are '['RHEL 7.2', 'RHEL 7.3', 'CentOS 7.2n', 'Ubuntu 14.04', 'Ubuntu 16.04']'")
 
-        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2')
+        image = ImageReference(id=None, publisher='OpenLogic', offer='CentOS', sku='7.2')
         result, msg = _check_encrypt_is_supported(image, 'data')
         self.assertTrue(result)
 
     def test_encryption_distro_check(self):
-        image = ImageReference(None, 'canonical', 'ubuntuserver', '16.04.0-LTS')
+        image = ImageReference(id=None, publisher='canonical', offer='ubuntuserver', sku='16.04.0-LTS')
         result, msg = _check_encrypt_is_supported(image, 'data')
         self.assertTrue(result)
         self.assertEqual(None, msg)
 
-        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2n')
+        image = ImageReference(id=None, publisher='OpenLogic', offer='CentOS', sku='7.2n')
         result, msg = _check_encrypt_is_supported(image, 'data')
         self.assertTrue(result)
         self.assertEqual(None, msg)
 
-        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2')
+        image = ImageReference(id=None, publisher='OpenLogic', offer='CentOS', sku='7.2')
         result, msg = _check_encrypt_is_supported(image, 'all')
         self.assertFalse(result)
         self.assertEqual(msg,
                          "Encryption might fail as current VM uses a distro not in the known list, which are '['RHEL 7.2', 'RHEL 7.3', 'CentOS 7.2n', 'Ubuntu 14.04', 'Ubuntu 16.04']'")
 
-        image = ImageReference(None, 'OpenLogic', 'CentOS', '7.2')
+        image = ImageReference(id=None, publisher='OpenLogic', offer='CentOS', sku='7.2')
         result, msg = _check_encrypt_is_supported(image, 'data')
         self.assertTrue(result)
 
@@ -454,7 +452,7 @@ class TestVMBootLog(unittest.TestCase):
 
 class FakedVM(object):  # pylint: disable=too-few-public-methods
     def __init__(self, nics=None, disks=None, os_disk=None):
-        self.network_profile = NetworkProfile(nics)
+        self.network_profile = NetworkProfile(network_interfaces=nics)
         self.storage_profile = StorageProfile(data_disks=disks, os_disk=os_disk)
         self.location = 'westus'
 

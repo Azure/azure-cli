@@ -173,7 +173,7 @@ helps['policy definition create'] = """
                     az policy definition create -n readOnlyStorage --rules '{
                             "if":
                             {
-                                "source": "action",
+                                "field": "type",
                                 "equals": "Microsoft.Storage/storageAccounts/write"
                             },
                             "then":

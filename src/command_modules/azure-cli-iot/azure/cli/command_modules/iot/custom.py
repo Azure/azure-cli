@@ -7,9 +7,7 @@
 from __future__ import print_function
 from os.path import exists
 from enum import Enum
-from knack.config import CLIConfig
 from knack.util import CLIError
-from knack.log import get_logger
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.mgmt.iothub.models import (IotHubSku,
@@ -32,27 +30,10 @@ from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.authentication
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.device_description import DeviceDescription
 from azure.cli.command_modules.iot.mgmt_iot_hub_device.lib.models.x509_thumbprint import X509Thumbprint
 from azure.cli.command_modules.iot.sas_token_auth import SasTokenAuthentication
-from azure.cli.core.extension import extension_exists
-from azure.cli.core._environment import get_config_dir
+from azure.cli.core.util import sdk_no_wait
 
 from ._client_factory import resource_service_factory
 from ._utils import create_self_signed_certificate, open_certificate
-
-logger = get_logger(__name__)
-
-
-# IoT Extension run once awareness
-if not extension_exists('azure_cli_iot_ext'):
-    config = CLIConfig(get_config_dir())
-    ran_before = config.getboolean('iot', 'first_run', fallback=False)
-    if not ran_before:
-        extension_text = """
-                         Comprehensive IoT data-plane functionality is available
-                         in the Azure IoT CLI Extension. For more info and install guide
-                         go to https://github.com/Azure/azure-iot-cli-extension
-                         """
-        logger.warning(extension_text)
-        config.set_value('iot', 'first_run', 'yes')
 
 
 # CUSTOM TYPE
@@ -586,7 +567,7 @@ def iot_device_send_message(client, hub_name, device_id, resource_group_name=Non
 # pylint: disable=inconsistent-return-statements
 def iot_device_receive_message(client, hub_name, device_id, resource_group_name=None, lock_timeout=60):
     device_client = _get_device_client(client, resource_group_name, hub_name, device_id)
-    result = device_client.receive_message(device_id, lock_timeout, raw=True)
+    result = sdk_no_wait(True, device_client.receive_message, device_id, lock_timeout)
     if result is not None and result.response.status_code == 200:
         return {
             'ack': result.headers['iothub-ack'],

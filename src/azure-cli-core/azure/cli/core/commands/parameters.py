@@ -31,6 +31,55 @@ def get_location_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: d
     return [l.name for l in result]
 
 
+# pylint: disable=redefined-builtin
+def get_datetime_type(help=None, date=True, time=True, timezone=True):
+
+    help_string = help + ' ' or ''
+    accepted_formats = []
+    if date:
+        accepted_formats.append('date (yyyy-mm-dd)')
+    if time:
+        accepted_formats.append('time (hh:mm:ss.xxxxx)')
+    if timezone:
+        accepted_formats.append('timezone (+/-hh:mm)')
+    help_string = help_string + 'Format: ' + ', '.join(accepted_formats)
+
+    # pylint: disable=too-few-public-methods
+    class DatetimeAction(argparse.Action):
+
+        def __call__(self, parser, namespace, values, option_string=None):
+            """ Parse a date value and return the ISO8601 string. """
+            import dateutil.parser
+
+            value_string = ' '.join(values)
+            dt_val = None
+            try:
+                # attempt to parse ISO 8601
+                dt_val = dateutil.parser.parse(value_string)
+            except ValueError:
+                pass
+
+            # TODO: custom parsing attempts here
+
+            if not dt_val:
+                raise CLIError("Unable to parse: '{}'. Expected format: {}".format(value_string, help_string))
+
+            # Issue warning if any supplied data will be ignored
+            if not date and any([dt_val.day, dt_val.month, dt_val.year]):
+                logger.warning('Date info will be ignored in %s.', value_string)
+
+            if not time and any([dt_val.hour, dt_val.minute, dt_val.second, dt_val.microsecond]):
+                logger.warning('Time info will be ignored in %s.', value_string)
+
+            if not timezone and dt_val.tzinfo:
+                logger.warning('Timezone info will be ignored in %s.', value_string)
+
+            iso_string = dt_val.isoformat()
+            setattr(namespace, self.dest, iso_string)
+
+    return CLIArgumentType(action=DatetimeAction, nargs='+', help=help_string)
+
+
 def file_type(path):
     import os
     return os.path.expanduser(path)
@@ -170,7 +219,7 @@ def get_enum_type(data, default=None):
     if default:
         default_value = next((x for x in choices if x.lower() == default.lower()), None)
         if not default_value:
-            raise CLIError("Command authoring exception: urecognized default '{}' from choices '{}'"
+            raise CLIError("Command authoring exception: unrecognized default '{}' from choices '{}'"
                            .format(default, choices))
         arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), action=DefaultAction, default=default_value)
     else:

@@ -4,11 +4,12 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.28"
+__version__ = "2.0.30"
 
 import os
 import sys
 import timeit
+from pkg_resources import parse_version
 
 from knack.arguments import ArgumentsContext
 from knack.cli import CLI
@@ -22,7 +23,8 @@ import six
 
 logger = get_logger(__name__)
 
-EXCLUDED_PARAMS = ['self', 'raw', 'custom_headers', 'operation_config', 'content_version', 'kwargs', 'client']
+EXCLUDED_PARAMS = ['self', 'raw', 'polling', 'custom_headers', 'operation_config',
+                   'content_version', 'kwargs', 'client', 'no_wait']
 
 
 class AzCli(CLI):
@@ -104,7 +106,7 @@ class MainCommandsLoader(CLICommandsLoader):
         from azure.cli.core.commands import (
             _load_module_command_loader, _load_extension_command_loader, BLACKLISTED_MODS, ExtensionCommandSource)
         from azure.cli.core.extension import (
-            get_extension_names, get_extension_path, get_extension_modname)
+            get_extensions, get_extension_path, get_extension_modname)
 
         cmd_to_mod_map = {}
 
@@ -144,12 +146,25 @@ class MainCommandsLoader(CLICommandsLoader):
                          "(note: there's always an overhead with the first module loaded)",
                          cumulative_elapsed_time)
 
-        def _update_command_table_from_extensions():
+        def _update_command_table_from_extensions(ext_suppressions):
 
-            extensions = get_extension_names()
+            def _handle_extension_suppressions(extensions):
+                filtered_extensions = []
+                for ext in extensions:
+                    should_include = True
+                    for suppression in ext_suppressions:
+                        if should_include and suppression.handle_suppress(ext):
+                            should_include = False
+                    if should_include:
+                        filtered_extensions.append(ext)
+                return filtered_extensions
+
+            extensions = get_extensions()
             if extensions:
-                logger.debug("Found %s extensions: %s", len(extensions), extensions)
-                for ext_name in extensions:
+                logger.debug("Found %s extensions: %s", len(extensions), [e.name for e in extensions])
+                allowed_extensions = _handle_extension_suppressions(extensions)
+                for ext in allowed_extensions:
+                    ext_name = ext.name
                     ext_dir = get_extension_path(ext_name)
                     sys.path.append(ext_dir)
                     try:
@@ -163,7 +178,8 @@ class MainCommandsLoader(CLICommandsLoader):
                         for cmd_name, cmd in extension_command_table.items():
                             cmd.command_source = ExtensionCommandSource(
                                 extension_name=ext_name,
-                                overrides_command=cmd_name in cmd_to_mod_map)
+                                overrides_command=cmd_name in cmd_to_mod_map,
+                                preview=ext.preview)
 
                         self.command_table.update(extension_command_table)
                         elapsed_time = timeit.default_timer() - start_time
@@ -172,11 +188,38 @@ class MainCommandsLoader(CLICommandsLoader):
                         logger.warning("Unable to load extension '%s'. Use --debug for more information.", ext_name)
                         logger.debug(traceback.format_exc())
 
+        def _wrap_suppress_extension_func(func, ext):
+            """ Wrapper method to handle centralization of log messages for extension filters """
+            res = func(ext)
+            should_suppress = res
+            reason = "Use --debug for more information."
+            if isinstance(res, tuple):
+                should_suppress, reason = res
+            suppress_types = (bool, type(None))
+            if not isinstance(should_suppress, suppress_types):
+                raise ValueError("Command module authoring error: "
+                                 "Valid extension suppression values are {} in {}".format(suppress_types, func))
+            if should_suppress:
+                logger.warning("Extension %s (%s) has been suppressed. %s",
+                               ext.name, ext.version, reason)
+                logger.debug("Extension %s (%s) suppressed from being loaded due "
+                             "to %s", ext.name, ext.version, func)
+            return should_suppress
+
+        def _get_extension_suppressions(mod_loaders):
+            res = []
+            for m in mod_loaders:
+                sup = getattr(m, 'suppress_extension', None)
+                if sup and isinstance(sup, ModExtensionSuppress):
+                    res.append(sup)
+            return res
+
         _update_command_table_from_modules(args)
         try:
+            ext_suppressions = _get_extension_suppressions(self.loaders)
             # We always load extensions even if the appropriate module has been loaded
             # as an extension could override the commands already loaded.
-            _update_command_table_from_extensions()
+            _update_command_table_from_extensions(ext_suppressions)
         except Exception:  # pylint: disable=broad-except
             logger.warning("Unable to load extensions. Use --debug for more information.")
             logger.debug(traceback.format_exc())
@@ -205,10 +248,33 @@ class MainCommandsLoader(CLICommandsLoader):
                 loader._update_command_definitions()  # pylint: disable=protected-access
 
 
-class AzCommandsLoader(CLICommandsLoader):
+class ModExtensionSuppress(object):  # pylint: disable=too-few-public-methods
+
+    def __init__(self, mod_name, suppress_extension_name, suppress_up_to_version, reason=None, recommend_remove=False):
+        self.mod_name = mod_name
+        self.suppress_extension_name = suppress_extension_name
+        self.suppress_up_to_version = suppress_up_to_version
+        self.reason = reason
+        self.recommend_remove = recommend_remove
+
+    def handle_suppress(self, ext):
+        should_suppress = ext.name == self.suppress_extension_name and ext.version and \
+            parse_version(ext.version) <= parse_version(self.suppress_up_to_version)
+        if should_suppress:
+            reason = self.reason or "Use --debug for more information."
+            logger.warning("Extension %s (%s) has been suppressed. %s",
+                           ext.name, ext.version, reason)
+            logger.debug("Extension %s (%s) suppressed from being loaded due "
+                         "to %s", ext.name, ext.version, self.mod_name)
+            if self.recommend_remove:
+                logger.warning("Remove this extension with 'az extension remove --name %s'", ext.name)
+        return should_suppress
+
+
+class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, cli_ctx=None, min_profile=None, max_profile='latest',
-                 command_group_cls=None, argument_context_cls=None,
+                 command_group_cls=None, argument_context_cls=None, suppress_extension=None,
                  **kwargs):
         from azure.cli.core.commands import AzCliCommand, AzCommandGroup, AzArgumentContext
 
@@ -217,6 +283,7 @@ class AzCommandsLoader(CLICommandsLoader):
                                                excluded_command_handler_args=EXCLUDED_PARAMS)
         self.min_profile = min_profile
         self.max_profile = max_profile
+        self.suppress_extension = suppress_extension
         self.module_kwargs = kwargs
         self.command_name = None
         self.skip_applicability = False
@@ -286,13 +353,13 @@ class AzCommandsLoader(CLICommandsLoader):
                 raise APIVersionException(operation_group, self.cli_ctx.cloud.profile)
 
     def supported_api_version(self, resource_type=None, min_api=None, max_api=None, operation_group=None):
-        from azure.cli.core.profiles import supported_api_version, PROFILE_TYPE
+        from azure.cli.core.profiles import supported_api_version
         if not min_api and not max_api:
             # optimistically assume that fully supported if no api restriction listed
             return True
         api_support = supported_api_version(
             cli_ctx=self.cli_ctx,
-            resource_type=resource_type or self._get_resource_type() or PROFILE_TYPE,
+            resource_type=resource_type or self._get_resource_type(),
             min_api=min_api or self.min_profile,
             max_api=max_api or self.max_profile,
             operation_group=operation_group)
@@ -335,14 +402,19 @@ class AzCommandsLoader(CLICommandsLoader):
         client_factory = kwargs.get('client_factory', None)
 
         def default_command_handler(command_args):
-            from azure.cli.core.util import get_arg_list
+            from azure.cli.core.util import get_arg_list, augment_no_wait_handler_args
+            from azure.cli.core.commands.client_factory import resolve_client_arg_name
+
             op = handler or self.get_op_handler(operation)
             op_args = get_arg_list(op)
 
             client = client_factory(self.cli_ctx, command_args) if client_factory else None
+            supports_no_wait = kwargs.get('supports_no_wait', None)
+            if supports_no_wait:
+                no_wait_enabled = command_args.pop('no_wait', False)
+                augment_no_wait_handler_args(no_wait_enabled, op, command_args)
             if client:
-                client_arg_name = kwargs.get('client_arg_name',
-                                             'client' if operation.startswith(('azure.cli', 'azext')) else 'self')
+                client_arg_name = resolve_client_arg_name(operation, kwargs)
                 if client_arg_name in op_args:
                     command_args[client_arg_name] = client
             result = op(**command_args)

@@ -9,7 +9,7 @@ from knack.log import get_logger
 
 from azure.cli.core.commands import LongRunningOperation
 
-from azure.cli.command_modules.vm.custom import set_vm, _compute_client_factory, get_vmss_instance_view
+from azure.cli.command_modules.vm.custom import set_vm, _compute_client_factory
 from azure.cli.command_modules.vm._vm_utils import get_key_vault_base_url, create_keyvault_data_plane_client
 
 _DATA_VOLUME_TYPE = 'DATA'
@@ -119,7 +119,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         cmd.get_models('VirtualMachineExtension', 'DiskEncryptionSettings', 'KeyVaultSecretReference',
                        'KeyVaultKeyReference', 'SubResource')
 
-    ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
+    ext = VirtualMachineExtension(location=vm.location,  # pylint: disable=no-member
                                   publisher=extension['publisher'],
                                   virtual_machine_extension_type=extension['name'],
                                   protected_settings=private_config,
@@ -145,12 +145,12 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
 
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     secret_ref = KeyVaultSecretReference(secret_url=status_url,
-                                         source_vault=SubResource(disk_encryption_keyvault))
+                                         source_vault=SubResource(id=disk_encryption_keyvault))
 
     key_encryption_key_obj = None
     if key_encryption_key:
-        key_encryption_key_obj = KeyVaultKeyReference(key_encryption_key,
-                                                      SubResource(key_encryption_keyvault))
+        key_encryption_key_obj = KeyVaultKeyReference(key_url=key_encryption_key,
+                                                      source_vault=SubResource(id=key_encryption_keyvault))
 
     disk_encryption_settings = DiskEncryptionSettings(disk_encryption_key=secret_ref,
                                                       key_encryption_key=key_encryption_key_obj,
@@ -219,7 +219,7 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
     VirtualMachineExtension, DiskEncryptionSettings = cmd.get_models(
         'VirtualMachineExtension', 'DiskEncryptionSettings')
 
-    ext = VirtualMachineExtension(vm.location,  # pylint: disable=no-member
+    ext = VirtualMachineExtension(location=vm.location,  # pylint: disable=no-member
                                   publisher=extension['publisher'],
                                   virtual_machine_extension_type=extension['name'],
                                   type_handler_version=extension['version'],
@@ -453,7 +453,7 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
                                           auto_upgrade_minor_version=True,
                                           force_update_tag=uuid.uuid4())
     if not vmss.virtual_machine_profile.extension_profile:
-        vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile([])
+        vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])
     vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
     poller = compute_client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
     LongRunningOperation(cmd.cli_ctx)(poller)
@@ -515,20 +515,25 @@ def _show_post_action_message(resource_group_name, vmss_name, maunal_mode, enabl
 
 
 def show_vmss_encryption_status(cmd, resource_group_name, vmss_name):
-    encryption_ext_names = [v['name'] for v in vmss_extension_info.values()]
-    views = get_vmss_instance_view(cmd, resource_group_name, vmss_name)
-    if not views.extensions or not [e for e in views.extensions if e.name in encryption_ext_names]:
-        from knack.util import CLIError
-        raise CLIError("'{}' is not encrypted yet".format(vmss_name))
+    client = _compute_client_factory(cmd.cli_ctx)
+    vm_instances = list(client.virtual_machine_scale_set_vms.list(resource_group_name, vmss_name,
+                                                                  select='instanceView', expand='instanceView'))
+    result = []
+    for instance in vm_instances:
+        view = instance.instance_view
+        disk_infos = []
+        vm_enc_info = {
+            'id': instance.id,
+            'disks': disk_infos
+        }
+        for div in view.disks:
+            disk_infos.append({
+                'name': div.name,
+                'encryptionSettings': div.encryption_settings,
+                'statuses': [x for x in (div.statuses or []) if (x.code or '').startswith('EncryptionState')]
+            })
 
-    views = get_vmss_instance_view(cmd, resource_group_name, vmss_name, instance_id='*')
-    result = [{'disks': v.disks, 'extensions': v.extensions} for v in views]
-    # get rid of unrelaed disk status
-    for r in result:
-        for d in r['disks']:
-            d.statuses = [s for s in d.statuses if s.code.startswith('EncryptionState')]
-        r['encryption-extension'] = next((e for e in (r['extensions'] or []) if e.name in encryption_ext_names), None)
-        r.pop('extensions')  # we don't need this array any more
+        result.append(vm_enc_info)
     return result
 
 

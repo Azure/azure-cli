@@ -16,7 +16,7 @@ helps['storage entity insert'] = """
           short-summary: The name of the table to insert the entity into.
         - name: --entity -e
           type: list
-          short-summary: A space-separated list of key=value pairs. Must contain a PartitionKey and a RowKey.
+          short-summary: Space-separated list of key=value pairs. Must contain a PartitionKey and a RowKey.
           long-summary: The PartitionKey and RowKey must be unique within the table, and may be up to 64Kb in size. If using an integer value as a key,
                         convert it to a fixed-width string which can be canonically sorted.
                         For example, convert the integer value 1 to the string value "0000001" to ensure proper sorting.
@@ -419,13 +419,14 @@ helps['storage cors add'] = """
         - name: --max-age
           short-summary: The maximum number of seconds the client/browser should cache a preflight response.
         - name: --origins
-          short-summary: List of origin domains that will be allowed via CORS, or '*' to allow all domains.
+          short-summary: Space-separated list of origin domains that will be allowed via CORS, or '*' to allow all
+                         domains.
         - name: --methods
-          short-summary: List of HTTP methods allowed to be executed by the origin.
+          short-summary: Space-separated list of HTTP methods allowed to be executed by the origin.
         - name: --allowed-headers
-          short-summary: List of response headers allowed to be part of the cross-origin request.
+          short-summary: Space-separated list of response headers allowed to be part of the cross-origin request.
         - name: --exposed-headers
-          short-summary: List of response headers to expose to CORS clients.
+          short-summary: Space-separated list of response headers to expose to CORS clients.
 """
 
 helps['storage cors clear'] = """
@@ -518,6 +519,9 @@ helps['storage file upload-batch'] = """
           type: string
           short-summary: The destination of the upload operation.
           long-summary: The destination can be the file share URL or the share name. When the destination is the share URL, the storage account name is parsed from the URL.
+        - name: --destination-path
+          type: string
+          short-summary: The directory where the source data is copied to. If omitted, data is copied to the root directory.
         - name: --pattern
           type: string
           short-summary: The pattern used for file globbing. The supported patterns are '*', '?', '[seq', and '[!seq]'.

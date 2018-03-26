@@ -2,6 +2,14 @@
 
 Release History
 ===============
+2.0.26
+++++++
+provider operation list/show: (breaking change)`api-version` is no longer required to run the command
+
+2.0.25
+++++++
+* Support Autorest 3.0 based SDKs
+
 2.0.24
 ++++++
 * `group deployment export`: On failure, command will now output a partial template and any failures.

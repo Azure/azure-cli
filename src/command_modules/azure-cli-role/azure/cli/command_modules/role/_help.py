@@ -57,7 +57,27 @@ helps['ad sp create-for-rbac'] = """
           text: az ad sp create-for-rbac --keyvault MyVault --cert CertName
     """
 
+helps['ad sp credential'] = """
+    type: group
+    short-summary: manage a service principal's credentials.
+"""
+
+helps['ad sp credential list'] = """
+    type: command
+    short-summary: list a service principal's credentials.
+"""
+
+helps['ad sp credential delete'] = """
+    type: command
+    short-summary: delete a service principal's credential.
+"""
+
 helps['ad sp reset-credentials'] = """
+    type: command
+    short-summary: (Deprecated, use "az ad sp credential reset")
+"""
+
+helps['ad sp credential reset'] = """
     type: command
     short-summary: Reset a service principal credential.
     long-summary: Use upon expiration of the service principal's credentials, or in the event that login credentials are lost.
@@ -175,6 +195,12 @@ helps['role definition create'] = """
                         "Microsoft.Insights/alertRules/*",
                         "Microsoft.Support/*"
                     ],
+                    "DataActions": [
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
+                    ],
+                    "NotDataActions": [
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
+                    ],
                     "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
                 }'
         - name: Create a role from a file containing a JSON description.
@@ -215,6 +241,12 @@ helps['role definition update'] = """
                         "Microsoft.Insights/alertRules/*",
                         "Microsoft.Support/*"
                     ],
+                    "DataActions": [
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*"
+                    ],
+                    "NotDataActions": [
+                        "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write"
+                    ],
                     "AssignableScopes": ["/subscriptions/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"]
                 }'
         - name: Create a role from a file containing a JSON description.
@@ -225,9 +257,23 @@ helps['ad'] = """
     type: group
     short-summary: Manage Azure Active Directory Graph entities needed for Role Based Access Control
 """
-helps['ad app'] = """
-    type: group
-    short-summary: Manage Azure Active Directory applications.
+helps['ad app create'] = """
+    type: command
+    short-summary: Create a web application, web API or native application
+    examples:
+        - name: Create a native application with delegated permission of "access the AAD directory as the signed-in user
+          text: |
+                az ad app create --display-name my-native --native-app --requiredResourceAccess @manifest.json
+                ("manifest.json" contains the following content)
+                [{
+                    "resourceAppId": "00000002-0000-0000-c000-000000000000",
+                    "resourceAccess": [
+                        {
+                            "id": "a42657d6-7f20-40e3-b6f0-cee03008a62a",
+                            "type": "Scope"
+                        }
+                   ]
+                }]
 """
 helps['ad group'] = """
     type: group

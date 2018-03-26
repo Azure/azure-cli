@@ -33,7 +33,7 @@ def _get_test_cmd():
     return cmd
 
 
-def _mock_resource_client(cli_ctx, client_type):
+def _mock_resource_client(cli_ctx, client_type, **kwargs):
     client = mock.MagicMock()
     if client_type is ResourceType.MGMT_NETWORK:
         def _mock_list(rg):
@@ -88,7 +88,7 @@ def _mock_resource_client(cli_ctx, client_type):
     return client
 
 
-def _mock_network_client_with_existing_subnet(*_):
+def _mock_network_client_with_existing_subnet(*_, **kwargs):
     client = mock.MagicMock()
 
     def _mock_list(rg):
@@ -153,6 +153,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         ns.subnet = None
         ns.vnet_name = None
         ns.vnet_type = None
+        ns.disable_overprovision = None
         return ns
 
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_network_client_with_existing_subnet)
@@ -178,19 +179,34 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         _validate_vm_vmss_create_vnet(_get_test_cmd(), ns, for_scale_set=True)
         self.assertEqual(ns.vnet_type, 'new')
 
-    def test_new_subnet_size_for_big_vmss(self):
-        ns = argparse.Namespace()
+    def test_new_subnet_size_for_big_vmss_with_over_provision(self):
+        ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.vnet_type = 'new'
         ns.vnet_address_prefix = '10.0.0.0/16'
         ns.subnet_address_prefix = None
         ns.app_gateway_type = 'new'
         ns.app_gateway_subnet_address_prefix = '10.0.1.0/22'
         ns.instance_count = 1000
+        # with over-provision, we has subnet size bigger than the capacity
+        _validate_vmss_create_subnet(ns)
+        self.assertEqual('10.0.0.0/21', ns.subnet_address_prefix)
+
+    def test_new_subnet_size_for_big_vmss_without_over_provision(self):
+        ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
+        ns.vnet_type = 'new'
+        ns.vnet_address_prefix = '10.0.0.0/16'
+        ns.subnet_address_prefix = None
+        ns.app_gateway_type = 'new'
+        ns.app_gateway_subnet_address_prefix = '10.0.1.0/22'
+        ns.instance_count = 1000
+        ns.disable_overprovision = True
+
+        # w/o over-provision, we set subnet size just based on the capacity
         _validate_vmss_create_subnet(ns)
         self.assertEqual('10.0.0.0/22', ns.subnet_address_prefix)
 
     def test_new_subnet_size_for_small_vmss(self):
-        ns = argparse.Namespace()
+        ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.vnet_type = 'new'
         ns.vnet_address_prefix = '10.0.0.0/16'
         ns.subnet_address_prefix = None
@@ -301,6 +317,7 @@ class TestVMImageDefaults(unittest.TestCase):
         ns.admin_username = 'admin123'
         ns.admin_password = 'verySecret!'
         ns.storage_sku = 'Premium_LRS'
+        ns.os_caching, ns.data_caching = None, None
         ns.os_type, ns.attach_os_disk, ns.storage_account, ns.storage_container_name, ns.use_unmanaged_disk = None, None, None, None, False
         _validate_vm_create_storage_profile(cmd, ns, False)
 

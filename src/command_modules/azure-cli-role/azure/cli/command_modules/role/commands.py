@@ -15,14 +15,14 @@ from ._client_factory import (_auth_client_factory, _graph_client_factory)
 
 
 def transform_definition_list(result):
-    return [OrderedDict([('Name', r['properties']['roleName']), ('Type', r['properties']['type']),
-                         ('Description', r['properties']['description'])]) for r in result]
+    return [OrderedDict([('Name', r['roleName']), ('Type', r['type']),
+                         ('Description', r['description'])]) for r in result]
 
 
 def transform_assignment_list(result):
-    return [OrderedDict([('Principal', r['properties']['principalName']),
-                         ('Role', r['properties']['roleDefinitionName']),
-                         ('Scope', r['properties']['scope'])]) for r in result]
+    return [OrderedDict([('Principal', r['principalName']),
+                         ('Role', r['roleDefinitionName']),
+                         ('Scope', r['scope'])]) for r in result]
 
 
 def get_role_definition_op(operation_name):
@@ -91,7 +91,10 @@ def load_command_table(self, _):
     # RBAC related
     with self.command_group('ad sp') as g:
         g.custom_command('create-for-rbac', 'create_service_principal_for_rbac')
-        g.custom_command('reset-credentials', 'reset_service_principal_credential')
+        g.custom_command('reset-credentials', 'reset_service_principal_credential', deprecate_info='ad sp credential reset')
+        g.custom_command('credential reset', 'reset_service_principal_credential')
+        g.custom_command('credential list', 'list_service_principal_credentials')
+        g.custom_command('credential delete', 'delete_service_principal_credential')
 
     with self.command_group('ad user', role_users_sdk) as g:
         g.command('delete', 'delete')
@@ -100,7 +103,7 @@ def load_command_table(self, _):
         g.custom_command('create', 'create_user', client_factory=get_graph_client_users, doc_string_source='azure.graphrbac.models#UserCreateParameters')
 
     with self.command_group('ad group', role_group_sdk) as g:
-        g.command('create', 'create')
+        g.custom_command('create', 'create_group', client_factory=get_graph_client_groups)
         g.command('delete', 'delete')
         g.command('show', 'get', exception_handler=empty_on_404)
         g.command('get-member-groups', 'get_member_groups')
@@ -110,4 +113,4 @@ def load_command_table(self, _):
         g.command('list', 'get_group_members')
         g.command('add', 'add_member')
         g.command('remove', 'remove_member')
-        g.command('check', 'is_member_of')
+        g.custom_command('check', 'check_group_membership', client_factory=get_graph_client_groups)

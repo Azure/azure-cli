@@ -49,9 +49,28 @@ def _quote_field(data, field):
     if data is None:
         return None
 
-    data[field] = data[field].replace(";", "\;")
-    data[field] = data[field].replace('"', '\\"')
-    data[field] = '"%s"' % data[field]
+    # embedded quotes require escaping - but only if not escaped already
+    # note that semi-colons do not need escaping here since we are putting it
+    # inside of a quoted string
+    fieldBuf = ""
+    escape = False
+    for c in data[field]:
+        if c == '"':
+            fieldBuf += '\\"'
+            escape = False
+        elif c == '\\':
+            if escape:
+                fieldBuf += '\\\\'
+                escape = False
+            else:
+                escape = True
+        else:
+            if escape:
+                fieldBuf += '\\'
+            fieldBuf += c
+            escape = False
+
+    data[field] = '"%s"' % fieldBuf
 
     return data
 

@@ -25,6 +25,7 @@ from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.core._profile import Profile
+from azure.cli.core.util import sdk_no_wait
 
 logger = get_logger(__name__)
 MAX_TASKS_PER_REQUEST = 100
@@ -61,10 +62,8 @@ def create_account(client,
         parameters.key_vault_reference = {'id': keyvault, 'url': keyvault_url}
         parameters.pool_allocation_mode = 'UserSubscription'
 
-    return client.create(resource_group_name=resource_group_name,
-                         account_name=account_name,
-                         parameters=parameters,
-                         raw=no_wait)
+    return sdk_no_wait(no_wait, client.create, resource_group_name=resource_group_name,
+                       account_name=account_name, parameters=parameters)
 
 
 @transfer_doc(AutoStorageBaseProperties)

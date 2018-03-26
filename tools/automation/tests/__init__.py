@@ -21,25 +21,36 @@ IS_WINDOWS = sys.platform.lower() in ['windows', 'win32']
 TEST_INDEX_FILE = 'testIndex.json'
 
 
+def extract_module_name(path):
+    mod_name_regex = re.compile(r'azure-cli-([^/\\]*)')
+    ext_name_regex = re.compile(r'.*(azext_[^/\\]+).*')
+
+    try:
+        return re.search(mod_name_regex, path).group(1)
+    except AttributeError:
+        return  re.search(ext_name_regex, path).group(1)
+
+
 def execute(args):
     from .main import run_tests, collect_test
 
     validate_usage(args)
     current_profile = get_current_profile(args)
     test_index = get_test_index(args)
+    modules = []
 
     if args.ci:
         # CI Mode runs specific modules
         selected_modules = [('CI mode', 'azure.cli', 'azure.cli')]
     elif not (args.tests or args.src_file):
         # Default is to run with modules (possibly via environment variable)
-        if not args.modules and os.environ.get('AZURE_CLI_TEST_MODULES', None):
+        if os.environ.get('AZURE_CLI_TEST_MODULES', None):
             display('Test modules list is parsed from environment variable AZURE_CLI_TEST_MODULES.')
-            args.modules = [m.strip() for m in os.environ.get('AZURE_CLI_TEST_MODULES').split(',')]
+            modules = [m.strip() for m in os.environ.get('AZURE_CLI_TEST_MODULES').split(',')]
 
-        selected_modules = filter_user_selected_modules_with_tests(args.modules, args.profile)
+        selected_modules = filter_user_selected_modules_with_tests(modules, args.profile)
         if not selected_modules:
-            display('No module is selected.')
+            display('\nNo tests selected.')
             sys.exit(1)
     else:
         # Otherwise run specific tests
@@ -54,11 +65,10 @@ def execute(args):
                         args.tests.append(line)
         test_paths = []
         selected_modules = []
-        regex = re.compile(r'azure-cli-([^/\\]*)[/\\]')
         for t in args.tests:
             try:
                 test_path = os.path.normpath(test_index[t])
-                mod_name = regex.findall(test_path)[0]
+                mod_name = extract_module_name(test_path)
                 test_paths.append(test_path)
                 if mod_name not in selected_modules:
                     selected_modules.append(mod_name)
@@ -79,14 +89,11 @@ def execute(args):
 def validate_usage(args):
     """ Ensure conflicting options aren't specified. """
     test_usage = '[--test TESTS [TESTS ...]] [--src-file FILENAME]'
-    module_usage = '--modules MODULES [MODULES ...]'
     ci_usage = '--ci'
 
     usages = []
     if args.tests or args.src_file:
         usages.append(test_usage)
-    if args.modules:
-        usages.append(module_usage)
     if args.ci:
         usages.append(ci_usage)
 
@@ -134,6 +141,27 @@ def get_test_index(args):
     return test_index
 
 
+def get_extension_modules():
+    from importlib import import_module
+    import os
+    import pkgutil
+    from azure.cli.core.extension import get_extensions, get_extension_path, get_extension_modname
+    extension_whls = get_extensions()
+    ext_modules = []
+    if extension_whls:
+        for ext_name in [e.name for e in extension_whls]:
+            ext_dir = get_extension_path(ext_name)
+            sys.path.append(ext_dir)
+            try:
+                ext_mod = get_extension_modname(ext_name, ext_dir=ext_dir)
+                module = import_module(ext_mod)
+                setattr(module, 'path', module.__path__[0])
+                ext_modules.append((module, ext_mod))
+            except Exception as ex:
+                display("Error importing '{}' extension: {}".format(ext_mod, ex))
+    return ext_modules
+
+
 def discover_tests(args):
     """ Builds an index of tests so that the user can simply supply the name they wish to test instead of the
         full path. 
@@ -150,7 +178,9 @@ def discover_tests(args):
     core_ns_pkg = import_module('azure.cli')
     command_modules = list(pkgutil.iter_modules(mods_ns_pkg.__path__))
     core_modules = list(pkgutil.iter_modules(core_ns_pkg.__path__))
-    all_modules = command_modules + [x for x in core_modules if x[1] not in CORE_EXCLUSIONS]
+    extensions = get_extension_modules()
+
+    all_modules = command_modules + [x for x in core_modules if x[1] not in CORE_EXCLUSIONS] + extensions
 
     display("""
 ==================
@@ -165,6 +195,12 @@ def discover_tests(args):
             mod_data = {
                 'filepath': os.path.join(mod[0].path, mod_name, 'tests'),
                 'base_path': 'azure.cli.{}.tests'.format(mod_name),
+                'files': {}
+            }
+        elif mod_name.startswith('azext_'):
+            mod_data = {
+                'filepath': os.path.join(mod[0].path, 'tests', profile),
+                'base_path': '{}.tests.{}'.format(mod_name, profile),
                 'files': {}
             }
         else:
@@ -187,8 +223,8 @@ def discover_tests(args):
             test_file_path = mod_data['base_path'] + '.' + file_name
             try:
                 module = import_module(test_file_path)
-            except ImportError:
-                display('Unable to import {}'.format(test_file_path))
+            except ImportError as ex:
+                display('Unable to import {}. Reason: {}'.format(test_file_path, ex))
                 continue
             module_dict = module.__dict__
             classes = {}
@@ -207,10 +243,22 @@ def discover_tests(args):
         module_data[mod_name] = mod_data
 
     test_index = {}
+    conflicted_keys = []
     def add_to_index(key, path):
+
         key = key or mod_name
         if key in test_index:
-            display("COLLISION: Test '{}' Attempted '{}' Existing '{}'".format(key, test_index[key], path))
+            if key not in conflicted_keys:
+                conflicted_keys.append(key)
+            mod1 = extract_module_name(path)
+            mod2 = extract_module_name(test_index[key])
+            if mod1 != mod2:
+                # resolve conflicted keys by prefixing with the module name and a dot (.)
+                display("\nCOLLISION: Test '{}' exists in both '{}' and '{}'. Resolve using <MOD_NAME>.<NAME>".format(key, mod1, mod2))
+                test_index['{}.{}'.format(mod1, key)] = path
+                test_index['{}.{}'.format(mod2, key)] = test_index[key]
+            else:
+                display("\nERROR: Test '{}' exists twice in the '{}' module. Please rename one or both and re-run --discover.".format(key, mod1))
         else:
             test_index[key] = path
 
@@ -227,18 +275,18 @@ def discover_tests(args):
                 add_to_index(class_name, class_path)
             add_to_index(file_name, file_path)
         add_to_index(mod_name, mod_path)
+
+    # remove the conflicted keys since they would arbitrarily point to a random implementation
+    for key in conflicted_keys:
+        del test_index[key]
+
     return test_index
 
 
 def setup_arguments(parser):
-    parser.add_argument('--modules', dest='modules', nargs='+',
-                        help='Space separated list of modules to be run. Accepts short names, except azure-cli and azure-cli-nspkg.'
-                             'The modules list can also be set through environment '
-                             'variable AZURE_CLI_TEST_MODULES.'
-                             'The environment variable will be overwritten by command line parameters.')
     parser.add_argument('--series', dest='parallel', action='store_false', default=True, help='Disable test parallelization.')
     parser.add_argument('--live', action='store_true', help='Run all the tests live.')
-    parser.add_argument('--tests', dest='tests', nargs='+',
+    parser.add_argument(dest='tests', nargs='*',
                         help='Space separated list of tests to run. Can specify test filenames, class name or individual method names.')
     parser.add_argument('--src-file', dest='src_file', help='Text file of test names to include in the the test run.')
     parser.add_argument('--dest-file', dest='dest_file', help='File in which to save the names of any test failures.', default='test_failures.txt')

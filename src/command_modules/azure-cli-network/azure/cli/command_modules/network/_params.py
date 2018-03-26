@@ -6,6 +6,8 @@
 # pylint: disable=line-too-long
 from argcomplete.completers import FilesCompleter
 
+import six
+
 from knack.arguments import CLIArgumentType, ignore_type
 
 from azure.cli.core.commands.parameters import (get_location_type, get_resource_name_completion_list,
@@ -23,7 +25,7 @@ from azure.cli.command_modules.network._validators import \
      validate_private_ip_address,
      get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_network_watcher_from_vm, get_network_watcher_from_location,
-     get_asg_validator, validate_ip_tags)
+     get_asg_validator, get_vnet_validator, validate_ip_tags)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.mgmt.trafficmanager.models import MonitorProtocol
 from azure.cli.command_modules.network._completers import (
@@ -40,13 +42,13 @@ def load_arguments(self, _):
      ExpressRouteCircuitPeeringType, ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, IPAllocationMethod,
      IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName,
      RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
-     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType) = self.get_models(
+     VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType, ZoneType) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'AuthenticationMethod', 'Direction',
          'ExpressRouteCircuitPeeringType', 'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier', 'IPAllocationMethod',
          'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName',
          'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
-         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType')
+         'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'ZoneType')
 
     default_existing = 'If only one exists, omit to use as default.'
 
@@ -313,15 +315,9 @@ def load_arguments(self, _):
         c.argument('zone_name', name_arg_type)
         c.ignore('location')
 
-        # TODO: remove when feature ready
-        c.ignore('zone_type')
-        c.ignore('registration_vnets')
-        c.ignore('resolution_vnets')
-
-        # TODO: Uncomment when feature is ready
-        # c.argument('zone_type', help='Type of DNS zone to create.', arg_type=get_enum_type(ZoneType))
-        # c.argument('registration_vnets', arg_group='Private Zone', nargs='+', help='Space-separated names or IDs of virtual networks that register hostnames in this DNS zone.', validator=get_vnet_validator('registration_vnets'))
-        # c.argument('resolution_vnets', arg_group='Private Zone', nargs='+', help='Space-separated names or IDs of virtual networks that resolve records in this DNS zone.', validator=get_vnet_validator('resolution_vnets'))
+        c.argument('zone_type', help='Type of DNS zone to create.', arg_type=get_enum_type(ZoneType))
+        c.argument('registration_vnets', arg_group='Private Zone', nargs='+', help='Space-separated names or IDs of virtual networks that register hostnames in this DNS zone.', validator=get_vnet_validator('registration_vnets'))
+        c.argument('resolution_vnets', arg_group='Private Zone', nargs='+', help='Space-separated names or IDs of virtual networks that resolve records in this DNS zone.', validator=get_vnet_validator('resolution_vnets'))
 
     with self.argument_context('network dns zone import') as c:
         c.argument('file_name', options_list=('--file-name', '-f'), type=file_type, completer=FilesCompleter(), help='Path to the DNS zone file to import')
@@ -399,16 +395,22 @@ def load_arguments(self, _):
     # endregion
 
     # region ExpressRoutes
+    sku_family_type = CLIArgumentType(help='Chosen SKU family of ExpressRoute circuit.', arg_type=get_enum_type(ExpressRouteCircuitSkuFamily), default=ExpressRouteCircuitSkuFamily.metered_data.value)
+    sku_tier_type = CLIArgumentType(help='SKU Tier of ExpressRoute circuit.', arg_type=get_enum_type(ExpressRouteCircuitSkuTier), default=ExpressRouteCircuitSkuTier.standard.value)
     with self.argument_context('network express-route') as c:
         c.argument('circuit_name', circuit_name_type, options_list=('--name', '-n'))
-        c.argument('sku_family', help='Chosen SKU family of ExpressRoute circuit.', arg_type=get_enum_type(ExpressRouteCircuitSkuFamily), default=ExpressRouteCircuitSkuFamily.metered_data.value)
-        c.argument('sku_tier', help='SKU Tier of ExpressRoute circuit.', arg_type=get_enum_type(ExpressRouteCircuitSkuTier), default=ExpressRouteCircuitSkuTier.standard.value)
+        c.argument('sku_family', sku_family_type)
+        c.argument('sku_tier', sku_tier_type)
         c.argument('bandwidth_in_mbps', options_list=('--bandwidth',), help="Bandwidth in Mbps of the circuit.")
         c.argument('service_provider_name', options_list=('--provider',), help="Name of the ExpressRoute Service Provider.")
         c.argument('peering_location', help="Name of the peering location.")
         c.argument('device_path', options_list=('--path',), arg_type=get_enum_type(device_path_values))
         c.argument('vlan_id', type=int)
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+
+    with self.argument_context('network express-route update') as c:
+        c.argument('sku_family', sku_family_type, default=None)
+        c.argument('sku_tier', sku_tier_type, default=None)
 
     with self.argument_context('network express-route auth') as c:
         c.argument('circuit_name', circuit_name_type)
@@ -419,7 +421,8 @@ def load_arguments(self, _):
         c.extra('cmd')
 
     with self.argument_context('network express-route peering') as c:
-        c.argument('peer_asn', help='Autonomous system number of the customer/connectivity provider.')
+        # Using six.integer_types so we get int for Py3 and long for Py2
+        c.argument('peer_asn', help='Autonomous system number of the customer/connectivity provider.', type=six.integer_types[-1])
         c.argument('vlan_id', help='Identifier used to identify the customer.')
         c.argument('circuit_name', circuit_name_type)
         c.argument('peering_name', name_arg_type, id_part='child_name_1')
@@ -462,7 +465,6 @@ def load_arguments(self, _):
         c.argument('floating_ip', help='Enable floating IP.', arg_type=get_enum_type(['true', 'false']))
         c.argument('idle_timeout', help='Idle timeout in minutes.')
         c.argument('protocol', help='', arg_type=get_enum_type(TransportProtocol))
-        c.argument('sku', min_api='2017-08-01', help='Load balancer SKU', arg_type=get_enum_type(LoadBalancerSkuName, default='basic'))
         for item in ['backend_pool_name', 'backend_address_pool_name']:
             c.argument(item, options_list=('--backend-pool-name',), help='The name of the backend address pool.', completer=get_lb_subresource_completion_list('backend_address_pools'))
 
@@ -472,6 +474,7 @@ def load_arguments(self, _):
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
         c.argument('public_ip_address_allocation', arg_type=get_enum_type(IPAllocationMethod))
         c.argument('public_ip_dns_name', help='Globally unique DNS name for a new public IP.')
+        c.argument('sku', min_api='2017-08-01', help='Load balancer SKU', arg_type=get_enum_type(LoadBalancerSkuName, default='basic'))
 
         public_ip_help = get_folded_parameter_help_string('public IP address', allow_none=True, allow_new=True)
         c.argument('public_ip_address', help=public_ip_help, completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
@@ -605,9 +608,9 @@ def load_arguments(self, _):
         with self.argument_context('network nsg rule {}'.format(item)) as c:
             c.argument('priority', help='Rule priority, between 100 (highest priority) and 4096 (lowest priority). Must be unique for each rule in the collection.', type=int)
             c.argument('description', help='Rule description')
-            c.argument('access', help=None, arg_type=get_enum_type(SecurityRuleAccess), default=SecurityRuleAccess.allow.value)
-            c.argument('protocol', help='Network protocol this rule applies to.', arg_type=get_enum_type(SecurityRuleProtocol), default=SecurityRuleProtocol.asterisk.value)
-            c.argument('direction', help=None, arg_type=get_enum_type(SecurityRuleDirection), default=SecurityRuleDirection.inbound.value)
+            c.argument('access', help=None, arg_type=get_enum_type(SecurityRuleAccess), default=SecurityRuleAccess.allow.value if item == 'create' else None)
+            c.argument('protocol', help='Network protocol this rule applies to.', arg_type=get_enum_type(SecurityRuleProtocol), default=SecurityRuleProtocol.asterisk.value if item == 'create' else None)
+            c.argument('direction', help=None, arg_type=get_enum_type(SecurityRuleDirection), default=SecurityRuleDirection.inbound.value if item == 'create' else None)
 
         with self.argument_context('network nsg rule {}'.format(item), min_api='2017-06-01') as c:
             c.argument('source_port_ranges', nargs='+', help="Space-separated list of ports or port ranges between 0-65535. Use '*' to match all ports.", arg_group='Source')
@@ -633,15 +636,40 @@ def load_arguments(self, _):
         c.ignore('watcher_rg')
         c.ignore('watcher_name')
 
+    with self.argument_context('network watcher connection-monitor') as c:
+        c.argument('network_watcher_name', arg_type=ignore_type, options_list=['--__NETWORK_WATCHER_NAME'])
+        c.argument('connection_monitor_name', name_arg_type, help='Connection monitor name.')
+
+    with self.argument_context('network watcher connection-monitor create') as c:
+        c.argument('monitoring_interval', help='Monitoring interval in seconds.', type=int)
+        c.argument('do_not_start', action='store_true', help='Create the connection monitor but do not start it immediately.')
+        c.argument('source_resource', help='Name or ID of the resource from which to originate traffic.')
+        c.argument('source_port', help='Port number from which to originate traffic.')
+        c.ignore('location')
+
+    with self.argument_context('network watcher connection-monitor', arg_group='Destination') as c:
+        c.argument('dest_resource', help='Name of ID of the resource to receive traffic.')
+        c.argument('dest_port', help='Port number on which to receive traffic.')
+        c.argument('dest_address', help='The IP address or URI at which to receive traffic.')
+
+    nw_validator = get_network_watcher_from_location(remove=True, watcher_name='network_watcher_name', rg_name='resource_group_name')
+    for scope in ['list', 'show', 'start', 'stop', 'delete', 'query']:
+        with self.argument_context('network watcher connection-monitor {}'.format(scope)) as c:
+            c.extra('location', get_location_type(self.cli_ctx), required=True)
+            c.argument('resource_group_name', arg_type=ignore_type, validator=nw_validator)
+
     with self.argument_context('network watcher configure') as c:
         c.argument('locations', get_location_type(self.cli_ctx), options_list=['--locations', '-l'], nargs='+')
         c.argument('enabled', arg_type=get_three_state_flag())
 
     with self.argument_context('network watcher show-topology') as c:
-        c.argument('network_watcher_name', ignore_type, options_list=['--watcher'])
-        c.argument('resource_group_name', ignore_type, options_list=['--watcher-resource-group'])
-        c.argument('target_resource_group_name', options_list=['--resource-group', '-g'], completer=get_resource_group_completion_list)
         c.extra('location')
+
+    with self.argument_context('network watcher show-topology', arg_group='Target') as c:
+        c.ignore('network_watcher_name', 'resource_group_name')
+        c.argument('target_resource_group_name', options_list=['--resource-group', '-g'], completer=get_resource_group_completion_list)
+        c.argument('target_vnet', options_list=['--vnet'], help='Name or ID of the virtual network to target.')
+        c.argument('target_subnet', options_list=['--subnet'], help='Name or ID of the subnet to target. If name is used, --vnet NAME must also be supplied.')
 
     with self.argument_context('network watcher create') as c:
         c.argument('location', validator=get_default_location_from_resource_group)
@@ -715,7 +743,7 @@ def load_arguments(self, _):
     for item in ['create', 'update']:
         with self.argument_context('network public-ip {}'.format(item)) as c:
             c.argument('allocation_method', help='IP address allocation method', arg_type=get_enum_type(IPAllocationMethod))
-            c.argument('sku', min_api='2017-08-01', help='Public IP SKU', default='Basic', arg_type=get_enum_type(PublicIPAddressSkuName))
+            c.argument('sku', min_api='2017-08-01', help='Public IP SKU', default=PublicIPAddressSkuName.basic.value if PublicIPAddressSkuName is not None and item == 'create' else None, arg_type=get_enum_type(PublicIPAddressSkuName))
             c.argument('version', min_api='2016-09-01', help='IP address type.', arg_type=get_enum_type(IPVersion, 'ipv4'))
 
     # endregion
@@ -761,16 +789,20 @@ def load_arguments(self, _):
     # endregion
 
     # region TrafficManagers
+    monitor_protocol_type = CLIArgumentType(help='Monitor protocol.', arg_type=get_enum_type(MonitorProtocol, default='http'))
     with self.argument_context('network traffic-manager profile') as c:
         c.argument('traffic_manager_profile_name', name_arg_type, id_part='name', help='Traffic manager profile name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
         c.argument('profile_name', name_arg_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.Network/trafficManagerProfiles'))
         c.argument('monitor_path', help='Path to monitor.')
         c.argument('monitor_port', help='Port to monitor.', type=int)
-        c.argument('monitor_protocol', help='Monitor protocol.', arg_type=get_enum_type(MonitorProtocol, default='http'))
+        c.argument('monitor_protocol', monitor_protocol_type)
         c.argument('profile_status', options_list=('--status',), help='Status of the Traffic Manager profile.', arg_type=get_enum_type(['Enabled', 'Disabled']))
         c.argument('routing_method', help='Routing method.', arg_type=get_enum_type(['Performance', 'Weighted', 'Priority', 'Geographic']))
         c.argument('unique_dns_name', help="Relative DNS name for the traffic manager profile. Resulting FQDN will be `<unique-dns-name>.trafficmanager.net` and must be globally unique.")
         c.argument('ttl', help='DNS config time-to-live in seconds.', type=int)
+
+    with self.argument_context('network traffic-manager profile update') as c:
+        c.argument('monitor_protocol', monitor_protocol_type, default=None)
 
     with self.argument_context('network traffic-manager profile check-dns') as c:
         c.argument('name', name_arg_type, help='DNS prefix to verify availability for.', required=True)
@@ -835,19 +867,27 @@ def load_arguments(self, _):
     # endregion
 
     # region VirtualNetworkGateways
+    vnet_gateway_type = CLIArgumentType(help='The gateway type.', arg_type=get_enum_type(VirtualNetworkGatewayType), default=VirtualNetworkGatewayType.vpn.value)
+    vnet_gateway_sku_type = CLIArgumentType(help='VNet gateway SKU.', arg_type=get_enum_type(VirtualNetworkGatewaySkuName), default=VirtualNetworkGatewaySkuName.basic.value)
+    vnet_gateway_routing_type = CLIArgumentType(help='VPN routing type.', arg_type=get_enum_type(VpnType), default=VpnType.route_based.value)
     with self.argument_context('network vnet-gateway') as c:
         c.argument('virtual_network_gateway_name', options_list=('--name', '-n'), help='Name of the VNet gateway.', completer=get_resource_name_completion_list('Microsoft.Network/virtualNetworkGateways'), id_part='name')
         c.argument('cert_name', help='Root certificate name', options_list=('--name', '-n'))
         c.argument('gateway_name', help='Virtual network gateway name')
-        c.argument('gateway_type', help='The gateway type.', arg_type=get_enum_type(VirtualNetworkGatewayType), default=VirtualNetworkGatewayType.vpn.value)
-        c.argument('sku', help='VNet gateway SKU.', arg_type=get_enum_type(VirtualNetworkGatewaySkuName), default=VirtualNetworkGatewaySkuName.basic.value)
-        c.argument('vpn_type', help='VPN routing type.', arg_type=get_enum_type(VpnType), default=VpnType.route_based.value)
+        c.argument('gateway_type', vnet_gateway_type)
+        c.argument('sku', vnet_gateway_sku_type)
+        c.argument('vpn_type', vnet_gateway_routing_type)
         c.argument('bgp_peering_address', arg_group='BGP Peering', help='IP address to use for BGP peering.')
         c.argument('public_ip_address', options_list=['--public-ip-addresses'], nargs='+', help='Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.', completer=get_resource_name_completion_list('Microsoft.Network/publicIPAddresses'))
         c.argument('address_prefixes', help='Space-separated list of CIDR prefixes representing the address space for the P2S client.', nargs='+', arg_group='VPN Client')
         c.argument('radius_server', min_api='2017-06-01', help='Radius server address to connect to.', arg_group='VPN Client')
         c.argument('radius_secret', min_api='2017-06-01', help='Radius secret to use for authentication.', arg_group='VPN Client')
         c.argument('client_protocol', min_api='2017-06-01', help='Protocols to use for connecting', nargs='+', arg_group='VPN Client', arg_type=get_enum_type(VpnClientProtocol))
+
+    with self.argument_context('network vnet-gateway update') as c:
+        c.argument('gateway_type', vnet_gateway_type, default=None)
+        c.argument('sku', vnet_gateway_sku_type, default=None)
+        c.argument('vpn_type', vnet_gateway_routing_type, default=None)
 
     with self.argument_context('network vnet-gateway create') as c:
         vnet_help = "Name or ID of an existing virtual network which has a subnet named 'GatewaySubnet'."
