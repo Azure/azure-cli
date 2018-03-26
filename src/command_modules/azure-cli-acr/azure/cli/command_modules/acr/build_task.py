@@ -141,11 +141,13 @@ def acr_build_task_logs(
 
     if build_id is None:     
         # show logs for the last build
-        builds_paged = acr_build_task_list_builds(cmd, client, registry_name)
-        if builds_paged:
-            builds = builds_paged.get(0)
+        paged_builds = acr_build_task_list_builds(cmd, client, registry_name)
+        if paged_builds:
+            builds = paged_builds.get(0)
             if builds:
                 build_id = builds[0].build_id
+                print("Showing logs for the last updated build...")
+                print("Build-id: {}".format(build_id))
             
     from ._client_factory import cf_acr_builds
     from .build import acr_build_show_logs
