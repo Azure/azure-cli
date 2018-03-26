@@ -4,6 +4,8 @@ Release History
 ===============
 2.0.30
 ++++++
+* `vmss create`: support to configure platform fault domain count
+* `vmss create`: default to Standard LB when conditions are met
 * BREAKING CHANGE: `vm assign-identity`, `vm remove-identity`: Deprecated commands have been removed.
 * BREAKING CHANGE: `vm format-secret`: Deprecated command has been removed.
 * `vm create`: support configure Public-IP sku

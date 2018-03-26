@@ -946,7 +946,9 @@ def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_t
 def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
     from msrestazure.azure_exceptions import CloudError
     from msrestazure.tools import parse_resource_id
+    from azure.cli.core.profiles import ResourceType
     INSTANCE_THRESHOLD = _get_vmss_create_instance_threshold()
+    std_lb_is_available = cmd.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK)
 
     # convert the single_placement_group to boolean for simpler logic beyond
     if namespace.single_placement_group is None:
@@ -970,14 +972,14 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
     # Resolve the type of balancer (if any) being used
     balancer_type = 'None'
     if namespace.load_balancer is None and namespace.application_gateway is None:
-        # use defaulting rules to determine
-        balancer_type = 'loadBalancer' if namespace.instance_count <= INSTANCE_THRESHOLD \
-            else 'applicationGateway'
-        logger.debug("defaulting to '%s' because instance count <= %s", balancer_type, INSTANCE_THRESHOLD)
-        if balancer_type == 'applicationGateway':
-            logger.warning("In a future release of CLI, for scalesets with 100+ instances, the default balancer "
-                           "will be Standard Load Balancer instead of Application Gateway. Use '--app-gateway' to "
-                           "continue using applicaiton gateways")
+        if std_lb_is_available:
+            balancer_type = 'loadBalancer'
+        else:
+            balancer_type = 'loadBalancer' if namespace.instance_count <= INSTANCE_THRESHOLD \
+                else 'applicationGateway'
+            logger.debug("W/o STD LB, defaulting to '%s' under because standard LB instance count <= %s",
+                         balancer_type, INSTANCE_THRESHOLD)
+
     elif namespace.load_balancer:
         balancer_type = 'loadBalancer'
     elif namespace.application_gateway:
@@ -1052,6 +1054,13 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
             namespace.load_balancer_type = 'new'
             logger.debug('new load balancer will be created')
 
+        if namespace.load_balancer_type == 'new' and not namespace.load_balancer_sku and std_lb_is_available:
+            if (namespace.instance_count >= INSTANCE_THRESHOLD or
+                    namespace.single_placement_group is False or namespace.zones):
+                PIPSkuName = cmd.get_models('PublicIPAddressSkuName', resource_type=ResourceType.MGMT_NETWORK)
+                namespace.load_balancer_sku = PIPSkuName.standard.value
+                logger.debug("defaulting to Standard Load Balancer as one of the conditions is met")
+
 
 def get_network_client(cli_ctx):
     from azure.cli.core.profiles import ResourceType
@@ -1073,6 +1082,13 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_location(cmd, namespace, namespace.zones, namespace.vm_sku)
     _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
     _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
+
+    if namespace.platform_fault_domain_count == 1:
+        if namespace.single_placement_group is None:
+            namespace.single_placement_group = False
+        elif namespace.single_placement_group:
+            raise CLIError('usage error: with platform fault domain count 1, you must use multiple placement groups')
+
     _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(cmd, namespace)
@@ -1085,6 +1101,7 @@ def process_vmss_create_namespace(cmd, namespace):
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
         raise CLIError('Usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
+
 # endregion
 
 
