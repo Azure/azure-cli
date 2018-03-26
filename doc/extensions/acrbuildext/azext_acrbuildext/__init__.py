@@ -7,10 +7,12 @@ from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands.parameters import (
     get_resource_name_completion_list
 )
+import azext_acrbuildext._help  # pylint: disable=unused-import
 from ._constants import (
-    REGISTRY_RESOURCE_TYPE
+    REGISTRY_RESOURCE_TYPE,
+    BUILD_TASK_RESOURCE_TYPE
 )
-from ._client_factory import cf_acr_builds
+from ._client_factory import cf_acr_builds, cf_acr_build_tasks
 
 class AcrBuildCommandsLoader(AzCommandsLoader):
 
@@ -25,9 +27,23 @@ class AcrBuildCommandsLoader(AzCommandsLoader):
             client_factory=cf_acr_builds
         )
 
+        acr_build_task_util = CliCommandType(
+            operations_tmpl='azext_acrbuildext.build_task#{}',    
+            client_factory=cf_acr_build_tasks
+        )
+
         with self.command_group('acr build', acr_build_util) as g:
             g.command('show-logs', 'acr_build_show_logs')
             g.command('', 'acr_queue') # TODO: it should be moved to acr command group once we can integrate the full sdk.
+
+        with self.command_group('acr build-task', acr_build_task_util) as g:
+            g.command('create', 'acr_build_task_create')
+            g.command('show', 'acr_build_task_show')
+            g.command('list', 'acr_build_task_list')
+            g.command('delete', 'acr_build_task_delete')
+            g.command('list-builds', 'acr_build_task_list_builds')
+            g.command('run', 'acr_build_task_run')
+            g.command('logs', 'acr_build_task_logs')
         return self.command_table
 
     def load_arguments(self, _):
@@ -40,6 +56,23 @@ class AcrBuildCommandsLoader(AzCommandsLoader):
             c.argument('build_args', nargs='+', help='The space-separated build arguments in a format of <name>=<value>.')
             c.argument('secret_build_args', nargs='+', help='The space-separated secret build arguments in a format of <name>=<value>.')
             c.argument('no_logs', options_list=['--no-logs'], action='store_true', help='Do not show logs after successfully queuing the build.') 
+
+        with self.argument_context('acr build-task') as c:
+            c.argument('registry_name', options_list=['--registry', '-r'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
+            c.argument('build_task_name', options_list=['--name', '-n'], help='The name of the build task', completer=get_resource_name_completion_list(BUILD_TASK_RESOURCE_TYPE))
+            c.argument('build_id', help='The unique build identifier.')
+            c.argument('image_name', options_list=['--image', '-t'], help="The image repository and optionally a tag in the 'repository:tag' format.")
+            c.argument('source_location', options_list=['--context', '-c'], help="The URL to a git repository.")
+            c.argument('source_branch', options_list=['--branch'], help="The source control branch name")
+            c.argument('docker_file_path', options_list=['--file', '-f'], help="The relative path of the the docker file to the source code root folder.")
+            c.argument('git_access_token', help="The git access token for configuring webhook.")
+            c.argument('os_type', options_list=['--os'], help="The platform OS that has to be used for build task.")
+            c.argument('cpu', help="The number of cpu cores to use for running builds.")
+            c.argument('no_logs', action='store_true', help="Do not show build logs.")
+
+        with self.argument_context('acr build-task create') as c:
+            c.argument('build_task_name', completer=None)
         return self.argument_context
+
 
 COMMAND_LOADER_CLS = AcrBuildCommandsLoader

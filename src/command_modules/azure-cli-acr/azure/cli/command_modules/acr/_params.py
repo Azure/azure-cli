@@ -21,6 +21,7 @@ from ._constants import (
     REGISTRY_RESOURCE_TYPE,
     WEBHOOK_RESOURCE_TYPE,
     REPLICATION_RESOURCE_TYPE,
+    BUILD_TASK_RESOURCE_TYPE,
     CLASSIC_REGISTRY_SKU,
     MANAGED_REGISTRY_SKU
 )
@@ -98,4 +99,19 @@ def load_arguments(self, _):
         c.argument('build_args', nargs='+', help='The space-separated build arguments in a format of <name>=<value>.')
         c.argument('secret_build_args', nargs='+', help='The space-separated secret build arguments in a format of <name>=<value>.')
         c.argument('no_logs', options_list=['--no-logs'], action='store_true', help='Do not show logs after successfully queuing the build.')
-        
+
+    with self.argument_context('acr build-task') as c:
+        c.argument('registry_name', options_list=['--registry', '-r'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
+        c.argument('build_task_name', options_list=['--name', '-n'], help='The name of the build task', completer=get_resource_name_completion_list(BUILD_TASK_RESOURCE_TYPE))
+        c.argument('build_id', help='The unique build identifier.')
+        c.argument('image_name', options_list=['--image', '-t'], help="The image repository and optionally a tag in the 'repository:tag' format.")
+        c.argument('source_location', options_list=['--context', '-c'], help="The URL to a git repository.")
+        c.argument('source_branch', options_list=['--branch'], help="The source control branch name")
+        c.argument('docker_file_path', options_list=['--file', '-f'], help="The relative path of the the docker file to the source code root folder.")
+        c.argument('git_access_token', help="The git access token for configuring webhook.")
+        c.argument('os_type', options_list=['--os'], help="The platform OS that has to be used for build task.")
+        c.argument('cpu', help="The number of cpu cores to use for running builds.")
+        c.argument('no_logs', action='store_true', help="Do not show build logs.")
+
+    with self.argument_context('acr build-task create') as c:
+        c.argument('build_task_name', completer=None)

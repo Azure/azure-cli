@@ -1,0 +1,179 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "registryName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the container registry."
+            }
+        },
+        "buildTaskName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the build task."
+            }
+        },
+        "buildTaskLocation": {
+            "type": "string",
+            "metadata": {
+                "description": "The location of the build task. This should be the same as the location of the container registry."
+            }
+        },
+        "buildTaskApiVersion": {
+            "defaultValue": "2018-02-01-preview",
+            "type": "string",
+            "metadata": {
+                "description": "The API version of the build task."
+            }
+        },
+        "buildTaskAlias": {
+            "type": "string",
+            "metadata": {
+                "description": "The alias of a build task."
+            }
+        },
+        "status": {
+            "type": "string",
+            "metadata": {
+                "description": "The status of build task."
+            }
+        },
+        "osType": {
+            "type": "string",
+            "metadata": {
+                "description": "The platform OS that has to be used for build task."
+            }
+        },
+        "cpu": {
+            "type": "int",
+            "metadata": {
+                "description": "The number of CPU cores."
+            }
+        },
+        "sourceControlType": {
+            "defaultValue": "github",
+            "type": "string",
+            "metadata": {
+                "description": "The source control provider type."
+            }
+        },
+        "sourceControlRepositoryUrl": {
+            "type": "string",
+            "metadata": {
+                "description": "the repository URL of the source control."
+            }
+        },
+        "isCommitTriggerEnabled": {
+            "type": "bool",
+            "metadata": {
+                "description": "Flag indicating whether builds are triggered on source repository commits."
+            }
+        },
+        "sourceControlAuthTokenType": {
+            "defaultValue": "OAuth",
+            "type": "string",
+            "metadata": {
+                "description": "The type of source auth token."
+            }
+        },
+        "sourceControlAuthToken": {
+            "type": "string",
+            "metadata": {
+                "description": "the access token for source control."
+            }
+        },
+        "sourceControlRefreshToken": {
+            "type": "string",
+            "metadata": {
+                "description": "the refresh token for refreshing the access token of source control."
+            }
+        },
+        "sourceControlAuthScope": {
+            "type": "string",
+            "metadata": {
+                "description": "the scope of the access token for source control."
+            }
+        },
+        "sourceControlAuthExpiresIn": {
+            "type": "int",
+            "metadata": {
+                "description": "the time in seconds when the access token expires."
+            }
+        },
+        "stepName": {
+            "type": "string",
+            "metadata": {
+                "description": "the name of the build step."
+            }
+        },
+        "dockerFilePath": {
+            "type": "string",
+            "metadata": {
+                "description": "the path to the docker file in the source control."
+            }
+        },
+        "sourceControlBranch": {
+            "type": "string",
+            "metadata": {
+                "description": "The branch of the source control."
+            }
+        },
+        "imageName": {
+            "type": "string",
+            "metadata": {
+                "description": "the name of the image that the build will push to registry."
+            }
+        },
+        "isPushEnabled": {
+            "type": "bool",
+            "metadata": {
+                "description": "Flag indicating whether build has to push image to registry."
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.ContainerRegistry/registries/buildTasks",
+            "name": "[concat(parameters('registryName'), '/', parameters('buildTaskName'))]",
+            "apiVersion": "[parameters('buildTaskApiVersion')]",
+            "location": "[parameters('buildTaskLocation')]",
+            "properties": {
+                "alias": "[parameters('buildTaskAlias')]",
+                "status": "[parameters('status')]",
+                "platform": {
+                    "osType": "[parameters('osType')]",
+                    "cpu": "[parameters('cpu')]"
+                },
+                "sourceRepository": {
+                    "sourceControlType": "[parameters('sourceControlType')]",
+                    "repositoryUrl": "[parameters('sourceControlRepositoryUrl')]",
+                    "isCommitTriggerEnabled": "[parameters('isCommitTriggerEnabled')]",
+                    "sourceControlAuthProperties": {
+                        "tokenType": "[parameters('sourceControlAuthTokenType')]",
+                        "token": "[parameters('sourceControlAuthToken')]",
+                        "refreshToken": "[parameters('sourceControlRefreshToken')]",
+                        "scope": "[parameters('sourceControlAuthScope')]",
+                        "expiresIn": "[parameters('sourceControlAuthExpiresIn')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.ContainerRegistry/registries/buildTasks/steps",
+            "dependsOn": [
+                "[concat('Microsoft.ContainerRegistry/registries/', parameters('registryName'), '/buildTasks/', parameters('buildTaskName'))]"
+            ],
+            "name": "[concat(parameters('registryName'), '/', parameters('buildTaskName'), '/', parameters('stepName'))]",
+            "apiVersion": "[parameters('buildTaskApiVersion')]",
+            "location": "[parameters('buildTaskLocation')]",
+            "properties": {
+                "type": "Docker",
+                "branch": "[parameters('sourceControlBranch')]",
+                "imageName": "[parameters('imageName')]",
+                "isPushEnabled": "[parameters('isPushEnabled')]",
+                "dockerFilePath": "[parameters('dockerFilePath')]"
+            }
+        }
+    ]
+}

@@ -7,7 +7,7 @@ from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
 from ._format import output_format
-from ._client_factory import cf_acr_registries, cf_acr_replications, cf_acr_webhooks, cf_acr_builds
+from ._client_factory import cf_acr_registries, cf_acr_replications, cf_acr_webhooks, cf_acr_builds, cf_acr_build_tasks
 
 
 def load_command_table(self, _):
@@ -45,6 +45,12 @@ def load_command_table(self, _):
         client_factory=cf_acr_builds
     )
 
+    acr_build_task_util = CliCommandType(
+        operations_tmpl='azure.cli.command_modules.acr.build_task#{}',    
+        table_transformer=output_format,
+        client_factory=cf_acr_build_tasks
+    )
+
     with self.command_group('acr', acr_custom_util) as g:
         g.command('check-name', 'acr_check_name', table_transformer=None)
         g.command('list', 'acr_list')
@@ -59,10 +65,6 @@ def load_command_table(self, _):
                                  custom_func_name='acr_update_custom',
                                  custom_func_type=acr_custom_util,
                                  client_factory=cf_acr_registries)
-
-    with self.command_group('acr build', acr_build_util) as g:
-            g.command('show-logs', 'acr_build_show_logs')
-            g.command('', 'acr_queue') # TODO: it should be moved to acr command group once we can integrate the full sdk.
 
     with self.command_group('acr credential', acr_cred_util) as g:
         g.command('show', 'acr_credential_show', exception_handler=empty_on_404)
@@ -101,3 +103,16 @@ def load_command_table(self, _):
                                  custom_func_name='acr_replication_update_custom',
                                  custom_func_type=acr_replication_util,
                                  client_factory=cf_acr_replications)
+
+    with self.command_group('acr build-task', acr_build_task_util) as g:
+            g.command('create', 'acr_build_task_create')
+            g.command('show', 'acr_build_task_show')
+            g.command('list', 'acr_build_task_list')
+            g.command('delete', 'acr_build_task_delete')
+            g.command('list-builds', 'acr_build_task_list_builds')
+            g.command('run', 'acr_build_task_run')
+            g.command('logs', 'acr_build_task_logs')
+
+    with self.command_group('acr build', acr_build_util) as g:
+            g.command('show-logs', 'acr_build_show_logs')
+            g.command('', 'acr_queue') # TODO: it should be moved to acr command group once we can integrate the full sdk.

@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from .sdk.operations.builds_operations import BuildsOperations
 
 
 def get_arm_service_client(cli_ctx):
@@ -24,6 +23,7 @@ def get_acr_service_client(cli_ctx, api_version=None):
     from azure.mgmt.containerregistry import ContainerRegistryManagementClient
     return get_mgmt_service_client(cli_ctx, ContainerRegistryManagementClient, api_version=api_version)
 
+
 def get_acr_build_client(cli_ctx, api_version=None):
     """Returns the client for managing container registries. """
     from .sdk.container_registry_management_client import ContainerRegistryManagementClient
@@ -32,6 +32,11 @@ def get_acr_build_client(cli_ctx, api_version=None):
 
 def cf_acr_builds(cli_ctx, *_):
     return get_acr_build_client(cli_ctx).builds
+
+
+def cf_acr_build_tasks(cli_ctx, *_):
+    return get_acr_build_client(cli_ctx).build_tasks
+ 
 
 def cf_acr_registries(cli_ctx, *_):
     return get_acr_build_client(cli_ctx).registries
