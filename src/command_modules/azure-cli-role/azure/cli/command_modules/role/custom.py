@@ -21,16 +21,12 @@ from azure.graphrbac.models.graph_error import GraphErrorException
 
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
-from azure.mgmt.authorization.models import (RoleAssignmentProperties, Permission, RoleDefinition,
-                                             RoleDefinitionProperties)
+from azure.mgmt.authorization.models import RoleAssignmentCreateParameters, Permission, RoleDefinition
 
-from azure.graphrbac.models import (ApplicationCreateParameters,
-                                    ApplicationUpdateParameters,
-                                    PasswordCredential,
-                                    KeyCredential,
-                                    UserCreateParameters,
-                                    PasswordProfile,
-                                    ServicePrincipalCreateParameters)
+from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, PasswordCredential,
+                                    KeyCredential, UserCreateParameters, PasswordProfile,
+                                    ServicePrincipalCreateParameters, RequiredResourceAccess,
+                                    ResourceAccess, GroupCreateParameters, CheckGroupMembershipParameters)
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 
@@ -82,7 +78,7 @@ def _create_update_role_definition(cli_ctx, role_definition, for_update):
             raise CLIError('Please provide the unique logic name of an existing role')
         role_definition['name'] = matched[0].name
         # ensure correct logical name and guid name. For update we accept both
-        role_name = matched[0].properties.role_name
+        role_name = matched[0].role_name
         role_id = matched[0].name
     else:
         role_id = _gen_guid()
@@ -91,18 +87,19 @@ def _create_update_role_definition(cli_ctx, role_definition, for_update):
         raise CLIError("please provide 'assignableScopes'")
 
     permission = Permission(actions=role_definition.get('actions', None),
-                            not_actions=role_definition.get('notActions', None))
-    properties = RoleDefinitionProperties(role_name=role_name,
-                                          description=role_definition.get('description', None),
-                                          type=_CUSTOM_RULE,
-                                          assignable_scopes=role_definition['assignableScopes'],
-                                          permissions=[permission])
+                            not_actions=role_definition.get('notActions', None),
+                            data_actions=role_definition.get('dataActions', None),
+                            not_data_actions=role_definition.get('notDataActions', None))
 
-    definition = RoleDefinition(name=role_id, properties=properties)
+    role_definition = RoleDefinition(role_name=role_name,
+                                     description=role_definition.get('description', None),
+                                     role_type=_CUSTOM_RULE,
+                                     assignable_scopes=role_definition['assignableScopes'],
+                                     permissions=[permission])
 
     return definitions_client.create_or_update(role_definition_id=role_id,
-                                               scope=properties.assignable_scopes[0],
-                                               role_definition=definition)
+                                               scope=role_definition.assignable_scopes[0],
+                                               role_definition=role_definition)
 
 
 def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
@@ -118,17 +115,18 @@ def delete_role_definition(cmd, name, resource_group_name=None, scope=None,
 def _search_role_definitions(definitions_client, name, scope, custom_role_only=False):
     roles = list(definitions_client.list(scope))
     if name:
-        roles = [r for r in roles if r.name == name or r.properties.role_name == name]
+        roles = [r for r in roles if r.name == name or r.role_name == name]
     if custom_role_only:
-        roles = [r for r in roles if r.properties.type == _CUSTOM_RULE]
+        roles = [r for r in roles if r.role_type == _CUSTOM_RULE]
     return roles
 
 
-def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None, scope=None):
+def create_role_assignment(cmd, role, assignee=None, assignee_object_id=None, resource_group_name=None,
+                           scope=None):
     if bool(assignee) == bool(assignee_object_id):
         raise CLIError('usage error: --assignee STRING | --assignee-object-id GUID')
-    return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id,
-                                   resource_group_name, scope, resolve_assignee=(not assignee_object_id))
+    return _create_role_assignment(cmd.cli_ctx, role, assignee or assignee_object_id, resource_group_name, scope,
+                                   resolve_assignee=(not assignee_object_id))
 
 
 def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, scope=None,
@@ -142,10 +140,11 @@ def _create_role_assignment(cli_ctx, role, assignee, resource_group_name=None, s
 
     role_id = _resolve_role_id(role, scope, definitions_client)
     object_id = _resolve_object_id(cli_ctx, assignee) if resolve_assignee else assignee
-    properties = RoleAssignmentProperties(role_id, object_id)
+    parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id)
     assignment_name = _gen_guid()
     custom_headers = None
-    return assignments_client.create(scope, assignment_name, properties,
+    return assignments_client.create(scope=scope, role_assignment_name=assignment_name,
+                                     parameters=parameters,
                                      custom_headers=custom_headers)
 
 
@@ -185,22 +184,22 @@ def list_role_assignments(cmd, assignee=None, role=None, resource_group_name=Non
     # 2. fill in role names
     role_defs = list(definitions_client.list(
         scope=scope or ('/subscriptions/' + definitions_client.config.subscription_id)))
-    role_dics = {i.id: i.properties.role_name for i in role_defs}
+    role_dics = {i.id: i.role_name for i in role_defs}
     for i in results:
-        if role_dics.get(i['properties']['roleDefinitionId']):
-            i['properties']['roleDefinitionName'] = role_dics[i['properties']['roleDefinitionId']]
+        if role_dics.get(i['roleDefinitionId']):
+            i['roleDefinitionName'] = role_dics[i['roleDefinitionId']]
 
     # fill in principal names
-    principal_ids = set(i['properties']['principalId'] for i in results if i['properties']['principalId'])
+    principal_ids = set(i['principalId'] for i in results if i['principalId'])
     if principal_ids:
         try:
             principals = _get_object_stubs(graph_client, principal_ids)
             principal_dics = {i.object_id: _get_displayable_name(i) for i in principals}
 
-            for i in [r for r in results if not r['properties'].get('principalName')]:
-                i['properties']['principalName'] = ''
-                if principal_dics.get(i['properties']['principalId']):
-                    i['properties']['principalName'] = principal_dics[i['properties']['principalId']]
+            for i in [r for r in results if not r.get('principalName')]:
+                i['principalName'] = ''
+                if principal_dics.get(i['principalId']):
+                    i['principalName'] = principal_dics[i['principalId']]
         except (CloudError, GraphErrorException) as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
@@ -256,7 +255,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
     # pylint: disable=too-many-nested-blocks, too-many-statements
     result = []
     start_events, end_events, offline_events, client = _get_assignment_events(cmd.cli_ctx, start_time, end_time)
-    role_defs = {d.id: [d.properties.role_name, d.id.split('/')[-1]] for d in list_role_definitions(cmd)}
+    role_defs = {d.id: [d.role_name, d.id.split('/')[-1]] for d in list_role_definitions(cmd)}
 
     for op_id in start_events:
         e = end_events.get(op_id, None)
@@ -309,7 +308,7 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
             result.append(entry)
 
     # Fill in logical user/sp names as guid principal-id not readable
-    principal_ids = [x['principalId'] for x in result if x['principalId']]
+    principal_ids = set([x['principalId'] for x in result if x['principalId']])
     if principal_ids:
         graph_client = _graph_client_factory(cmd.cli_ctx)
         stubs = _get_object_stubs(graph_client, principal_ids)
@@ -341,40 +340,40 @@ def list_role_assignment_change_logs(cmd, start_time=None, end_time=None):
 
 
 def _backfill_assignments_for_co_admins(cli_ctx, auth_client, assignee=None):
-    co_admins = auth_client.classic_administrators.list('2015-06-01')  # known swagger bug on api-version handling
-    co_admins = [x for x in co_admins if x.properties.email_address]
+    co_admins = auth_client.classic_administrators.list()  # known swagger bug on api-version handling
+    co_admins = [x for x in co_admins if x.email_address]
     graph_client = _graph_client_factory(cli_ctx)
     if assignee:  # apply assignee filter if applicable
         if _is_guid(assignee):
-            result = _get_object_stubs(graph_client, [assignee])
-            if not result:
-                return []
-            assignee = _get_displayable_name(result[0]).lower()
-
-        co_admins = [x for x in co_admins if assignee == x.properties.email_address.lower()]
+            try:
+                result = _get_object_stubs(graph_client, [assignee])
+                if not result:
+                    return []
+                assignee = _get_displayable_name(result[0]).lower()
+            except ValueError:
+                pass
+        co_admins = [x for x in co_admins if assignee == x.email_address.lower()]
 
     if not co_admins:
         return []
 
     result, users = [], []
     for i in range(0, len(co_admins), 10):  # graph allows up to 10 query filters, so split into chunks here
-        upn_queries = ["userPrincipalName eq '{}'".format(x.properties.email_address) for x in co_admins[i:i + 10]]
+        upn_queries = ["userPrincipalName eq '{}'".format(x.email_address) for x in co_admins[i:i + 10]]
         temp = list(list_users(graph_client.users, query_filter=' or '.join(upn_queries)))
         users += temp
     upns = {u.user_principal_name: u.object_id for u in users}
     for admin in co_admins:
         na_text = 'NA(classic admins)'
-        email = admin.properties.email_address
+        email = admin.email_address
         result.append({
             'id': na_text,
             'name': na_text,
-            'properties': {
-                'principalId': upns.get(email),
-                'principalName': email,
-                'roleDefinitionName': admin.properties.role,
-                'roleDefinitionId': 'NA(classic admin role)',
-                'scope': '/subscriptions/' + auth_client.config.subscription_id
-            }
+            'principalId': upns.get(email),
+            'principalName': email,
+            'roleDefinitionName': admin.role,
+            'roleDefinitionId': 'NA(classic admin role)',
+            'scope': '/subscriptions/' + auth_client.config.subscription_id
         })
     return result
 
@@ -434,13 +433,13 @@ def _search_role_assignments(cli_ctx, assignments_client, definitions_client,
     if assignments:
         assignments = [a for a in assignments if (
             not scope or
-            include_inherited and re.match(a.properties.scope, scope, re.I) or
-            a.properties.scope.lower() == scope.lower()
+            include_inherited and re.match(a.scope, scope, re.I) or
+            a.scope.lower() == scope.lower()
         )]
 
         if role:
             role_id = _resolve_role_id(role, scope, definitions_client)
-            assignments = [i for i in assignments if i.properties.role_definition_id == role_id]
+            assignments = [i for i in assignments if i.role_definition_id == role_id]
 
     return assignments
 
@@ -527,8 +526,18 @@ def create_user(client, user_principal_name, display_name, password,
                                  display_name=display_name, mail_nickname=mail_nickname,
                                  immutable_id=immutable_id,
                                  password_profile=PasswordProfile(
-                                     password, force_change_password_next_login))
+                                     password=password,
+                                     force_change_password_next_login=force_change_password_next_login))
     return client.create(param)
+
+
+def create_group(client, display_name, mail_nickname):
+    return client.create(GroupCreateParameters(display_name=display_name, mail_nickname=mail_nickname))
+
+
+def check_group_membership(cmd, client, group_id, member_object_id):  # pylint: disable=unused-argument
+    return client.is_member_of(CheckGroupMembershipParameters(group_id=group_id,
+                                                              member_id=member_object_id))
 
 
 def list_groups(client, display_name=None, query_filter=None):
@@ -543,23 +552,36 @@ def list_groups(client, display_name=None, query_filter=None):
     return client.list(filter=(' and ').join(sub_filters))
 
 
-def create_application(client, display_name, homepage, identifier_uris,
+def create_application(client, display_name, homepage=None, identifier_uris=None,
                        available_to_other_tenants=False, password=None, reply_urls=None,
-                       key_value=None, key_type=None, key_usage=None, start_date=None,
-                       end_date=None):
-    password_creds, key_creds = _build_application_creds(password, key_value, key_type,
-                                                         key_usage, start_date, end_date)
+                       key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
+                       oauth2_allow_implicit_flow=None, required_resource_accesses=None, native_app=None):
+    key_creds, password_creds, required_accesses = None, None, None
+    if native_app:
+        if identifier_uris:
+            raise CLIError("'--identifier-uris' is not required for creating a native application")
+        identifier_uris = ['http://{}'.format(_gen_guid())]  # we will create a temporary one and remove it later
+    else:
+        if not identifier_uris:
+            raise CLIError("'--identifier-uris' is required for creating an application")
+        password_creds, key_creds = _build_application_creds(password, key_value, key_type,
+                                                             key_usage, start_date, end_date)
 
-    app_create_param = ApplicationCreateParameters(available_to_other_tenants,
-                                                   display_name,
-                                                   identifier_uris,
-                                                   homepage=homepage,
-                                                   reply_urls=reply_urls,
-                                                   key_credentials=key_creds,
-                                                   password_credentials=password_creds)
+    if required_resource_accesses:
+        required_accesses = _build_application_accesses(required_resource_accesses)
+
+    app_patch_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
+                                                  display_name=display_name,
+                                                  identifier_uris=identifier_uris,
+                                                  homepage=homepage,
+                                                  reply_urls=reply_urls,
+                                                  key_credentials=key_creds,
+                                                  password_credentials=password_creds,
+                                                  oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
+                                                  required_resource_access=required_accesses)
 
     try:
-        return client.create(app_create_param)
+        result = client.create(app_patch_param)
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
             link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
@@ -567,24 +589,55 @@ def create_application(client, display_name, homepage, identifier_uris,
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
 
+    if native_app:
+        # AAD graph doesn't have the API to create a native app, aka public client, the recommended hack is
+        # to create a web app first, then convert to a native one
+        # pylint: disable=protected-access
+        if 'public_client' not in ApplicationUpdateParameters._attribute_map:
+            ApplicationUpdateParameters._attribute_map['public_client'] = {'key': 'publicClient', 'type': 'bool'}
+        app_patch_param = ApplicationUpdateParameters(identifier_uris=[])
+        setattr(app_patch_param, 'public_client', True)
+        client.patch(result.object_id, app_patch_param)
+        result = client.get(result.object_id)
+
+    return result
+
 
 def update_application(client, identifier, display_name=None, homepage=None,
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
-                       key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None):
+                       key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
+                       oauth2_allow_implicit_flow=None, required_resource_accesses=None):
     object_id = _resolve_application(client, identifier)
 
-    password_creds, key_creds = None, None
+    password_creds, key_creds, required_accesses = None, None, None
     if any([key_value, key_type, key_usage, start_date, end_date]):
         password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                              key_usage, start_date, end_date)
+
+    if required_resource_accesses:
+        required_accesses = _build_application_accesses(required_resource_accesses)
+
     app_patch_param = ApplicationUpdateParameters(display_name=display_name,
                                                   homepage=homepage,
                                                   identifier_uris=identifier_uris,
                                                   reply_urls=reply_urls,
                                                   key_credentials=key_creds,
                                                   password_credentials=password_creds,
-                                                  available_to_other_tenants=available_to_other_tenants)
+                                                  available_to_other_tenants=available_to_other_tenants,
+                                                  required_resource_access=required_accesses,
+                                                  oauth2_allow_implicit_flow=oauth2_allow_implicit_flow)
     return client.patch(object_id, app_patch_param)
+
+
+def _build_application_accesses(required_resource_accesses):
+    required_accesses = None
+    for x in required_resource_accesses:
+        accesses = [ResourceAccess(id=y['id'], type=y['type']) for y in x['resourceAccess']]
+        if required_accesses is None:
+            required_accesses = []
+        required_accesses.append(RequiredResourceAccess(resource_app_id=x['resourceAppId'],
+                                                        resource_access=accesses))
+    return required_accesses
 
 
 def show_application(client, identifier):
@@ -630,10 +683,12 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     password_creds = None
     key_creds = None
     if password:
-        password_creds = [PasswordCredential(start_date, end_date, str(_gen_guid()), password)]
+        password_creds = [PasswordCredential(start_date=start_date, end_date=end_date,
+                                             key_id=str(_gen_guid()), value=password)]
     elif key_value:
-        key_creds = [KeyCredential(start_date, end_date, key_value, str(_gen_guid()),
-                                   key_usage, key_type)]
+        key_creds = [KeyCredential(start_date=start_date, end_date=end_date,
+                                   key_id=str(_gen_guid()), value=key_value,
+                                   usage=key_usage, type=key_type)]
 
     return (password_creds, key_creds)
 
@@ -668,15 +723,8 @@ def show_service_principal(client, identifier):
 
 def delete_service_principal(cmd, identifier):
     client = _graph_client_factory(cmd.cli_ctx)
-    sp = client.service_principals.get(_resolve_service_principal(client.service_principals, identifier))
-    app_object_id = None
-
-    # see whether we need to delete the application if it is in the same tenant
-    if sp.service_principal_names:
-        result = list(client.applications.list(
-            filter="identifierUris/any(s:s eq '{}')".format(sp.service_principal_names[0])))
-        if result:
-            app_object_id = result[0].object_id
+    sp_object_id = _resolve_service_principal(client.service_principals, identifier)
+    app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
 
     assignments = list_role_assignments(cmd, assignee=identifier, show_all=True)
     if assignments:
@@ -686,7 +734,75 @@ def delete_service_principal(cmd, identifier):
     if app_object_id:  # delete the application, and AAD service will automatically clean up the SP
         client.applications.delete(app_object_id)
     else:
-        client.service_principals.delete(sp.object_id)
+        client.service_principals.delete(sp_object_id)
+
+
+def _get_app_object_id_from_sp_object_id(client, sp_object_id):
+    sp = client.service_principals.get(sp_object_id)
+    app_object_id = None
+
+    if sp.service_principal_names:
+        result = list(client.applications.list(
+            filter="identifierUris/any(s:s eq '{}')".format(sp.service_principal_names[0])))
+        if result:
+            app_object_id = result[0].object_id
+    return app_object_id
+
+
+def list_service_principal_credentials(cmd, identifier, cert=False):
+    client = _graph_client_factory(cmd.cli_ctx)
+    sp_object_id = _resolve_service_principal(client.service_principals, identifier)
+    app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
+    sp_creds, app_creds = [], []
+    if cert:
+        sp_creds = list(client.service_principals.list_key_credentials(sp_object_id))
+        if app_object_id:
+            app_creds = list(client.applications.list_key_credentials(app_object_id))
+    else:
+        sp_creds = list(client.service_principals.list_password_credentials(sp_object_id))
+        if app_object_id:
+            app_creds = list(client.applications.list_password_credentials(app_object_id))
+
+    for x in sp_creds:
+        setattr(x, 'source', 'ServicePrincipal')
+    for x in app_creds:
+        setattr(x, 'source', 'Application')
+    return app_creds + sp_creds
+
+
+def delete_service_principal_credential(cmd, identifier, key_id, cert=False):
+    client = _graph_client_factory(cmd.cli_ctx)
+    sp_object_id = _resolve_service_principal(client.service_principals, identifier)
+    if cert:
+        result = list(client.service_principals.list_key_credentials(sp_object_id))
+    else:
+        result = list(client.service_principals.list_password_credentials(sp_object_id))
+
+    to_delete = next((x for x in result if x.key_id == key_id), None)
+
+    # we will try to delete the creds at service principal level, if not found, we try application level
+
+    if to_delete:
+        result.remove(to_delete)
+        if cert:
+            return client.service_principals.update_key_credentials(sp_object_id, result)
+        return client.service_principals.update_password_credentials(sp_object_id, result)
+    else:
+        app_object_id = _get_app_object_id_from_sp_object_id(client, sp_object_id)
+        if app_object_id:
+            if cert:
+                result = list(client.applications.list_key_credentials(app_object_id))
+            else:
+                result = list(client.applications.list_password_credentials(app_object_id))
+            to_delete = next((x for x in result if x.key_id == key_id), None)
+            if to_delete:
+                result.remove(to_delete)
+                if cert:
+                    return client.applications.update_key_credentials(app_object_id, result)
+                return client.applications.update_password_credentials(app_object_id, result)
+
+    raise CLIError("'{}' doesn't exist in the service principal of '{}' or associated application".format(
+        key_id, identifier))
 
 
 def _resolve_service_principal(client, identifier):
@@ -1136,12 +1252,16 @@ def _is_guid(guid):
     return False
 
 
+def _get_object_stubs(graph_client, assignees):
+    from azure.graphrbac.models import GetObjectsParameters
+    result = []
+    assignees = list(assignees)  # callers could pass in a set
+    for i in range(0, len(assignees), 1000):
+        params = GetObjectsParameters(include_directory_object_references=True, object_ids=assignees[i:i + 1000])
+        result += list(graph_client.objects.get_objects_by_object_ids(params))
+    return result
+
+
 # for injecting test seams to produce predicatable role assignment id for playback
 def _gen_guid():
     return uuid.uuid4()
-
-
-def _get_object_stubs(graph_client, assignees):
-    from azure.graphrbac.models import GetObjectsParameters
-    params = GetObjectsParameters(include_directory_object_references=True, object_ids=assignees)
-    return list(graph_client.objects.get_objects_by_object_ids(params))

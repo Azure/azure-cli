@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from datetime import datetime
 
 from azure_devtools.scenario_tests import AbstractPreparer, SingleValueReplacer
 
@@ -36,7 +37,12 @@ class ResourceGroupPreparer(AbstractPreparer, SingleValueReplacer):
             return {self.parameter_name: self.dev_setting_name,
                     self.parameter_name_for_location: self.dev_setting_location}
 
-        template = 'az group create --location {} --name {} --tag use=az-test'
+        tags = {'product': 'azurecli', 'cause': 'automation', 'date': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')}
+        if 'ENV_JOB_NAME' in os.environ:
+            tags['job'] = os.environ['ENV_JOB_NAME']
+        tags = ' '.join(['{}={}'.format(key, value) for key, value in tags.items()])
+
+        template = 'az group create --location {} --name {} --tag ' + tags
         execute(self.cli_ctx, template.format(self.location, name))
         self.test_class_instance.kwargs[self.key] = name
         return {self.parameter_name: name, self.parameter_name_for_location: self.location}
@@ -172,6 +178,7 @@ class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
 
 
 # Utility
+
 
 def is_preparer_func(fn):
     return getattr(fn, '__is_preparer', False)

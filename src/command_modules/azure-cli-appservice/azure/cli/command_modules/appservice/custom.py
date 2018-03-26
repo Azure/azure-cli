@@ -11,6 +11,7 @@ except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 from binascii import hexlify
 from os import urandom
+import json
 import OpenSSL.crypto
 
 from knack.prompting import prompt_pass, NoTTYException
@@ -60,6 +61,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     location = plan_info.location
     site_config = SiteConfig(app_settings=[])
     webapp_def = Site(server_farm_id=plan_info.id, location=location, site_config=site_config)
+    helper = _StackRuntimeHelper(client, linux=is_linux)
 
     if is_linux:
         if runtime and deployment_container_image_name:
@@ -69,6 +71,11 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
         if runtime:
             site_config.linux_fx_version = runtime
+            match = helper.resolve(runtime)
+            if not match:
+                raise CLIError("Linux Runtime '{}' is not supported."
+                               "Please invoke 'list-runtimes' to cross check".format(runtime))
+
         elif deployment_container_image_name:
             site_config.linux_fx_version = _format_linux_fx_version(deployment_container_image_name)
             site_config.app_settings.append(NameValuePair("WEBSITES_ENABLE_APP_SERVICE_STORAGE", "false"))
@@ -79,7 +86,6 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         if startup_file or deployment_container_image_name:
             raise CLIError("usage error: --startup-file or --deployment-container-image-name is "
                            "only appliable on linux webapp")
-        helper = _StackRuntimeHelper(client)
         match = helper.resolve(runtime)
         if not match:
             raise CLIError("Runtime '{}' is not supported. Please invoke 'list-runtimes' to cross check".format(runtime))  # pylint: disable=line-too-long
@@ -167,11 +173,11 @@ def enable_zip_deploy(cmd, resource_group_name, name, src, slot=None):
 
 def get_sku_name(tier):
     tier = tier.upper()
-    if tier == 'F1':
+    if tier == 'F1' or tier == "FREE":
         return 'FREE'
-    elif tier == 'D1':
+    elif tier == 'D1' or tier == "SHARED":
         return 'SHARED'
-    elif tier in ['B1', 'B2', 'B3']:
+    elif tier in ['B1', 'B2', 'B3', 'BASIC']:
         return 'BASIC'
     elif tier in ['S1', 'S2', 'S3']:
         return 'STANDARD'
@@ -208,9 +214,11 @@ def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
     return webapp
 
 
-def update_webapp(instance, client_affinity_enabled=None):
+def update_webapp(instance, client_affinity_enabled=None, https_only=None):
     if client_affinity_enabled is not None:
         instance.client_affinity_enabled = client_affinity_enabled == 'true'
+    if https_only is not None:
+        instance.https_only = https_only == 'true'
     return instance
 
 
@@ -235,21 +243,23 @@ def _list_app(cli_ctx, resource_group_name=None):
     return result
 
 
-def assign_identity(cmd, resource_group_name, name, role='Contributor', scope=None, disable_msi=False):
-    client = web_client_factory(cmd.cli_ctx)
-
+def assign_identity(cmd, resource_group_name, name, role='Contributor', slot=None, scope=None, disable_msi=False):
     def getter():
-        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get')
+        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
 
     def setter(webapp):
         webapp.identity = ManagedServiceIdentity(type='SystemAssigned')
-        poller = client.web_apps.create_or_update(resource_group_name, name, webapp)
+        poller = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'create_or_update', slot, webapp)
         return LongRunningOperation(cmd.cli_ctx)(poller)
 
     from azure.cli.core.commands.arm import assign_identity as _assign_identity
     webapp = _assign_identity(cmd.cli_ctx, getter, setter, role, scope)
-    update_app_settings(cmd, resource_group_name, name, ['WEBSITE_DISABLE_MSI={}'.format(disable_msi)])
+    update_app_settings(cmd, resource_group_name, name, ['WEBSITE_DISABLE_MSI={}'.format(disable_msi)], slot)
     return webapp.identity
+
+
+def show_identity(cmd, resource_group_name, name, slot=None):
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot).identity
 
 
 def get_auth_settings(cmd, resource_group_name, name, slot=None):
@@ -292,14 +302,8 @@ def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=No
 
 def list_runtimes(cmd, linux=False):
     client = web_client_factory(cmd.cli_ctx)
-    if linux:
-        # workaround before API is exposed
-        logger.warning('You are viewing an offline list of runtimes. For up to date list, '
-                       'check out https://aka.ms/linux-stacks')
-        return ['node|6.4', 'node|4.5', 'node|6.2', 'node|6.6', 'node|6.9', 'node|6.10',
-                'php|5.6', 'php|7.0', 'dotnetcore|1.0', 'dotnetcore|1.1', 'ruby|2.3']
+    runtime_helper = _StackRuntimeHelper(client, linux)
 
-    runtime_helper = _StackRuntimeHelper(client)
     return [s['displayName'] for s in runtime_helper.stacks]
 
 
@@ -865,9 +869,8 @@ def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,
     client = web_client_factory(cmd.cli_ctx)
     if backup_name and backup_name.lower().endswith('.zip'):
         backup_name = backup_name[:-4]
-    location = _get_location_from_webapp(client, resource_group_name, webapp_name)
     db_setting = _create_db_setting(db_name, db_type, db_connection_string)
-    backup_request = BackupRequest(location, backup_request_name=backup_name,
+    backup_request = BackupRequest(backup_request_name=backup_name,
                                    storage_account_url=storage_account_url, databases=db_setting)
     if slot:
         return client.web_apps.backup_slot(resource_group_name, webapp_name, backup_request, slot)
@@ -878,10 +881,13 @@ def create_backup(cmd, resource_group_name, webapp_name, storage_account_url,
 def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_account_url=None,
                            frequency=None, keep_at_least_one_backup=None,
                            retention_period_in_days=None, db_name=None,
-                           db_connection_string=None, db_type=None, slot=None):
-    client = web_client_factory(cmd.cli_ctx)
-    location = _get_location_from_webapp(client, resource_group_name, webapp_name)
+                           db_connection_string=None, db_type=None, backup_name=None, slot=None):
     configuration = None
+    if backup_name and backup_name.lower().endswith('.zip'):
+        backup_name = backup_name[:-4]
+    if not backup_name:
+        from datetime import datetime
+        backup_name = '{0}_{1}'.format(webapp_name, datetime.utcnow().strftime('%Y%m%d%H%M'))
 
     try:
         configuration = _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name,
@@ -923,8 +929,9 @@ def update_backup_schedule(cmd, resource_group_name, webapp_name, storage_accoun
 
     backup_schedule = BackupSchedule(frequency_num, frequency_unit.name,
                                      keep_at_least_one_backup, retention_period_in_days)
-    backup_request = BackupRequest(location, backup_schedule=backup_schedule, enabled=True,
-                                   storage_account_url=storage_account_url, databases=db_setting)
+    backup_request = BackupRequest(backup_request_name=backup_name, backup_schedule=backup_schedule,
+                                   enabled=True, storage_account_url=storage_account_url,
+                                   databases=db_setting)
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name, 'update_backup_configuration',
                                    slot, backup_request)
 
@@ -936,9 +943,8 @@ def restore_backup(cmd, resource_group_name, webapp_name, storage_account_url, b
     storage_blob_name = backup_name
     if not storage_blob_name.lower().endswith('.zip'):
         storage_blob_name += '.zip'
-    location = _get_location_from_webapp(client, resource_group_name, webapp_name)
     db_setting = _create_db_setting(db_name, db_type, db_connection_string)
-    restore_request = RestoreRequest(location, storage_account_url=storage_account_url,
+    restore_request = RestoreRequest(storage_account_url=storage_account_url,
                                      blob_name=storage_blob_name, overwrite=overwrite,
                                      site_name=target_name, databases=db_setting,
                                      ignore_conflicting_host_names=ignore_hostname_conflict)
@@ -1021,8 +1027,7 @@ def set_deployment_user(cmd, user_name, password=None):
     Update deployment credentials.(Note, all webapps in your subscription will be impacted)
     '''
     client = web_client_factory(cmd.cli_ctx)
-    user = User()
-    user.publishing_user_name = user_name
+    user = User(user_name)
     if password is None:
         try:
             password = prompt_pass(msg='Password: ', confirm=True)
@@ -1282,7 +1287,6 @@ def _get_log(url, user_name, password, log_file=None):
     except ImportError:
         pass
 
-    std_encoding = sys.stdout.encoding
     http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
     headers = urllib3.util.make_headers(basic_auth='{0}:{1}'.format(user_name, password))
     r = http.request(
@@ -1302,6 +1306,7 @@ def _get_log(url, user_name, password, log_file=None):
                     break
                 f.write(data)
     else:  # streaming
+        std_encoding = sys.stdout.encoding
         for chunk in r.stream():
             if chunk:
                 # Extra encode() and decode for stdout which does not surpport 'utf-8'
@@ -1417,8 +1422,9 @@ def _match_host_names_from_cert(hostnames_from_cert, hostnames_in_webapp):
 # help class handles runtime stack in format like 'node|6.1', 'php|5.5'
 class _StackRuntimeHelper(object):
 
-    def __init__(self, client):
+    def __init__(self, client, linux=False):
         self._client = client
+        self._linux = linux
         self._stacks = []
 
     def resolve(self, display_name):
@@ -1447,50 +1453,66 @@ class _StackRuntimeHelper(object):
     def _load_stacks(self):
         if self._stacks:
             return
-        raw_list = self._client.provider.get_available_stacks()
-        stacks = raw_list['value']
-        config_mappings = {
-            'node': 'WEBSITE_NODE_DEFAULT_VERSION',
-            'python': 'python_version',
-            'php': 'php_version',
-            'aspnet': 'net_framework_version'
-        }
-
+        os_type = ('Linux' if self._linux else 'Windows')
+        raw_stacks = self._client.provider.get_available_stacks(os_type_selected=os_type, raw=True)
+        bytes_value = raw_stacks._get_next().content  # pylint: disable=protected-access
+        json_value = bytes_value.decode('utf8')
+        json_stacks = json.loads(json_value)
+        stacks = json_stacks['value']
         result = []
-        # get all stack version except 'java'
-        for name, properties in [(s['name'], s['properties']) for s in stacks
-                                 if s['name'] in config_mappings]:
-            for major in properties['majorVersions']:
-                default_minor = next((m for m in (major['minorVersions'] or []) if m['isDefault']),
-                                     None)
-                result.append({
-                    'displayName': name + '|' + major['displayVersion'],
-                    'configs': {
-                        config_mappings[name]: (default_minor['runtimeVersion']
-                                                if default_minor else major['runtimeVersion'])
-                    }
-                })
-
-        # deal with java, which pairs with java container version
-        java_stack = next((s for s in stacks if s['name'] == 'java'))
-        java_container_stack = next((s for s in stacks if s['name'] == 'javaContainers'))
-        for java_version in java_stack['properties']['majorVersions']:
-            for fx in java_container_stack['properties']['frameworks']:
-                for fx_version in fx['majorVersions']:
+        if self._linux:
+            for properties in [(s['properties']) for s in stacks]:
+                for major in properties['majorVersions']:
+                    default_minor = next((m for m in (major['minorVersions'] or []) if m['isDefault']),
+                                         None)
                     result.append({
-                        'displayName': 'java|{}|{}|{}'.format(java_version['displayVersion'],
-                                                              fx['display'],
-                                                              fx_version['displayVersion']),
+                        'displayName': (default_minor['runtimeVersion']
+                                        if default_minor else major['runtimeVersion'])
+                    })
+        else:  # Windows stacks
+            config_mappings = {
+                'node': 'WEBSITE_NODE_DEFAULT_VERSION',
+                'python': 'python_version',
+                'php': 'php_version',
+                'aspnet': 'net_framework_version'
+            }
+
+            # get all stack version except 'java'
+            for stack in stacks:
+                if stack['name'] not in config_mappings:
+                    continue
+                name, properties = stack['name'], stack['properties']
+                for major in properties['majorVersions']:
+                    default_minor = next((m for m in (major['minorVersions'] or []) if m['isDefault']),
+                                         None)
+                    result.append({
+                        'displayName': name + '|' + major['displayVersion'],
                         'configs': {
-                            'java_version': java_version['runtimeVersion'],
-                            'java_container': fx['name'],
-                            'java_container_version': fx_version['runtimeVersion']
+                            config_mappings[name]: (default_minor['runtimeVersion']
+                                                    if default_minor else major['runtimeVersion'])
                         }
                     })
 
-        for r in result:
-            r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
-                           r['displayName'] else _StackRuntimeHelper.update_site_config)
+            # deal with java, which pairs with java container version
+            java_stack = next((s for s in stacks if s['name'] == 'java'))
+            java_container_stack = next((s for s in stacks if s['name'] == 'javaContainers'))
+            for java_version in java_stack['properties']['majorVersions']:
+                for fx in java_container_stack['properties']['frameworks']:
+                    for fx_version in fx['majorVersions']:
+                        result.append({
+                            'displayName': 'java|{}|{}|{}'.format(java_version['displayVersion'],
+                                                                  fx['display'],
+                                                                  fx_version['displayVersion']),
+                            'configs': {
+                                'java_version': java_version['runtimeVersion'],
+                                'java_container': fx['name'],
+                                'java_container_version': fx_version['runtimeVersion']
+                            }
+                        })
+
+            for r in result:
+                r['setter'] = (_StackRuntimeHelper.update_site_appsettings if 'node' in
+                               r['displayName'] else _StackRuntimeHelper.update_site_config)
         self._stacks = result
 
 

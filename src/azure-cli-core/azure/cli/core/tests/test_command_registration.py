@@ -7,6 +7,7 @@ import sys
 import logging
 import mock
 import unittest
+from collections import namedtuple
 
 from azure.cli.core import AzCommandsLoader, MainCommandsLoader
 from azure.cli.core.commands import ExtensionCommandSource
@@ -150,8 +151,10 @@ class TestCommandRegistration(unittest.TestCase):
     def _mock_extension_modname(ext_name, ext_dir):
         return ext_name
 
-    def _mock_get_extension_names():
-        return [__name__ + '.ExtCommandsLoader', __name__ + '.Ext2CommandsLoader']
+    def _mock_get_extensions():
+        MockExtension = namedtuple('Extension', ['name', 'preview'])
+        return [MockExtension(name=__name__ + '.ExtCommandsLoader', preview=False),
+                MockExtension(name=__name__ + '.Ext2CommandsLoader', preview=False)]
 
     def _mock_load_command_loader(loader, args, name, prefix):
 
@@ -199,7 +202,7 @@ class TestCommandRegistration(unittest.TestCase):
     @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
     @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_extension_modname)
-    @mock.patch('azure.cli.core.extension.get_extension_names', _mock_get_extension_names)
+    @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
     def test_register_command_from_extension(self):
 
         from azure.cli.core.commands import _load_command_loader

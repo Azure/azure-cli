@@ -8,7 +8,7 @@ import datetime
 import unittest
 import tempfile
 
-import azclishell.frequency_heuristic as fh
+import azure.cli.command_modules.interactive.azclishell.frequency_heuristic as fh
 
 
 def _mock_update(_):
@@ -36,7 +36,7 @@ class FeedbackTest(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(FeedbackTest, self).__init__(*args, **kwargs)
         from azure.cli.testsdk import TestCli
-        from azclishell.app import AzInteractiveShell
+        from azure.cli.command_modules.interactive.azclishell.app import AzInteractiveShell
         self.norm_update = fh.update_frequency
         self.shell_ctx = AzInteractiveShell(TestCli(), None)
 
@@ -56,7 +56,7 @@ class FeedbackTest(unittest.TestCase):
         fh.update_frequency = self.norm_update
         now = fh.day_format(datetime.datetime.now())
 
-        _, freq_path = tempfile.mkstemp()
+        fd, freq_path = tempfile.mkstemp()
         freq_dir, freq_file = freq_path.rsplit(os.path.sep, 1)
 
         def _get_freq():
@@ -72,13 +72,14 @@ class FeedbackTest(unittest.TestCase):
         self.assertEqual(json_freq, {now: 2})
 
         if os.path.exists(freq_path):
+            os.close(fd)
             os.remove(freq_path)
 
     def test_update_freq_no_file(self):
         # tests updating the files for frequency with no file written
         fh.update_frequency = self.norm_update
 
-        _, freq_path = tempfile.mkstemp()
+        fd, freq_path = tempfile.mkstemp()
         freq_dir, freq_file = freq_path.rsplit(os.path.sep, 1)
 
         def _get_freq():
@@ -88,6 +89,7 @@ class FeedbackTest(unittest.TestCase):
         self.shell_ctx.config.get_frequency = _get_freq
 
         if os.path.exists(freq_path):
+            os.close(fd)
             os.remove(freq_path)
 
         # without a file already written

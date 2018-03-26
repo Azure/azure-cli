@@ -2,9 +2,25 @@
 
 Release History
 ===============
+
+2.0.29
+++++++
+* `vmss create`: warn on upcoming breaking changes on default balancer for scaleset with 100+ instances
+* vm snapshot/image: support zone resilient
+* vmss: report better encryption status through disk instance view
+* BC: `az vm extension delete` no longer returns output as expected for a `delete` command.
+
+2.0.28
+++++++
+* vm/vmss create: support to attach unmanaged data disks and configure their caching modes 
+* vm/vmss: author managed identity commands `identity assign/remove/show`, and deprecate `assign-identity/remove-identity`
+* vmss create: default priority to None
+* Support Autorest 3.0 based SDKs
+
 2.0.27
 ++++++
 * vmss instance update: support attach/detach disks on an individual instance
+* Support Autorest 3.0 based SDKs
 
 2.0.26
 ++++++

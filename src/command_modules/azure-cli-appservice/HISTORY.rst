@@ -2,6 +2,23 @@
 
 Release History
 ===============
+0.1.30
+++++++
+* webapp: az webapp update supports httpsOnly
+* webapp/functionapp:  slot support for identity assign & identity show=======
+
+0.1.29
+++++++
+* webapp/functionapp: author managed identity commands `identity assign/show`, and deprecate `assign-identity`
+
+0.1.28
+++++++
+* webapp: updating tests/code for sdk update
+
+0.1.27
+++++++
+* appservice: list-location: Fixes the bug where 'Free' was reported as an invalid SKU
+
 0.1.26
 ++++++
 * webapp backup/restore: Fix issue where restore command fails because of a null reference

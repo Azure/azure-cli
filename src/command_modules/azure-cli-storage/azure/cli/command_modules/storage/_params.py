@@ -12,7 +12,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           validate_included_datasets, validate_custom_domain, validate_container_public_access,
                           validate_table_payload_format, validate_key, add_progress_callback,
                           storage_account_key_options, process_file_download_namespace, process_metric_update_namespace,
-                          get_char_options_validator, validate_bypass)
+                          get_char_options_validator, validate_bypass, validate_encryption_source)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
@@ -113,6 +113,16 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(['true', 'false']))
         c.argument('tags', tags_type, default=None)
 
+    with self.argument_context('storage account update', arg_group='Customer managed key', min_api='2017-06-01') as c:
+        c.extra('encryption_key_name', help='The name of the KeyVault key', )
+        c.extra('encryption_key_vault', help='The Uri of the KeyVault')
+        c.extra('encryption_key_version', help='The version of the KeyVault key')
+        c.argument('encryption_key_source',
+                   arg_type=get_enum_type(['Microsoft.Storage', 'Microsoft.Keyvault'], 'Microsoft.Storage'),
+                   help='The default encryption service',
+                   validator=validate_encryption_source)
+        c.ignore('encryption_key_vault_properties')
+
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, resource_type=ResourceType.MGMT_STORAGE, min_api='2017-06-01',
                                    arg_group='Network Rule') as c:
@@ -184,6 +194,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('storage blob') as c:
         c.argument('blob_name', options_list=('--name', '-n'), arg_type=blob_name_type)
+        c.argument('destination_path', help='The destination path that will be appended to the blob name.')
 
     with self.argument_context('storage blob list') as c:
         c.argument('include', validator=validate_included_datasets)

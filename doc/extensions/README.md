@@ -28,6 +28,8 @@ Doc Sections
 
 - [Authoring](authoring.md) - How to author and develop an extension
 
+- [Command Guidelines](../command_guidelines.md) - Command Guidelines
+
 - [Publishing](publishing.md) - How to publish an extension
 
 - [Extension Metadata](metadata.md) - How to add additional extension metadata

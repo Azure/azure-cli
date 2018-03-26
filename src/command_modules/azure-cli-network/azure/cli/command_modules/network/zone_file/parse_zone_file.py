@@ -157,19 +157,26 @@ def _tokenize_line(line, quote_strings=False, infer_name=True):
                 # end of token
                 if len(tokbuf) > 0:
                     ret.append(tokbuf)
-
                 tokbuf = ''
+
+            elif escape:
+                # escaped space (can be inside or outside of quote)
+                tokbuf += '\\' + c
+                escape = False
+
             elif quote:
                 # in quotes
                 tokbuf += c
-            elif escape:
-                # escaped space
-                tokbuf += c
-                escape = False
+
             else:
                 tokbuf = ''
         elif c == '\\':
-            escape = True
+            if escape:
+                # escape of an escape is valid part of the line sequence
+                tokbuf += '\\\\'
+                escape = False
+            else:
+                escape = True
         elif c == '"':
             if not escape:
                 if quote:
@@ -190,6 +197,10 @@ def _tokenize_line(line, quote_strings=False, infer_name=True):
                 escape = False
         else:
             # normal character
+            if escape:
+                # append escape character
+                tokbuf += '\\'
+
             tokbuf += c
             escape = False
         firstchar = False
@@ -222,6 +233,7 @@ def _find_comment_index(line):
                 quote = not quote
         elif char == ';':
             if quote:
+                escape = False
                 continue
             elif escape:
                 escape = False
@@ -240,15 +252,11 @@ def _serialize(tokens):
     """
     Serialize tokens:
     * quote whitespace-containing tokens
-    * escape semicolons
     """
     ret = []
     for tok in tokens:
         if " " in tok:
             tok = '"%s"' % tok
-
-        if ";" in tok:
-            tok = tok.replace(";", "\;")
 
         ret.append(tok)
 
@@ -481,7 +489,6 @@ def _post_process_txt_record(record, current_ttl):
         record['txt'] = [record['txt']]
     record['ttl'] = _convert_to_seconds(record['ttl']) if 'ttl' in record else current_ttl
     long_text = ''.join(x for x in record['txt']) if isinstance(record['txt'], list) else record['txt']
-    long_text = long_text.replace('\\', '')
     original_len = len(long_text)
     record['txt'] = []
     while len(long_text) > 255:

@@ -16,3 +16,7 @@ def cf_container_groups(cli_ctx, *_):
 
 def cf_container_logs(cli_ctx, *_):
     return _container_instance_client_factory(cli_ctx).container_logs
+
+
+def cf_start_container(cli_ctx, *_):
+    return _container_instance_client_factory(cli_ctx).start_container

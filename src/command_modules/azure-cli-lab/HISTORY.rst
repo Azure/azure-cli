@@ -3,6 +3,18 @@
 Release History
 ===============
 
+0.0.20
+++++++
+* Fixed create enviorment.
+
+0.0.19
+++++++
+* Minor fixes.
+
+0.0.18
+++++++
+* Minor fixes.
+
 0.0.17
 ++++++
 * Minor fixes.
