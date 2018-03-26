@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.28
+++++++
+* Bumping DNS extension suppression version to 0.0.2.
+
 2.0.27
 ++++++
 * `network dns zone import`: Support for importing of TXT records with RFC 1035 escape sequences.
