@@ -3,6 +3,26 @@
 Release History
 ===============
 
+0.3.18
+++++++
+* Completions kick in as soon as command table loading is done.
+* Fix bug with using `--style` parameter.
+* Interactive lexer instantiated after command table dump if missing.
+* Improvements to completer support.
+
+0.3.17
+++++++
+* Persist history across different sessions
+* Fixed history while in scope
+* Updates to interactive telemetry
+* Fixed progress meter for long running operations
+* Completions more robust to command table exceptions
+
+0.3.16
+++++++
+* Fix issue where user is prompted to login when using interactive mode in Cloud Shell.
+* Fixed regression with missing parameter completions.
+
 0.3.15
 ++++++
 * Fixed issue where command option completions no longer appeared.

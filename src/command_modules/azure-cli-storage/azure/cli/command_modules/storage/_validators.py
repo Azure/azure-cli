@@ -14,7 +14,6 @@ from azure.cli.command_modules.storage.util import glob_files_locally, guess_con
 from azure.cli.command_modules.storage.sdkutil import get_table_data_type
 from azure.cli.command_modules.storage.url_quote_util import encode_for_url
 
-
 storage_account_key_options = {'primary': 'key1', 'secondary': 'key2'}
 
 
@@ -368,17 +367,13 @@ def validate_encryption_services(cmd, namespace):
     if namespace.encryption_services:
         t_encryption_services, t_encryption_service = get_sdk(cmd.cli_ctx, ResourceType.MGMT_STORAGE,
                                                               'EncryptionServices', 'EncryptionService', mod='models')
-        services = {service: t_encryption_service(True) for service in namespace.encryption_services}
+        services = {service: t_encryption_service(enabled=True) for service in namespace.encryption_services}
 
         namespace.encryption_services = t_encryption_services(**services)
 
 
 def validate_encryption_source(cmd, namespace):
     ns = vars(namespace)
-    if namespace.encryption_key_source:
-        allowed_options = ['Microsoft.Storage', 'Microsoft.Keyvault']
-        if namespace.encryption_key_source not in allowed_options:
-            raise ValueError('--encryption-key-source allows to values: {}'.format(', '.join(allowed_options)))
 
     key_name = ns.pop('encryption_key_name', None)
     key_version = ns.pop('encryption_key_version', None)
@@ -397,7 +392,7 @@ def validate_encryption_source(cmd, namespace):
         if not KeyVaultProperties:
             return
 
-        kv_prop = KeyVaultProperties(key_name, key_version, key_vault_uri)
+        kv_prop = KeyVaultProperties(key_name=key_name, key_version=key_version, key_vault_uri=key_vault_uri)
         namespace.encryption_key_vault_properties = kv_prop
 
 
@@ -468,11 +463,11 @@ def get_file_path_validator(default_file_param=None):
 def validate_included_datasets(cmd, namespace):
     if namespace.include:
         include = namespace.include
-        if set(include) - set('cms'):
-            help_string = '(c)opy-info (m)etadata (s)napshots'
+        if set(include) - set('cmsd'):
+            help_string = '(c)opy-info (m)etadata (s)napshots (d)eleted'
             raise ValueError('valid values are {} or a combination thereof.'.format(help_string))
         t_blob_include = cmd.get_models('blob#Include')
-        namespace.include = t_blob_include('s' in include, 'm' in include, False, 'c' in include)
+        namespace.include = t_blob_include('s' in include, 'm' in include, False, 'c' in include, 'd' in include)
 
 
 def validate_key(namespace):
@@ -600,13 +595,17 @@ def get_source_file_or_blob_service_client(cmd, namespace):
             source_key = _query_account_key(cmd.cli_ctx, source_account)
 
         if source_container:
-            ns['source_client'] = t_block_blob_svc(account_name=source_account,
-                                                   account_key=source_key,
-                                                   sas_token=source_sas)
+            ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx,
+                                                                  t_block_blob_svc,
+                                                                  name=source_account,
+                                                                  key=source_key,
+                                                                  sas_token=source_sas)
         elif source_share:
-            ns['source_client'] = t_file_svc(account_name=source_account,
-                                             account_key=source_key,
-                                             sas_token=source_sas)
+            ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx,
+                                                                  t_file_svc,
+                                                                  name=source_account,
+                                                                  key=source_key,
+                                                                  sas_token=source_sas)
         else:
             raise ValueError(usage_string)
 
@@ -625,13 +624,16 @@ def get_source_file_or_blob_service_client(cmd, namespace):
         elif identifier.container:
             ns['source_container'] = identifier.container
             if identifier.account_name != ns.get('account_name'):
-                ns['source_client'] = t_block_blob_svc(account_name=identifier.account_name,
-                                                       sas_token=identifier.sas_token)
+                ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx, t_block_blob_svc,
+                                                                      name=identifier.account_name,
+                                                                      sas_token=identifier.sas_token)
         elif identifier.share:
             ns['source_share'] = identifier.share
             if identifier.account_name != ns.get('account_name'):
-                ns['source_client'] = t_file_svc(account_name=identifier.account_name,
-                                                 sas_token=identifier.sas_token)
+                ns['source_client'] = get_storage_data_service_client(cmd.cli_ctx,
+                                                                      t_file_svc,
+                                                                      name=identifier.account_name,
+                                                                      sas_token=identifier.sas_token)
 
 
 def add_progress_callback(cmd, namespace):
@@ -642,6 +644,7 @@ def add_progress_callback(cmd, namespace):
             hook.add(message='Alive', value=current, total_val=total)
             if total == current:
                 hook.end()
+
     if not namespace.no_progress:
         namespace.progress_callback = _update_progress
     del namespace.no_progress

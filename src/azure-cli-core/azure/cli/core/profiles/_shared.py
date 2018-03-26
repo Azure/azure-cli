@@ -66,11 +66,11 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2017-10-01',
-        ResourceType.MGMT_NETWORK: '2017-11-01',
+        ResourceType.MGMT_NETWORK: '2018-01-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2017-12-01', {
             'resource_skus': '2017-09-01',
-            'disks': '2017-03-30',
-            'snapshots': '2017-03-30',
+            'disks': '2018-04-01',
+            'snapshots': '2018-04-01',
             'virtual_machine_run_commands': '2017-03-30'
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2015-12-01',
@@ -79,7 +79,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_POLICY: '2017-06-01-preview',
         ResourceType.MGMT_RESOURCE_RESOURCES: '2017-05-10',
         ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS: '2016-06-01',
-        ResourceType.DATA_STORAGE: '2017-04-17',
+        ResourceType.DATA_STORAGE: '2017-07-29',
         ResourceType.DATA_COSMOS_TABLE: '2017-04-17'
     },
     '2017-03-09-profile': {
@@ -224,7 +224,7 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
     or YYYY-MM-DD-profile-preview  formatted strings.
     """
     if not isinstance(resource_type, ResourceType) and resource_type != PROFILE_TYPE:
-        raise TypeError()
+        raise ValueError("'resource_type' is required.")
     if min_api is None and max_api is None:
         raise ValueError('At least a min or max version must be specified')
     api_version_obj = get_api_version(api_profile, resource_type, as_sdk_profile=True) \

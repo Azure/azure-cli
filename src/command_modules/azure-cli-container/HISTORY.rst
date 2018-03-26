@@ -3,6 +3,24 @@
 Release History
 ===============
 
+0.1.20
+++++++
+* Add 'az container exec' command that allows for exec commands in a container for a running container group.
+* Allow table output for creating and updating a container group.
+
+0.1.19
+++++++
+* Add '--secrets' and '--secrets-mount-path' options to 'az container create' for using secrets in ACI
+
+0.1.18
+++++++
+* Add '--follow' option to 'az container logs' for streaming logs
+* Add 'az container attach' command that attaches local standard output and error streams to a container in a container group.
+
+0.1.17
+++++++
+* Minor fixes
+
 0.1.16
 ++++++
 * Update for CLI core changes.

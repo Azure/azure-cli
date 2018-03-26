@@ -4,14 +4,13 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=too-many-statements
 
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, LiveScenarioTest
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 from ._test_utils import _create_test_cert, _delete_test_cert, _create_verification_cert
 import random
 
 
-# TODO: Convert back to ScenarioTest and re-record when #5213 is addressed.
-class IoTDpsTest(LiveScenarioTest):
+class IoTDpsTest(ScenarioTest):
 
     @ResourceGroupPreparer(parameter_name='group_name', parameter_name_for_location='group_location')
     def test_dps_lifecycle(self, group_name, group_location):

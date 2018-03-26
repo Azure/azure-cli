@@ -30,7 +30,7 @@ from azure.mgmt.resource.locks.models import ManagementLockObject
 from azure.mgmt.resource.links.models import ResourceLinkProperties
 
 from azure.cli.core.parser import IncorrectUsageError
-from azure.cli.core.util import get_file_json, shell_safe_json_parse
+from azure.cli.core.util import get_file_json, shell_safe_json_parse, sdk_no_wait
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType, get_sdk
 
@@ -245,8 +245,8 @@ def _deploy_arm_template_core(cli_ctx, resource_group_name,  # pylint: disable=t
 
     smc = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     if validate_only:
-        return smc.deployments.validate(resource_group_name, deployment_name, properties, raw=no_wait)
-    return smc.deployments.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
+        return sdk_no_wait(no_wait, smc.deployments.validate, resource_group_name, deployment_name, properties)
+    return sdk_no_wait(no_wait, smc.deployments.create_or_update, resource_group_name, deployment_name, properties)
 
 
 def _list_resources_odata_filter_builder(resource_group_name=None, resource_provider_namespace=None,
@@ -470,16 +470,18 @@ def export_group_as_template(
     options = ','.join(export_options) if export_options else None
 
     result = rcf.resource_groups.export_template(resource_group_name, ['*'], options=options)
+
+    print(json.dumps(result.template, indent=2))
     # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
     if result.error:
         error = result.error
-        if (hasattr(error, 'details') and error.details and
-                hasattr(error.details[0], 'message')):
-            error = error.details[0].message
-        raise CLIError(error)
-
-    print(json.dumps(result.template, indent=2))
+        try:
+            logger.warning(error.message)
+        except AttributeError:
+            logger.warning(str(error))
+        for detail in getattr(error, 'details', None) or []:
+            logger.error(detail.message)
 
 
 def create_application(cmd, resource_group_name,
@@ -836,23 +838,20 @@ def unregister_provider(cmd, resource_provider_namespace, wait=False):
     _update_provider(cmd.cli_ctx, resource_provider_namespace, registering=False, wait=wait)
 
 
-def list_provider_operations(cmd, api_version=None):
-    api_version = api_version or _get_auth_provider_latest_api_version(cmd.cli_ctx)
+def list_provider_operations(cmd):
     auth_client = _authorization_management_client(cmd.cli_ctx)
-    return auth_client.provider_operations_metadata.list(api_version)
+    return auth_client.provider_operations_metadata.list()
 
 
-def show_provider_operations(cmd, resource_provider_namespace, api_version=None):
-    api_version = api_version or _get_auth_provider_latest_api_version(cmd.cli_ctx)
-
+def show_provider_operations(cmd, resource_provider_namespace):
     auth_client = _authorization_management_client(cmd.cli_ctx)
-    return auth_client.provider_operations_metadata.get(resource_provider_namespace, api_version)
+    return auth_client.provider_operations_metadata.get(resource_provider_namespace)
 
 
 def move_resource(cmd, ids, destination_group, destination_subscription_id=None):
     """Moves resources from one resource group to another(can be under different subscription)
 
-    :param ids: the space separated resource ids to be moved
+    :param ids: the space-separated resource ids to be moved
     :param destination_group: the destination resource group name
     :param destination_subscription_id: the destination subscription identifier
     """
@@ -894,7 +893,7 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
                              resource_group_name=None, scope=None, sku=None,
                              not_scopes=None):
     """Creates a policy assignment
-    :param not_scopes: Space separated scopes where the policy assignment does not apply.
+    :param not_scopes: Space-separated scopes where the policy assignment does not apply.
     """
     if bool(policy) == bool(policy_set_definition):
         raise CLIError('usage error: --policy NAME_OR_ID | '

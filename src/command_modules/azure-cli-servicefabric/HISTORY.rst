@@ -3,6 +3,14 @@
 Release History
 ===============
 
+0.0.11
+++++++
+* Support Autorest 3.0 based SDKs
+
+0.0.10
+++++++
+* Minor fixes.
+
 0.0.9
 ++++++
 * Added detailed errors to validation response when creating cluster.

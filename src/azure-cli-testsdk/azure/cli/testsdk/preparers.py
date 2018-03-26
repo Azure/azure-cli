@@ -170,8 +170,8 @@ class RoleBasedServicePrincipalPreparer(AbstractPreparer, SingleValueReplacer):
         if not self.dev_setting_sp_name:
             execute(self.cli_ctx, 'az ad sp delete --id {}'.format(self.result['appId']))
 
-
 # Utility
+
 
 def is_preparer_func(fn):
     return getattr(fn, '__is_preparer', False)

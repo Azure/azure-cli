@@ -97,7 +97,7 @@ class GenericUpdateTest(unittest.TestCase):
     def setUpClass(cls):
         logging.getLogger().setLevel(logging.ERROR)
 
-    def test_generic_update(self):  # pylint: disable=too-many-statements
+    def test_generic_update_scenario(self):  # pylint: disable=too-many-statements
 
         my_obj, loader_cls = _prepare_test_loader()
         cli = TestCli(commands_loader_cls=loader_cls)

@@ -34,7 +34,7 @@ DEPENDENCIES = [
     'jmespath',
     'mock',
     'vcrpy>=1.10.3',
-    'azure-devtools>=0.5.0'
+    'azure-devtools>=0.5.4'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

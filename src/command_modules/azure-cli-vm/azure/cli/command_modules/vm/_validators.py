@@ -13,7 +13,7 @@ from knack.util import CLIError
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict, validate_parameter_set, validate_tags)
 from azure.cli.core.util import hash_string
-from azure.cli.command_modules.vm._vm_utils import check_existence
+from azure.cli.command_modules.vm._vm_utils import check_existence, get_target_network_api
 from azure.cli.command_modules.vm._template_builder import StorageProfile
 import azure.cli.core.keys as keys
 
@@ -329,15 +329,15 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     elif namespace.storage_profile == StorageProfile.SAPirImage:
         required = ['image', 'use_unmanaged_disk']
-        forbidden = ['os_type', 'data_caching', 'attach_os_disk', 'data_disk_sizes_gb']
+        forbidden = ['os_type', 'attach_os_disk', 'data_disk_sizes_gb']
 
     elif namespace.storage_profile == StorageProfile.SACustomImage:
         required = ['image', 'os_type', 'use_unmanaged_disk']
-        forbidden = ['attach_os_disk', 'data_caching', 'data_disk_sizes_gb']
+        forbidden = ['attach_os_disk', 'data_disk_sizes_gb']
 
     elif namespace.storage_profile == StorageProfile.SASpecializedOSDisk:
         required = ['os_type', 'attach_os_disk', 'use_unmanaged_disk']
-        forbidden = ['os_disk_name', 'os_caching', 'data_caching', 'image', 'storage_account',
+        forbidden = ['os_disk_name', 'os_caching', 'image', 'storage_account',
                      'storage_container_name', 'data_disk_sizes_gb', 'storage_sku'] + auth_params
 
     else:
@@ -384,6 +384,42 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
+
+    namespace.os_caching = _process_disk_caching_value(cmd, namespace.os_caching, is_os_disk=True)
+    namespace.data_caching = _process_disk_caching_value(cmd, namespace.data_caching, is_os_disk=False)
+
+
+def _process_disk_caching_value(cmd, disk_caching, is_os_disk):
+    from azure.cli.core.profiles import ResourceType
+    CachingTypes = cmd.get_models('CachingTypes', resource_type=ResourceType.MGMT_COMPUTE)
+
+    if is_os_disk:
+        if not disk_caching:
+            return CachingTypes.read_write.value
+        # value check is done at arg-parse layer through enum choice list, so skipping here
+        return disk_caching
+
+    if disk_caching:
+        disk_caching_values = [x.value for x in CachingTypes]
+        disk_caching_values_lower = [x.value.lower() for x in CachingTypes]
+        invalid_caching_val_err = 'usage error: please use data disk caching value from ' + '|'.join(
+            disk_caching_values)
+        using_luns = [x for x in disk_caching if '=' in x]
+        if len(disk_caching) > 1:
+            # verify if we have 2+ entries, all should have the format of '<lun>=<value>'
+            if len(using_luns) != len(disk_caching):
+                raise CLIError('usage error: --data-disk-caching VALUE | --data-disk-caching LUN=VALUE LUN2=VALUE2 ...')
+        for x in disk_caching:
+            c = x
+            if '=' in x:
+                lun, c = x.split('=', 1)
+                try:
+                    lun = int(lun)
+                except ValueError:
+                    raise CLIError("usage error: LUN used in --data-disk-caching must be an integer")
+            if c.lower() not in disk_caching_values_lower:
+                raise CLIError(invalid_caching_val_err.format('data'))
+    return disk_caching
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
@@ -467,7 +503,8 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
                     if s.name.lower() == 'gatewaysubnet':
                         return False
                     subnet_mask = s.address_prefix.split('/')[-1]
-                    return _subnet_capacity_check(subnet_mask, namespace.instance_count)
+                    return _subnet_capacity_check(subnet_mask, namespace.instance_count,
+                                                  not namespace.disable_overprovision)
 
                 result = next((s for s in vnet_match.subnets if _check_subnet(s)), None)
             if not result:
@@ -499,10 +536,12 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
     logger.debug('no suitable subnet found. One will be created.')
 
 
-def _subnet_capacity_check(subnet_mask, vmss_instance_count):
+def _subnet_capacity_check(subnet_mask, vmss_instance_count, over_provision):
     mask = int(subnet_mask)
     # '2' are the reserved broadcasting addresses
-    return ((1 << (32 - mask)) - 2) > vmss_instance_count
+    # '*1.5' so we have enough leeway for over-provision
+    factor = 1.5 if over_provision else 1
+    return ((1 << (32 - mask)) - 2) > int(vmss_instance_count * factor)
 
 
 def _validate_vmss_create_subnet(namespace):
@@ -511,7 +550,7 @@ def _validate_vmss_create_subnet(namespace):
             cidr = namespace.vnet_address_prefix.split('/', 1)[0]
             i = 0
             for i in range(24, 16, -1):
-                if _subnet_capacity_check(i, namespace.instance_count):
+                if _subnet_capacity_check(i, namespace.instance_count, not namespace.disable_overprovision):
                     break
             if i < 16:
                 err = "instance count '{}' is out of range of 2^16 subnet size'"
@@ -889,6 +928,10 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
         balancer_type = 'loadBalancer' if namespace.instance_count <= INSTANCE_THRESHOLD \
             else 'applicationGateway'
         logger.debug("defaulting to '%s' because instance count <= %s", balancer_type, INSTANCE_THRESHOLD)
+        if balancer_type == 'applicationGateway':
+            logger.warning("In a future release of CLI, for scalesets with 100+ instances, the default balancer "
+                           "will be Standard Load Balancer instead of Application Gateway. Use '--app-gateway' to "
+                           "continue using applicaiton gateways")
     elif namespace.load_balancer:
         balancer_type = 'loadBalancer'
     elif namespace.application_gateway:
@@ -967,7 +1010,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
 def get_network_client(cli_ctx):
     from azure.cli.core.profiles import ResourceType
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK)
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_NETWORK, api_version=get_target_network_api(cli_ctx))
 
 
 def get_network_lb(cli_ctx, resource_group_name, lb_name):
@@ -1003,6 +1046,16 @@ def process_vmss_create_namespace(cmd, namespace):
 def validate_vm_disk(cmd, namespace):
     namespace.disk = _get_resource_id(cmd.cli_ctx, namespace.disk,
                                       namespace.resource_group_name, 'disks', 'Microsoft.Compute')
+
+
+def validate_vmss_disk(cmd, namespace):
+    if namespace.disk:
+        namespace.disk = _get_resource_id(cmd.cli_ctx, namespace.disk,
+                                          namespace.resource_group_name, 'disks', 'Microsoft.Compute')
+    if bool(namespace.disk) == bool(namespace.size_gb):
+        raise CLIError('usage error: --disk EXIST_DISK --instance-id ID | --size-gb GB')
+    elif bool(namespace.disk) != bool(namespace.instance_id):
+        raise CLIError('usage error: --disk EXIST_DISK --instance-id ID')
 
 
 def process_disk_or_snapshot_create_namespace(cmd, namespace):

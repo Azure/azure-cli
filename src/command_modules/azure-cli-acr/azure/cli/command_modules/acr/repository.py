@@ -21,8 +21,9 @@ from ._docker_utils import get_access_credentials, log_registry_response
 logger = get_logger(__name__)
 
 
-DELETE_NOT_SUPPORTED = 'Delete is not supported for registries in Basic SKU.'
-LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is not supported for registries in Basic SKU.'
+UNTAG_NOT_SUPPORTED = 'Untag is only supported for managed registries.'
+DELETE_NOT_SUPPORTED = 'Delete is only supported for managed registries.'
+LIST_MANIFESTS_NOT_SUPPORTED = 'List manifests is only supported for managed registries.'
 
 
 def _get_basic_auth_str(username, password):
@@ -228,15 +229,136 @@ def acr_repository_show_manifests(cmd,
         result_index='manifests')
 
 
+def acr_repository_untag(cmd,
+                         registry_name,
+                         image,
+                         resource_group_name=None,
+                         username=None,
+                         password=None):
+    _, resource_group_name = validate_managed_registry(
+        cmd.cli_ctx, registry_name, resource_group_name, UNTAG_NOT_SUPPORTED)
+
+    repository, tag, _ = _parse_image_name(image)
+
+    login_server, username, password = get_access_credentials(
+        cli_ctx=cmd.cli_ctx,
+        registry_name=registry_name,
+        resource_group_name=resource_group_name,
+        username=username,
+        password=password,
+        repository=repository,
+        permission='*')
+
+    return _delete_data_from_registry(
+        login_server=login_server,
+        path='/v2/_acr/{}/tags/{}'.format(repository, tag),
+        username=username,
+        password=password)
+
+
 def acr_repository_delete(cmd,
                           registry_name,
-                          repository,
+                          repository=None,
+                          image=None,
                           tag=None,
                           manifest=None,
                           resource_group_name=None,
                           username=None,
                           password=None,
                           yes=False):
+    if bool(repository) == bool(image):
+        raise CLIError('Usage error: --image IMAGE | --repository REPOSITORY')
+
+    # Check if this is a legacy command. --manifest can be used as a flag so None is checked.
+    if repository and (tag or manifest is not None):
+        return _legacy_delete(cmd=cmd,
+                              registry_name=registry_name,
+                              repository=repository,
+                              tag=tag,
+                              manifest=manifest,
+                              resource_group_name=resource_group_name,
+                              username=username,
+                              password=password,
+                              yes=yes)
+
+    # At this point the specified command must not be a legacy command so we process it as a new command.
+    # If --tag/--manifest are specified with --repository, it's a legacy command handled above.
+    # If --tag/--manifest are specified with --image, error out here.
+    if tag:
+        raise CLIError("The parameter --tag is redundant and deprecated. Please use --image to delete an image.")
+    if manifest is not None:
+        raise CLIError("The parameter --manifest is redundant and deprecated. Please use --image to delete an image.")
+
+    _, resource_group_name = validate_managed_registry(
+        cmd.cli_ctx, registry_name, resource_group_name, DELETE_NOT_SUPPORTED)
+
+    if image:
+        # If --image is specified, repository/tag/manifest must be empty.
+        repository, tag, manifest = _parse_image_name(image, allow_digest=True)
+
+    login_server, username, password = get_access_credentials(
+        cli_ctx=cmd.cli_ctx,
+        registry_name=registry_name,
+        resource_group_name=resource_group_name,
+        username=username,
+        password=password,
+        repository=repository,
+        permission='*')
+
+    if tag or manifest:
+        manifest = _delete_manifest_confirmation(
+            login_server=login_server,
+            username=username,
+            password=password,
+            repository=repository,
+            tag=tag,
+            manifest=manifest,
+            yes=yes)
+        path = '/v2/{}/manifests/{}'.format(repository, manifest)
+    else:
+        _user_confirmation("Are you sure you want to delete the repository '{}' "
+                           "and all images under it?".format(repository), yes)
+        path = '/v2/_acr/{}/repository'.format(repository)
+
+    return _delete_data_from_registry(
+        login_server=login_server,
+        path=path,
+        username=username,
+        password=password)
+
+
+def _parse_image_name(image, allow_digest=False):
+    if allow_digest and '@' in image:
+        # This is probably an image name by manifest digest
+        tokens = image.split('@')
+        if len(tokens) == 2:
+            return tokens[0], None, tokens[1]
+
+    if ':' in image:
+        # This is probably an image name by tag
+        tokens = image.split(':')
+        if len(tokens) == 2:
+            return tokens[0], tokens[1], None
+    else:
+        # This is probably an image with implicit latest tag
+        return image, 'latest', None
+
+    if allow_digest:
+        raise CLIError("The name of the image to delete may include a tag in the"
+                       " format 'name:tag' or digest in the format 'name@digest'.")
+    else:
+        raise CLIError("The name of the image may include a tag in the format 'name:tag'.")
+
+
+def _legacy_delete(cmd,
+                   registry_name,
+                   repository,
+                   tag=None,
+                   manifest=None,
+                   resource_group_name=None,
+                   username=None,
+                   password=None,
+                   yes=False):
     _, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, DELETE_NOT_SUPPORTED)
 
@@ -258,6 +380,10 @@ def acr_repository_delete(cmd,
                                "and all images under it?".format(repository), yes)
             path = '/v2/_acr/{}/repository'.format(repository)
         else:
+            logger.warning(
+                "This command is deprecated. The new command for this operation "
+                "is 'az acr repository untag --name %s --image %s:%s'.",
+                registry_name, repository, tag)
             _user_confirmation("Are you sure you want to delete the tag '{}:{}'?".format(repository, tag), yes)
             path = '/v2/_acr/{}/tags/{}'.format(repository, tag)
     # If --manifest is specified as a flag
@@ -265,6 +391,10 @@ def acr_repository_delete(cmd,
         # Raise if --tag is empty
         if not tag:
             raise CLIError(_INVALID)
+        logger.warning(
+            "This command is deprecated. The new command for this operation "
+            "is 'az acr repository delete --name %s --image %s:%s'.",
+            registry_name, repository, tag)
         manifest = _delete_manifest_confirmation(
             login_server=login_server,
             username=username,
@@ -279,6 +409,10 @@ def acr_repository_delete(cmd,
         # Raise if --tag is not empty
         if tag:
             raise CLIError(_INVALID)
+        logger.warning(
+            "This command is deprecated. The new command for this operation "
+            "is 'az acr repository delete --name %s --image %s@%s'.",
+            registry_name, repository, manifest)
         manifest = _delete_manifest_confirmation(
             login_server=login_server,
             username=username,

@@ -99,7 +99,8 @@ helps['acr update'] = """
 
 helps['acr login'] = """
     type: command
-    short-summary: Log in to a container registry through Docker.
+    short-summary: Log in to a container registry through the Docker CLI.
+    long-summary: Docker must be installed on your machine.
     examples:
         - name: Log in to a container registry
           text: >
@@ -168,24 +169,27 @@ helps['acr repository show-manifests'] = """
 
 helps['acr repository delete'] = """
     type: command
-    short-summary: Delete a repository, manifest, or tag in a container registry.
-    parameters:
-        - name: --manifest
-          populator-commands:
-            - az acr repository show-manifests
+    short-summary: Delete a repository or image in a container registry.
     examples:
         - name: Delete a repository from a container registry.
           text:
-            az acr repository delete -n MyRegistry --repository MyRepository
-        - name: Delete a tag from a repository. This does not delete the manifest referenced by the tag or any associated layer data.
+            az acr repository delete -n MyRegistry --repository hello-world
+        - name: Delete an image by tag. This deletes the manifest referenced by 'hello-world:latest', all other tags referencing the manifest, and any associated layer data.
           text:
-            az acr repository delete -n MyRegistry --repository MyRepository --tag MyTag
-        - name: Delete the manifest referenced by a tag. This also deletes any associated layer data and all other tags referencing the manifest.
+            az acr repository delete -n MyRegistry --image hello-world:latest
+        - name: Delete an image by sha256-based manifest digest. This deletes all tags referencing the manifest and any associated layer data.
           text:
-            az acr repository delete -n MyRegistry --repository MyRepository --tag MyTag --manifest
-        - name: Delete a manifest using a sha256 based digest. This also deletes any associated layer data and all tags referencing the manifest.
+            az acr repository delete -n MyRegistry --image hello-world@sha256:abc123
+"""
+
+helps['acr repository untag'] = """
+    type: command
+    short-summary: Untag an image in a container registry.
+    long-summary: This command does not delete the manifest referenced by the tag or any associated layer data.
+    examples:
+        - name: Untag an image from a repository.
           text:
-            az acr repository delete -n MyRegistry --repository MyRepository --manifest sha256:abc123
+            az acr repository untag -n MyRegistry --image hello-world:latest
 """
 
 helps['acr webhook list'] = """
@@ -201,10 +205,10 @@ helps['acr webhook create'] = """
     type: command
     short-summary: Create a webhook for a container registry.
     examples:
-        - name: Create a webhook for a container registry that will deliver Docker push and delete events to a service URI.
+        - name: Create a webhook for a container registry that will deliver docker push and delete events to a service URI.
           text: >
             az acr webhook create -n MyWebhook -r MyRegistry --uri http://myservice.com --actions push delete
-        - name: Create a webhook for a container registry that will deliver Docker push events to a service URI with a basic authentication header.
+        - name: Create a webhook for a container registry that will deliver docker push events to a service URI with a basic authentication header.
           text: >
             az acr webhook create -n MyWebhook -r MyRegistry --uri http://myservice.com --actions push --headers "Authorization=Basic 000000"
 """

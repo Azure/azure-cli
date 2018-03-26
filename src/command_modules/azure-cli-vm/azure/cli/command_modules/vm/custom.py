@@ -14,7 +14,8 @@ try:
 except ImportError:
     from urlparse import urlparse  # pylint: disable=import-error
 
-from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import
+# the urlopen is imported for automation purpose
+from six.moves.urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -25,6 +26,7 @@ from azure.cli.core.commands.validators import validate_file_or_dict
 from azure.cli.core.commands import LongRunningOperation, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_data_service_client
 from azure.cli.core.profiles import ResourceType
+from azure.cli.core.util import sdk_no_wait
 
 from ._vm_utils import read_content_if_is_file
 from ._vm_diagnostics_templates import get_default_diag_config
@@ -67,13 +69,13 @@ extension_mappings = {
 }
 
 
-def _construct_identity_info(identity_scope, identity_role, port, external_identities):
+def _construct_identity_info(identity_scope, identity_role, port, implicit_identity, external_identities):
     info = {'port': port}
     if identity_scope:
         info['scope'] = identity_scope
         info['role'] = str(identity_role)  # could be DefaultStr, so convert to string
-    if external_identities:
-        info['userAssignedIdentities'] = external_identities
+    info['userAssignedIdentities'] = external_identities or []
+    info['systemAssignedIdentity'] = implicit_identity or ''
     return info
 
 
@@ -157,7 +159,7 @@ def _get_resource_group_location(cli_ctx, resource_group_name):
 def _get_sku_object(cmd, sku):
     if cmd.supported_api_version(min_api='2017-03-30'):
         DiskSku = cmd.get_models('DiskSku')
-        return DiskSku(sku)
+        return DiskSku(name=sku)
     return sku
 
 
@@ -228,7 +230,7 @@ def _parse_rg_name(strid):
 
 def _set_sku(cmd, instance, sku):
     if cmd.supported_api_version(min_api='2017-03-30'):
-        instance.sku = cmd.get_models('DiskSku')(sku)
+        instance.sku = cmd.get_models('DiskSku')(name=sku)
     else:
         instance.account_type = sku
 
@@ -249,7 +251,7 @@ def _show_missing_access_warning(resource_group, name, command):
 class ExtensionUpdateLongRunningOperation(LongRunningOperation):  # pylint: disable=too-few-public-methods
     def __call__(self, poller):
         super(ExtensionUpdateLongRunningOperation, self).__call__(poller)
-        # That said, we surppress the output. Operation failures will still
+        # That said, we suppress the output. Operation failures will still
         # be caught through the base class
         return None
 
@@ -271,19 +273,20 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,
     else:
         option = DiskCreateOption.empty
 
-    creation_data = CreationData(option, source_uri=source_blob_uri,
+    creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
                                  image_reference=None,
                                  source_resource_id=source_disk or source_snapshot,
                                  storage_account_id=source_storage_account_id)
 
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('usage error: --size-gb required to create an empty disk')
-    disk = Disk(location, creation_data, (tags or {}), _get_sku_object(cmd, sku), disk_size_gb=size_gb)
+    disk = Disk(location=location, creation_data=creation_data, tags=(tags or {}),
+                sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
     if zone:
         disk.zones = zone
 
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.disks.create_or_update(resource_group_name, disk_name, disk, raw=no_wait)
+    return sdk_no_wait(no_wait, client.disks.create_or_update, resource_group_name, disk_name, disk)
 
 
 def grant_disk_access(cmd, resource_group_name, disk_name, duration_in_seconds):
@@ -312,38 +315,42 @@ def create_image(cmd, resource_group_name, name, source, os_type=None, data_disk
                  source_virtual_machine=None,
                  os_blob_uri=None, data_blob_uris=None,
                  os_snapshot=None, data_snapshots=None,
-                 os_disk=None, data_disks=None, tags=None):
+                 os_disk=None, data_disks=None, tags=None, zone_resilient=None):
     ImageOSDisk, ImageDataDisk, ImageStorageProfile, Image, SubResource, OperatingSystemStateTypes = cmd.get_models(
         'ImageOSDisk', 'ImageDataDisk', 'ImageStorageProfile', 'Image', 'SubResource', 'OperatingSystemStateTypes')
 
     if source_virtual_machine:
         location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
-        image = Image(location, source_virtual_machine=SubResource(source_virtual_machine))
+        image_storage_profile = None if zone_resilient is None else ImageStorageProfile(zone_resilient=zone_resilient)
+        image = Image(location=location, source_virtual_machine=SubResource(id=source_virtual_machine),
+                      storage_profile=image_storage_profile, tags=(tags or {}))
     else:
         os_disk = ImageOSDisk(os_type=os_type,
                               os_state=OperatingSystemStateTypes.generalized,
-                              snapshot=SubResource(os_snapshot) if os_snapshot else None,
-                              managed_disk=SubResource(os_disk) if os_disk else None,
+                              snapshot=SubResource(id=os_snapshot) if os_snapshot else None,
+                              managed_disk=SubResource(id=os_disk) if os_disk else None,
                               blob_uri=os_blob_uri)
         all_data_disks = []
         lun = 0
         if data_blob_uris:
             for d in data_blob_uris:
-                all_data_disks.append(ImageDataDisk(lun, blob_uri=d))
+                all_data_disks.append(ImageDataDisk(lun=lun, blob_uri=d))
                 lun += 1
         if data_snapshots:
             for d in data_snapshots:
-                all_data_disks.append(ImageDataDisk(lun, snapshot=SubResource(d)))
+                all_data_disks.append(ImageDataDisk(lun=lun, snapshot=SubResource(id=d)))
                 lun += 1
         if data_disks:
             for d in data_disks:
-                all_data_disks.append(ImageDataDisk(lun, managed_disk=SubResource(d)))
+                all_data_disks.append(ImageDataDisk(lun=lun, managed_disk=SubResource(id=d)))
                 lun += 1
 
-        image_storage_profile = image_storage_profile = ImageStorageProfile(os_disk=os_disk, data_disks=all_data_disks)
+        image_storage_profile = ImageStorageProfile(os_disk=os_disk, data_disks=all_data_disks)
+        if zone_resilient is not None:
+            image_storage_profile.zone_resilient = zone_resilient
         location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
         # pylint disable=no-member
-        image = Image(location, storage_profile=image_storage_profile, tags=(tags or {}))
+        image = Image(location=location, storage_profile=image_storage_profile, tags=(tags or {}))
 
     client = _compute_client_factory(cmd.cli_ctx)
     return client.images.create_or_update(resource_group_name, name, image)
@@ -373,7 +380,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     else:
         option = DiskCreateOption.empty
 
-    creation_data = CreationData(option, source_uri=source_blob_uri,
+    creation_data = CreationData(create_option=option, source_uri=source_blob_uri,
                                  image_reference=None,
                                  source_resource_id=source_disk or source_snapshot,
                                  storage_account_id=source_storage_account_id)
@@ -381,7 +388,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
     if size_gb is None and option == DiskCreateOption.empty:
         raise CLIError('Please supply size for the snapshots')
 
-    snapshot = Snapshot(location, creation_data, (tags or {}), _get_sku_object(cmd, sku), disk_size_gb=size_gb)
+    snapshot = Snapshot(location=location, creation_data=creation_data, tags=(tags or {}),
+                        sku=_get_sku_object(cmd, sku), disk_size_gb=size_gb)
     client = _compute_client_factory(cmd.cli_ctx)
     return client.snapshots.create_or_update(resource_group_name, snapshot_name, snapshot)
 
@@ -405,6 +413,16 @@ def update_snapshot(cmd, instance, sku=None):
 
 
 # region VirtualMachines Identity
+def show_vm_identity(cmd, resource_group_name, vm_name):
+    client = _compute_client_factory(cmd.cli_ctx)
+    return client.virtual_machines.get(resource_group_name, vm_name).identity
+
+
+def show_vmss_identity(cmd, resource_group_name, vm_name):
+    client = _compute_client_factory(cmd.cli_ctx)
+    return client.virtual_machine_scale_sets.get(resource_group_name, vm_name).identity
+
+
 def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, identity_role='Contributor',
                        identity_role_id=None, identity_scope=None, port=None):
     VirtualMachineIdentity, ResourceIdentityType = cmd.get_models('VirtualMachineIdentity', 'ResourceIdentityType')
@@ -449,7 +467,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
                            version=_MSI_EXTENSION_VERSION,
                            settings={'port': port})
     LongRunningOperation(cmd.cli_ctx)(poller)
-    return _construct_identity_info(identity_scope, identity_role, port, external_identities)
+    return _construct_identity_info(identity_scope, identity_role, port, vm.identity.principal_id, external_identities)
 
 
 def list_user_assigned_identities(cmd, resource_group_name=None):
@@ -465,7 +483,9 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
                storage_container='vhds', overwrite=True):
     VirtualMachineCaptureParameters = cmd.get_models('VirtualMachineCaptureParameters')
     client = _compute_client_factory(cmd.cli_ctx)
-    parameter = VirtualMachineCaptureParameters(vhd_name_prefix, storage_container, overwrite)
+    parameter = VirtualMachineCaptureParameters(vhd_prefix=vhd_name_prefix,
+                                                destination_container_name=storage_container,
+                                                overwrite_vhds=overwrite)
     poller = client.virtual_machines.capture(resource_group_name, vm_name, parameter)
     result = LongRunningOperation(cmd.cli_ctx)(poller)
     print(json.dumps(result.output, indent=2))  # pylint: disable=no-member
@@ -618,7 +638,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         role_assignment_guid = None
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
-            master_template.add_resource(build_msi_role_assignment(cmd, vm_name, vm_id, identity_role_id,
+            master_template.add_resource(build_msi_role_assignment(vm_name, vm_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope))
         master_template.add_resource(build_vm_msi_extension(cmd, vm_name, location, role_assignment_guid, _MSI_PORT,
                                                             os_type.lower() != 'windows', _MSI_EXTENSION_VERSION))
@@ -644,16 +664,17 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
 
     # creates the VM deployment
     if no_wait:
-        return client.create_or_update(
-            resource_group_name, deployment_name, properties, raw=no_wait)
+        return sdk_no_wait(no_wait, client.create_or_update,
+                           resource_group_name, deployment_name, properties)
     else:
-        LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
-            resource_group_name, deployment_name, properties, raw=no_wait))
+        LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
+                                                      resource_group_name, deployment_name, properties))
     vm = get_vm_details(cmd, resource_group_name, vm_name)
     if assign_identity is not None:
         if enable_local_identity and not identity_scope:
             _show_missing_access_warning(resource_group_name, vm_name, 'vm')
-        setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, _MSI_PORT, external_identities))
+        setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, _MSI_PORT,
+                                                         vm.identity.principal_id, external_identities))
     return vm
 
 
@@ -668,8 +689,10 @@ def get_vm(cmd, resource_group_name, vm_name, expand=None):
 
 def get_vm_details(cmd, resource_group_name, vm_name):
     from msrestazure.tools import parse_resource_id
+    from azure.cli.command_modules.vm._vm_utils import get_target_network_api
     result = get_instance_view(cmd, resource_group_name, vm_name)
-    network_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_NETWORK)
+    network_client = get_mgmt_service_client(
+        cmd.cli_ctx, ResourceType.MGMT_NETWORK, api_version=get_target_network_api(cmd.cli_ctx))
     public_ips = []
     fqdns = []
     private_ips = []
@@ -849,10 +872,10 @@ def set_vm(cmd, instance, lro_operation=None, no_wait=False):
     instance.resources = None  # Issue: https://github.com/Azure/autorest/issues/934
     client = _compute_client_factory(cmd.cli_ctx)
     parsed_id = _parse_rg_name(instance.id)
-    poller = client.virtual_machines.create_or_update(
-        resource_group_name=parsed_id[0],
-        vm_name=parsed_id[1],
-        parameters=instance, raw=no_wait)
+    poller = sdk_no_wait(no_wait, client.virtual_machines.create_or_update,
+                         resource_group_name=parsed_id[0],
+                         vm_name=parsed_id[1],
+                         parameters=instance)
     if lro_operation:
         return lro_operation(poller)
 
@@ -877,8 +900,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, no_wait=False, **
             disk_name = os_disk
         vm.storage_profile.os_disk.managed_disk.id = disk_id
         vm.storage_profile.os_disk.name = disk_name
-    return _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update(
-        resource_group_name, vm_name, raw=no_wait, **kwargs)
+    return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
+                       resource_group_name, vm_name, **kwargs)
 # endregion
 
 
@@ -944,11 +967,11 @@ def create_av_set(cmd, availability_set_name, resource_group_name,
         return client.validate(resource_group_name, deployment_name, properties)
 
     if no_wait:
-        return client.create_or_update(
-            resource_group_name, deployment_name, properties, raw=no_wait)
+        return sdk_no_wait(no_wait, client.create_or_update,
+                           resource_group_name, deployment_name, properties)
 
-    LongRunningOperation(cmd.cli_ctx)(client.create_or_update(
-        resource_group_name, deployment_name, properties, raw=no_wait))
+    LongRunningOperation(cmd.cli_ctx)(sdk_no_wait(no_wait, client.create_or_update,
+                                                  resource_group_name, deployment_name, properties))
     compute_client = _compute_client_factory(cmd.cli_ctx)
     return compute_client.availability_sets.get(resource_group_name, availability_set_name)
 # endregion
@@ -990,9 +1013,9 @@ def enable_boot_diagnostics(cmd, resource_group_name, vm_name, storage):
 
     DiagnosticsProfile, BootDiagnostics = cmd.get_models('DiagnosticsProfile', 'BootDiagnostics')
 
-    boot_diag = BootDiagnostics(True, storage_uri)
+    boot_diag = BootDiagnostics(enabled=True, storage_uri=storage_uri)
     if vm.diagnostics_profile is None:
-        vm.diagnostics_profile = DiagnosticsProfile(boot_diag)
+        vm.diagnostics_profile = DiagnosticsProfile(boot_diagnostics=boot_diag)
     else:
         vm.diagnostics_profile.boot_diagnostics = boot_diag
 
@@ -1128,13 +1151,13 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk,
     if new:
         if not size_gb:
             raise CLIError('usage error: --size-gb required to create an empty disk for attach')
-        data_disk = DataDisk(lun, DiskCreateOption.empty,
+        data_disk = DataDisk(lun=lun, create_option=DiskCreateOption.empty,
                              name=parse_resource_id(disk)['name'],
                              disk_size_gb=size_gb, caching=caching,
                              managed_disk=ManagedDiskParameters(storage_account_type=sku))
     else:
         params = ManagedDiskParameters(id=disk, storage_account_type=sku)
-        data_disk = DataDisk(lun, DiskCreateOption.attach, managed_disk=params, caching=caching)
+        data_disk = DataDisk(lun=lun, create_option=DiskCreateOption.attach, managed_disk=params, caching=caching)
 
     vm.storage_profile.data_disks.append(data_disk)
     set_vm(cmd, vm)
@@ -1170,7 +1193,7 @@ def set_extension(
     VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
     instance_name = _get_extension_instance_name(vm.instance_view, publisher, vm_extension_name)
     version = _normalize_extension_version(cmd.cli_ctx, publisher, vm_extension_name, version, vm.location)
-    ext = VirtualMachineExtension(vm.location,
+    ext = VirtualMachineExtension(location=vm.location,
                                   publisher=publisher,
                                   virtual_machine_extension_type=vm_extension_name,
                                   protected_settings=protected_settings,
@@ -1330,7 +1353,7 @@ def _build_nic_list(cmd, nic_ids):
         for nic_id in nic_ids:
             rg, name = _parse_rg_name(nic_id)
             nic = network_client.network_interfaces.get(rg, name)
-            nic_list.append(NetworkInterfaceReference(nic.id, False))
+            nic_list.append(NetworkInterfaceReference(id=nic.id, primary=False))
     return nic_list
 
 
@@ -1365,7 +1388,7 @@ def _update_vm_nics(cmd, vm, nics, primary_nic):
 
     network_profile = getattr(vm, 'network_profile', None)
     if network_profile is None:
-        vm.network_profile = NetworkProfile(nics)
+        vm.network_profile = NetworkProfile(network_interfaces=nics)
     else:
         network_profile.network_interfaces = nics
 
@@ -1390,7 +1413,7 @@ def run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=No
             auto_arg_name_num += 1
             n = 'arg{}'.format(auto_arg_name_num)
             v = p
-        run_command_input_parameters.append(RunCommandInputParameter(n, v))
+        run_command_input_parameters.append(RunCommandInputParameter(name=n, value=v))
 
     client = _compute_client_factory(cmd.cli_ctx)
     return client.virtual_machines.run_command(resource_group_name, vm_name,
@@ -1465,7 +1488,7 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
     if vault_secret_group:
         vault_secret_group.vault_certificates.append(vault_cert)
     else:
-        vault_secret_group = VaultSecretGroup(source_vault=SubResource(keyvault), vault_certificates=[vault_cert])
+        vault_secret_group = VaultSecretGroup(source_vault=SubResource(id=keyvault), vault_certificates=[vault_cert])
         vm.os_profile.secrets.append(vault_secret_group)
     vm = set_vm(cmd, vm)
     return vm.os_profile.secrets
@@ -1529,7 +1552,7 @@ def attach_unmanaged_data_disk(cmd, resource_group_name, vm_name, new=False, vhd
 
     if lun is None:
         lun = _get_disk_lun(vm.storage_profile.data_disks)
-    disk = DataDisk(lun=lun, vhd=VirtualHardDisk(vhd_uri), name=disk_name,
+    disk = DataDisk(lun=lun, vhd=VirtualHardDisk(uri=vhd_uri), name=disk_name,
                     create_option=create_option,
                     caching=caching, disk_size_gb=size_gb if new else None)
     if vm.storage_profile.data_disks is None:
@@ -1560,17 +1583,15 @@ def _update_linux_access_extension(cmd, vm_instance, resource_group_name, protec
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
         vm_instance.resources, _LINUX_ACCESS_EXT)
 
-    ext = VirtualMachineExtension(vm_instance.location,  # pylint: disable=no-member
+    ext = VirtualMachineExtension(location=vm_instance.location,  # pylint: disable=no-member
                                   publisher=publisher,
                                   virtual_machine_extension_type=_LINUX_ACCESS_EXT,
                                   protected_settings=protected_settings,
                                   type_handler_version=version,
                                   settings={},
                                   auto_upgrade_minor_version=auto_upgrade)
-    return client.virtual_machine_extensions.create_or_update(resource_group_name,
-                                                              vm_instance.name,
-                                                              instance_name, ext,
-                                                              raw=no_wait)
+    return sdk_no_wait(no_wait, client.virtual_machine_extensions.create_or_update,
+                       resource_group_name, vm_instance.name, instance_name, ext)
 
 
 def _set_linux_user(cmd, vm_instance, resource_group_name, username,
@@ -1606,7 +1627,7 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
                                                  _WINDOWS_ACCESS_EXT,
                                                  _ACCESS_EXT_HANDLER_NAME)
 
-    ext = VirtualMachineExtension(vm_instance.location,  # pylint: disable=no-member
+    ext = VirtualMachineExtension(location=vm_instance.location,  # pylint: disable=no-member
                                   publisher=publisher,
                                   virtual_machine_extension_type=_WINDOWS_ACCESS_EXT,
                                   protected_settings={'Password': password},
@@ -1615,9 +1636,8 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
                                   auto_upgrade_minor_version=auto_upgrade)
 
     if no_wait:
-        return client.virtual_machine_extensions.create_or_update(resource_group_name,
-                                                                  vm_instance.name,
-                                                                  instance_name, ext, raw=no_wait)
+        return sdk_no_wait(no_wait, client.virtual_machine_extensions.create_or_update,
+                           resource_group_name, vm_instance.name, instance_name, ext)
     poller = client.virtual_machine_extensions.create_or_update(resource_group_name,
                                                                 vm_instance.name,
                                                                 instance_name, ext)
@@ -1711,7 +1731,8 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
     if vmss.upgrade_policy.mode == UpgradeMode.manual:
         logger.warning("With manual upgrade mode, you will need to run 'az vmss update-instances -g %s -n %s "
                        "--instance-ids *' to propagate the change", resource_group_name, vmss_name)
-    return _construct_identity_info(identity_scope, identity_role, port, external_identities)
+    return _construct_identity_info(identity_scope, identity_role, port,
+                                    vmss.identity.principal_id, external_identities)
 
 
 # pylint: disable=too-many-locals, too-many-statements
@@ -1961,7 +1982,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
             assign_identity)
         if identity_scope:
             role_assignment_guid = str(_gen_guid())
-            master_template.add_resource(build_msi_role_assignment(cmd, vmss_name, vmss_id, identity_role_id,
+            master_template.add_resource(build_msi_role_assignment(vmss_name, vmss_id, identity_role_id,
                                                                    role_assignment_guid, identity_scope, False))
         # pylint: disable=line-too-long
         msi_extention_type = 'ManagedIdentityExtensionFor' + ('Windows' if os_type.lower() == 'windows' else 'Linux')
@@ -1998,15 +2019,17 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         from azure.cli.command_modules.vm._vm_utils import log_pprint_template
         log_pprint_template(template)
         log_pprint_template(parameters)
-        return client.validate(resource_group_name, deployment_name, properties, raw=no_wait)
+        return sdk_no_wait(no_wait, client.validate, resource_group_name, deployment_name, properties)
 
     # creates the VMSS deployment
     deployment_result = DeploymentOutputLongRunningOperation(cmd.cli_ctx)(
-        client.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait))
+        sdk_no_wait(no_wait, client.create_or_update, resource_group_name, deployment_name, properties))
     if assign_identity is not None:
+        vmss_info = get_vmss(cmd, resource_group_name, vmss_name)
         if enable_local_identity and not identity_scope:
             _show_missing_access_warning(resource_group_name, vmss_name, 'vmss')
         deployment_result['vmss']['identity'] = _construct_identity_info(identity_scope, identity_role, _MSI_PORT,
+                                                                         vmss_info.identity.principal_id,
                                                                          external_identities)
     return deployment_result
 
@@ -2030,21 +2053,21 @@ def _build_identities_info(identities):
 def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids and len(instance_ids) == 1:
-        return client.virtual_machine_scale_set_vms.deallocate(resource_group_name, vm_scale_set_name, instance_ids[0],
-                                                               raw=no_wait)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.deallocate,
+                           resource_group_name, vm_scale_set_name, instance_ids[0])
 
-    return client.virtual_machine_scale_sets.deallocate(resource_group_name, vm_scale_set_name,
-                                                        instance_ids=instance_ids, raw=no_wait)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.deallocate,
+                       resource_group_name, vm_scale_set_name, instance_ids=instance_ids)
 
 
 def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if len(instance_ids) == 1:
-        return client.virtual_machine_scale_set_vms.delete(resource_group_name, vm_scale_set_name, instance_ids[0],
-                                                           raw=no_wait)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.delete,
+                           resource_group_name, vm_scale_set_name, instance_ids[0])
 
-    return client.virtual_machine_scale_sets.delete_instances(resource_group_name, vm_scale_set_name, instance_ids,
-                                                              raw=no_wait)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.delete_instances,
+                       resource_group_name, vm_scale_set_name, instance_ids)
 
 
 def get_vmss(cmd, resource_group_name, name):
@@ -2123,18 +2146,18 @@ def list_vmss_instance_public_ips(cmd, resource_group_name, vm_scale_set_name):
 def reimage_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id:
-        return client.virtual_machine_scale_set_vms.reimage(resource_group_name, vm_scale_set_name, instance_id,
-                                                            raw=no_wait)
-    return client.virtual_machine_scale_sets.reimage(resource_group_name, vm_scale_set_name, raw=no_wait)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.reimage,
+                           resource_group_name, vm_scale_set_name, instance_id)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.reimage, resource_group_name, vm_scale_set_name)
 
 
 def restart_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids and len(instance_ids) == 1:
-        return client.virtual_machine_scale_set_vms.restart(resource_group_name, vm_scale_set_name, instance_ids[0],
-                                                            raw=no_wait)
-    return client.virtual_machine_scale_sets.restart(resource_group_name, vm_scale_set_name, instance_ids=instance_ids,
-                                                     raw=no_wait)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.restart,
+                           resource_group_name, vm_scale_set_name, instance_ids[0])
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.restart, resource_group_name, vm_scale_set_name,
+                       instance_ids=instance_ids)
 
 
 # pylint: disable=inconsistent-return-statements
@@ -2147,16 +2170,14 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
         return
     else:
         vmss.sku.capacity = new_capacity
-    vmss_new = VirtualMachineScaleSet(vmss.location, sku=vmss.sku)
-    return client.virtual_machine_scale_sets.create_or_update(resource_group_name,
-                                                              vm_scale_set_name,
-                                                              vmss_new,
-                                                              raw=no_wait)
+    vmss_new = VirtualMachineScaleSet(location=vmss.location, sku=vmss.sku)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.create_or_update,
+                       resource_group_name, vm_scale_set_name, vmss_new)
 
 
 def set_vmss(cmd, resource_group_name, name, no_wait=False, **kwargs):
-    return _compute_client_factory(cmd.cli_ctx).virtual_machine_scale_sets.create_or_update(
-        resource_group_name, name, raw=no_wait, **kwargs)
+    return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machine_scale_sets.create_or_update,
+                       resource_group_name, name, **kwargs)
 
 
 def show_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
@@ -2169,29 +2190,27 @@ def show_vmss(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
 def start_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids and len(instance_ids) == 1:
-        return client.virtual_machine_scale_set_vms.start(resource_group_name, vm_scale_set_name, instance_ids[0],
-                                                          raw=no_wait)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.start,
+                           resource_group_name, vm_scale_set_name, instance_ids[0])
 
-    return client.virtual_machine_scale_sets.start(resource_group_name, vm_scale_set_name, instance_ids=instance_ids,
-                                                   raw=no_wait)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.start,
+                       resource_group_name, vm_scale_set_name, instance_ids=instance_ids)
 
 
 def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_ids and len(instance_ids) == 1:
-        return client.virtual_machine_scale_set_vms.power_off(resource_group_name, vm_scale_set_name,
-                                                              instance_ids[0], raw=no_wait)
+        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.power_off,
+                           resource_group_name, vm_scale_set_name, instance_ids[0])
 
-    return client.virtual_machine_scale_sets.power_off(resource_group_name, vm_scale_set_name,
-                                                       instance_ids=instance_ids, raw=no_wait)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.power_off, resource_group_name, vm_scale_set_name,
+                       instance_ids=instance_ids)
 
 
 def update_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machine_scale_sets.update_instances(resource_group_name,
-                                                              vm_scale_set_name,
-                                                              instance_ids,
-                                                              raw=no_wait)
+    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.update_instances,
+                       resource_group_name, vm_scale_set_name, instance_ids)
 # endregion
 
 
@@ -2234,34 +2253,62 @@ def set_vmss_diagnostics_extension(
 
 
 # region VirtualMachineScaleSets Disks (Managed)
-def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_gb, lun=None,
-                                     caching=None):
-    DiskCreateOptionTypes, VirtualMachineScaleSetDataDisk = cmd.get_models(
-        'DiskCreateOptionTypes', 'VirtualMachineScaleSetDataDisk')
+def attach_managed_data_disk_to_vmss(cmd, resource_group_name, vmss_name, size_gb=None, instance_id=None, lun=None,
+                                     caching=None, disk=None):
+
+    def _init_data_disk(storage_profile, lun, existing_disk=None):
+        data_disks = storage_profile.data_disks or []
+        if lun is None:
+            luns = [d.lun for d in data_disks]
+            lun = max(luns) + 1 if luns else 0
+        if existing_disk is None:
+            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.empty,
+                                 disk_size_gb=size_gb, caching=caching)
+        else:
+            data_disk = DataDisk(lun=lun, create_option=DiskCreateOptionTypes.attach,
+                                 managed_disk=ManagedDiskParameters(id=existing_disk), caching=caching)
+
+        data_disks.append(data_disk)
+        storage_profile.data_disks = data_disks
+
+    DiskCreateOptionTypes, ManagedDiskParameters = cmd.get_models(
+        'DiskCreateOptionTypes', 'ManagedDiskParameters')
+    if disk is None:
+        DataDisk = cmd.get_models('VirtualMachineScaleSetDataDisk')
+    else:
+        DataDisk = cmd.get_models('DataDisk')
+
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-    # pylint: disable=no-member
-    data_disks = vmss.virtual_machine_profile.storage_profile.data_disks or []
-    if lun is None:
-        luns = [d.lun for d in data_disks]
-        lun = max(luns) + 1 if luns else 0
-    data_disk = VirtualMachineScaleSetDataDisk(lun, DiskCreateOptionTypes.empty,
-                                               disk_size_gb=size_gb, caching=caching)
-    data_disks.append(data_disk)
-    vmss.virtual_machine_profile.storage_profile.data_disks = data_disks
-    return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+    if instance_id is None:
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        # pylint: disable=no-member
+        _init_data_disk(vmss.virtual_machine_profile.storage_profile, lun)
+        return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+
+    vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
+    _init_data_disk(vmss_vm.storage_profile, lun, disk)
+    return client.virtual_machine_scale_set_vms.update(resource_group_name, vmss_name, instance_id, vmss_vm)
 
 
-def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun):
+def detach_disk_from_vmss(cmd, resource_group_name, vmss_name, lun, instance_id=None):
     client = _compute_client_factory(cmd.cli_ctx)
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-    # pylint: disable=no-member
-    data_disks = vmss.virtual_machine_profile.storage_profile.data_disks
+    if instance_id is None:
+        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
+        # pylint: disable=no-member
+        data_disks = vmss.virtual_machine_profile.storage_profile.data_disks
+    else:
+        vmss_vm = client.virtual_machine_scale_set_vms.get(resource_group_name, vmss_name, instance_id)
+        data_disks = vmss_vm.storage_profile.data_disks
+
     leftovers = [d for d in data_disks if d.lun != lun]
     if len(data_disks) == len(leftovers):
         raise CLIError("Could not find the data disk with lun '{}'".format(lun))
-    vmss.virtual_machine_profile.storage_profile.data_disks = leftovers
-    return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+
+    if instance_id is None:
+        vmss.virtual_machine_profile.storage_profile.data_disks = leftovers
+        return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)
+    vmss_vm.storage_profile.data_disks = leftovers
+    return client.virtual_machine_scale_set_vms.update(resource_group_name, vmss_name, instance_id, vmss_vm)
 # endregion
 
 
@@ -2329,7 +2376,7 @@ def set_vmss_extension(
                                           auto_upgrade_minor_version=(not no_auto_upgrade))
 
     if not vmss.virtual_machine_profile.extension_profile:
-        vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile([])
+        vmss.virtual_machine_profile.extension_profile = VirtualMachineScaleSetExtensionProfile(extensions=[])
     vmss.virtual_machine_profile.extension_profile.extensions.append(ext)
 
     return client.virtual_machine_scale_sets.create_or_update(resource_group_name, vmss_name, vmss)

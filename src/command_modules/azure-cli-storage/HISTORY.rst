@@ -3,6 +3,32 @@
 Release History
 ===============
 
+2.0.30
+++++++
+* Fix issue of upload file with size between 195GB and 200GB
+
+2.0.29
+++++++
+* Minor fixes.
+
+2.0.28
+++++++
+* Fix problems with append blob uploads ignoring condition parameters.
+
+2.0.27
+++++++
+* Fix issue of missing endpoint suffix in batch copy command.
+* Blob batch commands no longer throw error upon failed precondition.
+* Support Autorest 3.0 based SDKs
+
+2.0.26
+++++++
+* Enabled specifying destination-path/prefix to blobs in batch upload and copy commands.
+
+2.0.25
+++++++
+* Added `storage blob service-properties delete-policy` and `storage blob undelete` commands to enable soft-delete.
+
 2.0.24
 ++++++
 * `storage account update`: do not create new networkRuleSet if "default_action" arg is not provided.

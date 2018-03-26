@@ -3,6 +3,31 @@
 Release History
 ===============
 
+2.0.26
+++++++
+* `network dns zone create/update`: Adding support for Private DNS zones.
+
+2.0.25
+++++++
+* BREAKING CHANGE: `route-filter rule create`: The `--tags` parameter is no longer supported.
+* Support Autorest 3.0 based SDKs
+* Fix issues with update commands in `express-route`, `nsg rule`, `public-ip`, `traffic manager profile` and `vnet-gateway` where some parameters erroneously had default values.
+* `network watcher`: Added `connection-monitor` commands.
+* `network watcher show-topology`: Added support to target `--vnet` and `--subnet`.
+
+2.0.24
+++++++
+* `network vnet-gateway vpn-client generate`: Fix missing client issue.
+
+2.0.23
+++++++
+* `network public-ip create`: Fix `--tags` option.
+* `network lb create`: Fix `--tags` option.
+* `network local-gateway create`: Fix `--tags` option.
+* `network nic create`: Fix `--tags` option.
+* `network vnet-gateway create`: Fix `--tags` option.
+* `network vpn-connection create`: Fix `--tags` option.
+
 2.0.22
 ++++++
 * `application-gateway create`: `--cert-password` protected using secureString.
@@ -153,7 +178,7 @@ Release History
 
 * Add support for active-active VNet gateways
 * Remove nulls values from output of `network vpn-connection list/show` commands.
-* BC: Fix bug in the output of `vpn-connection create` 
+* BC: Fix bug in the output of `vpn-connection create`
 * Fix bug where '--key-length' argument of 'vpn-connection create' was not parsed correctly.
 * Fix bug in `dns zone import` where records were not imported correctly.
 * Fix bug where `traffic-manager endpoint update` did not work.

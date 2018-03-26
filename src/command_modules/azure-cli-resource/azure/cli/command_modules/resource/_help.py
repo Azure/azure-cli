@@ -173,7 +173,7 @@ helps['policy definition create'] = """
                     az policy definition create -n readOnlyStorage --rules '{
                             "if":
                             {
-                                "source": "action",
+                                "field": "type",
                                 "equals": "Microsoft.Storage/storageAccounts/write"
                             },
                             "then":
@@ -405,6 +405,16 @@ helps['resource invoke-action'] = """
 helps['feature'] = """
     type: group
     short-summary: Manage resource provider features.
+"""
+
+helps['feature list'] = """
+    type: command
+    short-summary: List preview features.
+"""
+
+helps['feature register'] = """
+    type: command
+    short-summary: register a preview feature.
 """
 
 helps['group'] = """

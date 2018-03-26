@@ -54,14 +54,14 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
     with self.argument_context('iot dps access-policy create') as c:
         c.argument('rights', options_list=['--rights', '-r'], nargs='+',
                    arg_type=get_enum_type(AccessRightsDescription),
-                   help='Access rights for the IoT provisioning service. Use space separated list for multiple rights.')
+                   help='Access rights for the IoT provisioning service. Use space-separated list for multiple rights.')
         c.argument('primary_key', help='Primary SAS key value.')
         c.argument('secondary_key', help='Secondary SAS key value.')
 
     with self.argument_context('iot dps access-policy update') as c:
         c.argument('rights', options_list=['--rights', '-r'], nargs='+',
                    arg_type=get_enum_type(AccessRightsDescription),
-                   help='Access rights for the IoT provisioning service. Use space separated list for multiple rights.')
+                   help='Access rights for the IoT provisioning service. Use space-separated list for multiple rights.')
         c.argument('primary_key', help='Primary SAS key value.')
         c.argument('secondary_key', help='Secondary SAS key value.')
 
@@ -125,7 +125,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                    help='Shared access policy name.')
         permission_values = ', '.join([x.value for x in SimpleAccessRights])
         c.argument('permissions', nargs='*', validator=validate_policy_permissions, type=str.lower,
-                   help='Permissions of shared access policy. Use space separated list for multiple permissions. '
+                   help='Permissions of shared access policy. Use space-separated list for multiple permissions. '
                         'Possible values: {}'.format(permission_values))
 
     with self.argument_context('iot hub job') as c:
@@ -140,6 +140,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                         'Note that only one free IoT hub instance is allowed in each '
                         'subscription. Exception will be thrown if free instances exceed one.')
         c.argument('unit', help='Units in your IoT Hub.', type=int)
+        c.argument('partition_count', help='The number of partitions for device-to-cloud messages.', type=int)
 
     with self.argument_context('iot hub show-connection-string') as c:
         c.argument('policy_name', help='Shared access policy to use.')

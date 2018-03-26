@@ -126,7 +126,7 @@ def load_command_table(self, _):
         g.custom_command('update', 'update_lock')
 
     with self.command_group('group', resource_group_sdk, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
-        g.command('delete', 'delete', no_wait_param='raw', confirmation=True)
+        g.command('delete', 'delete', supports_no_wait=True, confirmation=True)
         g.command('show', 'get', exception_handler=empty_on_404)
         g.command('exists', 'check_existence')
         g.custom_command('list', 'list_resource_groups', table_transformer=transform_resource_group_list)
@@ -170,7 +170,7 @@ def load_command_table(self, _):
         g.custom_command('operation show', 'show_provider_operations')
 
     # Resource feature commands
-    with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, min_api='2017-05-10') as g:
+    with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, resource_type=ResourceType.MGMT_RESOURCE_FEATURES) as g:
         feature_table_transform = '{Name:name, RegistrationState:properties.state}'
         g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
         g.command('show', 'get', exception_handler=empty_on_404, table_transformer=feature_table_transform)
@@ -185,7 +185,7 @@ def load_command_table(self, _):
         g.command('remove-value', 'delete_value')
 
     with self.command_group('group deployment', resource_deployment_sdk) as g:
-        g.custom_command('create', 'deploy_arm_template', no_wait_param='no_wait', validator=process_deployment_create_namespace)
+        g.custom_command('create', 'deploy_arm_template', supports_no_wait=True, validator=process_deployment_create_namespace)
         g.command('list', 'list_by_resource_group', table_transformer=transform_deployments_list, min_api='2017-05-10')
         g.command('list', 'list', table_transformer=transform_deployments_list, max_api='2016-09-01')
         g.command('show', 'get', exception_handler=empty_on_404)
@@ -232,13 +232,13 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_resource_links')
         g.custom_command('update', 'update_resource_link')
 
-    with self.command_group('managedapp', resource_managedapp_sdk, min_api='2017-05-10') as g:
+    with self.command_group('managedapp', resource_managedapp_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('create', 'create_application')
         g.command('delete', 'delete')
         g.custom_command('show', 'show_application', exception_handler=empty_on_404)
         g.custom_command('list', 'list_applications')
 
-    with self.command_group('managedapp definition', resource_managedapp_def_sdk, min_api='2017-05-10') as g:
+    with self.command_group('managedapp definition', resource_managedapp_def_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES) as g:
         g.custom_command('create', 'create_applicationdefinition')
         g.command('delete', 'delete')
         g.custom_command('show', 'show_applicationdefinition')

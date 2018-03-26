@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import argparse
+
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
 
@@ -45,8 +47,10 @@ class ProfileCommandsLoader(AzCommandsLoader):
             c.argument('username', options_list=('--username', '-u'), help='user name, service principal, or managed service identity ID')
             c.argument('tenant', options_list=('--tenant', '-t'), help='The AAD tenant, must provide when using service principals.')
             c.argument('allow_no_subscriptions', action='store_true', help="Support access tenants without subscriptions. It's uncommon but useful to run tenant level commands, such as 'az ad'")
-            c.argument('msi', action='store_true', help="Log in using the Virtual Machine's identity", arg_group='Managed Service Identity')
-            c.argument('msi_port', help="the port to retrieve tokens for login", arg_group='Managed Service Identity')
+            c.argument('msi', help=argparse.SUPPRESS)
+            c.argument('identity', options_list=('-i', '--identity'), action='store_true', help="Log in using the Virtual Machine's identity", arg_group='Managed Service Identity')
+            c.argument('msi_port', type=int, help=argparse.SUPPRESS)
+            c.argument('identity_port', type=int, help="the port to retrieve tokens for login. Default: 50342", arg_group='Managed Service Identity')
 
         with self.argument_context('logout') as c:
             c.argument('username', help='account user, if missing, logout the current active account')

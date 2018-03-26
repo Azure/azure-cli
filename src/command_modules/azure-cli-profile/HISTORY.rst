@@ -2,6 +2,19 @@
 
 Release History
 ===============
+2.0.21
+++++++
+* az login: warn on using --identity-port/--msi-port as they become useless with imds support
+
+2.0.20
+++++++
+* az login: use `--identity` and deprecate `--msi`
+* enable login/logout commands in cloud shell
+
+2.0.19
+++++++
+* Enable `az login` in from interactive mode.
+
 2.0.18
 ++++++
 * ensure 'get-access-token' work inside a VM with identity
