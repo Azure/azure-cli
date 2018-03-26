@@ -469,7 +469,11 @@ def _build_service_principal(rbac_client, cli_ctx, name, url, client_secret):
     hook = cli_ctx.get_progress_controller(True)
     hook.add(messsage='Creating service principal', value=0, total_val=1.0)
     logger.info('Creating service principal')
-    result = create_application(rbac_client.applications, name, url, [url], password=client_secret)
+    # always create application with 5 years expiration
+    start_date = datetime.datetime.utcnow()
+    end_date = start_date + relativedelta(years=5)
+    result = create_application(rbac_client.applications, name, url, [url], password=client_secret,
+                                start_date=start_date, end_date=end_date)
     service_principal = result.app_id  # pylint: disable=no-member
     for x in range(0, 10):
         hook.add(message='Creating service principal', value=0.1 * x, total_val=1.0)
