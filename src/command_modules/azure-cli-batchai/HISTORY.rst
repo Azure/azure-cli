@@ -6,16 +6,15 @@ Release History
 1.0.0
 ++++++
 * Added support for 2018-03-01 API.
-  New features added in 2018-03-01
-    - Job level mounting
-    - Environment variables with secret values
-    - Performance counters settings
-    - Reporting of job specific path segment
-    - Support for subfolders in list files api
-    - Usage and limits reporting
-    - Allow to specify caching type for NFS servers
-    - Support for custom images
-    - Added pyTorch toolkit support
+** Job level mounting
+** Environment variables with secret values
+** Performance counters settings
+** Reporting of job specific path segment
+** Support for subfolders in list files api
+** Usage and limits reporting
+** Allow to specify caching type for NFS servers
+** Support for custom images
+**Added pyTorch toolkit support
 * Added 'job wait' command which allows to wait for the job completion and reports job exit code
 * Added 'usage show' command to list current Batch AI resources usage and limits for different regions
 * National clouds are supported
