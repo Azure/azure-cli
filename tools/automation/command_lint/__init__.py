@@ -9,7 +9,7 @@ from knack.help_files import helps
 from azure.cli.testsdk import TestCli
 from azure.cli.core.commands.arm import add_id_parameters
 from azure.cli.command_modules.interactive.azclishell._dump_commands import AzInteractiveCommandsLoader
-from azure.cli.command_modules.interactive.azclishell.command_tree import AzInteractiveCommandsLoader
+import azure.cli.command_modules.interactive.azclishell.command_tree as tree
 from .cli_command_linter import Linter
 
 import automation.utilities.path as automation_path
@@ -39,6 +39,15 @@ def main(args):
     for _, command in interactive_loader.command_table.items():
         command.description = command.description()
 
+    # load command_tree
+    command_tree = tree.CommandHead()
+    for command_name in interactive_loader.command_table:
+        branch = command_tree
+        for word in command_name.split():
+            if not branch.has_child(word):
+                branch.add_child(tree.CommandBranch(word))
+            branch = branch.get_child(word)
+
     # load yaml help
     all_help = {}
     for command_name, help_yaml in helps.items():
@@ -56,7 +65,9 @@ def main(args):
 
 
     # Instantiate and run Linter
-    Linter(command_table=interactive_loader.command_table, all_yaml_help=all_help).run()
+    Linter(command_table=interactive_loader.command_table,
+           all_yaml_help=all_help,
+           command_tree=command_tree).run()
 
 
 def init_args(root):
