@@ -617,7 +617,7 @@ def _validate_vmss_create_nsg(cmd, namespace):
                                          'networkSecurityGroups', 'Microsoft.Network')
 
 
-def _validate_vm_create_public_ip(cmd, namespace):
+def _validate_vm_vmss_create_public_ip(cmd, namespace):
     if namespace.public_ip_address:
         if check_existence(cmd.cli_ctx, namespace.public_ip_address, namespace.resource_group_name,
                            'Microsoft.Network', 'publicIPAddresses'):
@@ -633,7 +633,8 @@ def _validate_vm_create_public_ip(cmd, namespace):
         namespace.public_ip_type = 'new'
         logger.debug('new public IP address will be created')
 
-    if namespace.public_ip_sku:
+    # Public-IP SKU is only exposed for VM. VMSS has no such needs so far
+    if getattr(namespace, 'public_ip_sku', None):
         from azure.cli.core.profiles import ResourceType
         PublicIPAddressSkuName, IPAllocationMethod = cmd.get_models('PublicIPAddressSkuName', 'IPAllocationMethod',
                                                                     resource_type=ResourceType.MGMT_NETWORK)
@@ -648,7 +649,7 @@ def _validate_vmss_create_public_ip(cmd, namespace):
             raise CLIError('--public-ip-address can only be used when creating a new load '
                            'balancer or application gateway frontend.')
         namespace.public_ip_address = ''
-    _validate_vm_create_public_ip(cmd, namespace)
+    _validate_vm_vmss_create_public_ip(cmd, namespace)
 
 
 def _validate_vm_create_nics(cmd, namespace):
@@ -871,7 +872,7 @@ def process_vm_create_namespace(cmd, namespace):
     _validate_vm_create_availability_set(cmd, namespace)
     _validate_vm_vmss_create_vnet(cmd, namespace)
     _validate_vm_create_nsg(cmd, namespace)
-    _validate_vm_create_public_ip(cmd, namespace)
+    _validate_vm_vmss_create_public_ip(cmd, namespace)
     _validate_vm_create_nics(cmd, namespace)
     _validate_vm_vmss_create_auth(namespace)
     if namespace.secrets:
