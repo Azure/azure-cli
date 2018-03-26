@@ -633,10 +633,13 @@ def _validate_vm_create_public_ip(cmd, namespace):
         namespace.public_ip_type = 'new'
         logger.debug('new public IP address will be created')
 
-    if namespace.public_ip_sku == 'Standard':
-        namespace.public_ip_address_allocation = 'Static'  # Or error out and use enums
-
-    # TODO: validate misuse other pip properties
+    if namespace.public_ip_sku:
+        from azure.cli.core.profiles import ResourceType
+        PublicIPAddressSkuName, IPAllocationMethod = cmd.get_models('PublicIPAddressSkuName', 'IPAllocationMethod',
+                                                                    resource_type=ResourceType.MGMT_NETWORK)
+        if namespace.public_ip_sku == PublicIPAddressSkuName.standard.value:
+            if not namespace.public_ip_address_allocation:
+                namespace.public_ip_address_allocation = IPAllocationMethod.static.value
 
 
 def _validate_vmss_create_public_ip(cmd, namespace):
