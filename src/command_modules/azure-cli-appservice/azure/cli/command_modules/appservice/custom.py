@@ -56,6 +56,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     else:
         plan_info = client.app_service_plans.get(resource_group_name, plan)
+    if not plan_info:
+        raise CLIError("The plan of '{}' doesn't exist".format(plan))
     is_linux = plan_info.reserved
     node_default_version = "6.9.1"
     location = plan_info.location
@@ -1520,6 +1522,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     consumption_plan_location=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None,
                     deployment_container_image_name=None):
+    # pylint: disable=too-many-statements
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
@@ -1540,6 +1543,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         if is_valid_resource_id(plan):
             plan = parse_resource_id(plan)['name']
         plan_info = client.app_service_plans.get(resource_group_name, plan)
+        if not plan_info:
+            raise CLIError("The plan of '{}' doesn't exist".format(plan))
         location = plan_info.location
         is_linux = plan_info.reserved
         if is_linux:
