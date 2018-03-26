@@ -585,7 +585,6 @@ def db_update(
         max_size_bytes=None,
         sku=None,
         zone_redundant=None):
-<<<<<<< HEAD
     # Verify edition
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
