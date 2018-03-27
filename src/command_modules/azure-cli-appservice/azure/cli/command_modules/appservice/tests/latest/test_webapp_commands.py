@@ -574,12 +574,12 @@ class WebappSSLCertTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_webapp_ssl(self, resource_group, resource_group_location):
         plan = self.create_random_name(prefix='ssl-test-plan', length=24)
-        webapp_name = 'webapp-ssl-test123'
+        webapp_name = self.create_random_name(prefix='web-ssl-test', length=20)
         # Cert Generated using
         # https://docs.microsoft.com/en-us/azure/app-service-web/web-sites-configure-ssl-certificate#bkmk_ssopenssl
         pfx_file = os.path.join(TEST_DIR, 'server.pfx')
         cert_password = 'test'
-        cert_thumbprint = 'DB2BA6898D0B330A93E7F69FF505C61EF39921B6'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
         self.cmd('appservice plan create -g {} -n {} --sku B1'.format(resource_group, plan))
         self.cmd('webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan, resource_group_location))
         self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {}'.format(resource_group, webapp_name, pfx_file, cert_password), checks=[
@@ -744,11 +744,11 @@ class FunctionAppOnLinux(ScenarioTest):
         self.cmd('functionapp create -g {} -n {} --plan {} -s {}'.format(resource_group, functionapp, plan, storage_account), checks=[
             JMESPathCheck('name', functionapp)
         ])
-        self.cmd('functionapp list -g {}'.format(resource_group), checks=[
+        result = self.cmd('functionapp list -g {}'.format(resource_group), checks=[
             JMESPathCheck('length([])', 1),
-            JMESPathCheck('[0].name', functionapp),
-            JMESPathCheck('[0].kind', 'functionapp,linux')
-        ])
+            JMESPathCheck('[0].name', functionapp)
+        ]).get_output_in_json()
+        self.assertTrue('functionapp,linux' in result[0]['kind'])
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
 
@@ -781,7 +781,7 @@ class WebappAuthenticationTest(ScenarioTest):
         result = self.cmd('webapp auth update -g {} -n {} --enabled true --action LoginWithFacebook '
                           '--token-store false --runtime-version v5.0 --token-refresh-extension-hours 7.2 '
                           '--aad-client-id aad_client_id --aad-client-secret aad_secret '
-                          '--aad-allowed-token-audiences audience1 --aad-token-issuer-url issuer_url '
+                          '--aad-allowed-token-audiences https://audience1 --aad-token-issuer-url https://issuer_url '
                           '--facebook-app-id facebook_id --facebook-app-secret facebook_secret '
                           '--facebook-oauth-scopes public_profile email'
                           .format(resource_group, webapp_name)).assert_with_checks([
@@ -793,11 +793,11 @@ class WebappAuthenticationTest(ScenarioTest):
                               JMESPathCheck('tokenRefreshExtensionHours', 7.2),
                               JMESPathCheck('clientId', 'aad_client_id'),
                               JMESPathCheck('clientSecret', 'aad_secret'),
-                              JMESPathCheck('issuer', 'issuer_url'),
+                              JMESPathCheck('issuer', 'https://issuer_url'),
                               JMESPathCheck('facebookAppId', 'facebook_id'),
                               JMESPathCheck('facebookAppSecret', 'facebook_secret')]).get_output_in_json()
 
-        self.assertIn('audience1', result['allowedAudiences'])
+        self.assertIn('https://audience1', result['allowedAudiences'])
         self.assertIn('email', result['facebookOauthScopes'])
         self.assertIn('public_profile', result['facebookOauthScopes'])
 

@@ -189,7 +189,7 @@ class VMImageListSkusScenarioTest(ScenarioTest):
         result = self.cmd("vm image list-skus --location {loc} -p {pub} --offer {offer} --query \"length([].id.contains(@, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/'))\"").get_output_in_json()
         self.assertTrue(result > 0)
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=2048)
     def test_list_skus_contains_zone_info(self):
         # we pick eastus2 as it is one of 3 regions so far with zone support
         self.kwargs['loc'] = 'eastus2'
@@ -756,17 +756,28 @@ class VMAvailSetLiveScenarioTest(LiveScenarioTest):
         ])
 
 
-class ComputeListSkusScenarioTest(LiveScenarioTest):
+class ComputeListSkusScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=2048)
     def test_list_compute_skus_table_output(self):
         result = self.cmd('vm list-skus -l westus -otable')
         lines = result.output.split('\n')
         # 1st line is header
-        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Tier', 'Size', 'Capabilities'])
+        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Capabilities', 'Tier', 'Size'])
         # spot check the first 3 entries
-        self.assertEqual(lines[3].split(), ['availabilitySets', 'westus', 'Classic', 'MaximumPlatformFaultDomainCount=3'])
-        self.assertEqual(lines[4].split(), ['availabilitySets', 'westus', 'Aligned', 'MaximumPlatformFaultDomainCount=3'])
-        self.assertEqual(lines[5].split(), ['virtualMachines', 'westus', 'Standard_DS1_v2', 'DS1_v2', 'Standard'])
+        fd_found, ud_found, size_found = False, False, False
+        for l in lines[1:]:
+            parts = l.split()
+            if not fd_found and (parts == ['availabilitySets', 'westus', 'Aligned', 'MaximumPlatformFaultDomainCount=3']):
+                fd_found = True
+            elif not ud_found and (parts == ['availabilitySets', 'westus', 'Classic', 'MaximumPlatformFaultDomainCount=3']):
+                ud_found = True
+            elif not size_found and (parts == ['virtualMachines', 'westus', 'Standard_DS1_v2', 'LowPriorityCapable=True', 'Standard', 'DS1_v2']):
+                size_found = True
+
+        self.assertTrue(fd_found)
+        self.assertTrue(ud_found)
+        self.assertTrue(size_found)
 
 
 class VMExtensionScenarioTest(ScenarioTest):
@@ -1472,7 +1483,8 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'vmss': 'vmss1'
         })
 
-        res = self.cmd("vmss create -g {rg} --name {vmss} --validate --image UbuntuLTS --disable-overprovision --instance-count 101 --single-placement-group false --admin-username ubuntuadmin").get_output_in_json()
+        res = self.cmd("vmss create -g {rg} --name {vmss} --validate --image UbuntuLTS --disable-overprovision --instance-count 101 --single-placement-group false "
+                       "--admin-username ubuntuadmin --generate-ssh-keys").get_output_in_json()
         # Ensure generated template is valid. "Quota Exceeding" is expected on most subscriptions, so we allow that.
         self.assertTrue(not res['error'] or (res['error']['details'][0]['code'] == 'QuotaExceeded'))
 
@@ -2048,7 +2060,8 @@ class MSIScenarioTest(ScenarioTest):
             'emsi2': 'id2',
             'vm': 'vm1',
             'sub': self.get_subscription_id(),
-            'scope': '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group)
+            'scope': '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group),
+            'user': 'ubuntuadmin'
         })
 
         # create a managed identity
@@ -2057,7 +2070,7 @@ class MSIScenarioTest(ScenarioTest):
         emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
 
         # create a vm with only user assigned identity
-        result = self.cmd('vm create -g {rg} -n vm2 --image ubuntults --assign-identity {emsi} --generate-ssh-keys', checks=[
+        result = self.cmd('vm create -g {rg} -n vm2 --image ubuntults --assign-identity {emsi} --generate-ssh-keys --admin-username {user}', checks=[
             self.check('identity.role', None),
             self.check('identity.scope', None),
             self.check('length(identity.userAssignedIdentities)', 1)
@@ -2066,7 +2079,7 @@ class MSIScenarioTest(ScenarioTest):
         self.assertFalse(result['identity']['systemAssignedIdentity'])
 
         # create a vm with system + user assigned identities
-        result = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys --admin-username ubuntuadmin').get_output_in_json()
+        result = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys --admin-username {user}').get_output_in_json()
         self.assertEqual(result['identity']['userAssignedIdentities'][0].lower(), emsi_result['id'].lower())
         result = self.cmd('vm identity show -g {rg} -n {vm}', checks=[
             self.check('length(identityIds)', 1),
@@ -2489,7 +2502,7 @@ class VMOsDiskSwap(ScenarioTest):
             'vm': 'vm1',
             'backupDisk': 'disk1',
         })
-        self.cmd('vm create -g {rg} -n {vm} --image centos')
+        self.cmd('vm create -g {rg} -n {vm} --image centos --admin-username clitest123')
         res = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
         original_disk_id = res['storageProfile']['osDisk']['managedDisk']['id']
         backup_disk_id = self.cmd('disk create -g {{rg}} -n {{backupDisk}} --source {}'.format(original_disk_id)).get_output_in_json()['id']
