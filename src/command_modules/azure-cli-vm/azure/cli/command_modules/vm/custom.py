@@ -497,8 +497,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               admin_username=getpass.getuser(), ssh_dest_key_path=None, ssh_key_value=None,
               generate_ssh_keys=False, availability_set=None, nics=None, nsg=None, nsg_rule=None,
               private_ip_address=None, public_ip_address=None, public_ip_address_allocation='dynamic',
-              public_ip_address_dns_name=None, os_disk_name=None, os_type=None, storage_account=None,
-              os_caching=None, data_caching=None, storage_container_name=None, storage_sku=None,
+              public_ip_address_dns_name=None, public_ip_sku=None, os_disk_name=None, os_type=None,
+              storage_account=None, os_caching=None, data_caching=None, storage_container_name=None, storage_sku=None,
               use_unmanaged_disk=False, attach_os_disk=None, os_disk_size_gb=None,
               attach_data_disks=None, data_disk_sizes_gb=None, image_data_disks=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16', subnet=None, subnet_address_prefix='10.0.0.0/24',
@@ -569,7 +569,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             master_template.add_resource(build_public_ip_resource(cmd, public_ip_address, location, tags,
                                                                   public_ip_address_allocation,
                                                                   public_ip_address_dns_name,
-                                                                  None, zone))
+                                                                  public_ip_sku, zone))
 
         subnet_id = subnet if is_valid_resource_id(subnet) else \
             '{}/virtualNetworks/{}/subnets/{}'.format(network_id_template, vnet_name, subnet)
