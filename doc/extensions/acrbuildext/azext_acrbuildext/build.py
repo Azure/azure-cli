@@ -230,10 +230,10 @@ def acr_queue(cmd,
         else:
             raise CLIError(
                 "'--source-location' should be a local directory path or remote url.")
-        isLocalFile = True
+        is_local_file = True
     else:
         source_location = _check_remote_source_code(source_location)
-        isLocalFile = False
+        is_local_file = False
 
     is_push_enabled = True
     if image_name is None:
@@ -269,20 +269,19 @@ def acr_queue(cmd,
     result = LongRunningOperation(cmd.cli_ctx)(client_registries.queue_build(
         build_request=build_request, resource_group_name=resource_group_name, registry_name=registry_name))
 
-    if isLocalFile:
+    if is_local_file:
         try:
             size = os.path.getsize(tar_file_path)
         except OSError:
             raise CLIError(
                 "Get the size of file {0} failed.".format(tar_file_path))
         finally:
-            if os.path.exists(tar_file_path):
+            try:
                 logger.debug(
                     "Starting to delete the archived source code from '{}'.".format(tar_file_path))
-                try:
-                    os.remove(tar_file_path)
-                except OSError:
-                    pass
+                os.remove(tar_file_path)
+            except OSError:
+                pass
         unit = ""
         for S in ['Bytes', 'KiB', 'MiB', 'GiB']:
             if size < 1024:
@@ -411,13 +410,12 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
 
         return source_upload_location.relative_path
     except Exception as err:
-        if os.path.exists(tar_file_path):
+        try:
             logger.debug(
                 "Starting to delete the archived source code from '{}'.".format(tar_file_path))
-            try:
-                os.remove(tar_file_path)
-            except OSError:
-                pass
+            os.remove(tar_file_path)
+        except OSError:
+            pass
         raise CLIError(err)
 
 
