@@ -48,6 +48,7 @@ from ._util import (
 
 # Determines server location
 def _get_server_location(cli_ctx, server_name, resource_group_name):
+
     server_client = get_sql_servers_operations(cli_ctx, None)
     # pylint: disable=no-member
     return server_client.get(
@@ -79,6 +80,7 @@ class ClientAuthenticationType(Enum):
 
 
 def _get_server_dns_suffx(cli_ctx):
+
     # Allow dns suffix to be overridden by environment variable for testing purposes
     from os import getenv
     return getenv('_AZURE_CLI_SQL_DNS_SUFFIX', default=cli_ctx.cloud.suffixes.sql_server_hostname)
@@ -183,13 +185,16 @@ def db_show_conn_str(
 
 # Helper class to bundle up database identity properties
 class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
+
     def __init__(self, cli_ctx, database_name, server_name, resource_group_name):
+
         self.database_name = database_name
         self.server_name = server_name
         self.resource_group_name = resource_group_name
         self.cli_ctx = cli_ctx
 
     def id(self):
+
         return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(
             quote(get_subscription_id(self.cli_ctx)),
             quote(self.resource_group_name),
@@ -540,6 +545,7 @@ def db_export(
         storage_key_type,
         storage_key,
         **kwargs):
+
     storage_key = pad_sas_key(storage_key_type, storage_key)
 
     kwargs['storage_key_type'] = storage_key_type
@@ -562,6 +568,7 @@ def db_import(
         storage_key_type,
         storage_key,
         **kwargs):
+
     storage_key = pad_sas_key(storage_key_type, storage_key)
 
     kwargs['storage_key_type'] = storage_key_type
@@ -579,6 +586,7 @@ def db_import(
 def pad_sas_key(
         storage_key_type,
         storage_key):
+
     # Import/Export API requires that "?" precede SAS key as an argument.
     # Add ? prefix if it wasn't included.
     if storage_key_type.lower() == StorageKeyType.shared_access_key.value.lower():  # pylint: disable=no-member
@@ -663,6 +671,7 @@ def db_update(
 # resource group just to update some unrelated property, which is annoying and makes no sense to
 # the customer.
 def _find_storage_account_resource_group(cli_ctx, name):
+
     storage_type = 'Microsoft.Storage/storageAccounts'
     classic_storage_type = 'Microsoft.ClassicStorage/storageAccounts'
 
@@ -690,6 +699,7 @@ def _find_storage_account_resource_group(cli_ctx, name):
 # Determines storage account name from endpoint url string.
 # e.g. 'https://mystorage.blob.core.windows.net' -> 'mystorage'
 def _get_storage_account_name(storage_endpoint):
+
     return urlparse(storage_endpoint).netloc.split('.')[0]
 
 

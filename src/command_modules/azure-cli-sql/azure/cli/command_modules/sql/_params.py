@@ -15,7 +15,6 @@ from azure.mgmt.sql.models import (
     ElasticPoolPerDatabaseSettings,
     ImportExtensionRequest,
     ExportRequest,
-    Sku,
     Server,
     ServerAzureADAdministrator
 )
