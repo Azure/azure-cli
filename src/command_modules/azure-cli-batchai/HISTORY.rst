@@ -28,10 +28,11 @@ Release History
   Azure Blob Containers - CLI will populate missing credentials using storage account key provided via command line
   parameters or specified via environment variable or will query the key from Azure Storage (if the storage account
   belongs to the current subscription).
-* 'job stream-file' now auto-completes when the job is completed (succeeded, failed, terminated or deleted).
+* Job file stream command now auto-completes when the job is completed (succeeded, failed, terminated or deleted).
 * Improved '-o table' support for show operations.
 * Added auto storage option for cluster creation.
 * Added ability to provide node setup task via command line.
+* 'job stream-file' and 'job list-files' commands are grouped under 'job file' group.
 
 0.1.4
 ++++++
