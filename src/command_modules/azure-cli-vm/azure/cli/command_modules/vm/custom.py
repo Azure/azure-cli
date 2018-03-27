@@ -858,6 +858,10 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
 def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
     vm = get_vm(cmd, resource_group_name, vm_name)
+    if vm.hardware_profile.vm_size == size:
+        logger.warning("VM is already %s", size)
+        return None
+
     vm.hardware_profile.vm_size = size  # pylint: disable=no-member
     return set_vm(cmd, vm, no_wait)
 
