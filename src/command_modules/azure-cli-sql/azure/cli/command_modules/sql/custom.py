@@ -23,6 +23,7 @@ from azure.mgmt.sql.models import (
 )
 from azure.mgmt.sql.models.sql_management_client_enums import (
     BlobAuditingPolicyState,
+    CapabilityGroup,
     CreateMode,
     DatabaseEdition,
     IdentityType,
@@ -431,6 +432,7 @@ def db_list_capabilities(
         location,
         edition=None,
         service_objective=None,
+        sku=None,
         dtu=None,
         vcores=None,
         show_details=None):
@@ -440,7 +442,7 @@ def db_list_capabilities(
         show_details = []
 
     # Get capabilities tree from server
-    capabilities = client.list_by_location(location)
+    capabilities = client.list_by_location(location, CapabilityGroup.supported_editions)
 
     # Get subtree related to databases
     editions = next(sv for sv in capabilities.supported_server_versions
@@ -457,13 +459,20 @@ def db_list_capabilities(
                 slo for slo in e.supported_service_level_objectives
                 if slo.name.lower() == service_objective.lower()]
 
+    # Filter by sku name
+    if sku:
+        for e in editions:
+            e.supported_service_level_objectives = [
+                slo for slo in e.supported_service_level_objectives
+                if slo.sku.name.lower() == sku.lower()]
+
     # Filter by dtu
     if dtu:
         for e in editions:
             e.supported_service_level_objectives = [
                 slo for slo in e.supported_service_level_objectives
                 if slo.performance_level.limit == dtu and
-                   slo.performance_level.unit == PerformanceLevelUnit.dtu.value]
+                slo.performance_level.unit == PerformanceLevelUnit.dtu.value]
 
     # Filter by vcores
     if vcores:
@@ -471,7 +480,7 @@ def db_list_capabilities(
             e.supported_service_level_objectives = [
                 slo for slo in e.supported_service_level_objectives
                 if slo.performance_level.limit == vcores and
-                   slo.performance_level.unit == PerformanceLevelUnit.vcores.value]
+                slo.performance_level.unit == PerformanceLevelUnit.vcores.value]
 
     # Remove editions with no service objectives (due to filters)
     editions = [e for e in editions if e.supported_service_level_objectives]
@@ -604,6 +613,7 @@ def db_update(
         max_size_bytes=None,
         sku=None,
         zone_redundant=None):
+
     # Verify edition
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
@@ -966,6 +976,7 @@ def elastic_pool_list_capabilities(
         client,
         location,
         edition=None,
+        sku=None,
         dtu=None,
         vcores=None,
         show_details=None):
@@ -977,7 +988,7 @@ def elastic_pool_list_capabilities(
         dtu = int(dtu)
 
     # Get capabilities tree from server
-    capabilities = client.list_by_location(location)
+    capabilities = client.list_by_location(location, CapabilityGroup.supported_elastic_pool_editions)
 
     # Get subtree related to elastic pools
     editions = next(sv for sv in capabilities.supported_server_versions
@@ -987,13 +998,20 @@ def elastic_pool_list_capabilities(
     if edition:
         editions = [e for e in editions if e.name.lower() == edition.lower()]
 
+    # Filter by sku name
+    if sku:
+        for e in editions:
+            e.supported_elastic_pool_performance_levels = [
+                pl for pl in e.supported_elastic_pool_performance_levels
+                if pl.sku.name.lower() == sku.lower()]
+
     # Filter by dtu
     if dtu:
         for e in editions:
             e.supported_elastic_pool_performance_levels = [
                 pl for pl in e.supported_elastic_pool_performance_levels
                 if pl.performance_level.limit == dtu and
-                   pl.performance_level.unit == PerformanceLevelUnit.dtu.value]
+                pl.performance_level.unit == PerformanceLevelUnit.dtu.value]
 
     # Filter by vcores
     if vcores:
@@ -1001,7 +1019,7 @@ def elastic_pool_list_capabilities(
             e.supported_elastic_pool_performance_levels = [
                 pl for pl in e.supported_elastic_pool_performance_levels
                 if pl.performance_level.limit == vcores and
-                   pl.performance_level.unit == PerformanceLevelUnit.vcores.value]
+                pl.performance_level.unit == PerformanceLevelUnit.vcores.value]
 
     # Remove editions with no service objectives (due to filters)
     editions = [e for e in editions if e.supported_elastic_pool_performance_levels]
