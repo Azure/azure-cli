@@ -257,7 +257,7 @@ def container_exec(cmd, resource_group_name, name, container_name=None, exec_com
     container_group_client = cf_container_groups(cmd.cli_ctx)
     container_group = container_group_client.get(resource_group_name, name)
 
-    if container_name is None and len(container_group.containers) == 1:
+    if container_name or container_name is None and len(container_group.containers) == 1:
         # If only one container in container group, use that container.
         if container_name is None:
             container_name = container_group.containers[0].name
