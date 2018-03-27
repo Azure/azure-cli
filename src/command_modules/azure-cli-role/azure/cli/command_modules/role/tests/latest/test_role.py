@@ -105,7 +105,7 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
 
         try:
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-                self.cmd('ad sp create-for-rbac --scopes {scope} {scope}/resourceGroups/{rg} --create-cert --keyvault {kv} --cert {cert} -n {sp}')
+                self.cmd('ad sp create-for-rbac --scopes {scope}/resourceGroups/{rg} --create-cert --keyvault {kv} --cert {cert} -n {sp}')
                 cer1 = self.cmd('keyvault certificate show --vault-name {kv} -n {cert}').get_output_in_json()['cer']
                 self.cmd('ad sp reset-credentials -n {sp} --create-cert --keyvault {kv} --cert {cert}')
                 cer2 = self.cmd('keyvault certificate show --vault-name {kv} -n {cert}').get_output_in_json()['cer']
@@ -134,7 +134,7 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
             self.kwargs['policy'] = self.cmd('keyvault certificate get-default-policy').get_output_in_json()
             self.cmd('keyvault certificate create --vault-name {kv} -n {cert} -p "{policy}" --validity 24')
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-                self.cmd('ad sp create-for-rbac --scopes {scope} {scope}/resourceGroups/{rg} --keyvault {kv} --cert {cert} -n {sp}')
+                self.cmd('ad sp create-for-rbac -n {sp} --keyvault {kv} --cert {cert} --scopes {scope}/resourceGroups/{rg}')
             self.cmd('ad sp reset-credentials -n {sp} --keyvault {kv} --cert {cert}')
         finally:
             self.cmd('ad app delete --id {sp}')
@@ -144,7 +144,7 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
             self.kwargs['sp'] = '{}2'.format(self.kwargs['sp'])
             self.cmd('keyvault certificate create --vault-name {kv} -n {cert} -p "{policy}" --validity 6')
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
-                self.cmd('ad sp create-for-rbac --scopes {scope} {scope}/resourceGroups/{rg} --keyvault {kv} --cert {cert} -n {sp}')
+                self.cmd('ad sp create-for-rbac --scopes {scope}/resourceGroups/{rg} --keyvault {kv} --cert {cert} -n {sp}')
             self.cmd('ad sp reset-credentials -n {sp} --keyvault {kv} --cert {cert}')
         finally:
             self.cmd('ad app delete --id {sp}')
@@ -191,7 +191,7 @@ class RoleCreateScenarioTest(RoleScenarioTest):
                 self.check('permissions[0].dataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/*'),
                 self.check('permissions[0].notDataActions[0]', 'Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write'),
             ])
-            time.sleep(60)
+            time.sleep(180)
             self.cmd('role definition list -n {role}',
                      checks=self.check('[0].roleName', '{role}'))
             self.cmd('role definition delete -n {role}',
