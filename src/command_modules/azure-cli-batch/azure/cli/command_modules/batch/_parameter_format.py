@@ -51,6 +51,7 @@ IGNORE_OPTIONS = {
     'client_request_id',
     'return_client_request_id',
     'max_results',
+    'additional_properties'
 }
 
 # Parameters that can be completely ignored.

@@ -85,6 +85,12 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.check('targetLowPriorityNodes', 3),
             self.check('id', 'xplatCreatedPool')])
 
+        self.batch_cmd('batch pool node-counts list').assert_with_checks([
+            self.check('length(@)', 1),
+            self.check('[0].poolId', 'xplatCreatedPool'),
+            self.check('[0].dedicated.total', 0),
+            self.check('[0].lowPriority.total', 0)])
+
         self.batch_cmd('batch pool resize --pool-id {p_id} --abort')
         if not is_playback:
             import time
@@ -211,7 +217,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test get job
         self.batch_cmd('batch job show --job-id {j_id}').assert_with_checks([
-            self.check('onAllTasksComplete', 'noAction'),
+            self.check('onAllTasksComplete', 'noaction'),
             self.check('constraints.maxTaskRetryCount', 5),
             self.check('jobManagerTask.id', 'JobManager'),
             self.check('jobManagerTask.environmentSettings[0].name', 'CLI_TEST_VAR'),
@@ -225,9 +231,9 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test patch job
         self.batch_cmd('batch job set --job-id {j_id} --job-max-wall-clock-time P3Y6M4DT12H30M5S '
-                       '--on-all-tasks-complete terminateJob')
+                       '--on-all-tasks-complete terminatejob')
         self.batch_cmd('batch job show --job-id {j_id}').assert_with_checks([
-            self.check('onAllTasksComplete', 'terminateJob'),
+            self.check('onAllTasksComplete', 'terminatejob'),
             self.check('constraints.maxTaskRetryCount', 0),
             self.check('constraints.maxWallClockTime', '1279 days, 12:30:05'),
             self.check('jobManagerTask.id', 'JobManager'),
@@ -238,11 +244,11 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
 
         # test filter/header argument
         self.batch_cmd('batch job reset --job-id {j_id} --pool-id {p_id} --on-all-tasks-complete '
-                       'terminateJob --if-unmodified-since {start}', expect_failure=True)
+                       'terminatejob --if-unmodified-since {start}', expect_failure=True)
 
         # test reset job
         self.batch_cmd('batch job reset --job-id {j_id} --pool-id {p_id}  '
-                       '--on-all-tasks-complete terminateJob ')
+                       '--on-all-tasks-complete terminatejob ')
         job = self.batch_cmd('batch job show --job-id {j_id}').assert_with_checks([
             self.check('constraints.maxTaskRetryCount', 0),
             self.check('metadata', None)])
