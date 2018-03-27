@@ -210,9 +210,6 @@ def acr_queue(cmd,
     resource_group_name = get_resource_group_name_by_registry_name(
         cmd.cli_ctx, registry_name, resource_group_name)
 
-    tar_file_path = os.path.join(tempfile.gettempdir(),
-                                 "source_archive_{}.tar.gz".format(hash(os.times())))
-
     client_registries = cf_acr_registries(cmd.cli_ctx)
 
     if docker_file_path is None:
@@ -220,6 +217,11 @@ def acr_queue(cmd,
 
     if source_location is None:
         source_location = "."
+
+    tar_file_path = os.path.join(tempfile.gettempdir(),
+                                 "source_archive_{}.tar.gz".format(hash(os.times())))
+
+    isLocalFile = True
 
     if os.path.exists(source_location):
         if os.path.isdir(source_location):
@@ -232,6 +234,7 @@ def acr_queue(cmd,
                 "'--source-location' should be a local directory path or remote url.")
     else:
         source_location = _check_remote_source_code(source_location)
+        isLocalFile = False
 
     is_push_enabled = True
     if image_name is None:
@@ -255,20 +258,29 @@ def acr_queue(cmd,
             name, value = name_value.split('=', 1)
             build_arguments.append(BuildArgument(name, value, True))
 
-    try:
-        build_request = QuickBuildRequest(
-            source_location=source_location,
-            platform=platform,
-            docker_file_path=docker_file_path,
-            image_name=image_name,
-            is_push_enabled=is_push_enabled,
-            timeout=timeout,
-            build_arguments=build_arguments)
+    build_request = QuickBuildRequest(
+        source_location=source_location,
+        platform=platform,
+        docker_file_path=docker_file_path,
+        image_name=image_name,
+        is_push_enabled=is_push_enabled,
+        timeout=timeout,
+        build_arguments=build_arguments)
 
-        result = LongRunningOperation(cmd.cli_ctx)(client_registries.queue_build(
-            build_request=build_request, resource_group_name=resource_group_name, registry_name=registry_name))
+    result = LongRunningOperation(cmd.cli_ctx)(client_registries.queue_build(
+        build_request=build_request, resource_group_name=resource_group_name, registry_name=registry_name))
 
-        size = os.path.getsize(tar_file_path)
+    if isLocalFile:
+        try:
+            size = os.path.getsize(tar_file_path)
+        except OSError:
+            raise CLIError(
+                "Get the size of file {0} failed.".format(tar_file_path))
+        finally:
+            if os.path.exists(tar_file_path):
+                logger.debug(
+                    "Starting to delete the archived source code from '{}'.".format(tar_file_path))
+                os.remove(tar_file_path)
         unit = ""
         for S in ['Bytes', 'KiB', 'MiB', 'GiB']:
             if size < 1024:
@@ -277,19 +289,14 @@ def acr_queue(cmd,
             size = size / 1024.0
         if unit == "":
             unit = "GiB"
-
         print("Sending build context ({0: .3f} {1}) to ACR Build as Id: {2}".format(
             size, unit, result.build_id))
+    else:
+        print("Sending build context to ACR Build as Id: {0}".format(
+            result.build_id))
 
-        if no_logs == False:
-            return acr_build_show_logs(cmd, client, registry_name, result.build_id, resource_group_name)
-    except Exception as err:
-        raise CLIError(err)
-    finally:
-        if os.path.exists(tar_file_path):
-            logger.debug(
-                "Starting to delete the archived source code from '{}'.".format(tar_file_path))
-            os.remove(tar_file_path)
+    if no_logs == False:
+        return acr_build_show_logs(cmd, client, registry_name, result.build_id, resource_group_name)
 
 
 def _check_local_docker_file(source_location, docker_file_path):
