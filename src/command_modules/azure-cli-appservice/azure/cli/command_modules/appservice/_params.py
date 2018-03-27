@@ -136,7 +136,7 @@ def load_arguments(self, _):
             c.argument('slot_swap', arg_group='VSTS CD Provider', help='Name of the slot to be used for deployment and later promote to production. If slot is not available, it will be created. Default: Not configured')
             c.argument('repository_type', help='repository type', arg_type=get_enum_type(['git', 'mercurial', 'vsts', 'github', 'externalgit', 'localgit']))
             c.argument('git_token', help='Git access token required for auto sync')
-        with self.argument_context(scope + ' assign-identity') as c:
+        with self.argument_context(scope + ' identity') as c:
             c.argument('disable_msi', action='store_true', help='disable the identity')
             c.argument('scope', help="The scope the managed identity has access to")
             c.argument('role', help="Role name or id the managed identity will be assigned")

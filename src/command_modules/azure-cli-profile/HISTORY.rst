@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.22
+++++++
+* (Breaking change): remove `--msi` & `--msi-port` which were tagged `deprecating` 2 releases ago
+
 2.0.21
 ++++++
 * az login: warn on using --identity-port/--msi-port as they become useless with imds support
