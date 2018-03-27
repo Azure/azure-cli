@@ -30,6 +30,7 @@ from ._util import (
 )
 from ._validators import (
     validate_create_db,
+    validate_create_elastic_pool,
     validate_subnet
 )
 
@@ -155,7 +156,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations.elastic_pools_operations#ElasticPoolsOperations.{}',
         client_factory=get_sql_elastic_pools_operations)
     with self.command_group('sql elastic-pool', elastic_pools_ops, client_factory=get_sql_elastic_pools_operations) as g:
-        g.custom_command('create', 'elastic_pool_create')
+        g.custom_command('create', 'elastic_pool_create', validator=validate_create_elastic_pool)
         g.command('delete', 'delete')
         g.command('show', 'get')
         g.command('list', 'list_by_server')

@@ -143,6 +143,10 @@ def _configure_db_create_params(
                   options_list=['--tier', '--edition'],
                   arg_group=sku_arg_group,
                   help='The edition for the new database.')
+    arg_ctx.extra('capacity',
+                  options_list=['--capacity'],
+                  arg_group=sku_arg_group,
+                  help='The number of DTUs or vcores (depending on the edition) for the new database.')
 
     # elastic_pool_id is processed in validate_create_db
     arg_ctx.argument('elastic_pool_id',
@@ -312,10 +316,10 @@ def load_arguments(self, _):
                    help='Sku name to search for. If unspecified, all skus are shown.')
         c.argument('dtu',
                    arg_group=search_arg_group,
-                   help='DTU size to search for. If unspecified, all DTU sizes are shown.')
+                   help='Number of DTUs to search for. If unspecified, all DTU sizes are shown.')
         c.argument('vcores',
                    arg_group=search_arg_group,
-                   help='Vcore size to search for. If unspecified, all vcore sizes are shown.')
+                   help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
 
     with self.argument_context('sql db update') as c:
         c.argument('sku',
@@ -591,6 +595,20 @@ def load_arguments(self, _):
         # it as param.
         c.ignore('location')
 
+        # sku & tier parameters are processed in validate_sku function
+        sku_arg_group = 'Performance Level'
+        c.extra('sku',
+                arg_group=sku_arg_group,
+                help='The name of the sku for the new elastic pool.')
+        c.extra('tier',
+                options_list=['--tier', '--edition'],
+                arg_group=sku_arg_group,
+                help='The edition for the new elastic pool.')
+        c.extra('capacity',
+                options_list=['--capacity', '--dtu'],
+                arg_group=sku_arg_group,
+                help='The number of DTUs or vcores (depending on the edition) for the new elastic pool.')
+
     with self.argument_context('sql elastic-pool list-editions') as c:
         # Note that `ElasticPoolCapabilitiesAdditionalDetails` intentionally match param names to
         # other commands, such as `sql elastic-pool create --db-max-dtu --db-min-dtu --max-size`.
@@ -611,10 +629,10 @@ def load_arguments(self, _):
                    help='Edition to search for. If unspecified, all editions are shown.')
         c.argument('dtu',
                    arg_group=search_arg_group,
-                   help='DTU size to search for. If unspecified, all DTU sizes are shown.')
+                   help='Number of DTUs to search for. If unspecified, all DTU sizes are shown.')
         c.argument('vcores',
                    arg_group=search_arg_group,
-                   help='Vcore size to search for. If unspecified, all vcore sizes are shown.')
+                   help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
 
     with self.argument_context('sql elastic-pool update') as c:
         c.argument('database_dtu_max', help='The maximum DTU any one database can consume.')
