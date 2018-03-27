@@ -391,9 +391,9 @@ helps['network application-gateway http-settings list'] = """
 
 helps['network application-gateway http-settings show'] = """
     type: command
-    short-summary: Get the details of a gateways HTTP settings.
+    short-summary: Get the details of a gateway's HTTP settings.
     examples:
-        - name: Get the details of a gateways HTTP settings.
+        - name: Get the details of a gateway's HTTP settings.
           text: az network application-gateway http-settings show -g MyResourceGroup --gateway-name MyAppGateway -n MyHttpSettings
 """
 
@@ -557,7 +557,7 @@ helps['network application-gateway rule update'] = """
     type: command
     short-summary: Update a rule.
     examples:
-        - name: Update a rule use a new Http Listener.
+        - name: Update a rule use a new Http listener.
           text: |
             az network application-gateway rule update -g MyResourceGroup --gateway-name MyAppGateway \\
                 -n MyRule --http-listener MyNewBackendListener
@@ -657,9 +657,9 @@ helps['network application-gateway ssl-policy set'] = """
 
 helps['network application-gateway ssl-policy show'] = """
     type: command
-    short-summary: Get the details of gateway SSL policy settings.
+    short-summary: Get the details of gateway's SSL policy settings.
     examples:
-        - name: Get the details of a gateway SSL policy settings.
+        - name: Get the details of a gateway's SSL policy settings.
           text: az network application-gateway ssl-policy show -g MyResourceGroup --gateway-name MyAppGateway
 """
 
@@ -735,7 +735,7 @@ helps['network application-gateway url-path-map update'] = """
     type: command
     short-summary: Update a URL path map.
     examples:
-        - name: Update a URL path map to use new default http settings.
+        - name: Update a URL path map to use new default HTTP settings.
           text: |
             az network application-gateway url-path-map update -g MyResourceGroup --gateway-name MyAppGateway \\
                 -n MyUrlPathMap --http-settings MyNewHttpSettings --default-http-settings MyNewHttpSettings
@@ -849,7 +849,7 @@ helps['network asg'] = """
     type: group
     short-summary: Manage application security groups (ASGs).
     long-summary: >
-        You can configure network security as a natural extension of an application structure, ASG allows
+        You can configure network security as a natural extension of an application's structure, ASG allows
         you to group virtual machines and define network security policies based on those groups. You can specify an
         application security group as the source and destination in a NSG security rule. For more information
         visit https://docs.microsoft.com/en-us/azure/virtual-network/create-network-security-group-preview
@@ -894,7 +894,8 @@ helps['network asg update'] = """
     type: command
     short-summary: Update an application security group.
     long-summary: >
-        This command can only be used to update the tags for an application security group. Name and resource group are immutable and cannot be updated.
+        This command can only be used to update the tags for an application security group.
+        Name and resource group are immutable and cannot be updated.
     examples:
         - name: Update an application security group with a modified tag value.
           text: az network asg update -g MyResourceGroup -n MyAsg --set tags.CostCenter=MyBusinessGroup
@@ -934,7 +935,9 @@ helps['network dns record-set a add-record'] = """
     short-summary: Add an A record.
     examples:
         - name: Add an A record.
-          text: az network dns record-set a add-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -a MyIpv4Address
+          text: |
+            az network dns record-set a add-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -a MyIpv4Address
 """
 
 helps['network dns record-set a create'] = """
@@ -965,10 +968,13 @@ helps['network dns record-set a remove-record'] = """
     type: command
     short-summary: Remove an A record from its record set.
     long-summary: >
-        By default, if the last record in a set is removed, the record set is deleted. To retain the empty record set, include --keep-empty-record-set.
+        By default, if the last record in a set is removed, the record set is deleted.
+        To retain the empty record set, include --keep-empty-record-set.
     examples:
         - name: Remove an A record from its record set.
-          text: az network dns record-set a remove-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -a MyIpv4Address
+          text: |
+            az network dns record-set a remove-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -a MyIpv4Address
 """
 
 helps['network dns record-set a show'] = """
@@ -984,7 +990,9 @@ helps['network dns record-set a update'] = """
     short-summary: Update an A record set.
     examples:
         - name: Update an A record set.
-          text: az network dns record-set a update -g MyResourceGroup -n MyRecordSet -z www.mysite.com --metadata owner=WebTeam
+          text: |
+            az network dns record-set a update -g MyResourceGroup -n MyRecordSet\\
+            -z www.mysite.com --metadata owner=WebTeam
 """
 # endregion
 
@@ -999,7 +1007,9 @@ helps['network dns record-set aaaa add-record'] = """
     short-summary: Add an AAAA record.
     examples:
         - name: Add an AAAA record.
-          text: az network dns record-set aaaa add-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -a MyIpv6Address
+          text: |
+            az network dns record-set aaaa add-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -a MyIpv6Address
 """
 
 helps['network dns record-set aaaa create'] = """
@@ -1030,10 +1040,13 @@ helps['network dns record-set aaaa remove-record'] = """
     type: command
     short-summary: Remove AAAA record from its record set.
     long-summary: >
-        By default, if the last record in a set is removed, the record set is deleted. To retain the empty record set, include --keep-empty-record-set.
+        By default, if the last record in a set is removed, the record set is deleted.
+        To retain the empty record set, include --keep-empty-record-set.
     examples:
         - name: Remove an AAAA record from its record set.
-          text: az network dns record-set aaaa remove-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -a MyIpv6Address
+          text: |
+            az network dns record-set aaaa remove-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -a MyIpv6Address
 """
 
 helps['network dns record-set aaaa show'] = """
@@ -1049,7 +1062,9 @@ helps['network dns record-set aaaa update'] = """
     short-summary: Update an AAAA record set.
     examples:
         - name: Update an AAAA record set.
-          text: az network dns record-set aaaa update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
+          text: |
+            az network dns record-set aaaa update -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet --metadata owner=WebTeam
 """
 # endregion
 
@@ -1064,7 +1079,9 @@ helps['network dns record-set caa add-record'] = """
     short-summary: Add a CAA record.
     examples:
         - name: Add a CAA record.
-          text: az network dns record-set caa add-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet --flags 0 --tag “issue” –-value “ca.contoso.com”
+          text: |
+            az network dns record-set caa add-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet --flags 0 --tag “issue” –-value “ca.contoso.com”
 """
 
 helps['network dns record-set caa create'] = """
@@ -1095,10 +1112,13 @@ helps['network dns record-set caa remove-record'] = """
     type: command
     short-summary: Remove a CAA record from its record set.
     long-summary: >
-        By default, if the last record in a set is removed, the record set is deleted. To retain the empty record set, include --keep-empty-record-set.
+        By default, if the last record in a set is removed, the record set is deleted.
+        To retain the empty record set, include --keep-empty-record-set.
     examples:
         - name: Remove a CAA record from its record set.
-          text: az network dns record-set caa remove-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet --flags 0 --tag “issue” –-value “ca.contoso.com”
+          text: |
+            az network dns record-set caa remove-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet --flags 0 --tag “issue” –-value “ca.contoso.com”
 """
 
 helps['network dns record-set caa show'] = """
@@ -1114,7 +1134,9 @@ helps['network dns record-set caa update'] = """
     short-summary: Update a CAA record set.
     examples:
         - name: Update a CAA record set.
-          text: az network dns record-set caa update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
+          text: |
+            az network dns record-set caa update -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet --metadata owner=WebTeam
 """
 # endregion
 
@@ -1134,9 +1156,9 @@ helps['network dns record-set cname create'] = """
 
 helps['network dns record-set cname delete'] = """
     type: command
-    short-summary: Delete the CNAME record set and its associated record.
+    short-summary: Delete a CNAME record set and its associated record.
     examples:
-        - name: Delete the CNAME record set and its associated record.
+        - name: Delete a CNAME record set and its associated record.
           text: az network dns record-set cname delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
 """
 
@@ -1150,20 +1172,25 @@ helps['network dns record-set cname list'] = """
 
 helps['network dns record-set cname remove-record'] = """
     type: command
-    short-summary: Remove the CNAME record from its record set.
+    short-summary: Remove a CNAME record from its record set.
     long-summary: >
-        By default, if the last record in a set is removed, the record set is deleted. To retain the empty record set, include --keep-empty-record-set.
+        By default, if the last record in a set is removed, the record set is deleted.
+        To retain the empty record set, include --keep-empty-record-set.
     examples:
-        - name: Remove the CNAME record from its record set.
-          text: az network dns record-set cname remove-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -c www.contoso.com
+        - name: Remove a CNAME record from its record set.
+          text: |
+            az network dns record-set cname remove-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -c www.contoso.com
 """
 
 helps['network dns record-set cname set-record'] = """
     type: command
-    short-summary: Set the value of the CNAME record.
+    short-summary: Set the value of a CNAME record.
     examples:
-        - name: Set the value of the CNAME record.
-          text: az network dns record-set cname set-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -c www.contoso.com
+        - name: Set the value of a CNAME record.
+          text: |
+            az network dns record-set cname set-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -c www.contoso.com
 """
 
 helps['network dns record-set cname show'] = """
@@ -1183,10 +1210,12 @@ helps['network dns record-set mx'] = """
 
 helps['network dns record-set mx add-record'] = """
     type: command
-    short-summary: Add a MX record.
+    short-summary: Add an MX record.
     examples:
-        - name: Add a MX record.
-          text: az network dns record-set mx add-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -e mail.mysite.com -p 10
+        - name: Add an MX record.
+          text: |
+            az network dns record-set mx add-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -e mail.mysite.com -p 10
 """
 
 helps['network dns record-set mx create'] = """
@@ -1217,10 +1246,13 @@ helps['network dns record-set mx remove-record'] = """
     type: command
     short-summary: Remove an MX record from its record set.
     long-summary: >
-        By default, if the last record in a set is removed, the record set is deleted. To retain the empty record set, include --keep-empty-record-set.
+        By default, if the last record in a set is removed, the record set is deleted.
+        To retain the empty record set, include --keep-empty-record-set.
     examples:
         - name: Remove an MX record from its record set.
-          text: az network dns record-set mx remove-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -e mail.mysite.com -p 10
+          text: |
+            az network dns record-set mx remove-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -e mail.mysite.com -p 10
 """
 
 helps['network dns record-set mx show'] = """
@@ -1236,7 +1268,9 @@ helps['network dns record-set mx update'] = """
     short-summary: Update an MX record set.
     examples:
         - name: Update an MX record set.
-          text: az network dns record-set mx update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
+          text: |
+            az network dns record-set mx update -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet --metadata owner=WebTeam
 """
 # endregion
 
@@ -1251,7 +1285,9 @@ helps['network dns record-set ns add-record'] = """
     short-summary: Add an NS record.
     examples:
         - name: Add an NS record.
-          text: az network dns record-set ns add-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -d ns.mysite.com
+          text: |
+            az network dns record-set ns add-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -d ns.mysite.com
 """
 
 helps['network dns record-set ns create'] = """
@@ -1282,10 +1318,13 @@ helps['network dns record-set ns remove-record'] = """
     type: command
     short-summary: Remove an NS record from its record set.
     long-summary: >
-        By default, if the last record in a set is removed, the record set is deleted. To retain the empty record set, include --keep-empty-record-set.
+        By default, if the last record in a set is removed, the record set is deleted.
+        To retain the empty record set, include --keep-empty-record-set.
     examples:
         - name: Remove an NS record from its record set.
-          text: az network dns record-set ns remove-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -d ns.mysite.com
+          text: |
+            az network dns record-set ns remove-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -d ns.mysite.com
 """
 
 helps['network dns record-set ns show'] = """
@@ -1301,7 +1340,9 @@ helps['network dns record-set ns update'] = """
     short-summary: Update an NS record set.
     examples:
         - name: Update an NS record set.
-          text: az network dns record-set ns update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
+          text: |
+            az network dns record-set ns update -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet --metadata owner=WebTeam
 """
 # endregion
 
@@ -1316,7 +1357,9 @@ helps['network dns record-set ptr add-record'] = """
     short-summary: Add a PTR record.
     examples:
         - name: Add a PTR record.
-          text: az network dns record-set ptr add-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -d another.site.com
+          text: |
+            az network dns record-set ptr add-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -d another.site.com
 """
 
 helps['network dns record-set ptr create'] = """
@@ -1347,10 +1390,13 @@ helps['network dns record-set ptr remove-record'] = """
     type: command
     short-summary: Remove a PTR record from its record set.
     long-summary: >
-        By default, if the last record in a set is removed, the record set is deleted. To retain the empty record set, include --keep-empty-record-set.
+        By default, if the last record in a set is removed, the record set is deleted.
+        To retain the empty record set, include --keep-empty-record-set.
     examples:
         - name: Remove a PTR record from its record set.
-          text: az network dns record-set ptr remove-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -d another.site.com
+          text: |
+            az network dns record-set ptr remove-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -d another.site.com
 """
 
 helps['network dns record-set ptr show'] = """
@@ -1366,7 +1412,9 @@ helps['network dns record-set ptr update'] = """
     short-summary: Update a PTR record set.
     examples:
         - name: Update a PTR record set.
-          text: az network dns record-set ptr update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
+          text: |
+            az network dns record-set ptr update -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet --metadata owner=WebTeam
 """
 # endregion
 
@@ -1378,10 +1426,12 @@ helps['network dns record-set srv'] = """
 
 helps['network dns record-set srv add-record'] = """
     type: command
-    short-summary: Add a SRV record.
+    short-summary: Add an SRV record.
     examples:
-        - name: Add a SRV record.
-          text: az network dns record-set srv add-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -d another.site.com
+        - name: Add an SRV record.
+          text: |
+            az network dns record-set srv add-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -d another.site.com
 """
 
 helps['network dns record-set srv create'] = """
@@ -1389,7 +1439,9 @@ helps['network dns record-set srv create'] = """
     short-summary: Create an empty SRV record set.
     examples:
         - name: Create an empty SRV record set.
-          text: az network dns record-set srv create -g MyResourceGroup -z www.mysite.com -n MyRecordSet -t webserver.mysite.com -r 8081 -p 10 -w 10
+          text: |
+            az network dns record-set srv create -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -t webserver.mysite.com -r 8081 -p 10 -w 10
 """
 
 helps['network dns record-set srv delete'] = """
@@ -1412,10 +1464,13 @@ helps['network dns record-set srv remove-record'] = """
     type: command
     short-summary: Remove an SRV record from its record set.
     long-summary: >
-        By default, if the last record in a set is removed, the record set is deleted. To retain the empty record set, include --keep-empty-record-set.
+        By default, if the last record in a set is removed, the record set is deleted.
+        To retain the empty record set, include --keep-empty-record-set.
     examples:
         - name: Remove an SRV record from its record set.
-          text: az network dns record-set srv remove-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -t webserver.mysite.com -r 8081 -p 10 -w 10
+          text: |
+            az network dns record-set srv remove-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -t webserver.mysite.com -r 8081 -p 10 -w 10
 """
 
 helps['network dns record-set srv show'] = """
@@ -1431,7 +1486,9 @@ helps['network dns record-set srv update'] = """
     short-summary: Update an SRV record set.
     examples:
         - name: Update an SRV record set.
-          text: az network dns record-set srv update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
+          text: |
+            az network dns record-set srv update -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet --metadata owner=WebTeam
 """
 # endregion
 
@@ -1443,18 +1500,20 @@ helps['network dns record-set soa'] = """
 
 helps['network dns record-set soa show'] = """
     type: command
-    short-summary: Get the details of a SOA record.
+    short-summary: Get the details of an SOA record.
     examples:
-        - name: Get the details of a SOA record.
+        - name: Get the details of an SOA record.
           text: az network dns record-set soa show -g MyResourceGroup -z www.mysite.com
 """
 
 helps['network dns record-set soa update'] = """
     type: command
-    short-summary: Update properties of a SOA record.
+    short-summary: Update properties of an SOA record.
     examples:
-        - name: Update properties of a SOA record.
-          text: az network dns record-set soa update -g MyResourceGroup -z www.mysite.com -e myhostmaster.mysite.com
+        - name: Update properties of an SOA record.
+          text: |
+            az network dns record-set soa update -g MyResourceGroup -z www.mysite.com\\
+            -e myhostmaster.mysite.com
 """
 # endregion
 
@@ -1469,7 +1528,9 @@ helps['network dns record-set txt add-record'] = """
     short-summary: Add a TXT record.
     examples:
         - name: Add a TXT record.
-          text: az network dns record-set txt add-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -v Owner=WebTeam
+          text: |
+            az network dns record-set txt add-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -v Owner=WebTeam
 """
 
 helps['network dns record-set txt create'] = """
@@ -1500,10 +1561,13 @@ helps['network dns record-set txt remove-record'] = """
     type: command
     short-summary: Remove a TXT record from its record set.
     long-summary: >
-        By default, if the last record in a set is removed, the record set is deleted. To retain the empty record set, include --keep-empty-record-set.
+        By default, if the last record in a set is removed, the record set is deleted.
+        To retain the empty record set, include --keep-empty-record-set.
     examples:
         - name: Remove a TXT record from its record set.
-          text: az network dns record-set txt remove-record -g MyResourceGroup -z www.mysite.com -n MyRecordSet -v Owner=WebTeam
+          text: |
+            az network dns record-set txt remove-record -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet -v Owner=WebTeam
 """
 
 helps['network dns record-set txt show'] = """
@@ -1519,7 +1583,9 @@ helps['network dns record-set txt update'] = """
     short-summary: Update a TXT record set.
     examples:
         - name: Update a TXT record set.
-          text: az network dns record-set txt update -g MyResourceGroup -z www.mysite.com -n MyRecordSet --metadata owner=WebTeam
+          text: |
+            az network dns record-set txt update -g MyResourceGroup -z www.mysite.com\\
+            -n MyRecordSet --metadata owner=WebTeam
 """
 # endregion
 
@@ -1841,7 +1907,9 @@ helps['network lb create'] = """
         - name: Create a basic zone flavored internal load balancer, through provisioning a zonal public ip.
           text: >
             az network lb create -g MyResourceGroup -n MyLb --sku Basic --public-ip-zone 2
-        - name: Create a standard zone flavored public-facing load balancer, through provisioning a zonal frontend ip configuration and Vnet.
+        - name: > 
+            Create a standard zone flavored public-facing load balancer, through provisioning a
+            zonal frontend ip configuration and Vnet.
           text: >
             az network lb create -g MyResourceGroup -n MyLb --sku Standard --frontend-ip-zone 1 -vnet-name MyVnet --subnet MySubnet
 """
@@ -1935,7 +2003,7 @@ helps['network lb frontend-ip create'] = """
         - name: Create a frontend ip address for an internal load balancer.
           text: |
             az network lb frontend-ip create -g MyResourceGroup -n MyFrontendIp --lb-name MyLb \\
-            --private-ip-address 10.10.10.100 --subnet-name MySubnet --subnet-vnet-name MyVnet
+                --private-ip-address 10.10.10.100 --subnet-name MySubnet --subnet-vnet-name MyVnet
 """
 
 helps['network lb frontend-ip delete'] = """
@@ -2143,19 +2211,22 @@ helps['network lb rule create'] = """
     short-summary: Create a load balancing rule.
     examples:
         - name: >
-            Create a load balancing rule that assigns a front-facing IP configuration and port to an address pool and port.
+            Create a load balancing rule that assigns a front-facing IP configuration and port to
+            an address pool and port.
           text: |
             az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol Tcp \\
                 --frontend-ip-name MyFrontEndIp --frontend-port 80 \\
                 --backend-pool-name MyAddressPool --backend-port 80
         - name: >
-            Create a load balancing rule that assigns a front-facing IP configuration and port to an address pool and port with the floating ip feature.
+            Create a load balancing rule that assigns a front-facing IP configuration and port to
+            an address pool and port with the floating ip feature.
           text: |
             az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol Tcp \\
                 --frontend-ip-name MyFrontEndIp --backend-pool-name MyAddressPool --backend-port 80 \\
                 --floating-ip true
         - name: >
-            Create an HA ports load balancing rule that assigns a frontend IP and port to use all available backend IPs in a pool on the same port.
+            Create an HA ports load balancing rule that assigns a frontend IP and port to use all
+            available backend IPs in a pool on the same port.
           text: |
             az network lb rule create -g MyResourceGroup --lb-name MyLb -n MyHAPortsRule \\
                 --protocol All --frontend-port 0 --backend-port 0 --frontend-ip-name MyFrontendIp \\
@@ -2531,7 +2602,7 @@ helps['network nsg rule create'] = """
           text: |
             az network nsg rule create -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --priority 4096 \\
                 --source-address-prefixes 208.130.28/24 --source-port-ranges 80 \\
-                --destination-address-prefixes `*` --destination-port-ranges 80 8080 --access Deny \\
+                --destination-address-prefixes '*' --destination-port-ranges 80 8080 --access Deny \\
                 --protocol Tcp --description "Deny from specific IP address ranges on 80 and 8080."
         - name: Create a security rule using service tags. For more details visit https://aka.ms/servicetags
           text: |
@@ -2840,7 +2911,9 @@ helps['network route-filter rule list-service-communities'] = """
         - name: Gets all the available BGP service communities.
           text: az network route-filter rule list-service-communities -o table
         - name: Get the community value for Exchange.
-          text: az network route-filter rule list-service-communities --query '[].bgpCommunities[?communityName==`Exchange`].[communityValue][][]' -o tsv
+          text: |
+            az network route-filter rule list-service-communities\\
+            --query '[].bgpCommunities[?communityName==`Exchange`].[communityValue][][]' -o tsv
 """
 
 helps['network route-filter rule show'] = """
@@ -3131,10 +3204,13 @@ helps['network vnet peering create'] = """
     type: command
     short-summary: Create a virtual network peering connection.
     long-summary: >
-        To successfully peer two virtual networks this command must be called twice with the values for --vnet-name and --remote-vnet-id reversed.
+        To successfully peer two virtual networks this command must be called twice with
+        the values for --vnet-name and --remote-vnet-id reversed.
     examples:
         - name: Create a peering connection between two virtual networks.
-          text: az network vnet peering create -g MyResourceGroup -n MyVnet1ToMyVnet2 --vnet-name MyVnet1 --remote-vnet-id $vnet2Id --allow-vnet-access
+          text: |
+            az network vnet peering create -g MyResourceGroup -n MyVnet1ToMyVnet2 --vnet-name MyVnet1\\
+            --remote-vnet-id MyVnet2Id --allow-vnet-access
 """
 
 helps['network vnet peering delete'] = """
@@ -3196,13 +3272,13 @@ helps['network vpn-connection'] = """
 helps['network vpn-connection create'] = """
     type: command
     short-summary: Create a VPN connection.
+    long-summary: The VPN Gateway and Local Network Gateway must be provisioned before creating the connection between them.
     examples:
         - name: >
             Create a site-to-site connection between an Azure virtual network and an on-premises local network gateway.
-            NOTE: The VPN Gateway and Local Network Gateway must be provisioned before creating the connection between them.
           text: |
             az network vpn-connection create -g MyResourceGroup -n MyConnection --vnet-gateway1 MyVnetGateway \\
-            -local-gateway2 MyLocalGateway --shared-key Abc123
+                -local-gateway2 MyLocalGateway --shared-key Abc123
 """
 
 helps['network vpn-connection delete'] = """
@@ -3255,8 +3331,8 @@ helps['network vpn-connection ipsec-policy add'] = """
         - name: Add specified IPsec policies to a connection instead of relying on defaults.
           text: |
             az network vpn-connection ipsec-policy add -g MyResourceGroup –-connection-name MyConnection \\
-            -–dh-group DHGroup14 -–ike-encryption AES256 --ike-integrity SHA384 --ipsec-encryption DES3 \\
-            --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 600 --sa-max-size 1024
+                -–dh-group DHGroup14 -–ike-encryption AES256 --ike-integrity SHA384 --ipsec-encryption DES3 \\
+                --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 600 --sa-max-size 1024
 """
 
 helps['network vpn-connection ipsec-policy clear'] = """
