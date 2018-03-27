@@ -436,7 +436,7 @@ def _get_scale_settings(initial_count, min_count, max_count):
         return None
     if sum([1 if v is not None else 0 for v in (min_count, max_count)]) == 1:
         raise CLIError('You need to either provide both min and max node counts or not provide any of them')
-    if min_count > max_count:
+    if min_count is not None and max_count is not None and min_count > max_count:
         raise CLIError('Maximum nodes count must be greater or equal to minimum nodes count')
     if min_count == max_count:
         if min_count is None or initial_count == min_count:
