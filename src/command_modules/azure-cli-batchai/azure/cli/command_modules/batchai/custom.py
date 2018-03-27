@@ -5,6 +5,9 @@
 
 from __future__ import print_function
 
+import string
+from random import shuffle
+
 import collections
 import copy
 import datetime
@@ -41,6 +44,13 @@ MSG_CONFIGURE_STORAGE_ACCOUNT = 'Please configure Azure Storage account name via
 MSG_CONFIGURE_STORAGE_KEY = 'Please configure Azure Storage account key via AZURE_BATCHAI_STORAGE_KEY or ' \
                             'provide storage_key value in batchai section of your az configuration file.'
 STANDARD_OUTPUT_DIRECTORY_ID = 'stdouterr'
+
+# Parameters of auto storage
+AUTO_STORAGE_CONTAINER_NAME = 'batchaicontainer'
+AUTO_STORAGE_SHARE_NAME = 'batchaishare'
+AUTO_STORAGE_ACCOUNT_PREFIX = 'bai'
+AUTO_STORAGE_CONTAINER_PATH = 'autobfs'
+AUTO_STORAGE_SHARE_PATH = 'autoafs'
 
 # Placeholders which customer may use in his config file for cluster creation.
 AZURE_BATCHAI_STORAGE_KEY_PLACEHOLDER = '<{0}>'.format(AZURE_BATCHAI_STORAGE_KEY)
@@ -484,13 +494,88 @@ def _update_nodes_information(params, image, custom_image, vm_size, vm_priority,
     return result
 
 
+def _configure_auto_storage(cli_ctx, resource_group):
+    """Configures auto storage account for the cluster
+
+    :param str resource_group: name of the resource group.
+    :return (str, str): a tuple with auto storage account name and key.
+    """
+    from azure.storage.file import FileService
+    from azure.storage.blob import BlockBlobService
+    location = _get_resource_group_location(cli_ctx, resource_group)
+    storage_client = _get_storage_management_client(cli_ctx)  # type: StorageManagementClient
+    account = None
+    for a in storage_client.storage_accounts.list_by_resource_group(resource_group):
+        if a.name.startswith(AUTO_STORAGE_ACCOUNT_PREFIX):
+            account = a.name
+            logger.warning('Using existing %s storage account as an auto-storage account', account)
+            break
+    if account is None:
+        account = _create_auto_storage_account(storage_client, resource_group, location)
+        logger.warning('Created auto storage account %s', account)
+    key = _get_storage_account_key(cli_ctx, account, None)
+    file_service = FileService(account, key)
+    file_service.create_share(AUTO_STORAGE_SHARE_NAME, fail_on_exist=False)
+    blob_service = BlockBlobService(account, key)
+    blob_service.create_container(AUTO_STORAGE_CONTAINER_NAME, fail_on_exist=False)
+    return account, key
+
+
+def _generate_auto_storage_account_name():
+    """Generates unique name for auto storage account"""
+    characters = list(string.ascii_lowercase)
+    shuffle(characters)
+    return AUTO_STORAGE_ACCOUNT_PREFIX + ''.join(characters[:12])
+
+
+def _create_auto_storage_account(storage_client, resource_group, location):
+    """Creates new auto storage account in the given resource group and location
+
+    :param StorageManagementClient storage_client: storage client.
+    :param str resource_group: name of the resource group.
+    :param str location: location.
+    :return str: name of the created storage account.
+    """
+    from azure.mgmt.storage.models import Kind, Sku, SkuName
+    name = _generate_auto_storage_account_name()
+    check = storage_client.storage_accounts.check_name_availability(name)
+    while not check.name_available:
+        name = _generate_auto_storage_account_name()
+        check = storage_client.storage_accounts.check_name_availability(name).name_available
+    storage_client.storage_accounts.create(resource_group, name, {
+        'sku': Sku(SkuName.standard_lrs),
+        'kind': Kind.storage,
+        'location': location}).result()
+    return name
+
+
+def _add_setup_task(cmd_line, output, cluster):
+    """Adds a setup task with given command line and output destination to the cluster.
+
+    :param str cmd_line: node setup command line.
+    :param str output: output destination.
+    :param models.ClusterCreateParameters cluster: cluster creation parameters.
+    """
+    if cmd_line is None:
+        return cluster
+    if output is None:
+        raise CLIError('--setup-task requires providing of --setup-task-output')
+    cluster = copy.deepcopy(cluster)
+    cluster.node_setup = cluster.node_setup or models.NodeSetup()
+    cluster.node_setup.setup_task = models.SetupTask(
+        command_line=cmd_line,
+        std_out_err_path_prefix=output,
+        run_elevated=False)
+    return cluster
+
+
 def create_cluster(cmd, client,  # pylint: disable=too-many-locals
                    resource_group, cluster_name, json_file=None, location=None, user_name=None,
-                   ssh_key=None, password=None, image=None, custom_image=None,
+                   ssh_key=None, password=None, image=None, custom_image=None, auto_storage_rg=None,
                    vm_size=None, vm_priority='dedicated', target=None, min_nodes=None, max_nodes=None, subnet=None,
                    nfs_name=None, nfs_resource_group=None, nfs_mount_path='nfs', azure_file_share=None,
                    afs_mount_path='afs', container_name=None, container_mount_path='bfs', account_name=None,
-                   account_key=None):
+                   account_key=None, setup_task=None, setup_task_output=None):
     _ensure_resource_not_exist(client.clusters, resource_group, cluster_name)
     _verify_subnet(client, subnet, nfs_name, nfs_resource_group or resource_group)
     if json_file:
@@ -518,13 +603,22 @@ def create_cluster(cmd, client,  # pylint: disable=too-many-locals
     if container_name:
         mount_volumes = _add_azure_container_to_mount_volumes(cmd.cli_ctx, mount_volumes, container_name,
                                                               container_mount_path, account_name, account_key)
+    if auto_storage_rg is not None:
+        auto_storage_account, auto_storage_key = _configure_auto_storage(cmd.cli_ctx, auto_storage_rg)
+        mount_volumes = _add_azure_file_share_to_mount_volumes(
+            cmd.cli_ctx, mount_volumes, AUTO_STORAGE_SHARE_NAME, AUTO_STORAGE_SHARE_PATH,
+            auto_storage_account, auto_storage_key)
+        mount_volumes = _add_azure_container_to_mount_volumes(
+            cmd.cli_ctx, mount_volumes, AUTO_STORAGE_CONTAINER_NAME, AUTO_STORAGE_CONTAINER_PATH,
+            auto_storage_account, auto_storage_key)
     if mount_volumes:
         if params.node_setup is None:
             params.node_setup = models.NodeSetup()
         params.node_setup.mount_volumes = mount_volumes
     if subnet:
         params.subnet = models.ResourceId(id=subnet)
-
+    if setup_task:
+        params = _add_setup_task(setup_task, setup_task_output, params)
     return client.clusters.create(resource_group, cluster_name, params)
 
 

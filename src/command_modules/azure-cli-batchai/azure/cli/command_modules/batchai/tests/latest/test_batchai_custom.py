@@ -18,7 +18,9 @@ from azure.cli.command_modules.batchai.custom import (
     _is_on_mount_point,
     _verify_subnet,
     _get_image_reference,
-    _list_node_setup_files_for_cluster)
+    _list_node_setup_files_for_cluster,
+    _generate_auto_storage_account_name,
+    _add_setup_task)
 from azure.cli.core.util import CLIError
 from azure.cli.testsdk import TestCli
 from azure.mgmt.batchai.models import (
@@ -879,3 +881,52 @@ class TestBatchAICustom(unittest.TestCase):
             cli_ctx,
             AzureBlobFileSystemReference(relative_mount_path='bfs'),
             os.path.join('path/segment/', '.'), 60)
+
+    def test_generate_auto_storage_account_name(self):
+        names = {_generate_auto_storage_account_name() for i in range(100)}
+        # at least 90% of names must be unique
+        self.assertTrue(len(names) > 90)
+
+    def test_setup_task_no_output(self):
+        with self.assertRaisesRegexp(CLIError, '--setup-task requires providing of --setup-task-output'):
+            _add_setup_task('echo hi', None, ClusterCreateParameters())
+
+    def test_setup_task_added_to_cluster_without_node_setup(self):
+        actual = _add_setup_task('echo hi', '/tmp', ClusterCreateParameters())
+        self.assertEqual(actual,
+                         ClusterCreateParameters(
+                             node_setup=NodeSetup(
+                                 setup_task=SetupTask(
+                                     command_line='echo hi',
+                                     std_out_err_path_prefix='/tmp',
+                                     run_elevated=False
+                                 ))))
+
+    def test_setup_task_added_to_cluster_without_setup_task(self):
+        actual = _add_setup_task('echo hi', '/tmp', ClusterCreateParameters(node_setup=NodeSetup()))
+        self.assertEqual(actual,
+                         ClusterCreateParameters(
+                             node_setup=NodeSetup(
+                                 setup_task=SetupTask(
+                                     command_line='echo hi',
+                                     std_out_err_path_prefix='/tmp',
+                                     run_elevated=False
+                                 ))))
+
+    def test_setup_task_overwrite(self):
+        # Should overwrite setup task but keep other parameters of node setup (here we use mount_volumes to check it)
+        actual = _add_setup_task('echo hi', '/tmp',
+                                 ClusterCreateParameters(
+                                     node_setup=NodeSetup(
+                                         setup_task=SetupTask(command_line='different'),
+                                         mount_volumes=[]
+                                     )))
+        self.assertEqual(actual,
+                         ClusterCreateParameters(
+                             node_setup=NodeSetup(
+                                 setup_task=SetupTask(
+                                     command_line='echo hi',
+                                     std_out_err_path_prefix='/tmp',
+                                     run_elevated=False
+                                 ),
+                                 mount_volumes=[])))

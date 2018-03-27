@@ -30,6 +30,8 @@ Release History
   belongs to the current subscription).
 * 'job stream-file' now auto-completes when the job is completed (succeeded, failed, terminated or deleted).
 * Improved '-o table' support for show operations.
+* Added auto storage option for cluster creation.
+* Added ability to provide node setup task via command line.
 
 0.1.4
 ++++++

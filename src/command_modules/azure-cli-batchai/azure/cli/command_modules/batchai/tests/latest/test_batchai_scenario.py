@@ -263,6 +263,44 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
                      checks=[JMESPathCheck('nodeStateCounts.idleNodeCount', 1)])
 
     @ResourceGroupPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
+    @StorageAccountPreparer(name_prefix='bai', location=LOCATION_FOR_SCENARIO_TESTS)
+    def test_batchai_cluster_with_auto_storage(self, resource_group, storage_account):
+        # Test creation of a cluster with auto-storage account.
+        self.cmd(
+            'az batchai cluster create -n cluster -g {0} -l {1} '
+            '-i UbuntuLTS --vm-size STANDARD_D1 -t 0 -u DemoUser -k {2} '
+            '--auto-storage {0}'.format(
+                resource_group, LOCATION_FOR_SCENARIO_TESTS, _data_file('key.txt')),
+            checks=[
+                JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].accountName', storage_account),
+                JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].azureFileUrl',
+                              'https://{0}.file.core.windows.net/batchaishare'.format(storage_account)),
+                JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].relativeMountPath', 'autoafs'),
+                JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].accountName', storage_account),
+                JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].containerName', 'batchaicontainer'),
+                JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].relativeMountPath', 'autobfs')])
+
+    @ResourceGroupPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
+    @StorageAccountPreparer(name_prefix='bai', location=LOCATION_FOR_SCENARIO_TESTS)
+    def test_batchai_cluster_with_setup_command(self, resource_group, storage_account):
+        # Test creation of a cluster with auto-storage account and setup task.
+        self.cmd(
+            'az batchai cluster create -n cluster -g {0} -l {1} -s STANDARD_D1 -t 0 -u DemoUser -k {2} '
+            '--auto-storage {0} --setup-task "echo hi" --setup-task-output "$AZ_BATCHAI_MOUNT_ROOT/autoafs"'.format(
+                resource_group, LOCATION_FOR_SCENARIO_TESTS, _data_file('key.txt')),
+            checks=[
+                JMESPathCheck('nodeSetup.setupTask.commandLine', 'echo hi'),
+                JMESPathCheck('nodeSetup.setupTask.stdOutErrPathPrefix', '$AZ_BATCHAI_MOUNT_ROOT/autoafs'),
+                JMESPathCheck('nodeSetup.setupTask.runElevated', False),
+                JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].accountName', storage_account),
+                JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].azureFileUrl',
+                              'https://{0}.file.core.windows.net/batchaishare'.format(storage_account)),
+                JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].relativeMountPath', 'autoafs'),
+                JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].accountName', storage_account),
+                JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].containerName', 'batchaicontainer'),
+                JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].relativeMountPath', 'autobfs')])
+
+    @ResourceGroupPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
     @StorageAccountPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
     def test_batchai_job_level_mounting_scenario(self, resource_group, storage_account):
         # Typical usage scenario for regular (not auto scale) cluster.

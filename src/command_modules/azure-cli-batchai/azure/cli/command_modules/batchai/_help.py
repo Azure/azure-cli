@@ -36,6 +36,18 @@ helps['batchai cluster create'] = """
                 --min 0 --target 1 --max 10 \\
                 --nfs MyNfsToMount --afs MyAzureFileShareToMount --bfs MyBlobContainerNameToMount \\
                 -u $USER -k ~/.ssh/id_rsa.pub -p ImpossibleToGuessPassword
+        - name: Create a single node GPU cluster with default image, given ssh key and with auto-storage account.
+          text: |
+            az batchai cluster create -n MyCluster -g MyResourceGroup -a MyResourceGroup \\
+                -s Standard_NC6 -t 1 -k id_rsa.pub
+        - name:
+            Create a cluster with a setup command which installs unzip on every node, the command output will be
+            stored on auto storage account Azure File Share.
+          text: |
+            az batchai cluster create -n MyCluster -g MyResourceGroup -a MyResourceGroup \\
+                -s Standard_NC6 -t 1 -k id_rsa.pub \\
+                --setup-task 'sudo apt update; sudo apt install unzip' \\
+                --setup-task-output '$AZ_BATCHAI_MOUNT_ROOT/autoafs'
 
 """
 

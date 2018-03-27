@@ -33,6 +33,10 @@ def load_arguments(self, _):
     with self.argument_context('batchai cluster create') as c:
         c.argument('json_file', options_list=['--config', '-c'], help='A path to a json file containing cluster create parameters (json representation of azure.mgmt.batchai.models.ClusterCreateParameters).', arg_group='Advanced')
 
+    with self.argument_context('batchai cluster create') as c:
+        c.argument('setup_task', help='A command line which should be executed on each compute node when it\'s got allocated or rebooted. The task is executed under a user account added into sudoers list (so, it can use sudo). Note, if this parameter specified, it will overwrite setup task given in the configuration file.', arg_group='Setup Task')
+        c.argument('setup_task_output', help='Location of the folder where setup-task\'s logs will be stored. Required if setup-task argument provided. Note, Batch AI will create create several helper folders under this location. The created folders are reported as stdOutErrPathSuffix by get cluster command.', arg_group='Setup Task')
+
     with self.argument_context('batchai cluster create', arg_group='Virtual Network') as c:
         c.argument('subnet', options_list=['--subnet'], help='Resource id of a virtual network subnet to put the cluster in.')
 
@@ -40,6 +44,9 @@ def load_arguments(self, _):
         c.argument('user_name', options_list=['--user-name', '-u'], help='Name of the admin user to be created on every compute node. If the value is not provided and no user configuration is provided in the config file, current user\'s name will be used.')
         c.argument('ssh_key', options_list=['--ssh-key', '-k'], help='SSH public key value or path. If the value is not provided and no ssh public key or password is configured in the config file the default public ssh key (~/.ssh/id_rsa.pub) of the current user will be used (if available).', completer=FilesCompleter())
         c.argument('password', options_list=['--password', '-p'], help='Password.')
+
+    with self.argument_context('batchai cluster create', arg_group='Auto Storage') as c:
+        c.argument('auto_storage_rg', options_list=['--auto-storage', '-a'], help='Name of resource group to create a storage account with Azure File Share "batchaishare" and Azure Blob Container "batchaicontainer" which will be mounted to each cluster node at $AZ_BATCHAI_MOUNT_ROOT/autoafs and $AZ_BATCHAI_MOUNT_ROOT/autobfs. If provided resource group already has a storage account with a name starting with "bai" prefix, this storage account will be used.')
 
     with self.argument_context('batchai cluster create', arg_group='Nodes') as c:
         c.argument('image', options_list=['--image', '-i'], help='Operation system image for cluster nodes. The value may contain an alias ({0}) or specify image details in the form "publisher:offer:sku:version". If image configuration is not provided via command line or configuration file, Batch AI will choose default OS image'.format(', '.join(custom.SUPPORTED_IMAGE_ALIASES.keys())))
