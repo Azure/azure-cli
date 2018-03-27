@@ -34,8 +34,8 @@ def load_arguments(self, _):
         c.argument('json_file', options_list=['--config', '-c'], help='A path to a json file containing cluster create parameters (json representation of azure.mgmt.batchai.models.ClusterCreateParameters).', arg_group='Advanced')
 
     with self.argument_context('batchai cluster create') as c:
-        c.argument('setup_task', help='A command line which should be executed on each compute node when it\'s got allocated or rebooted. The task is executed under a user account added into sudoers list (so, it can use sudo). Note, if this parameter specified, it will overwrite setup task given in the configuration file.', arg_group='Setup Task')
-        c.argument('setup_task_output', help='Location of the folder where setup-task\'s logs will be stored. Required if setup-task argument provided. Note, Batch AI will create create several helper folders under this location. The created folders are reported as stdOutErrPathSuffix by get cluster command.', arg_group='Setup Task')
+        c.argument('setup_task', help='A command line which should be executed on each compute node when it\'s got allocated or rebooted. The task is executed under a user account added into sudoers list (so, it can use sudo). Note, if this parameter is specified, it will overwrite setup task given in the configuration file.', arg_group='Setup Task')
+        c.argument('setup_task_output', help='Location of the folder where setup-task\'s logs will be stored. Required if setup-task argument is provided. Note, Batch AI will create create several helper folders under this location. The created folders are reported as stdOutErrPathSuffix by get cluster command.', arg_group='Setup Task')
 
     with self.argument_context('batchai cluster create', arg_group='Virtual Network') as c:
         c.argument('subnet', options_list=['--subnet'], help='Resource id of a virtual network subnet to put the cluster in.')
@@ -46,7 +46,7 @@ def load_arguments(self, _):
         c.argument('password', options_list=['--password', '-p'], help='Password.')
 
     with self.argument_context('batchai cluster create', arg_group='Auto Storage') as c:
-        c.argument('auto_storage_rg', options_list=['--auto-storage', '-a'], help='Name of resource group to create a storage account with Azure File Share "batchaishare" and Azure Blob Container "batchaicontainer" which will be mounted to each cluster node at $AZ_BATCHAI_MOUNT_ROOT/autoafs and $AZ_BATCHAI_MOUNT_ROOT/autobfs. If provided resource group already has a storage account with a name starting with "bai" prefix, this storage account will be used.')
+        c.argument('use_auto_storage', action='store_true', help='If provided, the command will create a storage account in a new or existing resource group named "batchaiautostorage". It will also create Azure File Share with name "batchaishare", Azure Blob Container with name "batchaicontainer". The File Share and Blob Container will be mounted on each cluster node at $AZ_BATCHAI_MOUNT_ROOT/autoafs and $AZ_BATCHAI_MOUNT_ROOT/autobfs. If the resource group already exists and contains an approapriate storage account belonging to the same region as cluster, this command will reuse existing storage account.')
 
     with self.argument_context('batchai cluster create', arg_group='Nodes') as c:
         c.argument('image', options_list=['--image', '-i'], help='Operation system image for cluster nodes. The value may contain an alias ({0}) or specify image details in the form "publisher:offer:sku:version". If image configuration is not provided via command line or configuration file, Batch AI will choose default OS image'.format(', '.join(custom.SUPPORTED_IMAGE_ALIASES.keys())))
@@ -58,7 +58,7 @@ def load_arguments(self, _):
         c.argument('vm_priority', arg_type=get_enum_type(['dedicated', 'lowpriority']), options_list=['--vm-priority, -p'], help="VM priority. If lowpriority selected the node can get preempted while the job is running.")
 
     with self.argument_context('batchai cluster create', arg_group='File Server Mount') as c:
-        c.argument('nfs_name', options_list=['--nfs'], help='Name of a file server to mount on each cluster node. If you need to mount more than one file server, configure them in a configuration file and use --config option.')
+        c.argument('nfs_name', options_list=['--nfs-name', '--nfs'], help='Name of a file server to mount on each cluster node. If you need to mount more than one file server, configure them in a configuration file and use --config option.')
         c.argument('nfs_resource_group', options_list=['--nfs-resource-group'], help='Resource group in which file server is created. Can be omitted if the file server and the cluster belong to the same resource group')
         c.argument('nfs_mount_path', options_list=['--nfs-mount-path'], help='Relative mount path for NFS. The NFS will be available at $AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path> folder.')
 
@@ -71,7 +71,7 @@ def load_arguments(self, _):
         c.argument('afs_mount_path', options_list=['--afs-mount-path'], help='Relative mount path for Azure File share. The file share will be available at $AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path> folder.')
 
     with self.argument_context('batchai cluster create', arg_group='Azure Storage Container Mount') as c:
-        c.argument('container_name', options_list=['--bfs', '--container-name'], help='Name of Azure Storage container to be mounted on each cluster node. Must be used in conjunction with --storage-account-name and --storage-account-key arguments or AZURE_BATCHAI_STORAGE_ACCOUNT and AZURE_BATCHAI_STORAGE_KEY environment variables. If you need to mount more than one Azure Storage Blob Container, configure them in a configuration file and use --config option.')
+        c.argument('container_name', options_list=['--bfs-name', '--container-name'], help='Name of Azure Storage container to be mounted on each cluster node. Must be used in conjunction with --storage-account-name and --storage-account-key arguments or AZURE_BATCHAI_STORAGE_ACCOUNT and AZURE_BATCHAI_STORAGE_KEY environment variables. If you need to mount more than one Azure Storage Blob Container, configure them in a configuration file and use --config option.')
         c.argument('container_mount_path', options_list=['--bfs-mount-path', '--container-mount-path'], help='Relative mount path for Azure Storage container. The container will be available at $AZ_BATCHAI_MOUNT_ROOT/<relative_mount_path> folder.')
 
     with self.argument_context('batchai cluster resize') as c:
@@ -94,11 +94,6 @@ def load_arguments(self, _):
         c.argument('job_name', options_list=['--name', '-n'], help='Name of the job.')
         c.argument('cluster_name', options_list=['--cluster-name', '-r'], help='Name of the cluster.')
 
-    with self.argument_context('batchai job list-files') as c:
-        c.argument('output_directory_id', options_list=['--output-directory-id', '-d'], help='The Id of the job\'s output directory (as specified by "id" element in outputDirectories collection in the job create parameters).')
-        c.argument('path', options_list=['--path', '-p'], help='Relative path in the given output directory.')
-        c.argument('expiry', options_list=['--expiry', '-e'], type=int, help='Time in minutes for how long generated download URL should remain valid.')
-
     with self.argument_context('batchai job create') as c:
         c.argument('json_file', options_list=['--config', '-c'], help='A path to a json file containing job create parameters (json representation of azure.mgmt.batchai.models.JobCreateParameters).')
         c.argument('cluster_name', options_list=['--cluster-name', '-r'], help='If specified, the job will run on the given cluster instead of the one configured in the json file.')
@@ -109,15 +104,15 @@ def load_arguments(self, _):
         c.argument('afs_mount_path', options_list=['--afs-mount-path'], help='Relative mount path for Azure File Share. The File Share will be available at $AZ_BATCHAI_JOB_MOUNT_ROOT/<relative_mount_path> folder.')
 
     with self.argument_context('batchai job create', arg_group='Azure Storage Container Mount') as c:
-        c.argument('container_name', options_list=['--bfs', '--container-name'], help='Name of Azure Storage Blob Container to mount during the job execution. The container will be mounted only on the nodes which are executing the job. Must be used in conjunction with --storage-account-name and --storage-account-key arguments or AZURE_BATCHAI_STORAGE_ACCOUNT and AZURE_BATCHAI_STORAGE_KEY environment variables. If you need to mount more than one Azure Storage container, configure them in a configuration file and use --config option.')
-        c.argument('container_mount_path', options_list=['--bfs-mount-path', '--container-mount-path'], help='Relative mount path for Azure Storage Blob Container. The container will be available at $AZ_BATCHAI_JOB_MOUNT_ROOT/<relative_mount_path> folder.')
+        c.argument('container_name', options_list=['--bfs-name'], help='Name of Azure Storage Blob Container to mount during the job execution. The container will be mounted only on the nodes which are executing the job. Must be used in conjunction with --storage-account-name and --storage-account-key arguments or AZURE_BATCHAI_STORAGE_ACCOUNT and AZURE_BATCHAI_STORAGE_KEY environment variables. If you need to mount more than one Azure Storage container, configure them in a configuration file and use --config option.')
+        c.argument('container_mount_path', options_list=['--bfs-mount-path'], help='Relative mount path for Azure Storage Blob Container. The container will be available at $AZ_BATCHAI_JOB_MOUNT_ROOT/<relative_mount_path> folder.')
 
     with self.argument_context('batchai job create', arg_group='Storage Account') as c:
         c.argument('account_name', options_list=['--storage-account-name'], help='Storage account name for Azure File Shares and/or Azure Storage Containers to be mounted. Related environment variable: AZURE_BATCHAI_STORAGE_ACCOUNT. Must be used in conjunction with --storage-account-key. If the key is not provided, the command will try to query the storage account key using the authenticated Azure account.')
         c.argument('account_key', options_list=['--storage-account-key'], help='Storage account key. Must be used in conjunction with --storage-account-name. Environment variable: AZURE_BATCHAI_STORAGE_KEY.')
 
     with self.argument_context('batchai job create', arg_group='File Server Mount') as c:
-        c.argument('nfs_name', options_list=['--nfs'], help='Name of a file server to mount during the job execution. The NFS will be mounted only on the nodes which are executing the job. If you need to mount more than one file server, configure them in a configuration file and use --config option.')
+        c.argument('nfs_name', options_list=['--nfs-name'], help='Name of a file server to mount during the job execution. The NFS will be mounted only on the nodes which are executing the job. If you need to mount more than one file server, configure them in a configuration file and use --config option.')
         c.argument('nfs_resource_group', options_list=['--nfs-resource-group'], help='Resource group in which file server is created. Can be omitted if the file server and the job belong to the same resource group.')
         c.argument('nfs_mount_path', options_list=['--nfs-mount-path'], help='Relative mount path for NFS. The NFS will be available at $AZ_BATCHAI_JOB_MOUNT_ROOT/<relative_mount_path> folder.')
 
@@ -125,9 +120,15 @@ def load_arguments(self, _):
         # Not implemented yet
         c.ignore('jobs_list_options')
 
-    with self.argument_context('batchai job stream-file') as c:
-        c.argument('job_name', options_list=['--job-name', '-j'], help='Name of the job.')
-        c.argument('file_name', options_list=['--name', '-n'], help='The name of the file to stream.')
+    with self.argument_context('batchai job file stream') as c:
+        c.argument('output_directory_id', options_list=['--output-directory-id', '-d'], help='The Id of the job\'s output directory (as specified by "id" element in outputDirectories collection in the job create parameters).')
+        c.argument('file_name', options_list=['--file-name', '-f'], help='The name of the file to stream.')
+        c.argument('path', options_list=['--path', '-p'], help='Relative path in the given output directory.')
+
+    with self.argument_context('batchai job file list') as c:
+        c.argument('output_directory_id', options_list=['--output-directory-id', '-d'], help='The Id of the job\'s output directory (as specified by "id" element in outputDirectories collection in the job create parameters).')
+        c.argument('path', options_list=['--path', '-p'], help='Relative path in the given output directory.')
+        c.argument('expiry', options_list=['--expiry', '-e'], type=int, help='Time in minutes for how long generated download URL should remain valid.')
 
     with self.argument_context('batchai job wait') as c:
         c.argument('check_interval_sec', options_list=['--check-interval-sec', '-i'], help="Defined how often CLI will check job's status.")

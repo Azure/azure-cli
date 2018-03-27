@@ -62,9 +62,11 @@ def load_command_table(self, _):
         g.command('show', 'get', table_transformer=job_show_table_format)
         g.custom_command('list', 'list_jobs', table_transformer=job_list_table_format)
         g.command('list-nodes', 'list_remote_login_information', table_transformer=remote_login_table_format)
-        g.custom_command('list-files', 'list_files', table_transformer=file_list_table_format)
-        g.custom_command('stream-file', 'tail_file')
         g.custom_command('wait', 'wait_for_job_completion', client_factory=batchai_client_factory)
+
+    with self.command_group('batchai job file', batchai_job_sdk, client_factory=job_client_factory) as g:
+        g.custom_command('list', 'list_files', table_transformer=file_list_table_format)
+        g.custom_command('stream', 'tail_file')
 
     with self.command_group('batchai file-server', batchai_server_sdk, client_factory=file_server_client_factory) as g:
         g.custom_command('create', 'create_file_server', no_wait_param='raw')
@@ -72,5 +74,5 @@ def load_command_table(self, _):
         g.command('show', 'get', table_transformer=file_server_show_table_format)
         g.custom_command('list', 'list_file_servers', table_transformer=file_server_list_table_format)
 
-    with self.command_group('batchai usage', batchai_usage_sdk, client_factory=usage_client_factory) as g:
-        g.command('show', 'list', table_transformer=usage_table_format)
+    with self.command_group('batchai', batchai_usage_sdk, client_factory=usage_client_factory) as g:
+        g.command('list-usages', 'list', table_transformer=usage_table_format)

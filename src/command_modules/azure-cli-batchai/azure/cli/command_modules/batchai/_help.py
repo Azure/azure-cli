@@ -29,25 +29,25 @@ helps['batchai cluster create'] = """
           text: |
             az batchai cluster create -n MyCluster -g MyResourceGroup -c cluster.json \\
                 -u $USER -k ~/.ssh/id_rsa.pub
-        - name: Create a cluster providing all parameters manually (for simple cases).
-          text: |
-            az batchai cluster create -n MyCluster -g MyResourceGroup \\
-                -i UbuntuDSVM -s Standard_NC6 --vm-priority lowpriority \\
-                --min 0 --target 1 --max 10 \\
-                --nfs MyNfsToMount --afs MyAzureFileShareToMount --bfs MyBlobContainerNameToMount \\
-                -u $USER -k ~/.ssh/id_rsa.pub -p ImpossibleToGuessPassword
         - name: Create a single node GPU cluster with default image, given ssh key and with auto-storage account.
           text: |
-            az batchai cluster create -n MyCluster -g MyResourceGroup -a MyResourceGroup \\
+            az batchai cluster create -n MyCluster -g MyResourceGroup --use-auto-storage \\
                 -s Standard_NC6 -t 1 -k id_rsa.pub
         - name:
             Create a cluster with a setup command which installs unzip on every node, the command output will be
             stored on auto storage account Azure File Share.
           text: |
-            az batchai cluster create -n MyCluster -g MyResourceGroup -a MyResourceGroup \\
+            az batchai cluster create -n MyCluster -g MyResourceGroup --use-auto-storage \\
                 -s Standard_NC6 -t 1 -k id_rsa.pub \\
                 --setup-task 'sudo apt update; sudo apt install unzip' \\
                 --setup-task-output '$AZ_BATCHAI_MOUNT_ROOT/autoafs'
+        - name: Create a cluster providing all parameters manually.
+          text: |
+            az batchai cluster create -n MyCluster -g MyResourceGroup \\
+                -i UbuntuDSVM -s Standard_NC6 --vm-priority lowpriority \\
+                --min 0 --target 1 --max 10 \\
+                --nfs-name MyNfsToMount --afs-name MyAzureFileShareToMount --bfs-name MyBlobContainerNameToMount \\
+                -u $USER -k ~/.ssh/id_rsa.pub -p ImpossibleToGuessPassword
 
 """
 
@@ -238,7 +238,12 @@ helps['batchai job list-nodes'] = """
 
 """
 
-helps['batchai job list-files'] = """
+helps['batchai job file'] = """
+    type: group
+    short-summary: Commands to list and stream files in jobs' output directories.
+"""
+
+helps['batchai job file list'] = """
     type: command
     short-summary: List job's output files in a directory with given id.
     long-summary:
@@ -249,24 +254,24 @@ helps['batchai job list-files'] = """
             List files and directories with their parameters and download URLs in the root of the standard output
             directory of the job.
           text:
-            az batchai job list-files -n MyJob -g MyResourceGroup
+            az batchai job file list -n MyJob -g MyResourceGroup
         - name:
             List files and directories with their parameters and download URLs in a folder 'MyFolder/MySubfolder' of an
             output directory with id 'MODELS'.
           text:
-            az batchai job list-files -n MyJob -g MyResourceGroup -d MODELS -p MyFolder/MySubfolder
+            az batchai job file list -n MyJob -g MyResourceGroup -d MODELS -p MyFolder/MySubfolder
         - name:
             List name and sizes for files and directories in the root of the standard output directory of the job.
           text:
-            az batchai job list-files -n MyJob -g MyResourceGroup -o table
+            az batchai job file list -n MyJob -g MyResourceGroup -o table
         - name:
             List files and directories with their parameters and download URLs in the root of the standard output
             directory of the job making download URLs to remain valid for one hour.
           text:
-            az batchai job list-files -n MyJob -g MyResourceGroup -e 60
+            az batchai job file list -n MyJob -g MyResourceGroup -e 60
 """
 
-helps['batchai job stream-file'] = """
+helps['batchai job file stream'] = """
     type: command
     short-summary: Output the current content of the file and outputs appended data as the file grows
                    (similar to 'tail -f').
@@ -276,10 +281,10 @@ helps['batchai job stream-file'] = """
     examples:
         - name: Stream standard output file of the job.
           text:
-            az batchai stream-file -j MyJob -g MyResourceGroup -n stdout.txt
+            az batchai job file stream -n MyJob -g MyResourceGroup -f stdout.txt
         - name: Stream a file 'log.txt' from a folder 'logs' of an output directory with id 'OUTPUTS'.
           text:
-            az batchai stream-file -j MyJob -g MyResourceGroup -d OUTPUTS -p logs -n log.txt
+            az batchai job file stream -n MyJob -g MyResourceGroup -d OUTPUTS -p logs -f log.txt
 """
 
 helps['batchai file-server'] = """
@@ -345,17 +350,12 @@ helps['batchai file-server show'] = """
 
 """
 
-helps['batchai usage'] = """
-    type: group
-    short-summary: Commands to get current usage information as well as limits for Batch AI resources.
-"""
-
-helps['batchai usage show'] = """
+helps['batchai list-usages'] = """
     type: command
     short-summary:
         Gets the current usage information as well as limits for Batch AI resources for given location.
     examples:
         - name: Get information for eastus location.
           text:
-            az batchai usage show -l eastus -o table
+            az batchai list-usages -l eastus -o table
 """

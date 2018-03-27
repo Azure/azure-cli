@@ -83,7 +83,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             ])
 
             # Check the job's standard output: stdout.txt with length equal 3 ("hi\n"), stderr.txt
-            self.cmd('batchai job list-files -n job -g {0} -d=stdouterr'.format(resource_group), checks=[
+            self.cmd('batchai job file list -n job -g {0} -d stdouterr'.format(resource_group), checks=[
                 JMESPathCheck("[].name | sort(@)", ['execution.log', 'stderr.txt', 'stdout.txt']),
                 JMESPathCheck("[?name == 'stdout.txt'].contentLength", [3]),
                 JMESPathCheck("[?name == 'stderr.txt'].contentLength", [0]),
@@ -92,7 +92,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             ])
 
             # Check the job's output directory
-            self.cmd('batchai job list-files -n job -g {0} -d=OUTPUT'.format(resource_group), checks=[
+            self.cmd('batchai job file list -n job -g {0} -d=OUTPUT'.format(resource_group), checks=[
                 JMESPathCheck("[].name | sort(@)", ['result.txt']),
                 JMESPathCheck("[0].contentLength", 3),  # hi/n
                 JMESPathCheckExists("[0].downloadUrl")
@@ -266,39 +266,43 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
     @StorageAccountPreparer(name_prefix='bai', location=LOCATION_FOR_SCENARIO_TESTS)
     def test_batchai_cluster_with_auto_storage(self, resource_group, storage_account):
         # Test creation of a cluster with auto-storage account.
-        self.cmd(
-            'az batchai cluster create -n cluster -g {0} -l {1} '
-            '-i UbuntuLTS --vm-size STANDARD_D1 -t 0 -u DemoUser -k {2} '
-            '--auto-storage {0}'.format(
-                resource_group, LOCATION_FOR_SCENARIO_TESTS, _data_file('key.txt')),
-            checks=[
-                JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].accountName', storage_account),
-                JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].azureFileUrl',
-                              'https://{0}.file.core.windows.net/batchaishare'.format(storage_account)),
-                JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].relativeMountPath', 'autoafs'),
-                JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].accountName', storage_account),
-                JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].containerName', 'batchaicontainer'),
-                JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].relativeMountPath', 'autobfs')])
+        with mock.patch('azure.cli.command_modules.batchai.custom._get_auto_storage_resource_group') as p:
+            p.return_value = resource_group
+            self.cmd(
+                'az batchai cluster create -n cluster -g {0} -l {1} '
+                '-i UbuntuLTS --vm-size STANDARD_D1 -t 0 -u DemoUser -k {2} '
+                '--use-auto-storage'.format(
+                    resource_group, LOCATION_FOR_SCENARIO_TESTS, _data_file('key.txt')),
+                checks=[
+                    JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].accountName', storage_account),
+                    JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].azureFileUrl',
+                                  'https://{0}.file.core.windows.net/batchaishare'.format(storage_account)),
+                    JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].relativeMountPath', 'autoafs'),
+                    JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].accountName', storage_account),
+                    JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].containerName', 'batchaicontainer'),
+                    JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].relativeMountPath', 'autobfs')])
 
     @ResourceGroupPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
     @StorageAccountPreparer(name_prefix='bai', location=LOCATION_FOR_SCENARIO_TESTS)
     def test_batchai_cluster_with_setup_command(self, resource_group, storage_account):
         # Test creation of a cluster with auto-storage account and setup task.
-        self.cmd(
-            'az batchai cluster create -n cluster -g {0} -l {1} -s STANDARD_D1 -t 0 -u DemoUser -k {2} '
-            '--auto-storage {0} --setup-task "echo hi" --setup-task-output "$AZ_BATCHAI_MOUNT_ROOT/autoafs"'.format(
-                resource_group, LOCATION_FOR_SCENARIO_TESTS, _data_file('key.txt')),
-            checks=[
-                JMESPathCheck('nodeSetup.setupTask.commandLine', 'echo hi'),
-                JMESPathCheck('nodeSetup.setupTask.stdOutErrPathPrefix', '$AZ_BATCHAI_MOUNT_ROOT/autoafs'),
-                JMESPathCheck('nodeSetup.setupTask.runElevated', False),
-                JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].accountName', storage_account),
-                JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].azureFileUrl',
-                              'https://{0}.file.core.windows.net/batchaishare'.format(storage_account)),
-                JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].relativeMountPath', 'autoafs'),
-                JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].accountName', storage_account),
-                JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].containerName', 'batchaicontainer'),
-                JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].relativeMountPath', 'autobfs')])
+        with mock.patch('azure.cli.command_modules.batchai.custom._get_auto_storage_resource_group') as p:
+            p.return_value = resource_group
+            self.cmd(
+                'az batchai cluster create -n cluster -g {0} -l {1} -s STANDARD_D1 -t 0 -u DemoUser -k {2} '
+                '--use-auto-storage --setup-task "echo hi" --setup-task-output "$AZ_BATCHAI_MOUNT_ROOT/autoafs"'.format(
+                    resource_group, LOCATION_FOR_SCENARIO_TESTS, _data_file('key.txt')),
+                checks=[
+                    JMESPathCheck('nodeSetup.setupTask.commandLine', 'echo hi'),
+                    JMESPathCheck('nodeSetup.setupTask.stdOutErrPathPrefix', '$AZ_BATCHAI_MOUNT_ROOT/autoafs'),
+                    JMESPathCheck('nodeSetup.setupTask.runElevated', False),
+                    JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].accountName', storage_account),
+                    JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].azureFileUrl',
+                                  'https://{0}.file.core.windows.net/batchaishare'.format(storage_account)),
+                    JMESPathCheck('nodeSetup.mountVolumes.azureFileShares[0].relativeMountPath', 'autoafs'),
+                    JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].accountName', storage_account),
+                    JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].containerName', 'batchaicontainer'),
+                    JMESPathCheck('nodeSetup.mountVolumes.azureBlobFileSystems[0].relativeMountPath', 'autobfs')])
 
     @ResourceGroupPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
     @StorageAccountPreparer(location=LOCATION_FOR_SCENARIO_TESTS)
@@ -335,7 +339,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             ])
 
             # Check the job's standard output: stdout.txt with length equal 3 ("hi\n"), stderr.txt
-            self.cmd('batchai job list-files -n job -g {0} -d=stdouterr'.format(resource_group), checks=[
+            self.cmd('batchai job file list -n job -g {0} -d=stdouterr'.format(resource_group), checks=[
                 JMESPathCheck("[].name | sort(@)", ['execution.log', 'stderr.txt', 'stdout.txt']),
                 JMESPathCheck("[?name == 'stdout.txt'].contentLength", [3]),
                 JMESPathCheck("[?name == 'stderr.txt'].contentLength", [0]),
@@ -344,7 +348,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             ])
 
             # Check the job's output directory
-            self.cmd('batchai job list-files -n job -g {0} -d=OUTPUT'.format(resource_group), checks=[
+            self.cmd('batchai job file list -n job -g {0} -d=OUTPUT'.format(resource_group), checks=[
                 JMESPathCheck("[].name | sort(@)", ['result.txt']),
                 JMESPathCheck("[0].contentLength", 3),  # hi/n
                 JMESPathCheckExists("[0].downloadUrl")
@@ -352,7 +356,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
 
             # Submit the job specifying Azure File Share and Azure Blob Container via command line args
             self.cmd('batchai job create -n job2 --cluster-name cluster -g {0} -c {1} '
-                     '--afs-name share --container-name container'
+                     '--afs-name share --bfs-name container'
                      ''.format(resource_group, _data_file('job_referencing_file_systems.json')))
 
             # Wait for the cluster to be allocated and job completed
@@ -369,7 +373,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             ])
 
             # Check the job's standard output: stdout.txt with length equal 3 ("hi\n"), stderr.txt
-            self.cmd('batchai job list-files -n job2 -g {0} -d=stdouterr'.format(resource_group), checks=[
+            self.cmd('batchai job file list -n job2 -g {0} -d=stdouterr'.format(resource_group), checks=[
                 JMESPathCheck("[].name | sort(@)", ['execution.log', 'stderr.txt', 'stdout.txt']),
                 JMESPathCheck("[?name == 'stdout.txt'].contentLength", [3]),
                 JMESPathCheck("[?name == 'stderr.txt'].contentLength", [0]),
@@ -378,7 +382,7 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
             ])
 
             # Check the job's output directory
-            self.cmd('batchai job list-files -n job2 -g {0} -d=OUTPUT'.format(resource_group), checks=[
+            self.cmd('batchai job file list -n job2 -g {0} -d=OUTPUT'.format(resource_group), checks=[
                 JMESPathCheck("[].name | sort(@)", ['result.txt']),
                 JMESPathCheck("[0].contentLength", 3),  # hi/n
                 JMESPathCheckExists("[0].downloadUrl")
@@ -386,9 +390,9 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
 
     def test_batchai_usages(self):
         # Just check if we can get a usage and it contains info about clusters.
-        self.cmd('batchai usage show -l {0}'.format(LOCATION_FOR_SCENARIO_TESTS), checks=[
+        self.cmd('batchai list-usages -l {0}'.format(LOCATION_FOR_SCENARIO_TESTS), checks=[
             StringContainCheck("Clusters")])
-        self.cmd('batchai usage show -l {0} -o table'.format(LOCATION_FOR_SCENARIO_TESTS), checks=[
+        self.cmd('batchai list-usages -l {0} -o table'.format(LOCATION_FOR_SCENARIO_TESTS), checks=[
             StringContainCheck("Clusters")])
 
     @contextmanager

@@ -46,6 +46,7 @@ MSG_CONFIGURE_STORAGE_KEY = 'Please configure Azure Storage account key via AZUR
 STANDARD_OUTPUT_DIRECTORY_ID = 'stdouterr'
 
 # Parameters of auto storage
+AUTO_STORAGE_RESOURCE_GROUP = 'batchaiautostorage'
 AUTO_STORAGE_CONTAINER_NAME = 'batchaicontainer'
 AUTO_STORAGE_SHARE_NAME = 'batchaishare'
 AUTO_STORAGE_ACCOUNT_PREFIX = 'bai'
@@ -494,19 +495,32 @@ def _update_nodes_information(params, image, custom_image, vm_size, vm_priority,
     return result
 
 
-def _configure_auto_storage(cli_ctx, resource_group):
+def _get_auto_storage_resource_group():
+    return AUTO_STORAGE_RESOURCE_GROUP
+
+
+def _configure_auto_storage(cli_ctx, location):
     """Configures auto storage account for the cluster
 
-    :param str resource_group: name of the resource group.
+    :param str location: location for the auto-storage account.
     :return (str, str): a tuple with auto storage account name and key.
     """
+    from azure.mgmt.resource.resources.models import ResourceGroup
     from azure.storage.file import FileService
     from azure.storage.blob import BlockBlobService
-    location = _get_resource_group_location(cli_ctx, resource_group)
-    storage_client = _get_storage_management_client(cli_ctx)  # type: StorageManagementClient
+    resource_group = _get_auto_storage_resource_group()
+    resource_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    if resource_client.resource_groups.check_existence(resource_group):
+        logger.warning('BatchAI will use existing %s resource group for auto-storage account',
+                       resource_group)
+    else:
+        logger.warning('Creating %s resource for auto-storage account', resource_group)
+        resource_client.resource_groups.create_or_update(
+            resource_group, ResourceGroup(location=location))
+    storage_client = _get_storage_management_client(cli_ctx)
     account = None
     for a in storage_client.storage_accounts.list_by_resource_group(resource_group):
-        if a.name.startswith(AUTO_STORAGE_ACCOUNT_PREFIX):
+        if a.primary_location == location.lower().replace(' ', ''):
             account = a.name
             logger.warning('Using existing %s storage account as an auto-storage account', account)
             break
@@ -523,7 +537,7 @@ def _configure_auto_storage(cli_ctx, resource_group):
 
 def _generate_auto_storage_account_name():
     """Generates unique name for auto storage account"""
-    characters = list(string.ascii_lowercase)
+    characters = list(string.ascii_lowercase * 12)
     shuffle(characters)
     return AUTO_STORAGE_ACCOUNT_PREFIX + ''.join(characters[:12])
 
@@ -571,7 +585,7 @@ def _add_setup_task(cmd_line, output, cluster):
 
 def create_cluster(cmd, client,  # pylint: disable=too-many-locals
                    resource_group, cluster_name, json_file=None, location=None, user_name=None,
-                   ssh_key=None, password=None, image=None, custom_image=None, auto_storage_rg=None,
+                   ssh_key=None, password=None, image=None, custom_image=None, use_auto_storage=False,
                    vm_size=None, vm_priority='dedicated', target=None, min_nodes=None, max_nodes=None, subnet=None,
                    nfs_name=None, nfs_resource_group=None, nfs_mount_path='nfs', azure_file_share=None,
                    afs_mount_path='afs', container_name=None, container_mount_path='bfs', account_name=None,
@@ -603,8 +617,8 @@ def create_cluster(cmd, client,  # pylint: disable=too-many-locals
     if container_name:
         mount_volumes = _add_azure_container_to_mount_volumes(cmd.cli_ctx, mount_volumes, container_name,
                                                               container_mount_path, account_name, account_key)
-    if auto_storage_rg is not None:
-        auto_storage_account, auto_storage_key = _configure_auto_storage(cmd.cli_ctx, auto_storage_rg)
+    if use_auto_storage:
+        auto_storage_account, auto_storage_key = _configure_auto_storage(cmd.cli_ctx, params.location)
         mount_volumes = _add_azure_file_share_to_mount_volumes(
             cmd.cli_ctx, mount_volumes, AUTO_STORAGE_SHARE_NAME, AUTO_STORAGE_SHARE_PATH,
             auto_storage_account, auto_storage_key)
