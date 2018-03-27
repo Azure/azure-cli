@@ -221,8 +221,6 @@ def acr_queue(cmd,
     tar_file_path = os.path.join(tempfile.gettempdir(),
                                  "source_archive_{}.tar.gz".format(hash(os.times())))
 
-    isLocalFile = True
-
     if os.path.exists(source_location):
         if os.path.isdir(source_location):
             _check_local_docker_file(source_location, docker_file_path)
@@ -232,6 +230,7 @@ def acr_queue(cmd,
         else:
             raise CLIError(
                 "'--source-location' should be a local directory path or remote url.")
+        isLocalFile = True
     else:
         source_location = _check_remote_source_code(source_location)
         isLocalFile = False
@@ -296,7 +295,7 @@ def acr_queue(cmd,
             result.build_id))
 
     if no_logs == False:
-        return acr_build_show_logs(cmd, client, registry_name, result.build_id, resource_group_name)
+        acr_build_show_logs(cmd, client, registry_name, result.build_id, resource_group_name)
 
 
 def _check_local_docker_file(source_location, docker_file_path):
