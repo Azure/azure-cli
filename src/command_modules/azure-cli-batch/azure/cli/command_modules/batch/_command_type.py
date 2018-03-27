@@ -429,7 +429,7 @@ class BatchArgumentTree(object):
 
 class AzureBatchDataPlaneCommand(object):
     # pylint: disable=too-many-instance-attributes, too-few-public-methods, too-many-statements
-    def __init__(self, name, operation, command_loader, client_factory=None, validator=None, **kwargs):
+    def __init__(self, operation, command_loader, client_factory=None, validator=None, **kwargs):
 
         if not isinstance(operation, string_types):
             raise ValueError("Operation must be a string. Got '{}'".format(operation))
@@ -831,6 +831,6 @@ class BatchCommandGroup(AzCommandGroup):
         operations_tmpl = merged_kwargs.get('operations_tmpl')
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         operation = operations_tmpl.format(method_name) if operations_tmpl else None
-        command = AzureBatchDataPlaneCommand(name, operation, self.command_loader, **merged_kwargs)
+        command = AzureBatchDataPlaneCommand(operation, self.command_loader, **merged_kwargs)
 
         self.command_loader._cli_command(command_name, **command.get_kwargs())  # pylint: disable=protected-access

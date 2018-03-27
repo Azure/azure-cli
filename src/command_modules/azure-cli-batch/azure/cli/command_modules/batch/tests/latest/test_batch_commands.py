@@ -447,42 +447,34 @@ class TestBatchLoader(unittest.TestCase):  # pylint: disable=protected-access
             return BatchServiceClient(creds, 'https://test1.westus.batch.azure.com/')
 
         self.command_pool = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_pool',
             'azure.batch.operations.pool_operations#PoolOperations.add',
             operations.pool_operations.PoolOperations.add,
             client_factory=get_client)
         self.command_node = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_node',
             'azure.batch.operations.compute_node_operations#ComputeNodeOperations.reboot',
             operations.compute_node_operations.ComputeNodeOperations.reboot,
             client_factory=get_client)
         self.command_job = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_job',
             'azure.batch.operations.job_operations#JobOperations.add',
             operations.job_operations.JobOperations.add,
             client_factory=get_client)
         self.command_task = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_task',
             'azure.batch.operations.task_operations#TaskOperations.add',
             operations.task_operations.TaskOperations.add,
             client_factory=get_client, flatten=1)
         self.command_file = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_file',
             'azure.batch.operations.file_operations#FileOperations.get_from_task',
             operations.file_operations.FileOperations.get_from_task,
             client_factory=get_client)
         self.command_list = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_list',
             'azure.batch.operations.job_operations#JobOperations.list',
             operations.job_operations.JobOperations.list,
             client_factory=get_client)
         self.command_delete = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_delete',
             'azure.batch.operations.pool_operations#PoolOperations.delete',
             operations.pool_operations.PoolOperations.delete,
             client_factory=get_client)
         self.command_conflicts = _command_type.AzureBatchDataPlaneCommand(
-            'batch_tests_conflicts',
             'azure.batch.operations.job_schedule_operations#JobScheduleOperations.add',
             operations.job_schedule_operations.JobScheduleOperations.add,
             client_factory=get_client, flatten=4)
