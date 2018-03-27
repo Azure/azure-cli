@@ -3,8 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import argparse
-
 from azure.cli.core import AzCommandsLoader
 from azure.cli.core.commands import CliCommandType
 
