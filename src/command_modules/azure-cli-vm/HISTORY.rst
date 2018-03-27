@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.30
 ++++++
+* (Breaking change): remove `assign-identity` & `remove-identity` which were tagged `deprecating` 2 releases ago
 * `vm create`: support configure Public-IP sku
 
 2.0.29

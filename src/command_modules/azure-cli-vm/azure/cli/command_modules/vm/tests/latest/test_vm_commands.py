@@ -2099,13 +2099,13 @@ class MSIScenarioTest(ScenarioTest):
         self.cmd('vm identity show -g {rg} -n {vm}',
                  checks=self.check('length(identityIds)', 2))
         # remove the 1st user assigned identity
-        self.cmd('vm remove-identity -g {rg} -n {vm} --identities {emsi}')
+        self.cmd('vm identity remove -g {rg} -n {vm} --identities {emsi}')
         result = self.cmd('vm show -g {rg} -n {vm}',
                           checks=self.check('length(identity.identityIds)', 1)).get_output_in_json()
         self.assertEqual(result['identity']['identityIds'][0].lower(), emsi2_result['id'].lower())
 
         # remove the 2nd
-        self.cmd('vm remove-identity -g {rg} -n {vm} --identities {emsi2}')
+        self.cmd('vm identity remove -g {rg} -n {vm} --identities {emsi2}')
         # verify the VM still has the system assigned identity
         result = self.cmd('vm identity show -g {rg} -n {vm}', checks=[
             # blocked by https://github.com/Azure/azure-cli/issues/5103
@@ -2147,13 +2147,13 @@ class MSIScenarioTest(ScenarioTest):
         self.cmd('vmss update-instances -g {rg} -n {vmss} --instance-ids *')
 
         # remove the 1st user assigned identity
-        self.cmd('vmss remove-identity -g {rg} -n {vmss} --identities {emsi}')
+        self.cmd('vmss identity remove -g {rg} -n {vmss} --identities {emsi}')
         result = self.cmd('vmss show -g {rg} -n {vmss}',
                           checks=self.check('length(identity.identityIds)', 1)).get_output_in_json()
         self.assertEqual(result['identity']['identityIds'][0].lower(), emsi2_result['id'].lower())
 
         # remove the 2nd
-        self.cmd('vmss remove-identity -g {rg} -n {vmss} --identities {emsi2}')
+        self.cmd('vmss identity remove -g {rg} -n {vmss} --identities {emsi2}')
         # verify the vmss still has the system assigned identity
         self.cmd('vmss identity show -g {rg} -n {vmss}', checks=[
             # blocked by https://github.com/Azure/azure-cli/issues/5103
