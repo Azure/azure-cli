@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.30
+++++++
+* `vm create`: support configure Public-IP sku
 
 2.0.29
 ++++++

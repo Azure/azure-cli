@@ -389,8 +389,11 @@ def load_arguments(self, _):
             c.argument('nics', nargs='+', help='Names or IDs of existing NICs to attach to the VM. The first NIC will be designated as primary. If omitted, a new NIC will be created. If an existing NIC is specified, do not specify subnet, VNet, public IP or NSG.')
             c.argument('private_ip_address', help='Static private IP address (e.g. 10.0.0.5).')
             c.argument('public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None.')
-            c.argument('public_ip_address_allocation', help=None, arg_type=get_enum_type(['dynamic', 'static']))
+            c.argument('public_ip_address_allocation', help=None, default=None, arg_type=get_enum_type(['dynamic', 'static']))
             c.argument('public_ip_address_dns_name', help='Globally unique DNS name for a newly created public IP.')
+            if self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
+                PublicIPAddressSkuName = self.get_models('PublicIPAddressSkuName', resource_type=ResourceType.MGMT_NETWORK)
+                c.argument('public_ip_sku', help='Sku', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
 
         with self.argument_context(scope, arg_group='Marketplace Image Plan') as c:
             c.argument('plan_name', help='plan name')
