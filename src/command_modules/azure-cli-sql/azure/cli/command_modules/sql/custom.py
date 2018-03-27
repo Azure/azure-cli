@@ -26,6 +26,7 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
     CreateMode,
     DatabaseEdition,
     IdentityType,
+    PerformanceLevelUnit,
     ReplicationRole,
     SecurityAlertPolicyState,
     ServerKeyType,
@@ -430,6 +431,8 @@ def db_list_capabilities(
         location,
         edition=None,
         service_objective=None,
+        dtu=None,
+        vcores=None,
         show_details=None):
 
     # Fixup parameters
@@ -453,6 +456,22 @@ def db_list_capabilities(
             e.supported_service_level_objectives = [
                 slo for slo in e.supported_service_level_objectives
                 if slo.name.lower() == service_objective.lower()]
+
+    # Filter by dtu
+    if dtu:
+        for e in editions:
+            e.supported_service_level_objectives = [
+                slo for slo in e.supported_service_level_objectives
+                if slo.performance_level.limit == dtu and
+                   slo.performance_level.unit == PerformanceLevelUnit.dtu.value]
+
+    # Filter by vcores
+    if vcores:
+        for e in editions:
+            e.supported_service_level_objectives = [
+                slo for slo in e.supported_service_level_objectives
+                if slo.performance_level.limit == vcores and
+                   slo.performance_level.unit == PerformanceLevelUnit.vcores.value]
 
     # Remove editions with no service objectives (due to filters)
     editions = [e for e in editions if e.supported_service_level_objectives]
@@ -948,6 +967,7 @@ def elastic_pool_list_capabilities(
         location,
         edition=None,
         dtu=None,
+        vcores=None,
         show_details=None):
 
     # Fixup parameters
@@ -970,15 +990,24 @@ def elastic_pool_list_capabilities(
     # Filter by dtu
     if dtu:
         for e in editions:
-            e.supported_elastic_pool_dtus = [
-                d for d in e.supported_elastic_pool_dtus
-                if d.limit == dtu]
+            e.supported_elastic_pool_performance_levels = [
+                pl for pl in e.supported_elastic_pool_performance_levels
+                if pl.performance_level.limit == dtu and
+                   pl.performance_level.unit == PerformanceLevelUnit.dtu.value]
+
+    # Filter by vcores
+    if vcores:
+        for e in editions:
+            e.supported_elastic_pool_performance_levels = [
+                pl for pl in e.supported_elastic_pool_performance_levels
+                if pl.performance_level.limit == vcores and
+                   pl.performance_level.unit == PerformanceLevelUnit.vcores.value]
 
     # Remove editions with no service objectives (due to filters)
-    editions = [e for e in editions if e.supported_elastic_pool_dtus]
+    editions = [e for e in editions if e.supported_elastic_pool_performance_levels]
 
     for e in editions:
-        for d in e.supported_elastic_pool_dtus:
+        for d in e.supported_elastic_pool_performance_levels:
             # Optionally hide supported max sizes
             if ElasticPoolCapabilitiesAdditionalDetails.max_size.value not in show_details:
                 d.supported_max_sizes = []

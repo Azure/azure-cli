@@ -308,7 +308,13 @@ def load_arguments(self, _):
         c.argument('service_objective',
                    options_list=['--service-objective', '--sku'],
                    arg_group=search_arg_group,
-                   help='Service objective to search for. If unspecified, all editions are shown.')
+                   help='Service objective to search for. If unspecified, all service objectives are shown.')
+        c.argument('dtu',
+                   arg_group=search_arg_group,
+                   help='DTU size to search for. If unspecified, all DTU sizes are shown.')
+        c.argument('vcores',
+                   arg_group=search_arg_group,
+                   help='Vcore size to search for. If unspecified, all vcore sizes are shown.')
 
     with self.argument_context('sql db update') as c:
         c.argument('sku',
@@ -598,12 +604,16 @@ def load_arguments(self, _):
         # We could used 'arg_type=get_enum_type' here, but that will validate the inputs which means there
         # will be no way to query for new editions that are made available after
         # this version of CLI is released.
-        c.argument('tier',
+        c.argument('edition',
+                   options_list=['--tier', '--edition'],
                    arg_group=search_arg_group,
                    help='Edition to search for. If unspecified, all editions are shown.')
         c.argument('dtu',
                    arg_group=search_arg_group,
-                   help='Elastic pool DTU limit to search for. If unspecified, all DTU limits are shown.')
+                   help='DTU size to search for. If unspecified, all DTU sizes are shown.')
+        c.argument('vcores',
+                   arg_group=search_arg_group,
+                   help='Vcore size to search for. If unspecified, all vcore sizes are shown.')
 
     with self.argument_context('sql elastic-pool update') as c:
         c.argument('database_dtu_max', help='The maximum DTU any one database can consume.')
