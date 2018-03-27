@@ -57,7 +57,7 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     else:
         plan_info = client.app_service_plans.get(resource_group_name, plan)
     if not plan_info:
-        raise CLIError("The plan of '{}' doesn't exist".format(plan))
+        raise CLIError("The plan '{}' doesn't exist".format(plan))
     is_linux = plan_info.reserved
     node_default_version = "6.9.1"
     location = plan_info.location
@@ -1544,7 +1544,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             plan = parse_resource_id(plan)['name']
         plan_info = client.app_service_plans.get(resource_group_name, plan)
         if not plan_info:
-            raise CLIError("The plan of '{}' doesn't exist".format(plan))
+            raise CLIError("The plan '{}' doesn't exist".format(plan))
         location = plan_info.location
         is_linux = plan_info.reserved
         if is_linux:
