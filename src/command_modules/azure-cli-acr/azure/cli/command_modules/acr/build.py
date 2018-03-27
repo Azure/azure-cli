@@ -59,7 +59,7 @@ def acr_build_show_logs(cmd,
         log_file_sas)
 
     byte_size = 1024*4
-    timeout_in_minutes = 10
+    timeout_in_minutes = 30
     timeout_in_seconds = timeout_in_minutes * 60
 
     _stream_logs(byte_size, timeout_in_seconds,
@@ -378,6 +378,12 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
         def _filter_file(tarinfo):
 
             if ignore_list is None:
+                return tarinfo
+
+            # always include docker file
+            # file path comparision is case-sensitive 
+            if tarinfo.name == docker_file_path:
+                logger.debug(".dockerignore: skip checking '{}'".format(docker_file_path))
                 return tarinfo
 
             for item in ignore_list:

@@ -42,11 +42,19 @@ class DockerBuildStep(BuildStepProperties):
     :type context_path: str
     :param build_arguments: The custom arguments for building this build step.
     :type build_arguments: list[~containerregistrybuild.models.BuildArgument]
+    :ivar base_image_dependencies: List of base image dependencies for a step.
+    :vartype base_image_dependencies:
+     list[~containerregistrybuild.models.BaseImageDependency]
+    :param base_image_trigger: The type of the auto trigger for base image
+     dependency updates. Possible values include: 'Runtime', 'None'
+    :type base_image_trigger: str or
+     ~containerregistrybuild.models.BaseImageTriggerType
     """
 
     _validation = {
         'provisioning_state': {'readonly': True},
         'type': {'required': True},
+        'base_image_dependencies': {'readonly': True},
     }
 
     _attribute_map = {
@@ -58,9 +66,11 @@ class DockerBuildStep(BuildStepProperties):
         'docker_file_path': {'key': 'dockerFilePath', 'type': 'str'},
         'context_path': {'key': 'contextPath', 'type': 'str'},
         'build_arguments': {'key': 'buildArguments', 'type': '[BuildArgument]'},
+        'base_image_dependencies': {'key': 'baseImageDependencies', 'type': '[BaseImageDependency]'},
+        'base_image_trigger': {'key': 'baseImageTrigger', 'type': 'str'},
     }
 
-    def __init__(self, branch=None, image_name=None, is_push_enabled=False, docker_file_path=None, context_path=None, build_arguments=None):
+    def __init__(self, branch=None, image_name=None, is_push_enabled=False, docker_file_path=None, context_path=None, build_arguments=None, base_image_trigger=None):
         super(DockerBuildStep, self).__init__()
         self.branch = branch
         self.image_name = image_name
@@ -68,4 +78,6 @@ class DockerBuildStep(BuildStepProperties):
         self.docker_file_path = docker_file_path
         self.context_path = context_path
         self.build_arguments = build_arguments
+        self.base_image_dependencies = None
+        self.base_image_trigger = base_image_trigger
         self.type = 'Docker'

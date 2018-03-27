@@ -13,9 +13,9 @@ from msrest.service_client import ServiceClient
 from msrest import Serializer, Deserializer
 from msrestazure import AzureConfiguration
 from .version import VERSION
-from .operations.build_definitions_operations import BuildDefinitionsOperations
 from .operations.builds_operations import BuildsOperations
 from .operations.build_steps_operations import BuildStepsOperations
+from .operations.build_tasks_operations import BuildTasksOperations
 from .operations.registries_operations import RegistriesOperations
 from . import models
 
@@ -58,12 +58,12 @@ class ContainerRegistryManagementClient(object):
     :ivar config: Configuration for client.
     :vartype config: ContainerRegistryManagementClientConfiguration
 
-    :ivar build_definitions: BuildDefinitions operations
-    :vartype build_definitions: containerregistrybuild.operations.BuildDefinitionsOperations
     :ivar builds: Builds operations
     :vartype builds: containerregistrybuild.operations.BuildsOperations
     :ivar build_steps: BuildSteps operations
     :vartype build_steps: containerregistrybuild.operations.BuildStepsOperations
+    :ivar build_tasks: BuildTasks operations
+    :vartype build_tasks: containerregistrybuild.operations.BuildTasksOperations
     :ivar registries: Registries operations
     :vartype registries: containerregistrybuild.operations.RegistriesOperations
 
@@ -86,11 +86,11 @@ class ContainerRegistryManagementClient(object):
         self._serialize = Serializer(client_models)
         self._deserialize = Deserializer(client_models)
 
-        self.build_definitions = BuildDefinitionsOperations(
-            self._client, self.config, self._serialize, self._deserialize)
         self.builds = BuildsOperations(
             self._client, self.config, self._serialize, self._deserialize)
         self.build_steps = BuildStepsOperations(
+            self._client, self.config, self._serialize, self._deserialize)
+        self.build_tasks = BuildTasksOperations(
             self._client, self.config, self._serialize, self._deserialize)
         self.registries = RegistriesOperations(
             self._client, self.config, self._serialize, self._deserialize)

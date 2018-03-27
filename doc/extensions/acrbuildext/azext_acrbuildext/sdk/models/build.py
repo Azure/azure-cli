@@ -9,10 +9,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .resource import Resource
+from .proxy_resource import ProxyResource
 
 
-class Build(Resource):
+class Build(ProxyResource):
     """Build resource properties.
 
     Variables are only populated by the server, and will be ignored when
@@ -24,11 +24,6 @@ class Build(Resource):
     :vartype name: str
     :ivar type: The type of the resource.
     :vartype type: str
-    :param location: The location of the resource. This cannot be changed
-     after the resource is created.
-    :type location: str
-    :param tags: The tags of the resource.
-    :type tags: dict[str, str]
     :param build_id: The unique identifier for the build.
     :type build_id: str
     :param status: The current status of the build. Possible values include:
@@ -48,9 +43,9 @@ class Build(Resource):
     :param output_images: The list of all images that were generated from the
      build.
     :type output_images: list[~containerregistrybuild.models.ImageDescriptor]
-    :param build_definition: All the properties of the build definition with
-     which the build was started.
-    :type build_definition: str
+    :param build_task: All the properties of the build task with which the
+     build was started.
+    :type build_task: str
     :param trigger: The trigger that caused the build.
     :type trigger: str
     :param is_archive_enabled: The value that indicates whether archiving is
@@ -70,15 +65,12 @@ class Build(Resource):
         'id': {'readonly': True},
         'name': {'readonly': True},
         'type': {'readonly': True},
-        'location': {'required': True},
     }
 
     _attribute_map = {
         'id': {'key': 'id', 'type': 'str'},
         'name': {'key': 'name', 'type': 'str'},
         'type': {'key': 'type', 'type': 'str'},
-        'location': {'key': 'location', 'type': 'str'},
-        'tags': {'key': 'tags', 'type': '{str}'},
         'build_id': {'key': 'properties.buildId', 'type': 'str'},
         'status': {'key': 'properties.status', 'type': 'str'},
         'last_updated_time': {'key': 'properties.lastUpdatedTime', 'type': 'iso-8601'},
@@ -87,15 +79,15 @@ class Build(Resource):
         'start_time': {'key': 'properties.startTime', 'type': 'iso-8601'},
         'finish_time': {'key': 'properties.finishTime', 'type': 'iso-8601'},
         'output_images': {'key': 'properties.outputImages', 'type': '[ImageDescriptor]'},
-        'build_definition': {'key': 'properties.buildDefinition', 'type': 'str'},
+        'build_task': {'key': 'properties.buildTask', 'type': 'str'},
         'trigger': {'key': 'properties.trigger', 'type': 'str'},
         'is_archive_enabled': {'key': 'properties.isArchiveEnabled', 'type': 'bool'},
         'platform': {'key': 'properties.platform', 'type': 'PlatformProperties'},
         'provisioning_state': {'key': 'properties.provisioningState', 'type': 'str'},
     }
 
-    def __init__(self, location, tags=None, build_id=None, status=None, last_updated_time=None, build_type=None, create_time=None, start_time=None, finish_time=None, output_images=None, build_definition=None, trigger=None, is_archive_enabled=None, platform=None, provisioning_state=None):
-        super(Build, self).__init__(location=location, tags=tags)
+    def __init__(self, build_id=None, status=None, last_updated_time=None, build_type=None, create_time=None, start_time=None, finish_time=None, output_images=None, build_task=None, trigger=None, is_archive_enabled=None, platform=None, provisioning_state=None):
+        super(Build, self).__init__()
         self.build_id = build_id
         self.status = status
         self.last_updated_time = last_updated_time
@@ -104,7 +96,7 @@ class Build(Resource):
         self.start_time = start_time
         self.finish_time = finish_time
         self.output_images = output_images
-        self.build_definition = build_definition
+        self.build_task = build_task
         self.trigger = trigger
         self.is_archive_enabled = is_archive_enabled
         self.platform = platform

@@ -9,10 +9,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .resource import Resource
+from .proxy_resource import ProxyResource
 
 
-class BuildStep(Resource):
+class BuildStep(ProxyResource):
     """Build step resource properties.
 
     Variables are only populated by the server, and will be ignored when
@@ -24,11 +24,6 @@ class BuildStep(Resource):
     :vartype name: str
     :ivar type: The type of the resource.
     :vartype type: str
-    :param location: The location of the resource. This cannot be changed
-     after the resource is created.
-    :type location: str
-    :param tags: The tags of the resource.
-    :type tags: dict[str, str]
     :ivar provisioning_state: The provisioning state of the build step.
      Possible values include: 'Creating', 'Updating', 'Deleting', 'Succeeded',
      'Failed', 'Canceled'
@@ -42,7 +37,6 @@ class BuildStep(Resource):
         'id': {'readonly': True},
         'name': {'readonly': True},
         'type': {'readonly': True},
-        'location': {'required': True},
         'provisioning_state': {'readonly': True},
         'build_step_type': {'required': True},
     }
@@ -51,13 +45,11 @@ class BuildStep(Resource):
         'id': {'key': 'id', 'type': 'str'},
         'name': {'key': 'name', 'type': 'str'},
         'type': {'key': 'type', 'type': 'str'},
-        'location': {'key': 'location', 'type': 'str'},
-        'tags': {'key': 'tags', 'type': '{str}'},
         'provisioning_state': {'key': 'properties.provisioningState', 'type': 'str'},
         'build_step_type': {'key': 'properties.type', 'type': 'str'},
     }
 
-    def __init__(self, location, build_step_type, tags=None):
-        super(BuildStep, self).__init__(location=location, tags=tags)
+    def __init__(self, build_step_type):
+        super(BuildStep, self).__init__()
         self.provisioning_state = None
         self.build_step_type = build_step_type

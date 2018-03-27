@@ -9,11 +9,12 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .proxy_resource import ProxyResource
+from msrest.serialization import Model
 
 
-class BuildStep(ProxyResource):
-    """Build step resource properties.
+class ProxyResource(Model):
+    """The resource model definition for a ARM proxy resource. It will have
+    everything other than required location and tags.
 
     Variables are only populated by the server, and will be ignored when
     sending a request.
@@ -24,32 +25,22 @@ class BuildStep(ProxyResource):
     :vartype name: str
     :ivar type: The type of the resource.
     :vartype type: str
-    :ivar provisioning_state: The provisioning state of the build step.
-     Possible values include: 'Creating', 'Updating', 'Deleting', 'Succeeded',
-     'Failed', 'Canceled'
-    :vartype provisioning_state: str or
-     ~containerregistrybuild.models.ProvisioningState
-    :param build_step_type: Constant filled by server.
-    :type build_step_type: str
     """
 
     _validation = {
         'id': {'readonly': True},
         'name': {'readonly': True},
         'type': {'readonly': True},
-        'provisioning_state': {'readonly': True},
-        'build_step_type': {'required': True},
     }
 
     _attribute_map = {
         'id': {'key': 'id', 'type': 'str'},
         'name': {'key': 'name', 'type': 'str'},
         'type': {'key': 'type', 'type': 'str'},
-        'provisioning_state': {'key': 'properties.provisioningState', 'type': 'str'},
-        'build_step_type': {'key': 'properties.type', 'type': 'str'},
     }
 
-    def __init__(self, build_step_type):
-        super(BuildStep, self).__init__()
-        self.provisioning_state = None
-        self.build_step_type = build_step_type
+    def __init__(self):
+        super(ProxyResource, self).__init__()
+        self.id = None
+        self.name = None
+        self.type = None

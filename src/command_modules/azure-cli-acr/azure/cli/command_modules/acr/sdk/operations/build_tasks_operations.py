@@ -17,8 +17,8 @@ from msrestazure.azure_operation import AzureOperationPoller
 from .. import models
 
 
-class BuildDefinitionsOperations(object):
-    """BuildDefinitionsOperations operations.
+class BuildTasksOperations(object):
+    """BuildTasksOperations operations.
 
     :param client: Client for service requests.
     :param config: Configuration of service client.
@@ -40,26 +40,26 @@ class BuildDefinitionsOperations(object):
 
     def list(
             self, resource_group_name, registry_name, filter=None, skip_token=None, custom_headers=None, raw=False, **operation_config):
-        """Lists all the build definitions for a specified container registry.
+        """Lists all the build tasks for a specified container registry.
 
         :param resource_group_name: The name of the resource group to which
          the container registry belongs.
         :type resource_group_name: str
         :param registry_name: The name of the container registry.
         :type registry_name: str
-        :param filter: The build definition filter to apply on the operation.
+        :param filter: The build task filter to apply on the operation.
         :type filter: str
-        :param skip_token: $skipToken is supported on get list of build
-         definitions, which provides the next page in the list of definitions.
+        :param skip_token: $skipToken is supported on get list of build tasks,
+         which provides the next page in the list of tasks.
         :type skip_token: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
-        :return: An iterator like instance of BuildDefinition
+        :return: An iterator like instance of BuildTask
         :rtype:
-         ~containerregistrybuild.models.BuildDefinitionPaged[~containerregistrybuild.models.BuildDefinition]
+         ~containerregistrybuild.models.BuildTaskPaged[~containerregistrybuild.models.BuildTask]
         :raises:
          :class:`ErrorException<containerregistrybuild.models.ErrorException>`
         """
@@ -67,7 +67,7 @@ class BuildDefinitionsOperations(object):
 
             if not next_link:
                 # Construct URL
-                url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/buildDefinitions'
+                url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/buildTasks'
                 path_format_arguments = {
                     'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
                     'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
@@ -108,45 +108,44 @@ class BuildDefinitionsOperations(object):
             return response
 
         # Deserialize response
-        deserialized = models.BuildDefinitionPaged(internal_paging, self._deserialize.dependencies)
+        deserialized = models.BuildTaskPaged(internal_paging, self._deserialize.dependencies)
 
         if raw:
             header_dict = {}
-            client_raw_response = models.BuildDefinitionPaged(internal_paging, self._deserialize.dependencies, header_dict)
+            client_raw_response = models.BuildTaskPaged(internal_paging, self._deserialize.dependencies, header_dict)
             return client_raw_response
 
         return deserialized
 
     def get(
-            self, resource_group_name, registry_name, build_definition_name, custom_headers=None, raw=False, **operation_config):
-        """Get the properties of a specified build definition.
+            self, resource_group_name, registry_name, build_task_name, custom_headers=None, raw=False, **operation_config):
+        """Get the properties of a specified build task.
 
         :param resource_group_name: The name of the resource group to which
          the container registry belongs.
         :type resource_group_name: str
         :param registry_name: The name of the container registry.
         :type registry_name: str
-        :param build_definition_name: The name of the container registry build
-         definition.
-        :type build_definition_name: str
+        :param build_task_name: The name of the container registry build task.
+        :type build_task_name: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
         :param operation_config: :ref:`Operation configuration
          overrides<msrest:optionsforoperations>`.
-        :return: BuildDefinition or ClientRawResponse if raw=true
-        :rtype: ~containerregistrybuild.models.BuildDefinition or
+        :return: BuildTask or ClientRawResponse if raw=true
+        :rtype: ~containerregistrybuild.models.BuildTask or
          ~msrest.pipeline.ClientRawResponse
         :raises:
          :class:`ErrorException<containerregistrybuild.models.ErrorException>`
         """
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/buildDefinitions/{buildDefinitionName}'
+        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/buildTasks/{buildTaskName}'
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
             'registryName': self._serialize.url("registry_name", registry_name, 'str', max_length=50, min_length=5, pattern=r'^[a-zA-Z0-9]*$'),
-            'buildDefinitionName': self._serialize.url("build_definition_name", build_definition_name, 'str', max_length=50, min_length=5, pattern=r'^[a-zA-Z0-9]*$')
+            'buildTaskName': self._serialize.url("build_task_name", build_task_name, 'str', max_length=50, min_length=5, pattern=r'^[a-zA-Z0-9]*$')
         }
         url = self._client.format_url(url, **path_format_arguments)
 
@@ -174,7 +173,7 @@ class BuildDefinitionsOperations(object):
         deserialized = None
 
         if response.status_code == 200:
-            deserialized = self._deserialize('BuildDefinition', response)
+            deserialized = self._deserialize('BuildTask', response)
 
         if raw:
             client_raw_response = ClientRawResponse(deserialized, response)
@@ -184,14 +183,14 @@ class BuildDefinitionsOperations(object):
 
 
     def _create_initial(
-            self, resource_group_name, registry_name, build_definition_name, build_definition_create_parameters, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, registry_name, build_task_name, build_task_create_parameters, custom_headers=None, raw=False, **operation_config):
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/buildDefinitions/{buildDefinitionName}'
+        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/buildTasks/{buildTaskName}'
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
             'registryName': self._serialize.url("registry_name", registry_name, 'str', max_length=50, min_length=5, pattern=r'^[a-zA-Z0-9]*$'),
-            'buildDefinitionName': self._serialize.url("build_definition_name", build_definition_name, 'str', max_length=50, min_length=5, pattern=r'^[a-zA-Z0-9]*$')
+            'buildTaskName': self._serialize.url("build_task_name", build_task_name, 'str', max_length=50, min_length=5, pattern=r'^[a-zA-Z0-9]*$')
         }
         url = self._client.format_url(url, **path_format_arguments)
 
@@ -210,7 +209,7 @@ class BuildDefinitionsOperations(object):
             header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
 
         # Construct body
-        body_content = self._serialize.body(build_definition_create_parameters, 'BuildDefinition')
+        body_content = self._serialize.body(build_task_create_parameters, 'BuildTask')
 
         # Construct and send request
         request = self._client.put(url, query_parameters)
@@ -223,9 +222,9 @@ class BuildDefinitionsOperations(object):
         deserialized = None
 
         if response.status_code == 200:
-            deserialized = self._deserialize('BuildDefinition', response)
+            deserialized = self._deserialize('BuildTask', response)
         if response.status_code == 201:
-            deserialized = self._deserialize('BuildDefinition', response)
+            deserialized = self._deserialize('BuildTask', response)
 
         if raw:
             client_raw_response = ClientRawResponse(deserialized, response)
@@ -234,8 +233,8 @@ class BuildDefinitionsOperations(object):
         return deserialized
 
     def create(
-            self, resource_group_name, registry_name, build_definition_name, build_definition_create_parameters, custom_headers=None, raw=False, **operation_config):
-        """Creates a build definition for a container registry with the specified
+            self, resource_group_name, registry_name, build_task_name, build_task_create_parameters, custom_headers=None, raw=False, **operation_config):
+        """Creates a build task for a container registry with the specified
         parameters.
 
         :param resource_group_name: The name of the resource group to which
@@ -243,20 +242,19 @@ class BuildDefinitionsOperations(object):
         :type resource_group_name: str
         :param registry_name: The name of the container registry.
         :type registry_name: str
-        :param build_definition_name: The name of the container registry build
-         definition.
-        :type build_definition_name: str
-        :param build_definition_create_parameters: The parameters for creating
-         a build definition.
-        :type build_definition_create_parameters:
-         ~containerregistrybuild.models.BuildDefinition
+        :param build_task_name: The name of the container registry build task.
+        :type build_task_name: str
+        :param build_task_create_parameters: The parameters for creating a
+         build task.
+        :type build_task_create_parameters:
+         ~containerregistrybuild.models.BuildTask
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
-        :return: An instance of AzureOperationPoller that returns
-         BuildDefinition or ClientRawResponse if raw=true
+        :return: An instance of AzureOperationPoller that returns BuildTask or
+         ClientRawResponse if raw=true
         :rtype:
-         ~msrestazure.azure_operation.AzureOperationPoller[~containerregistrybuild.models.BuildDefinition]
+         ~msrestazure.azure_operation.AzureOperationPoller[~containerregistrybuild.models.BuildTask]
          or ~msrest.pipeline.ClientRawResponse
         :raises:
          :class:`ErrorException<containerregistrybuild.models.ErrorException>`
@@ -264,8 +262,8 @@ class BuildDefinitionsOperations(object):
         raw_result = self._create_initial(
             resource_group_name=resource_group_name,
             registry_name=registry_name,
-            build_definition_name=build_definition_name,
-            build_definition_create_parameters=build_definition_create_parameters,
+            build_task_name=build_task_name,
+            build_task_create_parameters=build_task_create_parameters,
             custom_headers=custom_headers,
             raw=True,
             **operation_config
@@ -292,7 +290,7 @@ class BuildDefinitionsOperations(object):
             if response.status_code not in [200, 201]:
                 raise models.ErrorException(self._deserialize, response)
 
-            deserialized = self._deserialize('BuildDefinition', response)
+            deserialized = self._deserialize('BuildTask', response)
 
             if raw:
                 client_raw_response = ClientRawResponse(deserialized, response)
@@ -309,14 +307,14 @@ class BuildDefinitionsOperations(object):
 
 
     def _delete_initial(
-            self, resource_group_name, registry_name, build_definition_name, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, registry_name, build_task_name, custom_headers=None, raw=False, **operation_config):
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/buildDefinitions/{buildDefinitionName}'
+        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/buildTasks/{buildTaskName}'
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
             'registryName': self._serialize.url("registry_name", registry_name, 'str', max_length=50, min_length=5, pattern=r'^[a-zA-Z0-9]*$'),
-            'buildDefinitionName': self._serialize.url("build_definition_name", build_definition_name, 'str', max_length=50, min_length=5, pattern=r'^[a-zA-Z0-9]*$')
+            'buildTaskName': self._serialize.url("build_task_name", build_task_name, 'str', max_length=50, min_length=5, pattern=r'^[a-zA-Z0-9]*$')
         }
         url = self._client.format_url(url, **path_format_arguments)
 
@@ -346,17 +344,16 @@ class BuildDefinitionsOperations(object):
             return client_raw_response
 
     def delete(
-            self, resource_group_name, registry_name, build_definition_name, custom_headers=None, raw=False, **operation_config):
-        """Deletes a specified build definition.
+            self, resource_group_name, registry_name, build_task_name, custom_headers=None, raw=False, **operation_config):
+        """Deletes a specified build task.
 
         :param resource_group_name: The name of the resource group to which
          the container registry belongs.
         :type resource_group_name: str
         :param registry_name: The name of the container registry.
         :type registry_name: str
-        :param build_definition_name: The name of the container registry build
-         definition.
-        :type build_definition_name: str
+        :param build_task_name: The name of the container registry build task.
+        :type build_task_name: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
@@ -370,7 +367,7 @@ class BuildDefinitionsOperations(object):
         raw_result = self._delete_initial(
             resource_group_name=resource_group_name,
             registry_name=registry_name,
-            build_definition_name=build_definition_name,
+            build_task_name=build_task_name,
             custom_headers=custom_headers,
             raw=True,
             **operation_config
@@ -410,14 +407,14 @@ class BuildDefinitionsOperations(object):
 
 
     def _update_initial(
-            self, resource_group_name, registry_name, build_definition_name, build_definition_update_parameters, custom_headers=None, raw=False, **operation_config):
+            self, resource_group_name, registry_name, build_task_name, build_task_update_parameters, custom_headers=None, raw=False, **operation_config):
         # Construct URL
-        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/buildDefinitions/{buildDefinitionName}'
+        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/buildTasks/{buildTaskName}'
         path_format_arguments = {
             'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
             'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
             'registryName': self._serialize.url("registry_name", registry_name, 'str', max_length=50, min_length=5, pattern=r'^[a-zA-Z0-9]*$'),
-            'buildDefinitionName': self._serialize.url("build_definition_name", build_definition_name, 'str', max_length=50, min_length=5, pattern=r'^[a-zA-Z0-9]*$')
+            'buildTaskName': self._serialize.url("build_task_name", build_task_name, 'str', max_length=50, min_length=5, pattern=r'^[a-zA-Z0-9]*$')
         }
         url = self._client.format_url(url, **path_format_arguments)
 
@@ -436,7 +433,7 @@ class BuildDefinitionsOperations(object):
             header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
 
         # Construct body
-        body_content = self._serialize.body(build_definition_update_parameters, 'BuildDefinitionUpdateParameters')
+        body_content = self._serialize.body(build_task_update_parameters, 'BuildTaskUpdateParameters')
 
         # Construct and send request
         request = self._client.patch(url, query_parameters)
@@ -449,9 +446,9 @@ class BuildDefinitionsOperations(object):
         deserialized = None
 
         if response.status_code == 200:
-            deserialized = self._deserialize('BuildDefinition', response)
+            deserialized = self._deserialize('BuildTask', response)
         if response.status_code == 201:
-            deserialized = self._deserialize('BuildDefinition', response)
+            deserialized = self._deserialize('BuildTask', response)
 
         if raw:
             client_raw_response = ClientRawResponse(deserialized, response)
@@ -460,28 +457,27 @@ class BuildDefinitionsOperations(object):
         return deserialized
 
     def update(
-            self, resource_group_name, registry_name, build_definition_name, build_definition_update_parameters, custom_headers=None, raw=False, **operation_config):
-        """Updates a build definition with the specified parameters.
+            self, resource_group_name, registry_name, build_task_name, build_task_update_parameters, custom_headers=None, raw=False, **operation_config):
+        """Updates a build task with the specified parameters.
 
         :param resource_group_name: The name of the resource group to which
          the container registry belongs.
         :type resource_group_name: str
         :param registry_name: The name of the container registry.
         :type registry_name: str
-        :param build_definition_name: The name of the container registry build
-         definition.
-        :type build_definition_name: str
-        :param build_definition_update_parameters: The parameters for updating
-         a build definition.
-        :type build_definition_update_parameters:
-         ~containerregistrybuild.models.BuildDefinitionUpdateParameters
+        :param build_task_name: The name of the container registry build task.
+        :type build_task_name: str
+        :param build_task_update_parameters: The parameters for updating a
+         build task.
+        :type build_task_update_parameters:
+         ~containerregistrybuild.models.BuildTaskUpdateParameters
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
          deserialized response
-        :return: An instance of AzureOperationPoller that returns
-         BuildDefinition or ClientRawResponse if raw=true
+        :return: An instance of AzureOperationPoller that returns BuildTask or
+         ClientRawResponse if raw=true
         :rtype:
-         ~msrestazure.azure_operation.AzureOperationPoller[~containerregistrybuild.models.BuildDefinition]
+         ~msrestazure.azure_operation.AzureOperationPoller[~containerregistrybuild.models.BuildTask]
          or ~msrest.pipeline.ClientRawResponse
         :raises:
          :class:`ErrorException<containerregistrybuild.models.ErrorException>`
@@ -489,8 +485,8 @@ class BuildDefinitionsOperations(object):
         raw_result = self._update_initial(
             resource_group_name=resource_group_name,
             registry_name=registry_name,
-            build_definition_name=build_definition_name,
-            build_definition_update_parameters=build_definition_update_parameters,
+            build_task_name=build_task_name,
+            build_task_update_parameters=build_task_update_parameters,
             custom_headers=custom_headers,
             raw=True,
             **operation_config
@@ -517,7 +513,7 @@ class BuildDefinitionsOperations(object):
             if response.status_code not in [200, 201]:
                 raise models.ErrorException(self._deserialize, response)
 
-            deserialized = self._deserialize('BuildDefinition', response)
+            deserialized = self._deserialize('BuildTask', response)
 
             if raw:
                 client_raw_response = ClientRawResponse(deserialized, response)
@@ -531,3 +527,67 @@ class BuildDefinitionsOperations(object):
         return AzureOperationPoller(
             long_running_send, get_long_running_output,
             get_long_running_status, long_running_operation_timeout)
+
+    def list_source_repository_properties(
+            self, resource_group_name, registry_name, build_task_name, custom_headers=None, raw=False, **operation_config):
+        """Get the source control properties for a build task.
+
+        :param resource_group_name: The name of the resource group to which
+         the container registry belongs.
+        :type resource_group_name: str
+        :param registry_name: The name of the container registry.
+        :type registry_name: str
+        :param build_task_name: The name of the container registry build task.
+        :type build_task_name: str
+        :param dict custom_headers: headers that will be added to the request
+        :param bool raw: returns the direct response alongside the
+         deserialized response
+        :param operation_config: :ref:`Operation configuration
+         overrides<msrest:optionsforoperations>`.
+        :return: SourceRepositoryProperties or ClientRawResponse if raw=true
+        :rtype: ~containerregistrybuild.models.SourceRepositoryProperties or
+         ~msrest.pipeline.ClientRawResponse
+        :raises:
+         :class:`ErrorException<containerregistrybuild.models.ErrorException>`
+        """
+        # Construct URL
+        url = '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ContainerRegistry/registries/{registryName}/buildTasks/{buildTaskName}/listSourceRepositoryProperties'
+        path_format_arguments = {
+            'subscriptionId': self._serialize.url("self.config.subscription_id", self.config.subscription_id, 'str'),
+            'resourceGroupName': self._serialize.url("resource_group_name", resource_group_name, 'str'),
+            'registryName': self._serialize.url("registry_name", registry_name, 'str', max_length=50, min_length=5, pattern=r'^[a-zA-Z0-9]*$'),
+            'buildTaskName': self._serialize.url("build_task_name", build_task_name, 'str', max_length=50, min_length=5, pattern=r'^[a-zA-Z0-9]*$')
+        }
+        url = self._client.format_url(url, **path_format_arguments)
+
+        # Construct parameters
+        query_parameters = {}
+        query_parameters['api-version'] = self._serialize.query("self.api_version", self.api_version, 'str')
+
+        # Construct headers
+        header_parameters = {}
+        header_parameters['Content-Type'] = 'application/json; charset=utf-8'
+        if self.config.generate_client_request_id:
+            header_parameters['x-ms-client-request-id'] = str(uuid.uuid1())
+        if custom_headers:
+            header_parameters.update(custom_headers)
+        if self.config.accept_language is not None:
+            header_parameters['accept-language'] = self._serialize.header("self.config.accept_language", self.config.accept_language, 'str')
+
+        # Construct and send request
+        request = self._client.post(url, query_parameters)
+        response = self._client.send(request, header_parameters, stream=False, **operation_config)
+
+        if response.status_code not in [200]:
+            raise models.ErrorException(self._deserialize, response)
+
+        deserialized = None
+
+        if response.status_code == 200:
+            deserialized = self._deserialize('SourceRepositoryProperties', response)
+
+        if raw:
+            client_raw_response = ClientRawResponse(deserialized, response)
+            return client_raw_response
+
+        return deserialized

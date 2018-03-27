@@ -12,21 +12,21 @@
 from msrest.serialization import Model
 
 
-class BuildDefinitionUpdateParameters(Model):
-    """The parameters for updating a build definition.
+class BuildTaskUpdateParameters(Model):
+    """The parameters for updating a build task.
 
-    :param alias: The alternative updatable name for a build definition.
+    :param alias: The alternative updatable name for a build task.
     :type alias: str
-    :param status: The current status of build definition. Possible values
-     include: 'Disabled', 'Enabled'
-    :type status: str or ~containerregistrybuild.models.BuildDefinitionStatus
+    :param status: The current status of build task. Possible values include:
+     'Disabled', 'Enabled'
+    :type status: str or ~containerregistrybuild.models.BuildTaskStatus
     :param platform: The platform properties against which the build has to
      happen.
     :type platform: ~containerregistrybuild.models.PlatformProperties
     :param timeout: Build timeout in seconds.
     :type timeout: int
     :param source_repository: The properties that describes the source(code)
-     for the build definition.
+     for the build task.
     :type source_repository:
      ~containerregistrybuild.models.SourceRepositoryUpdateParameters
     :param tags: The ARM resource tags.
@@ -43,7 +43,7 @@ class BuildDefinitionUpdateParameters(Model):
     }
 
     def __init__(self, alias=None, status=None, platform=None, timeout=None, source_repository=None, tags=None):
-        super(BuildDefinitionUpdateParameters, self).__init__()
+        super(BuildTaskUpdateParameters, self).__init__()
         self.alias = alias
         self.status = status
         self.platform = platform

@@ -12,10 +12,9 @@
 from .resource import Resource
 
 
-class BuildDefinition(Resource):
-    """The build defintion that has the resource properties and all build items.
-    The build definition will have all information to schedule a build against
-    it.
+class BuildTask(Resource):
+    """The build task that has the resource properties and all build items. The
+    build task will have all information to schedule a build against it.
 
     Variables are only populated by the server, and will be ignored when
     sending a request.
@@ -31,20 +30,20 @@ class BuildDefinition(Resource):
     :type location: str
     :param tags: The tags of the resource.
     :type tags: dict[str, str]
-    :ivar provisioning_state: The provisioning state of the build definition.
+    :ivar provisioning_state: The provisioning state of the build task.
      Possible values include: 'Creating', 'Updating', 'Deleting', 'Succeeded',
      'Failed', 'Canceled'
     :vartype provisioning_state: str or
      ~containerregistrybuild.models.ProvisioningState
-    :ivar creation_date: The creation date of build definition.
+    :ivar creation_date: The creation date of build task.
     :vartype creation_date: datetime
-    :param alias: The alternative updatable name for a build definition.
+    :param alias: The alternative updatable name for a build task.
     :type alias: str
-    :param status: The current status of build definition. Possible values
-     include: 'Disabled', 'Enabled'
-    :type status: str or ~containerregistrybuild.models.BuildDefinitionStatus
+    :param status: The current status of build task. Possible values include:
+     'Disabled', 'Enabled'
+    :type status: str or ~containerregistrybuild.models.BuildTaskStatus
     :param source_repository: The properties that describes the source(code)
-     for the build definition.
+     for the build task.
     :type source_repository:
      ~containerregistrybuild.models.SourceRepositoryProperties
     :param platform: The platform properties against which the build has to
@@ -82,7 +81,7 @@ class BuildDefinition(Resource):
     }
 
     def __init__(self, location, alias, source_repository, platform, tags=None, status=None, timeout=None):
-        super(BuildDefinition, self).__init__(location=location, tags=tags)
+        super(BuildTask, self).__init__(location=location, tags=tags)
         self.provisioning_state = None
         self.creation_date = None
         self.alias = alias

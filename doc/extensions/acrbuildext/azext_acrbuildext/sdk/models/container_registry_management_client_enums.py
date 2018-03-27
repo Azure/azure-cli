@@ -12,6 +12,28 @@
 from enum import Enum
 
 
+class BuildStatus(Enum):
+
+    queued = "Queued"
+    started = "Started"
+    running = "Running"
+    succeeded = "Succeeded"
+    failed = "Failed"
+    canceled = "Canceled"
+
+
+class BuildType(Enum):
+
+    auto_build = "AutoBuild"
+    quick_build = "QuickBuild"
+
+
+class OsType(Enum):
+
+    windows = "Windows"
+    linux = "Linux"
+
+
 class ProvisioningState(Enum):
 
     creating = "Creating"
@@ -22,7 +44,7 @@ class ProvisioningState(Enum):
     canceled = "Canceled"
 
 
-class BuildDefinitionStatus(Enum):
+class BuildTaskStatus(Enum):
 
     disabled = "Disabled"
     enabled = "Enabled"
@@ -40,34 +62,13 @@ class TokenType(Enum):
     oauth = "OAuth"
 
 
-class OsType(Enum):
-
-    windows = "Windows"
-    linux = "Linux"
-
-
-class BuildStatus(Enum):
-
-    queued = "Queued"
-    started = "Started"
-    running = "Running"
-    succeeded = "Succeeded"
-    failed = "Failed"
-    canceled = "Canceled"
-
-
-class BuildType(Enum):
-
-    auto_build = "AutoBuild"
-    quick_build = "QuickBuild"
-
-
-class BuildStepType(Enum):
-
-    docker = "Docker"
-
-
 class BaseImageDependencyType(Enum):
 
     build_time = "BuildTime"
     run_time = "RunTime"
+
+
+class BaseImageTriggerType(Enum):
+
+    runtime = "Runtime"
+    none = "None"
