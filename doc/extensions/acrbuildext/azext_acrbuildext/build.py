@@ -279,7 +279,10 @@ def acr_queue(cmd,
             if os.path.exists(tar_file_path):
                 logger.debug(
                     "Starting to delete the archived source code from '{}'.".format(tar_file_path))
-                os.remove(tar_file_path)
+                try:
+                    os.remove(tar_file_path)
+                except OSError:
+                    pass
         unit = ""
         for S in ['Bytes', 'KiB', 'MiB', 'GiB']:
             if size < 1024:
@@ -405,7 +408,10 @@ def _upload_source_code(client, registry_name, resource_group_name, source_locat
         if os.path.exists(tar_file_path):
             logger.debug(
                 "Starting to delete the archived source code from '{}'.".format(tar_file_path))
-            os.remove(tar_file_path)
+            try:
+                os.remove(tar_file_path)
+            except OSError:
+                pass
         raise CLIError(err)
 
 
