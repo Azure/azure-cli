@@ -159,11 +159,6 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_snapshot', setter_arg_name='snapshot')
 
     with self.command_group('vm', compute_vm_sdk) as g:
-
-        g.custom_command('assign-identity', 'assign_vm_identity', validator=process_assign_identity_namespace,
-                         deprecate_info='az vm identity assign')
-        g.custom_command('remove-identity', 'remove_vm_identity', validator=process_remove_identity_namespace, min_api='2017-12-01',
-                         deprecate_info='az vm identity remove')
         g.custom_command('identity assign', 'assign_vm_identity', validator=process_assign_identity_namespace)
         g.custom_command('identity remove', 'remove_vm_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
         g.custom_command('identity show', 'show_vm_identity')
@@ -269,9 +264,6 @@ def load_command_table(self, _):
         g.custom_command('reset-ssh', 'reset_linux_ssh')
 
     with self.command_group('vmss', compute_vmss_sdk, operation_group='virtual_machine_scale_sets') as g:
-        g.custom_command('assign-identity', 'assign_vmss_identity', validator=process_assign_identity_namespace, deprecate_info='az vmss identity assign')
-        g.custom_command('remove-identity', 'remove_vmss_identity', validator=process_remove_identity_namespace, min_api='2017-12-01',
-                         deprecate_info='az vmss identity remove')
         g.custom_command('identity assign', 'assign_vmss_identity', validator=process_assign_identity_namespace)
         g.custom_command('identity remove', 'remove_vmss_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
         g.custom_command('identity show', 'show_vmss_identity')
