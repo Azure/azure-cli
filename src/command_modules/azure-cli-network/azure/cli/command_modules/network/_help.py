@@ -470,8 +470,9 @@ helps['network application-gateway redirect-config create'] = """
     examples:
         - name: Create a redirect configuration to a http-listener called MyBackendListener.
           text: |
-            az network application-gateway redirect-config create -g MyResourceGroup --gateway-name MyAppGateway \\
-                -n MyRedirectConfig --type Permanent --include-path true --include-query-string true --target-listener MyBackendListener
+            az network application-gateway redirect-config create -g MyResourceGroup \\
+                --gateway-name MyAppGateway -n MyRedirectConfig --type Permanent \\
+                --include-path true --include-query-string true --target-listener MyBackendListener
 """
 
 helps['network application-gateway redirect-config delete'] = """
@@ -479,7 +480,8 @@ helps['network application-gateway redirect-config delete'] = """
     short-summary: Delete a redirect configuration.
     examples:
         - name: Delete a redirect configuration.
-          text: az network application-gateway redirect-config delete -g MyResourceGroup --gateway-name MyAppGateway -n MyRedirectConfig
+          text: az network application-gateway redirect-config delete -g MyResourceGroup \\
+            --gateway-name MyAppGateway -n MyRedirectConfig
 """
 
 helps['network application-gateway redirect-config list'] = """
@@ -557,7 +559,7 @@ helps['network application-gateway rule update'] = """
     type: command
     short-summary: Update a rule.
     examples:
-        - name: Update a rule use a new Http listener.
+        - name: Update a rule use a new HTTP listener.
           text: |
             az network application-gateway rule update -g MyResourceGroup --gateway-name MyAppGateway \\
                 -n MyRule --http-listener MyNewBackendListener
@@ -754,8 +756,9 @@ helps['network application-gateway url-path-map rule create'] = """
     examples:
         - name: Create a rule for a URL path map.
           text: |
-            az network application-gateway url-path-map rule create -g MyResourceGroup --gateway-name MyAppGateway \\
-                -n MyUrlPathMapRule2 --path-map-name MyUrlPathMap --paths /mypath2/* --address-pool MyAddressPool --http-settings MyHttpSettings
+            az network application-gateway url-path-map rule create -g MyResourceGroup \\
+                --gateway-name MyAppGateway -n MyUrlPathMapRule2 --path-map-name MyUrlPathMap \\
+                --paths /mypath2/* --address-pool MyAddressPool --http-settings MyHttpSettings
 """
 
 helps['network application-gateway url-path-map rule delete'] = """
@@ -936,8 +939,8 @@ helps['network dns record-set a add-record'] = """
     examples:
         - name: Add an A record.
           text: |
-            az network dns record-set a add-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -a MyIpv4Address
+            az network dns record-set a add-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -a MyIpv4Address
 """
 
 helps['network dns record-set a create'] = """
@@ -973,8 +976,8 @@ helps['network dns record-set a remove-record'] = """
     examples:
         - name: Remove an A record from its record set.
           text: |
-            az network dns record-set a remove-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -a MyIpv4Address
+            az network dns record-set a remove-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -a MyIpv4Address
 """
 
 helps['network dns record-set a show'] = """
@@ -991,8 +994,8 @@ helps['network dns record-set a update'] = """
     examples:
         - name: Update an A record set.
           text: |
-            az network dns record-set a update -g MyResourceGroup -n MyRecordSet\\
-            -z www.mysite.com --metadata owner=WebTeam
+            az network dns record-set a update -g MyResourceGroup -n MyRecordSet \\
+                -z www.mysite.com --metadata owner=WebTeam
 """
 # endregion
 
@@ -1008,8 +1011,8 @@ helps['network dns record-set aaaa add-record'] = """
     examples:
         - name: Add an AAAA record.
           text: |
-            az network dns record-set aaaa add-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -a MyIpv6Address
+            az network dns record-set aaaa add-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -a MyIpv6Address
 """
 
 helps['network dns record-set aaaa create'] = """
@@ -1045,8 +1048,8 @@ helps['network dns record-set aaaa remove-record'] = """
     examples:
         - name: Remove an AAAA record from its record set.
           text: |
-            az network dns record-set aaaa remove-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -a MyIpv6Address
+            az network dns record-set aaaa remove-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -a MyIpv6Address
 """
 
 helps['network dns record-set aaaa show'] = """
@@ -1063,8 +1066,8 @@ helps['network dns record-set aaaa update'] = """
     examples:
         - name: Update an AAAA record set.
           text: |
-            az network dns record-set aaaa update -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet --metadata owner=WebTeam
+            az network dns record-set aaaa update -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet --metadata owner=WebTeam
 """
 # endregion
 
@@ -1080,8 +1083,8 @@ helps['network dns record-set caa add-record'] = """
     examples:
         - name: Add a CAA record.
           text: |
-            az network dns record-set caa add-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet --flags 0 --tag “issue” –-value “ca.contoso.com”
+            az network dns record-set caa add-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet --flags 0 --tag “issue” –-value “ca.contoso.com”
 """
 
 helps['network dns record-set caa create'] = """
@@ -1117,8 +1120,8 @@ helps['network dns record-set caa remove-record'] = """
     examples:
         - name: Remove a CAA record from its record set.
           text: |
-            az network dns record-set caa remove-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet --flags 0 --tag “issue” –-value “ca.contoso.com”
+            az network dns record-set caa remove-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet --flags 0 --tag “issue” –-value “ca.contoso.com”
 """
 
 helps['network dns record-set caa show'] = """
@@ -1135,8 +1138,8 @@ helps['network dns record-set caa update'] = """
     examples:
         - name: Update a CAA record set.
           text: |
-            az network dns record-set caa update -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet --metadata owner=WebTeam
+            az network dns record-set caa update -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet --metadata owner=WebTeam
 """
 # endregion
 
@@ -1179,8 +1182,8 @@ helps['network dns record-set cname remove-record'] = """
     examples:
         - name: Remove a CNAME record from its record set.
           text: |
-            az network dns record-set cname remove-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -c www.contoso.com
+            az network dns record-set cname remove-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -c www.contoso.com
 """
 
 helps['network dns record-set cname set-record'] = """
@@ -1189,8 +1192,8 @@ helps['network dns record-set cname set-record'] = """
     examples:
         - name: Set the value of a CNAME record.
           text: |
-            az network dns record-set cname set-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -c www.contoso.com
+            az network dns record-set cname set-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -c www.contoso.com
 """
 
 helps['network dns record-set cname show'] = """
@@ -1214,8 +1217,8 @@ helps['network dns record-set mx add-record'] = """
     examples:
         - name: Add an MX record.
           text: |
-            az network dns record-set mx add-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -e mail.mysite.com -p 10
+            az network dns record-set mx add-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -e mail.mysite.com -p 10
 """
 
 helps['network dns record-set mx create'] = """
@@ -1251,8 +1254,8 @@ helps['network dns record-set mx remove-record'] = """
     examples:
         - name: Remove an MX record from its record set.
           text: |
-            az network dns record-set mx remove-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -e mail.mysite.com -p 10
+            az network dns record-set mx remove-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -e mail.mysite.com -p 10
 """
 
 helps['network dns record-set mx show'] = """
@@ -1269,8 +1272,8 @@ helps['network dns record-set mx update'] = """
     examples:
         - name: Update an MX record set.
           text: |
-            az network dns record-set mx update -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet --metadata owner=WebTeam
+            az network dns record-set mx update -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet --metadata owner=WebTeam
 """
 # endregion
 
@@ -1286,8 +1289,8 @@ helps['network dns record-set ns add-record'] = """
     examples:
         - name: Add an NS record.
           text: |
-            az network dns record-set ns add-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -d ns.mysite.com
+            az network dns record-set ns add-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -d ns.mysite.com
 """
 
 helps['network dns record-set ns create'] = """
@@ -1323,8 +1326,8 @@ helps['network dns record-set ns remove-record'] = """
     examples:
         - name: Remove an NS record from its record set.
           text: |
-            az network dns record-set ns remove-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -d ns.mysite.com
+            az network dns record-set ns remove-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -d ns.mysite.com
 """
 
 helps['network dns record-set ns show'] = """
@@ -1341,8 +1344,8 @@ helps['network dns record-set ns update'] = """
     examples:
         - name: Update an NS record set.
           text: |
-            az network dns record-set ns update -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet --metadata owner=WebTeam
+            az network dns record-set ns update -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet --metadata owner=WebTeam
 """
 # endregion
 
@@ -1358,8 +1361,8 @@ helps['network dns record-set ptr add-record'] = """
     examples:
         - name: Add a PTR record.
           text: |
-            az network dns record-set ptr add-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -d another.site.com
+            az network dns record-set ptr add-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -d another.site.com
 """
 
 helps['network dns record-set ptr create'] = """
@@ -1395,8 +1398,8 @@ helps['network dns record-set ptr remove-record'] = """
     examples:
         - name: Remove a PTR record from its record set.
           text: |
-            az network dns record-set ptr remove-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -d another.site.com
+            az network dns record-set ptr remove-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -d another.site.com
 """
 
 helps['network dns record-set ptr show'] = """
@@ -1413,8 +1416,8 @@ helps['network dns record-set ptr update'] = """
     examples:
         - name: Update a PTR record set.
           text: |
-            az network dns record-set ptr update -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet --metadata owner=WebTeam
+            az network dns record-set ptr update -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet --metadata owner=WebTeam
 """
 # endregion
 
@@ -1430,8 +1433,8 @@ helps['network dns record-set srv add-record'] = """
     examples:
         - name: Add an SRV record.
           text: |
-            az network dns record-set srv add-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -d another.site.com
+            az network dns record-set srv add-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -d another.site.com
 """
 
 helps['network dns record-set srv create'] = """
@@ -1440,8 +1443,8 @@ helps['network dns record-set srv create'] = """
     examples:
         - name: Create an empty SRV record set.
           text: |
-            az network dns record-set srv create -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -t webserver.mysite.com -r 8081 -p 10 -w 10
+            az network dns record-set srv create -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -t webserver.mysite.com -r 8081 -p 10 -w 10
 """
 
 helps['network dns record-set srv delete'] = """
@@ -1469,8 +1472,8 @@ helps['network dns record-set srv remove-record'] = """
     examples:
         - name: Remove an SRV record from its record set.
           text: |
-            az network dns record-set srv remove-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -t webserver.mysite.com -r 8081 -p 10 -w 10
+            az network dns record-set srv remove-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -t webserver.mysite.com -r 8081 -p 10 -w 10
 """
 
 helps['network dns record-set srv show'] = """
@@ -1487,8 +1490,8 @@ helps['network dns record-set srv update'] = """
     examples:
         - name: Update an SRV record set.
           text: |
-            az network dns record-set srv update -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet --metadata owner=WebTeam
+            az network dns record-set srv update -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet --metadata owner=WebTeam
 """
 # endregion
 
@@ -1512,8 +1515,8 @@ helps['network dns record-set soa update'] = """
     examples:
         - name: Update properties of an SOA record.
           text: |
-            az network dns record-set soa update -g MyResourceGroup -z www.mysite.com\\
-            -e myhostmaster.mysite.com
+            az network dns record-set soa update -g MyResourceGroup -z www.mysite.com \\
+                -e myhostmaster.mysite.com
 """
 # endregion
 
@@ -1529,8 +1532,8 @@ helps['network dns record-set txt add-record'] = """
     examples:
         - name: Add a TXT record.
           text: |
-            az network dns record-set txt add-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -v Owner=WebTeam
+            az network dns record-set txt add-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -v Owner=WebTeam
 """
 
 helps['network dns record-set txt create'] = """
@@ -1566,8 +1569,8 @@ helps['network dns record-set txt remove-record'] = """
     examples:
         - name: Remove a TXT record from its record set.
           text: |
-            az network dns record-set txt remove-record -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet -v Owner=WebTeam
+            az network dns record-set txt remove-record -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet -v Owner=WebTeam
 """
 
 helps['network dns record-set txt show'] = """
@@ -1584,8 +1587,8 @@ helps['network dns record-set txt update'] = """
     examples:
         - name: Update a TXT record set.
           text: |
-            az network dns record-set txt update -g MyResourceGroup -z www.mysite.com\\
-            -n MyRecordSet --metadata owner=WebTeam
+            az network dns record-set txt update -g MyResourceGroup -z www.mysite.com \\
+                -n MyRecordSet --metadata owner=WebTeam
 """
 # endregion
 
@@ -1691,7 +1694,7 @@ helps['network express-route create'] = """
     examples:
         - name: Create an ExpressRoute circuit.
           text: |
-            az network express-route create --bandwidth 200 -n MyCircuit --peering-location "Silicon Valley"\\
+            az network express-route create --bandwidth 200 -n MyCircuit --peering-location "Silicon Valley" \\
                 -g --provider "Equinix" -l "West US" --sku-family MeteredData --sku-tier Standard
 """
 
@@ -1738,7 +1741,7 @@ helps['network express-route list-route-tables'] = """
     examples:
         - name: Show the current routing table of an ExpressRoute circuit peering.
           text: |
-            az network express-route list-route-tables -g MyResourceGroup -n MyCircuit\\
+            az network express-route list-route-tables -g MyResourceGroup -n MyCircuit \\
                 --path primary --peering-name AzurePrivatePeering
 """
 
@@ -1835,15 +1838,15 @@ helps['network express-route peering create'] = """
     examples:
         - name: Create Microsoft Peering settings with IPv4 configuration.
           text: |
-            az network express-route peering create -g MyResourceGroup --circuit-name MyCircuit\\
-                --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103\\
-                --primary-peer-subnet 101.0.0.0/30 --secondary-peer-subnet 102.0.0.0/30\\
+            az network express-route peering create -g MyResourceGroup --circuit-name MyCircuit \\
+                --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 \\
+                --primary-peer-subnet 101.0.0.0/30 --secondary-peer-subnet 102.0.0.0/30 \\
                 --advertised-public-prefixes 101.0.0.0/30
         - name: Add IPv6 settings to existing IPv4 config for Microsoft peering.
           text: |
-            az network express-route peering update -g MyResourceGroup --circuit-name MyCircuit\\
-                --peering-type MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2002:db00::/126\\
-                 --secondary-peer-subnet 2003:db00::/126 --advertised-public-prefixes 2002:db00::/126
+            az network express-route peering update -g MyResourceGroup --circuit-name MyCircuit \\
+                --peering-type MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2002:db00::/126 \\
+                --secondary-peer-subnet 2003:db00::/126 --advertised-public-prefixes 2002:db00::/126
 """
 
 helps['network express-route peering delete'] = """
@@ -2053,8 +2056,9 @@ helps['network lb inbound-nat-pool create'] = """
     examples:
         - name: Create an inbound NAT address pool.
           text: |
-            az network lb inbound-nat-pool create -g MyResourceGroup --lb-name MyLb -n MyNatPool --protocol Tcp \\
-            --frontend-port-range-start 80 --frontend-port-range-end 89 --backend-port 80 --frontend-ip-name MyFrontendIp
+            az network lb inbound-nat-pool create -g MyResourceGroup --lb-name MyLb \\
+            -n MyNatPool --protocol Tcp --frontend-port-range-start 80 --frontend-port-range-end 89 \\
+            --backend-port 80 --frontend-ip-name MyFrontendIp
 """
 
 helps['network lb inbound-nat-pool delete'] = """
@@ -2283,8 +2287,9 @@ helps['network local-gateway create'] = """
     short-summary: Create a local VPN gateway.
     examples:
         - name: Create a Local Network Gateway to represent your on-premises site.
-          text: >
-            az network local-gateway create -g MyResourceGroup -n MyLocalGateway --gateway-ip-address 23.99.221.164 --local-address-prefixes 10.0.0.0/24 20.0.0.0/24
+          text: |
+            az network local-gateway create -g MyResourceGroup -n MyLocalGateway \\
+                --gateway-ip-address 23.99.221.164 --local-address-prefixes 10.0.0.0/24 20.0.0.0/24
 """
 
 helps['network local-gateway delete'] = """
@@ -2296,8 +2301,7 @@ helps['network local-gateway delete'] = """
         For more information, follow the order of instructions on this page: https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-delete-vnet-gateway-portal
     examples:
         - name: Create a Local Network Gateway to represent your on-premises site.
-          text: >
-            az network local-gateway delete -g MyResourceGroup -n MyLocalGateway
+          text: az network local-gateway delete -g MyResourceGroup -n MyLocalGateway
 """
 helps['network local-gateway list'] = """
     type: command
@@ -2319,8 +2323,9 @@ helps['network local-gateway update'] = """
     short-summary: Update a local VPN gateway.
     examples:
         - name: Update a Local Network Gateway provisioned with a 10.0.0.0/24 address prefix with additional prefixes.
-          text: >
-            az network local-gateway update -g MyResourceGroup -n MyLocalGateway -–local-address-prefixes 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24
+          text: |
+            az network local-gateway update -g MyResourceGroup -n MyLocalGateway \\
+                -–local-address-prefixes 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24
 """
 # endregion
 
@@ -2348,7 +2353,7 @@ helps['network nic create'] = """
         - name: >
             Create a network interface for a specified subnet on a virtual network with network security group and application security groups.
           text: |
-            az network nic create -g MyResourceGroup --vnet-name MyVnet --subnet MySubnet -n MyNic\\
+            az network nic create -g MyResourceGroup --vnet-name MyVnet --subnet MySubnet -n MyNic \\
                 --network-security-group MyNsg --application-security-groups Web App
 """
 
@@ -2537,8 +2542,7 @@ helps['network nsg create'] = """
     short-summary: Create a network security group.
     examples:
         - name: Create an NSG in a resource group within a region with tags.
-          text: >
-            az network nsg create -g MyResourceGroup -n MyNsg --tags super_secure no_80 no_22
+          text: az network nsg create -g MyResourceGroup -n MyNsg --tags super_secure no_80 no_22
 """
 
 helps['network nsg delete'] = """
@@ -2546,8 +2550,7 @@ helps['network nsg delete'] = """
     short-summary: Delete a network security group.
     examples:
         - name: Delete an NSG in a resource group.
-          text: >
-            az network nsg delete -g MyResourceGroup -n MyNsg
+          text: az network nsg delete -g MyResourceGroup -n MyNsg
 """
 
 helps['network nsg list'] = """
@@ -2555,8 +2558,7 @@ helps['network nsg list'] = """
     short-summary: List network security groups.
     examples:
         - name: List all NSGs in the 'westus' region.
-          text: >
-            az network nsg list --query "[?location=='westus']"
+          text: az network nsg list --query "[?location=='westus']"
 """
 
 helps['network nsg show'] = """
@@ -2564,14 +2566,11 @@ helps['network nsg show'] = """
     short-summary: Get information about a network security group.
     examples:
         - name: Get basic information about an NSG.
-          text: >
-            az network nsg show -g MyResourceGroup -n MyNsg
+          text: az network nsg show -g MyResourceGroup -n MyNsg
         - name: Get the default security rules of an NSG and format the output as a table.
-          text: >
-            az network nsg show -g MyResourceGroup -n MyNsg --query "defaultSecurityRules[]" -o table
+          text: az network nsg show -g MyResourceGroup -n MyNsg --query "defaultSecurityRules[]" -o table
         - name: Get all default NSG rules with "Allow" access and format the output as a table.
-          text: >
-            az network nsg show -g MyResourceGroup -n MyNsg --query "defaultSecurityRules[?access=='Allow']" -o table
+          text: az network nsg show -g MyResourceGroup -n MyNsg --query "defaultSecurityRules[?access=='Allow']" -o table
 """
 
 helps['network nsg update'] = """
@@ -2621,8 +2620,7 @@ helps['network nsg rule delete'] = """
     short-summary: Delete a network security group rule.
     examples:
         - name: Delete a network security group rule.
-          text: >
-            az network nsg rule delete -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule
+          text: az network nsg rule delete -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule
 """
 
 helps['network nsg rule list'] = """
@@ -2630,8 +2628,7 @@ helps['network nsg rule list'] = """
     short-summary: List all rules in a network security group.
     examples:
         - name: List all rules in a network security group.
-          text: >
-            az network nsg rule list -g MyResourceGroup --nsg-name MyNsg
+          text: az network nsg rule list -g MyResourceGroup --nsg-name MyNsg
 """
 
 helps['network nsg rule show'] = """
@@ -2639,8 +2636,7 @@ helps['network nsg rule show'] = """
     short-summary: Get the details of a network security group rule.
     examples:
         - name: Get the details of a network security group rule.
-          text: >
-            az network nsg rule show -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule
+          text: az network nsg rule show -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule
 """
 
 helps['network nsg rule update'] = """
@@ -2648,8 +2644,7 @@ helps['network nsg rule update'] = """
     short-summary: Update a network security group rule.
     examples:
         - name: Update an NSG rule with a new wildcard destination address prefix.
-          text: >
-            az network nsg rule update -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --destination-address-prefix '*'
+          text: az network nsg rule update -g MyResourceGroup --nsg-name MyNsg -n MyNsgRule --destination-address-prefix '*'
 """
 # endregion
 
@@ -2666,14 +2661,11 @@ helps['network public-ip create'] = """
     short-summary: Create a public IP address.
     examples:
         - name: Create a basic public IP resource.
-          text: >
-            az network public-ip create -g MyResourceGroup -n MyIp
+          text: az network public-ip create -g MyResourceGroup -n MyIp
         - name: Create a static public IP resource for a DNS name label.
-          text: >
-            az network public-ip create -g MyResourceGroup -n MyIp --dns-name MyLabel --allocation-method Static
+          text: az network public-ip create -g MyResourceGroup -n MyIp --dns-name MyLabel --allocation-method Static
         - name: Create a public IP resource in an availability zone in the current resource group region.
-          text: >
-            az network public-ip create -g MyResourceGroup -n MyIp --zone 2
+          text: az network public-ip create -g MyResourceGroup -n MyIp --zone 2
 """
 
 helps['network public-ip delete'] = """
@@ -2689,14 +2681,11 @@ helps['network public-ip list'] = """
     short-summary: List public IP addresses.
     examples:
         - name: List all public IPs in a subscription.
-          text: >
-            az network public-ip list
+          text: az network public-ip list
         - name: List all public IPs in a resource group.
-          text: >
-            az network public-ip list -g MyResourceGroup
+          text: az network public-ip list -g MyResourceGroup
         - name: List all public IPs of a domain name label.
-          text: >
-            az network public-ip list -g MyResourceGroup --query "[?dnsSettings.domainNameLabel=='MyLabel']"
+          text: az network public-ip list -g MyResourceGroup --query "[?dnsSettings.domainNameLabel=='MyLabel']"
 """
 
 helps['network public-ip show'] = """
@@ -2704,11 +2693,9 @@ helps['network public-ip show'] = """
     short-summary: Get the details of a public IP address.
     examples:
         - name: Get information about a public IP resource.
-          text: >
-            az network public-ip show -g MyResourceGroup -n MyIp
+          text: az network public-ip show -g MyResourceGroup -n MyIp
         - name: Get the FQDN and IP address of a public IP resource.
-          text: >
-            az network public-ip show -g MyResourceGroup -n MyIp --query "{fqdn: dnsSettings.fqdn, address: ipAddress}"
+          text: az network public-ip show -g MyResourceGroup -n MyIp --query "{fqdn: dnsSettings.fqdn, address: ipAddress}"
 """
 
 helps['network public-ip update'] = """
@@ -2716,8 +2703,7 @@ helps['network public-ip update'] = """
     short-summary: Update a public IP address.
     examples:
         - name: Update a public IP resource with a DNS name label and static allocation.
-          text: >
-            az network public-ip update -g MyResourceGroup -n MyIp --dns-name MyLabel --allocation-method Static
+          text: az network public-ip update -g MyResourceGroup -n MyIp --dns-name MyLabel --allocation-method Static
 """
 # endregion
 
@@ -2779,7 +2765,7 @@ helps['network route-table route create'] = """
         - name: Create a route that forces all inbound traffic to a Network Virtual Appliance.
           text: |
             az network route-table route create -g MyResourceGroup --route-table-name MyRouteTable -n MyRoute \\
-            --next-hop-type VirtualAppliance --address-prefix 10.0.0.0/16 --next-hop-ip-address 10.0.100.4
+                --next-hop-type VirtualAppliance --address-prefix 10.0.0.0/16 --next-hop-ip-address 10.0.100.4
 """
 
 helps['network route-table route delete'] = """
@@ -2812,7 +2798,7 @@ helps['network route-table route update'] = """
     examples:
         - name: Update a route in a route table to change the next hop ip address.
           text: az network route-table route update -g MyResourceGroup ---route-table-name MyRouteTable \\
-            -n MyRoute --next-hop-ip-address 10.0.100.5
+                    -n MyRoute --next-hop-ip-address 10.0.100.5
 """
 # endregion
 
@@ -2884,8 +2870,8 @@ helps['network route-filter rule create'] = """
     examples:
         - name: Create a rule in a route filter to allow Dynamics 365.
           text: |
-            az network route-filter rule create -g MyResourceGroup --filter-name MyRouteFilter -n MyRouteFilterRule \\
-             --communities 12076:5040 --access Allow
+            az network route-filter rule create -g MyResourceGroup --filter-name MyRouteFilter \\
+                -n MyRouteFilterRule --communities 12076:5040 --access Allow
 """
 
 helps['network route-filter rule delete'] = """
@@ -2912,8 +2898,8 @@ helps['network route-filter rule list-service-communities'] = """
           text: az network route-filter rule list-service-communities -o table
         - name: Get the community value for Exchange.
           text: |
-            az network route-filter rule list-service-communities\\
-            --query '[].bgpCommunities[?communityName==`Exchange`].[communityValue][][]' -o tsv
+            az network route-filter rule list-service-communities \\
+                --query '[].bgpCommunities[?communityName==`Exchange`].[communityValue][][]' -o tsv
 """
 
 helps['network route-filter rule show'] = """
@@ -2929,7 +2915,9 @@ helps['network route-filter rule update'] = """
     short-summary: Update a rule in a route filter.
     examples:
         - name: Update a rule in a route filter to add Exchange to rule list.
-          text: az network route-filter rule update -g MyResourceGroup --filter-name MyRouteFilter -n MyRouteFilterRule --add communities='12076:5010'
+          text: |
+            az network route-filter rule update -g MyResourceGroup --filter-name MyRouteFilter \\
+                -n MyRouteFilterRule --add communities='12076:5010'
 """
 # endregion
 
@@ -3012,7 +3000,7 @@ helps['network traffic-manager endpoint create'] = """
         - name: Create an endpoint for a performance profile to point to an Azure Web App endpoint.
           text: |
             az network traffic-manager endpoint create -g MyResourceGroup --profile-name MyTmProfile \\
-            -n MyEndpoint --type azureEndpoints --target-resource-id $MyWebApp1Id --endpoint-status enabled
+                -n MyEndpoint --type azureEndpoints --target-resource-id $MyWebApp1Id --endpoint-status enabled
 """
 
 helps['network traffic-manager endpoint delete'] = """
@@ -3020,7 +3008,8 @@ helps['network traffic-manager endpoint delete'] = """
     short-summary: Delete a traffic manager endpoint.
     examples:
         - name: Delete a traffic manager endpoint.
-          text: az network traffic-manager endpoint delete -g MyResourceGroup --profile-name MyTmProfile -n MyEndpoint --type azureEndpoints
+          text: az network traffic-manager endpoint delete -g MyResourceGroup \\
+            --profile-name MyTmProfile -n MyEndpoint --type azureEndpoints
 """
 
 helps['network traffic-manager endpoint list'] = """
@@ -3044,7 +3033,9 @@ helps['network traffic-manager endpoint show'] = """
     short-summary: Get the details of a traffic manager endpoint.
     examples:
         - name: Get the details of a traffic manager endpoint.
-          text: az network traffic-manager endpoint show -g MyResourceGroup --profile-name MyTmProfile -n MyEndpoint --type azureEndpoints
+          text: |
+            az network traffic-manager endpoint show -g MyResourceGroup \\
+                --profile-name MyTmProfile -n MyEndpoint --type azureEndpoints
 """
 
 helps['network traffic-manager endpoint update'] = """
@@ -3053,7 +3044,7 @@ helps['network traffic-manager endpoint update'] = """
     examples:
         - name: Update a traffic manager endpoint to change its weight.
           text: az network traffic-manager endpoint update -g MyResourceGroup --profile-name MyTmProfile \\
-            -n MyEndpoint --weight 20 --type azureEndpoints
+                    -n MyEndpoint --weight 20 --type azureEndpoints
 """
 # endregion
 
@@ -3080,11 +3071,11 @@ helps['network vnet create'] = """
         To learn about how to create a virtual network visit https://docs.microsoft.com/en-us/azure/virtual-network/manage-virtual-network#create-a-virtual-network
     examples:
         - name: Create a virtual network.
-          text: >
-            az network vnet create -g MyResourceGroup -n MyVnet
+          text: az network vnet create -g MyResourceGroup -n MyVnet
         - name: Create a virtual network with a specific address prefix and one subnet.
-          text: >
-            az network vnet create -g MyResourceGroup -n MyVnet --address-prefix 10.0.0.0/16 --subnet-name MySubnet --subnet-prefix 10.0.0.0/24
+          text: |
+            az network vnet create -g MyResourceGroup -n MyVnet --address-prefix 10.0.0.0/16 \\
+                --subnet-name MySubnet --subnet-prefix 10.0.0.0/24
 """
 
 helps['network vnet delete'] = """
@@ -3209,8 +3200,8 @@ helps['network vnet peering create'] = """
     examples:
         - name: Create a peering connection between two virtual networks.
           text: |
-            az network vnet peering create -g MyResourceGroup -n MyVnet1ToMyVnet2 --vnet-name MyVnet1\\
-            --remote-vnet-id MyVnet2Id --allow-vnet-access
+            az network vnet peering create -g MyResourceGroup -n MyVnet1ToMyVnet2 --vnet-name MyVnet1 \\
+                --remote-vnet-id MyVnet2Id --allow-vnet-access
 """
 
 helps['network vnet peering delete'] = """
@@ -3218,8 +3209,7 @@ helps['network vnet peering delete'] = """
     short-summary: Delete a peering.
     examples:
         - name: Delete a virtual network peering connection.
-          text: >
-            az network vnet peering delete -g MyResourceGroup -n MyVnet1ToMyVnet2 --vnet-name MyVnet1
+          text: az network vnet peering delete -g MyResourceGroup -n MyVnet1ToMyVnet2 --vnet-name MyVnet1
 """
 
 helps['network vnet peering list'] = """
@@ -3227,8 +3217,7 @@ helps['network vnet peering list'] = """
     short-summary: List peerings.
     examples:
         - name: List all peerings of a specified virtual network.
-          text: >
-            az network vnet peering list -g MyResourceGroup --vnet-name MyVnet1
+          text: az network vnet peering list -g MyResourceGroup --vnet-name MyVnet1
 """
 
 helps['network vnet peering show'] = """
@@ -3236,8 +3225,7 @@ helps['network vnet peering show'] = """
     short-summary: Show details of a peering.
     examples:
         - name: Show all details of the specified virtual network peering.
-          text: >
-             az network vnet peering show -g MyResourceGroup -n MyVnet1ToMyVnet2 --vnet-name MyVnet1
+          text: az network vnet peering show -g MyResourceGroup -n MyVnet1ToMyVnet2 --vnet-name MyVnet1
 """
 
 helps['network vnet peering update'] = """
@@ -3286,8 +3274,7 @@ helps['network vpn-connection delete'] = """
     short-summary: Delete a VPN connection.
     examples:
         - name: Delete a VPN connection.
-          text: >
-            az network vpn-connection create -g MyResourceGroup -n MyConnection
+          text: az network vpn-connection create -g MyResourceGroup -n MyConnection
 """
 
 helps['network vpn-connection list'] = """
@@ -3303,8 +3290,7 @@ helps['network vpn-connection show'] = """
     short-summary: Get the details of a VPN connection.
     examples:
         - name: View the details of a VPN connection.
-          text: >
-            az network vpn-connection show -g MyResourceGroup -n MyConnection
+          text: az network vpn-connection show -g MyResourceGroup -n MyConnection
 """
 
 helps['network vpn-connection update'] = """
@@ -3312,8 +3298,7 @@ helps['network vpn-connection update'] = """
     short-summary: Update a VPN connection.
     examples:
         - name: Add BGP to an existing connection.
-          text: >
-            az network vpn-connection update -g MyResourceGroup -n MyConnection --enable-bgp True
+          text: az network vpn-connection update -g MyResourceGroup -n MyConnection --enable-bgp True
 """
 # endregion
 
@@ -3340,8 +3325,7 @@ helps['network vpn-connection ipsec-policy clear'] = """
     short-summary: Delete all IPsec policies on a VPN connection.
     examples:
         - name: Remove all previously specified IPsec policies from a connection.
-          text: >
-            az network vpn-connection ipsec-policy clear -g MyResourceGroup –-connection-name MyConnection
+          text: az network vpn-connection ipsec-policy clear -g MyResourceGroup –-connection-name MyConnection
 """
 
 helps['network vpn-connection ipsec-policy list'] = """
@@ -3349,8 +3333,7 @@ helps['network vpn-connection ipsec-policy list'] = """
     short-summary: List IPSec policies associated with a VPN connection.
     examples:
         - name: List the IPsec policies set on a connection.
-          text: >
-            az network vpn-connection ipsec-policy list -g MyResourceGroup –-connection-name MyConnection
+          text: az network vpn-connection ipsec-policy list -g MyResourceGroup –-connection-name MyConnection
 """
 # endregion
 
@@ -3365,8 +3348,7 @@ helps['network vpn-connection shared-key reset'] = """
     short-summary: Reset a VPN connection shared key.
     examples:
         - name: Reset the shared key on a connection.
-          text: >
-            az network vpn-connection shared-key reset -g MyResourceGroup –-connection-name MyConnection –-key-length 128
+          text: az network vpn-connection shared-key reset -g MyResourceGroup –-connection-name MyConnection –-key-length 128
 """
 
 helps['network vpn-connection shared-key show'] = """
@@ -3374,8 +3356,7 @@ helps['network vpn-connection shared-key show'] = """
     short-summary: Retrieve a VPN connection shared key.
     examples:
         - name: View the shared key of a connection.
-          text: >
-            az network vpn-connection shared-key show -g MyResourceGroup –-connection-name MyConnection
+          text: az network vpn-connection shared-key show -g MyResourceGroup –-connection-name MyConnection
 """
 
 helps['network vpn-connection shared-key update'] = """
@@ -3383,8 +3364,7 @@ helps['network vpn-connection shared-key update'] = """
     short-summary: Update a VPN connection shared key.
     examples:
         - name: Change the shared key for the connection to “Abc123”.
-          text: >
-            az network vpn-connection shared-key update -g MyResourceGroup –-connection-name MyConnection --value Abc123
+          text: az network vpn-connection shared-key update -g MyResourceGroup –-connection-name MyConnection --value Abc123
 """
 # endregion
 
@@ -3422,8 +3402,7 @@ helps['network vnet-gateway delete'] = """
          https://docs.microsoft.com/en-us/azure/vpn-gateway/vpn-gateway-delete-vnet-gateway-portal
     examples:
         - name: Delete a virtual network gateway.
-          text: >
-            az network vnet-gateway delete -g MyResourceGroup -n MyVnetGateway
+          text: az network vnet-gateway delete -g MyResourceGroup -n MyVnetGateway
 """
 
 helps['network vnet-gateway list'] = """
@@ -3431,8 +3410,7 @@ helps['network vnet-gateway list'] = """
     short-summary: List virtual network gateways.
     examples:
         - name: List virtual network gateways in a resource group.
-          text: >
-            az network vnet-gateway list -g MyResourceGroup
+          text: az network vnet-gateway list -g MyResourceGroup
 """
 
 helps['network vnet-gateway list-advertised-routes'] = """
@@ -3440,8 +3418,7 @@ helps['network vnet-gateway list-advertised-routes'] = """
     short-summary: List the routes of a virtual network gateway advertised to the specified peer.
     examples:
         - name: List the routes of a virtual network gateway advertised to the specified peer.
-          text: >
-            az network vnet-gateway list-advertised-routes -g MyResourceGroup -n MyVnetGateway --peer 23.10.10.9
+          text: az network vnet-gateway list-advertised-routes -g MyResourceGroup -n MyVnetGateway --peer 23.10.10.9
 """
 
 helps['network vnet-gateway list-bgp-peer-status'] = """
@@ -3449,8 +3426,7 @@ helps['network vnet-gateway list-bgp-peer-status'] = """
     short-summary: Retrieve the status of BGP peers.
     examples:
         - name: Retrieve the status of a BGP peer.
-          text: >
-            az network vnet-gateway list-bgp-peer-status -g MyResourceGroup -n MyVnetGateway --peer 23.10.10.9
+          text: az network vnet-gateway list-bgp-peer-status -g MyResourceGroup -n MyVnetGateway --peer 23.10.10.9
 """
 
 helps['network vnet-gateway list-learned-routes'] = """
@@ -3458,8 +3434,7 @@ helps['network vnet-gateway list-learned-routes'] = """
     short-summary: This operation retrieves a list of routes the virtual network gateway has learned, including routes learned from BGP peers.
     examples:
         - name: Retrieve a list of learned routes.
-          text: >
-            az network vnet-gateway list-learned-routes -g MyResourceGroup -n MyVnetGateway
+          text: az network vnet-gateway list-learned-routes -g MyResourceGroup -n MyVnetGateway
 """
 
 helps['network vnet-gateway reset'] = """
@@ -3467,11 +3442,9 @@ helps['network vnet-gateway reset'] = """
     short-summary: Reset a virtual network gateway.
     examples:
         - name: Reset a virtual network gateway.
-          text: >
-            az network vnet-gateway reset -g MyResourceGroup -n MyVnetGateway
+          text: az network vnet-gateway reset -g MyResourceGroup -n MyVnetGateway
         - name: Reset a virtual network gateway with Active-Active feature enabled.
-          text: >
-            az network vnet-gateway reset -g MyResourceGroup -n MyVnetGateway --gateway-vip MyGatewayIP
+          text: az network vnet-gateway reset -g MyResourceGroup -n MyVnetGateway --gateway-vip MyGatewayIP
 """
 
 helps['network vnet-gateway show'] = """
@@ -3479,8 +3452,7 @@ helps['network vnet-gateway show'] = """
     short-summary: Get the details of a virtual network gateway.
     examples:
         - name: Get the details of a virtual network gateway.
-          text: >
-            az network vnet-gateway show -g MyResourceGroup -n MyVnetGateway
+          text: az network vnet-gateway show -g MyResourceGroup -n MyVnetGateway
 """
 
 helps['network vnet-gateway update'] = """
@@ -3488,8 +3460,7 @@ helps['network vnet-gateway update'] = """
     short-summary: Update a virtual network gateway.
     examples:
         - name: Change the SKU of a virtual network gateway.
-          text: >
-            az network vnet-gateway update -g MyResourceGroup -n MyVnetGateway --sku VpnGw2
+          text: az network vnet-gateway update -g MyResourceGroup -n MyVnetGateway --sku VpnGw2
 """
 
 helps['network vnet-gateway wait'] = """
@@ -3497,8 +3468,7 @@ helps['network vnet-gateway wait'] = """
     short-summary: Place the CLI in a waiting state until a condition of the virtual network gateway is met.
     examples:
         - name: Pause CLI until the virtual network gateway is created.
-          text: >
-            az network vnet-gateway wait -g MyResourceGroup -n MyVnetGateway --created
+          text: az network vnet-gateway wait -g MyResourceGroup -n MyVnetGateway --created
 """
 # endregion
 
@@ -3541,8 +3511,9 @@ helps['network vnet-gateway revoked-cert create'] = """
     short-summary: Revoke a certificate.
     examples:
         - name: Revoke a certificate.
-          text: >
-            az network vnet-gateway revoked-cert create -g MyResourceGroup -n MyRootCertificate --gateway-name MyVnetGateway --thumbprint abc123
+          text: |
+            az network vnet-gateway revoked-cert create -g MyResourceGroup -n MyRootCertificate \\
+                --gateway-name MyVnetGateway --thumbprint abc123
 """
 
 helps['network vnet-gateway revoked-cert delete'] = """
@@ -3550,8 +3521,7 @@ helps['network vnet-gateway revoked-cert delete'] = """
     short-summary: Delete a revoked certificate.
     examples:
         - name: Delete a revoked certificate.
-          text: >
-            az network vnet-gateway revoked-cert delete -g MyResourceGroup -n MyRootCertificate --gateway-name MyVnetGateway
+          text: az network vnet-gateway revoked-cert delete -g MyResourceGroup -n MyRootCertificate --gateway-name MyVnetGateway
 """
 # endregion
 
@@ -3566,8 +3536,9 @@ helps['network vnet-gateway root-cert create'] = """
     short-summary: Upload a root certificate.
     examples:
         - name: Add a Root Certificate to the list of certs allowed to connect to this Gateway.
-          text: >
-            az network vnet-gateway root-cert create -g MyResourceGroup -n MyRootCertificate --gateway-name MyVnetGateway --public-cert-data MyCertificateData
+          text: |
+            az network vnet-gateway root-cert create -g MyResourceGroup -n MyRootCertificate \\
+                --gateway-name MyVnetGateway --public-cert-data MyCertificateData
 """
 
 helps['network vnet-gateway root-cert delete'] = """
@@ -3575,8 +3546,7 @@ helps['network vnet-gateway root-cert delete'] = """
     short-summary: Delete a root certificate.
     examples:
         - name: Remove a certificate from the list of Root Certificates whose children are allowed to access this Gateway.
-          text: >
-            az network vnet-gateway root-cert delete -g MyResourceGroup -n MyRootCertificate --gateway-name MyVnetGateway
+          text: az network vnet-gateway root-cert delete -g MyResourceGroup -n MyRootCertificate --gateway-name MyVnetGateway
 """
 # endregion
 
@@ -3729,7 +3699,7 @@ helps['network watcher connection-monitor create'] = """
         - name: Create a connection monitor for a virtual machine.
           text: |
             az network watcher connection-monitor create -g MyResourceGroup -n MyConnectionMonitorName \\
-            --source-resource MyVM
+                --source-resource MyVM
 """
 
 helps['network watcher connection-monitor delete'] = """
@@ -3890,7 +3860,8 @@ helps['network watcher packet-capture stop'] = """
 helps['network watcher flow-log'] = """
     type: group
     short-summary: Manage network security group flow logging.
-    long-summary: For more information about configuring flow logs visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-nsg-flow-logging-cli
+    long-summary: >
+        For more information about configuring flow logs visit https://docs.microsoft.com/en-us/azure/network-watcher/network-watcher-nsg-flow-logging-cli
 """
 
 helps['network watcher flow-log configure'] = """
