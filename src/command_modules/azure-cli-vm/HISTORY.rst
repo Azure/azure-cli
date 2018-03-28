@@ -4,8 +4,12 @@ Release History
 ===============
 2.0.30
 ++++++
-* (Breaking change): remove `assign-identity` & `remove-identity` which were tagged `deprecating` 2 releases ago
+* BREAKING CHANGE: `vm assign-identity`, `vm remove-identity`: Deprecated commands have been removed.
+* BREAKING CHANGE: `vm format-secret`: Deprecated command has been removed.
 * `vm create`: support configure Public-IP sku
+* `vm create`: support configure Public-IP SKU
+* `vm secret format`: Added extra validation. Added `--keyvault` and `--resource-group` to support scenarios
+                      where the command is unable to resolve the vault ID. [#5718](https://github.com/Azure/azure-cli/issues/5718)
 
 2.0.29
 ++++++

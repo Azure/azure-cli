@@ -101,7 +101,7 @@ helps['keyvault certificate create'] = """
             secrets=$(az keyvault secret list-versions --vault-name vaultname \\
               -n cert1 --query "[?attributes.enabled].id" -o tsv)
 
-            vm_secrets=$(az vm format-secret -s "$secrets") \n
+            vm_secrets=$(az vm secret format -s "$secrets") \n
 
             az vm create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"
@@ -125,7 +125,7 @@ helps['keyvault certificate import'] = """
             secrets=$(az keyvault secret list-versions --vault-name vaultname \\
               -n cert1 --query "[?attributes.enabled].id" -o tsv)
 
-            vm_secrets=$(az vm format-secret -s "$secrets") \n
+            vm_secrets=$(az vm secret format -s "$secrets") \n
 
             az vm create -g group-name -n vm-name --admin-username deploy  \\
               --image debian --secrets "$vm_secrets"
