@@ -5,7 +5,7 @@ Release History
 
 2.0.28
 ++++++
-* Bumping DNS extension suppression version to 0.0.2.
+* `application-gateway create`: Fix issue where tags could not be set. [#5936](https://github.com/Azure/azure-cli/issues/5936)
 
 2.0.27
 ++++++
