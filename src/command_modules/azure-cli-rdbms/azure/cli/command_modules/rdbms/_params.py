@@ -34,6 +34,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
             c.argument('source_server', options_list=['--source-server', '-s'], help='The name or ID of the source server to restore from.')
             c.argument('restore_point_in_time', help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
 
+        with self.argument_context('{} server georestore'. format(command_group)) as c:
+            c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False)
+            c.argument('sku_name', options_list=['--sku-name'], required=True)
+            c.argument('source_server', options_list=['--source-server', '-s'], help='The name or ID of the source server to restore from.')            
+
         with self.argument_context('{} server configuration set'.format(command_group)) as c:
             c.argument('value', help='Value of the configuration. If not provided, configuration value will be set to default.', validator=configuration_value_validator)
             c.ignore('source')
