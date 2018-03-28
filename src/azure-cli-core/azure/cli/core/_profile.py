@@ -274,6 +274,7 @@ class Profile(object):
 
     def find_subscriptions_in_cloud_console(self):
         import jwt
+
         _, token, _ = self._get_token_from_cloud_shell(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, verify=False, algorithms=['RS256'])
@@ -292,13 +293,10 @@ class Profile(object):
         return deepcopy(consolidated)
 
     def _get_token_from_cloud_shell(self, resource):  # pylint: disable=no-self-use
-        import requests
-        request_uri = _get_cloud_console_token_endpoint()
-        payload = {
-            'resource': resource
-        }
-        result = requests.get(request_uri, params=payload, headers={'Metadata': 'true'})
-        token_entry = json.loads(result.content.decode())
+        from msrestazure.azure_active_directory import MSIAuthentication
+        auth = MSIAuthentication(resource=resource)
+        auth.set_token()
+        token_entry = auth.token
         return (token_entry['token_type'], token_entry['access_token'], token_entry)
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
