@@ -23,7 +23,7 @@ def load_arguments(self, _):
         get_policy_completion_list, get_policy_set_completion_list, get_policy_assignment_completion_list,
         get_resource_types_completion_list, get_providers_completion_list)
     from azure.cli.command_modules.resource._validators import (
-        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock)
+        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata)
 
     # BASIC PARAMETER CONFIGURATION
 
@@ -93,6 +93,7 @@ def load_arguments(self, _):
         c.argument('display_name', help='display name of policy definition')
         c.argument('description', help='description of policy definition')
         c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
+        c.argument('metadata', min_api='2017-06-01-preview', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
 
     with self.argument_context('policy definition create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
         from azure.mgmt.resource.policy.models import PolicyMode

@@ -2,6 +2,11 @@
 
 Release History
 ===============
+2.0.27
+++++++
+* `policy definition create`: Add support for `--metadata`.
+* `policy definition update`: Add support for `--metadata`, `--set`, `--add`, `--remove`.
+
 2.0.26
 ++++++
 provider operation list/show: (breaking change)`api-version` is no longer required to run the command
