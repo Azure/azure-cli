@@ -18,8 +18,6 @@ from azure.mgmt.resource.subscriptions.models import \
 
 from azure.cli.core._profile import (Profile, CredsCache, SubscriptionFinder,
                                      ServicePrincipalAuth, _AUTH_CTX_FACTORY)
-from azure.cli.core.msi_imds_authentication import MSIImdsAuthentication
-
 from azure.cli.testsdk import TestCli
 
 from knack.util import CLIError
@@ -639,32 +637,6 @@ class TestProfile(unittest.TestCase):
                                     },
                                     headers={'Metadata': 'true'})
 
-    @mock.patch('requests.get', autospec=True)
-    @mock.patch('time.sleep', autospec=True)
-    def test_msi_token_request_retries(self, mock_sleep, mock_get):
-        # set up error case: #1 exception thrown, #2 error status
-        bad_response = mock.MagicMock()
-        bad_response.status_code = 429
-        bad_response.text = 'just bad'
-
-        test_token_entry = {
-            'token_type': 'Bearer',
-            'access_token': 'good token for you',
-        }
-        encoded_test_token = json.dumps(test_token_entry).encode()
-        good_response = mock.MagicMock()
-        good_response.status_code = 200
-        good_response.content = encoded_test_token
-
-        mock_get.side_effect = [bad_response, good_response]
-
-        msi_auth = MSIImdsAuthentication(resource='azure-resource', object_id='12345')
-        # action
-        whole_entry = msi_auth.get_token()
-
-        # assert
-        self.assertEqual(test_token_entry, whole_entry)
-
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('azure.cli.core._profile.CredsCache.retrieve_token_for_user', autospec=True)
     def test_get_raw_token(self, mock_get_token, mock_read_cred_file):
@@ -850,10 +822,10 @@ class TestProfile(unittest.TestCase):
         mock_auth_context.acquire_token.assert_called_once_with(
             mgmt_resource, self.user1, mock.ANY)
 
-    @mock.patch('requests.get', autospec=True)
+    @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
     @mock.patch('azure.cli.core._profile._get_cloud_console_token_endpoint', autospec=True)
-    def test_find_subscriptions_in_cloud_console(self, mock_get_token_endpoint, mock_get_client_class, mock_get):
+    def test_find_subscriptions_in_cloud_console(self, mock_get_token_endpoint, mock_get_client_class, mock_msi_auth):
 
         class ClientStub:
             def __init__(self, *args, **kwargs):
@@ -871,11 +843,7 @@ class TestProfile(unittest.TestCase):
             'token_type': 'Bearer',
             'access_token': TestProfile.test_msi_access_token
         }
-        encoded_test_token = json.dumps(test_token_entry).encode()
-        good_response = mock.MagicMock()
-        good_response.status_code = 200
-        good_response.content = encoded_test_token
-        mock_get.return_value = good_response
+        mock_msi_auth.token = test_token_entry
 
         subscriptions = profile.find_subscriptions_in_cloud_console()
 
@@ -887,9 +855,6 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(s['name'], self.display_name1)
         self.assertEqual(s['id'], self.id1.split('/')[-1])
         self.assertEqual(s['tenantId'], '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a')
-        mock_get.assert_called_once_with(mock_get_token_endpoint.return_value,
-                                         params={'resource': 'https://management.core.windows.net/'},
-                                         headers={'Metadata': 'true'})
 
     @mock.patch('requests.get', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
