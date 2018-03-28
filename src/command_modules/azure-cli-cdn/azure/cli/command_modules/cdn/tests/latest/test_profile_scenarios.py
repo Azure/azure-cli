@@ -34,6 +34,7 @@ class CdnCustomDomainScenarioTest(ScenarioTest):
     def test_cdn_custom_domain(self, resource_group):
         from msrestazure.azure_exceptions import CloudError
         from azure.mgmt.cdn.models import ErrorResponseException
+        from knack.util import CLIError
 
         self.kwargs.update({
             'profile': 'cdnprofile1',
@@ -51,7 +52,7 @@ class CdnCustomDomainScenarioTest(ScenarioTest):
         # but they should still fail if there was a CLI-level regression.
         with self.assertRaises(CloudError):
             self.cmd('cdn custom-domain create -g {rg} --endpoint-name {endpoint} --hostname {hostname} --profile-name {profile} -n {name}')
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(CLIError):
             self.cmd('cdn custom-domain show -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
         self.cmd('cdn custom-domain delete -g {rg} --endpoint-name {endpoint} --profile-name {profile} -n {name}')
         with self.assertRaises(ErrorResponseException):

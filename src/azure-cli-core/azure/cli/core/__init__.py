@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from __future__ import print_function
 
-__version__ = "2.0.30"
+__version__ = "2.0.31"
 
 import os
 import sys
@@ -163,7 +163,8 @@ class MainCommandsLoader(CLICommandsLoader):
             if extensions:
                 logger.debug("Found %s extensions: %s", len(extensions), [e.name for e in extensions])
                 allowed_extensions = _handle_extension_suppressions(extensions)
-                for ext_name in [e.name for e in allowed_extensions]:
+                for ext in allowed_extensions:
+                    ext_name = ext.name
                     ext_dir = get_extension_path(ext_name)
                     sys.path.append(ext_dir)
                     try:
@@ -177,7 +178,8 @@ class MainCommandsLoader(CLICommandsLoader):
                         for cmd_name, cmd in extension_command_table.items():
                             cmd.command_source = ExtensionCommandSource(
                                 extension_name=ext_name,
-                                overrides_command=cmd_name in cmd_to_mod_map)
+                                overrides_command=cmd_name in cmd_to_mod_map,
+                                preview=ext.preview)
 
                         self.command_table.update(extension_command_table)
                         elapsed_time = timeit.default_timer() - start_time

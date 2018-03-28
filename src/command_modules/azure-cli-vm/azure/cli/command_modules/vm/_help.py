@@ -1203,16 +1203,6 @@ helps['vm identity show'] = """
     short-summary: display VM's managed identity info.
 """
 
-helps['vm assign-identity'] = """
-    type: command
-    short-summary: (Deprecated, please use 'az vm identity assign')
-"""
-
-helps['vm remove-identity'] = """
-    type: command
-    short-summary: (Deprecated, please use 'az vm identity remove')
-"""
-
 helps['vm run-command'] = """
     type: group
     short-summary: Manage run commands on a Virtual Machine
@@ -1253,16 +1243,6 @@ helps['vmss identity remove'] = """
 helps['vmss identity show'] = """
     type: command
     short-summary: display VM scaleset's managed identity info.
-"""
-
-helps['vmss assign-identity'] = """
-    type: command
-    short-summary: (Deprecated, please use 'az vmss identity assign')
-"""
-
-helps['vmss remove-identity'] = """
-    type: command
-    short-summary: (Deprecated, please use 'az vmss identity remove')
 """
 
 helps['disk'] = """

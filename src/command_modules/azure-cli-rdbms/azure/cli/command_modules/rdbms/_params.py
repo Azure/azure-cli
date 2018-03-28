@@ -6,7 +6,6 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.commands.parameters import get_resource_name_completion_list, tags_type, get_location_type, get_enum_type   # pylint: disable=line-too-long
-from azure.mgmt.rdbms import mysql, postgresql
 from azure.cli.command_modules.rdbms.validators import configuration_value_validator
 
 
@@ -17,28 +16,22 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         'postgres': get_resource_name_completion_list('Microsoft.DBForPostgreSQL/servers')
     }
 
-    def _complex_params(command_group, engine):
+    def _complex_params(command_group):
         with self.argument_context('{} server create'.format(command_group)) as c:
-            c.expand('sku', engine.models.Sku)
-            c.ignore('size', 'family', 'capacity', 'tier')
-            c.expand('storage_profile', engine.models.storage_profile.StorageProfile)
-            c.expand('properties', engine.models.ServerPropertiesForDefaultCreate)
+            c.argument('sku_name', options_list=['--sku-name'], required=True)
+
+            c.argument('backup_retention', type=int, options_list=['--backup-retention'], help='The number of days a backup is retained.')
+            c.argument('geo_redundant_backup', options_list=['--geo-redundant-backup'], help='Enable Geo-redundant or not for server backup.')
+            c.argument('storage_mb', options_list=['--storage-size'], type=int, help='The max storage size of the server. Unit is megabytes.')
+
             c.argument('administrator_login', required=True, arg_group='Authentication')
             c.argument('administrator_login_password', arg_group='Authentication')
 
-            c.expand('parameters', engine.models.ServerForCreate)
             c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False)
+            c.argument('version', help='Server version')
 
         with self.argument_context('{} server restore'. format(command_group)) as c:
-            c.ignore('sku', 'storage_profile')
-
-            c.expand('properties', engine.models.ServerPropertiesForRestore)
-            c.ignore('version', 'ssl_enforcement', 'storage_mb')
-
-            c.expand('parameters', engine.models.ServerForCreate)
-            c.ignore('tags', 'location')
-
-            c.argument('source_server_id', options_list=['--source-server', '-s'], help='The name or ID of the source server to restore from.')
+            c.argument('source_server', options_list=['--source-server', '-s'], help='The name or ID of the source server to restore from.')
             c.argument('restore_point_in_time', help='The point in time to restore from (ISO8601 format), e.g., 2017-04-26T02:10:00+08:00')
 
         with self.argument_context('{} server configuration set'.format(command_group)) as c:
@@ -48,8 +41,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements
         with self.argument_context('{} server wait'.format(command_group)) as c:
             c.ignore('created', 'deleted', 'updated')
 
-    _complex_params('mysql', mysql)
-    _complex_params('postgres', postgresql)
+    _complex_params('mysql')
+    _complex_params('postgres')
 
     for scope in ['mysql', 'postgres']:
         with self.argument_context(scope) as c:

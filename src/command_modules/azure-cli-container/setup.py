@@ -14,7 +14,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "0.1.19"
+VERSION = "0.1.21"
 
 CLASSIFIERS = [
     'Development Status :: 4 - Beta',
@@ -31,10 +31,11 @@ CLASSIFIERS = [
 ]
 
 DEPENDENCIES = [
-    'azure-mgmt-containerinstance==0.3.1',
+    'azure-mgmt-containerinstance==0.4.0',
     'azure-cli-core',
     'pyyaml',
-    'colorama'
+    'colorama',
+    'websocket-client'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

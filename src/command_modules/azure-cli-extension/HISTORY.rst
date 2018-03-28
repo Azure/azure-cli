@@ -3,9 +3,15 @@
 Release History
 ===============
 
+0.0.12
+++++++
+* Linux distro check message should be output to debug instead of warning.
+
 0.0.11
 ++++++
-* Minor fixes
+* Preview extensions: Show message on `az extension add` if extension is in preview
+* BC: `az extension list-available` - The full extension data is now available with `--show-details`
+* `az extension list-available` - A simplified view of the extensions available is now shown by default
 
 0.0.10
 +++++++

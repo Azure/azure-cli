@@ -2,9 +2,15 @@
 
 Release History
 ===============
+0.1.31
+++++++
+* (Breaking change): remove `assign-identity` which was tagged `deprecating` 2 releases ago
+* webapp: capture the unhandled exception if the appservice plan doesn't exist
+
 0.1.30
 ++++++
 * webapp: az webapp update supports httpsOnly
+* webapp/functionapp:  slot support for identity assign & identity show
 
 0.1.29
 ++++++

@@ -2,9 +2,17 @@
 
 Release History
 ===============
+2.0.30
+++++++
+* (Breaking change): remove `assign-identity` & `remove-identity` which were tagged `deprecating` 2 releases ago
+* `vm create`: support configure Public-IP sku
+
 2.0.29
 ++++++
-Minor change
+* `vmss create`: warn on upcoming breaking changes on default balancer for scaleset with 100+ instances
+* vm snapshot/image: support zone resilient
+* vmss: report better encryption status through disk instance view
+* BC: `az vm extension delete` no longer returns output as expected for a `delete` command.
 
 2.0.28
 ++++++

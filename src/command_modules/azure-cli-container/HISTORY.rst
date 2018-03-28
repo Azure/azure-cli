@@ -3,6 +3,15 @@
 Release History
 ===============
 
+0.1.21
+++++++
+* Fixed [#5926](https://github.com/Azure/azure-cli/issues/5926): Fix `az container exec` failing when --container-name specified
+
+0.1.20
+++++++
+* Add 'az container exec' command that allows for exec commands in a container for a running container group.
+* Allow table output for creating and updating a container group.
+
 0.1.19
 ++++++
 * Add '--secrets' and '--secrets-mount-path' options to 'az container create' for using secrets in ACI

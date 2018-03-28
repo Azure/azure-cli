@@ -422,9 +422,9 @@ class DnsParseZoneFiles(unittest.TestCase):
         self._check_txt(zone, 't2.' + zn, [(3600, None, 'foobar')])
         self._check_txt(zone, 't3.' + zn, [(3600, None, 'foobar')])
         self._check_txt(zone, 't4.' + zn, [(3600, None, 'foo;bar')])
-        self._check_txt(zone, 't5.' + zn, [(3600, None, 'foo;bar')])
-        self._check_txt(zone, 't6.' + zn, [(3600, None, 'foo;bar')])
-        self._check_txt(zone, 't7.' + zn, [(3600, None, '"quoted string"')])
+        self._check_txt(zone, 't5.' + zn, [(3600, None, 'foo\\;bar')])
+        self._check_txt(zone, 't6.' + zn, [(3600, None, 'foo\\;bar')])
+        self._check_txt(zone, 't7.' + zn, [(3600, None, '\\"quoted string\\"')])
         self._check_txt(zone, 't8.' + zn, [(3600, None, 'foobar')])
         self._check_txt(zone, 't9.' + zn, [(3600, None, 'foobarr')])
         self._check_txt(zone, 't10.' + zn, [(3600, None, 'foo bar')])
@@ -539,6 +539,20 @@ class DnsParseZoneFiles(unittest.TestCase):
         self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
         self._check_a(zone, 'www.' + zn, [(3600, '1.1.1.1')])
         self._check_a(zone, zn, [(3600, '1.1.1.1')])
+        self._check_ns(zone, zn, [
+            (172800, 'ns1-03.azure-dns.com.'),
+            (172800, 'ns2-03.azure-dns.net.'),
+            (172800, 'ns3-03.azure-dns.org.'),
+            (172800, 'ns4-03.azure-dns.info.'),
+        ])
+
+    def test_zone_file_7(self):
+        zn = 'zone7.com.'
+        zone = self._get_zone_object('zone7.txt', zn)
+        self._check_soa(zone, zn, 3600, 1, 3600, 300, 2419200, 300)
+        self._check_txt(zone, zn, [(60, None, 'a\\\\b\\255\\000\\;\\"\\"\\"testtesttest\\"\\"\\"')])
+        self._check_txt(zone, 'txt1.' + zn, [(3600, None, 'ab\\ cd')])
+        self._check_cname(zone, 'cn1.' + zn, 3600, 'contoso.com.')
         self._check_ns(zone, zn, [
             (172800, 'ns1-03.azure-dns.com.'),
             (172800, 'ns2-03.azure-dns.net.'),

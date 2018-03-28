@@ -3,6 +3,16 @@
 Release History
 ===============
 
+2.0.28
+++++++
+* `application-gateway create`: Fix issue where tags could not be set. [#5936](https://github.com/Azure/azure-cli/issues/5936)
+
+2.0.27
+++++++
+* `network dns zone import`: Support for importing of TXT records with RFC 1035 escape sequences.
+* `network dns zone export`: Support for exporting of TXT records with RFC 1035 escape sequences.
+* `network dns record-set txt add-record`: Support for TXT records with RFC 1035 escape sequences.
+
 2.0.26
 ++++++
 * `network dns zone create/update`: Adding support for Private DNS zones.

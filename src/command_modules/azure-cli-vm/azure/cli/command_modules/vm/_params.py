@@ -12,7 +12,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import (
-    get_location_type, get_resource_name_completion_list, tags_type,
+    get_location_type, get_resource_name_completion_list, tags_type, get_three_state_flag,
     file_type, get_enum_type, zone_type, zones_type)
 from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
@@ -82,10 +82,13 @@ def load_arguments(self, _):
     # endregion
 
     # region Snapshots
-    with self.argument_context('snapshot') as c:
+    with self.argument_context('snapshot', resource_type=ResourceType.MGMT_COMPUTE, operation_group='snapshots') as c:
         c.argument('snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
         c.argument('name', arg_type=name_arg_type)
-        c.argument('sku', arg_type=disk_sku)
+        if self.supported_api_version(min_api='2018-04-01', operation_group='snapshots'):
+            c.argument('sku', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'Standard_ZRS']))
+        else:
+            c.argument('sku', arg_type=disk_sku)
     # endregion
 
     # region Images
@@ -98,6 +101,8 @@ def load_arguments(self, _):
         c.argument('name', arg_type=name_arg_type, help='new image name')
         c.argument('source', help='OS disk source from the same region, including a virtual machine ID or name, OS disk blob URI, managed OS disk ID or name, or OS snapshot ID or name')
         c.argument('data_disk_sources', nargs='+', help='Space-separated list of data disk sources, including unmanaged blob URI, managed disk ID or name, or snapshot ID or name')
+        c.argument('zone_resilient', min_api='2017-12-01', arg_type=get_three_state_flag(), help='Specifies whether an image is zone resilient or not. '
+                   'Default is false. Zone resilient images can be created only in regions that provide Zone Redundant Storage')
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
     # endregion
 
@@ -323,14 +328,14 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
 
-    for scope in ['vm assign-identity', 'vmss assign-identity', 'vm identity assign', 'vmss identity assign']:
+    for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             c.argument('assign_identity', options_list=['--identities'], nargs='*', help="the identities to assign")
             c.argument('port', type=int, help="The port to fetch AAD token. Default: 50342")
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 
-    for scope in ['vm remove-identity', 'vmss remove-identity', 'vm identity remove', 'vmss identity remove']:
+    for scope in ['vm identity remove', 'vmss identity remove']:
         with self.argument_context(scope) as c:
             c.argument('identities', nargs='+', help="space-separated user assigned identities to remove")
             c.argument('vm_name', existing_vm_name)
@@ -384,8 +389,11 @@ def load_arguments(self, _):
             c.argument('nics', nargs='+', help='Names or IDs of existing NICs to attach to the VM. The first NIC will be designated as primary. If omitted, a new NIC will be created. If an existing NIC is specified, do not specify subnet, VNet, public IP or NSG.')
             c.argument('private_ip_address', help='Static private IP address (e.g. 10.0.0.5).')
             c.argument('public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None.')
-            c.argument('public_ip_address_allocation', help=None, arg_type=get_enum_type(['dynamic', 'static']))
+            c.argument('public_ip_address_allocation', help=None, default=None, arg_type=get_enum_type(['dynamic', 'static']))
             c.argument('public_ip_address_dns_name', help='Globally unique DNS name for a newly created public IP.')
+            if self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
+                PublicIPAddressSkuName = self.get_models('PublicIPAddressSkuName', resource_type=ResourceType.MGMT_NETWORK)
+                c.argument('public_ip_sku', help='Sku', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
 
         with self.argument_context(scope, arg_group='Marketplace Image Plan') as c:
             c.argument('plan_name', help='plan name')
@@ -393,7 +401,7 @@ def load_arguments(self, _):
             c.argument('plan_publisher', help='plan publisher')
             c.argument('plan_promotion_code', help='plan promotion code')
 
-    for scope in ['vm create', 'vmss create', 'vm assign-identity', 'vmss assign-identity', 'vm identity assign', 'vmss identity assign']:
+    for scope in ['vm create', 'vmss create', 'vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
             c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group, help="Scope that the system assigned identity can access")

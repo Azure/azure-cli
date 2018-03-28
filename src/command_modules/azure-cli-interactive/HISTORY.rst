@@ -7,6 +7,8 @@ Release History
 ++++++
 * Completions kick in as soon as command table loading is done.
 * Fix bug with using `--style` parameter.
+* Interactive lexer instantiated after command table dump if missing.
+* Improvements to completer support.
 
 0.3.17
 ++++++

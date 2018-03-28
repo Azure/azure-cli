@@ -10,7 +10,7 @@ def process_autoscale_create_namespace(cmd, namespace):
     from msrestazure.tools import parse_resource_id
 
     validate_tags(namespace)
-    get_target_resource_validator('resource', True, True)(cmd, namespace)
+    get_target_resource_validator('resource', required=True, preserve_resource_group_parameter=True)(cmd, namespace)
     if not namespace.resource_group_name:
         namespace.resource_group_name = parse_resource_id(namespace.resource).get('resource_group', None)
     get_default_location_from_resource_group(cmd, namespace)
@@ -99,7 +99,7 @@ def validate_autoscale_timegrain(namespace):
     namespace.timegrain = timegrain
 
 
-def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False):
+def get_target_resource_validator(dest, required, preserve_resource_group_parameter=False, alias='resource'):
     def _validator(cmd, namespace):
         from msrestazure.tools import is_valid_resource_id
         from knack.util import CLIError
@@ -111,7 +111,7 @@ def get_target_resource_validator(dest, required, preserve_resource_group_parame
 
         usage_error = CLIError('usage error: --{0} ID | --{0} NAME --resource-group NAME '
                                '--{0}-type TYPE [--{0}-parent PARENT] '
-                               '[--{0}-namespace NAMESPACE]'.format(dest))
+                               '[--{0}-namespace NAMESPACE]'.format(alias))
         if not name_or_id and required:
             raise usage_error
         elif name_or_id:
@@ -252,6 +252,11 @@ def process_metric_dimension(namespace):
         raise CLIError('usage: --dimension and --filter parameters are mutually exclusive.')
 
     ns['filter'] = ' and '.join("{} eq '*'".format(d) for d in dimensions)
+
+
+def validate_metric_names(namespace):
+    if namespace.metricnames:
+        namespace.metricnames = ','.join(namespace.metricnames)
 
 
 def process_webhook_prop(namespace):

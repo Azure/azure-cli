@@ -189,7 +189,7 @@ class VMImageListSkusScenarioTest(ScenarioTest):
         result = self.cmd("vm image list-skus --location {loc} -p {pub} --offer {offer} --query \"length([].id.contains(@, '/Publishers/{pub}/ArtifactTypes/VMImage/Offers/{offer}/Skus/'))\"").get_output_in_json()
         self.assertTrue(result > 0)
 
-    @AllowLargeResponse()
+    @AllowLargeResponse(size_kb=2048)
     def test_list_skus_contains_zone_info(self):
         # we pick eastus2 as it is one of 3 regions so far with zone support
         self.kwargs['loc'] = 'eastus2'
@@ -223,11 +223,10 @@ class VMGeneralizeScenarioTest(ScenarioTest):
     def test_vm_generalize(self, resource_group):
 
         self.kwargs.update({
-            'loc': 'westus',
             'vm': 'vm-generalize'
         })
 
-        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 --authentication-type password --use-unmanaged-disk')
+        self.cmd('vm create -g {rg} -n {vm} --admin-username ubuntu --image UbuntuLTS --admin-password testPassword0 --authentication-type password --use-unmanaged-disk')
         self.cmd('vm stop -g {rg} -n {vm}')
         # Should be able to generalize the VM after it has been stopped
         self.cmd('vm generalize -g {rg} -n {vm}', checks=self.is_empty())
@@ -239,7 +238,30 @@ class VMGeneralizeScenarioTest(ScenarioTest):
         self.kwargs['image'] = 'myImage'
         self.cmd('image create -g {rg} -n {image} --source {vm}', checks=[
             self.check('name', '{image}'),
-            self.check('sourceVirtualMachine.id', vm['id'])
+            self.check('sourceVirtualMachine.id', vm['id']),
+            self.check('storageProfile.zoneResilient', None)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_generalize_vm')
+    def test_vm_capture_zone_resilient_image(self, resource_group):
+
+        self.kwargs.update({
+            'loc': 'francecentral',
+            'vm': 'vm-generalize'
+        })
+
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username ubuntu --image centos --admin-password testPassword0 --authentication-type password')
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+        # Should be able to generalize the VM after it has been stopped
+        self.cmd('vm generalize -g {rg} -n {vm}', checks=self.is_empty())
+        vm = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
+
+        # capture to a custom image
+        self.kwargs['image'] = 'myImage2'
+        self.cmd('image create -g {rg} -n {image} --source {vm} --zone-resilient -l {loc}', checks=[
+            self.check('name', '{image}'),
+            self.check('sourceVirtualMachine.id', vm['id']),
+            self.check('storageProfile.zoneResilient', True)
         ])
 
 
@@ -734,17 +756,28 @@ class VMAvailSetLiveScenarioTest(LiveScenarioTest):
         ])
 
 
-class ComputeListSkusScenarioTest(LiveScenarioTest):
+class ComputeListSkusScenarioTest(ScenarioTest):
 
+    @AllowLargeResponse(size_kb=2048)
     def test_list_compute_skus_table_output(self):
         result = self.cmd('vm list-skus -l westus -otable')
         lines = result.output.split('\n')
         # 1st line is header
-        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Tier', 'Size', 'Capabilities'])
+        self.assertEqual(lines[0].split(), ['ResourceType', 'Locations', 'Name', 'Capabilities', 'Tier', 'Size'])
         # spot check the first 3 entries
-        self.assertEqual(lines[3].split(), ['availabilitySets', 'westus', 'Classic', 'MaximumPlatformFaultDomainCount=3'])
-        self.assertEqual(lines[4].split(), ['availabilitySets', 'westus', 'Aligned', 'MaximumPlatformFaultDomainCount=3'])
-        self.assertEqual(lines[5].split(), ['virtualMachines', 'westus', 'Standard_DS1_v2', 'DS1_v2', 'Standard'])
+        fd_found, ud_found, size_found = False, False, False
+        for l in lines[1:]:
+            parts = l.split()
+            if not fd_found and (parts == ['availabilitySets', 'westus', 'Aligned', 'MaximumPlatformFaultDomainCount=3']):
+                fd_found = True
+            elif not ud_found and (parts == ['availabilitySets', 'westus', 'Classic', 'MaximumPlatformFaultDomainCount=3']):
+                ud_found = True
+            elif not size_found and (parts == ['virtualMachines', 'westus', 'Standard_DS1_v2', 'LowPriorityCapable=True', 'Standard', 'DS1_v2']):
+                size_found = True
+
+        self.assertTrue(fd_found)
+        self.assertTrue(ud_found)
+        self.assertTrue(size_found)
 
 
 class VMExtensionScenarioTest(ScenarioTest):
@@ -778,8 +811,7 @@ class VMExtensionScenarioTest(ScenarioTest):
                 self.check('name', '{ext}'),
                 self.check('resourceGroup', '{rg}')
             ])
-            self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}',
-                     checks=[self.check('status', 'Succeeded')])
+            self.cmd('vm extension delete --resource-group {rg} --vm-name {vm} --name {ext}')
         finally:
             os.remove(config_file)
 
@@ -1136,26 +1168,34 @@ class VMCreateExistingIdsOptions(ScenarioTest):
                  checks=self.check('storageProfile.osDisk.vhd.uri', 'https://{sa}.blob.core.windows.net/{container}/{disk}.vhd'))
 
 
-# TODO: convert back to ScenarioTest when #5741 is fixed.
-class VMCreateCustomIP(LiveScenarioTest):
+class VMCreateCustomIP(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_ip')
     def test_vm_create_custom_ip(self, resource_group):
 
         self.kwargs.update({
             'vm': 'vrfvmz',
+            'vm2': 'vrfvmz2',
             'dns': 'vrfmyvm00110011z',
-            'ssh_key': TEST_SSH_KEY_PUB
+            'public_ip_sku': 'Standard'
         })
 
-        self.cmd('vm create -n {vm} -g {rg} --image openSUSE-Leap --admin-username user11 --private-ip-address 10.0.0.5 --public-ip-address-allocation static --public-ip-address-dns-name {dns} --ssh-key-value \'{ssh_key}\'')
+        self.cmd('vm create -n {vm} -g {rg} --image openSUSE-Leap --admin-username user11 --private-ip-address 10.0.0.5 --public-ip-sku {public_ip_sku} --public-ip-address-dns-name {dns} --generate-ssh-keys')
 
         self.cmd('network public-ip show -n {vm}PublicIP -g {rg}', checks=[
             self.check('publicIpAllocationMethod', 'Static'),
-            self.check('dnsSettings.domainNameLabel', '{dns}')
+            self.check('dnsSettings.domainNameLabel', '{dns}'),
+            self.check('sku.name', '{public_ip_sku}')
         ])
         self.cmd('network nic show -n {vm}VMNic -g {rg}',
                  checks=self.check('ipConfigurations[0].privateIpAllocationMethod', 'Static'))
+
+        # verify the default should be "Basic" sku with "Dynamic" allocation method
+        self.cmd('vm create -n {vm2} -g {rg} --image openSUSE-Leap --admin-username user11 --generate-ssh-keys')
+        self.cmd('network public-ip show -n {vm2}PublicIP -g {rg}', checks=[
+            self.check('publicIpAllocationMethod', 'Dynamic'),
+            self.check('sku.name', 'Basic')
+        ])
 
 
 class VMDiskAttachDetachTest(ScenarioTest):
@@ -1451,7 +1491,8 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
             'vmss': 'vmss1'
         })
 
-        res = self.cmd("vmss create -g {rg} --name {vmss} --validate --image UbuntuLTS --disable-overprovision --instance-count 101 --single-placement-group false --admin-username ubuntuadmin").get_output_in_json()
+        res = self.cmd("vmss create -g {rg} --name {vmss} --validate --image UbuntuLTS --disable-overprovision --instance-count 101 --single-placement-group false "
+                       "--admin-username ubuntuadmin --generate-ssh-keys").get_output_in_json()
         # Ensure generated template is valid. "Quota Exceeding" is expected on most subscriptions, so we allow that.
         self.assertTrue(not res['error'] or (res['error']['details'][0]['code'] == 'QuotaExceeded'))
 
@@ -2027,7 +2068,8 @@ class MSIScenarioTest(ScenarioTest):
             'emsi2': 'id2',
             'vm': 'vm1',
             'sub': self.get_subscription_id(),
-            'scope': '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group)
+            'scope': '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group),
+            'user': 'ubuntuadmin'
         })
 
         # create a managed identity
@@ -2036,7 +2078,7 @@ class MSIScenarioTest(ScenarioTest):
         emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
 
         # create a vm with only user assigned identity
-        result = self.cmd('vm create -g {rg} -n vm2 --image ubuntults --assign-identity {emsi} --generate-ssh-keys', checks=[
+        result = self.cmd('vm create -g {rg} -n vm2 --image ubuntults --assign-identity {emsi} --generate-ssh-keys --admin-username {user}', checks=[
             self.check('identity.role', None),
             self.check('identity.scope', None),
             self.check('length(identity.userAssignedIdentities)', 1)
@@ -2045,7 +2087,7 @@ class MSIScenarioTest(ScenarioTest):
         self.assertFalse(result['identity']['systemAssignedIdentity'])
 
         # create a vm with system + user assigned identities
-        result = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys --admin-username ubuntuadmin').get_output_in_json()
+        result = self.cmd('vm create -g {rg} -n {vm} --image ubuntults --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys --admin-username {user}').get_output_in_json()
         self.assertEqual(result['identity']['userAssignedIdentities'][0].lower(), emsi_result['id'].lower())
         result = self.cmd('vm identity show -g {rg} -n {vm}', checks=[
             self.check('length(identityIds)', 1),
@@ -2057,13 +2099,13 @@ class MSIScenarioTest(ScenarioTest):
         self.cmd('vm identity show -g {rg} -n {vm}',
                  checks=self.check('length(identityIds)', 2))
         # remove the 1st user assigned identity
-        self.cmd('vm remove-identity -g {rg} -n {vm} --identities {emsi}')
+        self.cmd('vm identity remove -g {rg} -n {vm} --identities {emsi}')
         result = self.cmd('vm show -g {rg} -n {vm}',
                           checks=self.check('length(identity.identityIds)', 1)).get_output_in_json()
         self.assertEqual(result['identity']['identityIds'][0].lower(), emsi2_result['id'].lower())
 
         # remove the 2nd
-        self.cmd('vm remove-identity -g {rg} -n {vm} --identities {emsi2}')
+        self.cmd('vm identity remove -g {rg} -n {vm} --identities {emsi2}')
         # verify the VM still has the system assigned identity
         result = self.cmd('vm identity show -g {rg} -n {vm}', checks=[
             # blocked by https://github.com/Azure/azure-cli/issues/5103
@@ -2105,13 +2147,13 @@ class MSIScenarioTest(ScenarioTest):
         self.cmd('vmss update-instances -g {rg} -n {vmss} --instance-ids *')
 
         # remove the 1st user assigned identity
-        self.cmd('vmss remove-identity -g {rg} -n {vmss} --identities {emsi}')
+        self.cmd('vmss identity remove -g {rg} -n {vmss} --identities {emsi}')
         result = self.cmd('vmss show -g {rg} -n {vmss}',
                           checks=self.check('length(identity.identityIds)', 1)).get_output_in_json()
         self.assertEqual(result['identity']['identityIds'][0].lower(), emsi2_result['id'].lower())
 
         # remove the 2nd
-        self.cmd('vmss remove-identity -g {rg} -n {vmss} --identities {emsi2}')
+        self.cmd('vmss identity remove -g {rg} -n {vmss} --identities {emsi2}')
         # verify the vmss still has the system assigned identity
         self.cmd('vmss identity show -g {rg} -n {vmss}', checks=[
             # blocked by https://github.com/Azure/azure-cli/issues/5103
@@ -2290,16 +2332,14 @@ class VMSSDiskEncryptionTest(ScenarioTest):
         self.cmd('vmss create -g {rg} -n {vmss} --image win2016datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789!')
         self.cmd('vmss encryption enable -g {rg} -n {vmss} --disk-encryption-keyvault {vault}')
         self.cmd('vmss update-instances -g {rg} -n {vmss}  --instance-ids "*"')
-        self.cmd('vmss encryption show -g {rg} -n {vmss}',
-                 checks=self.check('[0].disks[0].statuses[0].code', 'EncryptionState/encrypted'))
+        self.cmd('vmss encryption show -g {rg} -n {vmss}', checks=self.check('[0].disks[0].statuses[0].code', 'EncryptionState/encrypted'))
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'EnableEncryption'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
         ])
         self.cmd('vmss encryption disable -g {rg} -n {vmss}')
         self.cmd('vmss update-instances -g {rg} -n {vmss}  --instance-ids "*"')
-        self.cmd('vmss encryption show -g {rg} -n {vmss}',
-                 checks=self.check('[0].disks[0].statuses[0].code', 'EncryptionState/notEncrypted'))
+        self.cmd('vmss encryption show -g {rg} -n {vmss}', checks=self.check('[0].disks[0].statuses[0].code', 'EncryptionState/notEncrypted'))
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'DisableEncryption'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
@@ -2470,7 +2510,7 @@ class VMOsDiskSwap(ScenarioTest):
             'vm': 'vm1',
             'backupDisk': 'disk1',
         })
-        self.cmd('vm create -g {rg} -n {vm} --image centos')
+        self.cmd('vm create -g {rg} -n {vm} --image centos --admin-username clitest123')
         res = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()
         original_disk_id = res['storageProfile']['osDisk']['managedDisk']['id']
         backup_disk_id = self.cmd('disk create -g {{rg}} -n {{backupDisk}} --source {}'.format(original_disk_id)).get_output_in_json()['id']

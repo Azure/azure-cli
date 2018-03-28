@@ -67,8 +67,8 @@ def create(cmd, client, resource_group_name, activity_log_alert_name, scopes=Non
                                                                                                resource_group_name))
 
     # Add alert conditions
-    condition = condition or ActivityLogAlertAllOfCondition(all_of=[ActivityLogAlertLeafCondition('category',
-                                                                                                  'ServiceHealth')])
+    condition = condition or ActivityLogAlertAllOfCondition(
+        all_of=[ActivityLogAlertLeafCondition(field='category', equals='ServiceHealth')])
 
     # Add action groups
     action_group_rids = _normalize_names(cmd.cli_ctx, action_groups, resource_group_name, 'microsoft.insights',
@@ -179,7 +179,7 @@ def _normalize_condition(condition_instance):
     if isinstance(condition_instance, str):
         try:
             field, value = condition_instance.split('=')
-            return '{}={}'.format(field.lower(), value), ActivityLogAlertLeafCondition(field, value)
+            return '{}={}'.format(field.lower(), value), ActivityLogAlertLeafCondition(field=field, equals=value)
         except ValueError:
             # too many values to unpack or not enough values to unpack
             raise ValueError('Condition "{}" does not follow format FIELD=VALUE'.format(condition_instance))

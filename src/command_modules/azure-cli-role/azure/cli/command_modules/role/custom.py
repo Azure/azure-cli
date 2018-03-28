@@ -23,13 +23,10 @@ from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
 from azure.mgmt.authorization.models import RoleAssignmentCreateParameters, Permission, RoleDefinition
 
-from azure.graphrbac.models import (ApplicationCreateParameters,
-                                    ApplicationUpdateParameters,
-                                    PasswordCredential,
-                                    KeyCredential,
-                                    UserCreateParameters,
-                                    PasswordProfile,
-                                    ServicePrincipalCreateParameters)
+from azure.graphrbac.models import (ApplicationCreateParameters, ApplicationUpdateParameters, PasswordCredential,
+                                    KeyCredential, UserCreateParameters, PasswordProfile,
+                                    ServicePrincipalCreateParameters, RequiredResourceAccess,
+                                    ResourceAccess, GroupCreateParameters, CheckGroupMembershipParameters)
 
 from ._client_factory import _auth_client_factory, _graph_client_factory
 
@@ -529,8 +526,18 @@ def create_user(client, user_principal_name, display_name, password,
                                  display_name=display_name, mail_nickname=mail_nickname,
                                  immutable_id=immutable_id,
                                  password_profile=PasswordProfile(
-                                     password, force_change_password_next_login))
+                                     password=password,
+                                     force_change_password_next_login=force_change_password_next_login))
     return client.create(param)
+
+
+def create_group(client, display_name, mail_nickname):
+    return client.create(GroupCreateParameters(display_name=display_name, mail_nickname=mail_nickname))
+
+
+def check_group_membership(cmd, client, group_id, member_object_id):  # pylint: disable=unused-argument
+    return client.is_member_of(CheckGroupMembershipParameters(group_id=group_id,
+                                                              member_id=member_object_id))
 
 
 def list_groups(client, display_name=None, query_filter=None):
@@ -545,23 +552,36 @@ def list_groups(client, display_name=None, query_filter=None):
     return client.list(filter=(' and ').join(sub_filters))
 
 
-def create_application(client, display_name, homepage, identifier_uris,
+def create_application(client, display_name, homepage=None, identifier_uris=None,
                        available_to_other_tenants=False, password=None, reply_urls=None,
-                       key_value=None, key_type=None, key_usage=None, start_date=None,
-                       end_date=None):
-    password_creds, key_creds = _build_application_creds(password, key_value, key_type,
-                                                         key_usage, start_date, end_date)
+                       key_value=None, key_type=None, key_usage=None, start_date=None, end_date=None,
+                       oauth2_allow_implicit_flow=None, required_resource_accesses=None, native_app=None):
+    key_creds, password_creds, required_accesses = None, None, None
+    if native_app:
+        if identifier_uris:
+            raise CLIError("'--identifier-uris' is not required for creating a native application")
+        identifier_uris = ['http://{}'.format(_gen_guid())]  # we will create a temporary one and remove it later
+    else:
+        if not identifier_uris:
+            raise CLIError("'--identifier-uris' is required for creating an application")
+        password_creds, key_creds = _build_application_creds(password, key_value, key_type,
+                                                             key_usage, start_date, end_date)
 
-    app_create_param = ApplicationCreateParameters(available_to_other_tenants,
-                                                   display_name,
-                                                   identifier_uris,
-                                                   homepage=homepage,
-                                                   reply_urls=reply_urls,
-                                                   key_credentials=key_creds,
-                                                   password_credentials=password_creds)
+    if required_resource_accesses:
+        required_accesses = _build_application_accesses(required_resource_accesses)
+
+    app_patch_param = ApplicationCreateParameters(available_to_other_tenants=available_to_other_tenants,
+                                                  display_name=display_name,
+                                                  identifier_uris=identifier_uris,
+                                                  homepage=homepage,
+                                                  reply_urls=reply_urls,
+                                                  key_credentials=key_creds,
+                                                  password_credentials=password_creds,
+                                                  oauth2_allow_implicit_flow=oauth2_allow_implicit_flow,
+                                                  required_resource_access=required_accesses)
 
     try:
-        return client.create(app_create_param)
+        result = client.create(app_patch_param)
     except GraphErrorException as ex:
         if 'insufficient privileges' in str(ex).lower():
             link = 'https://docs.microsoft.com/en-us/azure/azure-resource-manager/resource-group-create-service-principal-portal'  # pylint: disable=line-too-long
@@ -569,24 +589,55 @@ def create_application(client, display_name, homepage, identifier_uris,
                            "For how to configure, please refer '{}'. Original error: {}".format(link, ex))
         raise
 
+    if native_app:
+        # AAD graph doesn't have the API to create a native app, aka public client, the recommended hack is
+        # to create a web app first, then convert to a native one
+        # pylint: disable=protected-access
+        if 'public_client' not in ApplicationUpdateParameters._attribute_map:
+            ApplicationUpdateParameters._attribute_map['public_client'] = {'key': 'publicClient', 'type': 'bool'}
+        app_patch_param = ApplicationUpdateParameters(identifier_uris=[])
+        setattr(app_patch_param, 'public_client', True)
+        client.patch(result.object_id, app_patch_param)
+        result = client.get(result.object_id)
+
+    return result
+
 
 def update_application(client, identifier, display_name=None, homepage=None,
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
-                       key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None):
+                       key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
+                       oauth2_allow_implicit_flow=None, required_resource_accesses=None):
     object_id = _resolve_application(client, identifier)
 
-    password_creds, key_creds = None, None
+    password_creds, key_creds, required_accesses = None, None, None
     if any([key_value, key_type, key_usage, start_date, end_date]):
         password_creds, key_creds = _build_application_creds(password, key_value, key_type,
                                                              key_usage, start_date, end_date)
+
+    if required_resource_accesses:
+        required_accesses = _build_application_accesses(required_resource_accesses)
+
     app_patch_param = ApplicationUpdateParameters(display_name=display_name,
                                                   homepage=homepage,
                                                   identifier_uris=identifier_uris,
                                                   reply_urls=reply_urls,
                                                   key_credentials=key_creds,
                                                   password_credentials=password_creds,
-                                                  available_to_other_tenants=available_to_other_tenants)
+                                                  available_to_other_tenants=available_to_other_tenants,
+                                                  required_resource_access=required_accesses,
+                                                  oauth2_allow_implicit_flow=oauth2_allow_implicit_flow)
     return client.patch(object_id, app_patch_param)
+
+
+def _build_application_accesses(required_resource_accesses):
+    required_accesses = None
+    for x in required_resource_accesses:
+        accesses = [ResourceAccess(id=y['id'], type=y['type']) for y in x['resourceAccess']]
+        if required_accesses is None:
+            required_accesses = []
+        required_accesses.append(RequiredResourceAccess(resource_app_id=x['resourceAppId'],
+                                                        resource_access=accesses))
+    return required_accesses
 
 
 def show_application(client, identifier):
@@ -632,10 +683,12 @@ def _build_application_creds(password=None, key_value=None, key_type=None,
     password_creds = None
     key_creds = None
     if password:
-        password_creds = [PasswordCredential(start_date, end_date, str(_gen_guid()), password)]
+        password_creds = [PasswordCredential(start_date=start_date, end_date=end_date,
+                                             key_id=str(_gen_guid()), value=password)]
     elif key_value:
-        key_creds = [KeyCredential(start_date, end_date, key_value, str(_gen_guid()),
-                                   key_usage, key_type)]
+        key_creds = [KeyCredential(start_date=start_date, end_date=end_date,
+                                   key_id=str(_gen_guid()), value=key_value,
+                                   usage=key_usage, type=key_type)]
 
     return (password_creds, key_creds)
 

@@ -167,7 +167,7 @@ def load_help_files(data):
 
 def get_cache_dir(shell_ctx):
     """ gets the location of the cache """
-    azure_folder = shell_ctx.config.config_dir
+    azure_folder = shell_ctx.config.get_config_dir()
     cache_path = os.path.join(azure_folder, 'cache')
     if not os.path.exists(azure_folder):
         os.makedirs(azure_folder)

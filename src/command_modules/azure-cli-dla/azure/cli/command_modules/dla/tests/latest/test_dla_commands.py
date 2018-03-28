@@ -273,10 +273,10 @@ CREATE PROCEDURE {0}.dbo.{4}() AS BEGIN CREATE VIEW {0}.dbo.{3} AS SELECT * FROM
         ])
 
         # job relationship. Attempt to submit a job with invalid job relationship param combos
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(CLIError):
             self.cmd('dla job submit -n {dla} --job-name clijobtest --script "DROP DATABASE IF EXISTS FOO; CREATE DATABASE FOO;" --recurrence-name {recurrence_name}')
 
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(CLIError):
             self.cmd('dla job submit -n {dla} --job-name clijobtest --script "DROP DATABASE IF EXISTS FOO; CREATE DATABASE FOO;" --recurrence-name {recurrence_name} --recurrence-id {recurrence_id} --pipeline-name {pipeline_name}')
 
         # re-submit job with a fully populated relationship
@@ -430,7 +430,7 @@ CREATE PROCEDURE {0}.dbo.{4}() AS BEGIN CREATE VIEW {0}.dbo.{3} AS SELECT * FROM
 
         # test compute policy
         # assert that it throws if I don't specify either of the policy types
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(CLIError):
             self.cmd('dla account compute-policy create -g {rg} -n {dla} --compute-policy-name {user_policy} --object-id {user_oid} --object-type User')
 
         self.cmd('dla account compute-policy create -g {rg} -n {dla} --compute-policy-name {user_policy} --object-id {user_oid} --object-type User --max-dop-per-job 2', checks=[
