@@ -329,9 +329,9 @@ def check_distro_consistency():
         logger.debug(err)
 
     if current_linux_dist_name != stored_linux_dist_name:
-        logger.warning("Linux distro check: Mismatch distribution "
-                       "name in %s file", LIST_FILE_PATH)
-        logger.warning("Linux distro check: If command fails, install the appropriate package "
-                       "for your distribution or change the above file accordingly.")
-        logger.warning("Linux distro check: %s has '%s', current distro is '%s'",
-                       LIST_FILE_PATH, stored_linux_dist_name, current_linux_dist_name)
+        logger.debug("Linux distro check: Mismatch distribution "
+                     "name in %s file", LIST_FILE_PATH)
+        logger.debug("Linux distro check: If command fails, install the appropriate package "
+                     "for your distribution or change the above file accordingly.")
+        logger.debug("Linux distro check: %s has '%s', current distro is '%s'",
+                     LIST_FILE_PATH, stored_linux_dist_name, current_linux_dist_name)
