@@ -711,7 +711,7 @@ def _get_files_from_bfs(cli_ctx, bfs, path, expiry):
     from azure.storage.blob.models import Blob, BlobPermissions
     result = []
     service = BlockBlobService(bfs.account_name, _get_storage_account_key(cli_ctx, bfs.account_name, None))
-    effective_path = os.path.normpath(path).replace('\\', '/')
+    effective_path = _get_path_for_storage(path)
     folders = set()
     for b in service.list_blobs(bfs.container_name, effective_path + '/', delimiter='/'):
         if isinstance(b, Blob):
@@ -731,6 +731,14 @@ def _get_files_from_bfs(cli_ctx, bfs, path, expiry):
     return result
 
 
+def _get_path_for_storage(path):
+    """Returns a path in format acceptable for passing to storage"""
+    result = os.path.normpath(path).replace('\\', '/')
+    if result.endswith('/.'):
+        result = result[:-2]
+    return result
+
+
 def _get_files_from_afs(cli_ctx, afs, path, expiry):
     """Returns a list of files and directories under given path on mounted Azure File share.
 
@@ -743,14 +751,17 @@ def _get_files_from_afs(cli_ctx, afs, path, expiry):
     result = []
     service = FileService(afs.account_name, _get_storage_account_key(cli_ctx, afs.account_name, None))
     share_name = afs.azure_file_url.split('/')[-1]
-    for f in service.list_directories_and_files(share_name, path):
+    effective_path = _get_path_for_storage(path)
+    for f in service.list_directories_and_files(share_name, effective_path):
         if isinstance(f, File):
+            logger.warning(effective_path)
+            logger.warning(f.name)
             sas = service.generate_file_shared_access_signature(
-                share_name, path, f.name, permission=FilePermissions(read=True),
+                share_name, effective_path, f.name, permission=FilePermissions(read=True),
                 expiry=datetime.datetime.utcnow() + datetime.timedelta(minutes=expiry))
             result.append(
                 LogFile(
-                    f.name, service.make_file_url(share_name, path, f.name, 'https', sas),
+                    f.name, service.make_file_url(share_name, effective_path, f.name, 'https', sas),
                     False, f.properties.content_length))
         else:
             result.append(LogFile(f.name, None, True, None))
