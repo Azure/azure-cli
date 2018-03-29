@@ -796,7 +796,7 @@ helps['network application-gateway waf-config list-rule-sets'] = """
         - name: List available rule groups in OWASP type rule sets.
           text: az network application-gateway waf-config list-rule-sets --type OWASP
         - name: List available rules in the OWASP 3.0 rule set.
-          text: az network application-gateway waf-config list-rule-sets --group `*` --type OWASP --version 3.0
+          text: az network application-gateway waf-config list-rule-sets --group '*' --type OWASP --version 3.0
         - name: List available rules in the `crs_35_bad_robots` rule group.
           text: az network application-gateway waf-config list-rule-sets --group crs_35_bad_robots
         - name: List available rules in table foramt.
@@ -1910,7 +1910,7 @@ helps['network lb create'] = """
         - name: Create a basic zone flavored internal load balancer, through provisioning a zonal public ip.
           text: >
             az network lb create -g MyResourceGroup -n MyLb --sku Basic --public-ip-zone 2
-        - name: > 
+        - name: >
             Create a standard zone flavored public-facing load balancer, through provisioning a
             zonal frontend ip configuration and Vnet.
           text: >
