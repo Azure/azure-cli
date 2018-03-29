@@ -19,7 +19,7 @@ from azure.cli.core.commands import CONFIRM_PARAM_NAME
 from azure.cli.core.commands import AzCommandGroup
 
 
-_CLASS_NAME = re.compile(r"<(.*?)>")  # Strip model name from class docstring
+_CLASS_NAME = re.compile(r"~(.*)")  # Strip model name from class docstring
 _UNDERSCORE_CASE = re.compile('(?!^)([A-Z]+)')  # Convert from CamelCase to underscore_case
 
 
@@ -117,7 +117,7 @@ def enum_value(enum_str):
     """Strip chars around enum value str.
     :param str enum_str: Enum value.
     """
-    return enum_str.strip(' \'')
+    return enum_str.strip(' \'').lower()
 
 
 def class_name(type_str):
@@ -429,7 +429,7 @@ class BatchArgumentTree(object):
 
 class AzureBatchDataPlaneCommand(object):
     # pylint: disable=too-many-instance-attributes, too-few-public-methods, too-many-statements
-    def __init__(self, name, operation, command_loader, client_factory=None, validator=None, **kwargs):
+    def __init__(self, operation, command_loader, client_factory=None, validator=None, **kwargs):
 
         if not isinstance(operation, string_types):
             raise ValueError("Operation must be a string. Got '{}'".format(operation))
@@ -532,7 +532,7 @@ class AzureBatchDataPlaneCommand(object):
 
         self.table_transformer = None
         try:
-            transform_func = '_'.join(name.split()[1:]).replace('-', '_')
+            transform_func = operation.split('.')[-1].replace('-', '_')
             self.table_transformer = getattr(transformers, transform_func + "_table_format")
         except AttributeError:
             pass
@@ -758,7 +758,7 @@ class AzureBatchDataPlaneCommand(object):
                                                          default=None,
                                                          choices=choices,
                                                          help=docstring))))
-            elif arg_type.startswith(":class:"):  # TODO: could add handling for enums
+            elif arg_type.startswith("~"):  # TODO: could add handling for enums
                 param_type = class_name(arg_type)
                 self.parser.set_request_param(arg[0], param_type)
                 param_model = _load_model(param_type)
@@ -779,7 +779,7 @@ class AzureBatchDataPlaneCommand(object):
             elif arg[0] not in pformat.IGNORE_PARAMETERS:
                 args.append(arg)
         return_type = find_return_type(handler)
-        if return_type == 'Generator':
+        if return_type and return_type.startswith('Generator'):
             param = 'destination'
             docstring = "The path to the destination file or directory."
             args.append((param, CLICommandArgument(param,
@@ -831,6 +831,6 @@ class BatchCommandGroup(AzCommandGroup):
         operations_tmpl = merged_kwargs.get('operations_tmpl')
         command_name = '{} {}'.format(self.group_name, name) if self.group_name else name
         operation = operations_tmpl.format(method_name) if operations_tmpl else None
-        command = AzureBatchDataPlaneCommand(name, operation, self.command_loader, **merged_kwargs)
+        command = AzureBatchDataPlaneCommand(operation, self.command_loader, **merged_kwargs)
 
         self.command_loader._cli_command(command_name, **command.get_kwargs())  # pylint: disable=protected-access

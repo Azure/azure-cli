@@ -3,6 +3,10 @@
 Release History
 ===============
 
+3.2.0
+++++++
+* Updated to Batch SDK 4.1.1.
+
 3.1.11
 ++++++
 * Support Autorest 3.0 based SDKs

@@ -1,16 +1,16 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [group create]
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -20,24 +20,24 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Nov 2017 17:52:05 GMT']
+      date: ['Mon, 26 Mar 2018 21:30:40 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 201, message: Created}
 - request:
     body: '{"location": "koreacentral"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [batch account create]
       Connection: [keep-alive]
       Content-Length: ['28']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchmanagementclient/4.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002?api-version=2017-05-01
@@ -46,9 +46,9 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 30 Nov 2017 17:52:07 GMT']
+      date: ['Mon, 26 Mar 2018 21:30:44 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/operationResults/fac86b6f-d1cf-4808-8bee-c6100cf50b5c?api-version=2017-05-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/operationResults/685852bd-5b88-41c9-9004-57ec822268a6?api-version=2017-05-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -60,25 +60,24 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [batch account create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchmanagementclient/4.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/operationResults/fac86b6f-d1cf-4808-8bee-c6100cf50b5c?api-version=2017-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/operationResults/685852bd-5b88-41c9-9004-57ec822268a6?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002","name":"clibatch000002","type":"Microsoft.Batch/batchAccounts","location":"koreacentral","properties":{"accountEndpoint":"clibatch000002.koreacentral.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":100,"lowPriorityCoreQuota":100,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002","name":"clibatch000002","type":"Microsoft.Batch/batchAccounts","location":"koreacentral","properties":{"accountEndpoint":"clibatch000002.koreacentral.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['573']
+      content-length: ['571']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Nov 2017 17:52:24 GMT']
-      etag: ['"0x8D5381B1CD354B7"']
+      date: ['Mon, 26 Mar 2018 21:31:00 GMT']
+      etag: ['"0x8D59360DF251530"']
       expires: ['-1']
-      last-modified: ['Thu, 30 Nov 2017 17:52:24 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:31:01 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -91,23 +90,22 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [batch account keys list]
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchmanagementclient/4.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/listKeys?api-version=2017-05-01
   response:
-    body: {string: '{"accountName":"clibatch000002","primary":"V/JGp2SYH4gGttTV8VnYzqMCow2N7+KUFJRbR08qOXLTEQG/A9jq3zIOCS9BHPs4CQSxygcqRNheMgXQ5bXCpA==","secondary":"bag0XgezDG/Rjp47eOZnIgqyrBkkofnQBQ4eUWz2sKK6CKBbfJNjrV5zWAkdrJNgZRm24Tz+Wp+UjPqCeSvJPQ=="}'}
+    body: {string: '{"accountName":"clibatch000002","primary":"rHMtb1a+l5yE9ZJ+yajODz+LPNnamHdu9B9fQadu3R7D+qYpAhTMAWV4kOq/RIwxSeRh5O0nYnm+44/QHA4Fnw==","secondary":"h1GEI0pGgtRDBi250khhDb6y0gHVquAUabE5SZf9hWd6lgCpu5P6Px8QHstU2yLjSNo2mshPxXF0pHzYGxNM5Q=="}'}
     headers:
       cache-control: [no-cache]
       content-length: ['246']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Nov 2017 17:52:24 GMT']
+      date: ['Mon, 26 Mar 2018 21:31:02 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -122,25 +120,24 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [batch account show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchmanagementclient/4.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002","name":"clibatch000002","type":"Microsoft.Batch/batchAccounts","location":"koreacentral","properties":{"accountEndpoint":"clibatch000002.koreacentral.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":100,"lowPriorityCoreQuota":100,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002","name":"clibatch000002","type":"Microsoft.Batch/batchAccounts","location":"koreacentral","properties":{"accountEndpoint":"clibatch000002.koreacentral.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['573']
+      content-length: ['571']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Nov 2017 17:52:26 GMT']
-      etag: ['"0x8D5381B133E620F"']
+      date: ['Mon, 26 Mar 2018 21:31:04 GMT']
+      etag: ['"0x8D59360D54739E2"']
       expires: ['-1']
-      last-modified: ['Thu, 30 Nov 2017 17:52:08 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:30:44 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -149,97 +146,94 @@ interactions:
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"id": "azure-cli-test-paas", "vmSize": "small", "cloudServiceConfiguration":
-      {"osFamily": "4"}}'
+    body: '{"cloudServiceConfiguration": {"osFamily": "4"}, "vmSize": "small", "id":
+      "azure-cli-test-paas"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['96']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:26 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchnh3ki3ojs2nce7qd.koreacentral.batch.azure.com/pools/azure-cli-test-paas']
+      dataserviceid: ['https://clibatcheuv5kmizgrqs55wq.koreacentral.batch.azure.com/pools/azure-cli-test-paas']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:27 GMT']
-      etag: ['0x8D5381B1EC74E51']
-      last-modified: ['Thu, 30 Nov 2017 17:52:27 GMT']
+      date: ['Mon, 26 Mar 2018 21:31:08 GMT']
+      etag: ['0x8D59360E3A54EBD']
+      last-modified: ['Mon, 26 Mar 2018 21:31:08 GMT']
       location: ['https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-paas']
-      request-id: [1dc0aa45-11c3-4fd1-80a5-0e2ce4019676]
+      request-id: [2e88de15-9666-464d-8831-2a5c9bbd85f0]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
     status: {code: 201, message: Created}
 - request:
-    body: '{"id": "azure-cli-test-iaas", "vmSize": "Standard_A1", "virtualMachineConfiguration":
-      {"imageReference": {"publisher": "Canonical", "offer": "UbuntuServer", "sku":
-      "16.04.0-LTS"}, "nodeAgentSKUId": "batch.node.ubuntu 16.04"}}'
+    body: '{"vmSize": "Standard_A1", "virtualMachineConfiguration": {"imageReference":
+      {"offer": "UbuntuServer", "sku": "16.04.0-LTS", "publisher": "Canonical"}, "nodeAgentSKUId":
+      "batch.node.ubuntu 16.04"}, "id": "azure-cli-test-iaas"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['225']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:27 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchnh3ki3ojs2nce7qd.koreacentral.batch.azure.com/pools/azure-cli-test-iaas']
+      dataserviceid: ['https://clibatcheuv5kmizgrqs55wq.koreacentral.batch.azure.com/pools/azure-cli-test-iaas']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:27 GMT']
-      etag: ['0x8D5381B1F309C98']
-      last-modified: ['Thu, 30 Nov 2017 17:52:28 GMT']
+      date: ['Mon, 26 Mar 2018 21:31:12 GMT']
+      etag: ['0x8D59360E5E0BE8C']
+      last-modified: ['Mon, 26 Mar 2018 21:31:12 GMT']
       location: ['https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas']
-      request-id: [5b9660fc-0a3b-4607-a1aa-18543cd2a494]
+      request-id: [01dbdaf3-e003-4aa5-a040-10da8d19e1fd]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
     status: {code: 201, message: Created}
 - request:
-    body: '{"id": "azure-cli-test-json", "vmSize": "small", "cloudServiceConfiguration":
-      {"osFamily": "4", "targetOSVersion": "*"}, "resizeTimeout": "PT15M", "startTask":
-      {"commandLine": "cmd /c echo test", "userIdentity": {"username": "cliTestUser"},
-      "waitForSuccess": true}, "userAccounts": [{"name": "cliTestUser", "password":
-      "SRYES@#%#_DSFH", "elevationLevel": "admin"}]}'
+    body: '{"cloudServiceConfiguration": {"targetOSVersion": "*", "osFamily": "4"},
+      "userAccounts": [{"name": "cliTestUser", "password": "SRYES@#%#_DSFH", "elevationLevel":
+      "admin"}], "startTask": {"waitForSuccess": true, "userIdentity": {"username":
+      "cliTestUser"}, "commandLine": "cmd /c echo test"}, "vmSize": "small", "resizeTimeout":
+      "PT15M", "id": "azure-cli-test-json"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['365']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:28 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchnh3ki3ojs2nce7qd.koreacentral.batch.azure.com/pools/azure-cli-test-json']
+      dataserviceid: ['https://clibatcheuv5kmizgrqs55wq.koreacentral.batch.azure.com/pools/azure-cli-test-json']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:29 GMT']
-      etag: ['0x8D5381B1FCD2F59']
-      last-modified: ['Thu, 30 Nov 2017 17:52:29 GMT']
+      date: ['Mon, 26 Mar 2018 21:31:18 GMT']
+      etag: ['0x8D59360E98BE656']
+      last-modified: ['Mon, 26 Mar 2018 21:31:18 GMT']
       location: ['https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-json']
-      request-id: [4dd2acd7-57ce-43ee-9981-618d217aba77]
+      request-id: [56f8f900-495e-4b6d-bf66-100ea5f2037b]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -251,21 +245,20 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:29 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-json?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-json?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.koreacentral.batch.azure.com/$metadata#pools/@Element\"\
         ,\"id\":\"azure-cli-test-json\",\"url\":\"https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-json\"\
-        ,\"eTag\":\"0x8D5381B1FCD2F59\",\"lastModified\":\"2017-11-30T17:52:29.1606361Z\"\
-        ,\"creationTime\":\"2017-11-30T17:52:29.1606361Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-11-30T17:52:29.1606361Z\",\"allocationState\"\
-        :\"steady\",\"allocationStateTransitionTime\":\"2017-11-30T17:52:29.2412392Z\"\
+        ,\"eTag\":\"0x8D59360E98BE656\",\"lastModified\":\"2018-03-26T21:31:18.7196502Z\"\
+        ,\"creationTime\":\"2018-03-26T21:31:18.7196502Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2018-03-26T21:31:18.7196502Z\",\"allocationState\"\
+        :\"steady\",\"allocationStateTransitionTime\":\"2018-03-26T21:31:18.796652Z\"\
         ,\"vmSize\":\"small\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\"\
         :0,\"targetDedicatedNodes\":0,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\"\
         :0,\"enableAutoScale\":false,\"enableInterNodeCommunication\":false,\"startTask\"\
@@ -279,10 +272,10 @@ interactions:
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:29 GMT']
-      etag: ['0x8D5381B1FCD2F59']
-      last-modified: ['Thu, 30 Nov 2017 17:52:29 GMT']
-      request-id: [6a9b5d16-6410-4eb5-bfde-831322a5317c]
+      date: ['Mon, 26 Mar 2018 21:31:21 GMT']
+      etag: ['0x8D59360E98BE656']
+      last-modified: ['Mon, 26 Mar 2018 21:31:18 GMT']
+      request-id: [3021ce47-8561-409f-83b3-ef5fa152f29c]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -294,21 +287,20 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:30 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools?api-version=2017-09-01.6.0&maxresults=1000&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools?timeout=30&maxresults=1000&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.koreacentral.batch.azure.com/$metadata#pools\"\
         ,\"value\":[\r\n    {\r\n      \"id\":\"azure-cli-test-iaas\",\"url\":\"https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas\"\
-        ,\"eTag\":\"0x8D5381B1F309C98\",\"lastModified\":\"2017-11-30T17:52:28.1345176Z\"\
-        ,\"creationTime\":\"2017-11-30T17:52:28.1345176Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-11-30T17:52:28.1345176Z\",\"allocationState\"\
-        :\"steady\",\"allocationStateTransitionTime\":\"2017-11-30T17:52:28.5244128Z\"\
+        ,\"eTag\":\"0x8D59360E5E0BE8C\",\"lastModified\":\"2018-03-26T21:31:12.5648012Z\"\
+        ,\"creationTime\":\"2018-03-26T21:31:12.5648012Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2018-03-26T21:31:12.5648012Z\",\"allocationState\"\
+        :\"steady\",\"allocationStateTransitionTime\":\"2018-03-26T21:31:13.2438194Z\"\
         ,\"vmSize\":\"standard_a1\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\"\
         :0,\"targetDedicatedNodes\":0,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\"\
         :0,\"enableAutoScale\":false,\"enableInterNodeCommunication\":false,\"maxTasksPerNode\"\
@@ -318,10 +310,10 @@ interactions:
         :\"16.04.0-LTS\",\"version\":\"latest\"\r\n        },\"nodeAgentSKUId\":\"\
         batch.node.ubuntu 16.04\"\r\n      }\r\n    },{\r\n      \"id\":\"azure-cli-test-json\"\
         ,\"url\":\"https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-json\"\
-        ,\"eTag\":\"0x8D5381B1FCD2F59\",\"lastModified\":\"2017-11-30T17:52:29.1606361Z\"\
-        ,\"creationTime\":\"2017-11-30T17:52:29.1606361Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-11-30T17:52:29.1606361Z\",\"allocationState\"\
-        :\"steady\",\"allocationStateTransitionTime\":\"2017-11-30T17:52:29.2412392Z\"\
+        ,\"eTag\":\"0x8D59360E98BE656\",\"lastModified\":\"2018-03-26T21:31:18.7196502Z\"\
+        ,\"creationTime\":\"2018-03-26T21:31:18.7196502Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2018-03-26T21:31:18.7196502Z\",\"allocationState\"\
+        :\"steady\",\"allocationStateTransitionTime\":\"2018-03-26T21:31:18.796652Z\"\
         ,\"vmSize\":\"small\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\"\
         :0,\"targetDedicatedNodes\":0,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\"\
         :0,\"enableAutoScale\":false,\"enableInterNodeCommunication\":false,\"startTask\"\
@@ -334,10 +326,10 @@ interactions:
         :{\r\n        \"osFamily\":\"4\",\"targetOSVersion\":\"*\",\"currentOSVersion\"\
         :\"*\"\r\n      }\r\n    },{\r\n      \"id\":\"azure-cli-test-paas\",\"url\"\
         :\"https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-paas\"\
-        ,\"eTag\":\"0x8D5381B1EC74E51\",\"lastModified\":\"2017-11-30T17:52:27.4443857Z\"\
-        ,\"creationTime\":\"2017-11-30T17:52:27.4443857Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-11-30T17:52:27.4443857Z\",\"allocationState\"\
-        :\"steady\",\"allocationStateTransitionTime\":\"2017-11-30T17:52:27.5453607Z\"\
+        ,\"eTag\":\"0x8D59360E3A54EBD\",\"lastModified\":\"2018-03-26T21:31:08.8198333Z\"\
+        ,\"creationTime\":\"2018-03-26T21:31:08.8198333Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2018-03-26T21:31:08.8198333Z\",\"allocationState\"\
+        :\"steady\",\"allocationStateTransitionTime\":\"2018-03-26T21:31:08.9238375Z\"\
         ,\"vmSize\":\"small\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\"\
         :0,\"targetDedicatedNodes\":0,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\"\
         :0,\"enableAutoScale\":false,\"enableInterNodeCommunication\":false,\"maxTasksPerNode\"\
@@ -347,8 +339,8 @@ interactions:
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:29 GMT']
-      request-id: [573838ac-5d82-4588-804e-cc57ba894e52]
+      date: ['Mon, 26 Mar 2018 21:31:25 GMT']
+      request-id: [ca4569d0-2d39-4c0f-a49a-21d8bf0d63f6]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -360,21 +352,20 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:31 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools?api-version=2017-09-01.6.0&$filter=id%20eq%20%27azure-cli-test-paas%27&maxresults=1000&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools?timeout=30&maxresults=1000&$filter=id%20eq%20%27azure-cli-test-paas%27&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.koreacentral.batch.azure.com/$metadata#pools\"\
         ,\"value\":[\r\n    {\r\n      \"id\":\"azure-cli-test-paas\",\"url\":\"https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-paas\"\
-        ,\"eTag\":\"0x8D5381B1EC74E51\",\"lastModified\":\"2017-11-30T17:52:27.4443857Z\"\
-        ,\"creationTime\":\"2017-11-30T17:52:27.4443857Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-11-30T17:52:27.4443857Z\",\"allocationState\"\
-        :\"steady\",\"allocationStateTransitionTime\":\"2017-11-30T17:52:27.5453607Z\"\
+        ,\"eTag\":\"0x8D59360E3A54EBD\",\"lastModified\":\"2018-03-26T21:31:08.8198333Z\"\
+        ,\"creationTime\":\"2018-03-26T21:31:08.8198333Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2018-03-26T21:31:08.8198333Z\",\"allocationState\"\
+        :\"steady\",\"allocationStateTransitionTime\":\"2018-03-26T21:31:08.9238375Z\"\
         ,\"vmSize\":\"small\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\"\
         :0,\"targetDedicatedNodes\":0,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\"\
         :0,\"enableAutoScale\":false,\"enableInterNodeCommunication\":false,\"maxTasksPerNode\"\
@@ -384,8 +375,8 @@ interactions:
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:31 GMT']
-      request-id: [40f4c499-dece-495a-9cff-cb100b2fde6a]
+      date: ['Mon, 26 Mar 2018 21:31:28 GMT']
+      request-id: [27414cc5-0d87-4989-9f27-8a45210db882]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -399,22 +390,21 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['27']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:31 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-paas/resize?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-paas/resize?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchnh3ki3ojs2nce7qd.koreacentral.batch.azure.com/pools/azure-cli-test-paas/resize']
+      dataserviceid: ['https://clibatcheuv5kmizgrqs55wq.koreacentral.batch.azure.com/pools/azure-cli-test-paas/resize']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:31 GMT']
-      etag: ['0x8D5381B218BD4A1']
-      last-modified: ['Thu, 30 Nov 2017 17:52:32 GMT']
-      request-id: [b77f12ef-83c6-4731-9e0a-641a8c50d373]
+      date: ['Mon, 26 Mar 2018 21:31:31 GMT']
+      etag: ['0x8D59360F15876DB']
+      last-modified: ['Mon, 26 Mar 2018 21:31:31 GMT']
+      request-id: [b409ae8f-2eff-4e1f-9132-1fe991095701]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -426,24 +416,23 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:32 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-paas?api-version=2017-09-01.6.0&$select=allocationState%2C%20targetDedicatedNodes&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-paas?timeout=30&$select=allocationState%2C%20targetDedicatedNodes&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.koreacentral.batch.azure.com/$metadata#pools/@Element\"\
         ,\"allocationState\":\"resizing\",\"targetDedicatedNodes\":5\r\n}"}
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:32 GMT']
-      etag: ['0x8D5381B218BD4A1']
-      last-modified: ['Thu, 30 Nov 2017 17:52:32 GMT']
-      request-id: [c1698e50-ac4d-450e-b937-bb2d0b9f160e]
+      date: ['Mon, 26 Mar 2018 21:31:33 GMT']
+      etag: ['0x8D59360F15876DB']
+      last-modified: ['Mon, 26 Mar 2018 21:31:31 GMT']
+      request-id: [6e29d72c-97f6-418c-a04a-96bbc4552fd2]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -456,23 +445,22 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:33 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-paas/stopresize?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-paas/stopresize?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchnh3ki3ojs2nce7qd.koreacentral.batch.azure.com/pools/azure-cli-test-paas/stopresize']
+      dataserviceid: ['https://clibatcheuv5kmizgrqs55wq.koreacentral.batch.azure.com/pools/azure-cli-test-paas/stopresize']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:33 GMT']
-      etag: ['0x8D5381B22559BC6']
-      last-modified: ['Thu, 30 Nov 2017 17:52:33 GMT']
-      request-id: [41e6fd7e-4c72-4a93-bf8d-182bb1d1a2d2]
+      date: ['Mon, 26 Mar 2018 21:31:35 GMT']
+      etag: ['0x8D59360F361B6EF']
+      last-modified: ['Mon, 26 Mar 2018 21:31:35 GMT']
+      request-id: [b4398904-10ae-4208-89a6-e9ff10b89229]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -486,22 +474,21 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['47']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:33 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas/enableautoscale?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas/enableautoscale?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchnh3ki3ojs2nce7qd.koreacentral.batch.azure.com/pools/azure-cli-test-iaas/enableautoscale']
+      dataserviceid: ['https://clibatcheuv5kmizgrqs55wq.koreacentral.batch.azure.com/pools/azure-cli-test-iaas/enableautoscale']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:34 GMT']
-      etag: ['0x8D5381B22D0946A']
-      last-modified: ['Thu, 30 Nov 2017 17:52:34 GMT']
-      request-id: [b059894f-131f-4c1a-a438-0871aeb0ce8e]
+      date: ['Mon, 26 Mar 2018 21:31:36 GMT']
+      etag: ['0x8D59360F44F387B']
+      last-modified: ['Mon, 26 Mar 2018 21:31:36 GMT']
+      request-id: [c0d615cd-8f3d-4e29-91c4-ba667c537b22]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -513,24 +500,23 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:34 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas?api-version=2017-09-01.6.0&$select=enableAutoScale&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas?timeout=30&$select=enableAutoScale&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.koreacentral.batch.azure.com/$metadata#pools/@Element\"\
         ,\"enableAutoScale\":true\r\n}"}
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:34 GMT']
-      etag: ['0x8D5381B22D0946A']
-      last-modified: ['Thu, 30 Nov 2017 17:52:34 GMT']
-      request-id: [ab1a3c54-1629-4327-b013-9e87b380a84c]
+      date: ['Mon, 26 Mar 2018 21:31:38 GMT']
+      etag: ['0x8D59360F44F387B']
+      last-modified: ['Mon, 26 Mar 2018 21:31:36 GMT']
+      request-id: [afce8905-a1e9-4063-bd14-d8bf73cf6a73]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -544,23 +530,22 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['47']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:35 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas/evaluateautoscale?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas/evaluateautoscale?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.koreacentral.batch.azure.com/$metadata#Microsoft.Azure.Batch.Protocol.Entities.AutoScaleRun\"\
-        ,\"timestamp\":\"2017-11-30T17:52:35.4256856Z\",\"results\":\"$TargetDedicatedNodes=3;$TargetLowPriorityNodes=0;$NodeDeallocationOption=requeue\"\
+        ,\"timestamp\":\"2018-03-26T21:31:39.7641404Z\",\"results\":\"$TargetDedicatedNodes=3;$TargetLowPriorityNodes=0;$NodeDeallocationOption=requeue\"\
         \r\n}"}
     headers:
       content-type: [application/json;odata=minimalmetadata]
-      dataserviceid: ['https://clibatchnh3ki3ojs2nce7qd.koreacentral.batch.azure.com/pools/azure-cli-test-iaas/evaluateautoscale']
+      dataserviceid: ['https://clibatcheuv5kmizgrqs55wq.koreacentral.batch.azure.com/pools/azure-cli-test-iaas/evaluateautoscale']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:35 GMT']
-      request-id: [969d5ef8-6c27-4107-b8a4-be97f73c1b0e]
+      date: ['Mon, 26 Mar 2018 21:31:39 GMT']
+      request-id: [e97917fc-4012-4a3f-9ebd-7e86dd260f89]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -573,23 +558,22 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:35 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas/disableautoscale?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas/disableautoscale?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchnh3ki3ojs2nce7qd.koreacentral.batch.azure.com/pools/azure-cli-test-iaas/disableautoscale']
+      dataserviceid: ['https://clibatcheuv5kmizgrqs55wq.koreacentral.batch.azure.com/pools/azure-cli-test-iaas/disableautoscale']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:35 GMT']
-      etag: ['0x8D5381B23F582CB']
-      last-modified: ['Thu, 30 Nov 2017 17:52:36 GMT']
-      request-id: [172fed1c-e61f-444a-8b48-248d26b856a2]
+      date: ['Mon, 26 Mar 2018 21:31:41 GMT']
+      etag: ['0x8D59360F71197DA']
+      last-modified: ['Mon, 26 Mar 2018 21:31:41 GMT']
+      request-id: [54aa06e4-1d0b-4da7-b511-3bee8b1f42f8]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -601,24 +585,23 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:36 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas?api-version=2017-09-01.6.0&$select=enableAutoScale&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas?timeout=30&$select=enableAutoScale&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.koreacentral.batch.azure.com/$metadata#pools/@Element\"\
         ,\"enableAutoScale\":false\r\n}"}
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:36 GMT']
-      etag: ['0x8D5381B23F582CB']
-      last-modified: ['Thu, 30 Nov 2017 17:52:36 GMT']
-      request-id: [2a940366-97db-4ce2-8a5d-bca081cf76a0]
+      date: ['Mon, 26 Mar 2018 21:31:42 GMT']
+      etag: ['0x8D59360F71197DA']
+      last-modified: ['Mon, 26 Mar 2018 21:31:41 GMT']
+      request-id: [0832194a-632b-4192-ba78-5ee4ffb4cab2]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -630,22 +613,21 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:37 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.koreacentral.batch.azure.com/poolusagemetrics?api-version=2017-09-01.6.0&maxresults=1000&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/poolusagemetrics?timeout=30&maxresults=1000&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.koreacentral.batch.azure.com/$metadata#poolusagemetrics\"\
         ,\"value\":[\r\n    \r\n  ]\r\n}"}
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:37 GMT']
-      request-id: [0e2762e1-2d02-4431-9349-4999424467f3]
+      date: ['Mon, 26 Mar 2018 21:31:43 GMT']
+      request-id: [8cf2516c-4ba5-4254-ac00-87901d659d38]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -657,14 +639,13 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:37 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-json?api-version=2017-09-01.6.0&$select=startTask&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-json?timeout=30&$select=startTask&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.koreacentral.batch.azure.com/$metadata#pools/@Element\"\
         ,\"startTask\":{\r\n    \"commandLine\":\"cmd /c echo test\",\"userIdentity\"\
@@ -673,10 +654,10 @@ interactions:
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:38 GMT']
-      etag: ['0x8D5381B1FCD2F59']
-      last-modified: ['Thu, 30 Nov 2017 17:52:29 GMT']
-      request-id: [9ad6c6b0-783f-4f01-91a7-4017f3fd695c]
+      date: ['Mon, 26 Mar 2018 21:31:45 GMT']
+      etag: ['0x8D59360E98BE656']
+      last-modified: ['Mon, 26 Mar 2018 21:31:18 GMT']
+      request-id: [c857e779-821b-4e2c-a0a6-1a9b86a9af2a]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -690,22 +671,21 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['43']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:38 GMT']
       return-client-request-id: ['false']
     method: PATCH
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-json?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-json?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchnh3ki3ojs2nce7qd.koreacentral.batch.azure.com/pools/azure-cli-test-json']
+      dataserviceid: ['https://clibatcheuv5kmizgrqs55wq.koreacentral.batch.azure.com/pools/azure-cli-test-json']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:38 GMT']
-      etag: ['0x8D5381B2593E768']
-      last-modified: ['Thu, 30 Nov 2017 17:52:38 GMT']
-      request-id: [d037a798-4a4f-477f-818a-795db51fccac]
+      date: ['Mon, 26 Mar 2018 21:31:47 GMT']
+      etag: ['0x8D59360FA8F73AA']
+      last-modified: ['Mon, 26 Mar 2018 21:31:47 GMT']
+      request-id: [11cdf188-c3c2-4809-9c38-89f75cd3a2c3]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -717,14 +697,13 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:39 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-json?api-version=2017-09-01.6.0&$select=startTask&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-json?timeout=30&$select=startTask&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.koreacentral.batch.azure.com/$metadata#pools/@Element\"\
         ,\"startTask\":{\r\n    \"commandLine\":\"new_value\",\"userIdentity\":{\r\
@@ -733,10 +712,10 @@ interactions:
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:38 GMT']
-      etag: ['0x8D5381B2593E768']
-      last-modified: ['Thu, 30 Nov 2017 17:52:38 GMT']
-      request-id: [8703394c-dff1-4a63-bb05-dd36ffd58084]
+      date: ['Mon, 26 Mar 2018 21:31:48 GMT']
+      etag: ['0x8D59360FA8F73AA']
+      last-modified: ['Mon, 26 Mar 2018 21:31:47 GMT']
+      request-id: [7fbad3af-f080-46ca-a18d-db8089cea33f]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -748,66 +727,63 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:39 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.koreacentral.batch.azure.com/nodeagentskus?api-version=2017-09-01.6.0&maxresults=1000&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/nodeagentskus?timeout=30&maxresults=1000&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.koreacentral.batch.azure.com/$metadata#nodeagentskus\"\
         ,\"value\":[\r\n    {\r\n      \"id\":\"batch.node.centos 7\",\"verifiedImageReferences\"\
         :[\r\n        {\r\n          \"publisher\":\"OpenLogic\",\"offer\":\"CentOS\"\
-        ,\"sku\":\"7.3\",\"version\":\"latest\"\r\n        },{\r\n          \"publisher\"\
+        ,\"sku\":\"7.4\",\"version\":\"latest\"\r\n        },{\r\n          \"publisher\"\
         :\"OpenLogic\",\"offer\":\"CentOS-HPC\",\"sku\":\"7.3\",\"version\":\"latest\"\
-        \r\n        },{\r\n          \"publisher\":\"Oracle\",\"offer\":\"Oracle-Linux\"\
-        ,\"sku\":\"7.3\",\"version\":\"latest\"\r\n        },{\r\n          \"publisher\"\
-        :\"microsoft-ads\",\"offer\":\"linux-data-science-vm\",\"sku\":\"linuxdsvm\"\
-        ,\"version\":\"latest\"\r\n        },{\r\n          \"publisher\":\"batch\"\
-        ,\"offer\":\"rendering-centos73\",\"sku\":\"rendering\",\"version\":\"latest\"\
-        \r\n        }\r\n      ],\"osType\":\"linux\"\r\n    },{\r\n      \"id\":\"\
-        batch.node.debian 8\",\"verifiedImageReferences\":[\r\n        {\r\n     \
-        \     \"publisher\":\"Credativ\",\"offer\":\"Debian\",\"sku\":\"8\",\"version\"\
-        :\"latest\"\r\n        },{\r\n          \"publisher\":\"Credativ\",\"offer\"\
-        :\"Debian\",\"sku\":\"8-backports\",\"version\":\"latest\"\r\n        }\r\n\
-        \      ],\"osType\":\"linux\"\r\n    },{\r\n      \"id\":\"batch.node.opensuse\
-        \ 13.2\",\"verifiedImageReferences\":[\r\n        \r\n      ],\"osType\":\"\
+        \r\n        },{\r\n          \"publisher\":\"OpenLogic\",\"offer\":\"CentOS-HPC\"\
+        ,\"sku\":\"7.1\",\"version\":\"latest\"\r\n        },{\r\n          \"publisher\"\
+        :\"Oracle\",\"offer\":\"Oracle-Linux\",\"sku\":\"7.4\",\"version\":\"latest\"\
+        \r\n        },{\r\n          \"publisher\":\"microsoft-ads\",\"offer\":\"\
+        linux-data-science-vm\",\"sku\":\"linuxdsvm\",\"version\":\"latest\"\r\n \
+        \       },{\r\n          \"publisher\":\"batch\",\"offer\":\"rendering-centos73\"\
+        ,\"sku\":\"rendering\",\"version\":\"latest\"\r\n        }\r\n      ],\"osType\"\
+        :\"linux\"\r\n    },{\r\n      \"id\":\"batch.node.debian 8\",\"verifiedImageReferences\"\
+        :[\r\n        {\r\n          \"publisher\":\"Credativ\",\"offer\":\"Debian\"\
+        ,\"sku\":\"8\",\"version\":\"latest\"\r\n        }\r\n      ],\"osType\":\"\
+        linux\"\r\n    },{\r\n      \"id\":\"batch.node.debian 9\",\"verifiedImageReferences\"\
+        :[\r\n        {\r\n          \"publisher\":\"Credativ\",\"offer\":\"Debian\"\
+        ,\"sku\":\"9\",\"version\":\"latest\"\r\n        }\r\n      ],\"osType\":\"\
         linux\"\r\n    },{\r\n      \"id\":\"batch.node.opensuse 42.1\",\"verifiedImageReferences\"\
         :[\r\n        {\r\n          \"publisher\":\"SUSE\",\"offer\":\"SLES\",\"\
-        sku\":\"12-SP2\",\"version\":\"latest\"\r\n        },{\r\n          \"publisher\"\
-        :\"SUSE\",\"offer\":\"SLES-HPC\",\"sku\":\"12-SP1\",\"version\":\"latest\"\
-        \r\n        }\r\n      ],\"osType\":\"linux\"\r\n    },{\r\n      \"id\":\"\
-        batch.node.ubuntu 14.04\",\"verifiedImageReferences\":[\r\n        {\r\n \
-        \         \"publisher\":\"Canonical\",\"offer\":\"UbuntuServer\",\"sku\":\"\
-        14.04.5-LTS\",\"version\":\"latest\"\r\n        }\r\n      ],\"osType\":\"\
-        linux\"\r\n    },{\r\n      \"id\":\"batch.node.ubuntu 16.04\",\"verifiedImageReferences\"\
+        sku\":\"12-SP2\",\"version\":\"latest\"\r\n        }\r\n      ],\"osType\"\
+        :\"linux\"\r\n    },{\r\n      \"id\":\"batch.node.ubuntu 14.04\",\"verifiedImageReferences\"\
         :[\r\n        {\r\n          \"publisher\":\"Canonical\",\"offer\":\"UbuntuServer\"\
-        ,\"sku\":\"16.04-LTS\",\"version\":\"latest\"\r\n        },{\r\n         \
-        \ \"publisher\":\"Canonical\",\"offer\":\"UbuntuServer\",\"sku\":\"17.04\"\
-        ,\"version\":\"latest\"\r\n        }\r\n      ],\"osType\":\"linux\"\r\n \
-        \   },{\r\n      \"id\":\"batch.node.windows amd64\",\"verifiedImageReferences\"\
-        :[\r\n        {\r\n          \"publisher\":\"MicrosoftWindowsServer\",\"offer\"\
-        :\"WindowsServer\",\"sku\":\"2012-R2-Datacenter\",\"version\":\"latest\"\r\
-        \n        },{\r\n          \"publisher\":\"MicrosoftWindowsServer\",\"offer\"\
-        :\"WindowsServer\",\"sku\":\"2012-Datacenter\",\"version\":\"latest\"\r\n\
-        \        },{\r\n          \"publisher\":\"MicrosoftWindowsServer\",\"offer\"\
-        :\"WindowsServer\",\"sku\":\"2008-R2-SP1\",\"version\":\"latest\"\r\n    \
-        \    },{\r\n          \"publisher\":\"MicrosoftWindowsServer\",\"offer\":\"\
+        ,\"sku\":\"14.04.5-LTS\",\"version\":\"latest\"\r\n        }\r\n      ],\"\
+        osType\":\"linux\"\r\n    },{\r\n      \"id\":\"batch.node.ubuntu 16.04\"\
+        ,\"verifiedImageReferences\":[\r\n        {\r\n          \"publisher\":\"\
+        Canonical\",\"offer\":\"UbuntuServer\",\"sku\":\"16.04-LTS\",\"version\":\"\
+        latest\"\r\n        }\r\n      ],\"osType\":\"linux\"\r\n    },{\r\n     \
+        \ \"id\":\"batch.node.windows amd64\",\"verifiedImageReferences\":[\r\n  \
+        \      {\r\n          \"publisher\":\"MicrosoftWindowsServer\",\"offer\":\"\
+        WindowsServer\",\"sku\":\"2008-R2-SP1\",\"version\":\"latest\"\r\n       \
+        \ },{\r\n          \"publisher\":\"MicrosoftWindowsServer\",\"offer\":\"WindowsServer\"\
+        ,\"sku\":\"2008-R2-SP1-smalldisk\",\"version\":\"latest\"\r\n        },{\r\
+        \n          \"publisher\":\"MicrosoftWindowsServer\",\"offer\":\"WindowsServer\"\
+        ,\"sku\":\"2012-Datacenter\",\"version\":\"latest\"\r\n        },{\r\n   \
+        \       \"publisher\":\"MicrosoftWindowsServer\",\"offer\":\"WindowsServer\"\
+        ,\"sku\":\"2012-Datacenter-smalldisk\",\"version\":\"latest\"\r\n        },{\r\
+        \n          \"publisher\":\"MicrosoftWindowsServer\",\"offer\":\"WindowsServer\"\
+        ,\"sku\":\"2012-R2-Datacenter\",\"version\":\"latest\"\r\n        },{\r\n\
+        \          \"publisher\":\"MicrosoftWindowsServer\",\"offer\":\"WindowsServer\"\
+        ,\"sku\":\"2012-R2-Datacenter-smalldisk\",\"version\":\"latest\"\r\n     \
+        \   },{\r\n          \"publisher\":\"MicrosoftWindowsServer\",\"offer\":\"\
         WindowsServer\",\"sku\":\"2016-Datacenter\",\"version\":\"latest\"\r\n   \
         \     },{\r\n          \"publisher\":\"MicrosoftWindowsServer\",\"offer\"\
-        :\"WindowsServer\",\"sku\":\"2008-R2-SP1-smalldisk\",\"version\":\"latest\"\
+        :\"WindowsServer\",\"sku\":\"2016-Datacenter-smalldisk\",\"version\":\"latest\"\
         \r\n        },{\r\n          \"publisher\":\"MicrosoftWindowsServer\",\"offer\"\
-        :\"WindowsServer\",\"sku\":\"2012-Datacenter-smalldisk\",\"version\":\"latest\"\
-        \r\n        },{\r\n          \"publisher\":\"MicrosoftWindowsServer\",\"offer\"\
-        :\"WindowsServer\",\"sku\":\"2012-R2-Datacenter-smalldisk\",\"version\":\"\
-        latest\"\r\n        },{\r\n          \"publisher\":\"MicrosoftWindowsServer\"\
-        ,\"offer\":\"WindowsServer\",\"sku\":\"2016-Datacenter-smalldisk\",\"version\"\
-        :\"latest\"\r\n        },{\r\n          \"publisher\":\"MicrosoftWindowsServer\"\
-        ,\"offer\":\"WindowsServer\",\"sku\":\"2016-Datacenter-with-Containers\",\"\
-        version\":\"latest\"\r\n        },{\r\n          \"publisher\":\"microsoft-ads\"\
-        ,\"offer\":\"standard-data-science-vm\",\"sku\":\"standard-data-science-vm\"\
+        :\"WindowsServer\",\"sku\":\"2016-Datacenter-with-Containers\",\"version\"\
+        :\"latest\"\r\n        },{\r\n          \"publisher\":\"microsoft-ads\",\"\
+        offer\":\"standard-data-science-vm\",\"sku\":\"standard-data-science-vm\"\
         ,\"version\":\"latest\"\r\n        },{\r\n          \"publisher\":\"batch\"\
         ,\"offer\":\"rendering-windows2016\",\"sku\":\"rendering\",\"version\":\"\
         latest\"\r\n        }\r\n      ],\"osType\":\"windows\"\r\n    }\r\n  ]\r\n\
@@ -815,8 +791,8 @@ interactions:
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:39 GMT']
-      request-id: [9fbbce4e-bc10-4ce3-9902-82fd00beaac0]
+      date: ['Mon, 26 Mar 2018 21:31:50 GMT']
+      request-id: [c74c5b4a-cf12-472a-b08a-f0d801735d77]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -829,20 +805,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:40 GMT']
       return-client-request-id: ['false']
     method: DELETE
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:40 GMT']
-      request-id: [d6eea035-492e-4809-be54-159025e10794]
+      date: ['Mon, 26 Mar 2018 21:31:51 GMT']
+      request-id: [ad8f7101-cc1c-4a90-8c5b-cc235ee6edca]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -854,59 +829,57 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:41 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas?api-version=2017-09-01.6.0&$select=state&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-iaas?timeout=30&$select=state&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.koreacentral.batch.azure.com/$metadata#pools/@Element\"\
         ,\"state\":\"deleting\"\r\n}"}
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:41 GMT']
-      etag: ['0x8D5381B26BEF4D7']
-      last-modified: ['Thu, 30 Nov 2017 17:52:40 GMT']
-      request-id: [e036747d-4232-427e-b5ec-4694f625af5f]
+      date: ['Mon, 26 Mar 2018 21:31:53 GMT']
+      etag: ['0x8D59360FD54FF1F']
+      last-modified: ['Mon, 26 Mar 2018 21:31:51 GMT']
+      request-id: [2038c86c-2c17-426a-8dc5-777e1d5c188d]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"id": "app_package_test", "vmSize": "small", "cloudServiceConfiguration":
-      {"osFamily": "4"}, "applicationPackageReferences": [{"applicationId": "does-not-exist"}]}'
+    body: '{"cloudServiceConfiguration": {"osFamily": "4"}, "vmSize": "small", "applicationPackageReferences":
+      [{"applicationId": "does-not-exist"}], "id": "app_package_test"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['164']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:41 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.koreacentral.batch.azure.com/$metadata#Microsoft.Azure.Batch.Protocol.Entities.Container.errors/@Element\"\
         ,\"code\":\"InvalidApplicationPackageReferences\",\"message\":{\r\n    \"\
         lang\":\"en-US\",\"value\":\"One or more of the specified application package\
-        \ references are invalid.\\nRequestId:aa954788-c064-4f4b-9a21-153c144c9d34\\\
-        nTime:2017-11-30T17:52:42.1027880Z\"\r\n  },\"values\":[\r\n    {\r\n    \
+        \ references are invalid.\\nRequestId:62ab60f9-0e30-4c7d-8baa-f97b9c3e84cd\\\
+        nTime:2018-03-26T21:31:55.1457089Z\"\r\n  },\"values\":[\r\n    {\r\n    \
         \  \"key\":\"does-not-exist\",\"value\":\"The specified application package\
         \ does not exist.\"\r\n    }\r\n  ]\r\n}"}
     headers:
       content-length: ['532']
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:42 GMT']
-      request-id: [aa954788-c064-4f4b-9a21-153c144c9d34]
+      date: ['Mon, 26 Mar 2018 21:31:55 GMT']
+      request-id: [62ab60f9-0e30-4c7d-8baa-f97b9c3e84cd]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
@@ -920,27 +893,26 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['71']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:52:42 GMT']
       return-client-request-id: ['false']
     method: PATCH
-    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-paas?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.koreacentral.batch.azure.com/pools/azure-cli-test-paas?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.koreacentral.batch.azure.com/$metadata#Microsoft.Azure.Batch.Protocol.Entities.Container.errors/@Element\"\
         ,\"code\":\"InvalidApplicationPackageReferences\",\"message\":{\r\n    \"\
         lang\":\"en-US\",\"value\":\"One or more of the specified application package\
-        \ references are invalid.\\nRequestId:c44901b3-c899-42b3-923b-962c15c3ac52\\\
-        nTime:2017-11-30T17:52:42.9946589Z\"\r\n  },\"values\":[\r\n    {\r\n    \
+        \ references are invalid.\\nRequestId:0101080a-a518-410d-aacf-9532e4e938e6\\\
+        nTime:2018-03-26T21:31:56.6849441Z\"\r\n  },\"values\":[\r\n    {\r\n    \
         \  \"key\":\"does-not-exist\",\"value\":\"The specified application package\
         \ does not exist.\"\r\n    }\r\n  ]\r\n}"}
     headers:
       content-length: ['532']
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:52:42 GMT']
-      request-id: [c44901b3-c899-42b3-923b-962c15c3ac52]
+      date: ['Mon, 26 Mar 2018 21:31:56 GMT']
+      request-id: [0101080a-a518-410d-aacf-9532e4e938e6]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
@@ -951,13 +923,13 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [group delete]
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -966,11 +938,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 30 Nov 2017 17:52:43 GMT']
+      date: ['Mon, 26 Mar 2018 21:31:58 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdGQU9OM0VTSlhIQ09NN0ZUVVlZUlUzNVE3WjdHQ0NPT1kyNHw1RTBENkMxMDNDNjRDMUVGLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdKU0xWWkNSRVVFQUVBM0ZUMlJFSEtTQ1o1Wkc0R1NJUzVCUXxEQzI3QkNCN0Y1NTM2RTg3LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 202, message: Accepted}
 version: 1

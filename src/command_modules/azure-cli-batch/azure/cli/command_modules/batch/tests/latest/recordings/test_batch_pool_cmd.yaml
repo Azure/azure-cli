@@ -1,16 +1,16 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [group create]
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -20,10 +20,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Nov 2017 17:40:54 GMT']
+      date: ['Mon, 26 Mar 2018 23:12:03 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
@@ -31,13 +32,12 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [batch account create]
       Connection: [keep-alive]
       Content-Length: ['25']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchmanagementclient/4.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002?api-version=2017-05-01
@@ -46,9 +46,9 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 30 Nov 2017 17:41:00 GMT']
+      date: ['Mon, 26 Mar 2018 23:12:06 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/operationResults/1cf71793-20e9-4f96-9ff3-57695f358496?api-version=2017-05-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/operationResults/9ca3d168-c662-4d83-8f34-c50a92a56f52?api-version=2017-05-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -60,25 +60,24 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [batch account create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchmanagementclient/4.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/operationResults/1cf71793-20e9-4f96-9ff3-57695f358496?api-version=2017-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/operationResults/9ca3d168-c662-4d83-8f34-c50a92a56f52?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002","name":"clibatch000002","type":"Microsoft.Batch/batchAccounts","location":"japanwest","properties":{"accountEndpoint":"clibatch000002.japanwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":100,"lowPriorityCoreQuota":100,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002","name":"clibatch000002","type":"Microsoft.Batch/batchAccounts","location":"japanwest","properties":{"accountEndpoint":"clibatch000002.japanwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['567']
+      content-length: ['565']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Nov 2017 17:41:15 GMT']
-      etag: ['"0x8D538198F1F4817"']
+      date: ['Mon, 26 Mar 2018 23:12:22 GMT']
+      etag: ['"0x8D5936F0839867D"']
       expires: ['-1']
-      last-modified: ['Thu, 30 Nov 2017 17:41:16 GMT']
+      last-modified: ['Mon, 26 Mar 2018 23:12:23 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -91,23 +90,22 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [batch account keys list]
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchmanagementclient/4.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/listKeys?api-version=2017-05-01
   response:
-    body: {string: '{"accountName":"clibatch000002","primary":"bs/5kZ/l8dBmLrg0uoAWx+eofuJVmtZ5e1IJIAuCXC7+0s8ve/s+cpBn0hPmqssbRLysXZmRRk1A9aD62CIXBQ==","secondary":"FeDHydvfkRfOuocMAkKJEj8ci1Iy/6ZpZy+cEWa0CYhFDI/lGwOKY/SCW9dMDj0dv14f5+wmowdVcmEzA7UUmg=="}'}
+    body: {string: '{"accountName":"clibatch000002","primary":"Co9IFXAY9YnSnUOyITrG7Gbj4T0sHzM+DaTycjq01fR88GDzR7IToHHL6d8oLSNbIYM9etHzm7jnYzw7AviQCQ==","secondary":"US/Rj1R8l5a/E0Xs5vlbhAtzXETpoOOI6dsjanEZbgLrKu2vanxH0gcwxdX0TGrdXRjwMlVLBaoTwRZsKImfVA=="}'}
     headers:
       cache-control: [no-cache]
       content-length: ['246']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Nov 2017 17:41:17 GMT']
+      date: ['Mon, 26 Mar 2018 23:12:25 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -115,32 +113,31 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [batch account show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchmanagementclient/4.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002","name":"clibatch000002","type":"Microsoft.Batch/batchAccounts","location":"japanwest","properties":{"accountEndpoint":"clibatch000002.japanwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":100,"lowPriorityCoreQuota":100,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002","name":"clibatch000002","type":"Microsoft.Batch/batchAccounts","location":"japanwest","properties":{"accountEndpoint":"clibatch000002.japanwest.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['567']
+      content-length: ['565']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Nov 2017 17:41:17 GMT']
-      etag: ['"0x8D5381985B3CAEE"']
+      date: ['Mon, 26 Mar 2018 23:12:26 GMT']
+      etag: ['"0x8D5936EFE719873"']
       expires: ['-1']
-      last-modified: ['Thu, 30 Nov 2017 17:41:01 GMT']
+      last-modified: ['Mon, 26 Mar 2018 23:12:06 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -149,41 +146,40 @@ interactions:
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"id": "xplatCreatedPool", "vmSize": "small", "cloudServiceConfiguration":
-      {"osFamily": "4", "targetOSVersion": "*"}, "startTask": {"commandLine": "cmd
-      /c echo test", "userIdentity": {"autoUser": {"scope": "task", "elevationLevel":
-      "admin"}}, "waitForSuccess": true}}'
+    body: '{"startTask": {"commandLine": "cmd /c echo test", "waitForSuccess": true,
+      "userIdentity": {"autoUser": {"elevationLevel": "admin", "scope": "task"}}},
+      "id": "xplatCreatedPool", "vmSize": "small", "cloudServiceConfiguration": {"osFamily":
+      "4", "targetOSVersion": "*"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['267']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:41:19 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.japanwest.batch.azure.com/pools?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.japanwest.batch.azure.com/pools?api-version=2018-03-01.6.1&timeout=30
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchzhy6eheyp3f7rptc.japanwest.batch.azure.com/pools/xplatCreatedPool']
+      dataserviceid: ['https://clibatchbyogr5b4nrqfyf42.japanwest.batch.azure.com/pools/xplatCreatedPool']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:41:19 GMT']
-      etag: ['0x8D5381990CF3314']
-      last-modified: ['Thu, 30 Nov 2017 17:41:19 GMT']
+      date: ['Mon, 26 Mar 2018 23:12:28 GMT']
+      etag: ['0x8D5936F0BB5F19F']
+      last-modified: ['Mon, 26 Mar 2018 23:12:28 GMT']
       location: ['https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool']
-      request-id: [12be57c4-a7b1-40f6-832d-b6514501741c]
+      request-id: [713963ce-748d-421e-b8c0-7e6e72bb3ec0]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
     status: {code: 201, message: Created}
 - request:
-    body: '{"id": "pool_image1", "vmSize": "Standard_A1", "virtualMachineConfiguration":
-      {"imageReference": {"publisher": "a", "offer": "b", "sku": "c"}, "nodeAgentSKUId":
+    body: '{"vmSize": "Standard_A1", "id": "pool_image1", "virtualMachineConfiguration":
+      {"imageReference": {"offer": "b", "publisher": "a", "sku": "c"}, "nodeAgentSKUId":
       "batch.node.windows amd64"}}'
     headers:
       Accept: [application/json]
@@ -191,18 +187,17 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['189']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:41:19 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.japanwest.batch.azure.com/pools?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.japanwest.batch.azure.com/pools?api-version=2018-03-01.6.1&timeout=30
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.japanwest.batch.azure.com/$metadata#Microsoft.Azure.Batch.Protocol.Entities.Container.errors/@Element\"\
         ,\"code\":\"InvalidPropertyValue\",\"message\":{\r\n    \"lang\":\"en-US\"\
         ,\"value\":\"The value provided for one of the properties in the request body\
-        \ is invalid.\\nRequestId:b06cac4b-43ee-47ae-a5e7-eada9e189dcb\\nTime:2017-11-30T17:41:20.3228549Z\"\
+        \ is invalid.\\nRequestId:320188c1-2637-4b4e-bddf-7d5aab9e2aa9\\nTime:2018-03-26T23:12:31.0481982Z\"\
         \r\n  },\"values\":[\r\n    {\r\n      \"key\":\"PropertyName\",\"value\"\
         :\"imageReference\"\r\n    },{\r\n      \"key\":\"Reason\",\"value\":\"The\
         \ specified imageReference with publisher a offer b sku c is not supported.\"\
@@ -211,15 +206,15 @@ interactions:
       content-length: ['600']
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:41:20 GMT']
-      request-id: [b06cac4b-43ee-47ae-a5e7-eada9e189dcb]
+      date: ['Mon, 26 Mar 2018 23:12:30 GMT']
+      request-id: [320188c1-2637-4b4e-bddf-7d5aab9e2aa9]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
     status: {code: 400, message: The value provided for one of the properties in the
         request body is invalid.}
 - request:
-    body: '{"id": "pool_image1", "vmSize": "Standard_A1", "virtualMachineConfiguration":
+    body: '{"vmSize": "Standard_A1", "id": "pool_image1", "virtualMachineConfiguration":
       {"imageReference": {"virtualMachineImageId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_rg/providers/Microsoft.Compute/images/custom_image"},
       "nodeAgentSKUId": "batch.node.windows amd64"}}'
     headers:
@@ -228,31 +223,30 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['296']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:41:20 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.japanwest.batch.azure.com/pools?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.japanwest.batch.azure.com/pools?api-version=2018-03-01.6.1&timeout=30
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.japanwest.batch.azure.com/$metadata#Microsoft.Azure.Batch.Protocol.Entities.Container.errors/@Element\"\
         ,\"code\":\"InvalidPropertyValue\",\"message\":{\r\n    \"lang\":\"en-US\"\
         ,\"value\":\"The value provided for one of the properties in the request body\
-        \ is invalid.\\nRequestId:a0ff0046-a86d-475e-b31c-21728f1b876e\\nTime:2017-11-30T17:41:21.7546997Z\"\
+        \ is invalid.\\nRequestId:8bf12cd8-e507-488c-bca8-60f3308721e5\\nTime:2018-03-26T23:12:32.6653976Z\"\
         \r\n  },\"values\":[\r\n    {\r\n      \"key\":\"PropertyName\",\"value\"\
         :\"virtualMachineImageId\"\r\n    },{\r\n      \"key\":\"PropertyValue\",\"\
         value\":\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_rg/providers/Microsoft.Compute/images/custom_image\"\
         \r\n    },{\r\n      \"key\":\"Reason\",\"value\":\"The specified virtualMachineImageId\
         \ is in a different subscription and cannot be used with the current Batch\
-        \ account in subscription 603663e9-700c-46de-9d41-e080ff1d461e\"\r\n    }\r\
+        \ account in subscription f30ef677-64a9-4768-934f-5fbbc0e1ad27\"\r\n    }\r\
         \n  ]\r\n}"}
     headers:
       content-length: ['870']
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:41:21 GMT']
-      request-id: [a0ff0046-a86d-475e-b31c-21728f1b876e]
+      date: ['Mon, 26 Mar 2018 23:12:32 GMT']
+      request-id: [8bf12cd8-e507-488c-bca8-60f3308721e5]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
@@ -264,21 +258,20 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:41:21 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool?api-version=2018-03-01.6.1&timeout=30
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.japanwest.batch.azure.com/$metadata#pools/@Element\"\
         ,\"id\":\"xplatCreatedPool\",\"url\":\"https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool\"\
-        ,\"eTag\":\"0x8D5381990CF3314\",\"lastModified\":\"2017-11-30T17:41:19.7629204Z\"\
-        ,\"creationTime\":\"2017-11-30T17:41:19.7629204Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-11-30T17:41:19.7629204Z\",\"allocationState\"\
-        :\"steady\",\"allocationStateTransitionTime\":\"2017-11-30T17:41:19.8818438Z\"\
+        ,\"eTag\":\"0x8D5936F0BB5F19F\",\"lastModified\":\"2018-03-26T23:12:28.9919391Z\"\
+        ,\"creationTime\":\"2018-03-26T23:12:28.9919391Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2018-03-26T23:12:28.9919391Z\",\"allocationState\"\
+        :\"steady\",\"allocationStateTransitionTime\":\"2018-03-26T23:12:29.2087231Z\"\
         ,\"vmSize\":\"small\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\"\
         :0,\"targetDedicatedNodes\":0,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\"\
         :0,\"enableAutoScale\":false,\"enableInterNodeCommunication\":false,\"startTask\"\
@@ -291,10 +284,10 @@ interactions:
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:41:22 GMT']
-      etag: ['0x8D5381990CF3314']
-      last-modified: ['Thu, 30 Nov 2017 17:41:19 GMT']
-      request-id: [5f2bea86-bab1-4ed1-934d-ea8fd766e7fd]
+      date: ['Mon, 26 Mar 2018 23:12:34 GMT']
+      etag: ['0x8D5936F0BB5F19F']
+      last-modified: ['Mon, 26 Mar 2018 23:12:28 GMT']
+      request-id: [d9dd6866-158a-4e35-b7ce-7b5529049363]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -308,22 +301,21 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['56']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:41:22 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool/resize?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool/resize?api-version=2018-03-01.6.1&timeout=30
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchzhy6eheyp3f7rptc.japanwest.batch.azure.com/pools/xplatCreatedPool/resize']
+      dataserviceid: ['https://clibatchbyogr5b4nrqfyf42.japanwest.batch.azure.com/pools/xplatCreatedPool/resize']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:41:21 GMT']
-      etag: ['0x8D5381992A93AAC']
-      last-modified: ['Thu, 30 Nov 2017 17:41:22 GMT']
-      request-id: [19110805-727a-4e24-a2dd-8b1a54d02fb3]
+      date: ['Mon, 26 Mar 2018 23:12:36 GMT']
+      etag: ['0x8D5936F0FF88945']
+      last-modified: ['Mon, 26 Mar 2018 23:12:36 GMT']
+      request-id: [a874f741-a433-4249-93eb-7d71143d05ad]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -335,21 +327,20 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:41:22 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool?api-version=2018-03-01.6.1&timeout=30
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.japanwest.batch.azure.com/$metadata#pools/@Element\"\
         ,\"id\":\"xplatCreatedPool\",\"url\":\"https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool\"\
-        ,\"eTag\":\"0x8D5381992A93AAC\",\"lastModified\":\"2017-11-30T17:41:22.8695212Z\"\
-        ,\"creationTime\":\"2017-11-30T17:41:19.7629204Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-11-30T17:41:19.7629204Z\",\"allocationState\"\
-        :\"resizing\",\"allocationStateTransitionTime\":\"2017-11-30T17:41:22.8695212Z\"\
+        ,\"eTag\":\"0x8D5936F0FF88945\",\"lastModified\":\"2018-03-26T23:12:36.1392453Z\"\
+        ,\"creationTime\":\"2018-03-26T23:12:28.9919391Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2018-03-26T23:12:28.9919391Z\",\"allocationState\"\
+        :\"resizing\",\"allocationStateTransitionTime\":\"2018-03-26T23:12:36.1392453Z\"\
         ,\"vmSize\":\"small\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\"\
         :0,\"targetDedicatedNodes\":5,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\"\
         :3,\"enableAutoScale\":false,\"enableInterNodeCommunication\":false,\"startTask\"\
@@ -362,10 +353,43 @@ interactions:
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:41:23 GMT']
-      etag: ['0x8D5381992A93AAC']
-      last-modified: ['Thu, 30 Nov 2017 17:41:22 GMT']
-      request-id: [1aac686e-912e-445d-95c4-baab83946485]
+      date: ['Mon, 26 Mar 2018 23:12:37 GMT']
+      etag: ['0x8D5936F0FF88945']
+      last-modified: ['Mon, 26 Mar 2018 23:12:36 GMT']
+      request-id: [09d5951e-1160-4002-9087-b6c4e4a96aef]
+      server: [Microsoft-HTTPAPI/2.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      x-content-type-options: [nosniff]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
+      accept-language: [en-US]
+      return-client-request-id: ['false']
+    method: GET
+    uri: https://clibatch000002.japanwest.batch.azure.com/nodecounts?api-version=2018-03-01.6.1&maxresults=10&timeout=30
+  response:
+    body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.japanwest.batch.azure.com/$metadata#poolnodecounts\"\
+        ,\"value\":[\r\n    {\r\n      \"poolId\":\"xplatCreatedPool\",\"dedicated\"\
+        :{\r\n        \"creating\":0,\"idle\":0,\"offline\":0,\"preempted\":0,\"rebooting\"\
+        :0,\"reimaging\":0,\"running\":0,\"starting\":0,\"startTaskFailed\":0,\"unusable\"\
+        :0,\"unknown\":0,\"waitingForStartTask\":0,\"total\":0\r\n      },\"lowPriority\"\
+        :{\r\n        \"creating\":0,\"idle\":0,\"offline\":0,\"preempted\":0,\"rebooting\"\
+        :0,\"reimaging\":0,\"running\":0,\"starting\":0,\"startTaskFailed\":0,\"unusable\"\
+        :0,\"unknown\":0,\"waitingForStartTask\":0,\"total\":0\r\n      }\r\n    }\r\
+        \n  ]\r\n}"}
+    headers:
+      content-type: [application/json;odata=minimalmetadata]
+      dataserviceversion: ['3.0']
+      date: ['Mon, 26 Mar 2018 23:12:38 GMT']
+      request-id: [3f3978ec-ef61-4138-85bc-fd05015294e7]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -378,23 +402,22 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:41:23 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool/stopresize?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool/stopresize?api-version=2018-03-01.6.1&timeout=30
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchzhy6eheyp3f7rptc.japanwest.batch.azure.com/pools/xplatCreatedPool/stopresize']
+      dataserviceid: ['https://clibatchbyogr5b4nrqfyf42.japanwest.batch.azure.com/pools/xplatCreatedPool/stopresize']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:41:23 GMT']
-      etag: ['0x8D5381993559EB6']
-      last-modified: ['Thu, 30 Nov 2017 17:41:23 GMT']
-      request-id: [d00a209e-4a0b-4830-bb50-ec4f43dc4e08]
+      date: ['Mon, 26 Mar 2018 23:12:40 GMT']
+      etag: ['0x8D5936F12665D5A']
+      last-modified: ['Mon, 26 Mar 2018 23:12:40 GMT']
+      request-id: [0196ca3a-94ac-4d70-9d1a-9c949fd23ecb]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -406,21 +429,20 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:43:23 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool?api-version=2018-03-01.6.1&timeout=30
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.japanwest.batch.azure.com/$metadata#pools/@Element\"\
         ,\"id\":\"xplatCreatedPool\",\"url\":\"https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool\"\
-        ,\"eTag\":\"0x8D5381993559EB6\",\"lastModified\":\"2017-11-30T17:41:23.9993014Z\"\
-        ,\"creationTime\":\"2017-11-30T17:41:19.7629204Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-11-30T17:41:19.7629204Z\",\"allocationState\"\
-        :\"steady\",\"allocationStateTransitionTime\":\"2017-11-30T17:42:05.4529709Z\"\
+        ,\"eTag\":\"0x8D5936F12665D5A\",\"lastModified\":\"2018-03-26T23:12:40.2144602Z\"\
+        ,\"creationTime\":\"2018-03-26T23:12:28.9919391Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2018-03-26T23:12:28.9919391Z\",\"allocationState\"\
+        :\"steady\",\"allocationStateTransitionTime\":\"2018-03-26T23:13:45.3871649Z\"\
         ,\"vmSize\":\"small\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\"\
         :0,\"targetDedicatedNodes\":5,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\"\
         :3,\"resizeErrors\":[\r\n    {\r\n      \"code\":\"ResizeStopped\",\"message\"\
@@ -437,41 +459,39 @@ interactions:
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:43:24 GMT']
-      etag: ['0x8D5381993559EB6']
-      last-modified: ['Thu, 30 Nov 2017 17:41:23 GMT']
-      request-id: [b5a680ef-8b1d-4e4f-88c9-6f375732b2a0]
+      date: ['Mon, 26 Mar 2018 23:14:43 GMT']
+      etag: ['0x8D5936F12665D5A']
+      last-modified: ['Mon, 26 Mar 2018 23:12:40 GMT']
+      request-id: [76869854-11c5-4d51-9347-04170cc7d498]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"startTask": {"commandLine": "cmd /c echo updated", "waitForSuccess":
-      true}, "certificateReferences": [], "applicationPackageReferences": [], "metadata":
-      []}'
+    body: '{"metadata": [], "certificateReferences": [], "applicationPackageReferences":
+      [], "startTask": {"commandLine": "cmd /c echo updated", "waitForSuccess": true}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['158']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:43:24 GMT']
     method: POST
-    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool/updateproperties?api-version=2017-09-01.6.0
+    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool/updateproperties?api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
       content-length: ['0']
-      dataserviceid: ['https://clibatchzhy6eheyp3f7rptc.japanwest.batch.azure.com/pools/xplatCreatedPool/updateproperties']
+      dataserviceid: ['https://clibatchbyogr5b4nrqfyf42.japanwest.batch.azure.com/pools/xplatCreatedPool/updateproperties']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:43:24 GMT']
-      etag: ['0x8D53819DB82C5B0']
-      last-modified: ['Thu, 30 Nov 2017 17:43:25 GMT']
-      request-id: [b53d3b43-4e02-4bfe-9a39-62e5e63af01f]
+      date: ['Mon, 26 Mar 2018 23:14:46 GMT']
+      etag: ['0x8D5936F5DA66ABB']
+      last-modified: ['Mon, 26 Mar 2018 23:14:46 GMT']
+      request-id: [ee2affea-466e-41f8-977b-024bbc9df3a8]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
@@ -482,20 +502,19 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:43:25 GMT']
     method: GET
-    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool?api-version=2017-09-01.6.0
+    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool?api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.japanwest.batch.azure.com/$metadata#pools/@Element\"\
         ,\"id\":\"xplatCreatedPool\",\"url\":\"https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool\"\
-        ,\"eTag\":\"0x8D53819DB82C5B0\",\"lastModified\":\"2017-11-30T17:43:25.0911664Z\"\
-        ,\"creationTime\":\"2017-11-30T17:41:19.7629204Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-11-30T17:41:19.7629204Z\",\"allocationState\"\
-        :\"steady\",\"allocationStateTransitionTime\":\"2017-11-30T17:42:05.4529709Z\"\
+        ,\"eTag\":\"0x8D5936F5DA66ABB\",\"lastModified\":\"2018-03-26T23:14:46.4633531Z\"\
+        ,\"creationTime\":\"2018-03-26T23:12:28.9919391Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2018-03-26T23:12:28.9919391Z\",\"allocationState\"\
+        :\"steady\",\"allocationStateTransitionTime\":\"2018-03-26T23:13:45.3871649Z\"\
         ,\"vmSize\":\"small\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\"\
         :0,\"targetDedicatedNodes\":5,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\"\
         :3,\"resizeErrors\":[\r\n    {\r\n      \"code\":\"ResizeStopped\",\"message\"\
@@ -512,41 +531,40 @@ interactions:
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:43:25 GMT']
-      etag: ['0x8D53819DB82C5B0']
-      last-modified: ['Thu, 30 Nov 2017 17:43:25 GMT']
-      request-id: [1d8bfa83-d626-482a-9721-cfd69f07412f]
+      date: ['Mon, 26 Mar 2018 23:14:49 GMT']
+      etag: ['0x8D5936F5DA66ABB']
+      last-modified: ['Mon, 26 Mar 2018 23:14:46 GMT']
+      request-id: [250a3b6a-dc8a-4ac0-9607-2f4d40b514ac]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"startTask": {"commandLine": "hostname"}, "certificateReferences": [],
-      "applicationPackageReferences": [], "metadata": [{"name": "a", "value": "b"},
-      {"name": "c", "value": "d"}]}'
+    body: '{"metadata": [{"name": "a", "value": "b"}, {"name": "c", "value": "d"}],
+      "certificateReferences": [], "applicationPackageReferences": [], "startTask":
+      {"commandLine": "hostname"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['179']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:43:25 GMT']
     method: POST
-    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool/updateproperties?api-version=2017-09-01.6.0
+    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool/updateproperties?api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
       content-length: ['0']
-      dataserviceid: ['https://clibatchzhy6eheyp3f7rptc.japanwest.batch.azure.com/pools/xplatCreatedPool/updateproperties']
+      dataserviceid: ['https://clibatchbyogr5b4nrqfyf42.japanwest.batch.azure.com/pools/xplatCreatedPool/updateproperties']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:43:26 GMT']
-      etag: ['0x8D53819DC2330D2']
-      last-modified: ['Thu, 30 Nov 2017 17:43:26 GMT']
-      request-id: [738c3e20-7cac-46ec-8b5b-a292416ee265]
+      date: ['Mon, 26 Mar 2018 23:14:53 GMT']
+      etag: ['0x8D5936F61A5478E']
+      last-modified: ['Mon, 26 Mar 2018 23:14:53 GMT']
+      request-id: [eafc391b-bcaf-496c-af54-af97141eb3da]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
@@ -557,20 +575,19 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:43:26 GMT']
     method: GET
-    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool?api-version=2017-09-01.6.0
+    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool?api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.japanwest.batch.azure.com/$metadata#pools/@Element\"\
         ,\"id\":\"xplatCreatedPool\",\"url\":\"https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool\"\
-        ,\"eTag\":\"0x8D53819DC2330D2\",\"lastModified\":\"2017-11-30T17:43:26.142485Z\"\
-        ,\"creationTime\":\"2017-11-30T17:41:19.7629204Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-11-30T17:41:19.7629204Z\",\"allocationState\"\
-        :\"steady\",\"allocationStateTransitionTime\":\"2017-11-30T17:42:05.4529709Z\"\
+        ,\"eTag\":\"0x8D5936F61A5478E\",\"lastModified\":\"2018-03-26T23:14:53.1667854Z\"\
+        ,\"creationTime\":\"2018-03-26T23:12:28.9919391Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2018-03-26T23:12:28.9919391Z\",\"allocationState\"\
+        :\"steady\",\"allocationStateTransitionTime\":\"2018-03-26T23:13:45.3871649Z\"\
         ,\"vmSize\":\"small\",\"resizeTimeout\":\"PT15M\",\"currentDedicatedNodes\"\
         :0,\"targetDedicatedNodes\":5,\"currentLowPriorityNodes\":0,\"targetLowPriorityNodes\"\
         :3,\"resizeErrors\":[\r\n    {\r\n      \"code\":\"ResizeStopped\",\"message\"\
@@ -589,10 +606,10 @@ interactions:
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:43:26 GMT']
-      etag: ['0x8D53819DC2330D2']
-      last-modified: ['Thu, 30 Nov 2017 17:43:26 GMT']
-      request-id: [ea4e0b7a-0f94-4ea1-96b4-ae77b4df09a8]
+      date: ['Mon, 26 Mar 2018 23:14:54 GMT']
+      etag: ['0x8D5936F61A5478E']
+      last-modified: ['Mon, 26 Mar 2018 23:14:53 GMT']
+      request-id: [e6255317-bea0-401f-a9d8-0efe8426f849]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -605,20 +622,19 @@ interactions:
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['0']
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 17:43:26 GMT']
       return-client-request-id: ['false']
     method: DELETE
-    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.japanwest.batch.azure.com/pools/xplatCreatedPool?api-version=2018-03-01.6.1&timeout=30
   response:
     body: {string: ''}
     headers:
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 17:43:27 GMT']
-      request-id: [1c2ff4c0-ee24-4b64-8703-fc4d2c820a82]
+      date: ['Mon, 26 Mar 2018 23:14:55 GMT']
+      request-id: [eab9baea-5058-445c-bc3f-6905d51c6b8e]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -629,13 +645,13 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [group delete]
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -644,11 +660,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 30 Nov 2017 17:43:28 GMT']
+      date: ['Mon, 26 Mar 2018 23:14:57 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdLVUZQRlFZVENNRFVQUktJN01GV0pGTU1LSjZMVFJXRVA2TXw1MzcxRjA1MTE3NjIxMzA3LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdDTklXTjRNSElPNDdTSkhGU0RON0RQU1pRT05HUkJZSE9YRnw4MzMwOUY4NzNBOTgzMTIyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 version: 1
