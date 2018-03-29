@@ -20,3 +20,8 @@ def cli_billing_get_invoice(client, name=None):
 def cli_billing_list_periods(client):
     """List all available billing periods of the subscription"""
     return list(client.list())
+
+
+def cli_billing_list_enrollment_accounts(client):
+    """List all available enrollment accounts"""
+    return list(client.list())
