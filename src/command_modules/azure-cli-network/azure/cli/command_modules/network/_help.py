@@ -2695,7 +2695,8 @@ helps['network public-ip show'] = """
         - name: Get information about a public IP resource.
           text: az network public-ip show -g MyResourceGroup -n MyIp
         - name: Get the FQDN and IP address of a public IP resource.
-          text: > az network public-ip show -g MyResourceGroup -n MyIp --query "{fqdn: dnsSettings.fqdn, address: ipAddress}"
+          text: > 
+              az network public-ip show -g MyResourceGroup -n MyIp --query "{fqdn: dnsSettings.fqdn, address: ipAddress}"
 """
 
 helps['network public-ip update'] = """
@@ -3363,7 +3364,7 @@ helps['network vpn-connection shared-key update'] = """
     type: command
     short-summary: Update a VPN connection shared key.
     examples:
-        - name: Change the shared key for the connection to “Abc123”.
+        - name: Change the shared key for the connection to "Abc123".
           text: az network vpn-connection shared-key update -g MyResourceGroup --connection-name MyConnection --value Abc123
 """
 # endregion
