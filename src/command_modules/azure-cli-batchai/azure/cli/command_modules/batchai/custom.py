@@ -876,6 +876,7 @@ def tail_file(client, resource_group, job_name, file_name, output_directory_id=S
                 break
             if not reported_absence_of_file:
                 logger.warning('The file "%s" not found. Waiting for the job to generate it.', file_name)
+                reported_absence_of_file = True
             time.sleep(1)
     if url is None:
         logger.warning('The file "%s" not found for the completed job.', file_name)
