@@ -21,14 +21,6 @@ class Linter():
         self._parameters = {}
         self._help_file_entries = set(help_file_entries.keys())
         self._exit_code = 0
-        self._exclusions = None
-
-        self._rules = {
-            'help_file_entries': [],
-            'command_groups': [],
-            'commands': [],
-            'params': []
-        }
 
         # get all unsupressed parameters
         for command_name, command in command_table.items():
@@ -75,6 +67,29 @@ class Linter():
             return self._command_table.get(command_name).arguments.get(parameter_name).type.settings.get('help')
         return param_help.short_summary or param_help.long_summary
 
+    def mark_rule_failure(self):
+        self._exit_code = 1
+
+    def get_exit_code(self):
+        return self._exit_code
+
+
+    def _get_loaded_help_description(self, entry):
+        return self._loaded_help.get(entry).short_summary or self._loaded_help.get(entry).long_summary
+
+
+class LinterManager():
+    def __init__(self, command_table=None, help_file_entries=None, loaded_help=None):
+        self.linter = Linter(command_table=command_table, help_file_entries=help_file_entries, loaded_help=loaded_help)
+        self._exclusions = None
+
+        self._rules = {
+            'help_file_entries': [],
+            'command_groups': [],
+            'commands': [],
+            'params': []
+        }
+
     def get_help_entry_exclusions(self):
         return self._exclusions.get('help_entries')
 
@@ -91,9 +106,6 @@ class Linter():
         if rule_type in self._rules:
             self._rules.get(rule_type).append(rule_callable)
 
-    def mark_rule_failure(self):
-        self._exit_code = 1
-
     def run(self, run_params=None, run_commands=None, run_command_groups=None, run_help_files_entries=None):
         paths = import_module('automation.cli_linter.rules').__path__
         exclusion_path = os.path.join(paths[0], 'exclusions.json')
@@ -107,7 +119,7 @@ class Linter():
             for rule_name, add_to_linter_func in functions:
                 if hasattr(add_to_linter_func, 'linter_rule'):
                     if rule_name in found_rules:
-                        raise Exception('Multiple rules found with the same name.')
+                        raise Exception('Multiple rules found with the same name: %s' % rule_name)
                     found_rules.add(rule_name)
                     add_to_linter_func(self)
 
@@ -136,10 +148,7 @@ class Linter():
                 callable_rule()
                 print(os.linesep)
 
-        return self._exit_code
-
-    def _get_loaded_help_description(self, entry):
-        return self._loaded_help.get(entry).short_summary or self._loaded_help.get(entry).long_summary
+        return self.linter.get_exit_code()
 
 def _share_element(first_iter, second_iter):
     return any(element in first_iter for element in second_iter)

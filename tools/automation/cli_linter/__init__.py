@@ -7,7 +7,7 @@
 import sys
 import yaml
 from knack.help_files import helps
-from .linter import Linter
+from .linter import LinterManager
 
 
 def define_arguments(parser):
@@ -23,13 +23,13 @@ def define_arguments(parser):
 
 
 def main(args):
-    from azure.cli.testsdk import TestCli
+    from azure.cli.core import get_default_cli
     from azure.cli.core.util import get_all_help, create_invoker_and_load_cmds_and_args
     from azure.cli.core.commands.arm import add_id_parameters
 
     print('Initializing linter with command table and help files...')
     # setup CLI to enable command loader
-    az_cli = TestCli()
+    az_cli = get_default_cli()
 
     # load commands, args, and help
     create_invoker_and_load_cmds_and_args(az_cli)
@@ -50,13 +50,13 @@ def main(args):
         args.rule_types_to_run = ['params', 'commands', 'command_groups', 'help_entries']
 
     # Instantiate and run Linter
-    linter = Linter(command_table=command_table,
-                    help_file_entries=help_file_entries,
-                    loaded_help=loaded_help)
-    exit_code = linter.run(run_params='params' in args.rule_types_to_run,
-                           run_commands='commands' in args.rule_types_to_run,
-                           run_command_groups='command_groups' in args.rule_types_to_run,
-                           run_help_files_entries='help_entries' in args.rule_types_to_run)
+    linter_manager = LinterManager(command_table=command_table,
+                                   help_file_entries=help_file_entries,
+                                   loaded_help=loaded_help)
+    exit_code = linter_manager.run(run_params='params' in args.rule_types_to_run,
+                                   run_commands='commands' in args.rule_types_to_run,
+                                   run_command_groups='command_groups' in args.rule_types_to_run,
+                                   run_help_files_entries='help_entries' in args.rule_types_to_run)
 
     sys.exit(exit_code)
 
