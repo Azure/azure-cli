@@ -117,7 +117,7 @@ class AzHelpGenDirective(Directive):
                for e in help_file.examples:
                   yield '{}.. cliexample:: {}'.format(INDENT, e.name)
                   yield ''
-                  yield DOUBLEINDENT + e.text
+                  yield DOUBLEINDENT + e.text.replace("\\", "\\\\")
                   yield ''
 
     def run(self):
