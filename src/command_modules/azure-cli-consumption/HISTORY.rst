@@ -2,7 +2,7 @@
 
 Release History
 ===============
-0.2.3
+0.3.0
 +++++
 * Added commands `marketplace`.
 * BREAKING CHANGE: `reservations summaries` commands renamed to `reservation summary`.
