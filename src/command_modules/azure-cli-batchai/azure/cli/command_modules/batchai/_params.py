@@ -131,7 +131,7 @@ def load_arguments(self, _):
         c.argument('expiry', options_list=['--expiry', '-e'], type=int, help='Time in minutes for how long generated download URL should remain valid.')
 
     with self.argument_context('batchai job wait') as c:
-        c.argument('check_interval_sec', options_list=['--check-interval-sec', '-i'], help="Defined how often CLI will check job's status.")
+        c.argument('check_interval_sec', options_list=['--interval'], help="Polling interval in sec.")
 
     with self.argument_context('batchai file-server') as c:
         c.argument('location', get_location_type(self.cli_ctx), help='Location in which to create the file server. If default location is not configured, will default to the resource group\'s location')
