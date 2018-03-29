@@ -11,6 +11,8 @@ import binascii
 
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
+from knack.help import GroupHelpFile
+from azure.cli.core._help import CliCommandHelpFile
 import six
 
 logger = get_logger(__name__)
@@ -252,3 +254,56 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
         kwargs.update({'raw': True, 'polling': False})
     return func(*args, **kwargs)
+
+def get_all_help(cli_ctx):
+    invoker = cli_ctx.invocation
+    if not invoker:
+        raise CLIError("CLI context does not contain invocation.")
+
+    parser_keys = []
+    parser_values = []
+    sub_parser_keys = []
+    sub_parser_values = []
+    _store_parsers(invoker.parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values)
+    for cmd, parser in zip(parser_keys, parser_values):
+        if cmd not in sub_parser_keys:
+            sub_parser_keys.append(cmd)
+            sub_parser_values.append(parser)
+    help_files = []
+    for cmd, parser in zip(sub_parser_keys, sub_parser_values):
+        try:
+            help_file = GroupHelpFile(cmd, parser) if _is_group(parser) else CliCommandHelpFile(cmd, parser)
+            help_file.load(parser)
+            help_files.append(help_file)
+        except Exception as ex:
+            print("Skipped '{}' due to '{}'".format(cmd, ex))
+    help_files = sorted(help_files, key=lambda x: x.command)
+    return help_files
+
+
+def create_invoker_and_load_cmds_and_args(cli_ctx):
+    invoker = cli_ctx.invocation_cls(cli_ctx=cli_ctx, commands_loader_cls=cli_ctx.commands_loader_cls,
+                                     parser_cls=cli_ctx.parser_cls, help_cls=cli_ctx.help_cls)
+    cli_ctx.invocation = invoker
+    cmd_table = invoker.commands_loader.load_command_table(None)
+    for command in cmd_table:
+        invoker.commands_loader.load_arguments(command)
+    invoker.parser.load_command_table(invoker.commands_loader.command_table)
+
+
+def _store_parsers(parser, parser_keys, parser_values, sub_parser_keys, sub_parser_values):
+    for s in parser.subparsers.values():
+        parser_keys.append(_get_parser_name(s))
+        parser_values.append(s)
+        if _is_group(s):
+            for c in s.choices.values():
+                sub_parser_keys.append(_get_parser_name(c))
+                sub_parser_values.append(c)
+                _store_parsers(c, parser_keys, parser_values, sub_parser_keys, sub_parser_values)
+
+def _get_parser_name(s):
+    return (s._prog_prefix if hasattr(s, '_prog_prefix') else s.prog)[3:]
+
+def _is_group(parser):
+    return getattr(parser, '_subparsers', None) is not None \
+        or getattr(parser, 'choices', None) is not None
