@@ -2695,7 +2695,7 @@ helps['network public-ip show'] = """
         - name: Get information about a public IP resource.
           text: az network public-ip show -g MyResourceGroup -n MyIp
         - name: Get the FQDN and IP address of a public IP resource.
-          text: > 
+          text: >
               az network public-ip show -g MyResourceGroup -n MyIp --query "{fqdn: dnsSettings.fqdn, address: ipAddress}"
 """
 
