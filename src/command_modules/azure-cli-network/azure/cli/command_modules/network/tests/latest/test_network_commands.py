@@ -223,8 +223,12 @@ class NetworkAppGatewayNoWaitScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_ag_no_wait')
     def test_network_app_gateway_no_wait(self, resource_group):
 
+        self.kwargs.update({
+            'tags': {u'a': u'b', u'c': u'd'}
+        })
+
         self.cmd('network application-gateway create -g {rg} -n ag1 --no-wait --connection-draining-timeout 180', checks=self.is_empty())
-        self.cmd('network application-gateway create -g {rg} -n ag2 --no-wait', checks=self.is_empty())
+        self.cmd('network application-gateway create -g {rg} -n ag2 --no-wait --tags a=b c=d', checks=self.is_empty())
         self.cmd('network application-gateway wait -g {rg} -n ag1 --created --interval 120', checks=self.is_empty())
         self.cmd('network application-gateway wait -g {rg} -n ag2 --created --interval 120', checks=self.is_empty())
         self.cmd('network application-gateway show -g {rg} -n ag1', checks=[
@@ -232,8 +236,10 @@ class NetworkAppGatewayNoWaitScenarioTest(ScenarioTest):
             self.check('backendHttpSettingsCollection[0].connectionDraining.enabled', True),
             self.check('backendHttpSettingsCollection[0].connectionDraining.drainTimeoutInSec', 180)
         ])
-        self.cmd('network application-gateway show -g {rg} -n ag2',
-                 checks=self.check('provisioningState', 'Succeeded'))
+        self.cmd('network application-gateway show -g {rg} -n ag2', checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('tags', '{tags}')
+        ])
         self.cmd('network application-gateway delete -g {rg} -n ag2 --no-wait')
         self.cmd('network application-gateway wait -g {rg} -n ag2 --deleted')
 

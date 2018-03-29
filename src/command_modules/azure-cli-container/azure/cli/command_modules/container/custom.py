@@ -250,7 +250,7 @@ def container_logs(cmd, resource_group_name, name, container_name=None, follow=F
             stream_args=(logs_client, resource_group_name, name, container_name, container_group.restart_policy))
 
 
-def container_exec(cmd, resource_group_name, name, container_name=None, exec_command=None, terminal_row_size=20, terminal_col_size=80):
+def container_exec(cmd, resource_group_name, name, exec_command, container_name=None, terminal_row_size=20, terminal_col_size=80):
     """Start exec for a container. """
 
     start_container_client = cf_start_container(cmd.cli_ctx)

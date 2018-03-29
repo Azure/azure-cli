@@ -522,6 +522,8 @@ def process_ag_create_namespace(cmd, namespace):
 
     validate_cert(namespace)
 
+    validate_tags(namespace)
+
 
 def process_auth_create_namespace(cmd, namespace):
     ExpressRouteCircuitAuthorization = cmd.get_models('ExpressRouteCircuitAuthorization')

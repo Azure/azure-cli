@@ -405,8 +405,8 @@ class FeatureScenarioTest(ScenarioTest):
         self.cmd('feature show --namespace Microsoft.Network -n AllowLBPreview')
 
 
-# TODO: convert back to ScenarioTest when #5741 is fixed.
-class PolicyScenarioTest(LiveScenarioTest):
+class PolicyScenarioTest(ScenarioTest):
+
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
     def test_resource_policy(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -418,21 +418,26 @@ class PolicyScenarioTest(LiveScenarioTest):
             'rf': os.path.join(curr_dir, 'sample_policy_rule.json').replace('\\', '\\\\'),
             'pdf': os.path.join(curr_dir, 'sample_policy_param_def.json').replace('\\', '\\\\'),
             'params': os.path.join(curr_dir, 'sample_policy_param.json').replace('\\', '\\\\'),
-            'mode': 'Indexed'
+            'mode': 'Indexed',
+            'metadata': {u'category': u'test'},
+            'updated_metadata': {u'category': u'test2'},
         })
 
         # create a policy
-        self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode}', checks=[
+        self.cmd('policy definition create -n {pn} --rules {rf} --params {pdf} --display-name {pdn} --description {desc} --mode {mode} --metadata category=test', checks=[
             self.check('name', '{pn}'),
             self.check('displayName', '{pdn}'),
             self.check('description', '{desc}'),
-            self.check('mode', '{mode}')
+            self.check('mode', '{mode}'),
+            self.check('metadata', '{metadata}')
         ])
 
         # update it
         self.kwargs['desc'] = self.kwargs['desc'] + '_new'
-        self.cmd('policy definition update -n {pn} --description {desc}',
-                 checks=self.check('description', '{desc}'))
+        self.cmd('policy definition update -n {pn} --description {desc} --metadata category=test2', checks=[
+            self.check('description', '{desc}'),
+            self.check('metadata', '{updated_metadata}')
+        ])
 
         # list and show it
         self.cmd('policy definition list',
@@ -473,7 +478,7 @@ class PolicyScenarioTest(LiveScenarioTest):
 
         # create a policy assignment using a built in policy definition name
         self.kwargs['pan2'] = self.create_random_name('azurecli-test-policy-assignment2', 40)
-        self.kwargs['bip'] = self.cmd('policy definition list --query "[?policyType==\'BuiltIn\']|[0]"').get_output_in_json()['name']
+        self.kwargs['bip'] = '06a78e20-9358-41c9-923c-fb736d382a4d'
         self.cmd('policy assignment create --policy {bip} -n {pan2} --display-name {padn} -g {rg}', checks=[
             self.check('name', '{pan2}'),
             self.check('displayName', '{padn}')
@@ -566,6 +571,12 @@ class PolicyScenarioTest(LiveScenarioTest):
         time.sleep(10)  # ensure the policy is gone when run live.
         self.cmd('policy set-definition list',
                  checks=self.check("length([?name=='{psn}'])", 0))
+
+        # delete the policy
+        self.cmd('policy definition delete -n {pn}')
+        time.sleep(10)  # ensure the policy is gone when run live.
+        self.cmd('policy definition list',
+                 checks=self.check("length([?name=='{pn}'])", 0))
 
     def test_show_built_in_policy(self):
         # This test actually does not work...
