@@ -59,9 +59,25 @@ def validate_nsg_name(cmd, namespace):
         or '{}_NSG_{}'.format(namespace.vm_name, hash_string(vm_id, length=8))
 
 
-def process_vm_secret_namespace(cmd, namespace):
+def validate_keyvault(cmd, namespace):
     namespace.keyvault = _get_resource_id(cmd.cli_ctx, namespace.keyvault, namespace.resource_group_name,
                                           'vaults', 'Microsoft.KeyVault')
+
+
+def process_vm_secret_format(cmd, namespace):
+    from msrestazure.tools import is_valid_resource_id
+
+    keyvault_usage = CLIError('usage error: [--keyvault NAME --resource-group NAME | --keyvault ID]')
+    kv = namespace.keyvault
+    rg = namespace.resource_group_name
+
+    if rg:
+        if not kv or is_valid_resource_id(kv):
+            raise keyvault_usage
+        validate_keyvault(cmd, namespace)
+    else:
+        if kv and not is_valid_resource_id(kv):
+            raise keyvault_usage
 
 
 def _get_resource_group_from_vault_name(cli_ctx, vault_name):
@@ -88,8 +104,16 @@ def _get_resource_id(cli_ctx, val, resource_group, resource_type, resource_names
     if is_valid_resource_id(val):
         return val
 
-    return resource_id(name=val, resource_group=resource_group, namespace=resource_namespace, type=resource_type,
-                       subscription=get_subscription_id(cli_ctx))
+    kwargs = {
+        'name': val,
+        'resource_group': resource_group,
+        'namespace': resource_namespace,
+        'type': resource_type,
+        'subscription': get_subscription_id(cli_ctx)
+    }
+    missing_kwargs = {k: v for k, v in kwargs.items() if not v}
+
+    return resource_id(**kwargs) if not missing_kwargs else None
 
 
 def _get_nic_id(cli_ctx, val, resource_group):

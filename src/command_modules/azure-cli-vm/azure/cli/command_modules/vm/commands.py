@@ -19,7 +19,7 @@ from azure.cli.command_modules.vm._format import (
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
-    process_vm_secret_namespace, process_msi_namespace, process_remove_identity_namespace)
+    process_msi_namespace, process_remove_identity_namespace, process_vm_secret_format)
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format
@@ -168,7 +168,6 @@ def load_command_table(self, _):
         g.command('convert', 'convert_to_managed_disks', min_api='2016-04-30-preview')
         g.command('deallocate', 'deallocate', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
-        g.custom_command('format-secret', 'get_vm_format_secret', deprecate_info='az vm secret format')
         g.command('generalize', 'generalize', supports_no_wait=True)
         g.custom_command('get-instance-view', 'get_instance_view', table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}')
         g.custom_command('list', 'list_vm', table_transformer=transform_vm_list)
@@ -248,10 +247,10 @@ def load_command_table(self, _):
         g.command('show', 'get')
 
     with self.command_group('vm secret', compute_vm_sdk) as g:
-        g.custom_command('format', 'get_vm_format_secret')
-        g.custom_command('add', 'add_vm_secret', validator=process_vm_secret_namespace)
+        g.custom_command('format', 'get_vm_format_secret', validator=process_vm_secret_format)
+        g.custom_command('add', 'add_vm_secret')
         g.custom_command('list', 'list_vm_secrets')
-        g.custom_command('remove', 'remove_vm_secret', validator=process_vm_secret_namespace)
+        g.custom_command('remove', 'remove_vm_secret')
 
     with self.command_group('vm unmanaged-disk', compute_vm_sdk) as g:
         g.custom_command('attach', 'attach_unmanaged_data_disk')
