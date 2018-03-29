@@ -1450,7 +1450,7 @@ def get_vm_format_secret(cmd, secrets, certificate_store=None, keyvault=None, re
         if vault_name not in grouped_secrets:
             grouped_secrets[vault_name] = {
                 'vaultCertificates': [],
-                'id': keyvault if keyvault else _get_vault_id_from_name(cmd.cli_ctx, client, vault_name)
+                'id': keyvault or _get_vault_id_from_name(cmd.cli_ctx, client, vault_name)
             }
 
         vault_cert = {'certificateUrl': secret}
