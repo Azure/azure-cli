@@ -41,8 +41,9 @@ def load_arguments(self, _):
         c.argument('subnet', options_list=['--subnet'], help='Resource id of a virtual network subnet to put the cluster in.')
 
     with self.argument_context('batchai cluster create', arg_group='Admin Account') as c:
-        c.argument('user_name', options_list=['--user-name', '-u'], help='Name of the admin user to be created on every compute node. If the value is not provided and no user configuration is provided in the config file, current user\'s name will be used.')
+        c.argument('user_name', options_list=['--user-name', '-u'], help='Name of the admin user account to be created on each compute node. If the value is not provided and no user configuration is provided in the config file, current user\'s name will be used.')
         c.argument('ssh_key', options_list=['--ssh-key', '-k'], help='SSH public key value or path. If the value is not provided and no ssh public key or password is configured in the config file the default public ssh key (~/.ssh/id_rsa.pub) of the current user will be used (if available).', completer=FilesCompleter())
+        c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory.')
         c.argument('password', options_list=['--password', '-p'], help='Password.')
 
     with self.argument_context('batchai cluster create', arg_group='Auto Storage') as c:
@@ -148,8 +149,9 @@ def load_arguments(self, _):
         c.argument('storage_sku', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS']), help='The sku of storage account to persist VM.')
 
     with self.argument_context('batchai file-server create', arg_group='Admin Account') as c:
-        c.argument('user_name', options_list=['--admin-user-name', '-u'], help='Name of the admin user to be created on NFS node.If the value is not provided and no user configuration is provided in the config file, current user\'s name will be used.')
+        c.argument('user_name', options_list=['--user-name', '-u'], help='Name of the admin user account to be created on NFS node. If the value is not provided and no user configuration is provided in the config file, current user\'s name will be used.')
         c.argument('ssh_key', options_list=['--ssh-key', '-k'], help='SSH public key value or path. If the value is not provided and no ssh public key or password is configured in the config file the default public ssh key (~/.ssh/id_rsa.pub) of the current user will be used (if available).', completer=FilesCompleter())
+        c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory.')
         c.argument('password', options_list=['--password', '-p'], help='Password.')
 
     with self.argument_context('batchai file-server create', arg_group='Virtual Network') as c:

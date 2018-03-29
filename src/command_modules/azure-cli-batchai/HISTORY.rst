@@ -3,7 +3,7 @@
 Release History
 ===============
 
-1.0.0
+0.2.0
 ++++++
 * Added support for 2018-03-01 API
 
@@ -30,9 +30,14 @@ Release History
   belongs to the current subscription).
 * Job file stream command now auto-completes when the job is completed (succeeded, failed, terminated or deleted).
 * Improved '-o table' support for show operations.
-* Added auto storage option for cluster creation.
+* Added --use-auto-storage option for cluster creation. This option make it simpler to manage storage accounts and
+  and mount Azure File Share and Azure Blob Containers to clusters.
+* Added --generate-ssh-keys option into 'cluster create' and 'file-server create'.
 * Added ability to provide node setup task via command line.
-* 'job stream-file' and 'job list-files' commands are grouped under 'job file' group.
+* Braking change: 'job stream-file' and 'job list-files' commands are grouped under 'job file' group.
+* Braking change: renamed --admin-user-name to --user-name in 'file-server create' command to be consistent with
+  'cluster create' command.
+
 
 0.1.4
 ++++++

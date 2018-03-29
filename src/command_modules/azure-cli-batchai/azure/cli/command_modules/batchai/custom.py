@@ -28,7 +28,7 @@ from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import is_valid_resource_id
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.keys import is_valid_ssh_rsa_public_key
+from azure.cli.core import keys
 from azure.cli.core.profiles import ResourceType
 
 import azure.mgmt.batchai.models as models
@@ -287,7 +287,7 @@ def _update_user_account_settings(params, admin_user_name, ssh_key, password):
             with open(os.path.expanduser(effective_key)) as f:
                 effective_key = f.read()
     try:
-        if effective_key and not is_valid_ssh_rsa_public_key(effective_key):
+        if effective_key and not keys.is_valid_ssh_rsa_public_key(effective_key):
             raise CLIError('Incorrect ssh public key value.')
     except Exception:
         raise CLIError('Incorrect ssh public key value.')
@@ -583,13 +583,32 @@ def _add_setup_task(cmd_line, output, cluster):
     return cluster
 
 
+def _generate_ssh_keys():
+    """Generates ssh keys pair"""
+    private_key_path = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa')
+    public_key_path = os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
+    if os.path.exists(private_key_path) and os.path.exists(public_key_path):
+        logger.warning('Reusing existing ssh public key from ~/.ssh')
+        return
+    if os.path.exists(private_key_path):
+        logger.warning('SSH private key id_rsa exists but public key is missing. Please export the public key.')
+        return
+    keys.generate_ssh_keys(private_key_path, public_key_path)
+    logger.warning('SSH key files id_rsa and id_rsa.pub have been generated under ~/.ssh to allow SSH access to the '
+                   'nodes. If using machines without permanent storage, back up your keys to a safe location.')
+
+
 def create_cluster(cmd, client,  # pylint: disable=too-many-locals
                    resource_group, cluster_name, json_file=None, location=None, user_name=None,
-                   ssh_key=None, password=None, image=None, custom_image=None, use_auto_storage=False,
-                   vm_size=None, vm_priority='dedicated', target=None, min_nodes=None, max_nodes=None, subnet=None,
-                   nfs_name=None, nfs_resource_group=None, nfs_mount_path='nfs', azure_file_share=None,
-                   afs_mount_path='afs', container_name=None, container_mount_path='bfs', account_name=None,
-                   account_key=None, setup_task=None, setup_task_output=None):
+                   ssh_key=None, password=None, generate_ssh_keys=None, image=None, custom_image=None,
+                   use_auto_storage=False, vm_size=None, vm_priority='dedicated', target=None, min_nodes=None,
+                   max_nodes=None, subnet=None, nfs_name=None, nfs_resource_group=None, nfs_mount_path='nfs',
+                   azure_file_share=None, afs_mount_path='afs', container_name=None, container_mount_path='bfs',
+                   account_name=None, account_key=None, setup_task=None, setup_task_output=None):
+    if generate_ssh_keys:
+        _generate_ssh_keys()
+        if ssh_key is None:
+            ssh_key = _get_default_ssh_public_key_location()
     _ensure_resource_not_exist(client.clusters, resource_group, cluster_name)
     _verify_subnet(client, subnet, nfs_name, nfs_resource_group or resource_group)
     if json_file:
@@ -752,10 +771,10 @@ def _get_files_from_afs(cli_ctx, afs, path, expiry):
     service = FileService(afs.account_name, _get_storage_account_key(cli_ctx, afs.account_name, None))
     share_name = afs.azure_file_url.split('/')[-1]
     effective_path = _get_path_for_storage(path)
+    if not service.exists(share_name, effective_path):
+        return result
     for f in service.list_directories_and_files(share_name, effective_path):
         if isinstance(f, File):
-            logger.warning(effective_path)
-            logger.warning(f.name)
             sas = service.generate_file_shared_access_signature(
                 share_name, effective_path, f.name, permission=FilePermissions(read=True),
                 expiry=datetime.datetime.utcnow() + datetime.timedelta(minutes=expiry))
@@ -928,9 +947,13 @@ def _log_failed_job(resource_group, job):
 
 
 def create_file_server(cmd, client, resource_group, file_server_name, json_file=None, vm_size=None, location=None,
-                       user_name=getpass.getuser(), ssh_key=_get_default_ssh_public_key_location(), password=None,
+                       user_name=None, ssh_key=None, password=None, generate_ssh_keys=None,
                        disk_count=None, disk_size=None, caching_type=None, storage_sku=None, subnet=None,
                        raw=False):
+    if generate_ssh_keys:
+        _generate_ssh_keys()
+        if ssh_key is None:
+            ssh_key = _get_default_ssh_public_key_location()
     _ensure_resource_not_exist(client, resource_group, file_server_name)
     if json_file:
         with open(json_file) as f:
@@ -939,7 +962,6 @@ def create_file_server(cmd, client, resource_group, file_server_name, json_file=
     else:
         # noinspection PyTypeChecker
         params = models.FileServerCreateParameters()
-
     params = _update_user_account_settings(params, user_name, ssh_key, password)
     params.location = location or _get_resource_group_location(cmd.cli_ctx, resource_group)
     if not params.data_disks:
