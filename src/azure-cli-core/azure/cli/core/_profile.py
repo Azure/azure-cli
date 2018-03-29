@@ -227,6 +227,7 @@ class Profile(object):
 
     def find_subscriptions_in_vm_with_msi(self, identity_id=None):
         import jwt
+        from requests import HTTPError
         from msrestazure.azure_active_directory import MSIAuthentication
         from msrestazure.tools import is_valid_resource_id
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
@@ -243,9 +244,12 @@ class Profile(object):
                     msi_creds.set_token()
                     token_entry = msi_creds.token
                     identity_type = MsiAccountTypes.user_assigned_client_id
-                except ValueError:
-                    identity_type = MsiAccountTypes.user_assigned_object_id
-                    msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
+                except HTTPError as ex:
+                    if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                        identity_type = MsiAccountTypes.user_assigned_object_id
+                        msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
+                    else:
+                        raise
         else:
             identity_type = MsiAccountTypes.system_assigned
             msi_creds = MSIAuthentication(resource=resource)
