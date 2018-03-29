@@ -879,20 +879,17 @@ class TestProfile(unittest.TestCase):
         class AuthStub:
             def __init__(self, **kwargs):
                 self.token = None
-                self.called_no = 0
                 self.client_id = kwargs.get('client_id')
                 self.object_id = kwargs.get('object_id')
 
             def set_token(self):
                 # here we will reject the 1st sniffing of trying with client_id and then acccept the 2nd
-
                 if self.object_id:
                     self.token = {
                         'token_type': 'Bearer',
                         'access_token': TestProfile.test_msi_access_token
                     }
                 else:
-                    self.called_no += 1
                     mock_obj = mock.MagicMock()
                     mock_obj.status, mock_obj.reason = 400, 'Bad Request'
                     raise HTTPError(response=mock_obj)
