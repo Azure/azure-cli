@@ -579,7 +579,7 @@ helps['network application-gateway ssl-cert create'] = """
         - name: Upload an SSL certificate.
           text: |
             az network application-gateway ssl-cert create -g MyResourceGroup --gateway-name MyAppGateway \\
-                -n MySslCert --cert-file \path\to\cert\file --cert-password Abc123
+                -n MySslCert --cert-file \\path\\to\\cert\\file --cert-password Abc123
 """
 
 helps['network application-gateway ssl-cert delete'] = """
@@ -613,7 +613,7 @@ helps['network application-gateway ssl-cert update'] = """
         - name: Change a gateway SSL certificate and password.
           text: |
             az network application-gateway ssl-cert update -g MyResourceGroup --gateway-name MyAppGateway -n MySslCert \\
-                --cert-file \path\to\new\cert\file --cert-password Abc123Abc123
+                --cert-file \\path\\to\\new\\cert\\file --cert-password Abc123Abc123
 """
 # endregion
 
@@ -1084,7 +1084,7 @@ helps['network dns record-set caa add-record'] = """
         - name: Add a CAA record.
           text: |
             az network dns record-set caa add-record -g MyResourceGroup -z www.mysite.com \\
-                -n MyRecordSet --flags 0 --tag “issue” –-value “ca.contoso.com”
+                -n MyRecordSet --flags 0 --tag "issue" --value "ca.contoso.com"
 """
 
 helps['network dns record-set caa create'] = """
@@ -1121,7 +1121,7 @@ helps['network dns record-set caa remove-record'] = """
         - name: Remove a CAA record from its record set.
           text: |
             az network dns record-set caa remove-record -g MyResourceGroup -z www.mysite.com \\
-                -n MyRecordSet --flags 0 --tag “issue” –-value “ca.contoso.com”
+                -n MyRecordSet --flags 0 --tag "issue" --value "ca.contoso.com"
 """
 
 helps['network dns record-set caa show'] = """
@@ -2325,7 +2325,7 @@ helps['network local-gateway update'] = """
         - name: Update a Local Network Gateway provisioned with a 10.0.0.0/24 address prefix with additional prefixes.
           text: |
             az network local-gateway update -g MyResourceGroup -n MyLocalGateway \\
-                -–local-address-prefixes 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24
+                --local-address-prefixes 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24
 """
 # endregion
 
@@ -2695,7 +2695,7 @@ helps['network public-ip show'] = """
         - name: Get information about a public IP resource.
           text: az network public-ip show -g MyResourceGroup -n MyIp
         - name: Get the FQDN and IP address of a public IP resource.
-          text: az network public-ip show -g MyResourceGroup -n MyIp --query "{fqdn: dnsSettings.fqdn, address: ipAddress}"
+          text: > az network public-ip show -g MyResourceGroup -n MyIp --query "{fqdn: dnsSettings.fqdn, address: ipAddress}"
 """
 
 helps['network public-ip update'] = """
@@ -3315,8 +3315,8 @@ helps['network vpn-connection ipsec-policy add'] = """
     examples:
         - name: Add specified IPsec policies to a connection instead of relying on defaults.
           text: |
-            az network vpn-connection ipsec-policy add -g MyResourceGroup –-connection-name MyConnection \\
-                -–dh-group DHGroup14 -–ike-encryption AES256 --ike-integrity SHA384 --ipsec-encryption DES3 \\
+            az network vpn-connection ipsec-policy add -g MyResourceGroup --connection-name MyConnection \\
+                --dh-group DHGroup14 --ike-encryption AES256 --ike-integrity SHA384 --ipsec-encryption DES3 \\
                 --ipsec-integrity GCMAES256 --pfs-group PFS2048 --sa-lifetime 600 --sa-max-size 1024
 """
 
@@ -3325,7 +3325,7 @@ helps['network vpn-connection ipsec-policy clear'] = """
     short-summary: Delete all IPsec policies on a VPN connection.
     examples:
         - name: Remove all previously specified IPsec policies from a connection.
-          text: az network vpn-connection ipsec-policy clear -g MyResourceGroup –-connection-name MyConnection
+          text: az network vpn-connection ipsec-policy clear -g MyResourceGroup --connection-name MyConnection
 """
 
 helps['network vpn-connection ipsec-policy list'] = """
@@ -3333,7 +3333,7 @@ helps['network vpn-connection ipsec-policy list'] = """
     short-summary: List IPSec policies associated with a VPN connection.
     examples:
         - name: List the IPsec policies set on a connection.
-          text: az network vpn-connection ipsec-policy list -g MyResourceGroup –-connection-name MyConnection
+          text: az network vpn-connection ipsec-policy list -g MyResourceGroup --connection-name MyConnection
 """
 # endregion
 
@@ -3348,7 +3348,7 @@ helps['network vpn-connection shared-key reset'] = """
     short-summary: Reset a VPN connection shared key.
     examples:
         - name: Reset the shared key on a connection.
-          text: az network vpn-connection shared-key reset -g MyResourceGroup –-connection-name MyConnection –-key-length 128
+          text: az network vpn-connection shared-key reset -g MyResourceGroup --connection-name MyConnection --key-length 128
 """
 
 helps['network vpn-connection shared-key show'] = """
@@ -3356,7 +3356,7 @@ helps['network vpn-connection shared-key show'] = """
     short-summary: Retrieve a VPN connection shared key.
     examples:
         - name: View the shared key of a connection.
-          text: az network vpn-connection shared-key show -g MyResourceGroup –-connection-name MyConnection
+          text: az network vpn-connection shared-key show -g MyResourceGroup --connection-name MyConnection
 """
 
 helps['network vpn-connection shared-key update'] = """
@@ -3364,7 +3364,7 @@ helps['network vpn-connection shared-key update'] = """
     short-summary: Update a VPN connection shared key.
     examples:
         - name: Change the shared key for the connection to “Abc123”.
-          text: az network vpn-connection shared-key update -g MyResourceGroup –-connection-name MyConnection --value Abc123
+          text: az network vpn-connection shared-key update -g MyResourceGroup --connection-name MyConnection --value Abc123
 """
 # endregion
 
