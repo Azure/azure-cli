@@ -25,7 +25,7 @@ def load_command_table(self, _):
         client_factory=billing_periods_mgmt_client_factory,
         exception_handler=billing_exception_handler
     )
-    
+
     enrollment_account_util = CliCommandType(
         operations_tmpl='azure.mgmt.billing.operations.enrollment_accounts_operations#EnrollmentAccountsOperations.{}',
         client_factory=enrollment_accounts_mgmt_client_factory,
