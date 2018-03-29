@@ -34,8 +34,8 @@ Release History
   and mount Azure File Share and Azure Blob Containers to clusters.
 * Added --generate-ssh-keys option into 'cluster create' and 'file-server create'.
 * Added ability to provide node setup task via command line.
-* Braking change: 'job stream-file' and 'job list-files' commands are grouped under 'job file' group.
-* Braking change: renamed --admin-user-name to --user-name in 'file-server create' command to be consistent with
+* Breaking change: 'job stream-file' and 'job list-files' commands are grouped under 'job file' group.
+* Breaking change: renamed --admin-user-name to --user-name in 'file-server create' command to be consistent with
   'cluster create' command.
 
 
