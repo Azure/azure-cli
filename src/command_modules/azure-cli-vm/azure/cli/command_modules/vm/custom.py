@@ -1425,11 +1425,13 @@ def run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=No
 # region VirtualMachines Secrets
 def _get_vault_id_from_name(cli_ctx, client, vault_name):
     group_name = _get_resource_group_from_vault_name(cli_ctx, vault_name)
+    if not group_name:
+        raise CLIError("unable to find vault '{}' in current subscription.".format(vault_name))
     vault = client.get(group_name, vault_name)
     return vault.id
 
 
-def get_vm_format_secret(cmd, secrets, certificate_store=None):
+def get_vm_format_secret(cmd, secrets, certificate_store=None, keyvault=None, resource_group_name=None):
     from azure.mgmt.keyvault import KeyVaultManagementClient
     from azure.keyvault import KeyVaultId
     import re
@@ -1448,7 +1450,7 @@ def get_vm_format_secret(cmd, secrets, certificate_store=None):
         if vault_name not in grouped_secrets:
             grouped_secrets[vault_name] = {
                 'vaultCertificates': [],
-                'id': _get_vault_id_from_name(cmd.cli_ctx, client, vault_name)
+                'id': keyvault or _get_vault_id_from_name(cmd.cli_ctx, client, vault_name)
             }
 
         vault_cert = {'certificateUrl': secret}

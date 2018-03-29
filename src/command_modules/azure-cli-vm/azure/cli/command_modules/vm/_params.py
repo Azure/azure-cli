@@ -19,7 +19,7 @@ from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
     validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk,
-    validate_vmss_disk, validate_asg_names_or_ids)
+    validate_vmss_disk, validate_asg_names_or_ids, validate_keyvault)
 
 
 # pylint: disable=too-many-statements, too-many-branches
@@ -186,12 +186,11 @@ def load_arguments(self, _):
         c.argument('vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), id_part='child_name_1')
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part='name')
 
-    for scope in ['vm format-secret', 'vm secret']:
-        with self.argument_context(scope) as c:
-            c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='Space-separated list of key vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
-            c.argument('keyvault', help='Name or ID of the key vault.')
-            c.argument('certificate', help='key vault certificate name or its full secret URL')
-            c.argument('certificate_store', help='Windows certificate store names. Default: My')
+    with self.argument_context('vm secret') as c:
+        c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='Space-separated list of key vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
+        c.argument('keyvault', help='Name or ID of the key vault.', validator=validate_keyvault)
+        c.argument('certificate', help='key vault certificate name or its full secret URL')
+        c.argument('certificate_store', help='Windows certificate store names. Default: My')
 
     with self.argument_context('vm image') as c:
         c.argument('publisher_name', options_list=['--publisher', '-p'])

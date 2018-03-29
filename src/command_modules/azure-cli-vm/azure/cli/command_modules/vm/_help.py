@@ -12,9 +12,29 @@ vm_ids_example = """        - name: {0}
             az {1} --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
 """
 
+helps['vm secret add'] = """
+    type: command
+    short-summary: Add a secret to a VM.
+"""
+
+helps['vm secret list'] = """
+    type: command
+    short-summary: List secrets on a VM.
+"""
+
+helps['vm secret remove'] = """
+    type: command
+    short-summary: Remove a secret from a VM.
+"""
+
 helps['vm secret format'] = """
     type: command
     short-summary: Transform secrets into a form that can be used by VMs and VMSSes.
+    parameters:
+        - name: --secrets -s
+          long-summary: >
+            The command will attempt to resolve the vault ID for each secret. If it is unable to do so,
+            specify the vault ID to use for *all* secrets using: --keyvault NAME --resource-group NAME | --keyvault ID.
     examples:
         - name: Create a self-signed certificate with the default policy, and add it to a virtual machine.
           text: >
