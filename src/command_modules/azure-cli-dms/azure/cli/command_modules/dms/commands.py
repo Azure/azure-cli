@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-from azure.cli.command_modules.dms._client_factory import dms_client_factory
+from azure.cli.command_modules.dms._client_factory import dms_client_factory, dms_cf_services, dms_cf_skus#, dms_cf_projects
 
 from azure.cli.core.commands import CliCommandType
 
@@ -19,27 +19,35 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.datamigration.operations.resource_skus_operations#ResourceSkusOperations.{}',
         client_factory=dms_client_factory
     )
+
+    #dms_projects_sdk = CliCommandType(
+    #    operations_tmpl='azure.mgmt.datamigration.operations.projects_operations#ProjectsOperations.{}',
+    #    client_factory=dms_client_factory)
     
     dms_tasks_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.datamigration.operations.tasks_operations#TasksOperations.{}',
         client_factory=dms_client_factory
     )
 
-    with self.command_group('dms', dms_sdk, client_factory=dms_client_factory) as g:
+    with self.command_group('dms', dms_sdk, client_factory=dms_cf_services) as g:
         g.custom_command('check-name-availability', 'check_service_name_availability')
-        g.custom_command('check-status', 'check_service_status')
-        g.custom_command('create', 'create_service')
-        g.custom_command('delete', 'delete_service')
+        g.command('check-status', 'check_status')
+        g.custom_command('create', 'create_service', supports_no_wait=True)
+        g.custom_command('delete', 'delete_service', supports_no_wait=True)
         g.custom_command('list', 'list_services')
-        g.custom_command('show', 'get_service')
-        g.custom_command('start', 'start_service')
-        g.custom_command('stop', 'stop_service')
-        g.custom_command('subtest', 'subtest')
+        g.command('show', 'get')
+        g.custom_command('start', 'start_service', supports_no_wait=True)
+        g.custom_command('stop', 'stop_service', supports_no_wait=True)
+        g.generic_wait_command('wait')
 
-    with self.command_group('dms', dms_skus_sdk, client_factory=dms_client_factory) as g:
-        g.custom_command('list-skus', 'list_skus')
+    with self.command_group('dms', dms_skus_sdk, client_factory=dms_cf_skus) as g:
+        g.command('list-skus', 'list_skus')
 
-    with self.command_group('dms task', dms_tasks_sdk, client_factory=dms_client_factory) as g:
+    #with self.command_group('dms project', dms_projects_sdk, client_factory=dms_cf_projects) as g:
+    #    g.command('show', 'get')
+    #    g.command('list', 'list')
+
+    with self.command_group('dms task', dms_tasks_sdk, client_factory=dms_cf_tasks) as g:
         #g.custom_command('list', 'list_tasks')
         g.command('list', 'list')
         #g.command('create', 'create_or_update')

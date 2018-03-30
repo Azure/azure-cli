@@ -21,16 +21,6 @@ helps['dms check-name-availability'] = """
             The Service name you wish to check.
 """
 
-helps['dms check-status'] = """
-    type: command
-    short-summary: Check the status of a given DMS instance.
-    parameters:
-        - name: --name -n
-          type: string
-          short-summary: >
-            The name of the service you wish to check.
-"""
-
 helps['dms create'] = """
     type: command
     short-summary: Create an instance of the Data Migration Service.
@@ -39,20 +29,64 @@ helps['dms create'] = """
           type: string
           short-summary: >
             The name of the CPU SKU on which the service's Virtual Machine will run.
-        - name: --virtual-subnet-id
+        - name: --subnet-name
           type: string
           short-summary: >
-            The Resource ID of the VNet's Subnet you will use to connect the source and target DBs.
-            Use "az network vnet subnet show -h" for help to get your subnet's ID.
+            The name of the Virtual Network Subnet the DMS instance will be attached to.
+        - name: --vnet-name
+          type: string
+          short-summary: >
+            The name of the Virtual Network the subnet is a part of.
+        - name: --vnet-resource-group
+          type: string
+          short-summary: >
+            The name of the resource group the Virtual Network belongs to.
     examples:
         - name: Create an instance of DMS.
           text: >
-            az dms create -l westus -n mydms -g myresourcegroup --sku-name Basic_2vCores --virtual-subnet-id /subscriptions/{vnet subscription id}/resourceGroups/{vnet resource group}/providers/Microsoft.Network/virtualNetworks/{vnet name}/subnets/{subnet name}
+            az dms create -l westus -n mydms -g myresourcegroup --sku-name Basic_2vCores --vnet-name myvnetname --vnet-resource-group --subnet-name mysubnet
 """
 
-helps['dms show'] = """
+helps['dms delete'] = """
     type: command
-    short-summary: Get the details of a given DMS instance.
+    short-summary: Delete an instance of the Data Migration Service.
+    parameters:
+        - name: --delete-running-tasks
+          type: bool
+          short-summary: >
+            Delete the resource even if it contains running tasks.
+"""
+
+helps['dms list'] = """
+    type: command
+    short-summary: List the DMS instances within your currently configured subscription (to set this use 'az account set'). If provided, only show the instances within a given resource group.
+    parameters:
+        - name: --resource-group-name -g
+          type: string
+          short-summary: >
+            The name of the resource group the list of DMS instances should be limited to.
+    examples:
+        - name: List all the instances in your subscription.
+          text: >
+            az dms list
+        - name: List all the instances in a given resource group.
+          text: >
+            az dms list -g myresourcegroup
+"""
+
+helps['dms start'] = """
+    type: command
+    short-summary: Start an instance of the Data Migration Service. It can then be used to run data migrations.
+"""
+
+helps['dms stop'] = """
+    type: command
+    short-summary: Stop an instance of the Data Migration Service. While stopped, it can't be used to run data migrations and the owner won't be billed.
+"""
+
+helps['dms wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the DMS instance is met.
 """
 
 helps['dms task'] = """
