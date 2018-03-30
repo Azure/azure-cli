@@ -135,8 +135,6 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
     return client.create(resource_group_name, server_name, parameters, raw=no_wait)
 
 
-
-
 def _server_update_custom_func(instance,
                                capacity=None,
                                storage_mb=None,
