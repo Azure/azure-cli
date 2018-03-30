@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.8
+++++++
+* Add enrollment account commands
+
 0.1.7
 ++++++
 * Update for CLI core changes.
