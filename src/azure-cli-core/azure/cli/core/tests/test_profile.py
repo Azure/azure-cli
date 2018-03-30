@@ -755,6 +755,17 @@ class TestProfile(unittest.TestCase):
         mock_auth_context.acquire_token.assert_called_once_with(
             mgmt_resource, self.user1, mock.ANY)
 
+    @mock.patch('adal.AuthenticationContext', autospec=True)
+    def test_find_subscriptions_thru_username_non_password(self, mock_auth_context):
+        cli = TestCli()
+        mock_auth_context.acquire_token_with_username_password.return_value = None
+        finder = SubscriptionFinder(cli, lambda _, _1, _2: mock_auth_context, None, lambda _: None)
+        # action
+        subs = finder.find_from_user_account(self.user1, 'bar', None, 'http://goo-resource')
+
+        # assert
+        self.assertEqual([], subs)
+
     @mock.patch('msrestazure.azure_active_directory.MSIAuthentication', autospec=True)
     @mock.patch('azure.cli.core.profiles._shared.get_client_class', autospec=True)
     @mock.patch('azure.cli.core._profile._get_cloud_console_token_endpoint', autospec=True)

@@ -351,7 +351,7 @@ class Profile(object):
     @staticmethod
     def _pick_working_subscription(subscriptions):
         from azure.mgmt.resource.subscriptions.models import SubscriptionState
-        s = next((x for x in subscriptions if x['state'] == SubscriptionState.enabled.value), None)
+        s = next((x for x in subscriptions if x.get(_STATE) == SubscriptionState.enabled.value), None)
         return s or subscriptions[0]
 
     def set_active_subscription(self, subscription):  # take id or name
@@ -658,6 +658,8 @@ class SubscriptionFinder(object):
         else:  # when refresh account, we will leverage local cached tokens
             token_entry = context.acquire_token(resource, username, _CLIENT_ID)
 
+        if not token_entry:
+            return []
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
 
         if tenant is None:
