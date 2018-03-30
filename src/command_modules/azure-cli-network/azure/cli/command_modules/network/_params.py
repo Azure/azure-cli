@@ -304,6 +304,13 @@ def load_arguments(self, _):
 
     # endregion
 
+    # region DDoS Protection Plans
+    with self.argument_context('network ddos-protection') as c:
+        for dest in ['ddos_plan_name', 'ddos_protection_plan_name']:
+            c.argument(dest, name_arg_type, help='Name of the DDoS protection plan.', id_part='name')
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
+    # endregion
+
     # region DNS
     with self.argument_context('network dns') as c:
         c.argument('record_set_name', name_arg_type, help='The name of the record set, relative to the name of the zone.')

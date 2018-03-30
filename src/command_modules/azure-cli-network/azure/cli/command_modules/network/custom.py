@@ -820,6 +820,32 @@ def update_asg(instance, tags=None):
 # endregion
 
 
+# region DdosProtectionPlans
+def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, tags=None):
+    client = network_client_factory(cmd.cli_ctx).ddos_protection_plans
+    DdosProtectionPlan, SubResource = cmd.get_models('DdosProtectionPlan')
+    plan = DdosProtectionPlan(
+        name=ddos_plan_name,
+        location=location,
+        tags=tags
+    )
+    return client.create_or_update(resource_group_name, ddos_plan_name, plan)
+
+
+def update_ddos_plan(instance, tags=None):
+    if tags is not None:
+        instance.tags = tags
+    return instance
+
+
+def list_ddos_plans(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).ddos_protection_plans
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
+# endregion
+
+
 # region DNS Commands
 def create_dns_zone(client, resource_group_name, zone_name, location='global', tags=None,
                     if_none_match=False, zone_type='Public', resolution_vnets=None, registration_vnets=None):
