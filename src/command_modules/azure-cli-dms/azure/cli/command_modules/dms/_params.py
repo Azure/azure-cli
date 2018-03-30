@@ -12,11 +12,18 @@ def load_arguments(self, _):
 
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
 
-    #region Service
+    # region Global
 
     with self.argument_context('dms') as c:
         c.argument('service_name', name_arg_type, help='The name of the Service')
         c.argument('group_name', resource_group_name_type)
         c.argument('tags', tags_type)
 
-    #endregion
+    # endregion
+
+    # region Service
+
+    #with self.argument_context('dms project') as c:
+        #c.argument('project_name', name_arg_type, help='The name of the Project')
+
+    # endregion

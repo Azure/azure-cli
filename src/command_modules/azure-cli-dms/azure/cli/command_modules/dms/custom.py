@@ -5,6 +5,7 @@
 
 from azure.mgmt.datamigration.models import (DataMigrationService, ServiceSku)
 from azure.cli.core.util import CLIError, sdk_no_wait
+from knack.prompting import prompt_pass
 
 virtual_subnet_id_template = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'
 
@@ -58,6 +59,13 @@ def stop_service(cmd, client, service_name, resource_group_name, no_wait=False):
                        client.stop,
                        group_name=resource_group_name,
                        service_name=service_name)
+
+# endregion
+
+# Projects
+
+def create_project(cmd, client, project_name, service_name, resource_group_name, location):
+    pass
 
 # endregion
 

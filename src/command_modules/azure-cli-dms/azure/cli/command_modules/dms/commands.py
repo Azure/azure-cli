@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-from azure.cli.command_modules.dms._client_factory import dms_client_factory, dms_cf_services, dms_cf_skus#, dms_cf_projects
+from azure.cli.command_modules.dms._client_factory import dms_client_factory, dms_cf_services, dms_cf_skus, dms_cf_projects, dms_cf_tasks
 
 from azure.cli.core.commands import CliCommandType
 
@@ -20,9 +20,9 @@ def load_command_table(self, _):
         client_factory=dms_client_factory
     )
 
-    #dms_projects_sdk = CliCommandType(
-    #    operations_tmpl='azure.mgmt.datamigration.operations.projects_operations#ProjectsOperations.{}',
-    #    client_factory=dms_client_factory)
+    dms_projects_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.datamigration.operations.projects_operations#ProjectsOperations.{}',
+        client_factory=dms_client_factory)
     
     dms_tasks_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.datamigration.operations.tasks_operations#TasksOperations.{}',
@@ -43,9 +43,10 @@ def load_command_table(self, _):
     with self.command_group('dms', dms_skus_sdk, client_factory=dms_cf_skus) as g:
         g.command('list-skus', 'list_skus')
 
-    #with self.command_group('dms project', dms_projects_sdk, client_factory=dms_cf_projects) as g:
-    #    g.command('show', 'get')
-    #    g.command('list', 'list')
+    with self.command_group('dms project', dms_projects_sdk, client_factory=dms_cf_projects) as g:
+        g.custom_command('create', 'create_project')
+        g.command('show', 'get')
+        g.command('list', 'list')
 
     with self.command_group('dms task', dms_tasks_sdk, client_factory=dms_cf_tasks) as g:
         #g.custom_command('list', 'list_tasks')
