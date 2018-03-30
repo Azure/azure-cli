@@ -45,6 +45,10 @@ jobs:
       script: ./scripts/ci/test_perf.sh
       env: PURPOSE='Module Load Performance'
       python: 3.6
+    - stage: verify
+      script: ./scripts/ci/test_ref_doc.sh
+      env: PURPOSE='RefDocVerify'
+      python: 3.6
     - stage: publish
       script: ./scripts/ci/publish.sh
       python: 3.6
