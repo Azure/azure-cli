@@ -2187,6 +2187,7 @@ class VMLiveScenarioTest(LiveScenarioTest):
 class VMZoneScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_zone', location='eastus2')
+    @AllowLargeResponse(size_kb=2048)
     def test_vm_create_zones(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -2203,7 +2204,16 @@ class VMZoneScenarioTest(ScenarioTest):
         table_output = set(result.output.splitlines()[2].split())
         self.assertTrue(set([resource_group_location, self.kwargs['zones']]).issubset(table_output))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_zone', location='westus')
+    @AllowLargeResponse(size_kb=2048)
+    def test_vm_error_on_zone_unavailable(self, resource_group, resource_group_location):
+        try:
+            self.cmd('vm create -g {rg} -n vm1 --admin-username clitester --admin-password PasswordPassword1! --image debian --zone 1')
+        except Exception as ex:
+            self.assertTrue('availablity zone is not yet supported' in str(ex))
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
+    @AllowLargeResponse(size_kb=2048)
     def test_vmss_create_single_zone(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -2229,6 +2239,7 @@ class VMZoneScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
+    @AllowLargeResponse(size_kb=2048)
     def test_vmss_create_x_zones(self, resource_group, resource_group_location):
 
         self.kwargs.update({

@@ -726,14 +726,8 @@ def get_vm_details(cmd, resource_group_name, vm_name):
 
 
 def list_skus(cmd, location=None):
-    def _match_location(l, locations):
-        return next((x for x in locations if x.lower() == l.lower()), None)
-
-    client = _compute_client_factory(cmd.cli_ctx)
-    result = client.resource_skus.list()
-    if location:
-        result = [r for r in result if _match_location(location, r.locations)]
-    return result
+    from ._vm_utils import list_sku_info
+    return list_sku_info(cmd.cli_ctx, location)
 
 
 def list_vm(cmd, resource_group_name=None, show_details=False):
