@@ -245,7 +245,7 @@ helps['eventhubs eventhub authorization-rule keys list'] = """
     short-summary: Shows the connection strings of Authorizationrule for the Eventhub.
     examples:
         - name: Shows the connection strings of Authorizationrule for the eventhub.
-          text: az eventhubs eventhub authorization-rule list-keys --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule
+          text: az eventhubs eventhub authorization-rule keys list --resource-group myresourcegroup --namespace-name mynamespace --eventhub-name myeventhub --name myauthorule
 """
 
 helps['eventhubs eventhub authorization-rule keys renew'] = """
