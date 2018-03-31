@@ -11,7 +11,7 @@ from importlib import import_module
 from pkgutil import iter_modules
 
 
-class Linter():
+class Linter(object):
     def __init__(self, command_table=None, help_file_entries=None, loaded_help=None):
         self._command_table = command_table
         self._all_yaml_help = help_file_entries
@@ -20,7 +20,6 @@ class Linter():
         self._command_groups = set()
         self._parameters = {}
         self._help_file_entries = set(help_file_entries.keys())
-        self._exit_code = 0
 
         # get all unsupressed parameters
         for command_name, command in command_table.items():
@@ -37,13 +36,16 @@ class Linter():
                 if command_args:
                     self._command_groups.add(' '.join(command_args))
 
-    def get_commands(self):
+    @property
+    def commands(self):
         return self._commands
 
-    def get_command_groups(self):
+    @property
+    def command_groups(self):
         return self._command_groups
 
-    def get_help_file_entries(self):
+    @property
+    def help_file_entries(self):
         return self._help_file_entries
 
     def get_command_parameters(self, command_name):
@@ -67,49 +69,53 @@ class Linter():
             return self._command_table.get(command_name).arguments.get(parameter_name).type.settings.get('help')
         return param_help.short_summary or param_help.long_summary
 
-    def mark_rule_failure(self):
-        self._exit_code = 1
-
-    def get_exit_code(self):
-        return self._exit_code
-
 
     def _get_loaded_help_description(self, entry):
         return self._loaded_help.get(entry).short_summary or self._loaded_help.get(entry).long_summary
 
 
-class LinterManager():
+class LinterManager(object):
     def __init__(self, command_table=None, help_file_entries=None, loaded_help=None):
         self.linter = Linter(command_table=command_table, help_file_entries=help_file_entries, loaded_help=loaded_help)
         self._exclusions = None
-
         self._rules = {
             'help_file_entries': [],
             'command_groups': [],
             'commands': [],
             'params': []
         }
+        self._exit_code = 0
 
     def get_help_entry_exclusions(self):
-        return self._exclusions.get('help_entries')
+        return self._exclusions.get('help_entries', [])
 
     def get_command_group_exclusions(self):
-        return self._exclusions.get('command_groups')
+        return self._exclusions.get('command_groups', [])
 
     def get_command_exclusions(self):
-        return self._exclusions.get('commands')
+        return self._exclusions.get('commands', [])
 
     def get_parameter_exclusions(self, command_name):
-        return self._exclusions.get('params').get(command_name, {})
+        return self._exclusions.get('params', {}).get(command_name, {})
 
     def add_rule(self, rule_type, rule_callable):
         if rule_type in self._rules:
             self._rules.get(rule_type).append(rule_callable)
 
-    def run(self, run_params=None, run_commands=None, run_command_groups=None, run_help_files_entries=None):
+    def mark_rule_failure(self):
+        self._exit_code = 1
+
+    @property
+    def exit_code(self):
+        return self._exit_code
+
+    def run(self, run_params=None, run_commands=None, run_command_groups=None, run_help_files_entries=None, ci=False):
         paths = import_module('automation.cli_linter.rules').__path__
         exclusion_path = os.path.join(paths[0], 'exclusions.json')
-        self._exclusions = json.load(open(exclusion_path))
+        try:
+            self._exclusions = json.load(open(exclusion_path))
+        except FileNotFoundError:
+            self._exclusions = {}
 
         # find all defined rules and check for name conflicts
         found_rules = set()
@@ -120,35 +126,45 @@ class LinterManager():
                 if hasattr(add_to_linter_func, 'linter_rule'):
                     if rule_name in found_rules:
                         raise Exception('Multiple rules found with the same name: %s' % rule_name)
+                    if ci and hasattr(add_to_linter_func, 'exclude_from_ci'):
+                        continue
                     found_rules.add(rule_name)
                     add_to_linter_func(self)
 
         # run all rule-checks
-        if run_help_files_entries:
+        if run_help_files_entries and self._rules.get('help_file_entries'):
             print('Running Linter on Help File Entries:')
             for callable_rule in self._rules.get('help_file_entries'):
                 callable_rule()
                 print(os.linesep)
 
-        if run_command_groups:
+        if run_command_groups and self._rules.get('command_groups'):
             print('Running Linter on Command Groups:')
             for callable_rule in self._rules.get('command_groups'):
                 callable_rule()
                 print(os.linesep)
 
-        if run_commands:
+        if run_commands and self._rules.get('commands'):
             print('Running Linter on Commands:')
             for callable_rule in self._rules.get('commands'):
                 callable_rule()
                 print(os.linesep)
 
-        if run_params:
+        if run_params and self._rules.get('params'):
             print('Running Linter on Parameters:')
             for callable_rule in self._rules.get('params'):
                 callable_rule()
                 print(os.linesep)
 
-        return self.linter.get_exit_code()
+        return self.exit_code
+
+
+class RuleError(Exception):
+    """
+    Exception thrown by rule violation
+    """
+    pass
+
 
 def _share_element(first_iter, second_iter):
     return any(element in first_iter for element in second_iter)

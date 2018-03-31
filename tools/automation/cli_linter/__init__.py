@@ -24,8 +24,7 @@ def define_arguments(parser):
 
 def main(args):
     from azure.cli.core import get_default_cli
-    from azure.cli.core.util import get_all_help, create_invoker_and_load_cmds_and_args
-    from azure.cli.core.commands.arm import add_id_parameters
+    from azure.cli.core.file_util import get_all_help, create_invoker_and_load_cmds_and_args
 
     print('Initializing linter with command table and help files...')
     # setup CLI to enable command loader
@@ -35,7 +34,6 @@ def main(args):
     create_invoker_and_load_cmds_and_args(az_cli)
     loaded_help = get_all_help(az_cli)
     command_table = az_cli.invocation.commands_loader.command_table
-    add_id_parameters(None, cmd_tbl=command_table)
 
     # format loaded help
     loaded_help = {data.command: data for data in loaded_help if data.command}
@@ -56,7 +54,8 @@ def main(args):
     exit_code = linter_manager.run(run_params='params' in args.rule_types_to_run,
                                    run_commands='commands' in args.rule_types_to_run,
                                    run_command_groups='command_groups' in args.rule_types_to_run,
-                                   run_help_files_entries='help_entries' in args.rule_types_to_run)
+                                   run_help_files_entries='help_entries' in args.rule_types_to_run,
+                                   ci=args.ci)
 
     sys.exit(exit_code)
 
