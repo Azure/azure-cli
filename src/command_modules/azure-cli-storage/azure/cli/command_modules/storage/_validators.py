@@ -5,7 +5,6 @@
 
 # pylint: disable=protected-access
 
-from knack.util import CLIError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_key_value_pairs
 from azure.cli.core.profiles import ResourceType, get_sdk
@@ -79,7 +78,9 @@ def validate_client_parameters(cmd, namespace):
         n.account_name = conn_dict.get('AccountName')
         n.account_key = conn_dict.get('AccountKey')
         if not n.account_name or not n.account_key:
-            raise CLIError('Connection-string: %s, is malformed.' % n.connection_string)
+            from knack.util import CLIError
+            raise CLIError('Connection-string: %s, is malformed. Some shell environments require the '
+                           'connection string to be surrounded by quotes.' % n.connection_string)
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
