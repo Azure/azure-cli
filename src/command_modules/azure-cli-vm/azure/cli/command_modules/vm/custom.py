@@ -1832,10 +1832,6 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
 
     # Handle load balancer creation
     if load_balancer_type == 'new':
-        # Defaults SKU to 'Standard' for zonal scale set
-        if load_balancer_sku is None:
-            load_balancer_sku = 'Standard' if zones else 'Basic'
-
         vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
 
         lb_dependencies = []

@@ -265,8 +265,8 @@ def load_arguments(self, _):
         VMPriorityTypes = self.get_models('VirtualMachinePriorityTypes', resource_type=ResourceType.MGMT_COMPUTE)
         c.argument('name', name_arg_type)
         c.argument('nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
-        c.argument('single_placement_group', default=None, help="Enable single placement group. This flag will default to True if instance count <=100, and default to False for instance count >100.", arg_type=get_enum_type(['true', 'false']))
-        c.argument('platform_fault_domain_count', default=None, type=int, help='Fault Domain count for each placement group', min_api='2017-12-01')
+        c.argument('single_placement_group', default=None, help="Enable replicate using fault domains within the same cluster", arg_type=get_enum_type(['true', 'false']))
+        c.argument('platform_fault_domain_count', default=None, type=int, help='Fault Domain count for each placement group in the availability zone', min_api='2017-12-01')
         c.argument('vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.')
         c.argument('instance_count', help='Number of VMs in the scale set.', type=int)
         c.argument('disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
@@ -287,7 +287,7 @@ def load_arguments(self, _):
         c.argument('backend_port', help='When creating a new load balancer, backend port to open with NAT rules (Defaults to 22 on Linux and 3389 on Windows). When creating an application gateway, the backend port to use for the backend HTTP settings.', type=int)
         c.argument('load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', options_list=['--load-balancer', '--lb'])
         c.argument('load_balancer_sku', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-08-01', options_list=['--lb-sku'], arg_type=get_enum_type(LoadBalancerSkuName),
-                   help="Sku of the Load Balancer to create. Default to 'Standard' when --zones is proivided, or single placement is turned off, or has 100+ instances; and 'Basic' otherwise")
+                   help="Sku of the Load Balancer to create. Default to 'Standard' for zonal or big scale-set, and 'Basic' otherwise")
         c.argument('nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'])
 
     with self.argument_context('vmss create', min_api='2017-03-30', arg_group='Network') as c:

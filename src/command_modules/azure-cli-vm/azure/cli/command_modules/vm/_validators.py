@@ -922,10 +922,6 @@ def process_vm_create_namespace(cmd, namespace):
 
 
 # region VMSS Create Validators
-def _get_vmss_create_instance_threshold():
-    return 100
-
-
 def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_type):
     option_name = '--backend-pool-name'
     client = getattr(get_network_client(cli_ctx), balancer_type, None)
@@ -942,26 +938,26 @@ def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_t
                        "again.".format(option_name))
     return values[0]
 
-def _validate_big_vmss(cmd, namespace):
-    # instance-count > 100 -> single-placement-group == FALSE and STD LB
-    # single-placement-group -> STD LB
-    # zones --> STD LB (singple-placement-group can't be TRUE)
-    # fd count --> STD LB + Zones (singple-placement-group can't be TRUE if FD_count == 1)
-    need_std_lb, need_spg = False, False
+
+def _validate_vmss_single_placement_group(namespace):
+    if namespace.platform_fault_domain_count is not None and namespace.zones is None:
+        raise CLIError('usage error: --platform-fault-domain-count <COUNT> --zones <ZONES>')
+    if namespace.platform_fault_domain_count == 1 or namespace.zones or namespace.instance_count > 100:
+        if namespace.single_placement_group is None:
+            namespace.single_placement_group = 'false'
+        elif namespace.single_placement_group == 'true':
+            raise CLIError("usage error: '--single-placement-group' should be turned off when one of the conditions"
+                           " are met: 1. Zonal, 2. 100+ instances, 3. fault domain count set to 1")
+
+    # convert the single_placement_group to boolean for simpler logic beyond
+    namespace.single_placement_group = (namespace.single_placement_group != 'false')
 
 
 def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
     from msrestazure.azure_exceptions import CloudError
     from msrestazure.tools import parse_resource_id
     from azure.cli.core.profiles import ResourceType
-    INSTANCE_THRESHOLD = _get_vmss_create_instance_threshold()
     std_lb_is_available = cmd.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK)
-
-    # convert the single_placement_group to boolean for simpler logic beyond
-    if namespace.single_placement_group is None:
-        namespace.single_placement_group = namespace.instance_count <= INSTANCE_THRESHOLD
-    else:
-        namespace.single_placement_group = (namespace.single_placement_group == 'true')
 
     if namespace.load_balancer and namespace.application_gateway:
         raise CLIError('incorrect usage: --load-balancer NAME_OR_ID | '
@@ -973,10 +969,9 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
         if std_lb_is_available:
             balancer_type = 'loadBalancer'
         else:
-            balancer_type = 'loadBalancer' if namespace.instance_count <= INSTANCE_THRESHOLD \
-                else 'applicationGateway'
-            logger.debug("W/o STD LB, defaulting to '%s' under because standard LB instance count <= %s",
-                         balancer_type, INSTANCE_THRESHOLD)
+            balancer_type = 'loadBalancer' if namespace.single_placement_group else 'applicationGateway'
+            logger.debug("W/o STD LB, defaulting to '%s' under because single placement group is disabled",
+                         balancer_type)
 
     elif namespace.load_balancer:
         balancer_type = 'loadBalancer'
@@ -1052,12 +1047,13 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
             namespace.load_balancer_type = 'new'
             logger.debug('new load balancer will be created')
 
-        if namespace.load_balancer_type == 'new' and not namespace.load_balancer_sku and std_lb_is_available:
-            if (namespace.instance_count >= INSTANCE_THRESHOLD or
-                    namespace.single_placement_group is False or namespace.zones):
-                PIPSkuName = cmd.get_models('PublicIPAddressSkuName', resource_type=ResourceType.MGMT_NETWORK)
-                namespace.load_balancer_sku = PIPSkuName.standard.value
-                logger.debug("defaulting to Standard Load Balancer as one of the conditions is met")
+        if namespace.load_balancer_type == 'new' and not namespace.single_placement_group and std_lb_is_available:
+            LBSkuName = cmd.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
+            if namespace.load_balancer_sku is None:
+                namespace.load_balancer_sku = LBSkuName.standard.value
+                logger.debug("defaulting to Standard Load Balancer for the big scale-set")
+            elif namespace.load_balancer_sku == LBSkuName.basic.value:
+                raise CLIError("usage error: Standard load balancer is required based on other arguments provided")
 
 
 def get_network_client(cli_ctx):
@@ -1081,12 +1077,7 @@ def process_vmss_create_namespace(cmd, namespace):
     _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
     _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
 
-    if namespace.platform_fault_domain_count == 1:
-        if namespace.single_placement_group is None:
-            namespace.single_placement_group = False
-        elif namespace.single_placement_group:
-            raise CLIError('usage error: with platform fault domain count 1, you must use multiple placement groups')
-
+    _validate_vmss_single_placement_group(namespace)
     _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace)
     _validate_vmss_create_subnet(namespace)
     _validate_vmss_create_public_ip(cmd, namespace)
