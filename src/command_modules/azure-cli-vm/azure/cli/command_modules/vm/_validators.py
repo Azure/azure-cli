@@ -1090,7 +1090,6 @@ def process_vmss_create_namespace(cmd, namespace):
 
     if not namespace.public_ip_per_vm and namespace.vm_domain_name:
         raise CLIError('Usage error: --vm-domain-name can only be used when --public-ip-per-vm is enabled')
-
 # endregion
 
 
