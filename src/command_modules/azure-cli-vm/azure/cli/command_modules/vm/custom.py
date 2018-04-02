@@ -1860,6 +1860,14 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         lb_resource['dependsOn'] = lb_dependencies
         master_template.add_resource(lb_resource)
 
+        # Per https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-overview#nsg
+        if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None:
+            nsg_name = '{}NSG'.format(vmss_name)
+            master_template.add_resource(build_nsg_resource(
+                None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
+            nsg = "[resourceId('Microsoft.Network/networkSecurityGroups', '{}')]".format(nsg_name)
+            vmss_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg_name))
+
     # Or handle application gateway creation
     if app_gateway_type == 'new':
         vmss_dependencies.append('Microsoft.Network/applicationGateways/{}'.format(app_gateway))
@@ -1934,14 +1942,6 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
 
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
-
-    if nsg is None and zones:
-        # Per https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-overview#nsg
-        nsg_name = '{}NSG'.format(vmss_name)
-        master_template.add_resource(build_nsg_resource(
-            None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
-        nsg = "[resourceId('Microsoft.Network/networkSecurityGroups', '{}')]".format(nsg_name)
-        vmss_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg_name))
 
     vmss_resource = build_vmss_resource(cmd, vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,

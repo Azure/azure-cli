@@ -2339,7 +2339,6 @@ class VMZoneScenarioTest(ScenarioTest):
         ])
 
 
-
 class VMRunCommandScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_run_command')
