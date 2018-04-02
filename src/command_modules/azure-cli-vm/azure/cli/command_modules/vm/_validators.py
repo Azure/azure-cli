@@ -942,6 +942,13 @@ def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_t
                        "again.".format(option_name))
     return values[0]
 
+def _validate_big_vmss(cmd, namespace):
+    # instance-count > 100 -> single-placement-group == FALSE and STD LB
+    # single-placement-group -> STD LB
+    # zones --> STD LB (singple-placement-group can't be TRUE)
+    # fd count --> STD LB + Zones (singple-placement-group can't be TRUE if FD_count == 1)
+    need_std_lb, need_spg = False, False
+
 
 def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
     from msrestazure.azure_exceptions import CloudError
@@ -956,18 +963,9 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
     else:
         namespace.single_placement_group = (namespace.single_placement_group == 'true')
 
-    if not namespace.single_placement_group and namespace.load_balancer:
-        raise CLIError(
-            '--load-balancer is not applicable when --single-placement-group is turned off.')
-
     if namespace.load_balancer and namespace.application_gateway:
         raise CLIError('incorrect usage: --load-balancer NAME_OR_ID | '
                        '--application-gateway NAME_OR_ID')
-
-    if namespace.instance_count > INSTANCE_THRESHOLD and namespace.load_balancer:
-        raise CLIError(
-            '--load-balancer cannot be used with --instance_count is > {}'.format(
-                INSTANCE_THRESHOLD))
 
     # Resolve the type of balancer (if any) being used
     balancer_type = 'None'
