@@ -292,6 +292,19 @@ def _validate_managed_disk_sku(sku):
         raise CLIError("invalid storage SKU '{}': allowed values: '{}'".format(sku, allowed_skus))
 
 
+def _validate_location(cmd, namespace, zone_info, size_info):
+    from ._vm_utils import list_sku_info
+    if not namespace.location:
+        get_default_location_from_resource_group(cmd, namespace)
+        if zone_info:
+            sku_infos = list_sku_info(cmd.cli_ctx, namespace.location)
+            temp = next((x for x in sku_infos if x.name.lower() == size_info.lower()), None)
+            if not temp or not [x for x in (temp.location_info or []) if x.zones]:
+                raise CLIError("{}'s location can't be used to create the VM/VMSS because availablity zone is not yet "
+                               "supported. Please use '--location' to specify a capable one. 'az vm list-skus' can be "
+                               "used to find such locations".format(namespace.resource_group_name))
+
+
 # pylint: disable=too-many-branches, too-many-statements
 def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     from msrestazure.tools import parse_resource_id
@@ -886,7 +899,7 @@ def _resolve_role_id(cli_ctx, role, scope):
 
 def process_vm_create_namespace(cmd, namespace):
     validate_tags(namespace)
-    get_default_location_from_resource_group(cmd, namespace)
+    _validate_location(cmd, namespace, namespace.zone, namespace.size)
     validate_asg_names_or_ids(cmd, namespace)
     _validate_vm_create_storage_profile(cmd, namespace)
     if namespace.storage_profile in [StorageProfile.SACustomImage,
@@ -1057,7 +1070,7 @@ def get_network_lb(cli_ctx, resource_group_name, lb_name):
 
 def process_vmss_create_namespace(cmd, namespace):
     validate_tags(namespace)
-    get_default_location_from_resource_group(cmd, namespace)
+    _validate_location(cmd, namespace, namespace.zones, namespace.vm_sku)
     _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=True)
     _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=True)
     _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace)
