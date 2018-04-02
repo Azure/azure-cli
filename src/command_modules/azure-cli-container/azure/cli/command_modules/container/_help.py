@@ -8,7 +8,7 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['container'] = """
     type: group
-    short-summary: (PREVIEW) Manage Azure Container Instances.
+    short-summary: Manage Azure Container Instances.
 """
 
 helps['container create'] = """
