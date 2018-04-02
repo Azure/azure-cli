@@ -67,7 +67,7 @@ DEPENDENCIES = [
     'pyyaml',
     'requests',
     'six',
-    'tabulate==0.7.7',
+    'tabulate>=0.7.7,<=0.8.2',
     'wheel',
 ]
 
