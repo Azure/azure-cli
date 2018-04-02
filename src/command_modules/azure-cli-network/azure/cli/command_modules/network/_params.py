@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 from argcomplete.completers import FilesCompleter
+import argparse
 
 import six
 
@@ -25,7 +26,7 @@ from azure.cli.command_modules.network._validators import \
      validate_private_ip_address,
      get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
      get_network_watcher_from_vm, get_network_watcher_from_location,
-     get_asg_validator, get_vnet_validator, validate_ip_tags)
+     get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.mgmt.trafficmanager.models import MonitorProtocol
 from azure.cli.command_modules.network._completers import (
@@ -308,6 +309,7 @@ def load_arguments(self, _):
     with self.argument_context('network ddos-protection') as c:
         for dest in ['ddos_plan_name', 'ddos_protection_plan_name']:
             c.argument(dest, name_arg_type, help='Name of the DDoS protection plan.', id_part='name')
+        c.argument('vnets', nargs='*', help='Space-separated list of VNets (name or IDs) to associate with the plan.')
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
     # endregion
 
@@ -840,7 +842,8 @@ def load_arguments(self, _):
         c.argument('virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')
         c.argument('vnet_prefixes', nargs='+', help='Space-separated list of IP address prefixes for the VNet.', options_list=('--address-prefixes',), metavar='PREFIX')
         c.argument('dns_servers', nargs='+', help='Space-separated list of DNS server IP addresses.', metavar='IP')
-        c.argument('ddos_protection', arg_type=get_three_state_flag(), help='Enable DDoS protection for protected resources in the VNet.', min_api='2017-09-01')
+        c.argument('ddos_protection', arg_type=get_three_state_flag(), help=argparse.SUPPRESS, min_api='2017-09-01')
+        c.argument('ddos_protection_plan', help='Name or ID of a DDoS protection plan to associate with the VNet.', min_api='2018-02-01', validator=validate_ddos_name_or_id)
         c.argument('vm_protection', arg_type=get_three_state_flag(), help='Enable VM protection for all subnets in the VNet.', min_api='2017-09-01')
 
     with self.argument_context('network vnet create') as c:

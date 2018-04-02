@@ -77,6 +77,18 @@ def get_vnet_validator(dest):
     return _validate_vnet_name_or_id
 
 
+def validate_ddos_name_or_id(cmd, namespace):
+
+    if namespace.ddos_protection_plan:
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        if not is_valid_resource_id(namespace.ddos_protection_plan):
+            namespace.ddos_protection_plan = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network', type='ddosProtectionPlans',
+                name=namespace.ddos_protection_plan
+            )
+
 # pylint: disable=inconsistent-return-statements
 def dns_zone_name_type(value):
     if value:
@@ -666,6 +678,7 @@ def process_tm_endpoint_create_namespace(cmd, namespace):
 
 def process_vnet_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
+    validate_ddos_name_or_id(cmd, namespace)
     validate_tags(namespace)
 
     if namespace.subnet_prefix and not namespace.subnet_name:

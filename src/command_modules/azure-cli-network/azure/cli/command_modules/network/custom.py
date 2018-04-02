@@ -821,7 +821,12 @@ def update_asg(instance, tags=None):
 
 
 # region DdosProtectionPlans
-def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, tags=None):
+def _update_ddos_vnets(cli_ctx, existing_vnets, set_vnets):
+    client = network_client_factory(cli_ctx).virtual_networks
+    pass
+
+
+def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, tags=None, vnets=None):
     client = network_client_factory(cmd.cli_ctx).ddos_protection_plans
     DdosProtectionPlan, SubResource = cmd.get_models('DdosProtectionPlan')
     plan = DdosProtectionPlan(
@@ -832,9 +837,11 @@ def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, ta
     return client.create_or_update(resource_group_name, ddos_plan_name, plan)
 
 
-def update_ddos_plan(instance, tags=None):
+def update_ddos_plan(instance, tags=None, vnets=None):
     if tags is not None:
         instance.tags = tags
+    if vnets is not None:
+        pass
     return instance
 
 
@@ -2733,9 +2740,10 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 # pylint: disable=too-many-locals
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
-                location=None, tags=None, vm_protection=None, ddos_protection=None):
-    AddressSpace, DhcpOptions, Subnet, VirtualNetwork = \
-        cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork')
+                location=None, tags=None, vm_protection=None, ddos_protection=None,
+                ddos_protection_plan=None):
+    AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource = \
+        cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).virtual_networks
     tags = tags or {}
 
@@ -2748,13 +2756,16 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
     if cmd.supported_api_version(min_api='2017-09-01'):
         vnet.enable_ddos_protection = ddos_protection
         vnet.enable_vm_protection = vm_protection
+    if cmd.supported_api_version(min_api='2018-02-01'):
+        vnet.ddos_protection_plan = SubResource(id=ddos_protection_plan) if ddos_protection_plan else None
     return client.create_or_update(resource_group_name, vnet_name, vnet)
 
 
-def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None):
+def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None,
+                ddos_protection_plan=None):
     # server side validation reports pretty good error message on invalid CIDR,
     # so we don't validate at client side
-    AddressSpace, DhcpOptions = cmd.get_models('AddressSpace', 'DhcpOptions')
+    AddressSpace, DhcpOptions, SubResource = cmd.get_models('AddressSpace', 'DhcpOptions', 'SubResource')
     if vnet_prefixes and instance.address_space:
         instance.address_space.address_prefixes = vnet_prefixes
     elif vnet_prefixes:
@@ -2771,6 +2782,10 @@ def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protec
         instance.enable_ddos_protection = ddos_protection
     if vm_protection is not None:
         instance.enable_vm_protection = vm_protection
+    if ddos_protection_plan is '':
+        instance.ddos_protection_plan = None
+    elif ddos_protection_plan is not None:
+        instance.ddos_protection_plan = SubResource(id=ddos_protection_plan)
     return instance
 
 
