@@ -451,6 +451,12 @@ def process_ag_http_settings_create_namespace(cmd, namespace):  # pylint: disabl
     if namespace.probe and not is_valid_resource_id(namespace.probe):
         namespace.probe = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'probes', namespace.probe)
+    if namespace.auth_certs:
+        def _validate_name_or_id(val):
+            return val if is_valid_resource_id(val) else _generate_ag_subproperty_id(
+                cmd.cli_ctx, namespace, 'authenticationCertificates', val)
+        namespace.auth_certs = [_validate_name_or_id(x) for x in namespace.auth_certs]
+
 
 
 def process_ag_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-argument

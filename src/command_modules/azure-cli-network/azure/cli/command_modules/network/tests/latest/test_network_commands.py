@@ -176,6 +176,28 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway list --resource-group {rg}', checks=self.check('length(@)', ag_count - 1))
 
 
+class NetworkAppGatewayAuthCertScenario(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_auth_cert')
+    def test_network_ag_auth_cert(self, resource_group):
+        self.kwargs.update({
+            'gateway': 'ag1',
+            'cert1': 'cert1',
+            'cert1_file': 'AuthCert.pfx',
+            'cert2': 'cert2',
+            'cert2_file': 'AuthCert2.pfx',
+            'settings': 'https_settings'
+        })
+        self.cmd('network application-gateway create -g {rg} -n {gateway} --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
+        self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file {cert1_file} --no-wait')
+        self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file {cert2_file} --no-wait')
+        self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {gateway} -n {settings} --auth-certs {cert1} {cert2} --no-wait --port 443 --protocol https')
+        self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --auth-certs {cert2} {cert1} --no-wait')
+        self.cmd('network application-gateway show -g {rg} -n {gateway}',
+                 checks=self.check('length(backendHttpSettingsCollection[1].authenticationCertificates)', 2))
+
+
 class NetworkAppGatewayRedirectConfigScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_basic')

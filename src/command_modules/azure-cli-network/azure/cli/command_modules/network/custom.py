@@ -360,7 +360,8 @@ def create_ag_backend_http_settings_collection(cmd, resource_group_name, applica
                                                probe=None, protocol='http', cookie_based_affinity=None, timeout=None,
                                                no_wait=False, connection_draining_timeout=0,
                                                host_name=None, host_name_from_backend_pool=None,
-                                               affinity_cookie_name=None, enable_probe=None, path=None):
+                                               affinity_cookie_name=None, enable_probe=None, path=None,
+                                               auth_certs=None):
     ApplicationGatewayBackendHttpSettings, ApplicationGatewayConnectionDraining, SubResource = cmd.get_models(
         'ApplicationGatewayBackendHttpSettings', 'ApplicationGatewayConnectionDraining', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -372,6 +373,8 @@ def create_ag_backend_http_settings_collection(cmd, resource_group_name, applica
         request_timeout=timeout,
         probe=SubResource(id=probe) if probe else None,
         name=item_name)
+    if cmd.supported_api_version(min_api='2016-09-01'):
+        new_settings.authentication_certificates = [SubResource(id=x) for x in auth_certs or []]
     if cmd.supported_api_version(min_api='2016-12-01'):
         new_settings.connection_draining = \
             ApplicationGatewayConnectionDraining(
@@ -391,8 +394,13 @@ def update_ag_backend_http_settings_collection(cmd, instance, parent, item_name,
                                                cookie_based_affinity=None, timeout=None,
                                                connection_draining_timeout=None,
                                                host_name=None, host_name_from_backend_pool=None,
-                                               affinity_cookie_name=None, enable_probe=None, path=None):
+                                               affinity_cookie_name=None, enable_probe=None, path=None,
+                                               auth_certs=None):
     SubResource = cmd.get_models('SubResource')
+    if auth_certs == "":
+        instance.authentication_certificates = None
+    elif auth_certs is not None:
+        instance.authentication_certificates = [SubResource(id=x) for x in auth_certs]
     if port is not None:
         instance.port = port
     if probe is not None:
