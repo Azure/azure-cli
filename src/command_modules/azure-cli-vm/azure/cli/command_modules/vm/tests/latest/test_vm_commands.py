@@ -1505,6 +1505,23 @@ class VMSSCreateBalancerOptionsTest(ScenarioTest):  # pylint: disable=too-many-i
         self.cmd('network lb create -g {rg} -n {lb} --backend-pool-name test')
         self.cmd('vmss create -g {rg} -n {vmss} --load-balancer {lb} --image UbuntuLTS --admin-username clitester --admin-password TestTest12#$')
 
+    @ResourceGroupPreparer()
+    def test_vmss_single_placement_group_default_to_std_lb(self, resource_group):
+        self.kwargs.update({
+            'vmss': 'vmss123'
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --admin-username clitester --admin-password PasswordPassword1! --image debian --single-placement-group false')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('singlePlacementGroup', False)
+        ])
+
+        self.cmd('network lb list -g {rg}', checks=[
+            self.check('[0].sku.name', 'Standard')
+        ])
+        self.cmd('network public-ip list -g {rg}', checks=[
+            self.check('[0].sku.name', 'Standard')
+        ])
+
 
 class VMSSCreatePublicIpPerVm(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
@@ -2299,6 +2316,28 @@ class VMZoneScenarioTest(ScenarioTest):
         result = self.cmd('disk list -g {rg} -otable')
         table_output = set(result.output.splitlines()[2].split())
         self.assertTrue(set([resource_group, resource_group_location, self.kwargs['disk'], self.kwargs['zones']]).issubset(table_output))
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
+    @AllowLargeResponse(size_kb=2048)
+    def test_vmss_create_zonal_with_fd(self, resource_group, resource_group_location):
+
+        self.kwargs.update({
+            'zones': '2',
+            'vmss': 'vmss123'
+        })
+        self.cmd('vmss create -g {rg} -n {vmss} --admin-username clitester --admin-password PasswordPassword1! --image debian --zones {zones} --platform-fault-domain-count 1')
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('singlePlacementGroup', False)
+        ])
+
+        self.cmd('network lb list -g {rg}', checks=[
+            self.check('[0].sku.name', 'Standard')
+        ])
+        self.cmd('network public-ip list -g {rg}', checks=[
+            self.check('[0].sku.name', 'Standard'),
+            self.check('[0].zones', ['2'])
+        ])
+
 
 
 class VMRunCommandScenarioTest(ScenarioTest):
