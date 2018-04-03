@@ -7,17 +7,14 @@ from ..rule_decorators import command_rule, exclude_from_ci
 from ..linter import RuleError
 
 
-@command_rule('Checking missing help for commands...')
+@command_rule
 def missing_command_help_rule(linter, command_name):
     if not linter.get_command_help(command_name):
         raise RuleError('Missing help')
-        # print('--Command: `%s`- Missing help.' % command_name)
-        # linter.mark_rule_failure()
 
 
 @exclude_from_ci
-@command_rule('Checking for --ids parameter in list commands...')
+@command_rule
 def no_ids_for_list_commands_rule(linter, command_name):
     if command_name.split()[-1] == 'list' and 'ids' in linter.get_command_parameters(command_name):
         raise RuleError('List commands should not expose --ids argument')
-        # print('--Command: `%s`- List commands should not expose --ids argument.' % command_name)

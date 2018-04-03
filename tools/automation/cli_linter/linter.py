@@ -134,29 +134,27 @@ class LinterManager(object):
         # run all rule-checks
         if run_help_files_entries and self._rules.get('help_file_entries'):
             print('Running Linter on Help File Entries:')
-            for callable_rule in self._rules.get('help_file_entries'):
-                callable_rule()
-                print(os.linesep)
+            self._run_rules('help_file_entries')
 
         if run_command_groups and self._rules.get('command_groups'):
             print('Running Linter on Command Groups:')
-            for callable_rule in self._rules.get('command_groups'):
-                callable_rule()
-                print(os.linesep)
+            self._run_rules('command_groups')
 
         if run_commands and self._rules.get('commands'):
             print('Running Linter on Commands:')
-            for callable_rule in self._rules.get('commands'):
-                callable_rule()
-                print(os.linesep)
+            self._run_rules('commands')
 
         if run_params and self._rules.get('params'):
             print('Running Linter on Parameters:')
-            for callable_rule in self._rules.get('params'):
-                callable_rule()
-                print(os.linesep)
+            self._run_rules('params')
 
         return self.exit_code
+
+    def _run_rules(self, rule_group):
+        for callable_rule in self._rules.get(rule_group):
+            for violation_msg in sorted(callable_rule()):
+                print(violation_msg)
+            print(os.linesep)
 
 
 class RuleError(Exception):

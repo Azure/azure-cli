@@ -20,6 +20,7 @@ def define_arguments(parser):
                         help='Run linter on command groups.')
     parser.add_argument('--help-file-entries', dest='rule_types_to_run', action='append_const', const='help_entries',
                         help='Run linter on help-file-entries.')
+    parser.add_argument('--modules', dest='modules', action='append', help='The modules on which the linter should run.')
 
 
 def main(args):
