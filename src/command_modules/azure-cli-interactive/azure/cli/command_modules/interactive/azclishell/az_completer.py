@@ -140,8 +140,13 @@ class AzCompleter(Completer):
         if not self.started:
             return
 
-        text = document.text_before_cursor
-        text = self.reformat_cmd(text)
+        text = self.reformat_cmd(document.text_before_cursor)
+        event_payload = {
+            'text': text
+        }
+        self.shell_ctx.cli_ctx.raise_event(EVENT_INTERACTIVE_PRE_SUB_TREE_CREATE, event_payload=event_payload)
+        # Reload various attributes from event_payload
+        text = event_payload.get('text', text)
         text_split = text.split()
         self.unfinished_word = ''
         new_word = text and text[-1].isspace()
@@ -149,7 +154,6 @@ class AzCompleter(Completer):
             self.unfinished_word = text_split[-1]
             text_split = text_split[:-1]
 
-        self.shell_ctx.cli_ctx.raise_event(EVENT_INTERACTIVE_PRE_SUB_TREE_CREATE, text_split=text_split)
         self.subtree, self.current_command, self.leftover_args = self.command_tree.get_sub_tree(text_split)
         self.shell_ctx.cli_ctx.raise_event(EVENT_INTERACTIVE_POST_SUB_TREE_CREATE, subtree=self.subtree)
         self.complete_command = not self.subtree.children
@@ -161,7 +165,7 @@ class AzCompleter(Completer):
             yield comp
 
         if self.complete_command and self.cmdtab and self.leftover_args and self.leftover_args[-1].startswith('-'):
-            for comp in sort_completions(self.gen_dynamic_completions(text_split)):
+            for comp in sort_completions(self.gen_dynamic_completions(text)):
                 yield comp
 
     def gen_enum_completions(self, arg_name):
@@ -196,11 +200,9 @@ class AzCompleter(Completer):
         return parse_args
 
     # pylint: disable=too-many-branches
-    def gen_dynamic_completions(self, text_split):
+    def gen_dynamic_completions(self, text):
         """ generates the dynamic values, like the names of resource groups """
         try:  # pylint: disable=too-many-nested-blocks
-            args = ' '.join(text_split)
-            args += ' {}'.format(self.unfinished_word) if self.unfinished_word else ''
             param = self.leftover_args[-1]
 
             # command table specific name
@@ -209,7 +211,7 @@ class AzCompleter(Completer):
             for comp in self.gen_enum_completions(arg_name):
                 yield comp
 
-            parsed_args = self.mute_parse_args(args)
+            parsed_args = self.mute_parse_args(text)
 
             # there are 3 formats for completers the cli uses
             # this try catches which format it is
