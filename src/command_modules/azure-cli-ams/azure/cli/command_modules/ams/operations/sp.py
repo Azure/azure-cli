@@ -169,7 +169,6 @@ def _create_role_assignment(cli_ctx, role, assignee_object_id, scope):
 
     role_id = _resolve_role_id(role, scope, definitions_client)
 
-
     from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
     parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=assignee_object_id)
 

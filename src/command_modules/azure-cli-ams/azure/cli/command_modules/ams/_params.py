@@ -106,16 +106,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('priority', arg_type=get_enum_type(Priority),
                    help='The priority with which the job should be processed.')
         c.argument('description', help='The job description.')
-        c.argument('input_asset_name', help='The name of the input asset.')
-        c.argument('output_asset_names', nargs='+', help='Space-separated list of output asset names.')
-        c.argument('base_uri', help="""Base uri for http job input. It will be concatenated with provided file names.
-                                 If no base uri is given,
-                                 then the provided file list is assumed to be fully qualified uris.""")
+        c.argument('input_asset_name',
+                   arg_group='Asset Job Input',
+                   help='The name of the input asset.')
+        c.argument('output_asset_names',
+                   nargs='+', help='Space-separated list of output asset names.')
+        c.argument('base_uri',
+                   arg_group='Http Job Input',
+                   help='Base uri for http job input. It will be concatenated with provided file names. If no base uri is given, then the provided file list is assumed to be fully qualified uris.')
         c.argument('files',
                    nargs='+',
-                   help="""Space-separated list of files.
-                                 It can be used to tell the service
-                                 to only use the files specified from the input asset.""")
+                   help='Space-separated list of files. It can be used to tell the service to only use the files specified from the input asset.')
 
     with self.argument_context('ams job cancel') as c:
         c.argument('delete', help='Delete the job being cancelled.')
