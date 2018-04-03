@@ -30,3 +30,15 @@ def create_job(client, resource_group_name, account_name, transform_name, job_na
     job = Job(input=job_input, outputs=job_outputs, description=description, priority=priority)
 
     return client.create_or_update(resource_group_name, account_name, transform_name, job_name, job)
+
+
+def cancel_job(client, resource_group_name, account_name,
+               transform_name, job_name, delete=False):
+    cancel_result = client.cancel_job(resource_group_name, account_name,
+                                      transform_name, job_name)
+
+    if delete:
+        return client.delete(resource_group_name, account_name,
+                             transform_name, job_name)
+
+    return cancel_result

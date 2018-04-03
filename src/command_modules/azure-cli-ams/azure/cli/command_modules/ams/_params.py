@@ -115,3 +115,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('files', help="""List of files. It can be used to tell the service to only use
                                 the files specified from the input asset.
                                 File names must be comma-separated and must not contain any spaces.""")
+
+    with self.argument_context('ams job cancel') as c:
+        c.argument('delete', help='Delete the job being cancelled.')
