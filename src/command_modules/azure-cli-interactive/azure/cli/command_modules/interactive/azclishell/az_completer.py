@@ -240,7 +240,7 @@ class AzCompleter(Completer):
             for param in self.command_param_info.get(self.current_command, []):
                 if self.validate_param_completion(param, self.leftover_args):
                     yield self.yield_param_completion(param, self.unfinished_word)
-        else:
+        elif not self.leftover_args:
             for child_command in self.subtree.children:
                 if self.validate_completion(child_command):
                     yield Completion(child_command, -len(self.unfinished_word))
