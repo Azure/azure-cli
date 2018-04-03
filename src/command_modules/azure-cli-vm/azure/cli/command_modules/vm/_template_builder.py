@@ -774,8 +774,6 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     if secrets:
         os_profile['secrets'] = secrets
 
-    if single_placement_group is None:  # this should never happen, but just in case
-        raise ValueError('single_placement_group was not set by validators')
     # Build VMSS
     nic_config = {
         'name': nic_name,

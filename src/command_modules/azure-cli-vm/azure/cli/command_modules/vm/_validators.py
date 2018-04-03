@@ -941,16 +941,13 @@ def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_t
 
 def _validate_vmss_single_placement_group(namespace):
     if namespace.platform_fault_domain_count is not None and namespace.zones is None:
-        raise CLIError('usage error: --platform-fault-domain-count <COUNT> --zones <ZONES>')
+        raise CLIError('usage error: --platform-fault-domain-count COUNT --zones ZONES')
     if namespace.platform_fault_domain_count == 1 or namespace.zones or namespace.instance_count > 100:
         if namespace.single_placement_group is None:
-            namespace.single_placement_group = 'false'
-        elif namespace.single_placement_group == 'true':
+            namespace.single_placement_group = False
+        elif namespace.single_placement_group is True:
             raise CLIError("usage error: '--single-placement-group' should be turned off when one of the conditions"
-                           " are met: 1. Zonal, 2. 100+ instances, 3. fault domain count set to 1")
-
-    # convert the single_placement_group to boolean for simpler logic beyond
-    namespace.single_placement_group = (namespace.single_placement_group != 'false')
+                           " are met: 1. zonal, 2. 100+ instances, 3. fault domain count set to 1")
 
 
 def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
@@ -968,8 +965,8 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
     if namespace.load_balancer is None and namespace.application_gateway is None:
         if std_lb_is_available:
             balancer_type = 'loadBalancer'
-        else:
-            balancer_type = 'loadBalancer' if namespace.single_placement_group else 'applicationGateway'
+        else:  # mainly for Azure stack users
+            balancer_type = 'loadBalancer' if namespace.single_placement_group is not False else 'applicationGateway'
             logger.debug("W/o STD LB, defaulting to '%s' under because single placement group is disabled",
                          balancer_type)
 
@@ -1047,13 +1044,15 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
             namespace.load_balancer_type = 'new'
             logger.debug('new load balancer will be created')
 
-        if namespace.load_balancer_type == 'new' and not namespace.single_placement_group and std_lb_is_available:
+        if namespace.load_balancer_type == 'new' and namespace.single_placement_group is False and std_lb_is_available:
             LBSkuName = cmd.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
             if namespace.load_balancer_sku is None:
                 namespace.load_balancer_sku = LBSkuName.standard.value
-                logger.debug("defaulting to Standard Load Balancer for the big scale-set")
+                logger.debug("use Standard sku as single placement group is turned off")
             elif namespace.load_balancer_sku == LBSkuName.basic.value:
-                raise CLIError("usage error: Standard load balancer is required based on other arguments provided")
+                raise CLIError("usage error: 'Standard' load balancer is required because 'single placement group' is "
+                               "turned off to accomodate zonal scale-sets, or with 100+ instances, or Fault Domain "
+                               "count is set to 1")
 
 
 def get_network_client(cli_ctx):

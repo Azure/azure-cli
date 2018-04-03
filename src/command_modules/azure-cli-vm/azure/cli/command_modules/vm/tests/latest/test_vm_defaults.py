@@ -339,7 +339,7 @@ class TestBigVMSSDefaults(unittest.TestCase):
         ns = argparse.Namespace()
         self._set_up_ns(ns)
         _validate_vmss_single_placement_group(ns)
-        self.assertEqual(ns.single_placement_group, True)
+        self.assertEqual(ns.single_placement_group, None)
 
         # disable on any zonal scale-set
         ns = argparse.Namespace()
@@ -369,16 +369,14 @@ class TestBigVMSSDefaults(unittest.TestCase):
         self._set_up_ns(ns)
         ns.zones = ['1']
         ns.single_placement_group = True
-        _validate_vmss_single_placement_group(ns)
-        self.assertRaises(CLIError)
+        self.assertRaises(CLIError, _validate_vmss_single_placement_group, ns)
 
-        # can't enable it with bit scale-set
+        # can't enable it with big scale-set
         ns = argparse.Namespace()
         self._set_up_ns(ns)
-        ns.instancc_count = 101
+        ns.instance_count = 101
         ns.single_placement_group = True
-        _validate_vmss_single_placement_group(ns)
-        self.assertRaises(CLIError)
+        self.assertRaises(CLIError, _validate_vmss_single_placement_group, ns)
 
     def test_vmss_default_std_lb(self):
         cmd = mock.MagicMock()
@@ -399,14 +397,12 @@ class TestBigVMSSDefaults(unittest.TestCase):
 
         # error on conflicts
         ns = argparse.Namespace()
-        cmd = mock.MagicMock()
         ns.load_balancer, ns.application_gateway = None, None
         ns.app_gateway_subnet_address_prefix, ns.application_gateway = None, None
         ns.app_gateway_sku, ns.app_gateway_capacity = None, None
         ns.load_balancer_sku = 'Basic'
         ns.single_placement_group = False
-        _validate_vmss_create_load_balancer_or_app_gateway(cmd, ns)
-        self.assertRaises(CLIError)
+        self.assertRaises(CLIError, _validate_vmss_create_load_balancer_or_app_gateway, cmd, ns)
 
 
 if __name__ == '__main__':
