@@ -283,7 +283,8 @@ def list_available_extensions(index_url=None, show_details=False):
         installed = False
         if name in installed_extension_names:
             installed = True
-            if parse_version(latest['metadata']['version']) > parse_version(get_extension(name).version):
+            ext_version = get_extension(name).version
+            if ext_version and parse_version(latest['metadata']['version']) > parse_version(ext_version):
                 installed = str(True) + ' (upgrade available)'
         results.append({
             'name': name,
