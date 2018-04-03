@@ -9,7 +9,7 @@ import os
 from prompt_toolkit.completion import Completer, Completion
 from azure.cli.core.parser import AzCliCommandParser
 from azure.cli.command_modules.interactive.events import (
-    EVENT_INTERACTIVE_PRE_SUB_TREE_CREATE,
+    EVENT_INTERACTIVE_PRE_COMPLETER_TEXT_PARSING,
     EVENT_INTERACTIVE_POST_SUB_TREE_CREATE
 )
 from . import configuration
@@ -144,7 +144,7 @@ class AzCompleter(Completer):
         event_payload = {
             'text': text
         }
-        self.shell_ctx.cli_ctx.raise_event(EVENT_INTERACTIVE_PRE_SUB_TREE_CREATE, event_payload=event_payload)
+        self.shell_ctx.cli_ctx.raise_event(EVENT_INTERACTIVE_PRE_COMPLETER_TEXT_PARSING, event_payload=event_payload)
         # Reload various attributes from event_payload
         text = event_payload.get('text', text)
         text_split = text.split()
