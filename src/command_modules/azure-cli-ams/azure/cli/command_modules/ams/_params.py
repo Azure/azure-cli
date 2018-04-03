@@ -102,7 +102,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('job_name', name_arg_type, id_part='child_name_2',
                    help='The name of the job.')
 
-    with self.argument_context('ams job create') as c:
+    with self.argument_context('ams job start') as c:
         c.argument('priority', arg_type=get_enum_type(Priority),
                    help='The priority with which the job should be processed.')
         c.argument('description', help='The job description.')

@@ -71,5 +71,5 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.command('list', 'list')
         g.command('delete', 'delete')
         g.command('cancel', 'cancel_job')
-        g.custom_command('create', 'create_job',
+        g.custom_command('start', 'create_job',
                          custom_command_type=get_custom_sdk('job', get_jobs_client))
