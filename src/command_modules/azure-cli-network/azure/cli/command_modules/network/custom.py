@@ -842,6 +842,7 @@ def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, ta
         location=location,
         tags=tags
     )
+    # TODO: Implement logic for VNets
     return client.create_or_update(resource_group_name, ddos_plan_name, plan)
 
 
@@ -849,6 +850,7 @@ def update_ddos_plan(instance, tags=None, vnets=None):
     if tags is not None:
         instance.tags = tags
     if vnets is not None:
+        # TODO: Implement logic for VNets
         pass
     return instance
 
