@@ -26,7 +26,7 @@ SERVER_NAME_MAX_LENGTH = 63
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine_type='mysql', engine_parameter_name='database_engine',
-                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='brazilsouth',
+                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='westus',
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  sku_name='GP_Gen4_2'):
@@ -84,63 +84,74 @@ class ServerMgmtScenarioTest(ScenarioTest):
         edition = 'GeneralPurpose'
         old_cu = 2
         new_cu = 4
-        family = 'Gen4'
+        family = 'Gen5'
         skuname = '{}_{}_{}'.format("GP", family, old_cu)
-
-        rg = resource_group_1
-        loc = 'brazilsouth'
+        loc = 'westus'
+        
+        geoGeoRedundantBackup = 'Disabled'
+        geoBackupRetention = 20
+        geoloc = 'westus2'
 
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
                  '--admin-user {} --admin-password {} '
-                 '--sku-name {} --tags key=1'
-                 .format(database_engine, rg, servers[0], loc,
-                         admin_login, admin_passwords[0], skuname),
+                 '--sku-name {} --tags key=1 --geo-redundant-backup {} '
+                 '--backup-retention {}'
+                 .format(database_engine, resource_group_1, servers[0], loc,
+                         admin_login, admin_passwords[0], skuname,
+                         geoRedundantBackup, backupRetention),
                  checks=[
                      JMESPathCheck('name', servers[0]),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', admin_login),
                      JMESPathCheck('sslEnforcement', 'Enabled'),
                      JMESPathCheck('tags.key', '1'),
                      JMESPathCheck('sku.capacity', old_cu),
-                     JMESPathCheck('sku.tier', edition)])
+                     JMESPathCheck('sku.tier', edition),
+                     JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
+                     JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)])
 
         # test show server
         result = self.cmd('{} server show -g {} --name {}'
-                          .format(database_engine, rg, servers[0]),
+                          .format(database_engine, resource_group_1, servers[0]),
                           checks=[
                               JMESPathCheck('name', servers[0]),
+                              JMESPathCheck('resourceGroup', resource_group_1),
                               JMESPathCheck('administratorLogin', admin_login),
+                              JMESPathCheck('sslEnforcement', 'Enabled'),
+                              JMESPathCheck('tags.key', '1'),
                               JMESPathCheck('sku.capacity', old_cu),
-                              JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
+                              JMESPathCheck('sku.tier', edition),
+                              JMESPathCheck('storageProfile.backupRetentionDays', backupRetention),
+                              JMESPathCheck('storageProfile.geoRedundantBackup', geoRedundantBackup)]).get_output_in_json()  # pylint: disable=line-too-long
 
         # test update server
         self.cmd('{} server update -g {} --name {} --admin-password {} '
                  '--ssl-enforcement Disabled --tags key=2'
-                 .format(database_engine, rg, servers[0], admin_passwords[1]),
+                 .format(database_engine, resource_group_1, servers[0], admin_passwords[1]),
                  checks=[
                      JMESPathCheck('name', servers[0]),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('sslEnforcement', 'Disabled'),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('tags.key', '2'),
                      JMESPathCheck('administratorLogin', admin_login)])
 
         self.cmd('{} server update -g {} --name {} --vcore {}'
-                 .format(database_engine, rg, servers[0], new_cu),
+                 .format(database_engine, resource_group_1, servers[0], new_cu),
                  checks=[
                      JMESPathCheck('name', servers[0]),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('sku.capacity', new_cu),
                      JMESPathCheck('administratorLogin', admin_login)])
 
         # test show server
         self.cmd('{} server show -g {} --name {}'
-                 .format(database_engine, rg, servers[0]),
+                 .format(database_engine, resource_group_1, servers[0]),
                  checks=[
                      JMESPathCheck('name', servers[0]),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('sslEnforcement', 'Disabled'),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('sku.capacity', new_cu),
@@ -149,28 +160,28 @@ class ServerMgmtScenarioTest(ScenarioTest):
 
         # test update server per property
         self.cmd('{} server update -g {} --name {} --vcore {}'
-                 .format(database_engine, rg, servers[0], old_cu),
+                 .format(database_engine, resource_group_1, servers[0], old_cu),
                  checks=[
                      JMESPathCheck('name', servers[0]),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('sku.capacity', old_cu),
                      JMESPathCheck('administratorLogin', admin_login)])
 
         self.cmd('{} server update -g {} --name {} --ssl-enforcement Enabled'
-                 .format(database_engine, rg, servers[0]),
+                 .format(database_engine, resource_group_1, servers[0]),
                  checks=[
                      JMESPathCheck('name', servers[0]),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('sslEnforcement', 'Enabled'),
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('administratorLogin', admin_login)])
 
         self.cmd('{} server update -g {} --name {} --tags key=3'
-                 .format(database_engine, rg, servers[0]),
+                 .format(database_engine, resource_group_1, servers[0]),
                  checks=[
                      JMESPathCheck('name', servers[0]),
-                     JMESPathCheck('resourceGroup', rg),
+                     JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('sslEnforcement', 'Enabled'),
                      JMESPathCheck('tags.key', '3'),
                      JMESPathCheck('sku.tier', edition),
@@ -191,6 +202,22 @@ class ServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('sku.tier', edition),
                      JMESPathCheck('administratorLogin', admin_login)])
 
+        # test georestore server
+        with self.assertRaises(CLIError) as exception:
+            self.cmd('{} server georestore -g {} --name {} --source-server {} -l {} '
+                     '--geo-redundant-backup {} --backup-retention {}'
+                     .format(database_engine, resource_group_2, servers[2], result['id'],
+                             geoloc, geoGeoRedundantBackup, geoBackupRetention),
+                     checks=[
+                         JMESPathCheck('name', servers[2]),
+                         JMESPathCheck('resourceGroup', resource_group_2),
+                         JMESPathCheck('sku.tier', edition),
+                         JMESPathCheck('administratorLogin', admin_login),
+                         JMESPathCheck('location', geoloc),
+                         JMESPathCheck('storageProfile.backupRetentionDays', geoBackupRetention),
+                         JMESPathCheck('storageProfile.geoRedundantBackup', geoGeoRedundantBackup)])
+        self.assertTrue(' does not have the server ' in '{}'.format(exception.exception))
+
         # test list servers
         self.cmd('{} server list -g {}'.format(database_engine, resource_group_2),
                  checks=[JMESPathCheck('type(@)', 'array')])
@@ -201,12 +228,13 @@ class ServerMgmtScenarioTest(ScenarioTest):
 
         # test delete server
         self.cmd('{} server delete -g {} --name {} --yes'
-                 .format(database_engine, rg, servers[0]), checks=NoneCheck())
+                 .format(database_engine, resource_group_1, servers[0]), checks=NoneCheck())
         self.cmd('{} server delete -g {} -n {} --yes'
                  .format(database_engine, resource_group_2, servers[1]), checks=NoneCheck())
 
         # test list server should be 0
-        self.cmd('{} server list -g {}'.format(database_engine, rg), checks=[NoneCheck()])
+        self.cmd('{} server list -g {}'.format(database_engine, resource_group_1), checks=[NoneCheck()])
+        self.cmd('{} server list -g {}'.format(database_engine, resource_group_2), checks=[NoneCheck()])
 
 
 class ProxyResourcesMgmtScenarioTest(ScenarioTest):

@@ -62,12 +62,10 @@ def _server_restore(cmd, client, resource_group_name, server_name, source_server
     if provider == 'Microsoft.DBForMySQL':
         from azure.mgmt.rdbms import mysql
         parameters = mysql.models.ServerForCreate(
-            sku=mysql.models.Sku(name=sku_name),
             properties=mysql.models.ServerPropertiesForRestore())
     elif provider == 'Microsoft.DBforPostgreSQL':
         from azure.mgmt.rdbms import postgresql
         parameters = postgresql.models.ServerForCreate(
-            sku=mysql.models.Sku(name=sku_name),
             properties=postgresql.models.ServerPropertiesForRestore())
 
     if not is_valid_resource_id(source_server):
