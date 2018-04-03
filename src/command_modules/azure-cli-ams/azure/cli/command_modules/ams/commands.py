@@ -61,7 +61,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.command('show', 'get')
         g.command('list', 'list')
         g.command('delete', 'delete')
-        g.command('get-sas-urls', 'list_container_sas')
+        g.custom_command('get-sas-urls', 'get_sas_urls',
+                         custom_command_type=get_custom_sdk('asset', get_assets_client))
         g.custom_command('create', 'create_asset',
                          custom_command_type=get_custom_sdk('asset', get_assets_client))
 

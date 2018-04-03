@@ -215,7 +215,7 @@ class AmsTests(ScenarioTest):
         ])
 
         self.cmd('az ams asset get-sas-urls -a {amsname} -n {assetName} -g {rg}', checks=[
-            self.check('length(assetContainerSasUrls)', 2)
+            self.check('length(@)', 2)
         ])
 
     @ResourceGroupPreparer()
