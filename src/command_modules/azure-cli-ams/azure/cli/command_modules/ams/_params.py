@@ -11,6 +11,8 @@ from azure.cli.command_modules.role._completers import get_role_definition_name_
 
 from azure.mediav3.models import (EncoderNamedPreset, Priority, AssetContainerPermission)
 
+from ._validators import storage_account_id
+
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
@@ -28,16 +30,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams account create') as c:
         c.argument('storage_account', storage_account_arg_type,
-                   help="""The name of the primary storage account to attach to the Azure Media Services account.
-                   Blob only accounts are not allowed as primary.""")
+                   help="""The name or resource ID of the primary storage account to attach to the Azure Media Services account.
+                                Blob only accounts are not allowed as primary.""",
+                   validator=storage_account_id)
         c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('ams storage') as c:
         c.argument('account_name', account_name_arg_type,
                    help='The name of the Azure Media Services account within the resource group.')
         c.argument('storage_account', name_arg_type,
-                   help="""The name of the secondary storage account to detach
-                  from the Azure Media Services account.""")
+                   help="""The name or resource ID of the secondary storage account to detach
+                  from the Azure Media Services account.""",
+                  validator=storage_account_id)
 
     with self.argument_context('ams sp create') as c:
         c.argument('account_name', account_name_arg_type,
