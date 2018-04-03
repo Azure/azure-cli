@@ -822,7 +822,7 @@ class CredsCache(object):
             real_token = [x for x in all_entries if x not in self._service_principal_creds]
             self._adal_token_cache_attr = adal.TokenCache(json.dumps(real_token))
 
-            global _CLIENT_ID # pylint: disable=global-statement
+            global _CLIENT_ID  # pylint: disable=global-statement
             clients = set()
             for token in real_token:
                 clients.add(token['_clientId'])
