@@ -96,20 +96,33 @@ def _server_restore(cmd, client, resource_group_name, server_name, source_server
     return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
-# need to replace source sever name with source server id, so customer server restore function
+# need to replace source server name with source server id, so customer server georestore function
 # The parameter list should be the same as that in factory to use the ParametersContext
 # auguments and validators
-def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, location, source_server, no_wait=False, **kwargs):
+def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, location, source_server,
+                       backup_retention=None, geo_redundant_backup=None, no_wait=False, **kwargs):
     provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
     parameters = None
     if provider == 'Microsoft.DBForMySQL':
-        from azure.mgmt.rdbms import mysql
-        parameters = mysql.models.ServerForCreate(properties=mysql.models.ServerPropertiesForGeoRestore())
+        from azext_rdbms import mysql
+        parameters = mysql.models.ServerForCreate(
+            sku=mysql.models.Sku(name=sku_name),
+            properties=mysql.models.ServerPropertiesForGeoRestore(
+                storage_profile=mysql.models.StorageProfile(
+                    backup_retention_days=backup_retention,
+                    geo_redundant_backup=geo_redundant_backup
+                )),
+            location=location)
     elif provider == 'Microsoft.DBforPostgreSQL':
-        from azure.mgmt.rdbms import postgresql
-        parameters = postgresql.models.ServerForCreate(properties=postgresql.models.ServerPropertiesForGeoRestore())
-
-    source_server = kwargs['source_server_id']
+        from azext_rdbms import postgresql
+        parameters = postgresql.models.ServerForCreate(
+            sku=postgresql.models.Sku(name=sku_name),
+            properties=postgresql.models.ServerPropertiesForGeoRestore(
+                storage_profile=postgresql.models.StorageProfile(
+                    backup_retention_days=backup_retention,
+                    geo_redundant_backup=geo_redundant_backup
+                )),
+            location=location)
 
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
@@ -122,17 +135,16 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
             raise ValueError('The provided source-server {} is invalid.'.format(source_server))
 
     parameters.properties.source_server_id = source_server
-    parameters.location = location
 
-    id_parts = parse_resource_id(source_server)
+    source_server_id_parts = parse_resource_id(source_server)
     try:
-        source_server_object = client.get(id_parts['resource_group'], id_parts['name'])
+        source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
         if parameters.sku.name is None:
             parameters.sku.name = source_server_object.sku.name
     except Exception as e:
         raise ValueError('Unable to get source server: {}.'.format(str(e)))
 
-    return client.create(resource_group_name, server_name, parameters, raw=no_wait)
+    return sdk_no_wait(no_wait, client.create, resource_group_name, server_name, parameters)
 
 
 def _server_update_custom_func(instance,

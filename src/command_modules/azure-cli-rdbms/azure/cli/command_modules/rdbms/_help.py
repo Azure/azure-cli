@@ -45,15 +45,15 @@ def add_helps(command_group, server_type):
                 """.format(command_group, server_type)
     helps['{} server georestore'.format(command_group)] = """
                 type: command
-                short-summary: Restore a server from geo-replicated backup.
+                short-summary: Georestore a server from backup.
                 examples:
-                    - name: Geo-Restore 'testsvr' as 'testsvrgeor'.
-                      text: az {0} server georestore -g testgroup -n testsvrgeor --source-server testsvr -l northeurope --sku-name GP_Gen4_2
-                    - name: Geo-Restore 'testsvr2' to 'testsvrnew', where 'testsvrnew' is in a different resource group than the backup.
+                    - name: Georestore 'testsvr' as 'testsvrnew' where 'testsvrnew' is in same resource group as 'testsvr'.
+                      text: az {0} server georestore -g testgroup -n testsvrnew --source-server testsvr -l westus2
+                    - name: Georestore 'testsvr2' to 'testsvrnew', where 'testsvrnew' is in the different resource group as the original server.
                       text: |
-                        az {0} server georestore -g testgroup -n testsvrgeor \\
-                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvrgeor" \\
-                            -l northeurope --sku-name GP_Gen4_2
+                        az {0} server georestore -g testgroup -n testsvrnew \\
+                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2" 
+                            -l westus2 --sku-name GP_Gen5_2
                 """.format(command_group, server_type)
     helps['{} server update'.format(command_group)] = """
                 type: command
