@@ -56,4 +56,3 @@ def create_or_update_mediaservice(client, resource_group_name, account_name, sto
     media_service = MediaService(location=location, storage_accounts=storage_accounts, tags=tags)
 
     return client.create_or_update(resource_group_name, account_name, media_service)
-

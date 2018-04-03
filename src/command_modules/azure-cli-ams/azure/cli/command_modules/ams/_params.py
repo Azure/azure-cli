@@ -13,6 +13,8 @@ from azure.mediav3.models import (EncoderNamedPreset, Priority, AssetContainerPe
 
 from ._validators import storage_account_id
 
+# pylint: disable=line-too-long
+
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
     name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
@@ -30,8 +32,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams account create') as c:
         c.argument('storage_account', storage_account_arg_type,
-                   help="""The name or resource ID of the primary storage account to attach to the Azure Media Services account.
-                                Blob only accounts are not allowed as primary.""",
+                   help='The name or resource ID of the primary storage account to attach to the Azure Media Services account. Blob only accounts are not allowed as primary.',
                    validator=storage_account_id)
         c.argument('tags', arg_type=tags_type)
 
@@ -39,9 +40,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', account_name_arg_type,
                    help='The name of the Azure Media Services account within the resource group.')
         c.argument('storage_account', name_arg_type,
-                   help="""The name or resource ID of the secondary storage account to detach
-                  from the Azure Media Services account.""",
-                  validator=storage_account_id)
+                   help='The name or resource ID of the secondary storage account to detach from the Azure Media Services account.',
+                   validator=storage_account_id)
 
     with self.argument_context('ams sp create') as c:
         c.argument('account_name', account_name_arg_type,
@@ -58,7 +58,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('years', type=int, default=None)
 
     with self.argument_context('ams transform') as c:
-        c.argument('account_name', account_name_arg_type, id_part='name', 
+        c.argument('account_name', account_name_arg_type, id_part='name',
                    help='The name of the Azure Media Services account within the resource group.')
         c.argument('transform_name', name_arg_type, id_part='child_name_1',
                    help='The name of the transform.')
@@ -91,7 +91,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams asset get-sas-urls') as c:
         c.argument('permissions', arg_type=get_enum_type(AssetContainerPermission),
-                  help='The permissions to set on the SAS URL.')
+                   help='The permissions to set on the SAS URL.')
         c.argument('expiry_time', expiry_arg_type, help="Specifies the UTC datetime (Y-m-d'T'H:M'Z') at which the SAS becomes invalid.")
 
     with self.argument_context('ams job') as c:
@@ -107,14 +107,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The priority with which the job should be processed.')
         c.argument('description', help='The job description.')
         c.argument('input_asset_name', help='The name of the input asset.')
-        c.argument('output_asset_name', help="""The name of the output asset.
-                                Output asset names must be comma-separated and must not contain any spaces.""")
+        c.argument('output_asset_names', nargs='+', help='Space-separated list of output asset names.')
         c.argument('base_uri', help="""Base uri for http job input. It will be concatenated with provided file names.
-                                If no base uri is given,
-                                then the provided file list is assumed to be fully qualified uris.""")
-        c.argument('files', help="""List of files. It can be used to tell the service to only use
-                                the files specified from the input asset.
-                                File names must be comma-separated and must not contain any spaces.""")
+                                 If no base uri is given,
+                                 then the provided file list is assumed to be fully qualified uris.""")
+        c.argument('files',
+                   nargs='+',
+                   help="""Space-separated list of files.
+                                 It can be used to tell the service
+                                 to only use the files specified from the input asset.""")
 
     with self.argument_context('ams job cancel') as c:
         c.argument('delete', help='Delete the job being cancelled.')

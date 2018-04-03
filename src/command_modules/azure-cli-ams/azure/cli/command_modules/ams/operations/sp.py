@@ -168,12 +168,14 @@ def _create_role_assignment(cli_ctx, role, assignee_object_id, scope):
     scope = '/subscriptions/' + assignments_client.config.subscription_id
 
     role_id = _resolve_role_id(role, scope, definitions_client)
-    from azure.mgmt.authorization.models import RoleAssignmentProperties
-    properties = RoleAssignmentProperties(role_id, assignee_object_id)
-    assignment_name = _gen_guid()
-    custom_headers = None
-    return assignments_client.create(scope, assignment_name, properties,
-                                     custom_headers=custom_headers)
+
+
+    from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
+    parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=assignee_object_id)
+
+    return assignments_client.create(scope=scope,
+                                     role_assignment_name=_gen_guid(),
+                                     parameters=parameters)
 
 
 def _resolve_role_id(role, scope, definitions_client):
