@@ -821,6 +821,18 @@ class CredsCache(object):
             self._load_service_principal_creds(all_entries)
             real_token = [x for x in all_entries if x not in self._service_principal_creds]
             self._adal_token_cache_attr = adal.TokenCache(json.dumps(real_token))
+
+            global _CLIENT_ID
+            clients = set()
+            for token in real_token:
+                clients.add(token['_clientId'])
+
+            if _CLIENT_ID not in clients and len(clients) == 1:
+                # We've had our token cache populated from an external source with
+                # a different client ID then we usually use.  Switch to using
+                # the available credetials now.
+                _CLIENT_ID = clients.pop()
+
         return self._adal_token_cache_attr
 
     def save_service_principal_cred(self, sp_entry):
