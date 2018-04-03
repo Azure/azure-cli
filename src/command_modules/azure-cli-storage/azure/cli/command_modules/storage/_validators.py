@@ -75,8 +75,12 @@ def validate_client_parameters(cmd, namespace):
     # if connection string supplied or in environment variables, extract account key and name
     if n.connection_string:
         conn_dict = validate_key_value_pairs(n.connection_string)
-        n.account_name = conn_dict['AccountName']
-        n.account_key = conn_dict['AccountKey']
+        n.account_name = conn_dict.get('AccountName')
+        n.account_key = conn_dict.get('AccountKey')
+        if not n.account_name or not n.account_key:
+            from knack.util import CLIError
+            raise CLIError('Connection-string: %s, is malformed. Some shell environments require the '
+                           'connection string to be surrounded by quotes.' % n.connection_string)
 
     # otherwise, simply try to retrieve the remaining variables from environment variables
     if not n.account_name:
