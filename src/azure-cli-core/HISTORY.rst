@@ -6,7 +6,7 @@ Release History
 
 2.0.31
 ++++++
-* Minor fixes
+* Allow other sources to add additional tab completion choices via event hook
 
 2.0.30
 ++++++
