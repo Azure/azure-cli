@@ -19,3 +19,8 @@ helps['billing period'] = """
     type: group
     short-summary: Get billing periods for a subscription.
 """
+
+helps['billing enrollment-account'] = """
+    type: group
+    short-summary: Get enrollment accounts.
+"""

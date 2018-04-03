@@ -107,3 +107,16 @@ def create_keyvault_data_plane_client(cli_ctx):
 def get_key_vault_base_url(cli_ctx, vault_name):
     suffix = cli_ctx.cloud.suffixes.keyvault_dns
     return 'https://{}{}'.format(vault_name, suffix)
+
+
+def list_sku_info(cli_ctx, location=None):
+    from ._client_factory import _compute_client_factory
+
+    def _match_location(l, locations):
+        return next((x for x in locations if x.lower() == l.lower()), None)
+
+    client = _compute_client_factory(cli_ctx)
+    result = client.resource_skus.list()
+    if location:
+        result = [r for r in result if _match_location(location, r.locations)]
+    return result

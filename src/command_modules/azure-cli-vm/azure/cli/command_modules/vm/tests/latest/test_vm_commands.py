@@ -1572,7 +1572,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
         self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
         self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
         self.kwargs['secret_out'] = self.cmd('keyvault secret list-versions --vault-name {vault} -n cert1 --query "[?attributes.enabled].id" -o tsv').output.strip()
-        vm_format = self.cmd('vm format-secret -s {secret_out}').get_output_in_json()
+        vm_format = self.cmd('vm secret format -s {secret_out}').get_output_in_json()
         self.kwargs['secrets'] = json.dumps(vm_format)
 
         self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --authentication-type {auth} --image {image} --ssh-key-value \'{ssh_key}\' -l {loc} --secrets \'{secrets}\'')
@@ -1609,7 +1609,7 @@ class SecretsScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance-at
         self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
 
         self.kwargs['secret_out'] = self.cmd('keyvault secret list-versions --vault-name {vault} -n cert1 --query "[?attributes.enabled].id" -o tsv').output.strip()
-        self.kwargs['secrets'] = self.cmd('vm format-secret -s {secret_out} --certificate-store "My"').get_output_in_json()
+        self.kwargs['secrets'] = self.cmd('vm secret format -s {secret_out} --certificate-store "My"').get_output_in_json()
 
         self.cmd('vm create -g {rg} -n {vm} --admin-username {admin} --admin-password VerySecret!12 --image {image} -l {loc} --secrets "{secrets}"')
 
@@ -1643,7 +1643,7 @@ class VMSSCreateLinuxSecretsScenarioTest(ScenarioTest):
         self.cmd('keyvault certificate create --vault-name {vault} -n cert1 -p @"{policy_path}"')
 
         self.kwargs['secret_out'] = self.cmd('keyvault secret list-versions --vault-name {vault} -n cert1 --query "[?attributes.enabled].id" -o tsv').output.strip()
-        vm_format = self.cmd('vm format-secret -s {secret_out}').get_output_in_json()
+        vm_format = self.cmd('vm secret format -s {secret_out}').get_output_in_json()
         self.kwargs['secrets'] = json.dumps(vm_format)
 
         self.cmd('vmss create -n {vmss} -g {rg} --image Debian --admin-username deploy --ssh-key-value \'{ssh_key}\' --secrets \'{secrets}\'')
@@ -2187,6 +2187,7 @@ class VMLiveScenarioTest(LiveScenarioTest):
 class VMZoneScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_zone', location='eastus2')
+    @AllowLargeResponse(size_kb=2048)
     def test_vm_create_zones(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -2203,7 +2204,16 @@ class VMZoneScenarioTest(ScenarioTest):
         table_output = set(result.output.splitlines()[2].split())
         self.assertTrue(set([resource_group_location, self.kwargs['zones']]).issubset(table_output))
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_zone', location='westus')
+    @AllowLargeResponse(size_kb=2048)
+    def test_vm_error_on_zone_unavailable(self, resource_group, resource_group_location):
+        try:
+            self.cmd('vm create -g {rg} -n vm1 --admin-username clitester --admin-password PasswordPassword1! --image debian --zone 1')
+        except Exception as ex:
+            self.assertTrue('availablity zone is not yet supported' in str(ex))
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
+    @AllowLargeResponse(size_kb=2048)
     def test_vmss_create_single_zone(self, resource_group, resource_group_location):
 
         self.kwargs.update({
@@ -2229,6 +2239,7 @@ class VMZoneScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_zones', location='eastus2')
+    @AllowLargeResponse(size_kb=2048)
     def test_vmss_create_x_zones(self, resource_group, resource_group_location):
 
         self.kwargs.update({

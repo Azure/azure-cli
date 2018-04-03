@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.31
+++++++
+* Better error message for malformed connection strings.
+
 2.0.30
 ++++++
 * Fix issue of upload file with size between 195GB and 200GB

@@ -256,3 +256,21 @@ def task_create_table_format(result):
             table_row['Error'] = item['error']['code'] if item['error'] else ""
             table_output.append(table_row)
     return table_output
+
+
+def list_pool_node_counts_table_format(result):
+    """Format account list pool node counts result as a table."""
+    table_output = []
+    for item in result:
+        table_row = OrderedDict()
+        table_row['Pool Id'] = item['poolId']
+        table_row['Dedicated Starting'] = str(item['dedicated']['starting'])
+        table_row['Dedicated Idle'] = str(item['dedicated']['idle'])
+        table_row['Dedicated Running'] = str(item['dedicated']['running'])
+        table_row['Dedicated Total'] = str(item['dedicated']['total'])
+        table_row['LowPri Starting'] = str(item['lowPriority']['starting'])
+        table_row['LowPri Idle'] = str(item['lowPriority']['idle'])
+        table_row['LowPri Running'] = str(item['lowPriority']['running'])
+        table_row['LowPri Total'] = str(item['lowPriority']['total'])
+        table_output.append(table_row)
+    return table_output

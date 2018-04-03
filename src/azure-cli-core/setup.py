@@ -58,7 +58,7 @@ DEPENDENCIES = [
     'jmespath',
     'knack==0.3.2',
     'msrest>=0.4.4',
-    'msrestazure>=0.4.7',
+    'msrestazure>=0.4.25',
     'paramiko',
     'pip',
     'pygments',
@@ -67,7 +67,7 @@ DEPENDENCIES = [
     'pyyaml',
     'requests',
     'six',
-    'tabulate==0.7.7',
+    'tabulate>=0.7.7,<=0.8.2',
     'wheel',
 ]
 
