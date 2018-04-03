@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import json
 import inspect
 import argparse
 from importlib import import_module
@@ -30,11 +29,7 @@ class Linter(object):
 
         # populate command groups
         for command_name in self._commands:
-            command_args = []
-            for arg in command_name.split()[:-1]:
-                command_args.append(arg)
-                if command_args:
-                    self._command_groups.add(' '.join(command_args))
+            self._command_groups.update(_get_command_groups(command_name))
 
     @property
     def commands(self):
@@ -75,9 +70,9 @@ class Linter(object):
 
 
 class LinterManager(object):
-    def __init__(self, command_table=None, help_file_entries=None, loaded_help=None):
+    def __init__(self, command_table=None, help_file_entries=None, loaded_help=None, exclusions={}):
         self.linter = Linter(command_table=command_table, help_file_entries=help_file_entries, loaded_help=loaded_help)
-        self._exclusions = None
+        self._exclusions = exclusions
         self._rules = {
             'help_file_entries': [],
             'command_groups': [],
@@ -85,18 +80,6 @@ class LinterManager(object):
             'params': []
         }
         self._exit_code = 0
-
-    def get_help_entry_exclusions(self):
-        return self._exclusions.get('help_entries', [])
-
-    def get_command_group_exclusions(self):
-        return self._exclusions.get('command_groups', [])
-
-    def get_command_exclusions(self):
-        return self._exclusions.get('commands', [])
-
-    def get_parameter_exclusions(self, command_name):
-        return self._exclusions.get('params', {}).get(command_name, {})
 
     def add_rule(self, rule_type, rule_callable):
         if rule_type in self._rules:
@@ -106,16 +89,15 @@ class LinterManager(object):
         self._exit_code = 1
 
     @property
+    def exclusions(self):
+        return self._exclusions
+
+    @property
     def exit_code(self):
         return self._exit_code
 
     def run(self, run_params=None, run_commands=None, run_command_groups=None, run_help_files_entries=None, ci=False):
         paths = import_module('automation.cli_linter.rules').__path__
-        exclusion_path = os.path.join(paths[0], 'exclusions.json')
-        try:
-            self._exclusions = json.load(open(exclusion_path))
-        except FileNotFoundError:
-            self._exclusions = {}
 
         # find all defined rules and check for name conflicts
         found_rules = set()
@@ -133,19 +115,19 @@ class LinterManager(object):
 
         # run all rule-checks
         if run_help_files_entries and self._rules.get('help_file_entries'):
-            print('Running Linter on Help File Entries:')
+            print(os.linesep + 'Running Linter on Help File Entries:')
             self._run_rules('help_file_entries')
 
         if run_command_groups and self._rules.get('command_groups'):
-            print('Running Linter on Command Groups:')
+            print(os.linesep + 'Running Linter on Command Groups:')
             self._run_rules('command_groups')
 
         if run_commands and self._rules.get('commands'):
-            print('Running Linter on Commands:')
+            print(os.linesep + 'Running Linter on Commands:')
             self._run_rules('commands')
 
         if run_params and self._rules.get('params'):
-            print('Running Linter on Parameters:')
+            print(os.linesep + 'Running Linter on Parameters:')
             self._run_rules('params')
 
         return self.exit_code
@@ -154,7 +136,7 @@ class LinterManager(object):
         for callable_rule in self._rules.get(rule_group):
             for violation_msg in sorted(callable_rule()):
                 print(violation_msg)
-            print(os.linesep)
+            print()
 
 
 class RuleError(Exception):
@@ -166,3 +148,10 @@ class RuleError(Exception):
 
 def _share_element(first_iter, second_iter):
     return any(element in first_iter for element in second_iter)
+
+def _get_command_groups(command_name):
+    command_args = []
+    for arg in command_name.split()[:-1]:
+        command_args.append(arg)
+        if command_args:
+            yield ' '.join(command_args)

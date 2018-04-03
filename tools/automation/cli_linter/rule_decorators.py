@@ -12,15 +12,15 @@ def exclude_from_ci(func):
 
 
 def help_file_entry_rule(func):
-    return _get_decorator(func, 'help_file_entries', 'get_help_entry_exclusions', 'Help-Entry: `{}`')
+    return _get_decorator(func, 'help_file_entries', 'Help-Entry: `{}`')
 
 
 def command_rule(func):
-    return _get_decorator(func, 'commands', 'get_command_exclusions', 'Command: `{}`')
+    return _get_decorator(func, 'commands', 'Command: `{}`')
 
 
 def command_group_rule(func):
-    return _get_decorator(func, 'command_groups', 'get_command_group_exclusions', 'Command-Group: `{}`')
+    return _get_decorator(func, 'command_groups', 'Command-Group: `{}`')
 
 
 def parameter_rule(func):
@@ -30,9 +30,9 @@ def parameter_rule(func):
             linter = linter_manager.linter
             for command_name in linter.commands:
                 for parameter_name in linter.get_command_parameters(command_name):
-                    parameter_exclusions = linter_manager.get_parameter_exclusions(command_name)
-                    if parameter_name not in parameter_exclusions or \
-                            func.__name__ not in parameter_exclusions.get(parameter_name):
+                    exclusion_parameters = linter_manager.exclusions.get(command_name, {}).get('parameters', {})
+                    exclusions = exclusion_parameters.get(parameter_name, {}).get('rule_exclusions', [])
+                    if func.__name__ not in exclusions:
                         try:
                             func(linter, command_name, parameter_name)
                         except RuleError as ex:
@@ -44,14 +44,14 @@ def parameter_rule(func):
     return add_to_linter
 
 
-def _get_decorator(func, rule_group, linter_exclusion_func_name, print_format):
+def _get_decorator(func, rule_group, print_format):
     def add_to_linter(linter_manager):
         def wrapper():
-            print(func.__name__)
+            print('-Rule:', func.__name__)
             linter = linter_manager.linter
             for iter_entity in getattr(linter, rule_group):
-                exclusions = getattr(linter_manager, linter_exclusion_func_name)()
-                if iter_entity not in exclusions or func.__name__ not in exclusions.get(iter_entity):
+                exclusions = linter_manager.exclusions.get(iter_entity, {}).get('rule_exclusions', [])
+                if func.__name__ not in exclusions:
                     try:
                         func(linter, iter_entity)
                     except RuleError as ex:

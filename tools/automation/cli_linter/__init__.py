@@ -6,8 +6,12 @@
 
 import sys
 import yaml
+import os
+import inspect
 from knack.help_files import helps
-from .linter import LinterManager
+from importlib import import_module
+from pkgutil import iter_modules
+from .linter import LinterManager, _get_command_groups
 
 
 def define_arguments(parser):
@@ -20,7 +24,7 @@ def define_arguments(parser):
                         help='Run linter on command groups.')
     parser.add_argument('--help-file-entries', dest='rule_types_to_run', action='append_const', const='help_entries',
                         help='Run linter on help-file-entries.')
-    parser.add_argument('--modules', dest='modules', action='append', help='The modules on which the linter should run.')
+    parser.add_argument('--modules', dest='modules', nargs='+', help='The modules on which the linter should run.')
 
 
 def main(args):
@@ -48,10 +52,35 @@ def main(args):
     if not args.rule_types_to_run:
         args.rule_types_to_run = ['params', 'commands', 'command_groups', 'help_entries']
 
+    # find rule exclusions and pass to linter manager
+    from ..utilities.path import get_command_modules_paths
+    exclusions = {}
+    command_modules_paths = get_command_modules_paths()
+    for _, path in get_command_modules_paths():
+        exclusion_path = os.path.join(path, 'linter_exclusions.yml')
+        if os.path.isfile(exclusion_path):
+            mod_exclusions = yaml.load(open(exclusion_path))
+            exclusions.update(mod_exclusions)
+
+    # only run linter on modules specified
+    if args.modules:
+        allowed_module_paths = tuple(path for mod, path in command_modules_paths if mod in args.modules)
+        for command_name, command in list(command_table.items()):
+            # brute force way to remove all traces from excluded modules
+            loader_cls = command.loader.__class__
+            loader_file_path = inspect.getfile(loader_cls)
+            if not loader_file_path.startswith(allowed_module_paths):
+                del command_table[command_name]
+                help_file_entries.pop(command_name, None)
+                for group_name in _get_command_groups(command_name):
+                    help_file_entries.pop(group_name, None)
+
+
     # Instantiate and run Linter
     linter_manager = LinterManager(command_table=command_table,
                                    help_file_entries=help_file_entries,
-                                   loaded_help=loaded_help)
+                                   loaded_help=loaded_help,
+                                   exclusions=exclusions)
     exit_code = linter_manager.run(run_params='params' in args.rule_types_to_run,
                                    run_commands='commands' in args.rule_types_to_run,
                                    run_command_groups='command_groups' in args.rule_types_to_run,
