@@ -102,7 +102,7 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
     provider = 'Microsoft.DBForMySQL' if isinstance(client, ServersOperations) else 'Microsoft.DBforPostgreSQL'
     parameters = None
     if provider == 'Microsoft.DBForMySQL':
-        from azext_rdbms import mysql
+        from azure.mgmt.rdbms import mysql
         parameters = mysql.models.ServerForCreate(
             sku=mysql.models.Sku(name=sku_name),
             properties=mysql.models.ServerPropertiesForGeoRestore(
@@ -112,7 +112,7 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
                 )),
             location=location)
     elif provider == 'Microsoft.DBforPostgreSQL':
-        from azext_rdbms import postgresql
+        from azure.mgmt.rdbms import postgresql
         parameters = postgresql.models.ServerForCreate(
             sku=postgresql.models.Sku(name=sku_name),
             properties=postgresql.models.ServerPropertiesForGeoRestore(

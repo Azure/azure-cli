@@ -6,6 +6,7 @@
 from datetime import datetime
 from dateutil.tz import tzutc   # pylint: disable=import-error
 
+from azure.cli.core.util import CLIError
 from azure.cli.testsdk.base import execute
 from azure.cli.testsdk.exceptions import CliTestError   # pylint: disable=unused-import
 from azure.cli.testsdk import (
@@ -26,7 +27,7 @@ SERVER_NAME_MAX_LENGTH = 63
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     # pylint: disable=too-many-instance-attributes
     def __init__(self, engine_type='mysql', engine_parameter_name='database_engine',
-                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='westus',
+                 name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='koreasouth',
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True,
                  sku_name='GP_Gen4_2'):
@@ -78,19 +79,22 @@ class ServerMgmtScenarioTest(ScenarioTest):
 
     def _test_server_mgmt(self, database_engine, resource_group_1, resource_group_2):
         servers = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH),
-                   self.create_random_name('azuredbclirestore', SERVER_NAME_MAX_LENGTH)]
+                   self.create_random_name('azuredbclirestore', SERVER_NAME_MAX_LENGTH),
+                   self.create_random_name('azuredbcligeorestore', SERVER_NAME_MAX_LENGTH)]
         admin_login = 'cloudsa'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         edition = 'GeneralPurpose'
+        backupRetention = 10
+        geoRedundantBackup = 'Enabled'
         old_cu = 2
         new_cu = 4
         family = 'Gen5'
         skuname = '{}_{}_{}'.format("GP", family, old_cu)
-        loc = 'westus'
-        
+        loc = 'koreasouth'
+
         geoGeoRedundantBackup = 'Disabled'
         geoBackupRetention = 20
-        geoloc = 'westus2'
+        geoloc = 'koreasouth'
 
         # test create server
         self.cmd('{} server create -g {} --name {} -l {} '
