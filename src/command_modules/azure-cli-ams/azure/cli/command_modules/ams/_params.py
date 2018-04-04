@@ -29,12 +29,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of the Azure Media Services account within the resource group.')
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
                    validator=get_default_location_from_resource_group)
+        c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('ams account create') as c:
         c.argument('storage_account', storage_account_arg_type,
                    help='The name or resource ID of the primary storage account to attach to the Azure Media Services account. Blob only accounts are not allowed as primary.',
                    validator=storage_account_id)
-        c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('ams account storage') as c:
         c.argument('account_name', account_name_arg_type,

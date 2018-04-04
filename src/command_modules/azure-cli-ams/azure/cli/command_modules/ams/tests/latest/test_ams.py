@@ -29,6 +29,10 @@ class AmsTests(ScenarioTest):
             self.check('location', 'West US 2')
         ])
 
+        self.cmd('az ams account update -n {amsname} -g {rg} --tags key=vale', checks=[
+            self.check('tags.key', 'value'),
+        ])
+
         self.cmd('az ams account show -n {amsname} -g {rg}', checks=[
             self.check('name', '{amsname}'),
             self.check('resourceGroup', '{rg}')
