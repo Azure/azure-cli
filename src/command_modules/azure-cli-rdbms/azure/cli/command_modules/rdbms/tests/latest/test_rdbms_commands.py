@@ -30,7 +30,7 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
                  name_prefix=SERVER_NAME_PREFIX, parameter_name='server', location='koreasouth',
                  admin_user='cloudsa', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True,
-                 sku_name='GP_Gen4_2'):
+                 sku_name='GP_Gen5_2'):
         super(ServerPreparer, self).__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
         from azure.cli.testsdk import TestCli
         self.cli_ctx = TestCli()
