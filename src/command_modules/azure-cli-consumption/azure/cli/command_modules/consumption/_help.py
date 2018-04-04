@@ -10,28 +10,28 @@ helps['consumption'] = """
     short-summary: Manage consumption of Azure resources.
 """
 
-helps['consumption reservations'] = """
+helps['consumption reservation'] = """
     type: group
     short-summary: Manage reservations for Azure resources.
 """
 
-helps['consumption reservations summaries'] = """
+helps['consumption reservation summary'] = """
     type: group
-    short-summary: List reservations summaries.
+    short-summary: List reservation summaries.
 """
-helps['consumption reservations summaries list'] = """
+helps['consumption reservation summary list'] = """
     type: command
-    short-summary: List reservations summaries for daily or monthly by reservation order Id and optionally by reservation id.
+    short-summary: List reservation summaries for daily or monthly by order Id or reservation id.
 """
 
-helps['consumption reservations details'] = """
+helps['consumption reservation detail'] = """
     type: group
-    short-summary: List reservations details.
+    short-summary: List reservation details.
 """
 
-helps['consumption reservations details list'] = """
+helps['consumption reservation detail list'] = """
     type: command
-    short-summary: List reservations details by reservation order id and optionally by reservation id
+    short-summary: List the details of a reservation by order id or reservation id.
 """
 
 helps['consumption usage'] = """
@@ -41,15 +41,25 @@ helps['consumption usage'] = """
 
 helps['consumption usage list'] = """
     type: command
-    short-summary: Show the details of Azure resource consumption, either as an invoice or within a billing period.
+    short-summary: List the details of Azure resource consumption, either as an invoice or within a billing period.
 """
 
 helps['consumption pricesheet'] = """
     type: group
-    short-summary: Inspect the price sheet by Azure subscription within current or specified billing period.
+    short-summary: Inspect the price sheet of an Azure subscription within a billing period.
 """
 
 helps['consumption pricesheet show'] = """
     type: command
-    short-summary: Show the price sheet for Azure subscription within a current billing period or specified billing period
+    short-summary: Show the price sheet for an Azure subscription within a billing period.
+"""
+
+helps['consumption marketplace'] = """
+    type: group
+    short-summary: Inspect the marketplace usage data of an Azure subscription within a billing period.
+"""
+
+helps['consumption marketplace list'] = """
+    type: command
+    short-summary: List the marketplace for an Azure subscription within a billing period.
 """
