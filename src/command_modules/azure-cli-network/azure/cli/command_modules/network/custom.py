@@ -866,18 +866,16 @@ def update_ddos_plan(cmd, instance, tags=None, vnets=None):
         vnets = []
     if vnets is not None:
         logger.info('Attempting to update the VNets attached to the DDoS protection plan.')
-        vnet_ids = [x.id for x in vnets]
-        existing_vnets = [x.id for x in instance.virtual_networks or []]
-        vnets_to_remove = [x for x in existing_vnets if x not in vnet_ids]
-        vnets_to_add = [x for x in vnet_ids if x not in existing_vnets]
+        vnet_ids = set([x.id for x in vnets])
+        existing_vnet_ids = set([x.id for x in instance.virtual_networks or []])
         client = network_client_factory(cmd.cli_ctx).virtual_networks
-        for vnet_id in vnets_to_add:
+        for vnet_id in vnet_ids.difference(existing_vnet_ids):
             logger.info("Adding VNet '%s' to plan.", vnet_id)
             id_parts = parse_resource_id(vnet_id)
             vnet = client.get(id_parts['resource_group'], id_parts['name'])
             vnet.ddos_protection_plan = SubResource(id=instance.id)
             client.create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
-        for vnet_id in vnets_to_remove:
+        for vnet_id in existing_vnet_ids.difference(vnet_ids):
             logger.info("Removing VNet '%s' from plan.", vnet_id)
             id_parts = parse_resource_id(vnet_id)
             vnet = client.get(id_parts['resource_group'], id_parts['name'])
