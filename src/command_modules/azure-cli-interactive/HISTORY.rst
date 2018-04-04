@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.3.19
+++++++
+* Stops completions upon unrecognized commands.
+* Add event hooks before and after command subtree is created.
+
 0.3.18
 ++++++
 * Completions kick in as soon as command table loading is done.
