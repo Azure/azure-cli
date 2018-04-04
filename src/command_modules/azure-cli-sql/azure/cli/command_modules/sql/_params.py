@@ -603,12 +603,10 @@ def load_arguments(self, _):
     with self.argument_context('sql elastic-pool op') as c:
         c.argument('elastic_pool_name',
                    options_list=['--elastic-pool'],
-                   required=True,
                    help='Name of the Azure SQL Elastic Pool.')
 
         c.argument('operation_id',
                    options_list=['--name', '-n'],
-                   required=True,
                    help='The unique name of the operation to cancel.')
 
     ###############################################
