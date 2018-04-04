@@ -77,7 +77,7 @@ def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_n
     assignments = list_role_assignments(cmd, sp_oid)
 
     if assignments:
-        if not list(filter(lambda x: x['roleDefinitionName'] == role, assignments)):
+        if not list(filter(lambda x: x['properties']['roleDefinitionName'] == role, assignments)):
             _assign_role(cmd, role, sp_oid, ams.id)
     else:
         _assign_role(cmd, role, sp_oid, ams.id)
@@ -137,22 +137,22 @@ def list_role_assignments(cmd, assignee_object_id):
     # 2. fill in role names
     role_defs = list(definitions_client.list(
         scope=('/subscriptions/' + definitions_client.config.subscription_id)))
-    role_dics = {i.id: i.role_name for i in role_defs}
+    role_dics = {i.id: i.properties.role_name for i in role_defs}
     for i in results:
-        if role_dics.get(i['roleDefinitionId']):
-            i['roleDefinitionName'] = role_dics[i['roleDefinitionId']]
+        if role_dics.get(i['properties']['roleDefinitionId']):
+            i['properties']['roleDefinitionName'] = role_dics[i['properties']['roleDefinitionId']]
 
     # fill in principal names
-    principal_ids = set(i['principalId'] for i in results if i['principalId'])
+    principal_ids = set(i['properties']['principalId'] for i in results if i['properties']['principalId'])
     if principal_ids:
         try:
             principals = _get_object_stubs(graph_client, principal_ids)
             principal_dics = {i.object_id: _get_displayable_name(i) for i in principals}
 
-            for i in [r for r in results if not r.get('principalName')]:
-                i['principalName'] = ''
-                if principal_dics.get(i['principalId']):
-                    i['principalName'] = principal_dics[i['principalId']]
+            for i in [r for r in results if not r['properties'].get('principalName')]:
+                i['properties']['principalName'] = ''
+                if principal_dics.get(i['properties']['principalId']):
+                    i['properties']['principalName'] = principal_dics[i['properties']['principalId']]
         except (CloudError, GraphErrorException) as ex:
             # failure on resolving principal due to graph permission should not fail the whole thing
             logger.info("Failed to resolve graph object information per error '%s'", ex)
@@ -168,13 +168,12 @@ def _create_role_assignment(cli_ctx, role, assignee_object_id, scope):
     scope = '/subscriptions/' + assignments_client.config.subscription_id
 
     role_id = _resolve_role_id(role, scope, definitions_client)
-
-    from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
-    parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=assignee_object_id)
-
-    return assignments_client.create(scope=scope,
-                                     role_assignment_name=_gen_guid(),
-                                     parameters=parameters)
+    from azure.mgmt.authorization.models import RoleAssignmentProperties
+    properties = RoleAssignmentProperties(role_id, assignee_object_id)
+    assignment_name = _gen_guid()
+    custom_headers = None
+    return assignments_client.create(scope, assignment_name, properties,
+                                     custom_headers=custom_headers)
 
 
 def _resolve_role_id(role, scope, definitions_client):

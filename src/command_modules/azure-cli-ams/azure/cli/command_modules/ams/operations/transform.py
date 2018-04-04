@@ -46,7 +46,8 @@ def remove_transform_output(client, account_name, resource_group_name, transform
 
     set_existent_preset_names = set_existent_preset_names.difference(set_preset_names)
 
-    transform_output_list = list(filter(lambda x: x.preset.preset_name.value in set_existent_preset_names, transform.outputs))
+    transform_output_list = list(filter(lambda x: x.preset.preset_name.value in set_existent_preset_names,
+                                        transform.outputs))
     transform.outputs = transform_output_list
 
     return client.create_or_update(resource_group_name, account_name, transform_name, transform)
