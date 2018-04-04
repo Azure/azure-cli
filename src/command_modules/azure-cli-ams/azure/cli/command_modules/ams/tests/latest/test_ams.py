@@ -9,11 +9,6 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccoun
 class AmsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
-    def test_ams_list(self, resource_group):
-        list = self.cmd('az ams account list -g {}'.format(resource_group)).get_output_in_json()
-        assert len(list) > 0
-
-    @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_ams_create_show(self, resource_group, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
@@ -32,6 +27,9 @@ class AmsTests(ScenarioTest):
         self.cmd('az ams account update -n {amsname} -g {rg} --tags key=vale', checks=[
             self.check('tags.key', 'value'),
         ])
+
+        list = self.cmd('az ams account list -g {}'.format(resource_group)).get_output_in_json()
+        assert len(list) > 0
 
         self.cmd('az ams account show -n {amsname} -g {rg}', checks=[
             self.check('name', '{amsname}'),
@@ -73,7 +71,7 @@ class AmsTests(ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
-    def test_ams_sp_create(self, resource_group, storage_account_for_create):
+    def test_ams_sp_create_reset(self, resource_group, storage_account_for_create):
         amsname = self.create_random_name(prefix='ams', length=12)
 
         self.kwargs.update({
@@ -98,6 +96,12 @@ class AmsTests(ScenarioTest):
 
         self.cmd('az ams account sp create -a {amsname} -n {spName} -g {rg} -p {spPassword} --role {role}', checks=[
             self.check('AadSecret', '{spPassword}'),
+            self.check('ResourceGroup', '{rg}'),
+            self.check('AccountName', '{amsname}')
+        ])
+
+        self.cmd('az ams account sp reset-credentials -a {amsname} -n {spName} -g {rg} -p mynewpassword --role {role}', checks=[
+            self.check('AadSecret', 'mynewpassword'),
             self.check('ResourceGroup', '{rg}'),
             self.check('AccountName', '{amsname}')
         ])
@@ -157,38 +161,34 @@ class AmsTests(ScenarioTest):
         ])
 
         assetName = self.create_random_name(prefix='asset', length=12)
+        alternateId = self.create_random_name(prefix='aid', length=12)
+        description = self.create_random_name(prefix='desc', length=12)
 
         self.kwargs.update({
-            'assetName': assetName
+            'assetName': assetName,
+            'alternateId': alternateId,
+            'description': description
         })
 
-        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg} --description mydesc --alternate-id myaid', checks=[
+        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg} --description {description} --alternate-id {alternateId}', checks=[
+            self.check('name', '{assetName}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('alternateId', '{alternateId}'),
+            self.check('description', '{description}')
+        ])
+
+        self.cmd('az ams asset update -a {amsname} -n {assetName} -g {rg} --set description=mydesc alternateId=myaid', checks=[
             self.check('name', '{assetName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('alternateId', 'myaid'),
             self.check('description', 'mydesc')
         ])
 
-        alternateId = self.create_random_name(prefix='aid', length=12)
-        description = self.create_random_name(prefix='desc', length=12)
-
-        self.kwargs.update({
-            'alternateId': alternateId,
-            'description': description
-        })
-
-        self.cmd('az ams asset update -a {amsname} -n {assetName} -g {rg} --set description={description} alternateId={alternateId}', checks=[
-            self.check('name', '{assetName}'),
-            self.check('resourceGroup', '{rg}'),
-            self.check('alternateId', '{alternateId}'),
-            self.check('description', '{description}')
-        ])
-
         self.cmd('az ams asset show -a {amsname} -n {assetName} -g {rg}', checks=[
             self.check('name', '{assetName}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('alternateId', '{alternateId}'),
-            self.check('description', '{description}')
+            self.check('alternateId', 'myaid'),
+            self.check('description', 'mydesc')
         ])
 
         list = self.cmd('az ams asset list -a {amsname} -g {rg}').get_output_in_json()

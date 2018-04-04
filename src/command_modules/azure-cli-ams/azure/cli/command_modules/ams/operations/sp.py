@@ -25,85 +25,74 @@ from azure.cli.command_modules.ams._utils import (_gen_guid, _is_guid)
 logger = get_logger(__name__)
 
 
+def reset_sp_credentials_for_mediaservice(cmd, client, account_name, resource_group_name, sp_name=None,
+                                          role='Contributor', sp_password=None, xml=False, years=None):
+    ams = client.get(resource_group_name, account_name)
+
+    graph_client = _graph_client_factory(cmd.cli_ctx)
+
+    sp_name = _create_sp_name(account_name, sp_name)
+    sp_password = _create_sp_password(sp_password)
+
+    aad_sp = _get_service_principal(graph_client, sp_name)
+    if not aad_sp:
+        raise CLIError("Can't find a service principal matching '{}'".format(name))
+
+    tenant = graph_client.config.tenant_id
+    sp_oid = aad_sp.object_id
+    app_id = aad_sp.app_id
+
+    app_object_id = _get_application_object_id(graph_client.applications, app_id)
+
+    _update_password_credentials(graph_client, app_object_id, sp_password, years)
+
+    _assign_role(cmd, role, sp_oid, ams.id)
+
+    return _build_sp_result(client.config.subscription_id, ams.location, resource_group_name, account_name,
+                            tenant, app_id, sp_password, cmd.cli_ctx.cloud.endpoints.management,
+                            cmd.cli_ctx.cloud.endpoints.active_directory,
+                            cmd.cli_ctx.cloud.endpoints.resource_manager, xml)
+
+
 def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_name, sp_name=None,
                                      role='Contributor', sp_password=None, xml=False, years=None):
     ams = client.get(resource_group_name, account_name)
 
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
-    sp_name = '{}-access-sp'.format(account_name) if sp_name is None else sp_name
-    sp_password = str(_gen_guid()) if sp_password is None else sp_password
+    sp_name = _create_sp_name(account_name, sp_name)
+    sp_password = _create_sp_password(sp_password)
 
-    app_display_name = sp_name
+    app_display_name = sp_name.replace('http://', '')
 
-    app_id = None
-    sp_oid = None
+    aad_sp = _get_service_principal(graph_client, sp_name)
+    if aad_sp:
+        raise CLIError("Service principal '{}' already exists.".format(app_display_name))
+
+    aad_application = create_application(graph_client.applications,
+                                         display_name=app_display_name,
+                                         homepage=sp_name,
+                                         years=years,
+                                         password=sp_password,
+                                         identifier_uris=[sp_name],
+                                         available_to_other_tenants=False)
+
+    app_id = aad_application.app_id
     tenant = graph_client.config.tenant_id
+    sp_oid = _create_service_principal(graph_client, name=sp_name,
+                                        app_id=app_id)
 
-    if '://' not in sp_name:
-        sp_name = "http://" + sp_name
+    _assign_role(cmd, role, sp_oid, ams.id)
 
-    years = years or 1
-
-    start_date = datetime.datetime.now(pytz.utc)
-    end_date = start_date + relativedelta(years=years)
-
-    query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(sp_name)
-    aad_sps = list(graph_client.service_principals.list(filter=query_exp))
-    if aad_sps:
-        tenant = aad_sps[0].additional_properties['appOwnerTenantId']
-        sp_oid = aad_sps[0].object_id
-
-        app_id = aad_sps[0].app_id
-        app_object_id = _get_application_object_id(graph_client.applications, app_id)
-
-        _update_password_credentials(graph_client, app_object_id, sp_password,
-                                     start_date, end_date)
-    else:
-        aad_application = create_application(graph_client.applications,
-                                             display_name=app_display_name,
-                                             homepage=sp_name,
-                                             identifier_uris=[sp_name],
-                                             available_to_other_tenants=False,
-                                             password=sp_password,
-                                             start_date=start_date,
-                                             end_date=end_date)
-
-        app_id = aad_application.app_id
-
-        sp_oid = _create_service_principal(graph_client, name=sp_name,
-                                           app_id=app_id)
-
-    assignments = list_role_assignments(cmd, sp_oid)
-
-    if assignments:
-        if not list(filter(lambda x: x['roleDefinitionName'] == role, assignments)):
-            _assign_role(cmd, role, sp_oid, ams.id)
-    else:
-        _assign_role(cmd, role, sp_oid, ams.id)
-
-    result = {
-        'SubscriptionId': client.config.subscription_id,
-        'Region': ams.location,
-        'ResourceGroup': resource_group_name,
-        'AccountName': account_name,
-        'AadTenantId': tenant,
-        'AadClientId': app_id,
-        'AadSecret': sp_password,
-        'ArmAadAudience': cmd.cli_ctx.cloud.endpoints.management,
-        'AadEndpoint': cmd.cli_ctx.cloud.endpoints.active_directory,
-        'ArmEndpoint': cmd.cli_ctx.cloud.endpoints.resource_manager
-    }
-
-    format_xml_fn = getattr(importlib.import_module('azure.cli.command_modules.ams._format'),
-                            'get_sp_create_output_{}'.format('xml'))
-
-    return format_xml_fn(result) if xml else result
+    return _build_sp_result(client.config.subscription_id, ams.location, resource_group_name, account_name,
+                            tenant, app_id, sp_password, cmd.cli_ctx.cloud.endpoints.management,
+                            cmd.cli_ctx.cloud.endpoints.active_directory,
+                            cmd.cli_ctx.cloud.endpoints.resource_manager, xml)
 
 
-def _update_password_credentials(client, app_object_id, sp_password, start_date, end_date):
+def _update_password_credentials(client, app_object_id, sp_password, years):
     app_creds = list(client.applications.list_password_credentials(app_object_id))
-    app_creds.append(_build_password_credential(sp_password, start_date, end_date))
+    app_creds.append(_build_password_credential(sp_password, years))
     client.applications.update_password_credentials(app_object_id, app_creds)
 
 
@@ -208,7 +197,12 @@ def _get_application_object_id(client, identifier):
     return list(client.list(filter="appId eq '{}'".format(identifier)))[0].object_id
 
 
-def _build_password_credential(password, start_date, end_date):
+def _build_password_credential(password, years):
+    years = years or 1
+
+    start_date = datetime.datetime.now(pytz.utc)
+    end_date = start_date + relativedelta(years=years)
+
     from azure.graphrbac.models import PasswordCredential
     return PasswordCredential(start_date, end_date, str(_gen_guid()), password)
 
@@ -235,10 +229,9 @@ def _create_service_principal(
     return aad_sp.object_id
 
 
-def create_application(client, display_name, homepage, identifier_uris,
-                       available_to_other_tenants=False, password=None, reply_urls=None,
-                       start_date=None, end_date=None):
-    password_credential = _build_password_credential(password, start_date, end_date)
+def create_application(client, display_name, homepage, years, password, identifier_uris,
+                       available_to_other_tenants=False, reply_urls=None):
+    password_credential = _build_password_credential(password, years)
 
     app_create_param = ApplicationCreateParameters(available_to_other_tenants,
                                                    display_name,
@@ -264,6 +257,10 @@ def _search_role_assignments(assignments_client, assignee_object_id):
 
 
 def _assign_role(cmd, role, sp_oid, scope):
+    assignments = list_role_assignments(cmd, sp_oid)
+    if assignments and list(filter(lambda x: x['roleDefinitionName'] == role, assignments)):
+        return
+
     _RETRY_TIMES = 36
     for l in range(0, _RETRY_TIMES):
         try:
@@ -282,3 +279,42 @@ def _assign_role(cmd, role, sp_oid, scope):
                     logger.warning('role assignment response headers: %s\n',
                                    ex.response.headers)  # pylint: disable=no-member
                 raise
+
+
+def _build_sp_result(subscription_id, location, resource_group_name, account_name,
+                     tenant, app_id, sp_password, management_endpoint,
+                     active_directory_endpoint, resource_manager_endoint, xml):
+    result = {
+        'SubscriptionId': subscription_id,
+        'Region': location,
+        'ResourceGroup': resource_group_name,
+        'AccountName': account_name,
+        'AadTenantId': tenant,
+        'AadClientId': app_id,
+        'AadSecret': sp_password,
+        'ArmAadAudience': management_endpoint,
+        'AadEndpoint': active_directory_endpoint,
+        'ArmEndpoint': resource_manager_endoint
+    }
+
+    format_xml_fn = getattr(importlib.import_module('azure.cli.command_modules.ams._format'),
+                            'get_sp_create_output_{}'.format('xml'))
+
+    return format_xml_fn(result) if xml else result
+
+
+def _get_service_principal(graph_client, sp_name):
+    query_exp = 'servicePrincipalNames/any(x:x eq \'{}\')'.format(sp_name)
+    aad_sps = list(graph_client.service_principals.list(filter=query_exp))
+    return aad_sps[0] if aad_sps else None
+
+
+def _create_sp_password(sp_password):
+    return str(_gen_guid()) if sp_password is None else sp_password
+
+
+def _create_sp_name(account_name, sp_name):
+    sp_name = '{}-access-sp'.format(account_name) if sp_name is None else sp_name
+    if '://' not in sp_name:
+        sp_name = "http://" + sp_name
+    return sp_name

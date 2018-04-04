@@ -43,16 +43,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name or resource ID of the secondary storage account to detach from the Azure Media Services account.',
                    validator=storage_account_id)
 
-    with self.argument_context('ams account sp create') as c:
+    with self.argument_context('ams account sp') as c:
         c.argument('account_name', account_name_arg_type,
                    help='The name of the Azure Media Services account within the resource group.')
         c.argument('sp_name', name_arg_type,
-                   help="""The app name or app URI to associate the RBAC with.
-                   If not present, a name will be generated.""")
+                   help="The app name or app URI to associate the RBAC with. If not present, a default name like '{amsaccountname}-access-sp' will be generated.")
         c.argument('sp_password', password_arg_type,
-                   help="""The password used to log in. Also known as 'Client Secret'.
-                   If not present, a random secret will be generated.
-                   """)
+                   help="The password used to log in. Also known as 'Client Secret'. If not present, a random secret will be generated.")
         c.argument('role', completer=get_role_definition_name_completion_list)
         c.argument('xml', help='Enables xml output format.')
         c.argument('years', type=int, default=None)
