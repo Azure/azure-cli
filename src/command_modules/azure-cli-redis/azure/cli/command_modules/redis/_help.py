@@ -18,14 +18,9 @@ helps['redis export'] = """
 
 helps['redis import-method'] = """
     type: command
-    short-summary: Import data into a Redis cache.
-"""
-
-helps['redis update-settings'] = """
-    type: command
-    short-summary: (DEPRECATED) Update the settings of a Redis cache.
+    short-summary: (DEPRECATED) Import data into Redis cache.
     long-summary: |
-        WARNING: This command is deprecated. Instead, use the `update` command.
+        WARNING: This command is deprecated. Instead, use the `import` command.
 """
 
 helps['redis update'] = """
@@ -36,4 +31,19 @@ helps['redis update'] = """
 helps['redis patch-schedule'] = """
     type: group
     short-summary: Manage Redis patch schedules.
+"""
+
+helps['redis firewall-rules'] = """
+    type: group
+    short-summary: Manage Redis firewall rules.
+"""
+
+helps['redis linked-server'] = """
+    type: group
+    short-summary: Manage Redis linked servers.
+"""
+
+helps['redis linked-server set'] = """
+    type: command
+    short-summary: Adds a linked server to the Redis cache (requires Premium SKU).
 """
