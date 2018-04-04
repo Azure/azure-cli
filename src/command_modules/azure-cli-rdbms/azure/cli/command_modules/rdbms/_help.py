@@ -52,7 +52,7 @@ def add_helps(command_group, server_type):
                     - name: Georestore 'testsvr2' to 'testsvrnew', where 'testsvrnew' is in the different resource group as the original server.
                       text: |
                         az {0} server georestore -g testgroup -n testsvrnew \\
-                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2" 
+                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2"
                             -l westus2 --sku-name GP_Gen5_2
                 """.format(command_group, server_type)
     helps['{} server update'.format(command_group)] = """
