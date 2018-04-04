@@ -16,16 +16,16 @@ from azure.cli.core.commands.parameters import (get_location_type, get_resource_
                                                 get_three_state_flag, get_enum_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
-from azure.cli.command_modules.network._validators import \
-    (dns_zone_name_type,
-     validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
-     validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
-     validate_address_pool_name_or_id, load_cert_file, validate_metadata,
-     validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
-     validate_private_ip_address,
-     get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
-     get_network_watcher_from_vm, get_network_watcher_from_location,
-     get_asg_validator, get_vnet_validator, validate_ip_tags)
+from azure.cli.command_modules.network._validators import (
+    dns_zone_name_type,
+    validate_auth_cert, validate_cert, validate_inbound_nat_rule_id_list,
+    validate_address_pool_id_list, validate_inbound_nat_rule_name_or_id,
+    validate_address_pool_name_or_id, load_cert_file, validate_metadata,
+    validate_peering_type, validate_dns_record_type, validate_route_filter, validate_target_listener,
+    validate_private_ip_address,
+    get_servers_validator, get_public_ip_validator, get_nsg_validator, get_subnet_validator,
+    get_network_watcher_from_vm, get_network_watcher_from_location,
+    get_asg_validator, get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id)
 from azure.mgmt.network.models import ApplicationGatewaySslProtocol
 from azure.mgmt.trafficmanager.models import MonitorProtocol
 from azure.cli.command_modules.network._completers import (
@@ -197,6 +197,7 @@ def load_arguments(self, _):
         c.argument('cookie_based_affinity', cookie_based_affinity_type, help='Enable or disable cookie-based affinity.')
         c.argument('timeout', help='Request timeout in seconds.')
         c.argument('probe', help='Name or ID of the probe to associate with the HTTP settings.', completer=get_ag_subresource_completion_list('probes'))
+        c.argument('auth_certs', nargs='+', min_api='2016-09-01', help='Space-separated list of authentication certificates (names or IDs) to associate with the HTTP settings.')
 
     with self.argument_context('network application-gateway probe') as c:
         c.argument('host', help='The name of the host to send the probe.')
@@ -302,6 +303,14 @@ def load_arguments(self, _):
         c.argument('application_security_group_name', name_arg_type, id_part='name', help='The name of the application security group.')
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
 
+    # endregion
+
+    # region DDoS Protection Plans
+    with self.argument_context('network ddos-protection') as c:
+        for dest in ['ddos_plan_name', 'ddos_protection_plan_name']:
+            c.argument(dest, name_arg_type, help='Name of the DDoS protection plan.', id_part='name')
+        c.argument('vnets', nargs='*', help='Space-separated list of VNets (name or IDs) to associate with the plan.', validator=get_vnet_validator('vnets'))
+        c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
     # endregion
 
     # region DNS
@@ -833,7 +842,8 @@ def load_arguments(self, _):
         c.argument('virtual_network_name', virtual_network_name_type, options_list=('--name', '-n'), id_part='name')
         c.argument('vnet_prefixes', nargs='+', help='Space-separated list of IP address prefixes for the VNet.', options_list=('--address-prefixes',), metavar='PREFIX')
         c.argument('dns_servers', nargs='+', help='Space-separated list of DNS server IP addresses.', metavar='IP')
-        c.argument('ddos_protection', arg_type=get_three_state_flag(), help='Enable DDoS protection for protected resources in the VNet.', min_api='2017-09-01')
+        c.argument('ddos_protection', arg_type=get_three_state_flag(), help='Control whether DDoS protection is enabled.', min_api='2017-09-01')
+        c.argument('ddos_protection_plan', help='Name or ID of a DDoS protection plan to associate with the VNet.', min_api='2018-02-01', validator=validate_ddos_name_or_id)
         c.argument('vm_protection', arg_type=get_three_state_flag(), help='Enable VM protection for all subnets in the VNet.', min_api='2017-09-01')
 
     with self.argument_context('network vnet create') as c:
