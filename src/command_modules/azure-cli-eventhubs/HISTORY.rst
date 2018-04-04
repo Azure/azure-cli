@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.1.2
++++++
+
+* Fix package wheel
+
 0.1.1
 +++++
 
