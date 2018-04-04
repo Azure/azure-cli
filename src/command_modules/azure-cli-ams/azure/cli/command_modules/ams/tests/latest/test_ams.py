@@ -121,7 +121,7 @@ class AmsTests(ScenarioTest):
             'presetName': 'AACGoodQualityAudio'
         })
 
-        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --preset-name {presetName}', checks=[
+        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --preset-names {presetName}', checks=[
             self.check('name', '{transformName}'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -252,7 +252,7 @@ class AmsTests(ScenarioTest):
             'presetName': 'AACGoodQualityAudio'
         })
 
-        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --preset-name {presetName}', checks=[
+        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --preset-names {presetName}', checks=[
             self.check('name', '{transformName}'),
             self.check('resourceGroup', '{rg}')
         ])
