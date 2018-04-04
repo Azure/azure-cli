@@ -53,6 +53,11 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('transform', get_transforms_client))
         g.custom_command('update', 'update_transform',
                          custom_command_type=get_custom_sdk('transform', get_transforms_client))
+        g.generic_update_command('update',
+                                 setter_name='transform_update_setter',
+                                 setter_type=get_custom_sdk('transform', get_mediaservices_client),
+                                 custom_func_name='update_transform',
+                                 custom_func_type=get_custom_sdk('transform', get_mediaservices_client))
 
     with self.command_group('ams transform output', get_sdk('Transforms', get_mediaservices_client)) as g:
         g.custom_command('add', 'add_transform_output',

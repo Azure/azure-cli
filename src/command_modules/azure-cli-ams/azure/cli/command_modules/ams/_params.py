@@ -62,23 +62,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of the Azure Media Services account within the resource group.')
         c.argument('transform_name', name_arg_type, id_part='child_name_1',
                    help='The name of the transform.')
-
-    with self.argument_context('ams transform create') as c:
         c.argument('preset_names', arg_type=get_enum_type(EncoderNamedPreset),
                    nargs='+',
                    help='Space-separated list of built preset names.')
+
+    with self.argument_context('ams transform create') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('description', help='Customer supplied description of the transform.')
 
     with self.argument_context('ams transform update') as c:
         c.argument('tags', arg_type=tags_type)
         c.argument('description', help='Customer supplied description of the transform.')
-        c.argument('location', arg_type=get_location_type(self.cli_ctx))
-
-    with self.argument_context('ams transform output') as c:
-        c.argument('preset_names', arg_type=get_enum_type(EncoderNamedPreset),
-                   nargs='+',
-                   help='Space-separated list of built preset names.')
 
     with self.argument_context('ams asset') as c:
         c.argument('account_name', account_name_arg_type, id_part='name',
