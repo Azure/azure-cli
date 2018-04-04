@@ -2,6 +2,15 @@
 
 Release History
 ===============
+0.3.0
++++++
+* Added commands `marketplace`.
+* BREAKING CHANGE: `reservations summaries` commands renamed to `reservation summary`.
+* BREAKING CHANGE: `reservations details` commands renamed to `reservation detail`.
+* BREAKING CHANGE: removed `--reservation-order-id` and `--reservation-id` short options for `reservation` commands.
+* BREAKING CHANGE: removed `--grain` short options for `reservation summary` commands.
+* BREAKING CHANGE: removed `--include-meter-details` short options for `pricesheet` commands.
+
 0.2.2
 +++++
 * Added new commands for pricesheet API. Also, updated the existing Usage Details and Reservation Details API request format.
