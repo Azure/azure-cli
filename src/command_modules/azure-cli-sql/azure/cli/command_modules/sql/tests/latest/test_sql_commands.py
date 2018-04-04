@@ -368,8 +368,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerDbOperationMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer()
-    @SqlServerPreparer()
+    @ResourceGroupPreparer(location='southeastasia')
+    @SqlServerPreparer(location='southeastasia')
     def test_sql_db_operation_mgmt(self, resource_group, resource_group_location, server):
         database_name = "cliautomationdb01"
         update_service_objective = 'S1'
@@ -418,7 +418,8 @@ class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
                      checks=[JMESPathCheck('connectionType', type)])
 
 
-class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
+class AzureActiveDirectoryAdministratorScenarioTest(LiveScenarioTest):
+    #  convert to ScenarioTest and re-record when ISSUE #6011 is fixed
     @ResourceGroupPreparer()
     @SqlServerPreparer()
     def test_aad_admin(self, resource_group, server):
