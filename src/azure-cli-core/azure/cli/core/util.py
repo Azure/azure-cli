@@ -8,12 +8,12 @@ import sys
 import json
 import base64
 import binascii
+import six
 
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
 from knack.help import GroupHelpFile
 from azure.cli.core._help import CliCommandHelpFile
-import six
 
 logger = get_logger(__name__)
 
@@ -255,6 +255,7 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
         kwargs.update({'raw': True, 'polling': False})
     return func(*args, **kwargs)
 
+
 def get_all_help(cli_ctx):
     invoker = cli_ctx.invocation
     if not invoker:
@@ -275,7 +276,7 @@ def get_all_help(cli_ctx):
             help_file = GroupHelpFile(cmd, parser) if _is_group(parser) else CliCommandHelpFile(cmd, parser)
             help_file.load(parser)
             help_files.append(help_file)
-        except Exception as ex:
+        except Exception as ex:  # pylint: disable=broad-except
             print("Skipped '{}' due to '{}'".format(cmd, ex))
     help_files = sorted(help_files, key=lambda x: x.command)
     return help_files
@@ -301,8 +302,10 @@ def _store_parsers(parser, parser_keys, parser_values, sub_parser_keys, sub_pars
                 sub_parser_values.append(c)
                 _store_parsers(c, parser_keys, parser_values, sub_parser_keys, sub_parser_values)
 
+
 def _get_parser_name(s):
-    return (s._prog_prefix if hasattr(s, '_prog_prefix') else s.prog)[3:]
+    return (s._prog_prefix if hasattr(s, '_prog_prefix') else s.prog)[3:]  # pylint: disable=protected-access
+
 
 def _is_group(parser):
     return getattr(parser, '_subparsers', None) is not None \

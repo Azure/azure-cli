@@ -7,6 +7,7 @@ Release History
 ++++++
 * Stops completions upon unrecognized commands.
 * Add event hooks before and after command subtree is created.
+* Add id parameters to be used by completers.
 
 0.3.18
 ++++++
