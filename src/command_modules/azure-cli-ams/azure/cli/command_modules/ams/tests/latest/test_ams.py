@@ -57,12 +57,12 @@ class AmsTests(ScenarioTest):
             'storageAccount': storage_account_for_update
         })
 
-        self.cmd('az ams storage add -a {amsname} -g {rg} -n {storageAccount}', checks=[
+        self.cmd('az ams account storage add -a {amsname} -g {rg} -n {storageAccount}', checks=[
             self.check('name', '{amsname}'),
             self.check('resourceGroup', '{rg}')
         ])
 
-        self.cmd('az ams storage remove -a {amsname} -g {rg} -n {storageAccount}', checks=[
+        self.cmd('az ams account storage remove -a {amsname} -g {rg} -n {storageAccount}', checks=[
             self.check('name', '{amsname}'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -92,7 +92,7 @@ class AmsTests(ScenarioTest):
             'role': 'Owner'
         })
 
-        self.cmd('az ams sp create -a {amsname} -n {spName} -g {rg} -p {spPassword} --role {role}', checks=[
+        self.cmd('az ams account sp create -a {amsname} -n {spName} -g {rg} -p {spPassword} --role {role}', checks=[
             self.check('AadSecret', '{spPassword}'),
             self.check('ResourceGroup', '{rg}'),
             self.check('AccountName', '{amsname}')
@@ -121,7 +121,7 @@ class AmsTests(ScenarioTest):
             'presetName': 'AACGoodQualityAudio'
         })
 
-        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --preset-name {presetName} -l {location}', checks=[
+        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --preset-name {presetName}', checks=[
             self.check('name', '{transformName}'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -252,7 +252,7 @@ class AmsTests(ScenarioTest):
             'presetName': 'AACGoodQualityAudio'
         })
 
-        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --preset-name {presetName} -l {location}', checks=[
+        self.cmd('az ams transform create -a {amsname} -n {transformName} -g {rg} --preset-name {presetName}', checks=[
             self.check('name', '{transformName}'),
             self.check('resourceGroup', '{rg}')
         ])
@@ -281,11 +281,12 @@ class AmsTests(ScenarioTest):
 
         self.cmd('az ams job cancel -n {jobName} -a {amsname} -g {rg} -t {transformName}')
 
-        self.cmd('az ams job show -a {amsname} -n {jobName} -g {rg} -t {transformName}', checks=[
+        job = self.cmd('az ams job show -a {amsname} -n {jobName} -g {rg} -t {transformName}', checks=[
             self.check('name', '{jobName}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('priority', '{priority}'),
-            self.check('state', 'Canceled')
-        ])
+            self.check('priority', '{priority}')
+        ]).get_output_in_json()
+
+        assert job['state'] == 'Canceled' or job['state'] == 'Canceling'
 
         self.cmd('az ams job delete -n {jobName} -a {amsname} -g {rg} -t {transformName}')

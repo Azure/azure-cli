@@ -38,27 +38,27 @@ helps['ams account delete'] = """
     short-summary: Delete an Azure Media Services account.
 """
 
-helps['ams storage'] = """
+helps['ams account storage'] = """
     type: group
     short-summary: Manage secondary storage for an Azure Media Services account.
 """
 
-helps['ams storage add'] = """
+helps['ams account storage add'] = """
     type: command
     short-summary: Attach a secondary storage to an Azure Media Services account.
 """
 
-helps['ams storage remove'] = """
+helps['ams account storage remove'] = """
     type: command
     short-summary: Detach a secondary storage from an Azure Media Services account.
 """
 
-helps['ams sp'] = """
+helps['ams account sp'] = """
     type: group
     short-summary: Manage service principal and role based access for an Azure Media Services account.
 """
 
-helps['ams sp create'] = """
+helps['ams account sp create'] = """
     type: command
     short-summary: Create a service principal and configure its access to an Azure Media Services account.
     parameters:
@@ -77,7 +77,7 @@ helps['ams sp create'] = """
     examples:
         - name: Create a service principal with password and configure its access to an Azure Media Services account. Output will be in xml format.
           text: >
-            az ams sp create -a {myamsaccount} -g {myresourcegroup} -n {mySpName} -password {mySpPassword} --role {rol} --xml
+            az ams account sp create -a {myamsaccount} -g {myresourcegroup} -n {mySpName} -password {mySpPassword} --role {rol} --xml
     """
 
 helps['ams transform'] = """

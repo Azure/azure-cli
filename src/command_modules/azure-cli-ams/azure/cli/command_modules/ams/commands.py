@@ -32,13 +32,13 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.custom_command('create', 'create_mediaservice',
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
 
-    with self.command_group('ams storage', get_sdk('Mediaservices', get_mediaservices_client)) as g:
+    with self.command_group('ams account storage', get_sdk('Mediaservices', get_mediaservices_client)) as g:
         g.custom_command('add', 'add_mediaservice_secondary_storage',
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
         g.custom_command('remove', 'remove_mediaservice_secondary_storage',
                          custom_command_type=get_custom_sdk('account', get_mediaservices_client))
 
-    with self.command_group('ams sp', get_sdk('Mediaservices', get_mediaservices_client)) as g:
+    with self.command_group('ams account sp', get_sdk('Mediaservices', get_mediaservices_client)) as g:
         g.custom_command('create', 'create_assign_sp_to_mediaservice',
                          custom_command_type=get_custom_sdk('sp', get_mediaservices_client))
 
