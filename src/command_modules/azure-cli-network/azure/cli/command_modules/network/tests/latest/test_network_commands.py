@@ -1862,7 +1862,8 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
 
 
-class NetworkWatcherScenarioTest(ScenarioTest):
+# convert to ScenarioTest and re-record when #6009 is fixed
+class NetworkWatcherScenarioTest(LiveScenarioTest):
     import mock
 
     def _mock_thread_count():
