@@ -44,9 +44,11 @@ def load_command_table(self, _):
         g.command('list-skus', 'list_skus')
 
     with self.command_group('dms project', dms_projects_sdk, client_factory=dms_cf_projects) as g:
-        g.custom_command('create', 'create_project')
-        g.command('show', 'get')
+        g.custom_command('create', 'create_or_update_project')
+        g.command('delete', 'delete')
         g.command('list', 'list')
+        g.command('show', 'get')
+        g.custom_command('update', 'create_or_update_project')
 
     with self.command_group('dms task', dms_tasks_sdk, client_factory=dms_cf_tasks) as g:
         #g.custom_command('list', 'list_tasks')
