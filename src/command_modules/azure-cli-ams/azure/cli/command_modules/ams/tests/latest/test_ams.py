@@ -157,16 +157,27 @@ class AmsTests(ScenarioTest):
         ])
 
         assetName = self.create_random_name(prefix='asset', length=12)
+
+        self.kwargs.update({
+            'assetName': assetName
+        })
+
+        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg} --description mydesc --alternate-id myaid', checks=[
+            self.check('name', '{assetName}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('alternateId', 'myaid'),
+            self.check('description', 'mydesc')
+        ])
+
         alternateId = self.create_random_name(prefix='aid', length=12)
         description = self.create_random_name(prefix='desc', length=12)
 
         self.kwargs.update({
-            'assetName': assetName,
             'alternateId': alternateId,
             'description': description
         })
 
-        self.cmd('az ams asset create -a {amsname} -n {assetName} -g {rg} --description {description} --alternate-id {alternateId}', checks=[
+        self.cmd('az ams asset update -a {amsname} -n {assetName} -g {rg} --set description={description} alternateId={alternateId}', checks=[
             self.check('name', '{assetName}'),
             self.check('resourceGroup', '{rg}'),
             self.check('alternateId', '{alternateId}'),

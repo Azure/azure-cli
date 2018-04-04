@@ -15,3 +15,13 @@ def create_asset(client, account_name, resource_group_name, asset_name, alternat
 def get_sas_urls(client, resource_group_name, account_name, asset_name, permissions=None, expiry_time=None):
     return client.list_container_sas(resource_group_name, account_name,
                                      asset_name, permissions, expiry_time).asset_container_sas_urls
+
+
+def update_asset(instance, alternate_id=None, description=None):
+    if alternate_id:
+        instance.alternate_id = alternate_id
+
+    if description:
+        instance.description = description
+
+    return instance

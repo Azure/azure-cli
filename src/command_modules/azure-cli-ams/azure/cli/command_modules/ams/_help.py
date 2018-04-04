@@ -23,6 +23,11 @@ helps['ams account create'] = """
     short-summary: Create an Azure Media Services account.
 """
 
+helps['ams account update'] = """
+    type: command
+    short-summary: Update the details of an Azure Media Services account.
+"""
+
 helps['ams account list'] = """
     type: command
     short-summary: List Azure Media Services accounts for the entire subscription.
@@ -143,6 +148,11 @@ helps['ams asset list'] = """
 helps['ams asset create'] = """
     type: command
     short-summary: Create an asset.
+"""
+
+helps['ams asset update'] = """
+    type: command
+    short-summary: Update the details of an asset.
 """
 
 helps['ams asset delete'] = """
