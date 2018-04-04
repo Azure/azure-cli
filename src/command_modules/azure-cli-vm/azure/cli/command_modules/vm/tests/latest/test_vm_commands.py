@@ -2357,8 +2357,9 @@ class VMSSDiskEncryptionTest(ScenarioTest):
         ])
 
 
+# convert to ScenarioTest and re-record when issue #6006 is fixed
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
-class VMSSRollingUpgrade(ScenarioTest):
+class VMSSRollingUpgrade(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_rolling_update')
     def test_vmss_rolling_upgrade(self, resource_group):
@@ -2420,7 +2421,8 @@ class VMSSPriorityTesting(ScenarioTest):
                  checks=self.check('virtualMachineProfile.priority', '{priority}'))
 
 
-class VMLBIntegrationTesting(ScenarioTest):
+# convert to ScenarioTest and re-record when issue #6006 is fixed
+class VMLBIntegrationTesting(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_lb_integration')
     def test_vm_lb_integration(self, resource_group):

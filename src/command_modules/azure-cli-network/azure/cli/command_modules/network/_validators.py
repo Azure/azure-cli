@@ -61,7 +61,7 @@ def get_vnet_validator(dest):
         ids = []
 
         if names_or_ids == [""] or not names_or_ids:
-            return
+            names_or_ids = []
 
         for val in names_or_ids:
             if not is_valid_resource_id(val):
@@ -88,6 +88,7 @@ def validate_ddos_name_or_id(cmd, namespace):
                 namespace='Microsoft.Network', type='ddosProtectionPlans',
                 name=namespace.ddos_protection_plan
             )
+
 
 # pylint: disable=inconsistent-return-statements
 def dns_zone_name_type(value):
@@ -456,7 +457,6 @@ def process_ag_http_settings_create_namespace(cmd, namespace):  # pylint: disabl
             return val if is_valid_resource_id(val) else _generate_ag_subproperty_id(
                 cmd.cli_ctx, namespace, 'authenticationCertificates', val)
         namespace.auth_certs = [_validate_name_or_id(x) for x in namespace.auth_certs]
-
 
 
 def process_ag_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-argument

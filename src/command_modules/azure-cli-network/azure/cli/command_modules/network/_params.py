@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from argcomplete.completers import FilesCompleter
 import argparse
+
+from argcomplete.completers import FilesCompleter
 
 import six
 
@@ -310,7 +311,7 @@ def load_arguments(self, _):
     with self.argument_context('network ddos-protection') as c:
         for dest in ['ddos_plan_name', 'ddos_protection_plan_name']:
             c.argument(dest, name_arg_type, help='Name of the DDoS protection plan.', id_part='name')
-        c.argument('vnets', nargs='*', help='Space-separated list of VNets (name or IDs) to associate with the plan.')
+        c.argument('vnets', nargs='*', help='Space-separated list of VNets (name or IDs) to associate with the plan.', validator=get_vnet_validator('vnets'))
         c.argument('location', get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
     # endregion
 

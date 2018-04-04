@@ -829,29 +829,60 @@ def update_asg(instance, tags=None):
 
 
 # region DdosProtectionPlans
-def _update_ddos_vnets(cli_ctx, existing_vnets, set_vnets):
-    client = network_client_factory(cli_ctx).virtual_networks
-    pass
-
-
 def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, tags=None, vnets=None):
-    client = network_client_factory(cmd.cli_ctx).ddos_protection_plans
-    DdosProtectionPlan, SubResource = cmd.get_models('DdosProtectionPlan')
+    from azure.cli.core.commands import LongRunningOperation
+
+    ddos_client = network_client_factory(cmd.cli_ctx).ddos_protection_plans
+    DdosProtectionPlan, SubResource = cmd.get_models('DdosProtectionPlan', 'SubResource')
     plan = DdosProtectionPlan(
         name=ddos_plan_name,
         location=location,
         tags=tags
     )
-    # TODO: Implement logic for VNets
-    return client.create_or_update(resource_group_name, ddos_plan_name, plan)
+    if not vnets:
+        # if no VNETs can do a simple PUT
+        return ddos_client.create_or_update(resource_group_name, ddos_plan_name, plan)
+
+    # if VNETs specified, have to create the protection plan and then add the VNETs
+    plan_id = LongRunningOperation(cmd.cli_ctx)(
+        ddos_client.create_or_update(resource_group_name, ddos_plan_name, plan)).id
+
+    logger.info('Attempting to attach VNets to newly created DDoS protection plan.')
+    for subresource in vnets:
+        vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
+        id_parts = parse_resource_id(subresource.id)
+        vnet = vnet_client.get(id_parts['resource_group'], id_parts['name'])
+        vnet.ddos_protection_plan = SubResource(id=plan_id)
+        vnet_client.create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
+    return ddos_client.get(resource_group_name, ddos_plan_name)
 
 
-def update_ddos_plan(instance, tags=None, vnets=None):
+def update_ddos_plan(cmd, instance, tags=None, vnets=None):
+    SubResource = cmd.get_models('SubResource')
+
     if tags is not None:
         instance.tags = tags
+    if vnets == "":
+        vnets = []
     if vnets is not None:
-        # TODO: Implement logic for VNets
-        pass
+        logger.info('Attempting to update the VNets attached to the DDoS protection plan.')
+        vnet_ids = [x.id for x in vnets]
+        existing_vnets = [x.id for x in instance.virtual_networks or []]
+        vnets_to_remove = [x for x in existing_vnets if x not in vnet_ids]
+        vnets_to_add = [x for x in vnet_ids if x not in existing_vnets]
+        client = network_client_factory(cmd.cli_ctx).virtual_networks
+        for vnet_id in vnets_to_add:
+            logger.info("Adding VNet '%s' to plan.", vnet_id)
+            id_parts = parse_resource_id(vnet_id)
+            vnet = client.get(id_parts['resource_group'], id_parts['name'])
+            vnet.ddos_protection_plan = SubResource(id=instance.id)
+            client.create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
+        for vnet_id in vnets_to_remove:
+            logger.info("Removing VNet '%s' from plan.", vnet_id)
+            id_parts = parse_resource_id(vnet_id)
+            vnet = client.get(id_parts['resource_group'], id_parts['name'])
+            vnet.ddos_protection_plan = None
+            client.create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
     return instance
 
 
@@ -2792,7 +2823,7 @@ def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protec
         instance.enable_ddos_protection = ddos_protection
     if vm_protection is not None:
         instance.enable_vm_protection = vm_protection
-    if ddos_protection_plan is '':
+    if ddos_protection_plan == '':
         instance.ddos_protection_plan = None
     elif ddos_protection_plan is not None:
         instance.ddos_protection_plan = SubResource(id=ddos_protection_plan)

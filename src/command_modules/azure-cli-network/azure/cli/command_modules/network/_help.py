@@ -914,6 +914,12 @@ helps['network ddos-protection'] = """
 helps['network ddos-protection create'] = """
     type: command
     short-summary: Create a DDoS protection plan.
+    parameters:
+        - name: --vnets
+          long-summary: >
+            This parameter can only be used if all the VNets are within the same subscription as
+            the DDoS protection plan. If this is not the case, set the protection plan on the VNet
+            directly using the `az network vnet update` command.
 """
 
 helps['network ddos-protection delete'] = """
@@ -934,6 +940,12 @@ helps['network ddos-protection show'] = """
 helps['network ddos-protection update'] = """
     type: command
     short-summary: Update a DDoS protection plan.
+    parameters:
+        - name: --vnets
+          long-summary: >
+            This parameter can only be used if all the VNets are within the same subscription as
+            the DDoS protection plan. If this is not the case, set the protection plan on the VNet
+            directly using the `az network vnet update` command.
 """
 # endregion
 
