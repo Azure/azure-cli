@@ -402,6 +402,7 @@ class TestBigVMSSDefaults(unittest.TestCase):
         ns.app_gateway_sku, ns.app_gateway_capacity = None, None
         ns.load_balancer_sku = 'Basic'
         ns.single_placement_group = False
+        ns.zones = '1'
         self.assertRaises(CLIError, _validate_vmss_create_load_balancer_or_app_gateway, cmd, ns)
 
 
