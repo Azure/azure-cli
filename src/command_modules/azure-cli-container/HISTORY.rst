@@ -6,6 +6,7 @@ Release History
 0.1.21
 ++++++
 * Fixed [#5926](https://github.com/Azure/azure-cli/issues/5926): Fix `az container exec` failing when --container-name specified
+* `sdist` is now compatible with wheel 0.31.0
 
 0.1.20
 ++++++

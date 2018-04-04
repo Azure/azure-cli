@@ -13,6 +13,7 @@ Release History
 * `vm secret format`: Added extra validation. Added `--keyvault` and `--resource-group` to support scenarios
                       where the command is unable to resolve the vault ID. [#5718](https://github.com/Azure/azure-cli/issues/5718)
 * `vm/vmss create`: emit out a better error if resource group's location has no zone support
+* `sdist` is now compatible with wheel 0.31.0
 
 2.0.29
 ++++++
