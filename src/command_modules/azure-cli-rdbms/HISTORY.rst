@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.2.1
++++++
+* Introduce georestore command.
+* Remove storage size restriction from create command.
+
 0.2.0
 +++++
 * Release with new business model GA API version 2017-12-01.
