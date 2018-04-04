@@ -30,7 +30,8 @@ from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
-                                                 ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize)
+                                                 ResourceRequirements, Volume, VolumeMount, ContainerExecRequestTerminalSize,
+                                                 GitRepoVolume)
 from ._client_factory import cf_container_groups, cf_container_logs, cf_start_container
 
 logger = get_logger(__name__)
@@ -38,6 +39,7 @@ WINDOWS_NAME = 'Windows'
 ACR_SERVER_SUFFIX = '.azurecr.io/'
 AZURE_FILE_VOLUME_NAME = 'azurefile'
 SECRETS_VOLUME_NAME = 'secrets'
+GITREPO_VOLUME_NAME = 'gitrepo'
 
 
 def list_containers(client, resource_group_name=None):
@@ -78,6 +80,9 @@ def create_container(client,
                      azure_file_volume_account_name=None,
                      azure_file_volume_account_key=None,
                      azure_file_volume_mount_path=None,
+                     gitrepo_repository=None,
+                     gitrepo_directory='.',
+                     gitrepo_mount_path=None,
                      secrets=None,
                      secrets_mount_path=None):
     """Create a container group. """
@@ -113,6 +118,13 @@ def create_container(client,
     if secrets_volume:
         volumes.append(secrets_volume)
         mounts.append(secrets_volume_mount)
+
+    gitrepo_volume = _create_gitrepo_volume(gitrepo_repository=gitrepo_repository, gitrepo_directory=gitrepo_directory)
+    gitrepo_volume_mount = _create_gitrepo_volume_mount(gitrepo_volume=gitrepo_volume, gitrepo_mount_path=gitrepo_mount_path)
+
+    if gitrepo_volume:
+        volumes.append(gitrepo_volume)
+        mounts.append(gitrepo_volume_mount)
 
     cgroup_ip_address = _create_ip_address(ip_address, ports, dns_name_label)
 
@@ -201,6 +213,13 @@ def _create_secrets_volume(secrets):
     return Volume(name=SECRETS_VOLUME_NAME, secret=secrets) if secrets else None
 
 
+def _create_gitrepo_volume(gitrepo_repository, gitrepo_directory):
+    """Create Git Repo volume. """
+    gitrepo_volume = GitRepoVolume(repository=gitrepo_repository, directory=gitrepo_directory)
+
+    return Volume(name=GITREPO_VOLUME_NAME, git_repo=gitrepo_volume) if gitrepo_repository else None
+
+
 # pylint: disable=inconsistent-return-statements
 def _create_azure_file_volume_mount(azure_file_volume, azure_file_volume_mount_path):
     """Create Azure File volume mount. """
@@ -218,6 +237,15 @@ def _create_secrets_volume_mount(secrets_volume, secrets_mount_path):
             raise CLIError('Please specify --secrets --secrets-mount-path '
                            'to enable secrets volume mount.')
         return VolumeMount(name=SECRETS_VOLUME_NAME, mount_path=secrets_mount_path)
+
+
+def _create_gitrepo_volume_mount(gitrepo_volume, gitrepo_mount_path):
+    """Create Git Repo volume mount. """
+    if gitrepo_mount_path:
+        if not gitrepo_volume:
+            raise CLIError('Please specify --gitrepo-repository --gitrepo-directory '
+                           'to enable Git Repo volume mount.')
+        return VolumeMount(name=GITREPO_VOLUME_NAME, mount_path=gitrepo_mount_path)
 
 
 # pylint: disable=inconsistent-return-statements

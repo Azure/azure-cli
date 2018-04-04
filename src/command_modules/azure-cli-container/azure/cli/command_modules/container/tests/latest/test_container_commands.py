@@ -206,3 +206,46 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('volumes[0].azureFile.storageAccountName', '{azure_file_volume_account_name}'),
                          self.exists('containers[0].volumeMounts'),
                          self.check('containers[0].volumeMounts[0].mountPath', '{azure_file_volume_mount_path}')])
+
+        # Test create container with git repo volume
+    @ResourceGroupPreparer()
+    def test_container_git_repo_volume_mount(self, resource_group, resource_group_location):
+        container_group_name = self.create_random_name('clicontainer', 16)
+        gitrepo_repository = 'https://github.com/yolo3301/dl-youtube-dockerfile.git'
+        gitrepo_mount_path = '/src'
+
+        self.kwargs.update({
+            'container_group_name': container_group_name,
+            'resource_group_location': resource_group_location,
+            'gitrepo_repository': gitrepo_repository,
+            'gitrepo_mount_path': gitrepo_mount_path,
+        })
+
+        self.cmd('container create -g {rg} -n {container_group_name} --image nginx '
+                 '--gitrepo-repository {gitrepo_repository} '
+                 '--gitrepo-mount-path {gitrepo_mount_path}',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Creating'),
+                         self.check('osType', 'Linux'),
+                         self.exists('volumes'),
+                         self.exists('volumes[0].gitRepo'),
+                         self.check('volumes[0].gitRepo.repository', '{gitrepo_repository}'),
+                         self.check('volumes[0].gitRepo.directory', '.'),
+                         self.exists('containers[0].volumeMounts'),
+                         self.check('containers[0].volumeMounts[0].mountPath', '{gitrepo_mount_path}')])
+
+        # Wait for container to be provisioned
+        time.sleep(60)
+
+        self.cmd('container show -g {rg} -n {container_group_name}',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{resource_group_location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('osType', 'Linux'),
+                         self.exists('volumes'),
+                         self.exists('volumes[0].gitRepo'),
+                         self.check('volumes[0].gitRepo.repository', '{gitrepo_repository}'),
+                         self.check('volumes[0].gitRepo.directory', '.'),
+                         self.exists('containers[0].volumeMounts'),
+                         self.check('containers[0].volumeMounts[0].mountPath', '{gitrepo_mount_path}')])
