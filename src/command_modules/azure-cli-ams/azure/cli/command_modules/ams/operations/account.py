@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
+
 
 def list_mediaservices(client, resource_group_name=None):
     return client.list(resource_group_name) if resource_group_name else client.list_by_subscription()
@@ -56,6 +58,15 @@ def create_or_update_mediaservice(client, resource_group_name, account_name, sto
     media_service = MediaService(location=location, storage_accounts=storage_accounts, tags=tags)
 
     return client.create_or_update(resource_group_name, account_name, media_service)
+
+
+def mediaservice_update_getter(client, resource_group_name, account_name):
+    from azure.mediav3.models import ApiErrorException
+
+    try:
+        return client.get(resource_group_name, account_name)
+    except ApiErrorException as ex:
+        raise CLIError(ex.message)
 
 
 def update_mediaservice(instance, location=None, tags=None):

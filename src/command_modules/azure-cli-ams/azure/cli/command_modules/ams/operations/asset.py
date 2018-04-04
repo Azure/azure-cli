@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
+
 
 def create_asset(client, account_name, resource_group_name, asset_name, alternate_id=None, description=None):
     from azure.mediav3.models import Asset
@@ -18,6 +20,9 @@ def get_sas_urls(client, resource_group_name, account_name, asset_name, permissi
 
 
 def update_asset(instance, alternate_id=None, description=None):
+    if not instance:
+        raise CLIError('The asset resource was not found.')
+
     if alternate_id:
         instance.alternate_id = alternate_id
 

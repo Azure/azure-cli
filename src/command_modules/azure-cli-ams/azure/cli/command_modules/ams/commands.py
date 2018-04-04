@@ -28,6 +28,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.command('show', 'get')
         g.command('delete', 'delete')
         g.generic_update_command('update',
+                                 getter_name='mediaservice_update_getter',
+                                 getter_type=get_custom_sdk('account', get_mediaservices_client),
                                  custom_func_name='update_mediaservice',
                                  custom_func_type=get_custom_sdk('account', get_mediaservices_client))
         g.custom_command('list', 'list_mediaservices',
