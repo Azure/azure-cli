@@ -942,12 +942,12 @@ def _get_default_address_pool(cli_ctx, resource_group, balancer_name, balancer_t
 def _validate_vmss_single_placement_group(namespace):
     if namespace.platform_fault_domain_count is not None and namespace.zones is None:
         raise CLIError('usage error: --platform-fault-domain-count COUNT --zones ZONES')
-    if namespace.platform_fault_domain_count == 1 or namespace.zones or namespace.instance_count > 100:
+    if namespace.zones or namespace.instance_count > 100:
         if namespace.single_placement_group is None:
             namespace.single_placement_group = False
-        elif namespace.single_placement_group is True:
-            raise CLIError("usage error: '--single-placement-group' should be turned off when one of the conditions"
-                           " are met: 1. zonal, 2. 100+ instances, 3. fault domain count set to 1")
+        elif namespace.single_placement_group:
+            raise CLIError("usage error: '--single-placement-group' should be turned off for zonal scale-sets or with"
+                           " 100+ instances")
 
 
 def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
@@ -965,7 +965,7 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
     if namespace.load_balancer is None and namespace.application_gateway is None:
         if std_lb_is_available:
             balancer_type = 'loadBalancer'
-        else:  # mainly for Azure stack users
+        else:  # needed for Stack profile 2017_03_09
             balancer_type = 'loadBalancer' if namespace.single_placement_group is not False else 'applicationGateway'
             logger.debug("W/o STD LB, defaulting to '%s' under because single placement group is disabled",
                          balancer_type)
@@ -1050,9 +1050,14 @@ def _validate_vmss_create_load_balancer_or_app_gateway(cmd, namespace):
                 namespace.load_balancer_sku = LBSkuName.standard.value
                 logger.debug("use Standard sku as single placement group is turned off")
             elif namespace.load_balancer_sku == LBSkuName.basic.value:
-                raise CLIError("usage error: 'Standard' load balancer is required because 'single placement group' is "
-                               "turned off to accomodate zonal scale-sets, or with 100+ instances, or Fault Domain "
-                               "count is set to 1")
+                if namespace.zones:
+                    err = "'Standard' load balancer is required for zonal scale-sets"
+                elif namespace.instance_count > 100:
+                    err = "'Standard' load balancer is required for scale-sets with 100+ instances"
+                else:
+                    err = "'Standard' load balancer is required because 'single placement group' is turned off"
+
+                raise CLIError('usage error:{}'.format(err))
 
 
 def get_network_client(cli_ctx):
