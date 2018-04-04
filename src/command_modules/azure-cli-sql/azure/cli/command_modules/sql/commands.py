@@ -16,6 +16,7 @@ from ._util import (
     get_sql_database_transparent_data_encryptions_operations,
     get_sql_database_usages_operations,
     get_sql_elastic_pools_operations,
+    get_sql_elastic_pool_operations_operations,
     get_sql_encryption_protectors_operations,
     get_sql_firewall_rules_operations,
     get_sql_replication_links_operations,
@@ -160,6 +161,13 @@ def load_command_table(self, _):
 
     with self.command_group('sql elastic-pool', database_operations) as g:
         g.command('list-dbs', 'list_by_elastic_pool')
+
+    elastic_pool_operations_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations.elastic_pool_operations#ElasticPoolOperations.{}',
+        client_factory=get_sql_elastic_pool_operations_operations)
+    with self.command_group('sql elastic-pool op', elastic_pool_operations_operations, client_factory=get_sql_elastic_pool_operations_operations) as g:
+        g.command('list', 'list_by_elastic_pool')
+        g.command('cancel', 'cancel')
 
     ###############################################
     #                sql server                   #
