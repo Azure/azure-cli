@@ -15,7 +15,7 @@ def create_transform(client, account_name, resource_group_name,
         transform_output = TransformOutput(preset=transform_preset)
         outputs.append(transform_output)
 
-    transform_parameters = Transform(outputs=[outputs], location='westus2', description=description, tags=tags)
+    transform_parameters = Transform(outputs=outputs, location='westus2', description=description, tags=tags)
 
     return client.create_or_update(resource_group_name, account_name, transform_name, transform_parameters)
 
