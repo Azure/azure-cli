@@ -34,7 +34,7 @@ parts:
       echo $SNAPCRAFT_PART_INSTALL/usr/bin/python3
       $SNAPCRAFT_PART_INSTALL/usr/bin/python3 -c 'import site; print("PYTHONUSERBASE set to {!r}".format(site.getuserbase()))'
       $SNAPCRAFT_PART_INSTALL/usr/bin/python3 -m pip install --user $python_packages
-      $SNAPCRAFT_PART_INSTALL/usr/bin/python3 -m pip install --no-index --user src/azure-cli
+      $SNAPCRAFT_PART_INSTALL/usr/bin/python3 -m pip install --no-index --user src/azure-cli --no-binary cryptography
       install build_scripts/snap/az.snap.completion $SNAPCRAFT_PART_INSTALL/az.completion
       # PEP 394 says you should use python3, but the client uses python.
       ln -s python3 $SNAPCRAFT_PART_INSTALL/usr/bin/python
