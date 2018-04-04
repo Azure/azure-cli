@@ -10,6 +10,7 @@ Release History
 2.0.23
 ++++++
 * Support Autorest 3.0 based SDKs
+* Added az sql failover-group commands.
 
 2.0.22
 ++++++

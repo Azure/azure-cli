@@ -15,6 +15,10 @@ from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)
 from azure.cli.core.util import CLIError, sdk_no_wait
+from azure.mgmt.sql.models.failover_group import FailoverGroup
+from azure.mgmt.sql.models.failover_group_read_only_endpoint import FailoverGroupReadOnlyEndpoint
+from azure.mgmt.sql.models.failover_group_read_write_endpoint import FailoverGroupReadWriteEndpoint
+from azure.mgmt.sql.models.partner_info import PartnerInfo
 from azure.mgmt.sql.models.server_key import ServerKey
 from azure.mgmt.sql.models.encryption_protector import EncryptionProtector
 from azure.mgmt.sql.models.resource_identity import ResourceIdentity
@@ -1008,6 +1012,155 @@ def elastic_pool_list_capabilities(
                 d.supported_per_database_max_sizes = []
 
     return editions
+
+
+###############################################
+#              sql failover-group             #
+###############################################
+# pylint: disable=too-few-public-methods
+class FailoverPolicyType(Enum):
+    automatic = 'Automatic'
+    manual = 'Manual'
+
+
+def failover_group_create(
+        cmd,
+        client,
+        resource_group_name,
+        server_name,
+        failover_group_name,
+        partner_server,
+        partner_resource_group=None,
+        failover_policy=FailoverPolicyType.automatic.value,
+        grace_period=1,
+        add_db=None):
+
+    # Build the partner server id
+    partner_server_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}".format(
+        quote(get_subscription_id(cmd.cli_ctx)),
+        quote(partner_resource_group or resource_group_name),
+        quote(partner_server))
+
+    partner_server = PartnerInfo(id=partner_server_id)
+
+    if add_db is None:
+        add_db = []
+
+    databases = _get_list_of_databases_for_fg(
+        get_subscription_id(cmd.cli_ctx),
+        resource_group_name,
+        server_name,
+        [],
+        add_db,
+        [])
+
+    # Convert grace period from hours to minutes
+    grace_period = int(grace_period) * 60
+
+    return client.create_or_update(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        failover_group_name=failover_group_name,
+        parameters=FailoverGroup(
+            partner_servers=[partner_server],
+            databases=databases,
+            read_write_endpoint=FailoverGroupReadWriteEndpoint(
+                failover_policy=failover_policy,
+                failover_with_data_loss_grace_period_minutes=grace_period),
+            read_only_endpoint=FailoverGroupReadOnlyEndpoint(
+                failover_policy="Disabled")))
+
+
+def failover_group_update(
+        cmd,
+        instance,
+        resource_group_name,
+        server_name,
+        failover_policy=None,
+        grace_period=None,
+        add_db=None,
+        remove_db=None):
+
+    if failover_policy is not None:
+        instance.read_write_endpoint.failover_policy = failover_policy
+
+    if grace_period is not None:
+        grace_period = int(grace_period) * 60
+        instance.read_write_endpoint.failover_with_data_loss_grace_period_minutes = grace_period
+
+    if instance.read_write_endpoint.failover_policy == 'Manual':
+        grace_period = None
+
+    if add_db is None:
+        add_db = []
+
+    if remove_db is None:
+        remove_db = []
+
+    databases = _get_list_of_databases_for_fg(
+        get_subscription_id(cmd.cli_ctx),
+        resource_group_name,
+        server_name,
+        instance.databases,
+        add_db,
+        remove_db)
+
+    instance.databases = databases
+
+    return instance
+
+
+def _get_list_of_databases_for_fg(
+        subscription_id,
+        resource_group_name,
+        server_name,
+        databases_in_fg,
+        add_db,
+        remove_db):
+
+    add_db_ids = ["/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}".format(
+        quote(subscription_id),
+        quote(resource_group_name),
+        quote(server_name),
+        quote(d)) for d in add_db]
+
+    remove_db_ids = ["/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}".format(
+        quote(subscription_id),
+        quote(resource_group_name),
+        quote(server_name),
+        quote(d)) for d in remove_db]
+
+    databases = list((set(map(str.lower, databases_in_fg)) |
+                      set(map(str.lower, add_db_ids))) - set(map(str.lower, remove_db_ids)))
+
+    return databases
+
+
+def failover_group_failover(
+        client,
+        resource_group_name,
+        server_name,
+        failover_group_name,
+        allow_data_loss=False):
+
+    failover_group = client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        failover_group_name=failover_group_name)
+
+    if failover_group.replication_role == "Primary":
+        return
+
+    # Choose which failover method to use
+    if allow_data_loss:
+        failover_func = client.force_failover_allow_data_loss
+    else:
+        failover_func = client.failover
+
+    return failover_func(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        failover_group_name=failover_group_name)
 
 
 ###############################################
