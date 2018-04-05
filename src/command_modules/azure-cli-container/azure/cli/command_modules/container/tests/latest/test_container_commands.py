@@ -132,7 +132,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
             'password': password
         })
 
-        self.cmd('container create -g {rg} -n {container_group_name} --image {image} --registry-password {password}',
+        self.cmd('container create -g {rg} -n {container_group_name} --image {image} --registry-username {registry_username} --registry-password {password}',
                  checks=[self.check('name', '{container_group_name}'),
                          self.check('location', '{resource_group_location}'),
                          self.check('provisioningState', 'Creating'),

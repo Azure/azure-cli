@@ -36,7 +36,7 @@ from ._client_factory import cf_container_groups, cf_container_logs, cf_start_co
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
-ACR_SERVER_SUFFIX = '.azurecr.io/'
+SERVER_DELIMITER = '.'
 AZURE_FILE_VOLUME_NAME = 'azurefile'
 SECRETS_VOLUME_NAME = 'secrets'
 GITREPO_VOLUME_NAME = 'gitrepo'
@@ -171,7 +171,7 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
         image_registry_credentials = [ImageRegistryCredential(server=registry_login_server,
                                                               username=registry_username,
                                                               password=registry_password)]
-    elif ACR_SERVER_SUFFIX in image:
+    elif SERVER_DELIMITER in image.split("/")[0]:
         if not registry_username:
             try:
                 registry_username = prompt(msg='Image registry username: ')
