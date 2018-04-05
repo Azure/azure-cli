@@ -658,16 +658,16 @@ def _validate_vm_vmss_create_public_ip(cmd, namespace):
     if namespace.public_ip_address:
         if check_existence(cmd.cli_ctx, namespace.public_ip_address, namespace.resource_group_name,
                            'Microsoft.Network', 'publicIPAddresses'):
-            namespace.public_ip_type = 'existing'
+            namespace.public_ip_address_type = 'existing'
             logger.debug("using existing specified public IP '%s'", namespace.public_ip_address)
         else:
-            namespace.public_ip_type = 'new'
+            namespace.public_ip_address_type = 'new'
             logger.debug("specified public IP '%s' not found. It will be created.", namespace.public_ip_address)
     elif namespace.public_ip_address == '':
-        namespace.public_ip_type = None
+        namespace.public_ip_address_type = None
         logger.debug('no public IP address will be used')
     elif namespace.public_ip_address is None:
-        namespace.public_ip_type = 'new'
+        namespace.public_ip_address_type = 'new'
         logger.debug('new public IP address will be created')
 
     # Public-IP SKU is only exposed for VM. VMSS has no such needs so far
@@ -717,7 +717,7 @@ def _validate_vm_create_nics(cmd, namespace):
 
     namespace.nics = nics
     namespace.nic_type = 'existing'
-    namespace.public_ip_type = None
+    namespace.public_ip_address_type = None
     logger.debug('existing NIC(s) will be used')
 
 

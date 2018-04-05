@@ -3043,7 +3043,6 @@ helps['network traffic-manager endpoint create'] = """
     short-summary: Create a traffic manager endpoint.
     parameters:
         - name: --geo-mapping
-          short-summary: Space-separated list of country/region codes mapped to this endpoint when using the 'Geographic' routing method.
           populator-commands:
           - az network traffic-manager endpoint show-geographic-hierarchy
     examples:
