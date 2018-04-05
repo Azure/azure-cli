@@ -3,10 +3,10 @@
 Release History
 ===============
 
-
 2.0.31
 ++++++
-* Minor fixes
+* Allow other sources to add additional tab completion choices via event hook
+* `sdist` is now compatible with wheel 0.31.0
 
 2.0.30
 ++++++

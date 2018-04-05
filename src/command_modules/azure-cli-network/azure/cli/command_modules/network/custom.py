@@ -360,7 +360,8 @@ def create_ag_backend_http_settings_collection(cmd, resource_group_name, applica
                                                probe=None, protocol='http', cookie_based_affinity=None, timeout=None,
                                                no_wait=False, connection_draining_timeout=0,
                                                host_name=None, host_name_from_backend_pool=None,
-                                               affinity_cookie_name=None, enable_probe=None, path=None):
+                                               affinity_cookie_name=None, enable_probe=None, path=None,
+                                               auth_certs=None):
     ApplicationGatewayBackendHttpSettings, ApplicationGatewayConnectionDraining, SubResource = cmd.get_models(
         'ApplicationGatewayBackendHttpSettings', 'ApplicationGatewayConnectionDraining', 'SubResource')
     ncf = network_client_factory(cmd.cli_ctx)
@@ -372,6 +373,8 @@ def create_ag_backend_http_settings_collection(cmd, resource_group_name, applica
         request_timeout=timeout,
         probe=SubResource(id=probe) if probe else None,
         name=item_name)
+    if cmd.supported_api_version(min_api='2016-09-01'):
+        new_settings.authentication_certificates = [SubResource(id=x) for x in auth_certs or []]
     if cmd.supported_api_version(min_api='2016-12-01'):
         new_settings.connection_draining = \
             ApplicationGatewayConnectionDraining(
@@ -391,8 +394,13 @@ def update_ag_backend_http_settings_collection(cmd, instance, parent, item_name,
                                                cookie_based_affinity=None, timeout=None,
                                                connection_draining_timeout=None,
                                                host_name=None, host_name_from_backend_pool=None,
-                                               affinity_cookie_name=None, enable_probe=None, path=None):
+                                               affinity_cookie_name=None, enable_probe=None, path=None,
+                                               auth_certs=None):
     SubResource = cmd.get_models('SubResource')
+    if auth_certs == "":
+        instance.authentication_certificates = None
+    elif auth_certs is not None:
+        instance.authentication_certificates = [SubResource(id=x) for x in auth_certs]
     if port is not None:
         instance.port = port
     if probe is not None:
@@ -817,6 +825,70 @@ def update_asg(instance, tags=None):
         instance.tags = tags
     return instance
 
+# endregion
+
+
+# region DdosProtectionPlans
+def create_ddos_plan(cmd, resource_group_name, ddos_plan_name, location=None, tags=None, vnets=None):
+    from azure.cli.core.commands import LongRunningOperation
+
+    ddos_client = network_client_factory(cmd.cli_ctx).ddos_protection_plans
+    DdosProtectionPlan, SubResource = cmd.get_models('DdosProtectionPlan', 'SubResource')
+    plan = DdosProtectionPlan(
+        name=ddos_plan_name,
+        location=location,
+        tags=tags
+    )
+    if not vnets:
+        # if no VNETs can do a simple PUT
+        return ddos_client.create_or_update(resource_group_name, ddos_plan_name, plan)
+
+    # if VNETs specified, have to create the protection plan and then add the VNETs
+    plan_id = LongRunningOperation(cmd.cli_ctx)(
+        ddos_client.create_or_update(resource_group_name, ddos_plan_name, plan)).id
+
+    logger.info('Attempting to attach VNets to newly created DDoS protection plan.')
+    for subresource in vnets:
+        vnet_client = network_client_factory(cmd.cli_ctx).virtual_networks
+        id_parts = parse_resource_id(subresource.id)
+        vnet = vnet_client.get(id_parts['resource_group'], id_parts['name'])
+        vnet.ddos_protection_plan = SubResource(id=plan_id)
+        vnet_client.create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
+    return ddos_client.get(resource_group_name, ddos_plan_name)
+
+
+def update_ddos_plan(cmd, instance, tags=None, vnets=None):
+    SubResource = cmd.get_models('SubResource')
+
+    if tags is not None:
+        instance.tags = tags
+    if vnets == "":
+        vnets = []
+    if vnets is not None:
+        logger.info('Attempting to update the VNets attached to the DDoS protection plan.')
+        vnet_ids = set([x.id for x in vnets])
+        existing_vnet_ids = set([x.id for x in instance.virtual_networks or []])
+        client = network_client_factory(cmd.cli_ctx).virtual_networks
+        for vnet_id in vnet_ids.difference(existing_vnet_ids):
+            logger.info("Adding VNet '%s' to plan.", vnet_id)
+            id_parts = parse_resource_id(vnet_id)
+            vnet = client.get(id_parts['resource_group'], id_parts['name'])
+            vnet.ddos_protection_plan = SubResource(id=instance.id)
+            client.create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
+        for vnet_id in existing_vnet_ids.difference(vnet_ids):
+            logger.info("Removing VNet '%s' from plan.", vnet_id)
+            id_parts = parse_resource_id(vnet_id)
+            vnet = client.get(id_parts['resource_group'], id_parts['name'])
+            vnet.ddos_protection_plan = None
+            client.create_or_update(id_parts['resource_group'], id_parts['name'], vnet)
+    return instance
+
+
+def list_ddos_plans(cmd, resource_group_name=None):
+    client = network_client_factory(cmd.cli_ctx).ddos_protection_plans
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name)
+    return client.list()
 # endregion
 
 
@@ -2707,9 +2779,10 @@ def list_traffic_manager_endpoints(cmd, resource_group_name, profile_name, endpo
 # pylint: disable=too-many-locals
 def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16',
                 subnet_name=None, subnet_prefix=None, dns_servers=None,
-                location=None, tags=None, vm_protection=None, ddos_protection=None):
-    AddressSpace, DhcpOptions, Subnet, VirtualNetwork = \
-        cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork')
+                location=None, tags=None, vm_protection=None, ddos_protection=None,
+                ddos_protection_plan=None):
+    AddressSpace, DhcpOptions, Subnet, VirtualNetwork, SubResource = \
+        cmd.get_models('AddressSpace', 'DhcpOptions', 'Subnet', 'VirtualNetwork', 'SubResource')
     client = network_client_factory(cmd.cli_ctx).virtual_networks
     tags = tags or {}
 
@@ -2722,13 +2795,16 @@ def create_vnet(cmd, resource_group_name, vnet_name, vnet_prefixes='10.0.0.0/16'
     if cmd.supported_api_version(min_api='2017-09-01'):
         vnet.enable_ddos_protection = ddos_protection
         vnet.enable_vm_protection = vm_protection
+    if cmd.supported_api_version(min_api='2018-02-01'):
+        vnet.ddos_protection_plan = SubResource(id=ddos_protection_plan) if ddos_protection_plan else None
     return client.create_or_update(resource_group_name, vnet_name, vnet)
 
 
-def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None):
+def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protection=None, vm_protection=None,
+                ddos_protection_plan=None):
     # server side validation reports pretty good error message on invalid CIDR,
     # so we don't validate at client side
-    AddressSpace, DhcpOptions = cmd.get_models('AddressSpace', 'DhcpOptions')
+    AddressSpace, DhcpOptions, SubResource = cmd.get_models('AddressSpace', 'DhcpOptions', 'SubResource')
     if vnet_prefixes and instance.address_space:
         instance.address_space.address_prefixes = vnet_prefixes
     elif vnet_prefixes:
@@ -2745,6 +2821,10 @@ def update_vnet(cmd, instance, vnet_prefixes=None, dns_servers=None, ddos_protec
         instance.enable_ddos_protection = ddos_protection
     if vm_protection is not None:
         instance.enable_vm_protection = vm_protection
+    if ddos_protection_plan == '':
+        instance.ddos_protection_plan = None
+    elif ddos_protection_plan is not None:
+        instance.ddos_protection_plan = SubResource(id=ddos_protection_plan)
     return instance
 
 

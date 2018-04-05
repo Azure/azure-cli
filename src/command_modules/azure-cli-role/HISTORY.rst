@@ -2,6 +2,12 @@
 
 Release History
 ===============
+
+2.0.22
+++++++
+
+* `sdist` is now compatible with wheel 0.31.0
+
 2.0.21
 ++++++
 * graph: support required access configuration and native client 

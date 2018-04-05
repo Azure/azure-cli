@@ -1754,7 +1754,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 os_offer=None, os_publisher=None, os_sku=None, os_version=None,
                 load_balancer_type=None, app_gateway_type=None, vnet_type=None,
                 public_ip_type=None, storage_profile=None,
-                single_placement_group=None, custom_data=None, secrets=None,
+                single_placement_group=None, custom_data=None, secrets=None, platform_fault_domain_count=None,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None):
@@ -1832,10 +1832,6 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
 
     # Handle load balancer creation
     if load_balancer_type == 'new':
-        # Defaults SKU to 'Standard' for zonal scale set
-        if load_balancer_sku is None:
-            load_balancer_sku = 'Standard' if zones else 'Basic'
-
         vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
 
         lb_dependencies = []
@@ -1863,6 +1859,14 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
             private_ip_address='', private_ip_allocation='Dynamic', sku=load_balancer_sku)
         lb_resource['dependsOn'] = lb_dependencies
         master_template.add_resource(lb_resource)
+
+        # Per https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-overview#nsg
+        if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None:
+            nsg_name = '{}NSG'.format(vmss_name)
+            master_template.add_resource(build_nsg_resource(
+                None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
+            nsg = "[resourceId('Microsoft.Network/networkSecurityGroups', '{}')]".format(nsg_name)
+            vmss_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg_name))
 
     # Or handle application gateway creation
     if app_gateway_type == 'new':
@@ -1939,14 +1943,6 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
-    if nsg is None and zones:
-        # Per https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-overview#nsg
-        nsg_name = '{}NSG'.format(vmss_name)
-        master_template.add_resource(build_nsg_resource(
-            None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
-        nsg = "[resourceId('Microsoft.Network/networkSecurityGroups', '{}')]".format(nsg_name)
-        vmss_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg_name))
-
     vmss_resource = build_vmss_resource(cmd, vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,
                                         vm_sku, instance_count,
@@ -1960,6 +1956,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                                         os_publisher, os_offer, os_sku, os_version,
                                         backend_address_pool_id, inbound_nat_pool_id, health_probe=health_probe,
                                         single_placement_group=single_placement_group,
+                                        platform_fault_domain_count=platform_fault_domain_count,
                                         custom_data=custom_data, secrets=secrets,
                                         license_type=license_type, zones=zones, priority=priority)
     vmss_resource['dependsOn'] = vmss_dependencies

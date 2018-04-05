@@ -4,6 +4,8 @@ Release History
 ===============
 2.0.30
 ++++++
+* `vmss create`: support to configure platform fault domain count
+* `vmss create`: default to Standard LB for zonal, large or single-placement-group disabled scale-set
 * BREAKING CHANGE: `vm assign-identity`, `vm remove-identity`: Deprecated commands have been removed.
 * BREAKING CHANGE: `vm format-secret`: Deprecated command has been removed.
 * `vm create`: support configure Public-IP sku
@@ -11,6 +13,7 @@ Release History
 * `vm secret format`: Added extra validation. Added `--keyvault` and `--resource-group` to support scenarios
                       where the command is unable to resolve the vault ID. [#5718](https://github.com/Azure/azure-cli/issues/5718)
 * `vm/vmss create`: emit out a better error if resource group's location has no zone support
+* `sdist` is now compatible with wheel 0.31.0
 
 2.0.29
 ++++++

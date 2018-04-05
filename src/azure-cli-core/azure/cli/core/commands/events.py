@@ -4,3 +4,4 @@
 # --------------------------------------------------------------------------------------------
 
 EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE = 'CommandInvoker.OnPreCommandTableTruncate'
+EVENT_INVOKER_ON_TAB_COMPLETION = 'CommandInvoker.OnTabCompletion'

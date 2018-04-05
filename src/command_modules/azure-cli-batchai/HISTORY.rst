@@ -38,6 +38,7 @@ Release History
 * Breaking change: renamed --admin-user-name to --user-name in 'file-server create' command to be consistent with
   'cluster create' command.
 
+* `sdist` is now compatible with wheel 0.31.0
 
 0.1.4
 ++++++

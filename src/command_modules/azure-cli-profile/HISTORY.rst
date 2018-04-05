@@ -6,6 +6,7 @@ Release History
 ++++++
 * account list: handle accounts which come from CLI 1.0/ASM mode
 * (Breaking change): remove `--msi` & `--msi-port` which were tagged `deprecating` 2 releases ago
+* `sdist` is now compatible with wheel 0.31.0
 
 2.0.21
 ++++++

@@ -6,6 +6,7 @@ Release History
 ++++++
 * `policy definition create`: Add support for `--metadata`.
 * `policy definition update`: Add support for `--metadata`, `--set`, `--add`, `--remove`.
+* `sdist` is now compatible with wheel 0.31.0
 
 2.0.26
 ++++++

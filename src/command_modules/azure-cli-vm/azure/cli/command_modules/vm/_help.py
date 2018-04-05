@@ -217,7 +217,7 @@ helps['vm extension set'] = """
 """
 
 helps['vm availability-set delete'] = """
-    type: command'
+    type: command
     short-summary: Delete an availability set.
     examples:
         - name: Delete an availability set.

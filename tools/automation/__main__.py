@@ -10,6 +10,7 @@ import automation.clibuild
 import automation.clipublish
 import automation.style
 import automation.tests
+import automation.cli_linter
 
 
 def main():
@@ -21,6 +22,7 @@ def main():
     automation.clipublish.init_args(sub_parser)
     automation.style.init_args(sub_parser)
     automation.tests.init_args(sub_parser)
+    automation.cli_linter.init_args(sub_parser)
 
     if sys.argv[1:]:
         args = parser.parse_args()

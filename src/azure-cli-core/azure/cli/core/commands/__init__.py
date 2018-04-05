@@ -266,7 +266,7 @@ class AzCliCommandInvoker(CommandInvoker):
                                  parser=self.parser)
 
         if not args:
-            self.cli_ctx.completion.enable_autocomplete(self.parser)
+            self.parser.enable_autocomplete()
             subparser = self.parser.subparsers[tuple()]
             self.help.show_welcome(subparser)
 
@@ -278,7 +278,7 @@ class AzCliCommandInvoker(CommandInvoker):
         if args[0].lower() == 'help':
             args[0] = '--help'
 
-        self.cli_ctx.completion.enable_autocomplete(self.parser)
+        self.parser.enable_autocomplete()
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_PARSE_ARGS, args=args)
         parsed_args = self.parser.parse_args(args)
