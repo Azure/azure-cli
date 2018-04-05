@@ -9,6 +9,7 @@ Release History
 * `application-gateway http-settings create/update`: Add convenience argument `--auth-certs` to attach authentication certificates. [#4910](https://github.com/Azure/azure-cli/issues/4910)
 * `ddos-protection`: Added new commands to create DDoS protection plans .
 * `vnet create/update`: Added support for `--ddos-protection-plan` to associate a VNet to a DDoS protection plan.
+* `sdist` is now compatible with wheel 0.31.0
 
 2.0.27
 ++++++

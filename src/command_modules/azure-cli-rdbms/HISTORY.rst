@@ -7,6 +7,7 @@ Release History
 +++++
 * Introduce georestore command.
 * Remove storage size restriction from create command.
+* `sdist` is now compatible with wheel 0.31.0
 
 0.2.0
 +++++

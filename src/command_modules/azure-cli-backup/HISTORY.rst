@@ -3,6 +3,11 @@
 Release History
 ===============
 
+1.1.1
++++++
+
+* `sdist` is now compatible with wheel 0.31.0
+
 1.1.0
 +++++
 * Added new command 'az backup protection isenabled-for-vm'. This command can be used to check if a VM is backed up by any vault in the subscription.
