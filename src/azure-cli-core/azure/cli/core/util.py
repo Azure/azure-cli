@@ -8,10 +8,10 @@ import sys
 import json
 import base64
 import binascii
+import six
 
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case
-import six
 
 logger = get_logger(__name__)
 
