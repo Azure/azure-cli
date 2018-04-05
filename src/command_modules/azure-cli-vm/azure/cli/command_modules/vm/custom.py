@@ -503,7 +503,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               attach_data_disks=None, data_disk_sizes_gb=None, image_data_disks=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16', subnet=None, subnet_address_prefix='10.0.0.0/24',
               storage_profile=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None,
-              storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None, nic_type=None,
+              storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_address_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None,
@@ -562,7 +562,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             nic_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg))
             master_template.add_resource(build_nsg_resource(cmd, nsg, location, tags, nsg_rule_type))
 
-        if public_ip_type == 'new':
+        if public_ip_address_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(vm_name)
             nic_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(
                 public_ip_address))
@@ -1753,7 +1753,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 subnet=None, subnet_address_prefix=None,
                 os_offer=None, os_publisher=None, os_sku=None, os_version=None,
                 load_balancer_type=None, app_gateway_type=None, vnet_type=None,
-                public_ip_type=None, storage_profile=None,
+                public_ip_address_type=None, storage_profile=None,
                 single_placement_group=None, custom_data=None, secrets=None, platform_fault_domain_count=None,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
@@ -1837,7 +1837,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         lb_dependencies = []
         if vnet_type == 'new':
             lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-        if public_ip_type == 'new':
+        if public_ip_address_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(load_balancer)
             lb_dependencies.append(
                 'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
@@ -1875,7 +1875,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         ag_dependencies = []
         if vnet_type == 'new':
             ag_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-        if public_ip_type == 'new':
+        if public_ip_address_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(app_gateway)
             ag_dependencies.append(
                 'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
