@@ -8,8 +8,6 @@ from knack.util import CLIError
 
 def create_transform(client, account_name, resource_group_name,
                      transform_name, preset_names, description=None):
-    from azure.mediav3.models import Transform
-
     outputs = []
 
     for preset in preset_names:
@@ -49,7 +47,8 @@ def remove_transform_output(client, account_name, resource_group_name, transform
 def transform_update_setter(client, resource_group_name,
                             account_name, transform_name, parameters):
     parameters.outputs = list(map(lambda x: get_transform_output(x) if isinstance(x, str) else x, parameters.outputs))
-    return client.create_or_update(resource_group_name, account_name, transform_name, parameters.outputs, parameters.description)
+    return client.create_or_update(resource_group_name, account_name, transform_name,
+                                   parameters.outputs, parameters.description)
 
 
 def update_transform(instance, description=None, preset_names=None):

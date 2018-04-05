@@ -34,9 +34,11 @@ def reset_sp_credentials_for_mediaservice(cmd, client, account_name, resource_gr
     sp_name = _create_sp_name(account_name, sp_name)
     sp_password = _create_sp_password(sp_password)
 
+    app_display_name = sp_name.replace('http://', '')
+
     aad_sp = _get_service_principal(graph_client, sp_name)
     if not aad_sp:
-        raise CLIError("Can't find a service principal matching '{}'".format(name))
+        raise CLIError("Can't find a service principal matching '{}'".format(app_display_name))
 
     tenant = graph_client.config.tenant_id
     sp_oid = aad_sp.object_id
@@ -80,7 +82,7 @@ def create_assign_sp_to_mediaservice(cmd, client, account_name, resource_group_n
     app_id = aad_application.app_id
     tenant = graph_client.config.tenant_id
     sp_oid = _create_service_principal(graph_client, name=sp_name,
-                                        app_id=app_id)
+                                       app_id=app_id)
 
     _assign_role(cmd, role, sp_oid, ams.id)
 

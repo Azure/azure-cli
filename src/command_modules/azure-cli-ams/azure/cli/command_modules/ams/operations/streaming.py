@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-def create_streaming_locator(cmd, client, resource_group_name, account_name,
+def create_streaming_locator(client, resource_group_name, account_name,
                              streaming_locator_name, streaming_policy_name,
                              asset_name, start_time=None, default_content_key_policy_name=None,
                              end_time=None):
