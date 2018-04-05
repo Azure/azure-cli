@@ -7,6 +7,7 @@ from knack.arguments import CLIArgumentType
 
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type)
+from azure.cli.command_modules.ams._completers import get_role_definition_name_completion_list
 
 from azure.mediav3.models import (EncoderNamedPreset, Priority, AssetContainerPermission)
 
@@ -49,7 +50,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help="The app name or app URI to associate the RBAC with. If not present, a default name like '{amsaccountname}-access-sp' will be generated.")
         c.argument('sp_password', password_arg_type,
                    help="The password used to log in. Also known as 'Client Secret'. If not present, a random secret will be generated.")
-        c.argument('role')
+        c.argument('role', completer=get_role_definition_name_completion_list)
         c.argument('xml', help='Enables xml output format.')
         c.argument('years', type=int, default=None)
 

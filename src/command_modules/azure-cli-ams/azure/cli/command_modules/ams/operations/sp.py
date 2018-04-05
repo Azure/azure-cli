@@ -320,3 +320,9 @@ def _create_sp_name(account_name, sp_name):
     if '://' not in sp_name:
         sp_name = "http://" + sp_name
     return sp_name
+
+
+def list_role_definitions(cmd):
+    definitions_client = _auth_client_factory(cmd.cli_ctx, None).role_definitions
+    scope = '/subscriptions/' + definitions_client.config.subscription_id
+    return list(definitions_client.list(scope))
