@@ -113,14 +113,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The default content key policy name used by the streaming locator.')
 
     with self.argument_context('ams streaming locator') as c:
-        c.argument('streaming_locator_name', name_arg_type, help='The name of the streaming locator.')
+        c.argument('streaming_locator_name', name_arg_type, id_part='child_name_1',
+                   help='The name of the streaming locator.')
         c.argument('asset_name',
                    help='The name of the asset used by the streaming locator.')
         c.argument('streaming_policy_name',
                    help='The name of the streaming policy used by the streaming locator.')
+        c.argument('start_time',
+                   help="Start time (Y-m-d'T'H:M'Z') of the streaming locator.")
+        c.argument('end_time',
+                   help="End time (Y-m-d'T'H:M'Z') of the streaming locator.")
 
     with self.argument_context('ams streaming policy') as c:
-        c.argument('streaming_policy_name', name_arg_type,
+        c.argument('streaming_policy_name', name_arg_type, id_part='child_name_1',
                    help='The name of the streaming policy.')
         c.argument('download',
                    arg_group='Encryption Protocols',

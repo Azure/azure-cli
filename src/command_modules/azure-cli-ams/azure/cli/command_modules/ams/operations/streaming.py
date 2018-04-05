@@ -6,10 +6,12 @@
 
 def create_streaming_locator(cmd, client, resource_group_name, account_name,
                              streaming_locator_name, streaming_policy_name,
-                             asset_name, default_content_key_policy_name=None):
+                             asset_name, start_time=None, default_content_key_policy_name=None,
+                             end_time=None):
     from azure.mediav3.models import StreamingLocator
 
     streaming_locator = StreamingLocator(asset_name=asset_name,
+                                         start_time=start_time, end_time=end_time,
                                          streaming_policy_name=streaming_policy_name,
                                          default_content_key_policy_name=default_content_key_policy_name)
 
