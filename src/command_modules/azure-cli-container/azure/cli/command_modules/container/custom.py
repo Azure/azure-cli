@@ -177,7 +177,7 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
                 registry_username = prompt(msg='Image registry username: ')
             except NoTTYException:
                 raise CLIError('Please specify --registry-username in order to use Azure Container Registry.')
-        
+
         if not registry_password:
             try:
                 registry_password = prompt_pass(msg='Image registry password: ')
