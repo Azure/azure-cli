@@ -20,16 +20,9 @@ def check_service_name_availability(cmd, client, service_name, location):
                                           name=service_name,
                                           type='services')
 
-def create_service(cmd, client, service_name, resource_group_name, location, vnet_name, vnet_resource_group_name, subnet_name, sku_name, tags=None, no_wait=False):
-    from msrestazure.tools import resource_id
+def create_service(cmd, client, service_name, resource_group_name, location, subnet, sku_name, tags=None, no_wait=False):
     parameters = DataMigrationService(location=location,
-                                      virtual_subnet_id=resource_id(subscription=client.config.subscription_id,
-                                                                    resource_group=vnet_resource_group_name,
-                                                                    namespace='Microsoft.Network',
-                                                                    type='virtualNetworks',
-                                                                    name=vnet_name,
-                                                                    child_type_1='subnets',
-                                                                    child_name_1=subnet_name),
+                                      virtual_subnet_id=subnet,
                                       sku=ServiceSku(name=sku_name),
                                       tags=tags)
 

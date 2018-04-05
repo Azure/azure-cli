@@ -29,22 +29,15 @@ helps['dms create'] = """
           type: string
           short-summary: >
             The name of the CPU SKU on which the service's Virtual Machine will run.
-        - name: --subnet-name
+        - name: --subnet
           type: string
           short-summary: >
-            The name of the Virtual Network Subnet the DMS instance will be attached to.
-        - name: --vnet-name
-          type: string
-          short-summary: >
-            The name of the Virtual Network the subnet is a part of.
-        - name: --vnet-resource-group
-          type: string
-          short-summary: >
-            The name of the resource group the Virtual Network belongs to.
+            The Resource ID of the VNet's Subnet you will use to connect the source and target DBs.
+            Use "az network vnet subnet show -h" for help to get your subnet's ID.
     examples:
         - name: Create an instance of DMS.
           text: >
-            az dms create -l westus -n mydms -g myresourcegroup --sku-name Basic_2vCores --vnet-name myvnetname --vnet-resource-group --subnet-name mysubnet
+            az dms create -l westus -n mydms -g myresourcegroup --sku-name Basic_2vCores --subnet /subscriptions/{vnet subscription id}/resourceGroups/{vnet resource group}/providers/Microsoft.Network/virtualNetworks/{vnet name}/subnets/{subnet name}
 """
 
 helps['dms delete'] = """

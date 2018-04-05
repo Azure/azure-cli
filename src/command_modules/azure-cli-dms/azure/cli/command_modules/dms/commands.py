@@ -51,11 +51,8 @@ def load_command_table(self, _):
         g.custom_command('update', 'create_or_update_project')
 
     with self.command_group('dms task', dms_tasks_sdk, client_factory=dms_cf_tasks) as g:
-        #g.custom_command('list', 'list_tasks')
+        g.custom_command('create', 'create_task')
+        g.command('delete', 'delete')
         g.command('list', 'list')
-        #g.command('create', 'create_or_update')
-        #g.command('set', 'create_or_update')
         g.command('show', 'get')
-        #g.command('delete', 'delete')
-        #g.command('update', 'update')
-        #g.command('cancel', 'cancel')
+        g.command('cancel', 'cancel')

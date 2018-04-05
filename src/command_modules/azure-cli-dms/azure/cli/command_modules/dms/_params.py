@@ -16,22 +16,32 @@ def load_arguments(self, _):
     # region Global
 
     with self.argument_context('dms') as c:
-        c.argument('service_name', name_arg_type, help='The name of the Service')
+        #c.argument('service_name', name_arg_type)
+        c.argument('service_name', help='The name of the Service')
         c.argument('group_name', resource_group_name_type)
         c.argument('tags', tags_type)
 
-    with self.argument_context('dms create') as c:
-        #c.argument('ids', CLIArgumentType(options_list=('--vnet-subnet-ids')))
-        c.argument('vnet_name', id_part='name')
-        c.argument('vnet_resource_group_name', id_part='resource_group')
-        c.argument('subnet_name', id_part='child_name_1')
+    for item in ['check-name-availability', 'check-status', 'create', 'delete', 'show', 'start', 'stop']:
+        with self.argument_context('dms {}'.format(item)) as c:
+            c.argument('service_name', name_arg_type)
+
+    with self.argument_context('dms wait') as c:
+        c.argument('service_name', name_arg_type, id_part='name')
 
     # endregion
 
     # region Project
 
     with self.argument_context('dms project') as c:
-        c.argument('database_list', list_arg_type)
-        #c.argument('project_name', name_arg_type, help='The name of the Project')
+        #c.argument('service-name', options_list=['--service-name'])
+        c.argument('project_name', name_arg_type, help='The name of the Project')
+        c.argument('database_list', nargs='*', help='A space delimited list of databases')
+
+    # endregion
+
+    # region Task
+
+    with self.argument_context('dms task') as c:
+        c.argument('task_name', name_arg_type, help='The name of the Task')
 
     # endregion
