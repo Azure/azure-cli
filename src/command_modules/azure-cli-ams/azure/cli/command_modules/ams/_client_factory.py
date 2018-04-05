@@ -51,5 +51,10 @@ def get_jobs_client(cli_ctx, *_):
     return cf_media(cli_ctx).jobs
 
 
-def get_streaming_client(cli_ctx, *_):
+def get_streaming_locators_client(cli_ctx, *_):
     return cf_media(cli_ctx).streaming_locators
+
+
+def get_streaming_policies_client(cli_ctx, *_):
+    return cf_media(cli_ctx).streaming_policies
+

@@ -106,13 +106,31 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     with self.argument_context('ams job cancel') as c:
         c.argument('delete', help='Delete the job being cancelled.')
 
-    with self.argument_context('ams streaming locator') as c:
+    with self.argument_context('ams streaming') as c:
         c.argument('account_name', account_name_arg_type, id_part='name',
                    help='The name of the Azure Media Services account within the resource group.')
-        c.argument('streaming_locator_name', name_arg_type, help='The name of the streaming locator.')
-        c.argument('asset_name',
-                   help='The name of the asset.')
-        c.argument('streaming_policy_name',
-                   help='The name of the streaming policy used by the streaming locator.')
         c.argument('default_content_key_policy_name',
                    help='The default content key policy name used by the streaming locator.')
+
+    with self.argument_context('ams streaming locator') as c:
+        c.argument('streaming_locator_name', name_arg_type, help='The name of the streaming locator.')
+        c.argument('asset_name',
+                   help='The name of the asset used by the streaming locator.')
+        c.argument('streaming_policy_name',
+                   help='The name of the streaming policy used by the streaming locator.')
+
+    with self.argument_context('ams streaming policy') as c:
+        c.argument('streaming_policy_name', name_arg_type,
+                   help='The name of the streaming policy.')
+        c.argument('download',
+                   arg_group='Encryption Protocols',
+                   help='Enable Download protocol.')
+        c.argument('dash',
+                   arg_group='Encryption Protocols',
+                   help='Enable Dash protocol.')
+        c.argument('hls',
+                   arg_group='Encryption Protocols',
+                   help='Enable Hls protocol.')
+        c.argument('smooth_streaming',
+                   arg_group='Encryption Protocols',
+                   help='Enable SmoothStreaming protocol.')

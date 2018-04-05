@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 
-def create_streaming_locator(client, resource_group_name, account_name,
-                             streaming_locator_name, asset_name=None,
-                             streaming_policy_name=None, default_content_key_policy_name=None):
+def create_streaming_locator(cmd, client, resource_group_name, account_name,
+                             streaming_locator_name, streaming_policy_name,
+                             asset_name, default_content_key_policy_name=None):
     from azure.mediav3.models import StreamingLocator
 
     streaming_locator = StreamingLocator(asset_name=asset_name,
@@ -14,3 +14,19 @@ def create_streaming_locator(client, resource_group_name, account_name,
                                          default_content_key_policy_name=default_content_key_policy_name)
 
     return client.create(resource_group_name, account_name, streaming_locator_name, streaming_locator)
+
+
+def create_streaming_policy(cmd, resource_group_name, account_name,
+                            streaming_policy_name,
+                            download=False, dash=False, hls=False, smooth_streaming=False,
+                            default_content_key_policy_name=None):
+    from azure.cli.command_modules.ams._client_factory import get_streaming_policies_client
+    from azure.mediav3.models import (StreamingPolicy, NoEncryption, EnabledProtocols)
+
+    enabled_protocols = EnabledProtocols(download, dash, hls, smooth_streaming)
+
+    streaming_policy = StreamingPolicy(default_content_key_policy_name=default_content_key_policy_name,
+                                       no_encryption=NoEncryption(enabled_protocols=enabled_protocols))
+
+    return get_streaming_policies_client(cmd.cli_ctx).create(resource_group_name, account_name,
+                                                             streaming_policy_name, streaming_policy)

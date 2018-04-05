@@ -207,7 +207,7 @@ helps['ams streaming'] = """
 
 helps['ams streaming locator'] = """
     type: group
-    short-summary: Manage streaming locator for an Azure Media Services account.
+    short-summary: Manage streaming locators for an Azure Media Services account.
 """
 
 helps['ams streaming locator create'] = """
@@ -228,4 +228,29 @@ helps['ams streaming locator list'] = """
 helps['ams streaming locator show'] = """
     type: command
     short-summary: Show the details of a streaming locator.
+"""
+
+helps['ams streaming policy'] = """
+    type: group
+    short-summary: Manage streaming policies for an Azure Media Services account.
+"""
+
+helps['ams streaming policy create'] = """
+    type: command
+    short-summary: Create a streaming policy.
+"""
+
+helps['ams streaming policy update'] = """
+    type: command
+    short-summary: Update a streaming policy.
+"""
+
+helps['ams streaming policy list'] = """
+    type: command
+    short-summary: List all the streaming policies within an Azure Media Services account.
+"""
+
+helps['ams streaming policy show'] = """
+    type: command
+    short-summary: Show the details of a streaming policy.
 """
