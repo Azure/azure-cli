@@ -5,6 +5,7 @@
 
 # pylint: disable=line-too-long
 from ._validators import get_datetime_type
+from decimal import Decimal
 
 
 def load_arguments(self, _):
@@ -35,11 +36,11 @@ def load_arguments(self, _):
         cmp.argument('start_date', options_list=['--start-date', '-s'], type=get_datetime_type(), help='Start date (YYYY-MM-DD in UTC). If specified, also requires --end-date.')
         cmp.argument('end_date', options_list=['--end-date', '-e'], type=get_datetime_type(), help='End date (YYYY-MM-DD in UTC). If specified, also requires --start-date.')
 
-     with self.argument_context('consumption budget') as cb:
+    with self.argument_context('consumption budget') as cb:
         cb.argument('resource_group_name', options_list='--resource-group-name', type=str, help='Resource group of the budget.')
         cb.argument('budget_name', options_list='--budget-name', type=str, help='Name of a budget.')
         cb.argument('category', options_list=['--category', '-c'], type=str, help='Category of the budget can be cost or usage.')
-        cb.argument('amount', options_list=['--amount', '-a'], type=get_decimal_type(), help='Amount of a budget.')
+        cb.argument('amount', options_list=['--amount', '-a'], type=Decimal, help='Amount of a budget.')
         cb.argument('time_grain', options_list='--time_grain', type=str, help='Time grain of the budget can be monthly, quarterly, or annually.')
         cb.argument('start_date', options_list=['--start_date', '-s'], type=get_datetime_type(), help='Start date (YYYY-MM-DD in UTC) of time period of a budget.')
         cb.argument('end_date', options_list=['--end_date', '-e'], type=get_datetime_type(), help='End date (YYYY-MM-DD in UTC) of time period of a budget.')

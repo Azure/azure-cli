@@ -213,4 +213,3 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
     def test_consumption_budget_delete(self):
         output = self.cmd('consumption budget delete --budget-name "costbudget"')
         self.assertTrue(output)
-
