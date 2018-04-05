@@ -112,7 +112,7 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('[0].containers[0].resources.requests.memoryInGb', memory)])
 
     # Test create container with azure container registry image.
-    # An ACR instance is required to re-record this test with 'nginx:latest' image available in the repository.
+    # An ACR instance is required to re-record this test with 'nginx:latest' image available in the url.
     # see https://docs.microsoft.com/en-us/azure/container-registry/container-registry-get-started-docker-cli
     # After recording, regenerate the password for the acr instance.
     @ResourceGroupPreparer()
@@ -211,18 +211,24 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
     def test_container_git_repo_volume_mount(self, resource_group, resource_group_location):
         container_group_name = self.create_random_name('clicontainer', 16)
-        gitrepo_repository = 'https://github.com/yolo3301/dl-youtube-dockerfile.git'
+        gitrepo_url = 'https://github.com/yolo3301/dumb-flow.git'
+        gitrepo_dir = './test'
+        gitrepo_revision = '5604f0a8f11bfe13e621418ab6f6a71973e208ce'
         gitrepo_mount_path = '/src'
 
         self.kwargs.update({
             'container_group_name': container_group_name,
             'resource_group_location': resource_group_location,
-            'gitrepo_repository': gitrepo_repository,
+            'gitrepo_url': gitrepo_url,
+            'gitrepo_dir': gitrepo_dir,
+            'gitrepo_revision': gitrepo_revision,
             'gitrepo_mount_path': gitrepo_mount_path,
         })
 
         self.cmd('container create -g {rg} -n {container_group_name} --image nginx '
-                 '--gitrepo-repository {gitrepo_repository} '
+                 '--gitrepo-url {gitrepo_url} '
+                 '--gitrepo-dir {gitrepo_dir} '
+                 '--gitrepo-revision {gitrepo_revision} '
                  '--gitrepo-mount-path {gitrepo_mount_path}',
                  checks=[self.check('name', '{container_group_name}'),
                          self.check('location', '{resource_group_location}'),
@@ -230,8 +236,9 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('osType', 'Linux'),
                          self.exists('volumes'),
                          self.exists('volumes[0].gitRepo'),
-                         self.check('volumes[0].gitRepo.repository', '{gitrepo_repository}'),
-                         self.check('volumes[0].gitRepo.directory', '.'),
+                         self.check('volumes[0].gitRepo.repository', '{gitrepo_url}'),
+                         self.check('volumes[0].gitRepo.directory', '{gitrepo_dir}'),
+                         self.check('volumes[0].gitRepo.revision', '{gitrepo_revision}'),
                          self.exists('containers[0].volumeMounts'),
                          self.check('containers[0].volumeMounts[0].mountPath', '{gitrepo_mount_path}')])
 
@@ -245,7 +252,8 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('osType', 'Linux'),
                          self.exists('volumes'),
                          self.exists('volumes[0].gitRepo'),
-                         self.check('volumes[0].gitRepo.repository', '{gitrepo_repository}'),
-                         self.check('volumes[0].gitRepo.directory', '.'),
+                         self.check('volumes[0].gitRepo.repository', '{gitrepo_url}'),
+                         self.check('volumes[0].gitRepo.directory', '{gitrepo_dir}'),
+                         self.check('volumes[0].gitRepo.revision', '{gitrepo_revision}'),
                          self.exists('containers[0].volumeMounts'),
                          self.check('containers[0].volumeMounts[0].mountPath', '{gitrepo_mount_path}')])

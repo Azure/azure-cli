@@ -5,7 +5,7 @@ Release History
 
 0.1.22
 ++++++
-* Add Git Repo volume mount parameters '--gitrepo-repository' '--gitrepo-directory' and '--gitrepo-mount-path'
+* Add Git Repo volume mount parameters '--gitrepo-url' '--gitrepo-dir' '--gitrepo-revision' and '--gitrepo-mount-path'
 
 0.1.21
 ++++++

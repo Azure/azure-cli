@@ -33,5 +33,5 @@ def validate_secret(string):
 
 
 def validate_gitrepo_directory(ns):
-    if ns.gitrepo_directory and '..' in ns.gitrepo_directory:
+    if ns.gitrepo_dir and '..' in ns.gitrepo_dir:
         raise CLIError("The git repo directory cannot contain '..'")

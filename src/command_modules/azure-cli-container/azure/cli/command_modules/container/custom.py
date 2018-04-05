@@ -80,8 +80,9 @@ def create_container(client,
                      azure_file_volume_account_name=None,
                      azure_file_volume_account_key=None,
                      azure_file_volume_mount_path=None,
-                     gitrepo_repository=None,
-                     gitrepo_directory='.',
+                     gitrepo_url=None,
+                     gitrepo_dir='.',
+                     gitrepo_revision=None,
                      gitrepo_mount_path=None,
                      secrets=None,
                      secrets_mount_path=None):
@@ -119,7 +120,7 @@ def create_container(client,
         volumes.append(secrets_volume)
         mounts.append(secrets_volume_mount)
 
-    gitrepo_volume = _create_gitrepo_volume(gitrepo_repository=gitrepo_repository, gitrepo_directory=gitrepo_directory)
+    gitrepo_volume = _create_gitrepo_volume(gitrepo_url=gitrepo_url, gitrepo_dir=gitrepo_dir, gitrepo_revision=gitrepo_revision)
     gitrepo_volume_mount = _create_gitrepo_volume_mount(gitrepo_volume=gitrepo_volume, gitrepo_mount_path=gitrepo_mount_path)
 
     if gitrepo_volume:
@@ -213,11 +214,11 @@ def _create_secrets_volume(secrets):
     return Volume(name=SECRETS_VOLUME_NAME, secret=secrets) if secrets else None
 
 
-def _create_gitrepo_volume(gitrepo_repository, gitrepo_directory):
+def _create_gitrepo_volume(gitrepo_url, gitrepo_dir, gitrepo_revision):
     """Create Git Repo volume. """
-    gitrepo_volume = GitRepoVolume(repository=gitrepo_repository, directory=gitrepo_directory)
+    gitrepo_volume = GitRepoVolume(repository=gitrepo_url, directory=gitrepo_dir, revision=gitrepo_revision)
 
-    return Volume(name=GITREPO_VOLUME_NAME, git_repo=gitrepo_volume) if gitrepo_repository else None
+    return Volume(name=GITREPO_VOLUME_NAME, git_repo=gitrepo_volume) if gitrepo_url else None
 
 
 # pylint: disable=inconsistent-return-statements
@@ -243,7 +244,7 @@ def _create_gitrepo_volume_mount(gitrepo_volume, gitrepo_mount_path):
     """Create Git Repo volume mount. """
     if gitrepo_mount_path:
         if not gitrepo_volume:
-            raise CLIError('Please specify --gitrepo-repository --gitrepo-directory '
+            raise CLIError('Please specify --gitrepo-url (--gitrepo-dir --gitrepo-revision) '
                            'to enable Git Repo volume mount.')
         return VolumeMount(name=GITREPO_VOLUME_NAME, mount_path=gitrepo_mount_path)
 
