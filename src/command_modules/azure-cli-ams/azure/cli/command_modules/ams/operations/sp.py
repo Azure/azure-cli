@@ -206,7 +206,7 @@ def _build_password_credential(password, years):
     end_date = start_date + relativedelta(years=years)
 
     from azure.graphrbac.models import PasswordCredential
-    return PasswordCredential(start_date, end_date, str(_gen_guid()), password)
+    return PasswordCredential(start_date=start_date, end_date=end_date, key_id=str(_gen_guid()), value=password)
 
 
 def _create_service_principal(
