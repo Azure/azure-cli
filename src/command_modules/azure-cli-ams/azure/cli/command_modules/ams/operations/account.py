@@ -69,10 +69,7 @@ def mediaservice_update_getter(client, resource_group_name, account_name):
         raise CLIError(ex.message)
 
 
-def update_mediaservice(instance, location=None, tags=None):
-    if location:
-        instance.location = location
-
+def update_mediaservice(instance, tags=None):
     if tags:
         instance.tags = tags
 

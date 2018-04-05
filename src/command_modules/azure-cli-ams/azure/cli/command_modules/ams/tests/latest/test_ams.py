@@ -24,7 +24,7 @@ class AmsTests(ScenarioTest):
             self.check('location', 'West US 2')
         ])
 
-        self.cmd('az ams account update -n {amsname} -g {rg} --tags key=vale', checks=[
+        self.cmd('az ams account update -n {amsname} -g {rg} --tags key=value', checks=[
             self.check('tags.key', 'value'),
         ])
 
