@@ -365,6 +365,8 @@ class AmsTests(ScenarioTest):
         list = self.cmd('az ams streaming locator list -a {amsname} -g {rg}').get_output_in_json()
         assert len(list) > 0
 
+        self.cmd('az ams streaming locator get-paths -a {amsname} -n {streamingLocatorName} -g {rg}')
+
         self.cmd('az ams streaming locator delete -n {streamingLocatorName} -a {amsname} -g {rg}')
 
     @ResourceGroupPreparer()

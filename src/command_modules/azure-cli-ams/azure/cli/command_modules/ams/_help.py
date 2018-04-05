@@ -230,6 +230,11 @@ helps['ams streaming locator show'] = """
     short-summary: Show the details of a streaming locator.
 """
 
+helps['ams streaming locator get-paths'] = """
+    type: command
+    short-summary: List paths supported by a streaming locator.
+"""
+
 helps['ams streaming policy'] = """
     type: group
     short-summary: Manage streaming policies for an Azure Media Services account.

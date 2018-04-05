@@ -97,6 +97,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.command('list', 'list')
         g.command('show', 'get')
         g.command('delete', 'delete')
+        g.command('get-paths', 'list_paths')
 
     with self.command_group('ams streaming policy', get_sdk('StreamingPolicies', get_streaming_policies_client)) as g:
         g.custom_command('create', 'create_streaming_policy',
