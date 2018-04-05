@@ -5,7 +5,7 @@
 
 from azure.cli.core.commands import CliCommandType
 from ._client_factory import (get_mediaservices_client, get_transforms_client,
-                              get_assets_client, get_jobs_client)
+                              get_assets_client, get_jobs_client, get_streaming_client)
 from ._exception_handler import (build_exception_wrapper)
 
 
@@ -89,3 +89,10 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          custom_command_type=get_custom_sdk('job', get_jobs_client))
         g.custom_command('start', 'create_job',
                          custom_command_type=get_custom_sdk('job', get_jobs_client))
+
+    with self.command_group('ams streaming locator', get_sdk('StreamingLocators', get_streaming_client)) as g:
+        g.custom_command('create', 'create_streaming_locator',
+                         custom_command_type=get_custom_sdk('streaming', get_streaming_client))
+        g.command('list', 'list')
+        g.command('show', 'get')
+        g.command('delete', 'delete')

@@ -199,3 +199,33 @@ helps['ams job cancel'] = """
     type: command
     short-summary: Cancel a job.
 """
+
+helps['ams streaming'] = """
+    type: group
+    short-summary: Manage streamings for an Azure Media Services account.
+"""
+
+helps['ams streaming locator'] = """
+    type: group
+    short-summary: Manage streaming locator for an Azure Media Services account.
+"""
+
+helps['ams streaming locator create'] = """
+    type: command
+    short-summary: Create a streaming locator.
+"""
+
+helps['ams streaming locator update'] = """
+    type: command
+    short-summary: Update a streaming locator.
+"""
+
+helps['ams streaming locator list'] = """
+    type: command
+    short-summary: List all the streaming locators within an Azure Media Services account.
+"""
+
+helps['ams streaming locator show'] = """
+    type: command
+    short-summary: Show the details of a streaming locator.
+"""
