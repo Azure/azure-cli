@@ -6,6 +6,7 @@ Release History
 0.1.8
 ++++++
 * Add enrollment account commands
+* `sdist` is now compatible with wheel 0.31.0
 
 0.1.7
 ++++++

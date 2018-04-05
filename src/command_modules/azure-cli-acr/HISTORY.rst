@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.23
+++++++
+
+* `sdist` is now compatible with wheel 0.31.0
+
 2.0.22
 ++++++
 * Improve repository delete command with --image parameter to support docker image format.

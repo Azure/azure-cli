@@ -10,6 +10,7 @@ Release History
 * BREAKING CHANGE: removed `--reservation-order-id` and `--reservation-id` short options for `reservation` commands.
 * BREAKING CHANGE: removed `--grain` short options for `reservation summary` commands.
 * BREAKING CHANGE: removed `--include-meter-details` short options for `pricesheet` commands.
+* `sdist` is now compatible with wheel 0.31.0
 
 0.2.2
 +++++
