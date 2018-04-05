@@ -2371,6 +2371,11 @@ helps['network local-gateway update'] = """
             az network local-gateway update -g MyResourceGroup -n MyLocalGateway \\
                 --local-address-prefixes 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24
 """
+
+helps['network local-gateway wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the local gateway is met.
+"""
 # endregion
 
 # region Network Interface (NIC)

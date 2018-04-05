@@ -341,9 +341,10 @@ def load_arguments(self, _):
         for item in ['record_type', 'record_set_type']:
             c.argument(item, ignore_type, validator=validate_dns_record_type)
 
-    with self.argument_context('network dns record-set create') as c:
-        c.argument('ttl', help='Record set TTL (time-to-live)')
-        c.argument('if_none_match', help='Create the record set only if it does not already exist.', action='store_true')
+    for item in ['', 'a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
+        with self.argument_context('network dns record-set {} create'.format(item)) as c:
+            c.argument('ttl', help='Record set TTL (time-to-live)')
+            c.argument('if_none_match', help='Create the record set only if it does not already exist.', action='store_true')
 
     for item in ['a', 'aaaa', 'caa', 'cname', 'mx', 'ns', 'ptr', 'srv', 'txt']:
         with self.argument_context('network dns record-set {} add-record'.format(item)) as c:
