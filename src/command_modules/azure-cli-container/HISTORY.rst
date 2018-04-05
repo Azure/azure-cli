@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.22
+++++++
+* Add Git Repo volume mount parameters '--gitrepo-url' '--gitrepo-dir' '--gitrepo-revision' and '--gitrepo-mount-path'
+
 0.1.21
 ++++++
 * Fixed [#5926](https://github.com/Azure/azure-cli/issues/5926): Fix `az container exec` failing when --container-name specified
