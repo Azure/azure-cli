@@ -38,4 +38,4 @@ def load_command_table(self, _):
     with self.command_group('redis patch-schedule', redis_patch) as g:
         g.command('set', 'create_or_update')
         g.command('delete', 'delete')
-        g.command('patch-schedule show', 'get')
+        g.command('show', 'get')

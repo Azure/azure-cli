@@ -117,6 +117,10 @@ helps['ad sp show'] = """
     type: command
     short-summary: Get the details of a service principal.
 """
+helps['ad app'] = """
+    type: group
+    short-summary: Manage applications with AAD Graph.
+"""
 helps['ad app delete'] = """
     type: command
     short-summary: Delete an application.
