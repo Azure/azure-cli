@@ -39,3 +39,4 @@ def load_command_table(self, _):
         g.command('set', 'create_or_update')
         g.command('delete', 'delete')
         g.command('show', 'get')
+        g.command('patch-schedule show', 'get', deprecate_info="az redis patch-schedule show")

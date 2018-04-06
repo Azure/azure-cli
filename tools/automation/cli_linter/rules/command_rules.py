@@ -7,6 +7,7 @@ from ..rule_decorators import command_rule, exclude_from_ci
 from ..linter import RuleError
 
 
+@exclude_from_ci
 @command_rule
 def missing_command_help_rule(linter, command_name):
     if not linter.get_command_help(command_name):
