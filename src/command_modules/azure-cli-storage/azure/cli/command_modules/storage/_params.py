@@ -57,6 +57,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                       completer=get_storage_name_completion_list(t_queue_service, 'list_queues'))
     progress_type = CLIArgumentType(help='Include this flag to disable progress reporting for the command.',
                                     action='store_true', validator=add_progress_callback)
+    socket_timeout_type = CLIArgumentType(help='The socket timeout used by the service to regulate data flow.',
+                                          type=int)
 
     sas_help = 'The permissions the SAS grants. Allowed values: {}. Do not use if a stored access policy is ' \
                'referenced with --id that specifies this value. Can be combined.'
@@ -249,6 +251,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_enum_type(get_blob_types()))
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
         c.extra('no_progress', progress_type)
+        c.extra('socket_timeout', socket_timeout_type)
         # TODO: Remove once #807 is complete. Smart Create Generation requires this parameter.
         # register_extra_cli_argument('storage blob upload', '_subscription_id', options_list=('--subscription',),
         #                              help=argparse.SUPPRESS)
@@ -271,6 +274,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('validate_content', action='store_true', min_api='2016-05-31', arg_group='Content Control')
         c.argument('blob_type', options_list=('--type', '-t'), arg_type=get_enum_type(get_blob_types()))
         c.extra('no_progress', progress_type)
+        c.extra('socket_timeout', socket_timeout_type)
 
     with self.argument_context('storage blob download') as c:
         c.argument('file_path', options_list=('--file', '-f'), type=file_type, completer=FilesCompleter())
@@ -279,6 +283,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('end_range', type=int)
         c.argument('validate_content', action='store_true', min_api='2016-05-31')
         c.extra('no_progress', progress_type)
+        c.extra('socket_timeout', socket_timeout_type)
 
     with self.argument_context('storage blob download-batch') as c:
         from azure.cli.command_modules.storage._validators import process_blob_download_batch_parameters
@@ -287,6 +292,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('destination', options_list=('--destination', '-d'))
         c.argument('source', options_list=('--source', '-s'), validator=process_blob_download_batch_parameters)
         c.extra('no_progress', progress_type)
+        c.extra('socket_timeout', socket_timeout_type)
         c.argument('max_connections', type=int)
 
     with self.argument_context('storage blob delete') as c:
