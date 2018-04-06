@@ -1468,10 +1468,13 @@ def create_express_route_peering(
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
         advertised_public_prefixes=None, customer_asn=None, routing_registry_name=None,
         route_filter=None):
-    (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, ExpressRoutePeeringType,
-     RouteFilter) = cmd.get_models(
-         'ExpressRouteCircuitPeering', 'ExpressRouteCircuitPeeringConfig', 'ExpressRoutePeeringType',
-         'RouteFilter')
+    (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, RouteFilter) = \
+        cmd.get_models('ExpressRouteCircuitPeering', 'ExpressRouteCircuitPeeringConfig', 'RouteFilter')
+
+    if cmd.supported_api_version(min_api='2018-02-01'):
+        ExpressRoutePeeringType = cmd.get_models('ExpressRoutePeeringType')
+    else:
+        ExpressRoutePeeringType = cmd.get_models('ExpressRouteCircuitPeeringType')
 
     peering = ExpressRouteCircuitPeering(
         peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
