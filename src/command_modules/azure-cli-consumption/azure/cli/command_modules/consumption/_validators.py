@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from datetime import datetime
+from decimal import Decimal
 from azure.cli.core.util import CLIError
 
 
@@ -22,6 +23,15 @@ def get_datetime_type():
                 continue
         raise ValueError("Input '{}' not valid. Valid example: 2017-02-11T23:59:59Z".format(string))
     return datetime_type
+
+
+def get_decimal_type():
+    def decimal_type(string):
+        try:
+            return Decimal(string)
+        except ValueError:
+            raise ValueError("the value passed cannot be converted to decimal")
+    return decimal_type
 
 
 def validate_both_start_end_dates(namespace):

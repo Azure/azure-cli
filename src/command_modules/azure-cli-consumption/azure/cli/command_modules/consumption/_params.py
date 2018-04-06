@@ -4,8 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
-from ._validators import get_datetime_type
-from decimal import Decimal
+# pylint: disable=too-many-statements
+from ._validators import (get_datetime_type,
+                          get_decimal_type)
 
 
 def load_arguments(self, _):
@@ -40,10 +41,10 @@ def load_arguments(self, _):
         cb.argument('resource_group_name', options_list='--resource-group-name', type=str, help='Resource group of the budget.')
         cb.argument('budget_name', options_list='--budget-name', type=str, help='Name of a budget.')
         cb.argument('category', options_list=['--category', '-c'], type=str, help='Category of the budget can be cost or usage.')
-        cb.argument('amount', options_list=['--amount', '-a'], type=Decimal, help='Amount of a budget.')
-        cb.argument('time_grain', options_list='--time_grain', type=str, help='Time grain of the budget can be monthly, quarterly, or annually.')
-        cb.argument('start_date', options_list=['--start_date', '-s'], type=get_datetime_type(), help='Start date (YYYY-MM-DD in UTC) of time period of a budget.')
-        cb.argument('end_date', options_list=['--end_date', '-e'], type=get_datetime_type(), help='End date (YYYY-MM-DD in UTC) of time period of a budget.')
+        cb.argument('amount', options_list=['--amount', '-a'], type=get_decimal_type(), help='Amount of a budget.')
+        cb.argument('time_grain', options_list='--time-grain', type=str, help='Time grain of the budget can be monthly, quarterly, or annually.')
+        cb.argument('start_date', options_list=['--start-date', '-s'], type=get_datetime_type(), help='Start date (YYYY-MM-DD in UTC) of time period of a budget.')
+        cb.argument('end_date', options_list=['--end-date', '-e'], type=get_datetime_type(), help='End date (YYYY-MM-DD in UTC) of time period of a budget.')
         cb.argument('resource_groups', options_list='--resource-groups', nargs='+', help='Space-separated list of resource groups to filter on.')
         cb.argument('resources', options_list='--resources', nargs='+', help='Space-separated list of resource instances to filter on.')
         cb.argument('meters', options_list='--meters', nargs='+', help='Space-separated list of meters to filter on. Required if category is usage.')
