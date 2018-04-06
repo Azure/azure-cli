@@ -36,7 +36,7 @@ def load_arguments(self, _):
     from azure.keyvault.models import JsonWebKeyOperation
     from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes
     from azure.mgmt.keyvault.models.key_vault_management_client_enums import (
-        SkuName, KeyPermissions, SecretPermissions, CertificatePermissions)
+        SkuName, KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions)
 
     # ARGUMENT DEFINITIONS
     vault_name_type = CLIArgumentType(
@@ -73,10 +73,11 @@ def load_arguments(self, _):
         c.argument('key_permissions', arg_type=get_enum_type(KeyPermissions), metavar='PERM', nargs='*', help='Space-separated list of key permissions to assign.', validator=validate_policy_permissions)
         c.argument('secret_permissions', arg_type=get_enum_type(SecretPermissions), metavar='PERM', nargs='*', help='Space-separated list of secret permissions to assign.')
         c.argument('certificate_permissions', arg_type=get_enum_type(CertificatePermissions), metavar='PERM', nargs='*', help='Space-separated list of certificate permissions to assign.')
+        c.argument('storage_permissions', arg_type=get_enum_type(StoragePermissions), metavar='PERM', nargs='*', help='Space-separated list of storage permissions to assign.')
     # endregion
 
     # region Shared
-    for item in ['key', 'secret', 'certificate']:
+    for item in ['key', 'secret', 'certificate', 'storage-account']:
         with self.argument_context('keyvault ' + item) as c:
             c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item), id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
             c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)

@@ -212,7 +212,7 @@ def recover_keyvault(cmd, client, vault_name, resource_group_name, location):
     _, _, tenant_id = profile.get_login_credentials(
         resource=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
 
-    params = VaultCreateOrUpdateParameters(location,
+    params = VaultCreateOrUpdateParameters(location=location,
                                            properties={'tenant_id': tenant_id,
                                                        'sku': Sku(name=SkuName.standard.value),
                                                        'create_mode': CreateMode.recover.value})
@@ -360,7 +360,7 @@ def _object_id_args_helper(cli_ctx, object_id, spn, upn):
 
 def set_policy(cmd, client, resource_group_name, vault_name,
                object_id=None, spn=None, upn=None, key_permissions=None, secret_permissions=None,
-               certificate_permissions=None):
+               certificate_permissions=None, storage_permissions=None):
     """ Update security policy settings for a Key Vault. """
     from azure.mgmt.keyvault.models import (
         VaultCreateOrUpdateParameters, AccessPolicyEntry, Permissions)
@@ -378,7 +378,8 @@ def set_policy(cmd, client, resource_group_name, vault_name,
             object_id=object_id,
             permissions=Permissions(keys=key_permissions,
                                     secrets=secret_permissions,
-                                    certificates=certificate_permissions)))
+                                    certificates=certificate_permissions,
+                                    storage=storage_permissions)))
     else:
         # Modify existing policy.
         # If key_permissions is not set, use prev. value (similarly with secret_permissions).
@@ -386,7 +387,8 @@ def set_policy(cmd, client, resource_group_name, vault_name,
         secrets = policy.permissions.secrets if secret_permissions is None else secret_permissions
         certs = policy.permissions.certificates \
             if certificate_permissions is None else certificate_permissions
-        policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs)
+        storage = policy.permissions.storage if storage_permissions is None else storage_permissions
+        policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs, storage=storage)
     return client.create_or_update(resource_group_name=resource_group_name,
                                    vault_name=vault_name,
                                    parameters=VaultCreateOrUpdateParameters(
@@ -420,7 +422,7 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 def create_key(client, vault_base_url, key_name, destination, key_size=None, key_ops=None,
                disabled=False, expires=None, not_before=None, tags=None):
     from azure.keyvault.models import KeyAttributes
-    key_attrs = KeyAttributes(not disabled, not_before, expires)
+    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
     return client.create_key(
         vault_base_url, key_name, destination, key_size, key_ops, key_attrs, tags)
 
@@ -485,7 +487,7 @@ def import_key(client, vault_base_url, key_name, destination=None, key_ops=None,
                     value = _to_bytes(regex2.findall(value)[0])
                 setattr(dest, name, value)
 
-    key_attrs = KeyAttributes(not disabled, not_before, expires)
+    key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
     key_obj = JsonWebKey(key_ops=key_ops)
     if pem_file:
         key_obj.kty = 'RSA'
@@ -568,7 +570,7 @@ def restore_secret(client, vault_base_url, file_path):
 def create_certificate(client, vault_base_url, certificate_name, certificate_policy,
                        disabled=False, tags=None, validity=None):
     from azure.keyvault.models import CertificateAttributes
-    cert_attrs = CertificateAttributes(not disabled)
+    cert_attrs = CertificateAttributes(enabled=not disabled)
     logger.info("Starting long-running operation 'keyvault certificate create'")
 
     if validity is not None:
@@ -715,8 +717,8 @@ def add_certificate_contact(client, vault_base_url, contact_email, contact_name=
     try:
         contacts = client.get_certificate_contacts(vault_base_url)
     except KeyVaultErrorException:
-        contacts = Contacts([])
-    contact = Contact(contact_email, contact_name, contact_phone)
+        contacts = Contacts(contact_list=[])
+    contact = Contact(email_address=contact_email, name=contact_name, phone=contact_phone)
     if any((x for x in contacts.contact_list if x.email_address == contact_email)):
         raise CLIError("contact '{}' already exists".format(contact_email))
     contacts.contact_list.append(contact)
@@ -726,9 +728,10 @@ def add_certificate_contact(client, vault_base_url, contact_email, contact_name=
 def delete_certificate_contact(client, vault_base_url, contact_email):
     """ Remove a certificate contact from the specified vault. """
     from azure.keyvault.models import Contacts
-    contacts = client.get_certificate_contacts(vault_base_url).contact_list
-    remaining = Contacts([x for x in contacts if x.email_address != contact_email])
-    if len(contacts) == len(remaining.contact_list):
+    orig_contacts = client.get_certificate_contacts(vault_base_url).contact_list
+    remaining_contacts = [ x for x in client.get_certificate_contacts(vault_base_url).contact_list if x.email_address != contact_email ]
+    remaining = Contacts(contact_list=remaining_contacts)
+    if len(remaining_contacts) == len(orig_contacts):
         raise CLIError("contact '{}' not found in vault '{}'".format(contact_email, vault_base_url))
     if remaining.contact_list:
         return client.set_certificate_contacts(vault_base_url, remaining.contact_list)
@@ -746,9 +749,9 @@ def create_certificate_issuer(client, vault_base_url, issuer_name, provider_name
     :param organization_id: The organization id.
     """
     from azure.keyvault.models import IssuerCredentials, OrganizationDetails, IssuerAttributes
-    credentials = IssuerCredentials(account_id, password)
-    issuer_attrs = IssuerAttributes(not disabled)
-    org_details = OrganizationDetails(organization_id, admin_details=[])
+    credentials = IssuerCredentials(account_id=account_id, password=password)
+    issuer_attrs = IssuerAttributes(enabled=not disabled)
+    org_details = OrganizationDetails(id=organization_id, admin_details=[])
     return client.set_certificate_issuer(
         vault_base_url, issuer_name, provider_name, credentials, org_details, issuer_attrs)
 
@@ -798,7 +801,7 @@ def add_certificate_issuer_admin(client, vault_base_url, issuer_name, email, fir
     admins = org_details.admin_details
     if any((x for x in admins if x.email_address == email)):
         raise CLIError("admin '{}' already exists".format(email))
-    new_admin = AdministratorDetails(first_name, last_name, email, phone)
+    new_admin = AdministratorDetails(first_name=first_name, last_name=last_name, email_address=email, phone=phone)
     admins.append(new_admin)
     org_details.admin_details = admins
     result = client.set_certificate_issuer(

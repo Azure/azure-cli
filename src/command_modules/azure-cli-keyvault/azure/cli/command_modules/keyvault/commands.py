@@ -117,3 +117,6 @@ def load_command_table(self, _):
         g.keyvault_custom('list', 'list_certificate_issuer_admins')
         g.keyvault_custom('add', 'add_certificate_issuer_admin')
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
+
+    with self.command_group('keyvault storage-account', kv_data_sdk) as g:
+        g.keyvault_command('add', 'set_storage_account')

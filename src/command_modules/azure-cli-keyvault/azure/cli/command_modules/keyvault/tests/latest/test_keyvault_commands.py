@@ -624,7 +624,7 @@ class KeyVaultSoftDeleteScenarioTest(LiveScenarioTest):
             'cert_perms': ' '.join(cert_perms)
         })
 
-        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms} --secret-permissions {secret_perms} --certificate-permissions {cert_perms`}')
+        self.cmd('keyvault set-policy -n {kv} --object-id {obj_id} --key-permissions {key_perms} --secret-permissions {secret_perms} --certificate-permissions {cert_perms}')
 
         # create, delete, restore, and purge a secret
         self.cmd('keyvault secret set --vault-name {kv} -n secret1 --value ABC123',
