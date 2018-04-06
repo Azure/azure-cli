@@ -50,9 +50,15 @@ def load_command_table(self, _):
         g.command('show', 'get')
         g.custom_command('update', 'create_or_update_project')
 
-    with self.command_group('dms task', dms_tasks_sdk, client_factory=dms_cf_tasks) as g:
+    with self.command_group('dms project', dms_sdk, client_factory=dms_cf_services) as g:
+        g.custom_command('check-name-availability', 'check_project_name_availability')
+
+    with self.command_group('dms project task', dms_tasks_sdk, client_factory=dms_cf_tasks) as g:
         g.custom_command('create', 'create_task')
         g.command('delete', 'delete')
         g.command('list', 'list')
         g.command('show', 'get')
         g.command('cancel', 'cancel')
+
+    with self.command_group('dms project task', dms_sdk, client_factory=dms_cf_services) as g:
+        g.custom_command('check-name-availability', 'check_task_name_availability')

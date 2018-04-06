@@ -60,6 +60,9 @@ def stop_service(cmd, client, service_name, resource_group_name, no_wait=False):
 
 # region Project
 
+def check_project_name_availability(cmd, client, resource_group_name, service_name, project_name):
+    return client.check_children_name_availability(group_name=resource_group_name, service_name=service_name, name=project_name, type='projects')
+
 def create_or_update_project(cmd,
                              client,
                              project_name,
@@ -118,6 +121,9 @@ def create_or_update_project(cmd,
 # endregion
 
 # region Task
+
+def check_task_name_availability(cmd, client, resource_group_name, service_name, task_name):
+    return client.check_children_name_availability(group_name=resource_group_name, service_name=service_name, name=task_name, type='tasks')
 
 def list_tasks(cmd, client, resource_group_name, service_name, project_name, task_type=None):
     return list(client.tasks.list(group_name=resource_group_name,
