@@ -125,7 +125,7 @@ class H264Complexity(Enum):
 class EncoderNamedPreset(Enum):
 
     adaptive_streaming = "AdaptiveStreaming"
-    content_adaptive_multiple_bitrate_mp4 = "ContentAdaptiveMultipleBitrateMP4"
+    # content_adaptive_multiple_bitrate_mp4 = "ContentAdaptiveMultipleBitrateMP4"
     aac_good_quality_audio = "AACGoodQualityAudio"
     h264_multiple_bitrate1080p = "H264MultipleBitrate1080p"
     h264_multiple_bitrate720p = "H264MultipleBitrate720p"
