@@ -39,13 +39,13 @@ def load_arguments(self, _):
 
     (Access, ApplicationGatewayFirewallMode, ApplicationGatewayProtocol, ApplicationGatewayRedirectType,
      ApplicationGatewayRequestRoutingRuleType, ApplicationGatewaySkuName, AuthenticationMethod, Direction,
-     ExpressRouteCircuitPeeringType, ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, IPAllocationMethod,
+     ExpressRoutePeeringType, ExpressRouteCircuitSkuFamily, ExpressRouteCircuitSkuTier, IPAllocationMethod,
      IPVersion, LoadBalancerSkuName, LoadDistribution, ProbeProtocol, ProcessorArchitecture, Protocol, PublicIPAddressSkuName,
      RouteNextHopType, SecurityRuleAccess, SecurityRuleProtocol, SecurityRuleDirection, TransportProtocol,
      VirtualNetworkGatewaySkuName, VirtualNetworkGatewayType, VpnClientProtocol, VpnType, ZoneType) = self.get_models(
          'Access', 'ApplicationGatewayFirewallMode', 'ApplicationGatewayProtocol', 'ApplicationGatewayRedirectType',
          'ApplicationGatewayRequestRoutingRuleType', 'ApplicationGatewaySkuName', 'AuthenticationMethod', 'Direction',
-         'ExpressRouteCircuitPeeringType', 'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier', 'IPAllocationMethod',
+         'ExpressRoutePeeringType', 'ExpressRouteCircuitSkuFamily', 'ExpressRouteCircuitSkuTier', 'IPAllocationMethod',
          'IPVersion', 'LoadBalancerSkuName', 'LoadDistribution', 'ProbeProtocol', 'ProcessorArchitecture', 'Protocol', 'PublicIPAddressSkuName',
          'RouteNextHopType', 'SecurityRuleAccess', 'SecurityRuleProtocol', 'SecurityRuleDirection', 'TransportProtocol',
          'VirtualNetworkGatewaySkuName', 'VirtualNetworkGatewayType', 'VpnClientProtocol', 'VpnType', 'ZoneType')
@@ -436,7 +436,7 @@ def load_arguments(self, _):
         c.argument('vlan_id', help='Identifier used to identify the customer.')
         c.argument('circuit_name', circuit_name_type)
         c.argument('peering_name', name_arg_type, id_part='child_name_1')
-        c.argument('peering_type', validator=validate_peering_type, arg_type=get_enum_type(ExpressRouteCircuitPeeringType), help='BGP peering type for the circuit.')
+        c.argument('peering_type', validator=validate_peering_type, arg_type=get_enum_type(ExpressRoutePeeringType), help='BGP peering type for the circuit.')
         c.argument('sku_family', arg_type=get_enum_type(ExpressRouteCircuitSkuFamily))
         c.argument('sku_tier', arg_type=get_enum_type(ExpressRouteCircuitSkuTier))
         c.argument('primary_peer_address_prefix', options_list=['--primary-peer-subnet'], help='/30 subnet used to configure IP addresses for primary interface.')
