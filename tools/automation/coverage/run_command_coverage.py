@@ -14,8 +14,6 @@ import sys
 import automation.tests.nose_helper as automation_tests
 import automation.utilities.path as automation_path
 
-from azure.cli.testsdk.base import ENV_COMMAND_COVERAGE, COVERAGE_FILE
-
 
 def init(root):
     command_coverage = root.add_parser('command', help='Examine command and parameter test coverage.')
@@ -31,12 +29,14 @@ def init(root):
 
 # pylint: disable=too-few-public-methods
 class CommandCoverageContext(object):
+
     FILE_NAME = 'command_coverage.txt'
 
     def __init__(self, data_file_path):
         self._data_file_path = os.path.join(data_file_path, self.FILE_NAME)
 
     def __enter__(self):
+        from azure.cli.testsdk.base import ENV_COMMAND_COVERAGE
         os.environ[ENV_COMMAND_COVERAGE] = self._data_file_path
         automation_path.make_dirs(os.path.dirname(self.coverage_file_path))
         with open(self.coverage_file_path, 'w') as f:
@@ -45,6 +45,7 @@ class CommandCoverageContext(object):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        from azure.cli.testsdk.base import ENV_COMMAND_COVERAGE
         del os.environ[ENV_COMMAND_COVERAGE]
 
     @property
@@ -155,6 +156,7 @@ def run_command_coverage(args):
 
     from azure.cli.core import get_default_cli
     from azure.cli.core.file_util import create_invoker_and_load_cmds_and_args
+    from azure.cli.testsdk.base import ENV_COMMAND_COVERAGE, COVERAGE_FILE
 
     print("""
     *******************************
