@@ -64,11 +64,17 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Space-separated list of built preset names.')
         c.argument('description', help='Customer supplied description of the transform.')
 
+    with self.argument_context('ams transform list') as c:
+        c.argument('account_name', id_part=None)
+
     with self.argument_context('ams asset') as c:
         c.argument('account_name', account_name_arg_type, id_part='name',
                    help='The name of the Azure Media Services account within the resource group.')
         c.argument('asset_name', name_arg_type, id_part='child_name_1',
                    help='The name of the asset.')
+
+    with self.argument_context('ams asset list') as c:
+        c.argument('account_name', id_part=None)
 
     with self.argument_context('ams asset create') as c:
         c.argument('alternate_id', help='The alternate id of the asset.')
@@ -87,6 +93,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of the transform.')
         c.argument('job_name', name_arg_type, id_part='child_name_2',
                    help='The name of the job.')
+
+    with self.argument_context('ams job list') as c:
+        c.argument('account_name', id_part=None)
 
     with self.argument_context('ams job start') as c:
         c.argument('priority', arg_type=get_enum_type(Priority),
