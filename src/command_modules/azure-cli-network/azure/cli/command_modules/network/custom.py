@@ -1468,10 +1468,13 @@ def create_express_route_peering(
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
         advertised_public_prefixes=None, customer_asn=None, routing_registry_name=None,
         route_filter=None):
-    (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, ExpressRouteCircuitPeeringType,
-     RouteFilter) = cmd.get_models(
-         'ExpressRouteCircuitPeering', 'ExpressRouteCircuitPeeringConfig', 'ExpressRouteCircuitPeeringType',
-         'RouteFilter')
+    (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, RouteFilter) = \
+        cmd.get_models('ExpressRouteCircuitPeering', 'ExpressRouteCircuitPeeringConfig', 'RouteFilter')
+
+    if cmd.supported_api_version(min_api='2018-02-01'):
+        ExpressRoutePeeringType = cmd.get_models('ExpressRoutePeeringType')
+    else:
+        ExpressRoutePeeringType = cmd.get_models('ExpressRouteCircuitPeeringType')
 
     peering = ExpressRouteCircuitPeering(
         peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
@@ -1479,7 +1482,7 @@ def create_express_route_peering(
         secondary_peer_address_prefix=secondary_peer_address_prefix,
         shared_key=shared_key)
 
-    if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value:
+    if peering_type == ExpressRoutePeeringType.microsoft_peering.value:
         peering.microsoft_peering_config = ExpressRouteCircuitPeeringConfig(
             advertised_public_prefixes=advertised_public_prefixes,
             customer_asn=customer_asn,
