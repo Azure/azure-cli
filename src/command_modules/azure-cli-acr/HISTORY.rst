@@ -5,6 +5,7 @@ Release History
 
 2.0.23
 ++++++
+* Improve repository commands error messages.
 * Improve error handling of wincred fallback.
 * `sdist` is now compatible with wheel 0.31.0
 
