@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.0.29
+++++++
+* Minor fixes.
+
 2.0.28
 ++++++
 * `application-gateway create`: Fix issue where tags could not be set. [#5936](https://github.com/Azure/azure-cli/issues/5936)

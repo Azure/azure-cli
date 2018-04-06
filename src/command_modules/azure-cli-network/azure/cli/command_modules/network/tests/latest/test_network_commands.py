@@ -692,8 +692,7 @@ class NetworkRouteFilterScenarioTest(ScenarioTest):
         self.cmd('network route-filter delete -g {rg} -n {filter}')
 
 
-# Convert back to ScenarioTest and re-record when issue #5998 is fixed
-class NetworkExpressRouteScenarioTest(LiveScenarioTest):
+class NetworkExpressRouteScenarioTest(ScenarioTest):
 
     def _test_express_route_peering(self):
 
@@ -707,8 +706,7 @@ class NetworkExpressRouteScenarioTest(LiveScenarioTest):
             })
             self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type {peering} --peer-asn {asn} --vlan-id {vlan} --primary-peer-subnet {pri_prefix} --secondary-peer-subnet {sec_prefix}')
 
-        # create public and private peerings
-        _create_peering('AzurePublicPeering', 10000, 100, '100.0.0.0/30', '101.0.0.0/30')
+        # create private peerings
         _create_peering('AzurePrivatePeering', 10001, 101, '102.0.0.0/30', '103.0.0.0/30')
 
         self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3')
@@ -721,9 +719,9 @@ class NetworkExpressRouteScenarioTest(LiveScenarioTest):
         self.cmd('network express-route peering delete -g {rg} --circuit-name {er} -n MicrosoftPeering')
 
         self.cmd('network express-route peering list --resource-group {rg} --circuit-name {er}',
-                 checks=self.check('length(@)', 2))
+                 checks=self.check('length(@)', 1))
 
-        self.cmd('network express-route peering update -g {rg} --circuit-name {er} -n AzurePublicPeering --set vlanId=200',
+        self.cmd('network express-route peering update -g {rg} --circuit-name {er} -n AzurePrivatePeering --set vlanId=200',
                  checks=self.check('vlanId', 200))
 
     def _test_express_route_auth(self):
@@ -792,8 +790,7 @@ class NetworkExpressRouteScenarioTest(LiveScenarioTest):
         self.cmd('network express-route list --resource-group {rg}', checks=self.is_empty())
 
 
-# Convert back to ScenarioTest and re-record when issue #5998 is fixed
-class NetworkExpressRouteIPv6PeeringScenarioTest(LiveScenarioTest):
+class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_express_route_ipv6_peering')
     def test_network_express_route_ipv6_peering(self, resource_group):
