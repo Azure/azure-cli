@@ -138,8 +138,9 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
         client_kwargs = {'account_name': account_name,
                          'account_key': account_key,
                          'connection_string': connection_string,
-                         'sas_token': sas_token,
-                         'socket_timeout': socket_timeout}
+                         'sas_token': sas_token}
+        if socket_timeout:
+            client_kwargs['socket_timeout'] = socket_timeout
         if endpoint_suffix:
             client_kwargs['endpoint_suffix'] = endpoint_suffix
         client = service_type(**client_kwargs)
