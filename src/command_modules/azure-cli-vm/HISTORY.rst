@@ -4,7 +4,8 @@ Release History
 ===============
 2.0.31
 ++++++
-* vm resize will check if the requested size is different than currently set and update only on change
+* `vm diagnostics set`: detect VM's OS type reliably
+* `vm resize`: check if the requested size is different than currently set and update only on change
 
 2.0.30
 ++++++
