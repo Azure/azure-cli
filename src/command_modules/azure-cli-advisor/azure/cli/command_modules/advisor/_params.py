@@ -19,7 +19,7 @@ from ._validators import \
 def load_arguments(self, _):
     ids_arg_type = CLIArgumentType(nargs='+', options_list=['--ids'],
                                    help='One or more resource IDs (space-delimited). If provided, no other '
-                                        '"Resource Id" arguments should be specified.')
+                                        '"hihi Resource Id" arguments should be specified.')
 
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'],
                                     help='The name of the recommendation as output by the list command.',
