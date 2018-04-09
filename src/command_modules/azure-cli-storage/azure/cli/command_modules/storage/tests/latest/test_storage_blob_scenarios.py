@@ -162,7 +162,6 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                          account_info, blob_name, container, downloaded)
         self.assertTrue(os.path.isfile(downloaded), 'The file is not downloaded.')
 
-
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     def test_storage_blob_lease_operations(self, resource_group, storage_account):
