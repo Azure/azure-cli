@@ -375,7 +375,7 @@ class AzCliCommandInvoker(CommandInvoker):
     def _rudimentary_get_command(self, args):  # pylint: disable=no-self-use
         """ Rudimentary parsing to get the command """
         nouns = []
-        command_names = self.commands_loader.command_table.keys()
+
         for arg in args:
             if arg[0] != '-':
                 nouns.append(arg)
@@ -384,7 +384,10 @@ class AzCliCommandInvoker(CommandInvoker):
 
         def _find_args(args):
             search = ' '.join(args)
-            return next((x for x in command_names if x.startswith(search)), False)
+            try:
+                return self.commands_loader.command_table[search]
+            except KeyError:
+                return False
 
         # since the command name may be immediately followed by a positional arg, strip those off
         while nouns and not _find_args(nouns):
