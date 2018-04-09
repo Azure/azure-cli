@@ -34,8 +34,6 @@ def contains_no_plus_dev(mod_version):
 def changes_require_version_bump(mod_name, mod_version, mod_path, base_repo=None, base_tag=None):
     revision_range = os.environ.get('TRAVIS_COMMIT_RANGE', None)
     if revision_range:
-        # See https://github.com/travis-ci/travis-ci/issues/4596
-        revision_range = revision_range.replace('...', '..')
         cmd = ["git", "diff", revision_range, "--", mod_path, ":(exclude)*/tests/*"]
         print('Executing: {}'.format(' '.join(cmd)))
         changes = subprocess.check_output(cmd, cwd=mod_path, universal_newlines=True).strip()
