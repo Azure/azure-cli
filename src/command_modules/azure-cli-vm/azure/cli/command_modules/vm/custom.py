@@ -79,14 +79,6 @@ def _construct_identity_info(identity_scope, identity_role, port, implicit_ident
     return info
 
 
-def _detect_os_type_for_diagnostics_ext(os_profile):
-    is_linux_os = bool(os_profile.linux_configuration)
-    is_windows_os = bool(os_profile.windows_configuration)
-    if not is_linux_os and not is_windows_os:
-        raise CLIError('Diagnostics extension can only be installed on Linux or Windows VM')
-    return is_linux_os
-
-
 # for injecting test seams to produce predicatable role assignment id for playback
 def _gen_guid():
     import uuid
@@ -170,9 +162,14 @@ def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk):
     return op.grant_access(resource_group_name, name, AccessLevel.read, duration_in_seconds)
 
 
-def _is_linux_vm(vm):
-    os_type = vm.storage_profile.os_disk.os_type.value
-    return os_type.lower() == 'linux'
+def _is_linux_os(vm):
+    os_type = vm.storage_profile.os_disk.os_type.value if vm.storage_profile.os_disk.os_type else None
+    if os_type:
+        return os_type.lower() == 'linux'
+    # the os_type could be None for VM scaleset, let us check out os configurations
+    if vm.os_profile.linux_configuration:
+        return bool(vm.os_profile.linux_configuration)
+    return False
 
 
 def _merge_secrets(secrets):
@@ -459,7 +456,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
                                 identity_scope=identity_scope)
 
     port = port or _MSI_PORT
-    ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if _is_linux_vm(vm) else 'Windows')
+    ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if _is_linux_os(vm) else 'Windows')
     logger.info("Provisioning extension: '%s'", ext_name)
     poller = set_extension(cmd, resource_group_name, vm_name,
                            publisher='Microsoft.ManagedIdentity',
@@ -1098,7 +1095,7 @@ def set_diagnostics_extension(
     client = _compute_client_factory(cmd.cli_ctx)
     vm = client.virtual_machines.get(resource_group_name, vm_name, 'instanceView')
     # pylint: disable=no-member
-    is_linux_os = _detect_os_type_for_diagnostics_ext(vm.os_profile)
+    is_linux_os = _is_linux_os(vm)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     if is_linux_os:  # check incompatible version
         exts = vm.instance_view.extensions or []
@@ -1478,7 +1475,7 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
             get_key_vault_base_url(cmd.cli_ctx, parse_resource_id(keyvault)['name']), certificate, '')
         certificate = cert_info.sid
 
-    if not _is_linux_vm(vm):
+    if not _is_linux_os(vm):
         certificate_store = certificate_store or 'My'
     elif certificate_store:
         raise CLIError('Usage error: --certificate-store is only applicable on Windows VM')
@@ -1647,7 +1644,7 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
 def set_user(cmd, resource_group_name, vm_name, username, password=None, ssh_key_value=None,
              no_wait=False):
     vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-    if _is_linux_vm(vm):
+    if _is_linux_os(vm):
         return _set_linux_user(cmd, vm, resource_group_name, username, password, ssh_key_value, no_wait)
     else:
         if ssh_key_value:
@@ -1657,7 +1654,7 @@ def set_user(cmd, resource_group_name, vm_name, username, password=None, ssh_key
 
 def delete_user(cmd, resource_group_name, vm_name, username, no_wait=False):
     vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-    if not _is_linux_vm(vm):
+    if not _is_linux_os(vm):
         raise CLIError('Deleting a user is not supported on Windows VM')
     if no_wait:
         return _update_linux_access_extension(cmd, vm, resource_group_name,
@@ -1669,7 +1666,7 @@ def delete_user(cmd, resource_group_name, vm_name, username, no_wait=False):
 
 def reset_linux_ssh(cmd, resource_group_name, vm_name, no_wait=False):
     vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-    if not _is_linux_vm(vm):
+    if not _is_linux_os(vm):
         raise CLIError('Resetting SSH is not supported in Windows VM')
     if no_wait:
         return _update_linux_access_extension(cmd, vm, resource_group_name,
@@ -1719,8 +1716,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
                                   identity_scope=identity_scope)
 
     port = port or _MSI_PORT
-    ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if vmss.virtual_machine_profile.os_profile.linux_configuration
-                                                else 'Windows')
+    ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if _is_linux_os(vmss.virtual_machine_profile) else 'Windows')
     logger.info("Provisioning extension: '%s'", ext_name)
     poller = set_vmss_extension(cmd, resource_group_name, vmss_name,
                                 publisher='Microsoft.ManagedIdentity',
@@ -2218,7 +2214,7 @@ def set_vmss_diagnostics_extension(
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     # pylint: disable=no-member
-    is_linux_os = _detect_os_type_for_diagnostics_ext(vmss.virtual_machine_profile.os_profile)
+    is_linux_os = _is_linux_os(vmss.virtual_machine_profile)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     if is_linux_os and vmss.virtual_machine_profile.extension_profile:  # check incompatibles
         exts = vmss.virtual_machine_profile.extension_profile.extensions or []
