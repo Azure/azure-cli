@@ -759,8 +759,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         self.cmd('network express-route create -g {rg} -n {er} --bandwidth 50 --provider "Microsoft ER Test" --peering-location Area51 --sku-tier Premium --tags foo=doo')
         self.cmd('network express-route list', checks=[
             self.check('type(@)', 'array'),
-            self.check("length([?type == '{rt}']) == length(@)", True),
-            self.check('tags.foo', 'doo')
+            self.check("length([?type == '{rt}']) == length(@)", True)
         ])
         self.cmd('network express-route list --resource-group {rg}', checks=[
             self.check('type(@)', 'array'),
@@ -771,13 +770,14 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
             self.check('type(@)', 'object'),
             self.check('type', '{rt}'),
             self.check('name', '{er}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('tags.foo', 'doo')
         ])
         self.cmd('network express-route get-stats --resource-group {rg} --name {er}',
                  checks=self.check('type(@)', 'object'))
 
         self.cmd('network express-route update -g {rg} -n {er} --set tags.test=Test',
-                 checks=self.check('tags', {'test': 'Test'}))
+                 checks=self.check('tags.test', 'Test'))
 
         self.cmd('network express-route update -g {rg} -n {er} --tags foo=boo',
                  checks=self.check('tags.foo', 'boo'))

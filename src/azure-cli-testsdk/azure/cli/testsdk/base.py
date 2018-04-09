@@ -26,6 +26,10 @@ from .utilities import find_recording_dir
 logger = logging.getLogger('azure.cli.testsdk')
 
 
+ENV_COMMAND_COVERAGE = 'AZURE_CLI_TEST_COMMAND_COVERAGE'
+COVERAGE_FILE = 'az_command_coverage.txt'
+
+
 class CheckerMixin(object):
 
     def _apply_kwargs(self, val):
@@ -180,6 +184,12 @@ class ExecutionResult(object):
         self.output = ''
         self.applog = ''
         self.command_coverage = {}
+
+        if os.environ.get(ENV_COMMAND_COVERAGE, None):
+            with open(COVERAGE_FILE, 'a') as coverage_file:
+                if command.startswith('az '):
+                    command = command[3:]
+                coverage_file.write(command + '\n')
 
         self._in_process_execute(cli_ctx, command, expect_failure=expect_failure)
 
