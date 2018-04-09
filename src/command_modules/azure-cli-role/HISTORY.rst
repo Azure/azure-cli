@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.23
+++++++
+* `az ad app create/update`: document updates on using `--required-resource-accesses`
 
 2.0.22
 ++++++
