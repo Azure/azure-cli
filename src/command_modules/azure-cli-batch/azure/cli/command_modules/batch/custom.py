@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import json
 import base64
 from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
 
@@ -25,7 +24,7 @@ from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.core._profile import Profile
-from azure.cli.core.util import sdk_no_wait
+from azure.cli.core.util import sdk_no_wait, get_file_json
 
 logger = get_logger(__name__)
 MAX_TASKS_PER_REQUEST = 100
@@ -227,22 +226,21 @@ def update_pool(client,
                 start_task_environment_settings=None, start_task_wait_for_success=None,
                 start_task_max_task_retry_count=None):
     if json_file:
-        with open(json_file) as f:
-            json_obj = json.load(f)
-            param = None
-            try:
-                param = PoolUpdatePropertiesParameter.from_dict(json_obj)
-            except DeserializationError:
-                pass
-            if not param:
-                raise ValueError("JSON file '{}' is not in correct format.".format(json_file))
+        json_obj = get_file_json(json_file)
+        param = None
+        try:
+            param = PoolUpdatePropertiesParameter.from_dict(json_obj)
+        except DeserializationError:
+            pass
+        if not param:
+            raise ValueError("JSON file '{}' is not in correct format.".format(json_file))
 
-            if param.certificate_references is None:
-                param.certificate_references = []
-            if param.metadata is None:
-                param.metadata = []
-            if param.application_package_references is None:
-                param.application_package_references = []
+        if param.certificate_references is None:
+            param.certificate_references = []
+        if param.metadata is None:
+            param.metadata = []
+        if param.application_package_references is None:
+            param.application_package_references = []
     else:
         if certificate_references is None:
             certificate_references = []
@@ -287,17 +285,16 @@ def create_task(client,
     task = None
     tasks = []
     if json_file:
-        with open(json_file) as f:
-            json_obj = json.load(f)
+        json_obj = get_file_json(json_file)
+        try:
+            task = TaskAddParameter.from_dict(json_obj)
+        except DeserializationError:
+            tasks = []
             try:
-                task = TaskAddParameter.from_dict(json_obj)
-            except DeserializationError:
-                tasks = []
-                try:
-                    for json_task in json_obj:
-                        tasks.append(TaskAddParameter.from_dict(json_task))
-                except (DeserializationError, TypeError):
-                    raise ValueError("JSON file '{}' is not formatted correctly.".format(json_file))
+                for json_task in json_obj:
+                    tasks.append(TaskAddParameter.from_dict(json_task))
+            except (DeserializationError, TypeError):
+                raise ValueError("JSON file '{}' is not formatted correctly.".format(json_file))
     else:
         if command_line is None or task_id is None:
             raise ValueError("Missing required arguments.\nEither --json-file, "

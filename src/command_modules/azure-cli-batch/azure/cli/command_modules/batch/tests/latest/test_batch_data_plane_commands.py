@@ -7,6 +7,7 @@ import os
 import datetime
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from knack.util import CLIError
 from .batch_preparers import BatchAccountPreparer, BatchScenarioMixin
 
 
@@ -173,9 +174,9 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         self.batch_cmd('batch task delete --job-id {j_id} --task-id {t_id} --yes')
 
         self.batch_cmd('batch task create --job-id {j_id} --task-id aaa'
-                       ' --command-line "echo hello"').assert_with_checks([
+                       ' --command-line "ping 127.0.0.1"').assert_with_checks([
                            self.check('id', 'aaa'),
-                           self.check('commandLine', 'echo hello')])
+                           self.check('commandLine', 'ping 127.0.0.1')])
 
         task_counts = self.batch_cmd('batch job task-counts show --job-id {j_id}').get_output_in_json()
         self.assertEqual(task_counts["completed"], 0)
@@ -312,7 +313,7 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
             self.batch_cmd('batch pool create --json-file batch-pool-create-missing.json')
 
         # test create pool from invalid JSON file
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(CLIError):
             self.kwargs['json'] = self._get_test_data_file('batch-pool-create-invalid.json').replace('\\', '\\\\')
             self.batch_cmd('batch pool create --json-file {json}')
 
