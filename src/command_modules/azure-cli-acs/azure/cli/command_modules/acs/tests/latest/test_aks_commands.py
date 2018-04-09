@@ -163,7 +163,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'service_principal': sp_name,
             'client_secret': sp_password,
             'resource_type': 'Microsoft.ContainerService/ManagedClusters',
-            'k8s_version': '1.7.12'
+            'k8s_version': '1.8.10'
         })
 
         # show k8s versions
@@ -208,7 +208,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
         # get versions for upgrade in table format
-        k8s_upgrade_version = '1.8.7'
+        k8s_upgrade_version = '1.9.6'
         self.cmd('aks get-upgrades -g {resource_group} -n {name} --output=table', checks=[
             StringContainCheck('Upgrades'),
             StringContainCheck(k8s_upgrade_version)
