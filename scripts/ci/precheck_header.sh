@@ -19,7 +19,7 @@ if [ $TRAVIS_EVENT_TYPE == "pull_request" ] && [ $TRAVIS_REPO_SLUG == "Azure/azu
     latestCliReleaseTag=$(git describe --tags `git rev-list --tags='azure-cli-*' --max-count=1`)
     latestCliReleaseDir=$(mktemp -d)
     echo "Latest CLI release tag $latestCliReleaseTag"
-    git clone git@github.com/$TRAVIS_REPO_SLUG --branch $latestCliReleaseTag $latestCliReleaseDir
+    git clone https://github.com/$TRAVIS_REPO_SLUG --branch $latestCliReleaseTag $latestCliReleaseDir
     python -m automation.tests.verify_package_versions --base-repo $latestCliReleaseDir --base-tag $latestCliReleaseTag
 fi
 
