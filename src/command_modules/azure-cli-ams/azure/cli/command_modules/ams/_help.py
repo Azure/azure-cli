@@ -215,11 +215,6 @@ helps['ams streaming locator create'] = """
     short-summary: Create a streaming locator.
 """
 
-helps['ams streaming locator update'] = """
-    type: command
-    short-summary: Update a streaming locator.
-"""
-
 helps['ams streaming locator list'] = """
     type: command
     short-summary: List all the streaming locators within an Azure Media Services account.
@@ -243,11 +238,6 @@ helps['ams streaming policy'] = """
 helps['ams streaming policy create'] = """
     type: command
     short-summary: Create a streaming policy.
-"""
-
-helps['ams streaming policy update'] = """
-    type: command
-    short-summary: Update a streaming policy.
 """
 
 helps['ams streaming policy list'] = """
