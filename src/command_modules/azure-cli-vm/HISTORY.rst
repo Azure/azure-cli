@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.31
 ++++++
+* vmss: expose `az vmss perform-maintenance`
 * `vm diagnostics set`: detect VM's OS type reliably
 * `vm resize`: check if the requested size is different than currently set and update only on change
 
