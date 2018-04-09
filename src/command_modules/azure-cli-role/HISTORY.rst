@@ -2,13 +2,17 @@
 
 Release History
 ===============
+
 2.0.23
 ++++++
-* Minor changes
+* Minor fixes.
+
+2.0.23
+++++++
+* Minor fixes.
 
 2.0.22
 ++++++
-
 * `sdist` is now compatible with wheel 0.31.0
 
 2.0.21
