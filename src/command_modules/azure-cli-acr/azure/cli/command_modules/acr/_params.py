@@ -87,3 +87,6 @@ def load_arguments(self, _):
 
     with self.argument_context('acr replication create') as c:
         c.argument('replication_name', help='The name of the replication. Default to the location name.', completer=None)
+
+    with self.argument_context('acr test') as c:
+        c.positional('path')

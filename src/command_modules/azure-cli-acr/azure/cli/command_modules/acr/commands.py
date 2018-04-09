@@ -41,6 +41,7 @@ def load_command_table(self, _):
     )
 
     with self.command_group('acr', acr_custom_util) as g:
+        g.command('test', 'acr_test')
         g.command('check-name', 'acr_check_name', table_transformer=None)
         g.command('list', 'acr_list')
         g.command('create', 'acr_create')
