@@ -55,6 +55,7 @@ setup(
         'azure.cli',
         'azure.cli.command_modules',
         'azure.cli.command_modules.ams',
+        'azure.cli.command_modules.ams.operations',
         'azure.mediav3',
         'azure.mediav3.models',
         'azure.mediav3.operations'
