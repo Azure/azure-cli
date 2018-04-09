@@ -1,0 +1,73 @@
+FROM microsoft/windowsservercore:1709 AS base
+
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+ENV PYTHON_VERSION 3.6.5
+ENV PYTHON_HASH 9e96c934f5d16399f860812b4ac7002b
+ENV DESTINATION_FOLDER C:\\tools
+
+WORKDIR /tmp
+
+RUN $python_url = ('https://www.python.org/ftp/python/{0}/python-{0}-amd64.exe' -f $env:PYTHON_VERSION); \
+    Write-Host ('Downloading {0}...' -f $python_url); \
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
+    (New-Object System.Net.WebClient).DownloadFile($python_url, '/tmp/python-installer.exe'); \
+    Write-Host ('Checking hash...' -f $python_url); \
+    if ((Get-FileHash python-installer.exe -Algorithm md5).Hash -ne $env:PYTHON_HASH) { Write-Host 'Python installer checksum verification failed!'; exit 1; }; \
+    $install_folder = Join-Path -Path $env:DESTINATION_FOLDER -ChildPath 'python'; \
+    Write-Host ('Installing into {0}...' -f $install_folder); \
+    Start-Process python-installer.exe -Wait -ArgumentList @('/quiet', 'InstallAllUsers=1', 'TargetDir={0}' -f $install_folder, 'PrependPath=1', 'Shortcuts=0', 'Include_doc=0','Include_pip=1', 'Include_test=0');
+
+WORKDIR /
+
+RUN Remove-Item tmp -Recurse -Force
+
+FROM microsoft/powershell:6.0.2-nanoserver
+
+COPY --from=base ["tools", "tools"]
+
+USER ContainerAdministrator
+
+RUN setx /M PATH %PATH%;c:\tools\python\;c:\tools\python\scripts\;
+
+COPY . /azure-cli
+
+WORKDIR azure-cli
+
+USER ContainerUser
+
+RUN pip install wheel
+
+SHELL ["pwsh.exe", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+RUN $folder = @('src\\azure-cli','src\\azure-cli-core','src\\azure-cli-nspkg','src\\azure-cli-command_modules-nspkg'); \
+foreach($i in Get-ChildItem 'src\\command_modules\\azure-cli-*\\') \
+{ \
+    $folder += Join-Path 'src\\command_modules\\' $i.Name \
+} \
+$wheels = Join-Path $pwd 'wheels'; \
+Write-Host 'Building python packages...'; \
+foreach($f in $folder) \
+{ \
+    try { \
+        Push-Location $f; \
+        & python.exe setup.py bdist_wheel -d $wheels; \
+    } \
+    finally { \
+        Pop-Location \
+    } \
+}\ 
+Write-Host 'Installing python packages...'; \
+Push-Location $wheels; \
+$modules = (Get-ChildItem *.whl -Name); \
+foreach($m in $modules) \
+{ \
+    & pip install --no-cache-dir $m; \
+}\
+& pip install --no-cache-dir --force-reinstall --upgrade azure-nspkg azure-mgmt-nspkg; \
+Pop-Location; \
+Write-Host 'Done'; 
+
+WORKDIR /
+
+CMD pwsh.exe
