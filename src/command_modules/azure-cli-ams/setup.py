@@ -55,6 +55,9 @@ setup(
         'azure.cli',
         'azure.cli.command_modules',
         'azure.cli.command_modules.ams',
+        'azure.mediav3',
+        'azure.mediav3.models',
+        'azure.mediav3.operations'
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass
