@@ -106,3 +106,28 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
             actual_content = f.read()
 
         self.assertEqual(expect_content, actual_content)
+
+        # test sas-token input starting with '?'
+        if not sas.startswith('?'):
+            sas = '?' + sas
+
+        target_container = self.create_container(account_info)
+        self.storage_cmd('storage blob copy start -b dst -c {} --source-blob src --sas-token {} --source-container {}',
+                         account_info, target_container, sas, source_container)
+
+        start = time()
+        while True:
+            blob = self.storage_cmd('storage blob show -c {} -n dst',
+                                    account_info, target_container).get_output_in_json()
+            if blob["properties"]["copy"]["status"] == "success" or time() - start > 10:
+                break
+            sleep(.1)
+
+        target_file = self.create_temp_file(1)
+        self.storage_cmd('storage blob download -c {} -n dst -f "{}"', account_info,
+                         target_container, target_file)
+
+        with open(target_file, 'rb') as f:
+            actual_content = f.read()
+
+        self.assertEqual(expect_content, actual_content)
