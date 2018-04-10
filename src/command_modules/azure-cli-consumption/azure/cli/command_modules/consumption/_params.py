@@ -5,9 +5,9 @@
 
 # pylint: disable=line-too-long
 # pylint: disable=too-many-statements
+from azure.cli.core.commands.parameters import get_enum_type
 from ._validators import (datetime_type,
                           decimal_type)
-from azure.cli.core.commands.parameters import get_enum_type
 
 
 def load_arguments(self, _):
