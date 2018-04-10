@@ -4,7 +4,7 @@ Release History
 ===============
 0.3.1
 +++++
-* Added commands `budget`.
+* Added new commands for budget API.
 
 0.3.0
 +++++

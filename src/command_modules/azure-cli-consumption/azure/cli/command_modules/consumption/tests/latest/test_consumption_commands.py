@@ -201,12 +201,12 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         all(self._validate_marketplace(marketplace_item, '201804-1') for marketplace_item in marketplace_list)
 
     def test_consumption_budget_usage_create(self):
-        output_budget = self.cmd('az consumption budget create --budget-name usagetypebudget1 -a 20 -s 2018-02-01 -e 2018-10-01 --time-grain annually -c usage --meters 0dfadad2-6e4f-4078-85e1-90c230d4d482').get_output_in_json()
+        output_budget = self.cmd('az consumption budget create --budget-name usagetypebudget1 --amount 20 -s 2018-02-01 -e 2018-10-01 --time-grain annually --category usage --meters 0dfadad2-6e4f-4078-85e1-90c230d4d482').get_output_in_json()
         self.assertTrue(output_budget)
         self._validate_budget(output_budget)
 
     def test_consumption_budget_create(self):
-        output_budget = self.cmd('consumption budget create --budget-name "costbudget" -c "cost" -a 100.0 -s "2018-02-01" -e "2018-10-01" --time-grain "monthly"').get_output_in_json()
+        output_budget = self.cmd('consumption budget create --budget-name "costbudget" --category "cost" --amount 100.0 -s "2018-02-01" -e "2018-10-01" --time-grain "monthly"').get_output_in_json()
         self.assertTrue(output_budget)
         self._validate_budget(output_budget)
 

@@ -93,8 +93,8 @@ def cli_consumption_list_marketplace(client, billing_period_name=None, start_dat
 
 def cli_consumption_list_budgets(client, resource_group_name=None):
     if resource_group_name:
-        return list(client.list_by_resource_group_name(resource_group_name))
-    return list(client.list())
+        return client.list_by_resource_group_name(resource_group_name)
+    return client.list()
 
 
 def cli_consumption_show_budget(client, budget_name, resource_group_name=None):
