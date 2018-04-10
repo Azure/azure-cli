@@ -3,8 +3,12 @@
 Release History
 ===============
 
+0.2.1
++++++
+* Minor fixes
+
 0.2.0
-++++++
++++++
 * Added support for 2018-03-01 API
 
  - Job level mounting
