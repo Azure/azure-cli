@@ -758,7 +758,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         }
 
     storage_profile = _build_data_disks(storage_properties, data_disk_sizes_gb,
-                                        image_data_disks, data_caching, storage_sku)
+                                        image_data_disks, data_caching,
+                                        storage_sku)
 
     # Build OS Profile
     os_profile = {

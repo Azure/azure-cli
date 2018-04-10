@@ -154,7 +154,6 @@ def load_arguments(self, _):
         c.argument('enable_write_accelerator', nargs='*', min_api='2017-03-30', arg_group='Storage',
                    help="enable disk write accelerator. By default, enable all disk; or you can specify individual disks, e.g. 'os 1' should enable os disk and the data disk with lun of 1(the 2nd)")
 
-
     with self.argument_context('vm open-port') as c:
         c.argument('vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
         c.argument('network_security_group_name', options_list=('--nsg-name',), help='The name of the network security group to create if one does not exist. Ignored if an NSG already exists.', validator=validate_nsg_name)

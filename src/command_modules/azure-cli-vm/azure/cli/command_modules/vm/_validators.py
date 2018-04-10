@@ -905,6 +905,9 @@ def process_vm_create_namespace(cmd, namespace):
     if namespace.storage_profile in [StorageProfile.SACustomImage,
                                      StorageProfile.SAPirImage]:
         _validate_vm_create_storage_account(cmd, namespace)
+    if namespace.enable_write_accelerator:
+        if (enable_write_accelerator == [] or 'os' in enable_write_accelerator) and namespace:
+            pass
 
     _validate_vm_create_availability_set(cmd, namespace)
     _validate_vm_vmss_create_vnet(cmd, namespace)
