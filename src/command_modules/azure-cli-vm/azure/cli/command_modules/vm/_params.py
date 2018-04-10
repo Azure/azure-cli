@@ -151,6 +151,9 @@ def load_arguments(self, _):
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
+        c.argument('enable_write_accelerator', nargs='*', min_api='2017-03-30', arg_group='Storage',
+                   help="enable disk write accelerator. By default, enable all disk; or you can specify individual disks, e.g. 'os 1' should enable os disk and the data disk with lun of 1(the 2nd)")
+
 
     with self.argument_context('vm open-port') as c:
         c.argument('vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
@@ -305,9 +308,6 @@ def load_arguments(self, _):
     with self.argument_context('vmss diagnostics') as c:
         c.argument('vmss_name', id_part=None, help='Scale set name')
 
-    with self.argument_context('vmss update') as c:
-        c.argument('write_accelerator', nargs='*', min_api='2017-03-30', help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g. '1=true 2=true' should enable for data disk with lun of 1 and 2")
-
     with self.argument_context('vmss disk') as c:
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine instance size.')
         c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.')
@@ -364,7 +364,6 @@ def load_arguments(self, _):
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@<file path>` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('license_type', help="license type if the Windows image or disk used was licensed on-premises", arg_type=get_enum_type(['Windows_Server', 'Windows_Client']))
             c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
-            c.argument('enable_write_accelerator', nargs='*', min_api='2017-03-30', help="enable disk write accelerator. By default, enable all disk; or you can specify individual disks, e.g. 'os 1' should enable os disk and the data disk with lun of 1(the 2nd)")
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
