@@ -170,11 +170,11 @@ class DnsScenarioTest(ScenarioTest):
         self.cmd('network vnet create -n {resvnet} -g {rg}')
 
         self.cmd('network dns zone list')  # just verify is works (no Exception raised)
-        self.cmd('network dns zone create -n {zone} -g {rg} --zone-type Private --registration-vnets {regvnet} --resolution-vnets {resvnet}')
+        self.cmd('network dns zone create -n {zone} -g {rg} --zone-type Private --registration-vnets {regvnet} --resolution-vnets {resvnet} --tags foo=doo')
         self.cmd('network dns zone list -g {rg}',
                  checks=self.check('length(@)', 1))
 
-        self.cmd('network dns zone update -n {zone} -g {rg} --zone-type Private --registration-vnets "" --resolution-vnets ""')
+        self.cmd('network dns zone update -n {zone} -g {rg} --zone-type Private --registration-vnets "" --resolution-vnets "" --tags foo=boo')
         self.cmd('network dns zone update -n {zone} -g {rg} --zone-type Private --registration-vnets {regvnet} --resolution-vnets {resvnet}')
 
         base_record_sets = 1
