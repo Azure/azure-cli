@@ -25,13 +25,14 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.custom_command('export', 'cli_redis_export')
         g.command('force-reboot', 'force_reboot')
-        g.custom_command('import-method', 'cli_redis_import_method')
-        g.command('list', 'list_by_resource_group')
-        g.command('list-all', 'list')
+        g.custom_command('import-method', 'cli_redis_import_method', deprecate_info='az redis import')
+        g.custom_command('import', 'cli_redis_import_method')
+        g.custom_command('list', 'cli_redis_list')
+        g.command('list-all', 'list', deprecate_info='az redis list')
         g.command('list-keys', 'list_keys')
         g.command('regenerate-keys', 'regenerate_key')
         g.command('show', 'get')
-        g.custom_command('update-settings', 'cli_redis_update_settings')
+        g.custom_command('update-settings', 'cli_redis_update_settings', deprecate_info='az redis update')
         g.generic_update_command('update', exception_handler=wrong_vmsize_argument_exception_handler,
                                  setter_name='update', custom_func_name='cli_redis_update')
 

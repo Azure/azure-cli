@@ -16,9 +16,24 @@ helps['redis export'] = """
     short-summary: Export data stored in a Redis cache.
 """
 
-helps['redis import-method'] = """
+helps['redis import'] = """
     type: command
     short-summary: Import data into a Redis cache.
+"""
+
+helps['redis import-method'] = """
+    type: command
+    short-summary: (DEPRECATED) Import data into a Redis cache.
+"""
+
+helps['redis list'] = """
+    type: command
+    short-summary: List Redis caches.
+"""
+
+helps['redis list-all'] = """
+    type: command
+    short-summary: (DEPRECATED) Gets all Redis caches in the specified subscription.
 """
 
 helps['redis update-settings'] = """
