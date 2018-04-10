@@ -834,7 +834,7 @@ def delete_certificate_contact(client, vault_base_url, contact_email):
     """ Remove a certificate contact from the specified vault. """
     from azure.keyvault.models import Contacts
     orig_contacts = client.get_certificate_contacts(vault_base_url).contact_list
-    remaining_contacts = [ x for x in client.get_certificate_contacts(vault_base_url).contact_list if x.email_address != contact_email ]
+    remaining_contacts = [x for x in client.get_certificate_contacts(vault_base_url).contact_list if x.email_address != contact_email]
     remaining = Contacts(contact_list=remaining_contacts)
     if len(remaining_contacts) == len(orig_contacts):
         raise CLIError("contact '{}' not found in vault '{}'".format(contact_email, vault_base_url))

@@ -50,7 +50,6 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='update_keyvault_setter', setter_type=kv_vaults_custom,
                                  custom_func_name='update_keyvault')
 
-
     with self.command_group('keyvault network-rule', kv_vaults_sdk, client_factory=keyvault_client_vaults_factory) as g:
         g.custom_command('add', 'add_network_rule')
         g.custom_command('remove', 'remove_network_rule')

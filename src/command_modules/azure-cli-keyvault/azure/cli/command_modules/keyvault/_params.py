@@ -61,7 +61,6 @@ def load_arguments(self, _):
         c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions), nargs='+', help='Bypass traffic for space-separated uses.')
         c.argument('default_action', arg_type=get_enum_type(NetworkRuleAction), help='Default action to apply when no rule matches.')
 
-
     with self.argument_context('keyvault create') as c:
         c.argument('resource_group_name', resource_group_name_type, required=True, completer=None, validator=None)
         c.argument('vault_name', completer=None)
