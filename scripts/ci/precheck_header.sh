@@ -2,8 +2,7 @@
 
 set -ex
 
-# Until https://gitlab.com/pycqa/flake8/issues/415 is resolved, pin version of pycodestyle
-pip install -e ./tools pycodestyle==2.3.1
+pip install -e ./tools
 
 echo "Scan license"
 azdev verify license
