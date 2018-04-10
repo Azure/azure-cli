@@ -248,7 +248,8 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('netFrameworkVersion', 'v4.0'),
             JMESPathCheck('pythonVersion', ''),
             JMESPathCheck('use32BitWorkerProcess', True),
-            JMESPathCheck('webSocketsEnabled', False)])
+            JMESPathCheck('webSocketsEnabled', False),
+            JMESPathCheck('minTlsVersion', '1.0')])
 
         # update and verify
         checks = [
@@ -258,11 +259,13 @@ class WebappConfigureTest(ScenarioTest):
             JMESPathCheck('netFrameworkVersion', 'v3.0'),
             JMESPathCheck('pythonVersion', '3.4'),
             JMESPathCheck('use32BitWorkerProcess', False),
-            JMESPathCheck('webSocketsEnabled', True)
+            JMESPathCheck('webSocketsEnabled', True),
+            JMESPathCheck('minTlsVersion', '1.2'),
+            JMESPathCheck('http20Enabled', True)
         ]
         self.cmd('webapp config set -g {} -n {} --always-on true --auto-heal-enabled true --php-version 7.0 '
                  '--net-framework-version v3.5 --python-version 3.4 --use-32bit-worker-process=false '
-                 '--web-sockets-enabled=true'.format(resource_group, webapp_name)).assert_with_checks(checks)
+                 '--web-sockets-enabled=true --http20-enabled true  --min-tls-version 1.2 '.format(resource_group, webapp_name)).assert_with_checks(checks)
         self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name)) \
             .assert_with_checks(checks)
 
