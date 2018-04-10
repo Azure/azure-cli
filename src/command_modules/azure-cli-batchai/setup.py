@@ -30,11 +30,13 @@ CLASSIFIERS = [
     'License :: OSI Approved :: MIT License',
 ]
 
+# Until https://gitlab.com/pycqa/flake8/issues/415 is resolved, pin version of pycodestyle
 DEPENDENCIES = [
     'azure-mgmt-batchai==1.0.0',
     'azure-cli-core',
     'adal>=0.4.3',
-    'mock>=2.0.0'
+    'mock>=2.0.0',
+    'pycodestyle==2.3.1'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
