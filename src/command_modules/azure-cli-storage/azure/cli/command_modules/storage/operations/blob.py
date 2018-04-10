@@ -131,7 +131,9 @@ def storage_blob_download_batch(client, source, destination, source_container_na
         normalized_blob_name = normalize_blob_file_path(None, blob_name)
         if normalized_blob_name in blobs_to_download:
             from knack.util import CLIError
-            raise CLIError('Multiple blobs with download path: `{}`'.format(normalized_blob_name))
+            raise CLIError('Multiple blobs with download path: `{}`. As a solution, use the `--pattern` parameter '
+                           'to select for a subset of blobs to download OR utilize the `storage blob download` '
+                           'command instead to download individual blobs.'.format(normalized_blob_name))
         blobs_to_download[normalized_blob_name] = blob_name
 
     if dryrun:
