@@ -1989,8 +1989,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                                         single_placement_group=single_placement_group,
                                         platform_fault_domain_count=platform_fault_domain_count,
                                         custom_data=custom_data, secrets=secrets,
-                                        license_type=license_type, zones=zones, priority=priority,
-                                        enable_write_accelerator=enable_write_accelerator)
+                                        license_type=license_type, zones=zones, priority=priority)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:
