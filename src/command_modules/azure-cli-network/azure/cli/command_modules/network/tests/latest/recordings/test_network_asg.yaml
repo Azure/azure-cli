@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2018-03-30T20:25:41Z"}}'
+      "date": "2018-04-06T21:59:14Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -16,17 +16,17 @@ interactions:
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_asg000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001","name":"cli_test_network_asg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-03-30T20:25:41Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001","name":"cli_test_network_asg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-04-06T21:59:14Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:25:42 GMT']
+      date: ['Fri, 06 Apr 2018 21:59:16 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1198']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -37,21 +37,23 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/applicationSecurityGroups?api-version=2018-02-01
   response:
-    body: {string: '{"value":[]}'}
+    body: {string: "{\r\n  \"value\": []\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['12']
+      content-length: ['19']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:25:43 GMT']
+      date: ['Fri, 06 Apr 2018 21:59:16 GMT']
       expires: ['-1']
       pragma: [no-cache]
+      server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
@@ -70,12 +72,12 @@ interactions:
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_asg000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001","name":"cli_test_network_asg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-03-30T20:25:41Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001","name":"cli_test_network_asg000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-04-06T21:59:14Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:25:44 GMT']
+      date: ['Fri, 06 Apr 2018 21:59:16 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -83,32 +85,32 @@ interactions:
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "westus"}'
+    body: '{"location": "westus", "tags": {"foo": "doo"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [network asg create]
       Connection: [keep-alive]
-      Content-Length: ['22']
+      Content-Length: ['46']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001/providers/Microsoft.Network/applicationSecurityGroups/asg1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"asg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001/providers/Microsoft.Network/applicationSecurityGroups/asg1\"\
-        ,\r\n  \"etag\": \"W/\\\"a70dfbc6-a73a-4e83-bd31-0285aeaa6d7d\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"10977fa5-5303-49d8-8419-39fea3012551\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationSecurityGroups\",\r\n  \"location\"\
-        : \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\"\
-        \r\n  }\r\n}"}
+        : \"westus\",\r\n  \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"provisioningState\": \"Updating\"\r\n  }\r\n}"}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3de3e092-2780-4cbc-bd4f-2201423c8729?api-version=2018-02-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/a367caf4-956d-441f-aaa3-60fe30a79e25?api-version=2018-02-01']
       cache-control: [no-cache]
-      content-length: ['438']
+      content-length: ['475']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:25:45 GMT']
+      date: ['Fri, 06 Apr 2018 21:59:18 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -124,17 +126,17 @@ interactions:
       CommandName: [network asg create]
       Connection: [keep-alive]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3de3e092-2780-4cbc-bd4f-2201423c8729?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/a367caf4-956d-441f-aaa3-60fe30a79e25?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['29']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:25:56 GMT']
+      date: ['Fri, 06 Apr 2018 21:59:28 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -151,22 +153,22 @@ interactions:
       CommandName: [network asg create]
       Connection: [keep-alive]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001/providers/Microsoft.Network/applicationSecurityGroups/asg1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"asg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001/providers/Microsoft.Network/applicationSecurityGroups/asg1\"\
-        ,\r\n  \"etag\": \"W/\\\"6c79a4b0-c447-4e37-82f8-0655105e11d5\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"94b08d4e-a745-417b-88a7-58445e3fbd11\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationSecurityGroups\",\r\n  \"location\"\
-        : \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\"\
-        \r\n  }\r\n}"}
+        : \"westus\",\r\n  \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['439']
+      content-length: ['476']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:25:57 GMT']
-      etag: [W/"6c79a4b0-c447-4e37-82f8-0655105e11d5"]
+      date: ['Fri, 06 Apr 2018 21:59:29 GMT']
+      etag: [W/"94b08d4e-a745-417b-88a7-58445e3fbd11"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -184,23 +186,23 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001/providers/Microsoft.Network/applicationSecurityGroups/asg1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"asg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001/providers/Microsoft.Network/applicationSecurityGroups/asg1\"\
-        ,\r\n  \"etag\": \"W/\\\"6c79a4b0-c447-4e37-82f8-0655105e11d5\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"94b08d4e-a745-417b-88a7-58445e3fbd11\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationSecurityGroups\",\r\n  \"location\"\
-        : \"westus\",\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\"\
-        \r\n  }\r\n}"}
+        : \"westus\",\r\n  \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\"\
+        : {\r\n    \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['439']
+      content-length: ['476']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:25:58 GMT']
-      etag: [W/"6c79a4b0-c447-4e37-82f8-0655105e11d5"]
+      date: ['Fri, 06 Apr 2018 21:59:29 GMT']
+      etag: [W/"94b08d4e-a745-417b-88a7-58445e3fbd11"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -220,23 +222,23 @@ interactions:
       Content-Length: ['257']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001/providers/Microsoft.Network/applicationSecurityGroups/asg1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"asg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001/providers/Microsoft.Network/applicationSecurityGroups/asg1\"\
-        ,\r\n  \"etag\": \"W/\\\"6e999477-0fec-4f2c-a139-c3bd24ee92c9\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"2f0cb405-5812-4561-9724-37be01d32433\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationSecurityGroups\",\r\n  \"location\"\
         : \"westus\",\r\n  \"tags\": {\r\n    \"foo\": \"bar\"\r\n  },\r\n  \"properties\"\
         : {\r\n    \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6a33033d-52a2-4a44-8fab-d4d2976123fb?api-version=2018-02-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6b123957-9266-4c40-b056-e5b745dc3e46?api-version=2018-02-01']
       cache-control: [no-cache]
       content-length: ['476']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:25:59 GMT']
+      date: ['Fri, 06 Apr 2018 21:59:30 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -244,7 +246,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -254,17 +256,17 @@ interactions:
       CommandName: [network asg update]
       Connection: [keep-alive]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6a33033d-52a2-4a44-8fab-d4d2976123fb?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/6b123957-9266-4c40-b056-e5b745dc3e46?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['29']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:26:30 GMT']
+      date: ['Fri, 06 Apr 2018 22:00:01 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -281,13 +283,13 @@ interactions:
       CommandName: [network asg update]
       Connection: [keep-alive]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001/providers/Microsoft.Network/applicationSecurityGroups/asg1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"asg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001/providers/Microsoft.Network/applicationSecurityGroups/asg1\"\
-        ,\r\n  \"etag\": \"W/\\\"6e999477-0fec-4f2c-a139-c3bd24ee92c9\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"2f0cb405-5812-4561-9724-37be01d32433\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationSecurityGroups\",\r\n  \"location\"\
         : \"westus\",\r\n  \"tags\": {\r\n    \"foo\": \"bar\"\r\n  },\r\n  \"properties\"\
         : {\r\n    \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"}
@@ -295,8 +297,8 @@ interactions:
       cache-control: [no-cache]
       content-length: ['476']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:26:31 GMT']
-      etag: [W/"6e999477-0fec-4f2c-a139-c3bd24ee92c9"]
+      date: ['Fri, 06 Apr 2018 22:00:01 GMT']
+      etag: [W/"2f0cb405-5812-4561-9724-37be01d32433"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -314,7 +316,7 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
@@ -322,7 +324,7 @@ interactions:
   response:
     body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"asg1\",\r\n\
         \      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001/providers/Microsoft.Network/applicationSecurityGroups/asg1\"\
-        ,\r\n      \"etag\": \"W/\\\"6e999477-0fec-4f2c-a139-c3bd24ee92c9\\\"\",\r\
+        ,\r\n      \"etag\": \"W/\\\"2f0cb405-5812-4561-9724-37be01d32433\\\"\",\r\
         \n      \"type\": \"Microsoft.Network/applicationSecurityGroups\",\r\n   \
         \   \"location\": \"westus\",\r\n      \"tags\": {\r\n        \"foo\": \"\
         bar\"\r\n      },\r\n      \"properties\": {\r\n        \"provisioningState\"\
@@ -331,7 +333,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['553']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:26:33 GMT']
+      date: ['Fri, 06 Apr 2018 22:00:02 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -349,14 +351,14 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001/providers/Microsoft.Network/applicationSecurityGroups/asg1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"asg1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_asg000001/providers/Microsoft.Network/applicationSecurityGroups/asg1\"\
-        ,\r\n  \"etag\": \"W/\\\"6e999477-0fec-4f2c-a139-c3bd24ee92c9\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"2f0cb405-5812-4561-9724-37be01d32433\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/applicationSecurityGroups\",\r\n  \"location\"\
         : \"westus\",\r\n  \"tags\": {\r\n    \"foo\": \"bar\"\r\n  },\r\n  \"properties\"\
         : {\r\n    \"provisioningState\": \"Succeeded\"\r\n  }\r\n}"}
@@ -364,8 +366,8 @@ interactions:
       cache-control: [no-cache]
       content-length: ['476']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:26:34 GMT']
-      etag: [W/"6e999477-0fec-4f2c-a139-c3bd24ee92c9"]
+      date: ['Fri, 06 Apr 2018 22:00:02 GMT']
+      etag: [W/"2f0cb405-5812-4561-9724-37be01d32433"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -384,7 +386,7 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: DELETE
@@ -392,12 +394,12 @@ interactions:
   response:
     body: {string: ''}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5176013e-14ac-4a07-a411-24098c642349?api-version=2018-02-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4acba8c4-522f-4208-91e0-8b47073256bd?api-version=2018-02-01']
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 30 Mar 2018 20:26:35 GMT']
+      date: ['Fri, 06 Apr 2018 22:00:03 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/5176013e-14ac-4a07-a411-24098c642349?api-version=2018-02-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/4acba8c4-522f-4208-91e0-8b47073256bd?api-version=2018-02-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -412,17 +414,17 @@ interactions:
       CommandName: [network asg delete]
       Connection: [keep-alive]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5176013e-14ac-4a07-a411-24098c642349?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/4acba8c4-522f-4208-91e0-8b47073256bd?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['29']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:26:45 GMT']
+      date: ['Fri, 06 Apr 2018 22:00:14 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -440,7 +442,7 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
@@ -451,7 +453,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['12']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:26:46 GMT']
+      date: ['Fri, 06 Apr 2018 22:00:15 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -478,12 +480,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 30 Mar 2018 20:26:48 GMT']
+      date: ['Fri, 06 Apr 2018 22:00:16 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGTkVUV09SSzo1RkFTR0c2V0xXNkdMWU1HUEdaNUFOV1oyWHw5RjlBQjI1ODJEOUZGMzk2LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGTkVUV09SSzo1RkFTR0YzQ1M0M1ZRTzZGN0VERlhSQ0k3NXw1REEyQTk3MzY4MzJDMTIyLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 version: 1
