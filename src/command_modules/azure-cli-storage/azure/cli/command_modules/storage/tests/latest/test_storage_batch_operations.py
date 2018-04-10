@@ -56,8 +56,8 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
 
         for name in blob_names:
             self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block', storage_account_info,
-                            src_container, local_file, name)
-        
+                             src_container, local_file, name)
+
         # download blobs that start with forward slash into local folder
         local_folder = self.create_temp_dir()
         self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern {}', storage_account_info, src_container,
