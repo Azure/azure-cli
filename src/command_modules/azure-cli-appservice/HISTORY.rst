@@ -2,12 +2,15 @@
 
 Release History
 ===============
+0.1.32
+++++++
+* webapp: az webapp config set support for min_tls_version & https2.0
+
 0.1.31
 ++++++
 * (Breaking change): remove `assign-identity` which was tagged `deprecating` 2 releases ago
 * webapp: capture the unhandled exception if the appservice plan doesn't exist
 * `sdist` is now compatible with wheel 0.31.0
-* webapp: az webapp config set support for min_tls_version & https2.0
 
 0.1.30
 ++++++
