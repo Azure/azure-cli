@@ -236,6 +236,10 @@ helps['monitor diagnostic-settings'] = """
             type: group
             short-summary: Manage service diagnostic settings.
             """
+helps['monitor diagnostic-settings categories'] = """
+            type: group
+            short-summary: Retrieve service diagnostic settings categories.
+            """
 helps['monitor diagnostic-settings create'] = """
             type: command
             short-summary: Create diagnostic settings for the specified resource.

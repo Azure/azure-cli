@@ -12,7 +12,7 @@ from knack.log import get_logger
 from msrestazure.azure_exceptions import CloudError
 from msrestazure.tools import parse_resource_id, is_valid_resource_id, resource_id
 
-from azure.mgmt.trafficmanager.models import MonitorProtocol
+from azure.mgmt.trafficmanager.models import MonitorProtocol, ProfileStatus
 
 # pylint: disable=no-self-use,no-member,too-many-lines,unused-argument
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
@@ -1468,10 +1468,13 @@ def create_express_route_peering(
         primary_peer_address_prefix, secondary_peer_address_prefix, shared_key=None,
         advertised_public_prefixes=None, customer_asn=None, routing_registry_name=None,
         route_filter=None):
-    (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, ExpressRouteCircuitPeeringType,
-     RouteFilter) = cmd.get_models(
-         'ExpressRouteCircuitPeering', 'ExpressRouteCircuitPeeringConfig', 'ExpressRouteCircuitPeeringType',
-         'RouteFilter')
+    (ExpressRouteCircuitPeering, ExpressRouteCircuitPeeringConfig, RouteFilter) = \
+        cmd.get_models('ExpressRouteCircuitPeering', 'ExpressRouteCircuitPeeringConfig', 'RouteFilter')
+
+    if cmd.supported_api_version(min_api='2018-02-01'):
+        ExpressRoutePeeringType = cmd.get_models('ExpressRoutePeeringType')
+    else:
+        ExpressRoutePeeringType = cmd.get_models('ExpressRouteCircuitPeeringType')
 
     peering = ExpressRouteCircuitPeering(
         peering_type=peering_type, peer_asn=peer_asn, vlan_id=vlan_id,
@@ -1479,7 +1482,7 @@ def create_express_route_peering(
         secondary_peer_address_prefix=secondary_peer_address_prefix,
         shared_key=shared_key)
 
-    if peering_type == ExpressRouteCircuitPeeringType.microsoft_peering.value:
+    if peering_type == ExpressRoutePeeringType.microsoft_peering.value:
         peering.microsoft_peering_config = ExpressRouteCircuitPeeringConfig(
             advertised_public_prefixes=advertised_public_prefixes,
             customer_asn=customer_asn,
@@ -2678,12 +2681,13 @@ def list_traffic_manager_profiles(cmd, resource_group_name=None):
 
 def create_traffic_manager_profile(cmd, traffic_manager_profile_name, resource_group_name,
                                    routing_method, unique_dns_name, monitor_path='/',
-                                   monitor_port=80, monitor_protocol=MonitorProtocol.http.value, status='enabled',
+                                   monitor_port=80, monitor_protocol=MonitorProtocol.http.value,
+                                   profile_status=ProfileStatus.enabled.value,
                                    ttl=30, tags=None):
     from azure.mgmt.trafficmanager import TrafficManagerManagementClient
     from azure.mgmt.trafficmanager.models import Profile, DnsConfig, MonitorConfig
     client = get_mgmt_service_client(cmd.cli_ctx, TrafficManagerManagementClient).profiles
-    profile = Profile(location='global', tags=tags, profile_status=status,
+    profile = Profile(location='global', tags=tags, profile_status=profile_status,
                       traffic_routing_method=routing_method,
                       dns_config=DnsConfig(relative_name=unique_dns_name, ttl=ttl),
                       monitor_config=MonitorConfig(protocol=monitor_protocol,

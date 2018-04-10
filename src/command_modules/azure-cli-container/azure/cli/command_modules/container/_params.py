@@ -10,7 +10,7 @@ from azure.cli.core.commands.parameters import (get_enum_type,
                                                 resource_group_name_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.mgmt.containerinstance.models import (ContainerGroupRestartPolicy, OperatingSystemTypes)
-from ._validators import validate_volume_mount_path, validate_secrets
+from ._validators import validate_volume_mount_path, validate_secrets, validate_gitrepo_directory
 
 # pylint: disable=line-too-long
 
@@ -54,7 +54,7 @@ def load_arguments(self, _):
         c.argument('command_line', help='The command line to run when the container is started, e.g. \'/bin/bash -c myscript.sh\'')
         c.argument('environment_variables', nargs='+', options_list=['--environment-variables', '-e'], type=_environment_variables_type, help='A list of environment variable for the container. Space-separated values in \'key=value\' format.')
         c.argument('secrets', secrets_type)
-        c.argument('secrets_mount_path', validator=validate_volume_mount_path, help='The path within the container where the secrets volume should be mounted. Must not contain colon (:).')
+        c.argument('secrets_mount_path', validator=validate_volume_mount_path, help="The path within the container where the secrets volume should be mounted. Must not contain colon ':'.")
 
     with self.argument_context('container create', arg_group='Image Registry') as c:
         c.argument('registry_login_server', help='The container image registry login server')
@@ -65,7 +65,13 @@ def load_arguments(self, _):
         c.argument('azure_file_volume_share_name', help='The name of the Azure File share to be mounted as a volume')
         c.argument('azure_file_volume_account_name', help='The name of the storage account that contains the Azure File share')
         c.argument('azure_file_volume_account_key', help='The storage account access key used to access the Azure File share')
-        c.argument('azure_file_volume_mount_path', validator=validate_volume_mount_path, help='The path within the container where the volume should be mounted. Must not contain colon (:).')
+        c.argument('azure_file_volume_mount_path', validator=validate_volume_mount_path, help="The path within the container where the azure file volume should be mounted. Must not contain colon ':'.")
+
+    with self.argument_context('container create', arg_group='Git Repo Volume') as c:
+        c.argument('gitrepo_url', help='The URL of a git repository to be mounted as a volume')
+        c.argument('gitrepo_dir', validator=validate_gitrepo_directory, help="The target directory path in the git repository. Must not contain '..'.")
+        c.argument('gitrepo_revision', help='The commit hash for the specified revision')
+        c.argument('gitrepo_mount_path', validator=validate_volume_mount_path, help="The path within the container where the git repo volume should be mounted. Must not contain colon ':'.")
 
     with self.argument_context('container logs') as c:
         c.argument('container_name', help='The container name to tail the logs. If omitted, the first container in the container group will be chosen')

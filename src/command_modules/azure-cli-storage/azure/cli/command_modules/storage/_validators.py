@@ -203,12 +203,12 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
     # source credential clues
     source_account_name = ns.pop('source_account_name', None)
     source_account_key = ns.pop('source_account_key', None)
-    sas = ns.pop('source_sas', None)
+    source_sas = ns.pop('source_sas', None)
 
     # source in the form of an uri
     uri = ns.get('copy_source', None)
     if uri:
-        if any([container, blob, sas, snapshot, share, path, source_account_name,
+        if any([container, blob, source_sas, snapshot, share, path, source_account_name,
                 source_account_key]):
             raise ValueError(usage_string.format('Unused parameters are given in addition to the '
                                                  'source URI'))
@@ -228,48 +228,41 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
 
     validate_client_parameters(cmd, namespace)  # must run first to resolve storage account
 
+    if not source_account_name:
+        if source_account_key:
+            raise ValueError(usage_string.format('Source account key is given but account name is not'))
+        # assume that user intends to copy blob in the same account
+        source_account_name = ns.get('account_name', None)
+
     # determine if the copy will happen in the same storage account
     same_account = False
-    if not source_account_name and source_account_key:
-        raise ValueError(usage_string.format('Source account key is given but account name is not'))
-    elif not source_account_name and not source_account_key:
-        # neither source account name or key is given, assume that user intends to copy blob in
-        # the same account
-        same_account = True
-        source_account_name = ns.get('account_name', None)
-        source_account_key = ns.get('account_key', None)
-    elif source_account_name and not source_account_key:
+
+    if not source_account_key and not source_sas:
         if source_account_name == ns.get('account_name', None):
-            # the source account name is same as the destination account name
             same_account = True
             source_account_key = ns.get('account_key', None)
+            source_sas = ns.get('sas_token', None)
         else:
-            # the source account is different from destination account but the key is missing
-            # try to query one.
+            # the source account is different from destination account but the key is missing try to query one.
             try:
                 source_account_key = _query_account_key(cmd.cli_ctx, source_account_name)
             except ValueError:
                 raise ValueError('Source storage account {} not found.'.format(source_account_name))
-    # else: both source account name and key are given by user
 
-    if not source_account_name:
-        raise ValueError(usage_string.format('Storage account name not found'))
-
-    if not sas:
-        # generate a sas token even in the same account when the source and destination are not the
-        # same kind.
+    # Both source account name and either key or sas (or both) are now available
+    if not source_sas:
+        # generate a sas token even in the same account when the source and destination are not the same kind.
         if valid_file_source and (ns.get('container_name', None) or not same_account):
             import os
             dir_name, file_name = os.path.split(path) if path else (None, '')
-            sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
-                                              dir_name, file_name)
+            source_sas = create_short_lived_file_sas(cmd, source_account_name, source_account_key, share,
+                                                     dir_name, file_name)
         elif valid_blob_source and (ns.get('share_name', None) or not same_account):
-            sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container,
-                                              blob)
+            source_sas = create_short_lived_blob_sas(cmd, source_account_name, source_account_key, container, blob)
 
     query_params = []
-    if sas:
-        query_params.append(sas)
+    if source_sas:
+        query_params.append(source_sas)
     if snapshot:
         query_params.append('snapshot={}'.format(snapshot))
 

@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.32
+++++++
+* Allow destination sas-token to apply to source for blob copy if source sas and account key are unspecified.
+* Expose --socket-timeout for blob uploads and downloads.
+
 2.0.31
 ++++++
 * Better error message for malformed connection strings.
