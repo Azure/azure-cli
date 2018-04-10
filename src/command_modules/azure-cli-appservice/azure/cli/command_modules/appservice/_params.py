@@ -202,6 +202,8 @@ def load_arguments(self, _):
         c.argument('java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
         c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
         c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
+        c.argument('min_tls_version', help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
+        c.argument('http20_enabled', help="configures a web site to allow clients to connect over http2.0.", arg_type=get_three_state_flag(return_label=True))
         c.argument('app_command_line', options_list=['--startup-file'], help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
 
     with self.argument_context('webapp config backup') as c:

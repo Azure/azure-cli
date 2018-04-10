@@ -49,6 +49,26 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
                          local_folder, '*/file_0')
         self.assertEqual(4, sum(len(f) for r, d, f in os.walk(local_folder)))
 
+        # upload blobs with names that start with path separator
+        local_file = self.create_temp_file(1)
+        src_container = self.create_container(storage_account_info)
+        blob_names = ['/dir1/file', 'dir1/file', '/dir2//file', 'dir2/file']
+
+        for name in blob_names:
+            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block', storage_account_info,
+                             src_container, local_file, name)
+
+        # download blobs that start with forward slash into local folder
+        local_folder = self.create_temp_dir()
+        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern {}', storage_account_info, src_container,
+                         local_folder, '/*')
+        self.assertEqual(2, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # download blobs that start with forward slash into local folder with conflicts
+        local_folder = self.create_temp_dir()
+        self.storage_cmd_negative('storage blob download-batch -s {} -d "{}"', storage_account_info, src_container,
+                                  local_folder)
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
