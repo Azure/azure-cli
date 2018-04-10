@@ -406,6 +406,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
                         remote_debugging_enabled=None, web_sockets_enabled=None,  # pylint: disable=unused-argument
                         always_on=None, auto_heal_enabled=None,  # pylint: disable=unused-argument
                         use32_bit_worker_process=None,  # pylint: disable=unused-argument
+                        min_tls_version=None,  # pylint: disable=unused-argument
+                        http20_enabled=None,  # pylint: disable=unused-argument
                         app_command_line=None):  # pylint: disable=unused-argument
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     if linux_fx_version:
@@ -417,7 +419,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
-                  'auto_heal_enabled', 'use32_bit_worker_process']
+                  'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled']
     # note: getargvalues is used already in azure.cli.core.commands.
     # and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
