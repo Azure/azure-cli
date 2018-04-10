@@ -70,9 +70,9 @@ class Linter(object):
 
 
 class LinterManager(object):
-    def __init__(self, command_table=None, help_file_entries=None, loaded_help=None, exclusions={}):
+    def __init__(self, command_table=None, help_file_entries=None, loaded_help=None, exclusions=None):
         self.linter = Linter(command_table=command_table, help_file_entries=help_file_entries, loaded_help=loaded_help)
-        self._exclusions = exclusions
+        self._exclusions = exclusions or {}
         self._rules = {
             'help_file_entries': [],
             'command_groups': [],

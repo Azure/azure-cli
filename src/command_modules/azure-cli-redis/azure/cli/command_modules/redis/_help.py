@@ -37,3 +37,9 @@ helps['redis patch-schedule'] = """
     type: group
     short-summary: Manage Redis patch schedules.
 """
+
+helps['redis patch-schedule patch-schedule'] = """
+    type: group
+    short-summary: This group is deprecated and will be removed in CLI version 2.0.36.
+        The command, `redis patch-schedule patch-schedule show`, will be replaced with `redis patch-schedule show`'
+"""
