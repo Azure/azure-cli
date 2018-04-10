@@ -6,7 +6,7 @@
 from azure.cli.core.commands import CliCommandType
 from ._client_factory import (get_mediaservices_client, get_transforms_client,
                               get_assets_client, get_jobs_client, get_streaming_locators_client,
-                              get_streaming_policies_client)
+                              get_streaming_policies_client, get_streaming_endpoints_client)
 from ._exception_handler import (build_exception_wrapper)
 
 
@@ -105,3 +105,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.command('list', 'list')
         g.command('show', 'get')
         g.command('delete', 'delete')
+
+    with self.command_group('ams streaming endpoint', get_sdk('StreamingEndpoints', get_streaming_endpoints_client)) as g:
+        g.command('list', 'list')
+        g.command('start', 'start')
+        g.command('stop', 'stop')

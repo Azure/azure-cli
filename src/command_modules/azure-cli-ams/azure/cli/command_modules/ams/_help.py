@@ -249,3 +249,23 @@ helps['ams streaming policy show'] = """
     type: command
     short-summary: Show the details of a streaming policy.
 """
+
+helps['ams streaming endpoint'] = """
+    type: group
+    short-summary: Manage streaming endpoints for an Azure Media Service account.
+"""
+
+helps['ams streaming endpoint start'] = """
+    type: command
+    short-summary: Start an endpoint.
+"""
+
+helps['ams streaming endpoint stop'] = """
+    type: command
+    short-summary: Stop an endpoint.
+"""
+
+helps['ams streaming endpoint list'] = """
+    type: command
+    short-summary: List all the streaming endpoints within an Azure Media Services account.
+"""

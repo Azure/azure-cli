@@ -149,3 +149,6 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('smooth_streaming',
                    arg_group='Encryption Protocols',
                    help='Enable SmoothStreaming protocol.')
+
+    with self.argument_context('ams streaming endpoint list') as c:
+        c.argument('account_name', id_part=None)
