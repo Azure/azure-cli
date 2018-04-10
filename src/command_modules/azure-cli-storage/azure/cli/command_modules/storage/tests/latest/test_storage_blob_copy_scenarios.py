@@ -107,12 +107,12 @@ class StorageBlobCopyTests(StorageScenarioMixin, LiveScenarioTest):
 
         self.assertEqual(expect_content, actual_content)
 
-        # test sas-token input starting with '?'
+        # test source sas-token input starting with '?'
         if not sas.startswith('?'):
             sas = '?' + sas
 
         target_container = self.create_container(account_info)
-        self.storage_cmd('storage blob copy start -b dst -c {} --source-blob src --sas-token {} --source-container {}',
+        self.storage_cmd('storage blob copy start -b dst -c {} --source-blob src --source-sas {} --source-container {}',
                          account_info, target_container, sas, source_container)
 
         start = time()
