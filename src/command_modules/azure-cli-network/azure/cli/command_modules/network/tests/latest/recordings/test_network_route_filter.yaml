@@ -1,7 +1,7 @@
 interactions:
 - request:
     body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
-      "date": "2018-03-30T20:33:52Z"}}'
+      "date": "2018-04-09T15:56:56Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -16,17 +16,17 @@ interactions:
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_route_filter000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001","name":"cli_test_network_route_filter000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-03-30T20:33:52Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001","name":"cli_test_network_route_filter000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-04-09T15:56:56Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:33:53 GMT']
+      date: ['Mon, 09 Apr 2018 15:56:57 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -43,12 +43,12 @@ interactions:
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_route_filter000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001","name":"cli_test_network_route_filter000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-03-30T20:33:52Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001","name":"cli_test_network_route_filter000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-04-09T15:56:56Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:33:54 GMT']
+      date: ['Mon, 09 Apr 2018 15:56:58 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -56,38 +56,39 @@ interactions:
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "westus"}'
+    body: '{"location": "westus", "tags": {"foo": "doo"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [network route-filter create]
       Connection: [keep-alive]
-      Content-Length: ['22']
+      Content-Length: ['46']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"filter1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1\"\
-        ,\r\n  \"etag\": \"W/\\\"577e5772-093f-4baa-b8dc-7a7e8e4aa5fa\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"809ada92-792f-412c-bd48-f3ec869afa26\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/routeFilters\",\r\n  \"location\": \"westus\"\
-        ,\r\n  \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n \
-        \   \"rules\": []\r\n  }\r\n}"}
+        ,\r\n  \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\
+        \n    \"provisioningState\": \"Updating\",\r\n    \"rules\": []\r\n  }\r\n\
+        }"}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/fa3ae4f9-1e74-4405-9d41-54f13078bd36?api-version=2018-02-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/99bbac05-095a-44cf-95bb-b039b5857407?api-version=2018-02-01']
       cache-control: [no-cache]
-      content-length: ['436']
+      content-length: ['473']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:33:55 GMT']
+      date: ['Mon, 09 Apr 2018 15:57:00 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1194']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -97,17 +98,17 @@ interactions:
       CommandName: [network route-filter create]
       Connection: [keep-alive]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/fa3ae4f9-1e74-4405-9d41-54f13078bd36?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/99bbac05-095a-44cf-95bb-b039b5857407?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['29']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:34:06 GMT']
+      date: ['Mon, 09 Apr 2018 15:57:10 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -124,22 +125,23 @@ interactions:
       CommandName: [network route-filter create]
       Connection: [keep-alive]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"filter1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1\"\
-        ,\r\n  \"etag\": \"W/\\\"14700909-966f-45c2-a610-445bf856a7f2\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"a764138e-a12b-4cff-9479-33a8aa57ff86\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/routeFilters\",\r\n  \"location\": \"westus\"\
-        ,\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n\
-        \    \"rules\": []\r\n  }\r\n}"}
+        ,\r\n  \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\
+        \n    \"provisioningState\": \"Succeeded\",\r\n    \"rules\": []\r\n  }\r\n\
+        }"}
     headers:
       cache-control: [no-cache]
-      content-length: ['437']
+      content-length: ['474']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:34:07 GMT']
-      etag: [W/"14700909-966f-45c2-a610-445bf856a7f2"]
+      date: ['Mon, 09 Apr 2018 15:57:10 GMT']
+      etag: [W/"a764138e-a12b-4cff-9479-33a8aa57ff86"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -157,23 +159,24 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"filter1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1\"\
-        ,\r\n  \"etag\": \"W/\\\"14700909-966f-45c2-a610-445bf856a7f2\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"a764138e-a12b-4cff-9479-33a8aa57ff86\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/routeFilters\",\r\n  \"location\": \"westus\"\
-        ,\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n\
-        \    \"rules\": []\r\n  }\r\n}"}
+        ,\r\n  \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\
+        \n    \"provisioningState\": \"Succeeded\",\r\n    \"rules\": []\r\n  }\r\n\
+        }"}
     headers:
       cache-control: [no-cache]
-      content-length: ['437']
+      content-length: ['474']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:34:09 GMT']
-      etag: [W/"14700909-966f-45c2-a610-445bf856a7f2"]
+      date: ['Mon, 09 Apr 2018 15:57:11 GMT']
+      etag: [W/"a764138e-a12b-4cff-9479-33a8aa57ff86"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -184,32 +187,33 @@ interactions:
     status: {code: 200, message: OK}
 - request:
     body: 'b''{"id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1",
-      "location": "westus", "properties": {"rules": []}}'''
+      "location": "westus", "tags": {"foo": "doo"}, "properties": {"rules": []}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [network route-filter update]
       Connection: [keep-alive]
-      Content-Length: ['252']
+      Content-Length: ['276']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"filter1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1\"\
-        ,\r\n  \"etag\": \"W/\\\"f9de795c-82f4-4e3d-b0b1-a3b312360c28\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"0f0a5330-847f-41f5-a6fc-694d94a4ddf0\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/routeFilters\",\r\n  \"location\": \"westus\"\
-        ,\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n\
-        \    \"rules\": []\r\n  }\r\n}"}
+        ,\r\n  \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\
+        \n    \"provisioningState\": \"Succeeded\",\r\n    \"rules\": []\r\n  }\r\n\
+        }"}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/709daf4c-b0f4-4f00-8f12-f146181e7a1f?api-version=2018-02-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f2c5a7f4-3d69-4460-9ec1-44ddaa07041a?api-version=2018-02-01']
       cache-control: [no-cache]
-      content-length: ['437']
+      content-length: ['474']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:34:09 GMT']
+      date: ['Mon, 09 Apr 2018 15:57:12 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -217,7 +221,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -227,17 +231,17 @@ interactions:
       CommandName: [network route-filter update]
       Connection: [keep-alive]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/709daf4c-b0f4-4f00-8f12-f146181e7a1f?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/f2c5a7f4-3d69-4460-9ec1-44ddaa07041a?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['29']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:34:40 GMT']
+      date: ['Mon, 09 Apr 2018 15:57:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -254,22 +258,23 @@ interactions:
       CommandName: [network route-filter update]
       Connection: [keep-alive]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"filter1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1\"\
-        ,\r\n  \"etag\": \"W/\\\"f9de795c-82f4-4e3d-b0b1-a3b312360c28\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"0f0a5330-847f-41f5-a6fc-694d94a4ddf0\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/routeFilters\",\r\n  \"location\": \"westus\"\
-        ,\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n\
-        \    \"rules\": []\r\n  }\r\n}"}
+        ,\r\n  \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\
+        \n    \"provisioningState\": \"Succeeded\",\r\n    \"rules\": []\r\n  }\r\n\
+        }"}
     headers:
       cache-control: [no-cache]
-      content-length: ['437']
+      content-length: ['474']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:34:40 GMT']
-      etag: [W/"f9de795c-82f4-4e3d-b0b1-a3b312360c28"]
+      date: ['Mon, 09 Apr 2018 15:57:43 GMT']
+      etag: [W/"0f0a5330-847f-41f5-a6fc-694d94a4ddf0"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -287,23 +292,24 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"filter1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1\"\
-        ,\r\n  \"etag\": \"W/\\\"f9de795c-82f4-4e3d-b0b1-a3b312360c28\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"0f0a5330-847f-41f5-a6fc-694d94a4ddf0\\\"\",\r\n \
         \ \"type\": \"Microsoft.Network/routeFilters\",\r\n  \"location\": \"westus\"\
-        ,\r\n  \"properties\": {\r\n    \"provisioningState\": \"Succeeded\",\r\n\
-        \    \"rules\": []\r\n  }\r\n}"}
+        ,\r\n  \"tags\": {\r\n    \"foo\": \"doo\"\r\n  },\r\n  \"properties\": {\r\
+        \n    \"provisioningState\": \"Succeeded\",\r\n    \"rules\": []\r\n  }\r\n\
+        }"}
     headers:
       cache-control: [no-cache]
-      content-length: ['437']
+      content-length: ['474']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:34:42 GMT']
-      etag: [W/"f9de795c-82f4-4e3d-b0b1-a3b312360c28"]
+      date: ['Mon, 09 Apr 2018 15:57:43 GMT']
+      etag: [W/"0f0a5330-847f-41f5-a6fc-694d94a4ddf0"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -321,7 +327,7 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
@@ -329,15 +335,16 @@ interactions:
   response:
     body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"filter1\",\r\
         \n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1\"\
-        ,\r\n      \"etag\": \"W/\\\"f9de795c-82f4-4e3d-b0b1-a3b312360c28\\\"\",\r\
+        ,\r\n      \"etag\": \"W/\\\"0f0a5330-847f-41f5-a6fc-694d94a4ddf0\\\"\",\r\
         \n      \"type\": \"Microsoft.Network/routeFilters\",\r\n      \"location\"\
-        : \"westus\",\r\n      \"properties\": {\r\n        \"provisioningState\"\
-        : \"Succeeded\",\r\n        \"rules\": []\r\n      }\r\n    }\r\n  ]\r\n}"}
+        : \"westus\",\r\n      \"tags\": {\r\n        \"foo\": \"doo\"\r\n      },\r\
+        \n      \"properties\": {\r\n        \"provisioningState\": \"Succeeded\"\
+        ,\r\n        \"rules\": []\r\n      }\r\n    }\r\n  ]\r\n}"}
     headers:
       cache-control: [no-cache]
-      content-length: ['506']
+      content-length: ['555']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:34:43 GMT']
+      date: ['Mon, 09 Apr 2018 15:57:44 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -355,7 +362,7 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
@@ -1637,7 +1644,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['87605']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:34:49 GMT']
+      date: ['Mon, 09 Apr 2018 15:57:47 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -1661,12 +1668,12 @@ interactions:
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_network_route_filter000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001","name":"cli_test_network_route_filter000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-03-30T20:33:52Z"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001","name":"cli_test_network_route_filter000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-04-09T15:56:56Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
       content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:34:48 GMT']
+      date: ['Mon, 09 Apr 2018 15:57:47 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -1684,30 +1691,30 @@ interactions:
       Content-Length: ['138']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"rule1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1\"\
-        ,\r\n  \"etag\": \"W/\\\"c4057fb1-5a2c-4d05-9ff1-c7a9d22c079d\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"9c9a263d-b335-4b46-af05-0773b6559ea7\\\"\",\r\n \
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"\
         access\": \"Allow\",\r\n    \"routeFilterRuleType\": \"Community\",\r\n  \
         \  \"communities\": [\r\n      \"12076:5040\",\r\n      \"12076:5030\"\r\n\
         \    ]\r\n  }\r\n}"}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/252458b3-2c28-4755-a4ff-195a270da2fa?api-version=2018-02-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/a580efd3-b820-4646-8917-8e800714957b?api-version=2018-02-01']
       cache-control: [no-cache]
       content-length: ['505']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:34:50 GMT']
+      date: ['Mon, 09 Apr 2018 15:57:48 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -1717,10 +1724,10 @@ interactions:
       CommandName: [network route-filter rule create]
       Connection: [keep-alive]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/252458b3-2c28-4755-a4ff-195a270da2fa?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/a580efd3-b820-4646-8917-8e800714957b?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"status\": \"Failed\",\r\n  \"error\": {\r\n    \"code\"\
         : \"SubscriptionNotAuthorized\",\r\n    \"message\": \"This subscriptionId:0b1f6471-1bf0-4dda-aec3-cb9272f09590\
@@ -1730,7 +1737,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['220']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:35:01 GMT']
+      date: ['Mon, 09 Apr 2018 15:57:59 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -1748,14 +1755,14 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"rule1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1\"\
-        ,\r\n  \"etag\": \"W/\\\"c4606370-7e57-434a-bfc0-76b0cc09f9cc\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"f62f1de7-7924-446f-b09b-43c5db454222\\\"\",\r\n \
         \ \"properties\": {\r\n    \"provisioningState\": \"Failed\",\r\n    \"access\"\
         : \"Allow\",\r\n    \"routeFilterRuleType\": \"Community\",\r\n    \"communities\"\
         : [\r\n      \"12076:5040\",\r\n      \"12076:5030\"\r\n    ]\r\n  }\r\n}"}
@@ -1763,8 +1770,8 @@ interactions:
       cache-control: [no-cache]
       content-length: ['503']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:35:01 GMT']
-      etag: [W/"c4606370-7e57-434a-bfc0-76b0cc09f9cc"]
+      date: ['Mon, 09 Apr 2018 15:58:00 GMT']
+      etag: [W/"f62f1de7-7924-446f-b09b-43c5db454222"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -1785,24 +1792,24 @@ interactions:
       Content-Length: ['356']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"rule1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1\"\
-        ,\r\n  \"etag\": \"W/\\\"38f2720a-9350-4f3e-890d-2fe734597b7a\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"b933614b-7fd0-4c84-9b0c-868bab380e31\\\"\",\r\n \
         \ \"properties\": {\r\n    \"provisioningState\": \"Updating\",\r\n    \"\
         access\": \"Deny\",\r\n    \"routeFilterRuleType\": \"Community\",\r\n   \
         \ \"communities\": [\r\n      \"12076:5040\",\r\n      \"12076:5030\"\r\n\
         \    ]\r\n  }\r\n}"}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/bcbf2ee1-a788-4f39-bdd6-a7e73be19b7c?api-version=2018-02-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3f4bb15b-6882-42db-ad5a-bf01673c7cdb?api-version=2018-02-01']
       cache-control: [no-cache]
       content-length: ['504']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:35:03 GMT']
+      date: ['Mon, 09 Apr 2018 15:58:00 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -1810,7 +1817,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -1820,10 +1827,10 @@ interactions:
       CommandName: [network route-filter rule update]
       Connection: [keep-alive]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/bcbf2ee1-a788-4f39-bdd6-a7e73be19b7c?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/3f4bb15b-6882-42db-ad5a-bf01673c7cdb?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"status\": \"Failed\",\r\n  \"error\": {\r\n    \"code\"\
         : \"SubscriptionNotAuthorized\",\r\n    \"message\": \"This subscriptionId:0b1f6471-1bf0-4dda-aec3-cb9272f09590\
@@ -1833,7 +1840,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['220']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:35:14 GMT']
+      date: ['Mon, 09 Apr 2018 15:58:11 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -1851,14 +1858,14 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"name\": \"rule1\",\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1\"\
-        ,\r\n  \"etag\": \"W/\\\"d2a862ff-5db9-4aab-aacd-661bfcf60e50\\\"\",\r\n \
+        ,\r\n  \"etag\": \"W/\\\"89eb0d56-a4dc-45f4-b6bf-4a8a11a2f9f5\\\"\",\r\n \
         \ \"properties\": {\r\n    \"provisioningState\": \"Failed\",\r\n    \"access\"\
         : \"Deny\",\r\n    \"routeFilterRuleType\": \"Community\",\r\n    \"communities\"\
         : [\r\n      \"12076:5040\",\r\n      \"12076:5030\"\r\n    ]\r\n  }\r\n}"}
@@ -1866,8 +1873,8 @@ interactions:
       cache-control: [no-cache]
       content-length: ['502']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:35:15 GMT']
-      etag: [W/"d2a862ff-5db9-4aab-aacd-661bfcf60e50"]
+      date: ['Mon, 09 Apr 2018 15:58:12 GMT']
+      etag: [W/"89eb0d56-a4dc-45f4-b6bf-4a8a11a2f9f5"]
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -1885,7 +1892,7 @@ interactions:
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
@@ -1893,7 +1900,7 @@ interactions:
   response:
     body: {string: "{\r\n  \"value\": [\r\n    {\r\n      \"name\": \"rule1\",\r\n\
         \      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_network_route_filter000001/providers/Microsoft.Network/routeFilters/filter1/routeFilterRules/rule1\"\
-        ,\r\n      \"etag\": \"W/\\\"d2a862ff-5db9-4aab-aacd-661bfcf60e50\\\"\",\r\
+        ,\r\n      \"etag\": \"W/\\\"89eb0d56-a4dc-45f4-b6bf-4a8a11a2f9f5\\\"\",\r\
         \n      \"properties\": {\r\n        \"provisioningState\": \"Failed\",\r\n\
         \        \"access\": \"Deny\",\r\n        \"routeFilterRuleType\": \"Community\"\
         ,\r\n        \"communities\": [\r\n          \"12076:5040\",\r\n         \
@@ -1902,7 +1909,7 @@ interactions:
       cache-control: [no-cache]
       content-length: ['583']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:35:16 GMT']
+      date: ['Mon, 09 Apr 2018 15:58:13 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -1921,7 +1928,7 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: DELETE
@@ -1929,17 +1936,17 @@ interactions:
   response:
     body: {string: ''}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d14d0cd4-cbe9-42c3-a384-50d83c192c78?api-version=2018-02-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/1576f9d0-a753-4817-ba0d-8744b35d830d?api-version=2018-02-01']
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 30 Mar 2018 20:35:18 GMT']
+      date: ['Mon, 09 Apr 2018 15:58:14 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/d14d0cd4-cbe9-42c3-a384-50d83c192c78?api-version=2018-02-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/1576f9d0-a753-4817-ba0d-8744b35d830d?api-version=2018-02-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -1949,17 +1956,17 @@ interactions:
       CommandName: [network route-filter rule delete]
       Connection: [keep-alive]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/d14d0cd4-cbe9-42c3-a384-50d83c192c78?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/1576f9d0-a753-4817-ba0d-8744b35d830d?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['29']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:35:29 GMT']
+      date: ['Mon, 09 Apr 2018 15:58:25 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -1978,7 +1985,7 @@ interactions:
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
       accept-language: [en-US]
     method: DELETE
@@ -1986,17 +1993,17 @@ interactions:
   response:
     body: {string: ''}
     headers:
-      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5aecda86-cb6d-4535-bc60-6de243bf5317?api-version=2018-02-01']
+      azure-asyncoperation: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ab838086-6f9d-47e0-9688-90f69b14357d?api-version=2018-02-01']
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 30 Mar 2018 20:35:30 GMT']
+      date: ['Mon, 09 Apr 2018 15:58:26 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/5aecda86-cb6d-4535-bc60-6de243bf5317?api-version=2018-02-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operationResults/ab838086-6f9d-47e0-9688-90f69b14357d?api-version=2018-02-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1196']
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 202, message: Accepted}
 - request:
     body: null
@@ -2006,17 +2013,17 @@ interactions:
       CommandName: [network route-filter delete]
       Connection: [keep-alive]
       User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
-          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc1 Azure-SDK-For-Python
+          msrest_azure/0.4.25 networkmanagementclient/2.0.0rc2 Azure-SDK-For-Python
           AZURECLI/2.0.31]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/5aecda86-cb6d-4535-bc60-6de243bf5317?api-version=2018-02-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Network/locations/westus/operations/ab838086-6f9d-47e0-9688-90f69b14357d?api-version=2018-02-01
   response:
     body: {string: "{\r\n  \"status\": \"Succeeded\"\r\n}"}
     headers:
       cache-control: [no-cache]
       content-length: ['29']
       content-type: [application/json; charset=utf-8]
-      date: ['Fri, 30 Mar 2018 20:35:41 GMT']
+      date: ['Mon, 09 Apr 2018 15:58:37 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0, Microsoft-HTTPAPI/2.0]
@@ -2045,12 +2052,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Fri, 30 Mar 2018 20:35:43 GMT']
+      date: ['Mon, 09 Apr 2018 15:58:38 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGTkVUV09SSzo1RlJPVVRFOjVGRklMVEVSUTVVWFJaRURaVHxGM0E5OUUzMDI4MTE2QzA0LVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGTkVUV09SSzo1RlJPVVRFOjVGRklMVEVSQ09LNk5KNjQ1UXw1MDkwNjI0MEQyMzA0QTMxLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
-      x-ms-ratelimit-remaining-subscription-writes: ['1197']
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 version: 1
