@@ -11,8 +11,7 @@ from azure.cli.core.util import CLIError
 def datetime_type(string):
     """ Validates UTC datetime. Examples of accepted forms:
     2017-12-31T01:11:59Z,2017-12-31T01:11Z or 2017-12-31T01Z or 2017-12-31 """
-    accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ',
-                                '%Y-%m-%dT%HZ', '%Y-%m-%d']
+    accepted_date_formats = ['%Y-%m-%dT%H:%M:%SZ', '%Y-%m-%dT%H:%MZ', '%Y-%m-%dT%HZ', '%Y-%m-%d']
     for form in accepted_date_formats:
         try:
             return datetime.strptime(string, form)
@@ -48,11 +47,8 @@ def validate_budget_parameters(namespace):
     budgetcategory = namespace.category.lower()
     if budgetcategory != 'cost' and budgetcategory != 'usage':
         raise CLIError("usage error: --category must be set to either cost or usage")
-
     time_grain = namespace.time_grain.lower().strip()
-
     if time_grain != 'annually' and time_grain != 'quarterly' and time_grain != 'monthly':
         raise CLIError("usage error: --time_grain can be 'Annually', 'Quarterly', or 'Monthly'.")
-
     if namespace.amount < 0:
         raise CLIError("usage error: --amount must be greater than 0")
