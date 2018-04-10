@@ -141,7 +141,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         container = self.create_container(account_info)
 
-        with self.assertRaises(Exception):
+        from azure.common import AzureException
+        with self.assertRaises(AzureException):
             self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block --socket-timeout -11',
                              account_info, container, local_file, blob_name)
 
