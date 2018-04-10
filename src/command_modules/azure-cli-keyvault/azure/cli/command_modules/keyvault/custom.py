@@ -191,6 +191,13 @@ def _get_object_id(graph_client, subscription=None, spn=None, upn=None):
     return _get_object_id_from_subscription(graph_client, subscription)
 
 
+def _create_network_rule_set(bypass=None, default_action=None):
+    from azure.mgmt.keyvault.models import NetworkRuleSet, NetworkRuleBypassOptions, NetworkRuleAction
+
+    return NetworkRuleSet(bypass=bypass or NetworkRuleBypassOptions.azure_services.value,
+                          default_action=default_action or NetworkRuleAction.allow.value)
+
+
 # region KeyVault Vault
 def get_default_policy(client, scaffold=False):  # pylint: disable=unused-argument
     """
@@ -228,11 +235,15 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                     enabled_for_disk_encryption=None,
                     enabled_for_template_deployment=None,
                     enable_soft_delete=None,
+                    enable_purge_protection=None,
+                    bypass=None,
+                    default_action=None,
                     no_self_perms=None,
                     tags=None):
     from azure.mgmt.keyvault.models import (
         VaultCreateOrUpdateParameters, Permissions, KeyPermissions, SecretPermissions,
-        CertificatePermissions, StoragePermissions, AccessPolicyEntry, Sku, VaultProperties)
+        CertificatePermissions, StoragePermissions, AccessPolicyEntry, Sku, VaultProperties, NetworkRuleSet,
+        NetworkRuleBypassOptions, NetworkRuleAction)
     from azure.cli.core._profile import Profile
     from azure.graphrbac.models import GraphErrorException
     from azure.graphrbac import GraphRbacManagementClient
@@ -246,6 +257,11 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
         tenant_id,
         base_url=cmd.cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
     subscription = profile.get_subscription()
+
+    # if bypass or default_action was specified create a NetworkRuleSet
+    # if neither were specified we make network_acls None
+    network_acls = _create_network_rule_set(bypass, default_action) if bypass or default_action else None
+
     if no_self_perms:
         access_policies = []
     else:
@@ -309,7 +325,9 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                                  enabled_for_deployment=enabled_for_deployment,
                                  enabled_for_disk_encryption=enabled_for_disk_encryption,
                                  enabled_for_template_deployment=enabled_for_template_deployment,
-                                 enable_soft_delete=enable_soft_delete)
+                                 enable_soft_delete=enable_soft_delete,
+                                 enable_purge_protection=enable_purge_protection,
+                                 network_acls=network_acls)
     parameters = VaultCreateOrUpdateParameters(location=location,
                                                tags=tags,
                                                properties=properties)
@@ -327,8 +345,13 @@ def update_keyvault_setter(client, parameters, resource_group_name, vault_name):
                                        properties=parameters.properties))
 
 
-def update_keyvault(instance, enabled_for_deployment=None, enabled_for_disk_encryption=None,
-                    enabled_for_template_deployment=None):
+def update_keyvault(instance, enabled_for_deployment=None,
+                    enabled_for_disk_encryption=None,
+                    enabled_for_template_deployment=None,
+                    enable_soft_delete=None,
+                    enable_purge_protection=None,
+                    bypass=None,
+                    default_action=None,):
     if enabled_for_deployment is not None:
         instance.properties.enabled_for_deployment = enabled_for_deployment
 
@@ -338,6 +361,20 @@ def update_keyvault(instance, enabled_for_deployment=None, enabled_for_disk_encr
     if enabled_for_template_deployment is not None:
         instance.properties.enabled_for_template_deployment = enabled_for_template_deployment
 
+    if enable_soft_delete is not None:
+        instance.properties.properties.enable_soft_delete = enable_soft_delete
+
+    if enable_purge_protection is not None:
+        instance.properties.properties.enable_purge_protection = enable_purge_protection
+
+    if bypass or default_action:
+        if instance.properties.properties.network_acls is None:
+            instance.properties.properties.network_acls = _create_network_rule_set(bypass, default_action)
+        else:
+            if bypass:
+                instance.properties.properties.network_acls.bypass = bypass
+            if default_action:
+                instance.properties.properties.network_acls.default_action = default_action
     return instance
 
 
@@ -395,6 +432,74 @@ def set_policy(cmd, client, resource_group_name, vault_name,
                                        location=vault.location,
                                        tags=vault.tags,
                                        properties=vault.properties))
+
+
+def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None):
+    """ Add a network rule to the network ACLs for a Key Vault. """
+    from azure.mgmt.keyvault.models import VirtualNetworkRule, IPRule, VaultCreateOrUpdateParameters
+
+    vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+    vault.properties.network_acls = vault.properties.network_acls or _create_network_rule_set()
+    rules = vault.properties.network_acls
+
+    if subnet:
+        rules.virtual_network_rules = rules.virtual_network_rules or []
+        rules.virtual_network_rules.append(VirtualNetworkRule(id=subnet))
+
+    if ip_address:
+        rules.ip_rules = rules.ip_rules or []
+        rules.ip_rules.append(IPRule(value=ip_address))
+
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   vault_name=vault_name,
+                                   parameters=VaultCreateOrUpdateParameters(
+                                       location=vault.location,
+                                       tags=vault.tags,
+                                       properties=vault.properties))
+
+
+def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None):
+    """ Removes a network rule from the network ACLs for a Key Vault. """
+    from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
+
+    vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+
+    if not vault.properties.network_acls:
+        return vault
+
+    rules = vault.properties.network_acls
+
+    modified = False
+
+    if subnet and rules.virtual_network_rules:
+        new_rules = [x for x in rules.virtual_network_rules if x.id != subnet]
+        modified |= len(new_rules) != len(rules.virtual_network_rules)
+        if modified:
+            rules.virtual_network_rules = new_rules
+
+    if ip_address and rules.ip_rules:
+        new_rules = [x for x in rules.ip_rules if x.value != ip_address]
+        modified |= len(new_rules) != len(rules.ip_rules)
+        if modified:
+            rules.ip_rules = new_rules
+
+    # if we didn't modify the network rules just return the vault as is
+    if not modified:
+        return vault
+
+    # otherwise update
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   vault_name=vault_name,
+                                   parameters=VaultCreateOrUpdateParameters(
+                                       location=vault.location,
+                                       tags=vault.tags,
+                                       properties=vault.properties))
+
+
+def list_network_rules(cmd, client, resource_group_name, vault_name):
+    """ Lists the network rules from the network ACLs for a Key Vault. """
+    vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+    return vault.properties.network_acls
 
 
 def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, spn=None, upn=None):
@@ -824,4 +929,20 @@ def delete_certificate_issuer_admin(client, vault_base_url, issuer_name, email):
     client.set_certificate_issuer(
         vault_base_url, issuer_name, issuer.provider, issuer.credentials, org_details,
         issuer.attributes)
+# endregion
+
+# region storage_account
+
+
+def backup_storage_account(client, vault_base_url, storage_account_name, file_path):
+    backup = client.backup_storage_account(vault_base_url, storage_account_name).value
+    with open(file_path, 'wb') as output:
+        output.write(backup)
+
+
+def restore_storage_account(client, vault_base_url, file_path):
+    with open(file_path, 'rb') as file_in:
+        data = file_in.read()
+    return client.restore_storage_account(vault_base_url, data)
+
 # endregion

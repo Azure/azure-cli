@@ -50,6 +50,12 @@ def load_command_table(self, _):
         g.generic_update_command('update', setter_name='update_keyvault_setter', setter_type=kv_vaults_custom,
                                  custom_func_name='update_keyvault')
 
+
+    with self.command_group('keyvault network-rule', kv_vaults_sdk, client_factory=keyvault_client_vaults_factory) as g:
+        g.custom_command('add', 'add_network_rule')
+        g.custom_command('remove', 'remove_network_rule')
+        g.custom_command('list', 'list_network_rules')
+
     # Data Plane Commands
     with self.command_group('keyvault key', kv_data_sdk) as g:
         g.keyvault_command('list', 'get_keys')
@@ -118,5 +124,23 @@ def load_command_table(self, _):
         g.keyvault_custom('add', 'add_certificate_issuer_admin')
         g.keyvault_custom('delete', 'delete_certificate_issuer_admin')
 
-    with self.command_group('keyvault storage-account', kv_data_sdk) as g:
+    with self.command_group('keyvault storage', kv_data_sdk) as g:
         g.keyvault_command('add', 'set_storage_account')
+        g.keyvault_command('list', 'get_storage_accounts')
+        g.keyvault_command('list-deleted', 'get_deleted_storage_accounts')
+        g.keyvault_command('show', 'get_storage_account')
+        g.keyvault_command('show-deleted', 'get_deleted_storage_account')
+        g.keyvault_command('delete', 'delete_storage_account')
+        g.keyvault_command('purge', 'purge_deleted_storage_account')
+        g.keyvault_command('recover', 'recover_deleted_storage_account')
+        g.keyvault_custom('backup', 'backup_storage_account', doc_string_source=_data_sdk_path('backup_storage_account'))
+        g.keyvault_custom('restore', 'restore_storage_account', doc_string_source=_data_sdk_path('restore_storage_account'))
+
+    with self.command_group('keyvault storage sas-definition', kv_data_sdk) as g:
+        g.keyvault_command('create', 'set_sas_definition')
+        g.keyvault_command('list', 'get_sas_definitions')
+        g.keyvault_command('list-deleted', 'get_deleted_sas_definitions')
+        g.keyvault_command('show', 'get_sas_definition')
+        g.keyvault_command('show-deleted', 'get_deleted_sas_definition')
+        g.keyvault_command('delete', 'delete_sas_definition')
+        g.keyvault_command('recover', 'recover_deleted_sas_definition')

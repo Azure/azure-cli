@@ -34,9 +34,9 @@ certificate_format_values = ['PEM', 'DER']
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
     from azure.keyvault.models import JsonWebKeyOperation
-    from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes
+    from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes
     from azure.mgmt.keyvault.models.key_vault_management_client_enums import (
-        SkuName, KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions)
+        SkuName, KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions, NetworkRuleBypassOptions, NetworkRuleAction)
 
     # ARGUMENT DEFINITIONS
     vault_name_type = CLIArgumentType(
@@ -55,6 +55,12 @@ def load_arguments(self, _):
         c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag(), help='Allow Disk Encryption to retrieve secrets from the vault and unwrap keys.')
         c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag(), help='Allow Resource Manager to retrieve secrets from the vault.')
         c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help='Enable vault deletion recovery for the vault, and all contained entities')
+        c.argument('enable_purge_protection', arg_type=get_three_state_flag(), help='Disable manual purging of deleted vault, and all contained entities')
+
+    with self.argument_context('keyvault', arg_group='Network Rule') as c:
+        c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions), nargs='+', help='Bypass traffic for space-separated uses.')
+        c.argument('default_action', arg_type=get_enum_type(NetworkRuleAction), help='Default action to apply when no rule matches.')
+
 
     with self.argument_context('keyvault create') as c:
         c.argument('resource_group_name', resource_group_name_type, required=True, completer=None, validator=None)
@@ -74,12 +80,16 @@ def load_arguments(self, _):
         c.argument('secret_permissions', arg_type=get_enum_type(SecretPermissions), metavar='PERM', nargs='*', help='Space-separated list of secret permissions to assign.')
         c.argument('certificate_permissions', arg_type=get_enum_type(CertificatePermissions), metavar='PERM', nargs='*', help='Space-separated list of certificate permissions to assign.')
         c.argument('storage_permissions', arg_type=get_enum_type(StoragePermissions), metavar='PERM', nargs='*', help='Space-separated list of storage permissions to assign.')
+
+    with self.argument_context('keyvault network-rule') as c:
+        c.argument('ip_address', help='IPv4 address or CIDR range.')
+        c.argument('subnet', help='Full resource id of a vnet subnet')
     # endregion
 
     # region Shared
-    for item in ['key', 'secret', 'certificate', 'storage-account']:
+    for item in ['key', 'secret', 'certificate', 'storage']:
         with self.argument_context('keyvault ' + item) as c:
-            c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item), id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
+            c.argument(item.replace('-', '_') + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item), id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
             c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
     # endregion
 
@@ -130,6 +140,22 @@ def load_arguments(self, _):
     with self.argument_context('keyvault secret download') as c:
         c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='File to receive the secret contents.')
         c.argument('encoding', arg_type=get_enum_type(secret_encoding_values), options_list=['--encoding', '-e'], help="Encoding of the destination file. By default, will look for the 'file-encoding' tag on the secret. Otherwise will assume 'utf-8'.", default=None)
+    # endregion
+
+    # region KeyVault Storage Account
+
+    with self.argument_context('keyvault storage') as c:
+        c.argument('storage_account_name', options_list=['--name', '-n'], help='Name to identify the storage account in the vault.', id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
+
+    with self.argument_context('keyvault storage add') as c:
+        c.attributes_argument('storage_account', StorageAccountAttributes, create=True)
+
+    with self.argument_context('keyvault storage backup') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local file path in which to store storage account backup.')
+
+    with self.argument_context('keyvault storagerestore') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(), help='Local key backup from which to restore storage account.')
+
     # endregion
 
     # KeyVault Certificate
