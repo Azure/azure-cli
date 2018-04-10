@@ -3,9 +3,13 @@
 Release History
 ===============
 
+
+0.2.13
+++++++
+* Deprecated `redis patch-schedule patch-schedule show` in favor of `redis patch-schedule show`.
+
 0.2.12
 ++++++
-
 * `sdist` is now compatible with wheel 0.31.0
 
 0.2.11
