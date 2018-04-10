@@ -423,3 +423,22 @@ class AmsTests(ScenarioTest):
         assert len(list) > 0
 
         self.cmd('az ams streaming policy delete -n {streamingPolicyName} -a {amsname} -g {rg}')
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(parameter_name='storage_account_for_create')
+    def test_ams_streaming_endpoint(self, resource_group, storage_account_for_create):
+        amsname = self.create_random_name(prefix='ams', length=12)
+
+        self.kwargs.update({
+            'amsname': amsname,
+            'storageAccount': storage_account_for_create,
+            'location': 'westus2'
+        })
+
+        self.cmd('az ams account create -n {amsname} -g {rg} --storage-account {storageAccount} -l {location}', checks=[
+            self.check('name', '{amsname}'),
+            self.check('location', 'West US 2')
+        ])
+
+        list = self.cmd('az ams streaming endpoint list -a {amsname} -g {rg}').get_output_in_json()
+        assert len(list) > 0
