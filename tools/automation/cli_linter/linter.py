@@ -4,11 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import yaml
 import inspect
 import argparse
 from importlib import import_module
 from pkgutil import iter_modules
+import yaml
 import colorama
 from .util import _get_command_groups, _share_element, _exclude_mods
 
@@ -66,7 +66,6 @@ class Linter(object):
         if not param_help:
             return self._command_table.get(command_name).arguments.get(parameter_name).type.settings.get('help')
         return param_help.short_summary or param_help.long_summary
-
 
     def _get_loaded_help_description(self, entry):
         return self._loaded_help.get(entry).short_summary or self._loaded_help.get(entry).long_summary
@@ -171,6 +170,7 @@ class RuleError(Exception):
     Exception thrown by rule violation
     """
     pass
+
 
 class GetLinter():
     def __init__(self, linter_manager, linter_callable):
