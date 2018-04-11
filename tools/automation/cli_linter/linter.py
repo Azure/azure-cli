@@ -8,6 +8,7 @@ import inspect
 import argparse
 from importlib import import_module
 from pkgutil import iter_modules
+import colorama
 
 
 class Linter(object):
@@ -74,16 +75,16 @@ class LinterManager(object):
         self.linter = Linter(command_table=command_table, help_file_entries=help_file_entries, loaded_help=loaded_help)
         self._exclusions = exclusions or {}
         self._rules = {
-            'help_file_entries': [],
-            'command_groups': [],
-            'commands': [],
-            'params': []
+            'help_file_entries': {},
+            'command_groups': {},
+            'commands': {},
+            'params': {}
         }
         self._exit_code = 0
 
-    def add_rule(self, rule_type, rule_callable):
+    def add_rule(self, rule_type, rule_name, rule_callable):
         if rule_type in self._rules:
-            self._rules.get(rule_type).append(rule_callable)
+            self._rules.get(rule_type)[rule_name] = rule_callable
 
     def mark_rule_failure(self):
         self._exit_code = 1
@@ -113,30 +114,36 @@ class LinterManager(object):
                     found_rules.add(rule_name)
                     add_to_linter_func(self)
 
+        colorama.init()
         # run all rule-checks
         if run_help_files_entries and self._rules.get('help_file_entries'):
-            print(os.linesep + 'Running Linter on Help File Entries:')
             self._run_rules('help_file_entries')
 
         if run_command_groups and self._rules.get('command_groups'):
-            print(os.linesep + 'Running Linter on Command Groups:')
             self._run_rules('command_groups')
 
         if run_commands and self._rules.get('commands'):
-            print(os.linesep + 'Running Linter on Commands:')
             self._run_rules('commands')
 
         if run_params and self._rules.get('params'):
-            print(os.linesep + 'Running Linter on Parameters:')
             self._run_rules('params')
 
+        if not self.exit_code:
+            print('\nNo violations found.')
+        colorama.deinit()
         return self.exit_code
 
     def _run_rules(self, rule_group):
-        for callable_rule in self._rules.get(rule_group):
-            for violation_msg in sorted(callable_rule()):
-                print(violation_msg)
-            print()
+        from colorama import Fore
+        for rule_name, rule_func in self._rules.get(rule_group).items():
+            violations = sorted(rule_func()) or []
+            if violations:
+                print('- {} FAIL{}: {}'.format(Fore.RED, Fore.RESET, rule_name))
+                for violation_msg in violations:
+                    print(violation_msg)
+                print()
+            else:
+                print('- {} pass{}: {} '.format(Fore.GREEN, Fore.RESET, rule_name))
 
 
 class RuleError(Exception):
