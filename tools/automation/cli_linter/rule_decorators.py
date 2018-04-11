@@ -26,7 +26,6 @@ def command_group_rule(func):
 def parameter_rule(func):
     def add_to_linter(linter_manager):
         def wrapper():
-            print('-Rule:', func.__name__)
             linter = linter_manager.linter
             for command_name in linter.commands:
                 for parameter_name in linter.get_command_parameters(command_name):
@@ -39,7 +38,7 @@ def parameter_rule(func):
                             linter_manager.mark_rule_failure()
                             yield _create_violation_msg(ex, 'Parameter: {}, `{}`',
                                                         command_name, parameter_name)
-        linter_manager.add_rule('params', wrapper)
+        linter_manager.add_rule('params', func.__name__, wrapper)
     add_to_linter.linter_rule = True
     return add_to_linter
 
@@ -47,7 +46,6 @@ def parameter_rule(func):
 def _get_decorator(func, rule_group, print_format):
     def add_to_linter(linter_manager):
         def wrapper():
-            print('-Rule:', func.__name__)
             linter = linter_manager.linter
             for iter_entity in getattr(linter, rule_group):
                 exclusions = linter_manager.exclusions.get(iter_entity, {}).get('rule_exclusions', [])
@@ -57,7 +55,7 @@ def _get_decorator(func, rule_group, print_format):
                     except RuleError as ex:
                         linter_manager.mark_rule_failure()
                         yield _create_violation_msg(ex, print_format, iter_entity)
-        linter_manager.add_rule(rule_group, wrapper)
+        linter_manager.add_rule(rule_group, func.__name__, wrapper)
     add_to_linter.linter_rule = True
     return add_to_linter
 
