@@ -7,7 +7,7 @@ from azure.cli.core.commands import CliCommandType
 from ._client_factory import (get_mediaservices_client, get_transforms_client,
                               get_assets_client, get_jobs_client, get_streaming_locators_client,
                               get_streaming_policies_client, get_streaming_endpoints_client)
-from ._exception_handler import (build_exception_wrapper)
+from ._exception_handler import ams_exception_handler
 
 # pylint: disable=line-too-long
 
@@ -16,14 +16,14 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         return CliCommandType(
             operations_tmpl='azure.mediav3.operations#{}Operations.'.format(operation) + '{}',
             client_factory=client_factory,
-            exception_handler=build_exception_wrapper()
+            exception_handler=ams_exception_handler
         )
 
     def get_custom_sdk(custom_module, client_factory):
         return CliCommandType(
             operations_tmpl='azure.cli.command_modules.ams.operations.{}#'.format(custom_module) + '{}',
             client_factory=client_factory,
-            exception_handler=build_exception_wrapper()
+            exception_handler=ams_exception_handler
         )
 
     with self.command_group('ams account', get_sdk('Mediaservices', get_mediaservices_client)) as g:

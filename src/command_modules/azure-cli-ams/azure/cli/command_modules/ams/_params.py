@@ -17,16 +17,17 @@ from ._validators import storage_account_id
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
-    name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME')
-    account_name_arg_type = CLIArgumentType(options_list=('--account-name', '-a'), metavar='ACCOUNT_NAME')
-    storage_account_arg_type = CLIArgumentType(options_list=('--storage-account'), metavar='STORAGE_NAME')
-    password_arg_type = CLIArgumentType(options_list=('--password', '-p'), metavar='PASSWORD_NAME')
-    transform_name_arg_type = CLIArgumentType(options_list=('--transform-name', '-t'), metavar='TRANSFORM_NAME')
-    expiry_arg_type = CLIArgumentType(options_list=('--expiry'), metavar='EXPIRY_TIME')
+    name_arg_type = CLIArgumentType(options_list=['--name', '-n'], id_part='name', help='The name of the Azure Media Services account.', metavar='NAME')
+    account_name_arg_type = CLIArgumentType(options_list=['--account-name', '-a'], id_part='name', help='The name of the Azure Media Services account.', metavar='ACCOUNT_NAME')
+    storage_account_arg_type = CLIArgumentType(options_list=['--storage-account'], metavar='STORAGE_NAME')
+    password_arg_type = CLIArgumentType(options_list=['--password', '-p'], metavar='PASSWORD_NAME')
+    transform_name_arg_type = CLIArgumentType(options_list=['--transform-name', '-t'], metavar='TRANSFORM_NAME')
+    expiry_arg_type = CLIArgumentType(options_list=['--expiry'], metavar='EXPIRY_TIME')
+
+    with self.argument_context('ams') as c:
+        c.argument('account_name', name_arg_type)
 
     with self.argument_context('ams account') as c:
-        c.argument('account_name', name_arg_type, id_part='name',
-                   help='The name of the Azure Media Services account within the resource group.')
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
                    validator=get_default_location_from_resource_group)
         c.argument('tags', arg_type=tags_type)
@@ -37,15 +38,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    validator=storage_account_id)
 
     with self.argument_context('ams account storage') as c:
-        c.argument('account_name', account_name_arg_type,
-                   help='The name of the Azure Media Services account within the resource group.')
+        c.argument('account_name', account_name_arg_type)
         c.argument('storage_account', name_arg_type,
                    help='The name or resource ID of the secondary storage account to detach from the Azure Media Services account.',
                    validator=storage_account_id)
 
     with self.argument_context('ams account sp') as c:
-        c.argument('account_name', account_name_arg_type,
-                   help='The name of the Azure Media Services account within the resource group.')
+        c.argument('account_name', account_name_arg_type)
         c.argument('sp_name', name_arg_type,
                    help="The app name or app URI to associate the RBAC with. If not present, a default name like '{amsaccountname}-access-sp' will be generated.")
         c.argument('sp_password', password_arg_type,
@@ -55,21 +54,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('years', type=int, default=None)
 
     with self.argument_context('ams transform') as c:
-        c.argument('account_name', account_name_arg_type, id_part='name',
-                   help='The name of the Azure Media Services account within the resource group.')
+        c.argument('account_name', account_name_arg_type)
         c.argument('transform_name', name_arg_type, id_part='child_name_1',
                    help='The name of the transform.')
         c.argument('preset_names', arg_type=get_enum_type(EncoderNamedPreset),
                    nargs='+',
-                   help='Space-separated list of built preset names.')
-        c.argument('description', help='Customer supplied description of the transform.')
+                   help='Space-separated list of built-in preset names.')
+        c.argument('description', help='The description of the transform.')
 
     with self.argument_context('ams transform list') as c:
         c.argument('account_name', id_part=None)
 
     with self.argument_context('ams asset') as c:
-        c.argument('account_name', account_name_arg_type, id_part='name',
-                   help='The name of the Azure Media Services account within the resource group.')
+        c.argument('account_name', account_name_arg_type)
         c.argument('asset_name', name_arg_type, id_part='child_name_1',
                    help='The name of the asset.')
 
@@ -87,8 +84,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('expiry_time', expiry_arg_type, help="Specifies the UTC datetime (Y-m-d'T'H:M'Z') at which the SAS becomes invalid.")
 
     with self.argument_context('ams job') as c:
-        c.argument('account_name', account_name_arg_type, id_part='name',
-                   help='The name of the Azure Media Services account within the resource group.')
+        c.argument('account_name', account_name_arg_type)
         c.argument('transform_name', transform_name_arg_type, id_part='child_name_1',
                    help='The name of the transform.')
         c.argument('job_name', name_arg_type, id_part='child_name_2',
@@ -117,8 +113,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('delete', help='Delete the job being cancelled.')
 
     with self.argument_context('ams streaming') as c:
-        c.argument('account_name', account_name_arg_type, id_part='name',
-                   help='The name of the Azure Media Services account within the resource group.')
+        c.argument('account_name', account_name_arg_type)
         c.argument('default_content_key_policy_name',
                    help='The default content key policy name used by the streaming locator.')
 
@@ -145,7 +140,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Enable Dash protocol.')
         c.argument('hls',
                    arg_group='Encryption Protocols',
-                   help='Enable Hls protocol.')
+                   help='Enable HLS protocol.')
         c.argument('smooth_streaming',
                    arg_group='Encryption Protocols',
                    help='Enable SmoothStreaming protocol.')

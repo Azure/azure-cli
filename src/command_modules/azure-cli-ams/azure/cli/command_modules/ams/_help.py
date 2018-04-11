@@ -67,16 +67,6 @@ helps['ams account sp create'] = """
     type: command
     short-summary: Create a service principal and configure its access to an Azure Media Services account.
     parameters:
-        - name: --account-name
-          short-summary: The name of the Azure Media Services account within the resource group.
-        - name: --name
-          short-summary: The app name or app URI to associate the RBAC with. If not present, a default name like '{amsaccountname}-access-sp' will be generated.
-        - name: --password
-          short-summary: The password used to log in. Also known as 'Client Secret'. If not present, a random secret will be generated.
-        - name: --role
-          short-summary: The role of the service principal.
-        - name: --xml
-          short-summary: Flag that enables xml output format.
         - name: --years
           short-summary: 'Number of years for which the secret will be valid. Default: 1 year'
     examples:
