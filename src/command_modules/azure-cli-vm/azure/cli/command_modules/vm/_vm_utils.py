@@ -120,3 +120,97 @@ def list_sku_info(cli_ctx, location=None):
     if location:
         result = [r for r in result if _match_location(location, r.locations)]
     return result
+
+
+def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
+                        os_caching=None, data_disk_cachings=None, write_accelerator_settings=None):
+    # we should return a dictionary with info like below and will emoit when see conflictions
+    # {
+    #   'os': { caching: 'Read', write_accelerator: None},
+    #   0: { caching: 'None', write_accelerator: True},
+    #   1: { caching: 'None', write_accelerator: True},
+    # }
+    info = {}
+    attach_data_disks = attach_data_disks or []
+    image_data_disks = image_data_disks or []
+    info['os'] = {
+        'caching': os_caching,
+        'write_accelerator': None,
+    }
+
+    for i in range(len(image_data_disks) + len(data_disk_sizes_gb) + len(attach_data_disks)):
+        info[i] = {
+            'lun': i,
+            'caching': None,
+            'write_accelerator': None
+        }
+
+    # fill in storage sku for managed data disks
+    for i in range(len(image_data_disks) + len(data_disk_sizes_gb)):
+        info[i]['managedDisk'] = {'storageAccountType': storage_sku}
+
+    # fill in createOption
+    for i in range(len(image_data_disks)):
+        info[i]['createOption'] = 'fromImage'
+    base = len(image_data_disks)
+    for i in range(base, base + len(data_disk_sizes_gb)):
+        info[i]['createOption'] = 'empty'
+    base = len(image_data_disks) + len(data_disk_sizes_gb)
+    for i in range(base, base + len(attach_data_disks)):
+        info[i]['createOption'] = 'atatch'
+
+    # fill in attached data disks details
+    base = len(image_data_disks) + len(data_disk_sizes_gb)
+    for i, d in enumerate(attach_data_disks):
+        if is_valid_resource_id(d):
+            info[base+i]['managedDisk'] = {'id': d}
+        else:
+            info[base+i]['vhd'] = {'uri': d}
+            info[base+i]['name'] = d.split('/')[-1].split('.')[0]
+
+    # fill in data disk caching
+    if data_disk_cachings:
+        if len(data_disk_cachings) == 1 and '=' not in data_disk_cachings[0]:
+            for d in info:
+                if d != 'os':
+                    info[d]['caching'] = data_disk_cachings[0]
+        else:
+            for x in data_disk_cachings:
+                if '=' not in x:
+                    raise CLIError("usage error: please use 'LUN=VALUE' to configure caching on individual disks")
+                lun, value = x.split('=', 1)
+                lun = int(lun)
+                if lun not in info:
+                    raise CLIError("usage error: data disk with lun of '{}' doesn't exist".format(lun))
+                info[lun]['caching'] = value
+
+    # fill in write accelerators 
+    if write_accelerator_settings:
+        if len(write_accelerator_settings) == 1 and '=' not in write_accelerator_settings[0]:
+            for d in info:
+                if d != 'os':
+                    info[d]['write_accelerator'] = write_accelerator_settings[0]
+            for x in write_accelerator_settings:
+                if '=' not in x:
+                    raise CLIError("usage error: please use 'LUN=VALUE' to configure write accelerator"
+                                   " on individual disk")
+                lun, value = x.split('=', 1)
+                lun = int(lun)
+                if lun not in info:
+                    raise CLIError("usage error: data disk with lun of '{}' doesn't exist".format(lun))
+                info[lun]['write_accelerator'] = value.lower() == 'true'
+
+    # cross check that for disk with write accelerator, the caching must be None
+    for k in info:
+        if info[k]['write_accelerator']:
+             if info[k]['caching'] is None:
+                 info[k]['caching'] = 'None'
+             elif info[k]['caching'].lower() != 'none':
+                 raise CLIError("usage error: with write accelerator turned on, disk '{}''s cacheing must"
+                                " be 'None'")
+
+    # default os disk caching to 'ReadWrite' unless set otherwise
+    if info['os']['caching'] is None:
+        info['os']['caching'] = 'ReadWrite'
+
+    return info

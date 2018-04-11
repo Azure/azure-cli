@@ -422,41 +422,9 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     if not namespace.os_type:
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
-    namespace.os_caching = _process_disk_caching_value(cmd, namespace.os_caching, is_os_disk=True)
-    namespace.data_caching = _process_disk_caching_value(cmd, namespace.data_caching, is_os_disk=False)
-
-
-def _process_disk_caching_value(cmd, disk_caching, is_os_disk):
-    from azure.cli.core.profiles import ResourceType
-    CachingTypes = cmd.get_models('CachingTypes', resource_type=ResourceType.MGMT_COMPUTE)
-
-    if is_os_disk:
-        if not disk_caching:
-            return CachingTypes.read_write.value
-        # value check is done at arg-parse layer through enum choice list, so skipping here
-        return disk_caching
-
-    if disk_caching:
-        disk_caching_values = [x.value for x in CachingTypes]
-        disk_caching_values_lower = [x.value.lower() for x in CachingTypes]
-        invalid_caching_val_err = 'usage error: please use data disk caching value from ' + '|'.join(
-            disk_caching_values)
-        using_luns = [x for x in disk_caching if '=' in x]
-        if len(disk_caching) > 1:
-            # verify if we have 2+ entries, all should have the format of '<lun>=<value>'
-            if len(using_luns) != len(disk_caching):
-                raise CLIError('usage error: --data-disk-caching VALUE | --data-disk-caching LUN=VALUE LUN2=VALUE2 ...')
-        for x in disk_caching:
-            c = x
-            if '=' in x:
-                lun, c = x.split('=', 1)
-                try:
-                    lun = int(lun)
-                except ValueError:
-                    raise CLIError("usage error: LUN used in --data-disk-caching must be an integer")
-            if c.lower() not in disk_caching_values_lower:
-                raise CLIError(invalid_caching_val_err.format('data'))
-    return disk_caching
+    from ._vm_utils import normalize_disk_info
+    namespace.disk_info = normalize_disk_info(namespace.image_data_disks, namespace.data_disk_sizes_gb, namespace.attach_data_disks, 
+                                              namespace.os_caching, namespace.data_caching, getattr(namespace, 'write_accelerator', None))
 
 
 def _validate_vm_create_storage_account(cmd, namespace):
@@ -905,10 +873,7 @@ def process_vm_create_namespace(cmd, namespace):
     if namespace.storage_profile in [StorageProfile.SACustomImage,
                                      StorageProfile.SAPirImage]:
         _validate_vm_create_storage_account(cmd, namespace)
-    if namespace.enable_write_accelerator:
-        if (enable_write_accelerator == [] or 'os' in enable_write_accelerator) and namespace:
-            pass
-
+        
     _validate_vm_create_availability_set(cmd, namespace)
     _validate_vm_vmss_create_vnet(cmd, namespace)
     _validate_vm_create_nsg(cmd, namespace)
