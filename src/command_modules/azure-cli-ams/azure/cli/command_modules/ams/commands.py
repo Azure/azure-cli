@@ -9,6 +9,7 @@ from ._client_factory import (get_mediaservices_client, get_transforms_client,
                               get_streaming_policies_client, get_streaming_endpoints_client)
 from ._exception_handler import (build_exception_wrapper)
 
+# pylint: disable=line-too-long
 
 def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-statements
     def get_sdk(operation, client_factory):
