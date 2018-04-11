@@ -258,12 +258,13 @@ def build_vm_msi_extension(cmd, vm_name, location, role_assignment_guid, port, i
 def build_vm_resource(  # pylint: disable=too-many-locals
         cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
-        image_reference=None, os_disk_name=None, custom_image_os_type=None, disk_info=None,
-        storage_sku=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
+        image_reference=None, os_disk_name=None, custom_image_os_type=None,
+        os_caching=None, data_caching=None, storage_sku=None,
+        os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, os_disk_size_gb=None, attach_data_disks=None, data_disk_sizes_gb=None,
-        image_data_disks=None, custom_data=None, secrets=None, license_type=None, zone=None):
+        custom_data=None, secrets=None, license_type=None, zone=None,
+        disk_info=None):
 
-    os_caching = disk_info['os']['caching']
     def _build_os_profile():
 
         os_profile = {
@@ -368,13 +369,10 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         profile = storage_profiles[storage_profile.name]
         if os_disk_size_gb:
             profile['osDisk']['diskSizeGb'] = os_disk_size_gb
-        if disk_info['os']['caching'] is not None:
-            profile['osDisk']['caching'] = disk_info['os']['caching']
-        if disk_info['os']['write_accelerator'] is not None:
-            profile['osDisk']['writeAcceleratorEnabled'] = disk_info['os']['write_accelerator']
-        return _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
-                                 disk_info, storage_sku, attach_data_disks=attach_data_disks,
-                                 enable_write_accelerator=enable_write_accelerator)
+        if disk_info['os']['writeAcceleratorEnabled'] is not None:
+            profile['osDisk']['writeAcceleratorEnabled'] = disk_info['os']['writeAcceleratorEnabled']
+        profile['dataDisks'] = [v for k, v in disk_info if k != 'os']
+        return profile
 
     vm_properties = {
         'hardwareProfile': {'vmSize': size},
@@ -406,8 +404,22 @@ def build_vm_resource(  # pylint: disable=too-many-locals
     return vm
 
 
-def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks, disk_info, storage_sku, attach_data_disks=None):
+def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks, data_caching, storage_sku, attach_data_disks=None,
+                      enable_write_accelerator=None):
     lun = 0
+
+    # handle 2 kinds of values
+    # 1 "--data-disk-caching <value>": all disks will be applied
+    # 2 "--data-disk-caching 1=<value> 2=<value>": apply based on lun, the rest will use server side default
+    default_caching, individual_disk_cachings = None, {}
+    if data_caching:
+        if len(data_caching) == 1 and '=' not in data_caching[0]:
+            default_caching = data_caching[0]
+        else:
+            for x in data_caching:
+                temp, caching = x.split('=', 1)
+                temp = int(temp)
+                individual_disk_cachings[temp] = caching
 
     if image_data_disks:
         profile['dataDisks'] = profile.get('dataDisks') or []
@@ -415,11 +427,9 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks, disk_info, 
             profile['dataDisks'].append({
                 'lun': image_data_disk.lun,
                 'createOption': "fromImage",
-                'caching': disk_info[image_data_disk.lun]['caching'],
+                'caching': default_caching or individual_disk_cachings.get(image_data_disk.lun),
                 'managedDisk': {'storageAccountType': storage_sku}
             })
-            if disk_info[image_data_disk.lun]['write_accelerator'] is not None:
-                profile['dataDisks'][-1]['writeAcceleratorEnabled'] = disk_info[image_data_disk.lun]['write_accelerator']
             lun = lun + 1
 
     if data_disk_sizes_gb:
@@ -430,11 +440,9 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks, disk_info, 
                 'lun': lun,
                 'createOption': "empty",
                 'diskSizeGB': int(size),
-                'caching': disk_info[lun]['caching'],
+                'caching': default_caching or individual_disk_cachings.get(lun),
                 'managedDisk': {'storageAccountType': storage_sku}
             })
-            if disk_info[lun]['write_accelerator'] is not None:
-                profile['dataDisks'][-1]['writeAcceleratorEnabled'] = disk_info[lun]['write_accelerator']
             lun = lun + 1
 
     if attach_data_disks:
@@ -444,7 +452,7 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks, disk_info, 
             disk_entry = {
                 'lun': lun,
                 'createOption': 'attach',
-                'caching': disk_info[lun]['caching'],
+                'caching': default_caching or individual_disk_cachings.get(lun),
             }
             if is_valid_resource_id(d):
                 disk_entry['managedDisk'] = {'id': d}
@@ -452,9 +460,14 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks, disk_info, 
                 disk_entry['vhd'] = {'uri': d}
                 disk_entry['name'] = d.split('/')[-1].split('.')[0]
             profile['dataDisks'].append(disk_entry)
-            if disk_info[lun]['write_accelerator'] is not None:
-                profile['dataDisks'][-1]['writeAcceleratorEnabled'] = disk_info[lun]['write_accelerator']
             lun += 1
+
+    if enable_write_accelerator is not None:
+        for d in profile.get('dataDisks', []):
+            if enable_write_accelerator == [] or str(d['lun']) in enable_write_accelerator:
+                d['writeAcceleratorEnabled'] = True
+                d['caching'] = 'None'  # TODO: set it through validator
+
     return profile
 
 
@@ -664,12 +677,12 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         public_ip_per_vm, vm_domain_name, dns_servers, nsg, accelerated_networking,
                         admin_username, authentication_type, storage_profile, os_disk_name,
-                        disk_info, storage_sku, data_disk_sizes_gb, image_data_disks, os_type,
+                        os_caching, data_caching, storage_sku, data_disk_sizes_gb, image_data_disks, os_type,
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
-                        secrets=None, license_type=None, zones=None, priority=None):
+                        secrets=None, license_type=None, zones=None, priority=None, disk_info=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -740,8 +753,7 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
             'id': image
         }
 
-    storage_profile = _build_data_disks(storage_properties, data_disk_sizes_gb,
-                                        image_data_disks, disk_info, storage_sku)
+    storage_properties['dataDisks'] = [v for k, v in disk_info if k != 'os']
 
     # Build OS Profile
     os_profile = {

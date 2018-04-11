@@ -496,7 +496,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               private_ip_address=None, public_ip_address=None, public_ip_address_allocation='dynamic',
               public_ip_address_dns_name=None, public_ip_sku=None, os_disk_name=None, os_type=None,
               storage_account=None, os_caching=None, data_caching=None, storage_container_name=None, storage_sku=None,
-              use_unmanaged_disk=False, attach_os_disk=None, os_disk_size_gb=None, attach_data_disks=None, 
+              use_unmanaged_disk=False, attach_os_disk=None, os_disk_size_gb=None, attach_data_disks=None,
               data_disk_sizes_gb=None, image_data_disks=None, enable_write_accelerator=None, disk_info=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16', subnet=None, subnet_address_prefix='10.0.0.0/24',
               storage_profile=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None,
@@ -617,8 +617,8 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         cmd, vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
         os_type, disk_info, storage_sku, os_publisher, os_offer, os_sku, os_version,
-        os_vhd_uri, attach_os_disk, os_disk_size_gb, attach_data_disks, data_disk_sizes_gb, image_data_disks,
-        custom_data, secrets, license_type, zone)
+        os_vhd_uri, attach_os_disk, os_disk_size_gb, attach_data_disks, data_disk_sizes_gb,
+        custom_data, secrets, license_type, zone, disk_info=disk_info)
     vm_resource['dependsOn'] = vm_dependencies
 
     if plan_name:
@@ -885,6 +885,7 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
 def update_vm(cmd, resource_group_name, vm_name, os_disk=None,
               write_accelerator=None, no_wait=False, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
+    from ._vm_utils import update_write_accelerator_settings
     vm = kwargs['parameters']
     if os_disk is not None:
         if is_valid_resource_id(os_disk):
@@ -898,35 +899,10 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None,
         vm.storage_profile.os_disk.name = disk_name
 
     if write_accelerator is not None:
-        _upodate_storagage_profile_with_write_accelerator(vm.storage_profile, write_accelerator)
+        update_write_accelerator_settings(vm.storage_profile, write_accelerator)
 
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
-
-
-def _upodate_storagage_profile_with_write_accelerator(storage_profile, write_accelerator):
-    apply_all = None
-    if write_accelerator == []:
-        apply_all = True
-    if len(write_accelerator) == 1 and ('=' not in write_accelerator[0]):
-        apply_all = (write_accelerator[0].lower() == 'true')
-    if apply_all is not None:
-        storage_profile.os_disk.write_accelerator_enabled = apply_all
-        for d in (storage_profile.data_disks or []):
-            d.write_accelerator_enabled = apply_all
-    else:
-        for x in write_accelerator:
-            disk_name, value = x.split('=', 1)
-            value = value.lower() == 'true'
-            if disk_name.lower() == 'os':
-                storage_profile.os_disk.write_accelerator_enabled = value
-            else:
-                lun = int(disk_name)
-                disk = next((d for d in storage_profile.data_disks if d.lun == lun), None)
-                if disk:
-                    disk.write_accelerator_enabled = value
-                else:
-                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
 
 # endregion
 
@@ -1980,7 +1956,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                                         ip_config_name, nic_name, subnet_id, public_ip_per_vm,
                                         vm_domain_name, dns_servers, nsg, accelerated_networking,
                                         admin_username, authentication_type, storage_profile,
-                                        os_disk_name, disk_info,
+                                        os_disk_name,
                                         storage_sku, data_disk_sizes_gb, image_data_disks,
                                         os_type, image, admin_password,
                                         ssh_key_value, ssh_dest_key_path,
@@ -1989,7 +1965,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                                         single_placement_group=single_placement_group,
                                         platform_fault_domain_count=platform_fault_domain_count,
                                         custom_data=custom_data, secrets=secrets,
-                                        license_type=license_type, zones=zones, priority=priority)
+                                        license_type=license_type, zones=zones, priority=priority, disk_info=disk_info)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:

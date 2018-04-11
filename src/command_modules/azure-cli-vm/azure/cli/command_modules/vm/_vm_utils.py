@@ -130,6 +130,7 @@ def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_d
     #   0: { caching: 'None', write_accelerator: True},
     #   1: { caching: 'None', write_accelerator: True},
     # }
+    from msrestazure.tools import is_valid_resource_id
     info = {}
     attach_data_disks = attach_data_disks or []
     image_data_disks = image_data_disks or []
@@ -163,10 +164,10 @@ def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_d
     base = len(image_data_disks) + len(data_disk_sizes_gb)
     for i, d in enumerate(attach_data_disks):
         if is_valid_resource_id(d):
-            info[base+i]['managedDisk'] = {'id': d}
+            info[base + i]['managedDisk'] = {'id': d}
         else:
-            info[base+i]['vhd'] = {'uri': d}
-            info[base+i]['name'] = d.split('/')[-1].split('.')[0]
+            info[base + i]['vhd'] = {'uri': d}
+            info[base + i]['name'] = d.split('/')[-1].split('.')[0]
 
     # fill in data disk caching
     if data_disk_cachings:
@@ -184,33 +185,49 @@ def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_d
                     raise CLIError("usage error: data disk with lun of '{}' doesn't exist".format(lun))
                 info[lun]['caching'] = value
 
-    # fill in write accelerators 
-    if write_accelerator_settings:
-        if len(write_accelerator_settings) == 1 and '=' not in write_accelerator_settings[0]:
-            for d in info:
-                if d != 'os':
-                    info[d]['write_accelerator'] = write_accelerator_settings[0]
-            for x in write_accelerator_settings:
-                if '=' not in x:
-                    raise CLIError("usage error: please use 'LUN=VALUE' to configure write accelerator"
-                                   " on individual disk")
-                lun, value = x.split('=', 1)
-                lun = int(lun)
-                if lun not in info:
-                    raise CLIError("usage error: data disk with lun of '{}' doesn't exist".format(lun))
-                info[lun]['write_accelerator'] = value.lower() == 'true'
-
-    # cross check that for disk with write accelerator, the caching must be None
-    for k in info:
-        if info[k]['write_accelerator']:
-             if info[k]['caching'] is None:
-                 info[k]['caching'] = 'None'
-             elif info[k]['caching'].lower() != 'none':
-                 raise CLIError("usage error: with write accelerator turned on, disk '{}''s cacheing must"
-                                " be 'None'")
+    # fill in write accelerators
+    update_write_accelerator_settings(info, write_accelerator_settings)
 
     # default os disk caching to 'ReadWrite' unless set otherwise
-    if info['os']['caching'] is None:
+    if info['os']['caching'] is None and not info['os']['writeAcceleratorEnabled']:
         info['os']['caching'] = 'ReadWrite'
 
     return info
+
+
+def update_write_accelerator_settings(model, write_accelerator_settings):
+
+    def _update(model, lun, value):
+        err_caching = "useage error: please turn off 'read-write' caching on disk '{}' when enable write accelerator"
+        if isinstance(model, dict):
+            luns = model.keys() if lun is None else [lun]
+            for l in luns:
+                model[l]['writeAcceleratorEnabled'] = value
+                if value and model[l]['caching'] == 'ReadWrite':
+                    raise CLIError(err_caching.format(l))  # TODO: make sure service end emit out a good error. if, remove the code here
+        else:
+            if lun is None:
+                disks = [model.os_disk] + (model.data_disks or [])
+            elif lun == 'os':
+                disks = [model.os_disk]
+            else:
+                disk = next((d for d in model.data_disks if d.lun == lun), None)
+                if not disk:
+                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
+                disks = [disk]
+            for disk in disks:
+                disk.write_accelerator_enabled = value
+                if value and disk.caching == 'ReadWrite':
+                    raise CLIError(err_caching.format(lun))  # TODO: make sure service end emit out a good error. if, remove the code here
+
+    # fill in write accelerators
+    if len(write_accelerator_settings) == 1 and '=' not in write_accelerator_settings[0]:
+        _update(model, None, write_accelerator_settings[0].lower() == 'true')
+    else:
+        for x in write_accelerator_settings:
+            if '=' not in x:
+                raise CLIError("usage error: please use 'LUN=VALUE' to configure write accelerator"
+                               " on individual disk")
+            lun, value = x.split('=', 1)
+            lun = int(lun)
+            _update(model, lun, value.lower() == 'true')
