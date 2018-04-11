@@ -262,7 +262,7 @@ def validate_source_uri(cmd, namespace):  # pylint: disable=too-many-statements
 
     query_params = []
     if source_sas:
-        query_params.append(source_sas)
+        query_params.append(source_sas.lstrip('?'))
     if snapshot:
         query_params.append('snapshot={}'.format(snapshot))
 
