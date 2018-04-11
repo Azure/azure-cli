@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.32
+++++++
+
+* fix the permission issue in `aks install-connector` when --aci-resource-group is not specified
+
 2.0.31
 ++++++
 
