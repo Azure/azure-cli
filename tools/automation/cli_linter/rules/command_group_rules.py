@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ..rule_decorators import command_group_rule, exclude_from_ci
+from ..rule_decorators import command_group_rule
 from ..linter import RuleError
 
 
