@@ -170,20 +170,7 @@ def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_d
             info[base + i]['name'] = d.split('/')[-1].split('.')[0]
 
     # fill in data disk caching
-    if data_disk_cachings:
-        if len(data_disk_cachings) == 1 and '=' not in data_disk_cachings[0]:
-            for d in info:
-                if d != 'os':
-                    info[d]['caching'] = data_disk_cachings[0]
-        else:
-            for x in data_disk_cachings:
-                if '=' not in x:
-                    raise CLIError("usage error: please use 'LUN=VALUE' to configure caching on individual disks")
-                lun, value = x.split('=', 1)
-                lun = int(lun)
-                if lun not in info:
-                    raise CLIError("usage error: data disk with lun of '{}' doesn't exist".format(lun))
-                info[lun]['caching'] = value
+    update_disk_caching(info, data_disk_cachings)
 
     # fill in write accelerators
     update_write_accelerator_settings(info, write_accelerator_settings)
@@ -195,6 +182,37 @@ def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_d
     return info
 
 
+def update_disk_caching(model, caching_settings):
+
+    def _update(model, lun, value):
+        if isinstance(model, dict):
+            luns = model.keys() if lun is None else [lun]
+            for l in luns:
+                model[l]['caching'] = value
+        else:
+            if lun is None:
+                disks = [model.os_disk] + (model.data_disks or [])
+            elif lun == 'os':
+                disks = [model.os_disk]
+            else:
+                disk = next((d for d in model.data_disks if d.lun == lun), None)
+                if not disk:
+                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
+                disks = [disk]
+            for disk in disks:
+                disk.caching = value
+
+    if len(caching_settings) == 1 and '=' not in caching_settings[0]:
+        _update(model, None, caching_settings[0])
+    else:
+        for x in caching_settings:
+            if '=' not in x:
+                raise CLIError("usage error: please use 'LUN=VALUE' to configure caching on individual disk")
+            lun, value = x.split('=', 1)
+            lun = int(lun)
+            _update(model, lun, value)
+
+
 def update_write_accelerator_settings(model, write_accelerator_settings):
 
     def _update(model, lun, value):
@@ -204,7 +222,7 @@ def update_write_accelerator_settings(model, write_accelerator_settings):
             for l in luns:
                 model[l]['writeAcceleratorEnabled'] = value
                 if value and model[l]['caching'] == 'ReadWrite':
-                    raise CLIError(err_caching.format(l))  # TODO: make sure service end emit out a good error. if, remove the code here
+                    raise CLIError(err_caching.format(l))  # TODO: make sure service end emit good error
         else:
             if lun is None:
                 disks = [model.os_disk] + (model.data_disks or [])
@@ -218,9 +236,8 @@ def update_write_accelerator_settings(model, write_accelerator_settings):
             for disk in disks:
                 disk.write_accelerator_enabled = value
                 if value and disk.caching == 'ReadWrite':
-                    raise CLIError(err_caching.format(lun))  # TODO: make sure service end emit out a good error. if, remove the code here
+                    raise CLIError(err_caching.format(lun))  # TODO: make sure service end emit out a good error
 
-    # fill in write accelerators
     if len(write_accelerator_settings) == 1 and '=' not in write_accelerator_settings[0]:
         _update(model, None, write_accelerator_settings[0].lower() == 'true')
     else:

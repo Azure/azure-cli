@@ -139,7 +139,8 @@ def load_arguments(self, _):
 
     with self.argument_context('vm update') as c:
         c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to. Feature registration for 'Microsoft.Compute/AllowManagedDisksReplaceOSDisk' is needed")
-        c.argument('write_accelerator', nargs='*', min_api='2017-03-30', help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g. '1=true 2=true' should enable for data disk with lun of 1 and 2")
+        c.argument('write_accelerator', nargs='*', min_api='2017-12-01', help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g. '1=true 2=true' should enable for data disk with lun of 1 and 2")
+        c.argument('disk_caching', nargs='*', help="Use singular value to apply across, or specify individual disks, e.g. 'os=ReadWrite 0=None 1=ReadOnly' should enable update os disk and 2 data disks")
 
     with self.argument_context('vm create') as c:
         c.argument('name', name_arg_type, validator=_resource_not_exists(self.cli_ctx, 'Microsoft.Compute/virtualMachines'))
@@ -151,7 +152,7 @@ def load_arguments(self, _):
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
         c.argument('application_security_groups', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
-        c.argument('enable_write_accelerator', nargs='*', min_api='2017-03-30', arg_group='Storage',
+        c.argument('enable_write_accelerator', nargs='*', min_api='2017-12-01', arg_group='Storage',
                    help="enable disk write accelerator. By default, enable all disk; or you can specify individual disks, e.g. 'os 1' should enable os disk and the data disk with lun of 1(the 2nd)")
 
     with self.argument_context('vm open-port') as c:
@@ -178,6 +179,9 @@ def load_arguments(self, _):
         c.argument('sku', arg_type=disk_sku)
         c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.')
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine size.')
+
+    with self.argument_context('vm disk attach') as c:
+        c.argument('enable_write_accelerator', min_api='2017-12-01', action='store_true', help='enable write accelerator')
 
     with self.argument_context('vm disk detach') as c:
         c.argument('disk_name', options_list=['--name', '-n'], help='The data disk name.')

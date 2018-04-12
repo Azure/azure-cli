@@ -617,7 +617,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         cmd, vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
         admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
         os_type, disk_info, storage_sku, os_publisher, os_offer, os_sku, os_version,
-        os_vhd_uri, attach_os_disk, os_disk_size_gb, attach_data_disks, data_disk_sizes_gb,
+        os_vhd_uri, attach_os_disk, os_disk_size_gb,
         custom_data, secrets, license_type, zone, disk_info=disk_info)
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -882,10 +882,10 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
         else get_vm(cmd, resource_group_name, vm_name)
 
 
-def update_vm(cmd, resource_group_name, vm_name, os_disk=None,
+def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
               write_accelerator=None, no_wait=False, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
-    from ._vm_utils import update_write_accelerator_settings
+    from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
     if os_disk is not None:
         if is_valid_resource_id(os_disk):
@@ -900,6 +900,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None,
 
     if write_accelerator is not None:
         update_write_accelerator_settings(vm.storage_profile, write_accelerator)
+
+    if disk_caching is not None:
+        update_disk_caching(vm.storage_profile, disk_caching)
 
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
@@ -1137,8 +1140,8 @@ def show_default_diagnostics_configuration(is_windows_os=False):
 
 
 # region VirtualMachines Disks (Managed)
-def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk,
-                             new=False, sku=None, size_gb=None, lun=None, caching=None):
+def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk, new=False, sku=None,
+                             size_gb=None, lun=None, caching=None, enable_write_accelerator=False):
     '''attach a managed disk'''
     from msrestazure.tools import parse_resource_id
     vm = get_vm(cmd, resource_group_name, vm_name)
@@ -1160,6 +1163,9 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk,
     else:
         params = ManagedDiskParameters(id=disk, storage_account_type=sku)
         data_disk = DataDisk(lun=lun, create_option=DiskCreateOption.attach, managed_disk=params, caching=caching)
+
+    if enable_write_accelerator:
+        data_disk.write_accelerator_enabled = enable_write_accelerator
 
     vm.storage_profile.data_disks.append(data_disk)
     set_vm(cmd, vm)
@@ -1957,7 +1963,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                                         vm_domain_name, dns_servers, nsg, accelerated_networking,
                                         admin_username, authentication_type, storage_profile,
                                         os_disk_name,
-                                        storage_sku, data_disk_sizes_gb, image_data_disks,
+                                        storage_sku,
                                         os_type, image, admin_password,
                                         ssh_key_value, ssh_dest_key_path,
                                         os_publisher, os_offer, os_sku, os_version,
