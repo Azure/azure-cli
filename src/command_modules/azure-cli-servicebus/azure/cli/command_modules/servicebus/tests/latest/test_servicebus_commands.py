@@ -244,7 +244,7 @@ class SBNamespaceCURDScenarioTest(ScenarioTest):
 
         # Update Authoriazation Rule
         self.cmd(
-            'servicebus topic authorization-rule Update --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname} --rights {accessrights1}',
+            'servicebus topic authorization-rule update --resource-group {rg} --namespace-name {namespacename} --topic-name {topicname} --name {authoname} --rights {accessrights1}',
             checks=[self.check('name', self.kwargs['authoname'])])
 
         # Get Authorization Rule Listkeys
