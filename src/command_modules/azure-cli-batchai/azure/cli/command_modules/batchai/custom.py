@@ -603,7 +603,7 @@ def _generate_ssh_keys():
 def create_cluster(cmd, client,  # pylint: disable=too-many-locals
                    resource_group, cluster_name, json_file=None, location=None, user_name=None,
                    ssh_key=None, password=None, generate_ssh_keys=None, image=None, custom_image=None,
-                   use_auto_storage=False, vm_size=None, vm_priority='dedicated', target=None, min_nodes=None,
+                   use_auto_storage=False, vm_size=None, vm_priority=None, target=None, min_nodes=None,
                    max_nodes=None, subnet=None, nfs_name=None, nfs_resource_group=None, nfs_mount_path='nfs',
                    azure_file_share=None, afs_mount_path='afs', container_name=None, container_mount_path='bfs',
                    account_name=None, account_key=None, setup_task=None, setup_task_output=None):
