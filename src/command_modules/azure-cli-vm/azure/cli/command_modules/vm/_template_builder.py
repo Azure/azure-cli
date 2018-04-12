@@ -259,12 +259,12 @@ def build_vm_resource(  # pylint: disable=too-many-locals
         cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
         image_reference=None, os_disk_name=None, custom_image_os_type=None,
-        os_caching=None, storage_sku=None,
+        storage_sku=None,
         os_publisher=None, os_offer=None, os_sku=None, os_version=None, os_vhd_uri=None,
         attach_os_disk=None, os_disk_size_gb=None,
         custom_data=None, secrets=None, license_type=None, zone=None,
         disk_info=None):
-
+    os_caching = disk_info['os'].get('caching')
     def _build_os_profile():
 
         os_profile = {
@@ -371,7 +371,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals
             profile['osDisk']['diskSizeGb'] = os_disk_size_gb
         if disk_info['os']['writeAcceleratorEnabled'] is not None:
             profile['osDisk']['writeAcceleratorEnabled'] = disk_info['os']['writeAcceleratorEnabled']
-        profile['dataDisks'] = [v for k, v in disk_info if k != 'os']
+        profile['dataDisks'] = [v for k, v in disk_info.items() if k != 'os']
         return profile
 
     vm_properties = {

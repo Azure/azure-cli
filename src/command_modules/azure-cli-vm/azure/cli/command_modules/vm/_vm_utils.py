@@ -123,7 +123,7 @@ def list_sku_info(cli_ctx, location=None):
 
 
 def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_data_disks=None, storage_sku=None,
-                        os_caching=None, data_disk_cachings=None, write_accelerator_settings=None):
+                        os_disk_caching=None, data_disk_cachings=None, write_accelerator_settings=None):
     # we should return a dictionary with info like below and will emoit when see conflictions
     # {
     #   'os': { caching: 'Read', write_accelerator: None},
@@ -134,16 +134,12 @@ def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_d
     info = {}
     attach_data_disks = attach_data_disks or []
     image_data_disks = image_data_disks or []
-    info['os'] = {
-        'caching': os_caching,
-        'write_accelerator': None,
-    }
+    data_disk_sizes_gb = data_disk_sizes_gb or []
+    info['os'] = {}
 
     for i in range(len(image_data_disks) + len(data_disk_sizes_gb) + len(attach_data_disks)):
         info[i] = {
-            'lun': i,
-            'caching': None,
-            'write_accelerator': None
+            'lun': i
         }
 
     # fill in storage sku for managed data disks
@@ -170,14 +166,21 @@ def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_d
             info[base + i]['name'] = d.split('/')[-1].split('.')[0]
 
     # fill in data disk caching
-    update_disk_caching(info, data_disk_cachings)
+    if data_disk_cachings:
+        update_disk_caching(info, data_disk_cachings)
 
     # fill in write accelerators
-    update_write_accelerator_settings(info, write_accelerator_settings)
+    if write_accelerator_settings:
+        update_write_accelerator_settings(info, write_accelerator_settings)
 
     # default os disk caching to 'ReadWrite' unless set otherwise
-    if info['os']['caching'] is None and not info['os']['writeAcceleratorEnabled']:
-        info['os']['caching'] = 'ReadWrite'
+    if os_disk_caching:
+        info['os']['caching'] = os_disk_caching
+    else:
+        if info['os'].get('writeAcceleratorEnabled'):
+            info['os']['caching'] = 'None'
+        else:
+            info['os']['caching'] = 'ReadWrite'
 
     return info
 
@@ -209,7 +212,8 @@ def update_disk_caching(model, caching_settings):
             if '=' not in x:
                 raise CLIError("usage error: please use 'LUN=VALUE' to configure caching on individual disk")
             lun, value = x.split('=', 1)
-            lun = int(lun)
+            lun = lun.lower()
+            lun = int(lun) if lun != 'os' else lun
             _update(model, lun, value)
 
 
@@ -221,7 +225,7 @@ def update_write_accelerator_settings(model, write_accelerator_settings):
             luns = model.keys() if lun is None else [lun]
             for l in luns:
                 model[l]['writeAcceleratorEnabled'] = value
-                if value and model[l]['caching'] == 'ReadWrite':
+                if value and model[l].get('caching') == 'ReadWrite':
                     raise CLIError(err_caching.format(l))  # TODO: make sure service end emit good error
         else:
             if lun is None:
@@ -246,5 +250,6 @@ def update_write_accelerator_settings(model, write_accelerator_settings):
                 raise CLIError("usage error: please use 'LUN=VALUE' to configure write accelerator"
                                " on individual disk")
             lun, value = x.split('=', 1)
-            lun = int(lun)
+            lun = lun.lower()
+            lun = int(lun) if lun != 'os' else lun
             _update(model, lun, value.lower() == 'true')

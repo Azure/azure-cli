@@ -423,10 +423,13 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         namespace.os_type = 'windows' if 'windows' in namespace.os_offer.lower() else 'linux'
 
     from ._vm_utils import normalize_disk_info
-    namespace.disk_info = normalize_disk_info(namespace.image_data_disks, namespace.data_disk_sizes_gb,
-                                              namespace.attach_data_disks, namespace.os_caching,
-                                              namespace.data_caching, getattr(namespace, 'write_accelerator', None))
-
+    namespace.disk_info = normalize_disk_info(image_data_disks=namespace.image_data_disks,
+                                              data_disk_sizes_gb=namespace.data_disk_sizes_gb,
+                                              attach_data_disks=namespace.attach_data_disks,
+                                              storage_sku=namespace.storage_sku,
+                                              os_disk_caching=namespace.os_caching,
+                                              data_disk_cachings=namespace.data_caching, 
+                                              write_accelerator_settings=getattr(namespace, 'enable_write_accelerator', None))
 
 def _validate_vm_create_storage_account(cmd, namespace):
     from msrestazure.tools import parse_resource_id
