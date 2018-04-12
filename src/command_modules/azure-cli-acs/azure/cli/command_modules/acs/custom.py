@@ -349,9 +349,7 @@ def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_grou
     # Validate if the RG exists
     groups = cf_resource_groups(cmd.cli_ctx)
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rgkaci = groups.get(resource_group_name)
-    if aci_resource_group is not None:
-        rgkaci = groups.get(aci_resource_group)
+    rgkaci = groups.get(aci_resource_group or resource_group_name)
     # Auto assign the location
     if location is None:
         location = rgkaci.location  # pylint:disable=no-member
