@@ -89,7 +89,8 @@ helps['acs kubernetes'] = """
 
 helps['acs kubernetes get-credentials'] = """
     type: command
-    short-summary: Download and install credentials to access a cluster.
+    short-summary: Download and install credentials to access a cluster.  This command requires
+    the same private-key used to create the cluster.
 """
 
 helps['acs list-locations'] = """
