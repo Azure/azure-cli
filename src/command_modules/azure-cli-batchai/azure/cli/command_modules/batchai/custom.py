@@ -228,7 +228,8 @@ def _patch_mount_volumes(cli_ctx, volumes, account_name=None, account_key=None):
             if not ref.credentials and ref.account_name == storage_account_name:
                 require_storage_account_key = True
                 ref.credentials = models.AzureStorageCredentialsInfo(account_key=storage_account_key)
-            ref.credentials = _get_effective_credentials(cli_ctx, ref.credentials, ref.account_name)
+            if ref.account_name:
+                ref.credentials = _get_effective_credentials(cli_ctx, ref.credentials, ref.account_name)
 
     # Patch parameters of blob file systems.
     if result.azure_blob_file_systems:
@@ -247,7 +248,8 @@ def _patch_mount_volumes(cli_ctx, volumes, account_name=None, account_key=None):
             if not ref.account_name:
                 raise CLIError('Ill-formed Azure Blob File System reference in the configuration file - no account '
                                'name provided.')
-            ref.credentials = _get_effective_credentials(cli_ctx, ref.credentials, ref.account_name)
+            if ref.account_name:
+                ref.credentials = _get_effective_credentials(cli_ctx, ref.credentials, ref.account_name)
 
     if require_storage_account and not storage_account_name:
         raise CLIError(MSG_CONFIGURE_STORAGE_ACCOUNT)

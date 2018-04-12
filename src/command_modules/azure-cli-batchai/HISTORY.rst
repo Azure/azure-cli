@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.2.2
++++++
+* Now 'az batchai create cluster' respects vm priority configured in the cluster's configuration file.
+* Minor error diagnostics improvement.
+
 0.2.1
 +++++
 * Minor fixes
