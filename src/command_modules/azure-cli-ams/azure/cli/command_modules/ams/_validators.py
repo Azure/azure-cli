@@ -18,10 +18,12 @@ def validate_storage_account_id(cmd, namespace):
                 name=namespace.storage_account
             )
 
+
 def datetime_format(value):
     """Validate the correct format of a datetime string and deserialize."""
     from msrest.serialization import Deserializer
     from msrest.exceptions import DeserializationError
+
     try:
         datetime_obj = Deserializer.deserialize_iso(value)
     except DeserializationError:
