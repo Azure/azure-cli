@@ -21,7 +21,7 @@ def include_commands(command_table, help_file_entries, module_inclusions=None, e
     return _filter_mods(command_table, help_file_entries, modules=module_inclusions, extensions=extensions)
 
 
-def _filter_mods(command_table, help_file_entries, modules=None, extensions=None, exclude=False):
+def _filter_mods(command_loader, help_file_entries, modules=None, extensions=None, exclude=False):
     from ..utilities.path import get_command_modules_paths
     modules = modules or []
     extensions = extensions or []
@@ -29,7 +29,7 @@ def _filter_mods(command_table, help_file_entries, modules=None, extensions=None
     command_modules_paths = get_command_modules_paths()
     filtered_module_names = {mod for mod, path in command_modules_paths if mod in modules}
 
-    command_table = command_table.copy()
+    command_table = command_loader.command_table.copy()
     help_file_entries = help_file_entries.copy()
 
     for command_name in list(command_table.keys()):
@@ -48,7 +48,8 @@ def _filter_mods(command_table, help_file_entries, modules=None, extensions=None
             for group_name in get_command_groups(command_name):
                 help_file_entries.pop(group_name, None)
 
-    return command_table, help_file_entries
+    command_loader.command_table = command_table
+    return command_loader, help_file_entries
 
 
 def share_element(first_iter, second_iter):

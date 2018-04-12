@@ -10,6 +10,8 @@ import os
 import sys
 import timeit
 
+import six
+
 from knack.arguments import ArgumentsContext
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
@@ -18,7 +20,6 @@ from knack.introspection import extract_args_from_signature, extract_full_summar
 from knack.log import get_logger
 from knack.util import CLIError
 
-import six
 
 logger = get_logger(__name__)
 
@@ -75,6 +76,9 @@ class AzCli(CLI):
 
         self.progress_controller.init_progress(progress.get_progress_view(det))
         return self.progress_controller
+
+    def get_cli_version(self):
+        return __version__
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string
@@ -173,7 +177,8 @@ class MainCommandsLoader(CLICommandsLoader):
                         # from an extension requires this map to be up-to-date.
                         # self._mod_to_ext_map[ext_mod] = ext_name
                         start_time = timeit.default_timer()
-                        extension_command_table = _load_extension_command_loader(self, args, ext_mod)
+                        extension_command_table, extension_group_table = \
+                            _load_extension_command_loader(self, args, ext_mod)
 
                         for cmd_name, cmd in extension_command_table.items():
                             cmd.command_source = ExtensionCommandSource(
@@ -182,6 +187,7 @@ class MainCommandsLoader(CLICommandsLoader):
                                 preview=ext.preview)
 
                         self.command_table.update(extension_command_table)
+                        self.command_group_table.update(extension_group_table)
                         elapsed_time = timeit.default_timer() - start_time
                         logger.debug("Loaded extension '%s' in %.3f seconds.", ext_name, elapsed_time)
                     except Exception:  # pylint: disable=broad-except
@@ -384,12 +390,18 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
     def command_group(self, group_name, command_type=None, **kwargs):
         if command_type:
             kwargs['command_type'] = command_type
+        if 'deprecate_info' in kwargs:
+            kwargs['deprecate_info'].target = group_name
         return self._command_group_cls(self, group_name, **kwargs)
 
     def argument_context(self, scope, **kwargs):
         return self._argument_context_cls(self, scope, **kwargs)
 
     def _cli_command(self, name, operation=None, handler=None, argument_loader=None, description_loader=None, **kwargs):
+
+        from knack.deprecation import Deprecated
+
+        kwargs['deprecate_info'] = Deprecated.ensure_new_style_deprecation(self.cli_ctx, kwargs, 'command')
 
         if operation and not isinstance(operation, six.string_types):
             raise TypeError("Operation must be a string. Got '{}'".format(operation))

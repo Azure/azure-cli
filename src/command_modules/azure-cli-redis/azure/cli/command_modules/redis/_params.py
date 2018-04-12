@@ -44,3 +44,7 @@ def load_arguments(self, _):
         c.argument('container', help='Container name to export to.')
         c.argument('prefix', help='Prefix to use for exported files.')
         c.argument('file_format', help='File format to export.')
+
+    with self.argument_context('redis update-settings') as c:
+        c.argument('test', help='The magic thing!', action='store_true', deprecate_info=c.deprecate(hide='2.0.34', expiration='2.0.33'))
+        c.argument('test2', help='Another magic thing!', options_list=['--wazoop', c.deprecate(target='--magic', redirect='--wazoop', hide='2.0.33', expiration='2.0.33')])

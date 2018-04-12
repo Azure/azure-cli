@@ -36,7 +36,7 @@ class HelpTest(unittest.TestCase):
         except SystemExit:
             pass
         cmd_tbl = cli.invocation.commands_loader.command_table
-        cli.invocation.parser.load_command_table(cmd_tbl)
+        cli.invocation.parser.load_command_table(cli.invocation.commands_loader)
         for cmd in cmd_tbl:
             try:
                 cmd_tbl[cmd].loader.command_name = cmd
@@ -45,7 +45,7 @@ class HelpTest(unittest.TestCase):
                 pass
         cli.register_event(events.EVENT_INVOKER_CMD_TBL_LOADED, add_id_parameters)
         cli.raise_event(events.EVENT_INVOKER_CMD_TBL_LOADED, command_table=cmd_tbl)
-        cli.invocation.parser.load_command_table(cmd_tbl)
+        cli.invocation.parser.load_command_table(cli.invocation.commands_loader)
         _store_parsers(cli.invocation.parser, parser_dict)
 
         for name, parser in parser_dict.items():

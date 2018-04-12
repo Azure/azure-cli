@@ -7,6 +7,7 @@ from __future__ import print_function
 
 from knack.help import (HelpExample,
                         HelpFile as KnackHelpFile,
+                        CommandHelpFile as KnackCommandHelpFile,
                         CLIHelp,
                         HelpParameter,
                         ArgumentGroupRegistry as KnackArgumentGroupRegistry)
@@ -48,8 +49,11 @@ Here are the base commands:
 class AzCliHelp(CLIHelp):
 
     def __init__(self, cli_ctx):
-        self.cli_ctx = cli_ctx
-        super(AzCliHelp, self).__init__(cli_ctx, PRIVACY_STATEMENT, WELCOME_MESSAGE)
+        super(AzCliHelp, self).__init__(cli_ctx,
+                                        privacy_statement=PRIVACY_STATEMENT,
+                                        welcome_message=WELCOME_MESSAGE,
+                                        command_help_cls=CliCommandHelpFile,
+                                        help_cls=CliHelpFile)
 
     @staticmethod
     def _print_extensions_msg(help_file):
@@ -60,27 +64,12 @@ class AzCliHelp(CLIHelp):
             if help_file.command_source.preview:
                 logger.warning(help_file.command_source.get_preview_warn_msg())
 
-    @classmethod
-    def print_detailed_help(cls, cli_name, help_file):
-        cls._print_extensions_msg(help_file)
-        cls._print_detailed_help(cli_name, help_file)
-
-    @classmethod
-    def show_help(cls, cli_name, nouns, parser, is_group):
-        from knack.help import GroupHelpFile
-        delimiters = ' '.join(nouns)
-        help_file = CliCommandHelpFile(delimiters, parser) if not is_group else GroupHelpFile(delimiters, parser)
-        help_file.load(parser)
-        if not nouns:
-            help_file.command = ''
-        cls.print_detailed_help(cli_name, help_file)
+    def print_detailed_help(self, cli_name, help_file):
+        AzCliHelp._print_extensions_msg(help_file)
+        self._print_detailed_help(cli_name, help_file)
 
 
 class CliHelpFile(KnackHelpFile):
-
-    def __init__(self, cli_ctx, delimiters):
-        super(CliHelpFile, self).__init__(delimiters)
-        self.cli_ctx = cli_ctx
 
     def _should_include_example(self, ex):
         min_profile = ex.get('min_profile')
@@ -90,7 +79,7 @@ class CliHelpFile(KnackHelpFile):
             # yaml will load this as a datetime if it's a date, we need a string.
             min_profile = str(min_profile) if min_profile else None
             max_profile = str(max_profile) if max_profile else None
-            return supported_api_version(self.cli_ctx, resource_type=PROFILE_TYPE,
+            return supported_api_version(self.help_ctx.cli_ctx, resource_type=PROFILE_TYPE,
                                          min_api=min_profile, max_api=max_profile)
         return True
 
@@ -118,10 +107,10 @@ class CliHelpFile(KnackHelpFile):
                     self.examples.append(HelpExample(d))
 
 
-class CliCommandHelpFile(CliHelpFile):
+class CliCommandHelpFile(KnackCommandHelpFile, CliHelpFile):
 
-    def __init__(self, delimiters, parser):
-        super(CliCommandHelpFile, self).__init__(parser.cli_ctx, delimiters)
+    def __init__(self, help_ctx, delimiters, parser):
+        super(CliCommandHelpFile, self).__init__(help_ctx, delimiters, parser)
         import argparse
         self.type = 'command'
         self.command_source = getattr(parser, 'command_source', None)
@@ -130,19 +119,19 @@ class CliCommandHelpFile(CliHelpFile):
 
         for action in [a for a in parser._actions if a.help != argparse.SUPPRESS]:  # pylint: disable=protected-access
             if action.option_strings:
-                self.parameters.append(HelpParameter(' '.join(sorted(action.option_strings)),
-                                                     action.help,
-                                                     required=action.required,
-                                                     choices=action.choices,
-                                                     default=action.default,
-                                                     group_name=action.container.description))
+                self._add_parameter_help(action)
             else:
-                self.parameters.append(HelpParameter(action.metavar,
-                                                     action.help,
-                                                     required=False,
-                                                     choices=action.choices,
-                                                     default=None,
-                                                     group_name='Positional Arguments'))
+                # use metavar for positional parameters
+                param_kwargs = {
+                    'name_source': [action.metavar],
+                    'deprecate_info': getattr(action, 'deprecate_info', None),
+                    'description': action.help,
+                    'choices': action.choices,
+                    'required': False,
+                    'default': None,
+                    'group_name': 'Positional'
+                }
+                self.parameters.append(HelpParameter(**param_kwargs))
 
         help_param = next(p for p in self.parameters if p.name == '--help -h')
         help_param.group_name = 'Global Arguments'
