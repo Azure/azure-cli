@@ -503,8 +503,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_address_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
-              identity_role='Contributor', identity_role_id=None, application_security_groups=None,
-              zone=None):
+              identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -1958,22 +1957,20 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
-    vmss_resource = build_vmss_resource(cmd, vmss_name, naming_prefix, location, tags,
-                                        not disable_overprovision, upgrade_policy_mode,
-                                        vm_sku, instance_count,
-                                        ip_config_name, nic_name, subnet_id, public_ip_per_vm,
-                                        vm_domain_name, dns_servers, nsg, accelerated_networking,
-                                        admin_username, authentication_type, storage_profile,
-                                        os_disk_name,
-                                        storage_sku,
-                                        os_type, image, admin_password,
-                                        ssh_key_value, ssh_dest_key_path,
-                                        os_publisher, os_offer, os_sku, os_version,
-                                        backend_address_pool_id, inbound_nat_pool_id, health_probe=health_probe,
-                                        single_placement_group=single_placement_group,
-                                        platform_fault_domain_count=platform_fault_domain_count,
-                                        custom_data=custom_data, secrets=secrets,
-                                        license_type=license_type, zones=zones, priority=priority, disk_info=disk_info)
+    vmss_resource = build_vmss_resource(
+        cmd=cmd, name=vmss_name, naming_prefix=naming_prefix, location=location, tags=tags,
+        overprovision=not disable_overprovision, upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,
+        instance_count=instance_count, ip_config_name=ip_config_name, nic_name=nic_name, subnet_id=subnet_id,
+        public_ip_per_vm=public_ip_per_vm, vm_domain_name=vm_domain_name, dns_servers=dns_servers, nsg=nsg,
+        accelerated_networking=accelerated_networking, admin_username=admin_username,
+        authentication_type=authentication_type, storage_profile=storage_profile, os_disk_name=os_disk_name,
+        storage_sku=storage_sku, os_type=os_type, image=image, admin_password=admin_password,
+        ssh_key_value=ssh_key_value, ssh_key_path=ssh_dest_key_path, os_publisher=os_publisher, os_offer=os_offer,
+        os_sku=os_sku, os_version=os_version, backend_address_pool_id=backend_address_pool_id,
+        inbound_nat_pool_id=inbound_nat_pool_id, health_probe=health_probe,
+        single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
+        custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
+        disk_info=disk_info)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:

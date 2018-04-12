@@ -152,6 +152,7 @@ def normalize_disk_info(image_data_disks=None, data_disk_sizes_gb=None, attach_d
     base = len(image_data_disks)
     for i in range(base, base + len(data_disk_sizes_gb)):
         info[i]['createOption'] = 'empty'
+        info[i]['diskSizeGB'] = data_disk_sizes_gb[i]
     base = len(image_data_disks) + len(data_disk_sizes_gb)
     for i in range(base, base + len(attach_data_disks)):
         info[i]['createOption'] = 'atatch'
@@ -191,6 +192,8 @@ def update_disk_caching(model, caching_settings):
         if isinstance(model, dict):
             luns = model.keys() if lun is None else [lun]
             for l in luns:
+                if l not in model:
+                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
                 model[l]['caching'] = value
         else:
             if lun is None:
@@ -220,13 +223,12 @@ def update_disk_caching(model, caching_settings):
 def update_write_accelerator_settings(model, write_accelerator_settings):
 
     def _update(model, lun, value):
-        err_caching = "useage error: please turn off 'read-write' caching on disk '{}' when enable write accelerator"
         if isinstance(model, dict):
             luns = model.keys() if lun is None else [lun]
             for l in luns:
+                if l not in model:
+                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
                 model[l]['writeAcceleratorEnabled'] = value
-                if value and model[l].get('caching') == 'ReadWrite':
-                    raise CLIError(err_caching.format(l))  # TODO: make sure service end emit good error
         else:
             if lun is None:
                 disks = [model.os_disk] + (model.data_disks or [])
@@ -239,8 +241,6 @@ def update_write_accelerator_settings(model, write_accelerator_settings):
                 disks = [disk]
             for disk in disks:
                 disk.write_accelerator_enabled = value
-                if value and disk.caching == 'ReadWrite':
-                    raise CLIError(err_caching.format(lun))  # TODO: make sure service end emit out a good error
 
     if len(write_accelerator_settings) == 1 and '=' not in write_accelerator_settings[0]:
         _update(model, None, write_accelerator_settings[0].lower() == 'true')
