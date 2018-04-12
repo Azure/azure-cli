@@ -4,7 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 
+import re
+import os
 import inspect
+
+
+_LOADER_CLS_RE = re.compile('.*azure/cli/command_modules/(?P<module>[^/]*)/__init__.*')
 
 
 def _exclude_mods(command_table, help_file_entries, module_exclusions):
@@ -19,16 +24,19 @@ def _filter_mods(command_table, help_file_entries, modules, exclude):
     from ..utilities.path import get_command_modules_paths
 
     command_modules_paths = get_command_modules_paths()
-    filtered_module_paths = tuple(path for mod, path in command_modules_paths if mod in modules)
+    filtered_module_names = {mod for mod, path in command_modules_paths if mod in modules}
 
     command_table = command_table.copy()
     help_file_entries = help_file_entries.copy()
 
-    for command_name, command in list(command_table.items()):
-        # brute force way to remove all traces from excluded modules
-        loader_cls = command.loader.__class__
-        loader_file_path = inspect.getfile(loader_cls)
-        if loader_file_path.startswith(filtered_module_paths) == exclude:
+    for command_name in list(command_table.keys()):
+        try:
+            mod_name = _get_command_module(command_name, command_table)
+        except LinterError as ex:
+            print(ex)
+            continue
+        if (mod_name in filtered_module_names) == exclude:
+            # brute force method of clearing traces of a module
             del command_table[command_name]
             help_file_entries.pop(command_name, None)
             for group_name in _get_command_groups(command_name):
@@ -50,11 +58,23 @@ def _get_command_groups(command_name):
 
 
 def _get_command_module(command_name, command_table):
-    from ..utilities.path import get_command_modules_paths
-
-    command_modules_paths = get_command_modules_paths()
-
+    # hacky way to get a command's module
     command = command_table.get(command_name)
     loader_cls = command.loader.__class__
     loader_file_path = inspect.getfile(loader_cls)
-    return [mod for mod, path in command_modules_paths if loader_file_path.startswith(path)]
+    # normalize os path to '/' for regex
+    loader_file_path = '/'.join(loader_file_path.split(os.path.sep))
+    match = _LOADER_CLS_RE.match(loader_file_path)
+    # loader class path is consistent due to convention, throw error if no match
+    # this will likely throw error for extensions
+    if not match:
+        raise LinterError('`{}`\'s loader class path does not match regex pattern: {}' \
+            .format(command_name, _LOADER_CLS_RE.pattern))
+    return match.groupdict().get('module')
+
+
+class LinterError(Exception):
+    """
+    Exception thrown by linter for non rule violation reasons
+    """
+    pass
