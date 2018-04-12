@@ -17,3 +17,14 @@ def validate_storage_account_id(cmd, namespace):
                 namespace='Microsoft.Storage', type='storageAccounts',
                 name=namespace.storage_account
             )
+
+def datetime_format(value):
+    """Validate the correct format of a datetime string and deserialize."""
+    from msrest.serialization import Deserializer
+    from msrest.exceptions import DeserializationError
+    try:
+        datetime_obj = Deserializer.deserialize_iso(value)
+    except DeserializationError:
+        message = "Argument {} is not a valid ISO-8601 datetime format"
+        raise ValueError(message.format(value))
+    return datetime_obj

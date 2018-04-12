@@ -11,7 +11,7 @@ from azure.cli.command_modules.ams._completers import get_role_definition_name_c
 
 from azure.mediav3.models import (EncoderNamedPreset, Priority, AssetContainerPermission)
 
-from ._validators import validate_storage_account_id
+from ._validators import validate_storage_account_id, datetime_format
 
 # pylint: disable=line-too-long
 
@@ -22,7 +22,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     storage_account_arg_type = CLIArgumentType(options_list=['--storage-account'], validator=validate_storage_account_id, metavar='STORAGE_NAME')
     password_arg_type = CLIArgumentType(options_list=['--password', '-p'], metavar='PASSWORD_NAME')
     transform_name_arg_type = CLIArgumentType(options_list=['--transform-name', '-t'], metavar='TRANSFORM_NAME')
-    expiry_arg_type = CLIArgumentType(options_list=['--expiry'], metavar='EXPIRY_TIME')
+    expiry_arg_type = CLIArgumentType(options_list=['--expiry'], type=datetime_format, metavar='EXPIRY_TIME')
 
     with self.argument_context('ams') as c:
         c.argument('account_name', name_arg_type)
