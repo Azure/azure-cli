@@ -85,26 +85,28 @@ class AmsTests(ScenarioTest):
             self.check('location', 'West US 2')
         ])
 
-        spName = self.create_random_name(prefix='spn', length=10)
         spPassword = self.create_random_name(prefix='spp', length=10)
 
         self.kwargs.update({
-            'spName': spName,
+            'spName': 'http://{}'.format(resource_group),
             'spPassword': spPassword,
             'role': 'Owner'
         })
 
-        self.cmd('az ams account sp create -a {amsname} -n {spName} -g {rg} -p {spPassword} --role {role}', checks=[
-            self.check('AadSecret', '{spPassword}'),
-            self.check('ResourceGroup', '{rg}'),
-            self.check('AccountName', '{amsname}')
-        ])
+        try:
+            self.cmd('az ams account sp create -a {amsname} -n {spName} -g {rg} -p {spPassword} --role {role}', checks=[
+                self.check('AadSecret', '{spPassword}'),
+                self.check('ResourceGroup', '{rg}'),
+                self.check('AccountName', '{amsname}')
+            ])
 
-        self.cmd('az ams account sp reset-credentials -a {amsname} -n {spName} -g {rg} -p mynewpassword --role {role}', checks=[
-            self.check('AadSecret', 'mynewpassword'),
-            self.check('ResourceGroup', '{rg}'),
-            self.check('AccountName', '{amsname}')
-        ])
+            self.cmd('az ams account sp reset-credentials -a {amsname} -n {spName} -g {rg} -p mynewpassword --role {role}', checks=[
+                self.check('AadSecret', 'mynewpassword'),
+                self.check('ResourceGroup', '{rg}'),
+                self.check('AccountName', '{amsname}')
+            ])
+        finally:
+            self.cmd('ad app delete --id {spName}')
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
