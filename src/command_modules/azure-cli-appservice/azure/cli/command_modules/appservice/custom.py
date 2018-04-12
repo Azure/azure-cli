@@ -34,7 +34,7 @@ from azure.cli.core.commands import LongRunningOperation
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory
-from ._appservice_utils import _generic_site_operation
+from ._appservice_utils import _generic_site_operation, _random_str_generator
 
 
 logger = get_logger(__name__)
@@ -1520,10 +1520,10 @@ class _StackRuntimeHelper(object):
         self._stacks = result
 
 
-def create_function(cmd, resource_group_name, name, storage_account, plan=None,
-                    consumption_plan_location=None, deployment_source_url=None,
-                    deployment_source_branch='master', deployment_local_git=None,
-                    deployment_container_image_name=None):
+def create_function(cmd, resource_group_name, name, storage_account, is_linux,
+                    plan=None, consumption_plan_location=None, runtime=None, zip_url=None,
+                    function_app_mode=None, deployment_source_url=None, deployment_source_branch='master',
+                    deployment_local_git=None, deployment_container_image_name=None):
     # pylint: disable=too-many-statements
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
@@ -1541,6 +1541,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
             raise CLIError("Location is invalid. Use: az functionapp list-consumption-locations")
         functionapp_def.location = consumption_plan_location
         functionapp_def.kind = 'functionapp'
+        if is_linux and not runtime:
+            raise CLIError("usage error: --runtime RUNTIME required for linux functions apps with cosumption plan.")
     else:
         if is_valid_resource_id(plan):
             plan = parse_resource_id(plan)['name']
@@ -1548,28 +1550,44 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         if not plan_info:
             raise CLIError("The plan '{}' doesn't exist".format(plan))
         location = plan_info.location
-        is_linux = plan_info.reserved
-        if is_linux:
-            functionapp_def.kind = 'functionapp,linux'
-            site_config.app_settings.append(NameValuePair('FUNCTIONS_EXTENSION_VERSION', 'beta'))
-            site_config.app_settings.append(NameValuePair('MACHINEKEY_DecryptionKey',
-                                                          str(hexlify(urandom(32)).decode()).upper()))
-            if deployment_container_image_name:
-                site_config.app_settings.append(NameValuePair('DOCKER_CUSTOM_IMAGE_NAME',
-                                                              deployment_container_image_name))
-                site_config.app_settings.append(NameValuePair('FUNCTION_APP_EDIT_MODE', 'readOnly'))
-                site_config.app_settings.append(NameValuePair('WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'false'))
-            else:
-                site_config.app_settings.append(NameValuePair('WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'true'))
-                site_config.linux_fx_version = 'DOCKER|appsvc/azure-functions-runtime'
-        else:
-            functionapp_def.kind = 'functionapp'
-            site_config.app_settings.append(NameValuePair('FUNCTIONS_EXTENSION_VERSION', '~1'))
-
+        is_linux = plan_info.reserved if plan_info.reserved else is_linux
         functionapp_def.server_farm_id = plan
         functionapp_def.location = location
 
     con_string = _validate_and_get_connection_string(cmd.cli_ctx, resource_group_name, storage_account)
+    if is_linux:
+        functionapp_def.kind = 'functionapp,linux'
+        site_config.app_settings.append(NameValuePair('FUNCTIONS_EXTENSION_VERSION', 'beta'))
+        if consumption_plan_location:
+            site_config.app_settings.append(NameValuePair('FUNCTIONS_WORKER_RUNTIME', runtime))
+            # TODO: currently supported for linux only, update when windows support is included
+            if function_app_mode == 'dev':
+                site_config.app_settings.append(NameValuePair('WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
+                                                              con_string))
+                site_config.app_settings.append(NameValuePair('WEBSITE_CONTENTSHARE',
+                                                              'name'.join(_random_str_generator(3))))
+            else:  # prod is the default value
+                if zip_url is None:
+                    logger.warning('''No zip_url provided. All requests to the function app will result in
+                                   non-success HTTP responses until content is published via local development
+                                   tools or directly mapped to the WEBSITE_USE_ZIP app setting. Please refer to
+                                   documentation to learn more: <link>.''')  # TODO: Add link here to documentation
+                else:
+                    site_config.app_settings.append(NameValuePair('WEBSITE_USE_ZIP', zip_url))
+        else:
+            site_config.app_settings.append(NameValuePair('MACHINEKEY_DecryptionKey',
+                                                          str(hexlify(urandom(32)).decode()).upper()))
+        if deployment_container_image_name:
+            site_config.app_settings.append(NameValuePair('DOCKER_CUSTOM_IMAGE_NAME',
+                                                          deployment_container_image_name))
+            site_config.app_settings.append(NameValuePair('FUNCTION_APP_EDIT_MODE', 'readOnly'))
+            site_config.app_settings.append(NameValuePair('WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'false'))
+        else:
+            site_config.app_settings.append(NameValuePair('WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'true'))
+            site_config.linux_fx_version = 'DOCKER|appsvc/azure-functions-runtime'
+    else:
+        functionapp_def.kind = 'functionapp'
+        site_config.app_settings.append(NameValuePair('FUNCTIONS_EXTENSION_VERSION', '~1'))
 
     # adding appsetting to site to make it a function
     site_config.app_settings.append(NameValuePair('AzureWebJobsStorage', con_string))
