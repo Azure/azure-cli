@@ -6,6 +6,7 @@ Release History
 2.0.32
 ++++++
 * Added limited support for positional arguments.
+* Fix issue where `--query` could not be used with `--ids`. [#5591](https://github.com/Azure/azure-cli/issues/5591)
 
 2.0.31
 ++++++
