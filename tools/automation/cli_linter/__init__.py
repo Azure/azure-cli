@@ -5,13 +5,10 @@
 
 
 import sys
-import yaml
 import os
-import inspect
+import yaml
 from knack.help_files import helps
-from importlib import import_module
-from pkgutil import iter_modules
-from .linter import LinterManager, _get_command_groups
+from .linter import LinterManager
 
 
 def define_arguments(parser):
@@ -56,7 +53,7 @@ def main(args):
     from ..utilities.path import get_command_modules_paths
     exclusions = {}
     command_modules_paths = get_command_modules_paths()
-    for _, path in get_command_modules_paths():
+    for _, path in command_modules_paths:
         exclusion_path = os.path.join(path, 'linter_exclusions.yml')
         if os.path.isfile(exclusion_path):
             mod_exclusions = yaml.load(open(exclusion_path))
@@ -64,16 +61,8 @@ def main(args):
 
     # only run linter on modules specified
     if args.modules:
-        allowed_module_paths = tuple(path for mod, path in command_modules_paths if mod in args.modules)
-        for command_name, command in list(command_table.items()):
-            # brute force way to remove all traces from excluded modules
-            loader_cls = command.loader.__class__
-            loader_file_path = inspect.getfile(loader_cls)
-            if not loader_file_path.startswith(allowed_module_paths):
-                del command_table[command_name]
-                help_file_entries.pop(command_name, None)
-                for group_name in _get_command_groups(command_name):
-                    help_file_entries.pop(group_name, None)
+        from .util import include_mods
+        command_table, help_file_entries = include_mods(command_table, help_file_entries, args.modules)
 
 
     # Instantiate and run Linter
