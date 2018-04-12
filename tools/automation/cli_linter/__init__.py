@@ -61,8 +61,8 @@ def main(args):
 
     # only run linter on modules specified
     if args.modules:
-        from .util import _include_mods
-        command_table, help_file_entries = _include_mods(command_table, help_file_entries, args.modules)
+        from .util import include_mods
+        command_table, help_file_entries = include_mods(command_table, help_file_entries, args.modules)
 
 
     # Instantiate and run Linter

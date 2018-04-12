@@ -10,7 +10,7 @@ from importlib import import_module
 from pkgutil import iter_modules
 import yaml
 import colorama
-from .util import _get_command_groups, _share_element, _exclude_mods
+from .util import get_command_groups, share_element, exclude_mods
 
 
 class Linter(object):
@@ -32,7 +32,7 @@ class Linter(object):
 
         # populate command groups
         for command_name in self._commands:
-            self._command_groups.update(_get_command_groups(command_name))
+            self._command_groups.update(get_command_groups(command_name))
 
     @property
     def commands(self):
@@ -61,7 +61,7 @@ class Linter(object):
     def get_parameter_help(self, command_name, parameter_name):
         options = self._command_table.get(command_name).arguments.get(parameter_name).type.settings.get('options_list')
         parameter_helps = self._loaded_help.get(command_name).parameters
-        param_help = next((param for param in parameter_helps if _share_element(options, param.name.split())), None)
+        param_help = next((param for param in parameter_helps if share_element(options, param.name.split())), None)
         # workaround for --ids which is not does not generate doc help (BUG)
         if not param_help:
             return self._command_table.get(command_name).arguments.get(parameter_name).type.settings.get('help')
@@ -93,8 +93,8 @@ class LinterManager(object):
             def get_linter():
                 if rule_name in self._ci_exclusions and self._ci:
                     mod_exclusions = self._ci_exclusions[rule_name]
-                    command_table, help_file_entries = _exclude_mods(self._command_table, self._help_file_entries,
-                                                                     mod_exclusions)
+                    command_table, help_file_entries = exclude_mods(self._command_table, self._help_file_entries,
+                                                                    mod_exclusions)
                     return Linter(command_table=command_table, help_file_entries=help_file_entries,
                                   loaded_help=self._loaded_help)
                 return self.linter
@@ -154,7 +154,7 @@ class LinterManager(object):
         from colorama import Fore
         for rule_name, (rule_func, linter_callable) in self._rules.get(rule_group).items():
             # use new linter if needed
-            with GetLinter(self, linter_callable):
+            with LinterScope(self, linter_callable):
                 violations = sorted(rule_func()) or []
                 if violations:
                     print('- {} FAIL{}: {}'.format(Fore.RED, Fore.RESET, rule_name))
@@ -172,7 +172,7 @@ class RuleError(Exception):
     pass
 
 
-class GetLinter():
+class LinterScope():
     def __init__(self, linter_manager, linter_callable):
         self.linter_manager = linter_manager
         self.linter = linter_callable()
