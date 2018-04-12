@@ -6,11 +6,6 @@
 from .linter import RuleError
 
 
-def exclude_from_ci(func):
-    func.exclude_from_ci = True
-    return func
-
-
 def help_file_entry_rule(func):
     return _get_decorator(func, 'help_file_entries', 'Help-Entry: `{}`')
 
