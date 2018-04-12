@@ -23,6 +23,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
     password_arg_type = CLIArgumentType(options_list=['--password', '-p'], metavar='PASSWORD_NAME')
     transform_name_arg_type = CLIArgumentType(options_list=['--transform-name', '-t'], metavar='TRANSFORM_NAME')
     expiry_arg_type = CLIArgumentType(options_list=['--expiry'], type=datetime_format, metavar='EXPIRY_TIME')
+    default_policy_name_arg_type = CLIArgumentType(options_list=['--content-policy-name'], help='The default content key policy name used by the streaming locator.', metavar='DEFAULT_CONTENT_KEY_POLICY_NAME')
 
     with self.argument_context('ams') as c:
         c.argument('account_name', name_arg_type)
@@ -114,8 +115,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams streaming') as c:
         c.argument('account_name', account_name_arg_type)
-        c.argument('default_content_key_policy_name',
-                   help='The default content key policy name used by the streaming locator.')
+        c.argument('default_content_key_policy_name', default_policy_name_arg_type)
 
     with self.argument_context('ams streaming locator') as c:
         c.argument('streaming_locator_name', name_arg_type, id_part='child_name_1',
@@ -124,9 +124,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of the asset used by the streaming locator.')
         c.argument('streaming_policy_name',
                    help='The name of the streaming policy used by the streaming locator.')
-        c.argument('start_time',
+        c.argument('start_time', type=datetime_format,
                    help="Start time (Y-m-d'T'H:M'Z') of the streaming locator.")
-        c.argument('end_time',
+        c.argument('end_time', type=datetime_format,
                    help="End time (Y-m-d'T'H:M'Z') of the streaming locator.")
 
     with self.argument_context('ams streaming policy') as c:
