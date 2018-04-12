@@ -292,8 +292,3 @@ def _check_wincred(login_server):
             return True
 
     return False
-
-
-def acr_test(resource_group_name, path):
-    print('PATH: {}'.format(path))
-    print('RESOURCE GROUP: {}'.format(resource_group_name))
