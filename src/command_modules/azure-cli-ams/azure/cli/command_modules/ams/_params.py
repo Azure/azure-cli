@@ -51,7 +51,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help="The password used to log in. Also known as 'Client Secret'. If not present, a random secret will be generated.")
         c.argument('role', completer=get_role_definition_name_completion_list)
         c.argument('xml', action='store_true', help='Enables xml output format.')
-        c.argument('years', type=int, default=None)
+        c.argument('years', help='Number of years for which the secret will be valid. Default: 1 year', type=int, default=None)
 
     with self.argument_context('ams transform') as c:
         c.argument('account_name', account_name_arg_type)

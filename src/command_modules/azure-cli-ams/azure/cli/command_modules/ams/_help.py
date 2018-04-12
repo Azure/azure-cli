@@ -66,9 +66,6 @@ helps['ams account sp'] = """
 helps['ams account sp create'] = """
     type: command
     short-summary: Create a service principal and configure its access to an Azure Media Services account.
-    parameters:
-        - name: --years
-          short-summary: 'Number of years for which the secret will be valid. Default: 1 year'
     examples:
         - name: Create a service principal with password and configure its access to an Azure Media Services account. Output will be in xml format.
           text: >
