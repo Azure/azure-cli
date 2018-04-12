@@ -4,18 +4,16 @@
 # --------------------------------------------------------------------------------------------
 
 
-def storage_account_id(cmd, namespace):
+def validate_storage_account_id(cmd, namespace):
     """Validate storage account name"""
-    from azure.cli.core.profiles import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from msrestazure.tools import is_valid_resource_id, resource_id
 
-    if (namespace.storage_account and not
-            ('/providers/Microsoft.ClassicStorage/storageAccounts/' in namespace.storage_account or
-             '/providers/Microsoft.Storage/storageAccounts/' in namespace.storage_account)):
-        storage_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_STORAGE)
-        acc = storage_client.storage_accounts.get_properties(namespace.resource_group_name,
-                                                             namespace.storage_account)
-        if not acc:
-            raise ValueError("Storage account named '{}' not found in the resource group '{}'.".
-                             format(namespace.storage_account, namespace.resource_group_name))
-        namespace.storage_account = acc.id  # pylint: disable=no-member
+    if namespace.storage_account:
+        if not is_valid_resource_id(namespace.storage_account):
+            namespace.storage_account = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Storage', type='storageAccounts',
+                name=namespace.storage_account
+            )

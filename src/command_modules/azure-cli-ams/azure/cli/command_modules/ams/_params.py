@@ -6,12 +6,12 @@
 from knack.arguments import CLIArgumentType
 
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
-from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type)
+from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type, get_three_state_flag)
 from azure.cli.command_modules.ams._completers import get_role_definition_name_completion_list
 
 from azure.mediav3.models import (EncoderNamedPreset, Priority, AssetContainerPermission)
 
-from ._validators import storage_account_id
+from ._validators import validate_storage_account_id
 
 # pylint: disable=line-too-long
 
@@ -19,7 +19,7 @@ from ._validators import storage_account_id
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements
     name_arg_type = CLIArgumentType(options_list=['--name', '-n'], id_part='name', help='The name of the Azure Media Services account.', metavar='NAME')
     account_name_arg_type = CLIArgumentType(options_list=['--account-name', '-a'], id_part='name', help='The name of the Azure Media Services account.', metavar='ACCOUNT_NAME')
-    storage_account_arg_type = CLIArgumentType(options_list=['--storage-account'], metavar='STORAGE_NAME')
+    storage_account_arg_type = CLIArgumentType(options_list=['--storage-account'], validator=validate_storage_account_id, metavar='STORAGE_NAME')
     password_arg_type = CLIArgumentType(options_list=['--password', '-p'], metavar='PASSWORD_NAME')
     transform_name_arg_type = CLIArgumentType(options_list=['--transform-name', '-t'], metavar='TRANSFORM_NAME')
     expiry_arg_type = CLIArgumentType(options_list=['--expiry'], metavar='EXPIRY_TIME')
@@ -34,14 +34,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams account create') as c:
         c.argument('storage_account', storage_account_arg_type,
-                   help='The name or resource ID of the primary storage account to attach to the Azure Media Services account. Blob only accounts are not allowed as primary.',
-                   validator=storage_account_id)
+                   help='The name or resource ID of the primary storage account to attach to the Azure Media Services account. Blob only accounts are not allowed as primary.')
 
     with self.argument_context('ams account storage') as c:
         c.argument('account_name', account_name_arg_type)
         c.argument('storage_account', name_arg_type,
                    help='The name or resource ID of the secondary storage account to detach from the Azure Media Services account.',
-                   validator=storage_account_id)
+                   validator=validate_storage_account_id)
 
     with self.argument_context('ams account sp') as c:
         c.argument('account_name', account_name_arg_type)
@@ -50,7 +49,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('sp_password', password_arg_type,
                    help="The password used to log in. Also known as 'Client Secret'. If not present, a random secret will be generated.")
         c.argument('role', completer=get_role_definition_name_completion_list)
-        c.argument('xml', help='Enables xml output format.')
+        c.argument('xml', action='store_true', help='Enables xml output format.')
         c.argument('years', type=int, default=None)
 
     with self.argument_context('ams transform') as c:
@@ -80,6 +79,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams asset get-sas-urls') as c:
         c.argument('permissions', arg_type=get_enum_type(AssetContainerPermission),
+                   nargs='+',
                    help='The permissions to set on the SAS URL.')
         c.argument('expiry_time', expiry_arg_type, help="Specifies the UTC datetime (Y-m-d'T'H:M'Z') at which the SAS becomes invalid.")
 
@@ -110,7 +110,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Space-separated list of files. It can be used to tell the service to only use the files specified from the input asset.')
 
     with self.argument_context('ams job cancel') as c:
-        c.argument('delete', help='Delete the job being cancelled.')
+        c.argument('delete', action='store_true', help='Delete the job being cancelled.')
 
     with self.argument_context('ams streaming') as c:
         c.argument('account_name', account_name_arg_type)
@@ -133,15 +133,19 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('streaming_policy_name', name_arg_type, id_part='child_name_1',
                    help='The name of the streaming policy.')
         c.argument('download',
+                   arg_type=get_three_state_flag(),
                    arg_group='Encryption Protocols',
                    help='Enable Download protocol.')
         c.argument('dash',
+                   arg_type=get_three_state_flag(),
                    arg_group='Encryption Protocols',
                    help='Enable Dash protocol.')
         c.argument('hls',
+                   arg_type=get_three_state_flag(),
                    arg_group='Encryption Protocols',
                    help='Enable HLS protocol.')
         c.argument('smooth_streaming',
+                   arg_type=get_three_state_flag(),
                    arg_group='Encryption Protocols',
                    help='Enable SmoothStreaming protocol.')
 
