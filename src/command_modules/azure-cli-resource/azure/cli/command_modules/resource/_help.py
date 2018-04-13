@@ -609,7 +609,7 @@ helps['resource link'] = """
 helps['resource link create'] = """
     type: command
     short-summary: Create a new link between resources.
-    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/{ProviderNamespace}/{ResourceType}/{ResourceName}/Microsoft.Resources/links/{LinkName}
+    long-summary: A link-id is of the form /subscriptions/{SubID}/resourceGroups/{ResourceGroupID}/providers/{ProviderNamespace}/{ResourceType}/{ResourceName}/providers/Microsoft.Resources/links/{LinkName}
     examples:
         - name: Create a link from {SourceID} to {ResourceID} with notes
           text: >
