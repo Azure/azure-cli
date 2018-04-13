@@ -58,6 +58,21 @@ helps['keyvault certificate'] = """
     short-summary: Manage certificates.
 """
 
+helps['keyvault storage'] = """
+    type: group
+    short-summary: Manage storage accounts.
+"""
+
+helps['keyvault storage sas-definition'] = """
+    type: group
+    short-summary: Manage storage account SAS definitions.
+"""
+
+helps['keyvault network-rule'] = """
+    type: group
+    short-summary: Manage vault network ACLs.
+"""
+
 helps['keyvault certificate download'] = """
     type: command
     short-summary: Download the public portion of a Key Vault certificate.
