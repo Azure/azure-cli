@@ -70,7 +70,7 @@ def cli_cosmosdb_create(cmd, client,
         locations.append(Location(location_name=resource_group_location, failover_priority=0))
 
     params = DatabaseAccountCreateUpdateParameters(
-        resource_group_location=resource_group_location,
+        location=resource_group_location,
         locations=locations,
         tags=tags,
         kind=kind,
@@ -182,8 +182,8 @@ def cli_cosmosdb_update(client,
         tags = existing.tags
 
     params = DatabaseAccountCreateUpdateParameters(
-        existing.location,
-        locations,
+        location=existing.location,
+        locations=locations,
         tags=tags,
         kind=existing.kind,
         consistency_policy=consistency_policy,
