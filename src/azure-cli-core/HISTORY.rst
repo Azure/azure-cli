@@ -6,6 +6,7 @@ Release History
 2.0.32
 ++++++
 * Added limited support for positional arguments.
+* Fix issue where reading in from STDIN with @- didn't work. [#1398](https://github.com/Azure/azure-cli/issues/1398)
 
 2.0.31
 ++++++

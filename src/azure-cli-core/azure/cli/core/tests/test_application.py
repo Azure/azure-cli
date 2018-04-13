@@ -90,7 +90,7 @@ class TestApplication(unittest.TestCase):
         f_with_bom.close()
 
         with open(f.name, 'w+') as stream:
-            stream.write('foo')
+            stream.write('foo \r\n')
 
         from codecs import open as codecs_open
         with codecs_open(f_with_bom.name, encoding='utf-8-sig', mode='w+') as stream:
