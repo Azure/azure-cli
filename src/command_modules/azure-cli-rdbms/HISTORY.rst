@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.2.2
++++++
+* Minor help fix.
+
 0.2.1
 +++++
 * Introduce georestore command.
