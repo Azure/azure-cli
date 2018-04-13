@@ -49,9 +49,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help="The app name or app URI to associate the RBAC with. If not present, a default name like '{amsaccountname}-access-sp' will be generated.")
         c.argument('sp_password', password_arg_type,
                    help="The password used to log in. Also known as 'Client Secret'. If not present, a random secret will be generated.")
-        c.argument('role', completer=get_role_definition_name_completion_list)
+        c.argument('role', help='The role of the service principal.', completer=get_role_definition_name_completion_list)
         c.argument('xml', action='store_true', help='Enables xml output format.')
-        c.argument('years', help='Number of years for which the secret will be valid. Default: 1 year', type=int, default=None)
+        c.argument('years', help='Number of years for which the secret will be valid. Default: 1 year.', type=int, default=None)
 
     with self.argument_context('ams transform') as c:
         c.argument('account_name', account_name_arg_type)
@@ -77,6 +77,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('alternate_id', help='The alternate id of the asset.')
         c.argument('description', help='The asset description.')
         c.argument('asset_name', name_arg_type, help='The name of the asset.')
+
+    with self.argument_context('ams asset update') as c:
+        c.argument('alternate_id', help='The alternate id of the asset.')
+        c.argument('description', help='The asset description.')
 
     with self.argument_context('ams asset get-sas-urls') as c:
         c.argument('permissions', arg_type=get_enum_type(AssetContainerPermission),
@@ -129,6 +133,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('end_time', type=datetime_format,
                    help="End time (Y-m-d'T'H:M'Z') of the streaming locator.")
 
+    with self.argument_context('ams streaming locator list') as c:
+        c.argument('account_name', id_part=None)
+
     with self.argument_context('ams streaming policy') as c:
         c.argument('streaming_policy_name', name_arg_type, id_part='child_name_1',
                    help='The name of the streaming policy.')
@@ -148,6 +155,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_type=get_three_state_flag(),
                    arg_group='Encryption Protocols',
                    help='Enable SmoothStreaming protocol.')
+
+    with self.argument_context('ams streaming policy list') as c:
+        c.argument('account_name', id_part=None)
 
     with self.argument_context('ams streaming endpoint list') as c:
         c.argument('account_name', id_part=None)
