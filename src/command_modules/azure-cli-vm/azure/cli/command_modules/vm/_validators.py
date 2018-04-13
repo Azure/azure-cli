@@ -424,7 +424,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
 
     from ._vm_utils import normalize_disk_info
     # accelnet and attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
-    write_accelerator_settings = getattr(namespace, 'enable_write_accelerator', None)
+    write_accelerator_settings = getattr(namespace, 'write_accelerator', None)
     namespace.disk_info = normalize_disk_info(image_data_disks=namespace.image_data_disks,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
                                               attach_data_disks=getattr(namespace, 'attach_data_disks', []),

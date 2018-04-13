@@ -497,7 +497,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               public_ip_address_dns_name=None, public_ip_sku=None, os_disk_name=None, os_type=None,
               storage_account=None, os_caching=None, data_caching=None, storage_container_name=None, storage_sku=None,
               use_unmanaged_disk=False, attach_os_disk=None, os_disk_size_gb=None, attach_data_disks=None,
-              data_disk_sizes_gb=None, image_data_disks=None, enable_write_accelerator=None, disk_info=None,
+              data_disk_sizes_gb=None, image_data_disks=None, write_accelerator=None, disk_info=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16', subnet=None, subnet_address_prefix='10.0.0.0/24',
               storage_profile=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_address_type=None, nic_type=None,

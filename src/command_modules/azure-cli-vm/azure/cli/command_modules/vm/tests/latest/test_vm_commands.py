@@ -585,6 +585,22 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         ])
 
 
+class VMWriteAcceleratorScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_vm_write_accel', location='westus2')
+    def test_vm_write_accelerator_e2e(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+        self.cmd('vm create -g {rg} -n {vm} --write-accelerator 0=true --data-disk-sizes-gb 1 --image centos --size Standard_M64ms')
+        self.cmd('vm show -g {rg} -n {vm}')
+        self.cmd('vm update -g {rg} -n {vm} --write-accelerator true --disk-caching readonly')
+        self.cmd('vm show -g {rg} -n {vm}')
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk d1 --enable-write-accelerator --new --size-gb 1')
+        self.cmd('vm update -g {rg} -n {vm} --write-accelerator 1=false os=false')
+        self.cmd('vm show -g {rg} -n {vm}')
+
+
 class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
 
     def _check_vm_power_state(self, expected_power_state):
