@@ -113,12 +113,18 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         'KeyEncryptionAlgorithm': key_encryption_algorithm,
         'SequenceVersion': sequence_version,
     }
-    if not use_new_ade:
+    if use_new_ade:
+        public_config.update({
+            "KeyVaultResourceId": disk_encryption_keyvault,
+            "KekVaultResourceId": key_encryption_keyvault if key_encryption_key else '',
+        })
+    else:
         public_config.update({
             'AADClientID': aad_client_id,
             'AADClientCertThumbprint': aad_client_cert_thumbprint,
         })
-    private_config = {
+
+    ade_legacy_private_config = {
         'AADClientSecret': aad_client_secret if is_linux else (aad_client_secret or '')
     }
 
@@ -129,7 +135,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     ext = VirtualMachineExtension(location=vm.location,  # pylint: disable=no-member
                                   publisher=extension['publisher'],
                                   virtual_machine_extension_type=extension['name'],
-                                  protected_settings=None if use_new_ade else private_config,
+                                  protected_settings=None if use_new_ade else ade_legacy_private_config,
                                   type_handler_version=extension['version'],
                                   settings=public_config,
                                   auto_upgrade_minor_version=True)
