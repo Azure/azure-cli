@@ -9,7 +9,7 @@ from knack.log import get_logger
 
 from azure.cli.core.commands import LongRunningOperation
 
-from azure.cli.command_modules.vm.custom import set_vm, _compute_client_factory
+from azure.cli.command_modules.vm.custom import set_vm, _compute_client_factory, _is_linux_os
 from azure.cli.command_modules.vm._vm_utils import get_key_vault_base_url, create_keyvault_data_plane_client
 
 _DATA_VOLUME_TYPE = 'DATA'
@@ -21,32 +21,34 @@ vm_extension_info = {
     'Linux': {
         'publisher': os.environ.get('ADE_TEST_EXTENSION_PUBLISHER') or 'Microsoft.Azure.Security',
         'name': os.environ.get('ADE_TEST_EXTENSION_NAME') or 'AzureDiskEncryptionForLinux',
-        'version': '0.1'
+        'version': '1.1',
+        'legacy_version': '0.1'
     },
     'Windows': {
         'publisher': os.environ.get('ADE_TEST_EXTENSION_PUBLISHER') or 'Microsoft.Azure.Security',
         'name': os.environ.get('ADE_TEST_EXTENSION_NAME') or 'AzureDiskEncryption',
-        'version': '1.1'
+        'version': '2.2',
+        'legacy_version': '1.1'
     }
 }
 
-vmss_extension_info = {
-    'Linux': {
-        'publisher': 'Microsoft.Azure.Security',
-        'name': vm_extension_info['Linux']['name'],
-        'version': '1.1'
-    },
-    'Windows': {
-        'publisher': 'Microsoft.Azure.Security',
-        'name': vm_extension_info['Windows']['name'],
-        'version': '2.1'
-    }
-}
+
+def _get_extension_version(vm, aad_client_id):
+    ade_ext_info = vm_extension_info['Linux'] if _is_linux_os(vm) else vm_extension_info['Windows']
+    extensions = vm.resources or []
+    ade = next((e for e in extensions if (e.publisher.lower() == ade_ext_info['publisher'].lower() and 
+                                          e.virtual_machine_extension_type.lower() == ade_ext_info['name'].lower())), None)
+    if ade is None:
+        return not aad_client_id
+    elif ade.type_handler_version.split('.')[0] == ade_ext_info['legacy_version'].split('.')[0]:
+        return False
+    else:
+        return True
 
 
 def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-locals, too-many-statements
-               aad_client_id,
                disk_encryption_keyvault,
+               aad_client_id=None,
                aad_client_secret=None, aad_client_cert_thumbprint=None,
                key_encryption_keyvault=None,
                key_encryption_key=None,
@@ -59,15 +61,17 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     # pylint: disable=no-member
     compute_client = _compute_client_factory(cmd.cli_ctx)
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
-    os_type = vm.storage_profile.os_disk.os_type.value
-    is_linux = _is_linux_vm(os_type)
-    extension = vm_extension_info[os_type]
+    is_linux = _is_linux_os(vm)
     backup_encryption_settings = vm.storage_profile.os_disk.encryption_settings
     vm_encrypted = backup_encryption_settings.enabled if backup_encryption_settings else False
+    use_new_ade = _get_extension_version(vm, aad_client_id)
+    extension = vm_extension_info['Linux' if is_linux else 'Windows']
+
+    if not use_new_ade and not aad_client_id:
+        raise CLIError('Please provide --aad-client-id')
 
     # 1. First validate arguments
-
-    if not aad_client_cert_thumbprint and not aad_client_secret:
+    if not use_new_ade and not aad_client_cert_thumbprint and not aad_client_secret:
         raise CLIError('Please provide either --aad-client-cert-thumbprint or --aad-client-secret')
 
     if volume_type is None:
@@ -102,8 +106,6 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     # 2. we are ready to provision/update the disk encryption extensions
     # The following logic was mostly ported from xplat-cli
     public_config = {
-        'AADClientID': aad_client_id,
-        'AADClientCertThumbprint': aad_client_cert_thumbprint,
         'KeyVaultURL': disk_encryption_keyvault_url,
         'VolumeType': volume_type,
         'EncryptionOperation': 'EnableEncryption' if not encrypt_format_all else 'EnableEncryptionFormatAll',
@@ -111,6 +113,11 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         'KeyEncryptionAlgorithm': key_encryption_algorithm,
         'SequenceVersion': sequence_version,
     }
+    if not use_new_ade:
+        public_config.update({
+            'AADClientID': aad_client_id,
+            'AADClientCertThumbprint': aad_client_cert_thumbprint,
+        })
     private_config = {
         'AADClientSecret': aad_client_secret if is_linux else (aad_client_secret or '')
     }
@@ -122,7 +129,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     ext = VirtualMachineExtension(location=vm.location,  # pylint: disable=no-member
                                   publisher=extension['publisher'],
                                   virtual_machine_extension_type=extension['name'],
-                                  protected_settings=private_config,
+                                  protected_settings=None if use_new_ade else private_config,
                                   type_handler_version=extension['version'],
                                   settings=public_config,
                                   auto_upgrade_minor_version=True)
@@ -181,11 +188,11 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
 
     compute_client = _compute_client_factory(cmd.cli_ctx)
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
+    is_linux = _is_linux_os(vm)
     # pylint: disable=no-member
-    os_type = vm.storage_profile.os_disk.os_type.value
 
     # 1. be nice, figure out the default volume type and also verify VM will not be busted
-    is_linux = _is_linux_vm(os_type)
+    is_linux = _is_linux_os(vm)
     if is_linux:
         if volume_type:
             if not force:
@@ -204,7 +211,7 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
         if vm.storage_profile.data_disks:
             raise CLIError("VM has data disks, please specify --volume-type")
 
-    extension = vm_extension_info[os_type]
+    extension = vm_extension_info['Linux' if is_linux else 'Windows']
     # sequence_version should be incremented since encryptions occurred before
     sequence_version = uuid.uuid4()
 
@@ -256,8 +263,8 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
     # pylint: disable=no-member
     # The following logic was mostly ported from xplat-cli
-    os_type = vm.storage_profile.os_disk.os_type.value
-    is_linux = _is_linux_vm(os_type)
+    is_linux = _is_linux_os(vm)
+    os_type = 'Linux' if is_linux else 'Windows'
     encryption_status['osType'] = os_type
     extension = vm_extension_info[os_type]
     extension_result = compute_client.virtual_machine_extensions.get(resource_group_name,
@@ -307,10 +314,6 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
                 encryption_status['dataDisk'] = _STATUS_ENCRYPTED
 
     return encryption_status
-
-
-def _is_linux_vm(os_type):
-    return os_type.lower() == 'linux'
 
 
 def _get_keyvault_key_url(cli_ctx, keyvault_name, key_name):
@@ -404,9 +407,8 @@ def encrypt_vmss(cmd, resource_group_name, vmss_name,  # pylint: disable=too-man
 
     compute_client = _compute_client_factory(cmd.cli_ctx)
     vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-    os_type = 'Linux' if vmss.virtual_machine_profile.os_profile.linux_configuration else 'Windows'
-    is_linux = _is_linux_vm(os_type)
-    extension = vmss_extension_info[os_type]
+    is_linux = _is_linux_os(vmss.virtual_machine_profile)
+    extension = vm_extension_info['Linux' if is_linux else 'Windows']
 
     # 1. First validate arguments
     volume_type = _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, force)
@@ -464,9 +466,8 @@ def decrypt_vmss(cmd, resource_group_name, vmss_name, volume_type=None, force=Fa
     UpgradeMode, VirtualMachineScaleSetExtension = cmd.get_models('UpgradeMode', 'VirtualMachineScaleSetExtension')
     compute_client = _compute_client_factory(cmd.cli_ctx)
     vmss = compute_client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-    os_type = 'Linux' if vmss.virtual_machine_profile.os_profile.linux_configuration else 'Windows'
-    is_linux = _is_linux_vm(os_type)
-    extension = vmss_extension_info[os_type]
+    is_linux = _is_linux_os(vmss.virtual_machine_profile)
+    extension = vm_extension_info['Linux' if is_linux else 'Windows']
 
     # 1. be nice, figure out the default volume type
     volume_type = _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, force)
