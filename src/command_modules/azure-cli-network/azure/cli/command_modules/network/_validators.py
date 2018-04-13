@@ -723,6 +723,7 @@ def process_vnet_gateway_update_namespace(cmd, namespace):
     ns = namespace
     get_virtual_network_validator()(cmd, ns)
     get_public_ip_validator()(cmd, ns)
+    validate_tags(ns)
     public_ip_count = len(ns.public_ip_address or [])
     if public_ip_count > 2:
         raise CLIError('Specify a single public IP to create an active-standby gateway or two '
@@ -826,6 +827,8 @@ def get_network_watcher_from_location(remove=False, watcher_name='watcher_name',
 
 def process_nw_cm_create_namespace(cmd, namespace):
     from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+
+    validate_tags(namespace)
 
     compute_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_COMPUTE).virtual_machines
     vm_name = parse_resource_id(namespace.source_resource)['name']

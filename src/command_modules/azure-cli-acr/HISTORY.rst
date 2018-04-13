@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.0.24
+++++++
+* Improve repository commands error messages.
+* Update table columns and ordering.
+
 2.0.23
 ++++++
 * Improve error handling of wincred fallback.

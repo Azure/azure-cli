@@ -1904,7 +1904,6 @@ class VMSSLoadBalancerWithSku(ScenarioTest):
         ])
 
 
-# TODO: convert back to ScenarioTest when #5741 is fixed.
 class MSIScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_msi')

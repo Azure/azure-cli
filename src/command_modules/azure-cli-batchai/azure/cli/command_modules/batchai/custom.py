@@ -29,7 +29,7 @@ from msrestazure.tools import is_valid_resource_id
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core import keys
-from azure.cli.core.profiles import ResourceType
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 import azure.mgmt.batchai.models as models
 
@@ -506,8 +506,8 @@ def _configure_auto_storage(cli_ctx, location):
     :return (str, str): a tuple with auto storage account name and key.
     """
     from azure.mgmt.resource.resources.models import ResourceGroup
-    from azure.storage.file import FileService
-    from azure.storage.blob import BlockBlobService
+    BlockBlobService, FileService = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
+                                            'blob#BlockBlobService', 'file#FileService')
     resource_group = _get_auto_storage_resource_group()
     resource_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     if resource_client.resource_groups.check_existence(resource_group):
@@ -765,8 +765,8 @@ def _get_files_from_afs(cli_ctx, afs, path, expiry):
     :param str path: path to list files from.
     :param int expiry: SAS expiration time in minutes.
     """
-    from azure.storage.file import FileService
-    from azure.storage.file.models import File, FilePermissions
+    FileService, File, FilePermissions = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
+                                                 'file#FileService', 'file.models#File', 'file.models#FilePermissions')
     result = []
     service = FileService(afs.account_name, _get_storage_account_key(cli_ctx, afs.account_name, None))
     share_name = afs.azure_file_url.split('/')[-1]

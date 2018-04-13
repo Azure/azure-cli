@@ -113,9 +113,9 @@ def storage_blob_copy_batch(cmd, client, source_client, destination_container=No
 def storage_blob_download_batch(client, source, destination, source_container_name, pattern=None, dryrun=False,
                                 progress_callback=None, max_connections=2):
 
-    def _download_blob(blob_service, container, destination_folder, blob_name):
+    def _download_blob(blob_service, container, destination_folder, normalized_blob_name, blob_name):
         # TODO: try catch IO exception
-        destination_path = os.path.join(destination_folder, blob_name)
+        destination_path = os.path.join(destination_folder, normalized_blob_name)
         destination_folder = os.path.dirname(destination_path)
         if not os.path.exists(destination_folder):
             mkdir_p(destination_folder)
@@ -124,7 +124,17 @@ def storage_blob_download_batch(client, source, destination, source_container_na
                                              progress_callback=progress_callback)
         return blob.name
 
-    source_blobs = list(collect_blobs(client, source_container_name, pattern))
+    source_blobs = collect_blobs(client, source_container_name, pattern)
+    blobs_to_download = {}
+    for blob_name in source_blobs:
+        # remove starting path seperator and normalize
+        normalized_blob_name = normalize_blob_file_path(None, blob_name)
+        if normalized_blob_name in blobs_to_download:
+            from knack.util import CLIError
+            raise CLIError('Multiple blobs with download path: `{}`. As a solution, use the `--pattern` parameter '
+                           'to select for a subset of blobs to download OR utilize the `storage blob download` '
+                           'command instead to download individual blobs.'.format(normalized_blob_name))
+        blobs_to_download[normalized_blob_name] = blob_name
 
     if dryrun:
         logger = get_logger(__name__)
@@ -137,7 +147,8 @@ def storage_blob_download_batch(client, source, destination, source_container_na
             logger.warning('  - %s', b)
         return []
 
-    return list(_download_blob(client, source_container_name, destination, blob) for blob in source_blobs)
+    return list(_download_blob(client, source_container_name, destination, blob_normed, blobs_to_download[blob_normed])
+                for blob_normed in blobs_to_download)
 
 
 def storage_blob_upload_batch(cmd, client, source, destination, pattern=None,  # pylint: disable=too-many-locals

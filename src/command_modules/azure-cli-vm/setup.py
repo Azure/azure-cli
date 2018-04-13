@@ -15,7 +15,7 @@ except ImportError:
     cmdclass = {}
 
 
-VERSION = "2.0.30"
+VERSION = "2.0.31"
 
 CLASSIFIERS = [
     'Development Status :: 5 - Production/Stable',
