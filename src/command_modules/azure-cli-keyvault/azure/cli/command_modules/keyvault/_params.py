@@ -14,9 +14,9 @@ from azure.cli.core.commands.parameters import (
     get_enum_type)
 from azure.cli.core.util import get_json_object
 
-from azure.cli.command_modules.keyvault._completers import (
+from ._completers import (
     get_keyvault_name_completion_list, get_keyvault_version_completion_list)
-from azure.cli.command_modules.keyvault._validators import (
+from ._validators import (
     datetime_type, certificate_type,
     get_vault_base_url_type, validate_key_import_source,
     validate_key_type, validate_policy_permissions,

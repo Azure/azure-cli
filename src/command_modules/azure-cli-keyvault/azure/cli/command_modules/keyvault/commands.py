@@ -3,13 +3,13 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.keyvault._client_factory import (
+from ._client_factory import (
     keyvault_client_vaults_factory, keyvault_data_plane_factory)
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
 
-from azure.cli.command_modules.keyvault._validators import (
+from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace)
 
 

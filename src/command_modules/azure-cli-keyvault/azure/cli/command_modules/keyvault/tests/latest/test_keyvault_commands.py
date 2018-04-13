@@ -11,12 +11,20 @@ import unittest
 from datetime import datetime, timedelta
 from dateutil import tz
 
-from azure.cli.command_modules.keyvault.custom import _asn1_to_iso8601
-from azure.cli.command_modules.keyvault._params import secret_encoding_values
-
 from azure.cli.testsdk import ResourceGroupPreparer, ScenarioTest, LiveScenarioTest
 
 from knack.util import CLIError
+
+secret_text_encoding_values = ['utf-8', 'utf-16le', 'utf-16be', 'ascii']
+secret_binary_encoding_values = ['base64', 'hex']
+secret_encoding_values = secret_text_encoding_values + secret_binary_encoding_values
+
+
+def _asn1_to_iso8601(asn1_date):
+    import dateutil.parser
+    if isinstance(asn1_date, bytes):
+        asn1_date = asn1_date.decode('utf-8')
+    return dateutil.parser.parse(asn1_date)
 
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))

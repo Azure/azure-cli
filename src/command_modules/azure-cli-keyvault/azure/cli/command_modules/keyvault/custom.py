@@ -16,7 +16,7 @@ from OpenSSL import crypto
 
 import azure.cli.core.telemetry as telemetry
 
-from azure.cli.command_modules.keyvault._validators import secret_text_encoding_values
+from ._validators import secret_text_encoding_values
 
 logger = get_logger(__name__)
 
