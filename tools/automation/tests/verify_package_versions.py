@@ -55,9 +55,16 @@ def changes_require_version_bump(mod_name, mod_version, mod_path, base_repo=None
 
 def version_in_base_repo(base_repo, mod_path, mod_name, mod_version):
     base_repo_mod_path = mod_path.replace(get_repo_root(), base_repo)
-    if mod_version == _get_mod_version(base_repo_mod_path):
-        print('Version {} of {} is already used on in the base repo.'.format(mod_version, mod_name))
-        return True
+    try:
+        if mod_version == _get_mod_version(base_repo_mod_path):
+            print('Version {} of {} is already used on in the base repo.'.format(mod_version, mod_name))
+            return True
+    except FileNotFoundError:
+        print('Module {} not in base repo. Skipping...'.format(mod_name), file=sys.stderr)
+    except Exception as ex:
+        # Print warning if unable to get module from base version (e.g. mod didn't exist there)
+        print('Warning: Unable to get module version from base repo... skipping...', file=sys.stderr)
+        print(str(ex), file=sys.stderr)
     return False
 
 
