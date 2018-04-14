@@ -6,19 +6,29 @@
 import json
 import os
 
-from azure.mgmt.datamigration.models import (DataMigrationService, ServiceSku, Project, SqlConnectionInfo, DatabaseInfo)
-from azure.cli.core.util import CLIError, sdk_no_wait, get_file_json, shell_safe_json_parse
-from knack.prompting import prompt_pass
+from azure.mgmt.datamigration.models import (DataMigrationService,
+                                             ServiceSku,
+                                             Project,
+                                             SqlConnectionInfo,
+                                             DatabaseInfo,
+                                             ProjectTask,
+                                             ProjectTaskProperties,
+                                             MigrateSqlServerSqlDbTaskProperties,
+                                             MigrateSqlServerSqlDbTaskInput,
+                                             MigrateSqlServerSqlDbDatabaseInput,
+                                             MigrationValidationOptions,
+                                             ApiErrorException)
 
-virtual_subnet_id_template = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'
+from azure.cli.core.util import CLIError, sdk_no_wait, get_file_json, shell_safe_json_parse
+from knack.prompting import prompt, prompt_pass
 
 
 # region Service
 
 def check_service_name_availability(cmd, client, service_name, location):
     return client.check_name_availability(location=location,
-                                          name=service_name,
-                                          type='services')
+                                            name=service_name,
+                                            type='services')
 
 def create_service(cmd, client, service_name, resource_group_name, location, subnet, sku_name, tags=None, no_wait=False):
     parameters = DataMigrationService(location=location,
@@ -73,43 +83,37 @@ def create_or_update_project(cmd,
                              source_connection_json,
                              target_platform,
                              target_connection_json,
-                             database_list,
+                             database_list=None,
                              tags=None):
     if os.path.exists(source_connection_json):
         source_connection_json = get_file_json(source_connection_json)
     else:
-        source_connection_json = shell_safe_json_parse(source_connection_json)
-
+        try:
+            source_connection_json = shell_safe_json_parse(source_connection_json)
+        except:
+            raise CLIError('Source Connection JSON: File was not found and input string could not be parsed as JSON')
+    
     if os.path.exists(target_connection_json):
         target_connection_json = get_file_json(target_connection_json)
     else:
-        target_connection_json = shell_safe_json_parse(target_connection_json)
-
-    sconn_info = SqlConnectionInfo(user_name=source_connection_json.get('userName', None),
-                                   password=source_connection_json.get('password', None),
-                                   data_source=source_connection_json.get('dataSource', None),
-                                   authentication=source_connection_json.get('authentication', None),
-                                   encrypt_connection=source_connection_json.get('encryptConnection', None),
-                                   trust_server_certificate=source_connection_json.get('trustServerCertificate', None),
-                                   additional_settings=source_connection_json.get('additionalSettings', None))
-
-    tconn_info = SqlConnectionInfo(user_name=target_connection_json.get('userName', None),
-                                   password=target_connection_json.get('password', None),
-                                   data_source=target_connection_json.get('dataSource', None),
-                                   authentication=target_connection_json.get('authentication', None),
-                                   encrypt_connection=target_connection_json.get('encryptConnection', None),
-                                   trust_server_certificate=target_connection_json.get('trustServerCertificate', None),
-                                   additional_settings=target_connection_json.get('additionalSettings', None))
+        try:
+            target_connection_json = shell_safe_json_parse(target_connection_json)
+        except:
+            raise CLIError('Target Connection JSON: File was not found and input string could not be parsed as JSON')
+    
+    source_connection_info = create_sql_connection_info(source_connection_json, False)
+    target_connection_info = create_sql_connection_info(target_connection_json, False)
 
     databases = []
-    for d in database_list:
-        databases.append(DatabaseInfo(source_database_name=d))
+    if database_list is not None:
+        for d in database_list:
+            databases.append(DatabaseInfo(source_database_name=d))
     
     parameters = Project(location=location,
                          source_platform=source_platform,
-                         source_connection_info=sconn_info,
+                         source_connection_info=source_connection_info,
                          target_platform=target_platform,
-                         target_connection_info=tconn_info,
+                         target_connection_info=target_connection_info,
                          databases_info=databases,
                          tags=tags)
 
@@ -125,10 +129,77 @@ def create_or_update_project(cmd,
 def check_task_name_availability(cmd, client, resource_group_name, service_name, task_name):
     return client.check_children_name_availability(group_name=resource_group_name, service_name=service_name, name=task_name, type='tasks')
 
+def create_task(cmd,
+                client,
+                resource_group_name,
+                service_name,
+                project_name,
+                task_name,
+                source_connection_json,
+                target_connection_json,
+                database_options_json,
+                enable_schema_validation=False,
+                enable_data_integrity_validation=False,
+                enable_query_analysis_validation=False):
+    if os.path.exists(source_connection_json):
+        source_connection_json = get_file_json(source_connection_json)
+    else:
+        source_connection_json = shell_safe_json_parse(source_connection_json)
+
+    if os.path.exists(target_connection_json):
+        target_connection_json = get_file_json(target_connection_json)
+    else:
+        target_connection_json = shell_safe_json_parse(target_connection_json)
+
+    if os.path.exists(database_options_json):
+        database_options_json = get_file_json(database_options_json)
+    else:
+        database_options_json = shell_safe_json_parse(database_options_json)
+
+    source_connection_info = create_sql_connection_info(source_connection_json, True)
+    target_connection_info = create_sql_connection_info(target_connection_json, True)
+
+    database_options = []
+    for d in database_options_json:
+        database_options.append(MigrateSqlServerSqlDbDatabaseInput(name=d.get('name', None),
+                                                                   target_database_name=d.get('target_database_name', None),
+                                                                   make_source_db_read_only=d.get('make_source_db_read_only', None),
+                                                                   table_map=d.get('table_map', None)))
+
+    validation_options = MigrationValidationOptions(enable_schema_validation=enable_schema_validation,
+                                                    enable_data_integrity_validation=enable_data_integrity_validation,
+                                                    enable_query_analysis_validation=enable_query_analysis_validation)
+
+    task_input = MigrateSqlServerSqlDbTaskInput(source_connection_info=source_connection_info,
+                                                target_connection_info=target_connection_info,
+                                                selected_databases=database_options,
+                                                validation_options=validation_options)
+
+    migration_properties = MigrateSqlServerSqlDbTaskProperties(input=task_input)
+
+    return client.create_or_update(group_name=resource_group_name,
+                                   service_name=service_name,
+                                   project_name=project_name,
+                                   task_name=task_name,
+                                   properties=migration_properties)
+
 def list_tasks(cmd, client, resource_group_name, service_name, project_name, task_type=None):
     return list(client.tasks.list(group_name=resource_group_name,
                                   service_name=service_name,
                                   project_name=project_name,
                                   task_type=task_type))
+
+# endregion
+
+# region Helper Methods
+
+def create_sql_connection_info(connection_info_json, include_user_info=False):
+    return SqlConnectionInfo(user_name=connection_info_json.get('userName', None) or prompt('Username: ') if include_user_info else None,
+                             password=connection_info_json.get('password', None) or prompt_pass if include_user_info else None,
+                             data_source=connection_info_json.get('dataSource', None),
+                             authentication=connection_info_json.get('authentication', None),
+                             encrypt_connection=connection_info_json.get('encryptConnection', None),
+                             trust_server_certificate=connection_info_json.get('trustServerCertificate', None),
+                             additional_settings=connection_info_json.get('additionalSettings', None))
 
 # endregion
