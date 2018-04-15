@@ -33,18 +33,20 @@ vm_extension_info = {
 }
 
 
-# None: no ADE; True: new ade; False: old ade
-def _get_extension_status(vm):
+# return (has_new_ade, has_old_ade)
+def _detect_ade_status(vm):
+    if vm.storage_profile.os_disk.encryption_settings:
+        return False, True
     ade_ext_info = vm_extension_info['Linux'] if _is_linux_os(vm) else vm_extension_info['Windows']
-    extensions = vm.resources or []
-    ade = next((e for e in extensions if (e.publisher.lower() == ade_ext_info['publisher'].lower() and
-                                          e.virtual_machine_extension_type.lower() == ade_ext_info['name'].lower())), None)
+    exts = vm.resources or []
+    ade = next((e for e in exts if (e.publisher.lower() == ade_ext_info['publisher'].lower() and
+                                    e.virtual_machine_extension_type.lower() == ade_ext_info['name'].lower())), None)
     if ade is None:
-        return None
+        return False, False
     elif ade.type_handler_version.split('.')[0] == ade_ext_info['legacy_version'].split('.')[0]:
-        return False
+        return False, True
 
-    return True
+    return True, False   # we believe impossible to have both old & new ADE
 
 
 def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-locals, too-many-statements
@@ -65,7 +67,8 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     is_linux = _is_linux_os(vm)
     backup_encryption_settings = vm.storage_profile.os_disk.encryption_settings
     vm_encrypted = backup_encryption_settings.enabled if backup_encryption_settings else False
-    use_new_ade = not aad_client_id and (_get_extension_status(vm) is not False)
+    _, has_old_ade = _detect_ade_status(vm)
+    use_new_ade = not aad_client_id and not has_old_ade
     extension = vm_extension_info['Linux' if is_linux else 'Windows']
 
     if not use_new_ade and not aad_client_id:
@@ -133,13 +136,14 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         cmd.get_models('VirtualMachineExtension', 'DiskEncryptionSettings', 'KeyVaultSecretReference',
                        'KeyVaultKeyReference', 'SubResource')
 
-    ext = VirtualMachineExtension(location=vm.location,  # pylint: disable=no-member
-                                  publisher=extension['publisher'],
-                                  virtual_machine_extension_type=extension['name'],
-                                  protected_settings=None if use_new_ade else ade_legacy_private_config,
-                                  type_handler_version=extension['version'],
-                                  settings=public_config,
-                                  auto_upgrade_minor_version=True)
+    ext = VirtualMachineExtension(
+        location=vm.location,  # pylint: disable=no-member
+        publisher=extension['publisher'],
+        virtual_machine_extension_type=extension['name'],
+        protected_settings=None if use_new_ade else ade_legacy_private_config,
+        type_handler_version=extension['version'] if use_new_ade else extension['legacy_version'],
+        settings=public_config,
+        auto_upgrade_minor_version=True)
 
     poller = compute_client.virtual_machine_extensions.create_or_update(
         resource_group_name, vm_name, extension['name'], ext)
@@ -197,7 +201,10 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
 
     compute_client = _compute_client_factory(cmd.cli_ctx)
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name)
-    has_new_ade = _get_extension_status(vm)
+    has_new_ade, has_old_ade = _detect_ade_status(vm)
+    if not has_new_ade and not has_old_ade:
+        logger.warning('Azure Disk Encryption is not enabled')
+        return
     is_linux = _is_linux_os(vm)
     # pylint: disable=no-member
 
@@ -235,12 +242,13 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
     VirtualMachineExtension, DiskEncryptionSettings = cmd.get_models(
         'VirtualMachineExtension', 'DiskEncryptionSettings')
 
-    ext = VirtualMachineExtension(location=vm.location,  # pylint: disable=no-member
-                                  publisher=extension['publisher'],
-                                  virtual_machine_extension_type=extension['name'],
-                                  type_handler_version=extension['version'] if has_new_ade else extension['legacy_version'],
-                                  settings=public_config,
-                                  auto_upgrade_minor_version=True)
+    ext = VirtualMachineExtension(
+        location=vm.location,  # pylint: disable=no-member
+        publisher=extension['publisher'],
+        virtual_machine_extension_type=extension['name'],
+        type_handler_version=extension['version'] if has_new_ade else extension['legacy_version'],
+        settings=public_config,
+        auto_upgrade_minor_version=True)
 
     poller = compute_client.virtual_machine_extensions.create_or_update(resource_group_name,
                                                                         vm_name,
@@ -282,7 +290,11 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
     }
     compute_client = _compute_client_factory(cmd.cli_ctx)
     vm = compute_client.virtual_machines.get(resource_group_name, vm_name, 'instanceView')
-    if _get_extension_status(vm):
+    has_new_ade, has_old_ade = _detect_ade_status(vm)
+    if not has_new_ade and not has_old_ade:
+        logger.warning('Azure Disk Encryption is not enabled')
+        return None
+    if has_new_ade:
         return _show_new_vm_encryption_status_thru_new_ade(vm.instance_view)
     is_linux = _is_linux_os(vm)
 
