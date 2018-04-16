@@ -6,6 +6,7 @@ Release History
 2.0.32
 ++++++
 * Added limited support for positional arguments.
+* Display command suggestions on error if users have typo in their commands
 
 2.0.31
 ++++++

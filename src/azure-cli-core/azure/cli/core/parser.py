@@ -3,7 +3,9 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from __future__ import print_function
 import sys
+import difflib
 
 import argparse
 import argcomplete
@@ -144,8 +146,21 @@ class AzCliCommandParser(CLICommandParser):
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
         if action.choices is not None and value not in action.choices:
-            msg = 'invalid choice: {}'.format(value)
-            raise argparse.ArgumentError(action, msg)
+            error_msg = "{prog}: '{value}' is not an {prog} command. See '{prog} --help'.".format(prog=self.prog,
+                                                                                                  value=value)
+            telemetry.set_user_fault(error_msg)
+            logger.error(error_msg)
+            candidates = difflib.get_close_matches(value, action.choices, cutoff=0.8)
+            if candidates:
+                print_args = {
+                    's': 's' if len(candidates) > 1 else '',
+                    'verb': 'are' if len(candidates) > 1 else 'is',
+                    'value': value
+                }
+                print("\nThe most similar command{s} to '{value}' {verb}:".format(**print_args))
+                print('\n'.join(['\t' + candidate for candidate in candidates]))
+
+            self.exit(2)
 
     @staticmethod
     def _add_argument(obj, arg):
