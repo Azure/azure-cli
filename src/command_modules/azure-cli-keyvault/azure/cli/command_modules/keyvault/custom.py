@@ -242,8 +242,7 @@ def create_keyvault(cmd, client,  # pylint: disable=too-many-locals
                     tags=None):
     from azure.mgmt.keyvault.models import (
         VaultCreateOrUpdateParameters, Permissions, KeyPermissions, SecretPermissions,
-        CertificatePermissions, StoragePermissions, AccessPolicyEntry, Sku, VaultProperties, NetworkRuleSet,
-        NetworkRuleBypassOptions, NetworkRuleAction)
+        CertificatePermissions, StoragePermissions, AccessPolicyEntry, Sku, VaultProperties)
     from azure.cli.core._profile import Profile
     from azure.graphrbac.models import GraphErrorException
     from azure.graphrbac import GraphRbacManagementClient
@@ -434,7 +433,7 @@ def set_policy(cmd, client, resource_group_name, vault_name,
                                        properties=vault.properties))
 
 
-def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None):
+def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None):  # pylint: disable=unused-argument
     """ Add a network rule to the network ACLs for a Key Vault. """
     from azure.mgmt.keyvault.models import VirtualNetworkRule, IPRule, VaultCreateOrUpdateParameters
 
@@ -458,7 +457,7 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
                                        properties=vault.properties))
 
 
-def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None):
+def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None):  # pylint: disable=unused-argument
     """ Removes a network rule from the network ACLs for a Key Vault. """
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
 
@@ -496,7 +495,7 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
                                        properties=vault.properties))
 
 
-def list_network_rules(cmd, client, resource_group_name, vault_name):
+def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint: disable=unused-argument
     """ Lists the network rules from the network ACLs for a Key Vault. """
     vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
     return vault.properties.network_acls
@@ -834,7 +833,8 @@ def delete_certificate_contact(client, vault_base_url, contact_email):
     """ Remove a certificate contact from the specified vault. """
     from azure.keyvault.models import Contacts
     orig_contacts = client.get_certificate_contacts(vault_base_url).contact_list
-    remaining_contacts = [x for x in client.get_certificate_contacts(vault_base_url).contact_list if x.email_address != contact_email]
+    remaining_contacts = [x for x in client.get_certificate_contacts(vault_base_url).contact_list
+                          if x.email_address != contact_email]
     remaining = Contacts(contact_list=remaining_contacts)
     if len(remaining_contacts) == len(orig_contacts):
         raise CLIError("contact '{}' not found in vault '{}'".format(contact_email, vault_base_url))

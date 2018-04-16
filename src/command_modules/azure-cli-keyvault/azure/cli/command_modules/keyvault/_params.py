@@ -144,7 +144,7 @@ def load_arguments(self, _):
     # region KeyVault Storage Account
 
     with self.argument_context('keyvault storage') as c:
-        c.argument('storage_account_name', options_list=['--name', '-n'], help='Name to identify the storage account in the vault.', id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
+        c.argument('storage_account_name', options_list=['--name', '-n'], help='Name to identify the storage account in the vault.', id_part='child_name_1', completer=get_keyvault_name_completion_list('storage_account'))
 
     with self.argument_context('keyvault storage add') as c:
         c.attributes_argument('storage_account', StorageAccountAttributes, create=True)

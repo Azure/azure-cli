@@ -3,11 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from ._client_factory import (
-    keyvault_client_vaults_factory, keyvault_data_plane_factory)
-
 from azure.cli.core.commands import CliCommandType
 from azure.cli.core.util import empty_on_404
+
+from ._client_factory import (
+    keyvault_client_vaults_factory, keyvault_data_plane_factory)
 
 from ._validators import (
     process_secret_set_namespace, process_certificate_cancel_namespace)
@@ -132,8 +132,12 @@ def load_command_table(self, _):
         g.keyvault_command('delete', 'delete_storage_account')
         g.keyvault_command('purge', 'purge_deleted_storage_account')
         g.keyvault_command('recover', 'recover_deleted_storage_account')
-        g.keyvault_custom('backup', 'backup_storage_account', doc_string_source=_data_sdk_path('backup_storage_account'))
-        g.keyvault_custom('restore', 'restore_storage_account', doc_string_source=_data_sdk_path('restore_storage_account'))
+        g.keyvault_custom('backup',
+                          'backup_storage_account',
+                          doc_string_source=_data_sdk_path('backup_storage_account'))
+        g.keyvault_custom('restore',
+                          'restore_storage_account',
+                          doc_string_source=_data_sdk_path('restore_storage_account'))
 
     with self.command_group('keyvault storage sas-definition', kv_data_sdk) as g:
         g.keyvault_command('create', 'set_sas_definition')

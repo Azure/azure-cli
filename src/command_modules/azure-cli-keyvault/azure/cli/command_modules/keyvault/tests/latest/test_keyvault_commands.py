@@ -602,12 +602,12 @@ def _generate_certificate(path, keyfile=None, password=None):
     # Various details about who we are. For a self-signed certificate the
     # Subject and issuer are always the same.
     subject = issuer = x509.Name([
-             x509.NameAttribute(NameOID.COUNTRY_NAME, u'US'),
-             x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u'WA'),
-             x509.NameAttribute(NameOID.LOCALITY_NAME, u'Redmond'),
-             x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"My Company"),
-             x509.NameAttribute(NameOID.COMMON_NAME, u"mysite.com"),
-        ])
+        x509.NameAttribute(NameOID.COUNTRY_NAME, u'US'),
+        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u'WA'),
+        x509.NameAttribute(NameOID.LOCALITY_NAME, u'Redmond'),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"My Company"),
+        x509.NameAttribute(NameOID.COMMON_NAME, u"mysite.com")])
+
     cert = x509.CertificateBuilder().subject_name(subject) \
                                     .issuer_name(issuer) \
                                     .public_key(key.public_key()) \

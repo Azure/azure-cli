@@ -5,7 +5,7 @@
 
 from azure.cli.core import AzCommandsLoader
 
-from ._help import *  # pylint: disable=unused-import
+import azure.cli.command_modules.keyvault._help  # pylint: disable=unused-import
 
 
 class KeyVaultCommandsLoader(AzCommandsLoader):
