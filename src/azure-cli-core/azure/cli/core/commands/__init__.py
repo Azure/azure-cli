@@ -8,6 +8,7 @@ from __future__ import print_function
 import datetime
 import json
 import logging as logs
+import os
 import sys
 import time
 from importlib import import_module
@@ -62,7 +63,6 @@ def _expand_file_prefixed_files(args):
         if path == '-':
             content = sys.stdin.read()
         else:
-            import os
             content = read_file_content(os.path.expanduser(path), allow_binary=True)
 
         return content.rstrip(os.linesep)

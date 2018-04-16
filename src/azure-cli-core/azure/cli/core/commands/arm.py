@@ -185,8 +185,10 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                 for val in values:
                     try:
                         # support piping values from JSON. Does not require use of --query
-                        json_val = json.loads(val)
-                        expanded_values = expanded_values + [x['id'] for x in json_val]
+                        json_vals = json.loads(val)
+                        for json_val in json_vals:
+                            if 'id' in json_val:
+                                expanded_values += [json_val['id']]
                     except ValueError:
                         # supports piping of --ids to the command when using TSV. Requires use of --query
                         expanded_values = expanded_values + val.split(os.linesep)
