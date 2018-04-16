@@ -3,6 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=too-many-lines
 from __future__ import print_function
 
 import string
@@ -228,7 +229,8 @@ def _patch_mount_volumes(cli_ctx, volumes, account_name=None, account_key=None):
             if not ref.credentials and ref.account_name == storage_account_name:
                 require_storage_account_key = True
                 ref.credentials = models.AzureStorageCredentialsInfo(account_key=storage_account_key)
-            ref.credentials = _get_effective_credentials(cli_ctx, ref.credentials, ref.account_name)
+            if ref.account_name:
+                ref.credentials = _get_effective_credentials(cli_ctx, ref.credentials, ref.account_name)
 
     # Patch parameters of blob file systems.
     if result.azure_blob_file_systems:
@@ -247,7 +249,8 @@ def _patch_mount_volumes(cli_ctx, volumes, account_name=None, account_key=None):
             if not ref.account_name:
                 raise CLIError('Ill-formed Azure Blob File System reference in the configuration file - no account '
                                'name provided.')
-            ref.credentials = _get_effective_credentials(cli_ctx, ref.credentials, ref.account_name)
+            if ref.account_name:
+                ref.credentials = _get_effective_credentials(cli_ctx, ref.credentials, ref.account_name)
 
     if require_storage_account and not storage_account_name:
         raise CLIError(MSG_CONFIGURE_STORAGE_ACCOUNT)
@@ -601,7 +604,7 @@ def _generate_ssh_keys():
 def create_cluster(cmd, client,  # pylint: disable=too-many-locals
                    resource_group, cluster_name, json_file=None, location=None, user_name=None,
                    ssh_key=None, password=None, generate_ssh_keys=None, image=None, custom_image=None,
-                   use_auto_storage=False, vm_size=None, vm_priority='dedicated', target=None, min_nodes=None,
+                   use_auto_storage=False, vm_size=None, vm_priority=None, target=None, min_nodes=None,
                    max_nodes=None, subnet=None, nfs_name=None, nfs_resource_group=None, nfs_mount_path='nfs',
                    azure_file_share=None, afs_mount_path='afs', container_name=None, container_mount_path='bfs',
                    account_name=None, account_key=None, setup_task=None, setup_task_output=None):
