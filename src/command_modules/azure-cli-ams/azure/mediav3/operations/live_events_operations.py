@@ -176,7 +176,6 @@ class LiveEventsOperations(object):
         return deserialized
     get.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}'}
 
-
     def _create_initial(
             self, resource_group_name, account_name, live_event_name, parameters, auto_start=None, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -304,7 +303,6 @@ class LiveEventsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     create.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}'}
 
-
     def _update_initial(
             self, resource_group_name, account_name, live_event_name, parameters, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -425,7 +423,6 @@ class LiveEventsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     update.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}'}
 
-
     def _delete_initial(
             self, resource_group_name, account_name, live_event_name, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -527,7 +524,6 @@ class LiveEventsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     delete.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}'}
 
-
     def _start_initial(
             self, resource_group_name, account_name, live_event_name, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -628,7 +624,6 @@ class LiveEventsOperations(object):
             long_running_send, get_long_running_output,
             get_long_running_status, long_running_operation_timeout)
     start.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}/start'}
-
 
     def _stop_initial(
             self, resource_group_name, account_name, live_event_name, remove_outputs_on_stop=None, custom_headers=None, raw=False, **operation_config):
@@ -740,7 +735,6 @@ class LiveEventsOperations(object):
             long_running_send, get_long_running_output,
             get_long_running_status, long_running_operation_timeout)
     stop.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}/stop'}
-
 
     def _reset_initial(
             self, resource_group_name, account_name, live_event_name, custom_headers=None, raw=False, **operation_config):

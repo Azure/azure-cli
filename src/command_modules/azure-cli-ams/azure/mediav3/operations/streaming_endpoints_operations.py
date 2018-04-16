@@ -177,7 +177,6 @@ class StreamingEndpointsOperations(object):
         return deserialized
     get.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/streamingEndpoints/{streamingEndpointName}'}
 
-
     def _create_initial(
             self, resource_group_name, account_name, streaming_endpoint_name, parameters, auto_start=None, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -305,7 +304,6 @@ class StreamingEndpointsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     create.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/streamingEndpoints/{streamingEndpointName}'}
 
-
     def _update_initial(
             self, resource_group_name, account_name, streaming_endpoint_name, parameters, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -428,7 +426,6 @@ class StreamingEndpointsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     update.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/streamingEndpoints/{streamingEndpointName}'}
 
-
     def _delete_initial(
             self, resource_group_name, account_name, streaming_endpoint_name, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -529,7 +526,6 @@ class StreamingEndpointsOperations(object):
             long_running_send, get_long_running_output,
             get_long_running_status, long_running_operation_timeout)
     delete.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/streamingEndpoints/{streamingEndpointName}'}
-
 
     def _start_initial(
             self, resource_group_name, account_name, streaming_endpoint_name, custom_headers=None, raw=False, **operation_config):
@@ -632,7 +628,6 @@ class StreamingEndpointsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     start.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/streamingEndpoints/{streamingEndpointName}/start'}
 
-
     def _stop_initial(
             self, resource_group_name, account_name, streaming_endpoint_name, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -733,7 +728,6 @@ class StreamingEndpointsOperations(object):
             long_running_send, get_long_running_output,
             get_long_running_status, long_running_operation_timeout)
     stop.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/streamingEndpoints/{streamingEndpointName}/stop'}
-
 
     def _scale_initial(
             self, resource_group_name, account_name, streaming_endpoint_name, scale_unit=None, custom_headers=None, raw=False, **operation_config):

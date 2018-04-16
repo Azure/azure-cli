@@ -182,7 +182,6 @@ class LiveOutputsOperations(object):
         return deserialized
     get.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}/liveOutputs/{liveOutputName}'}
 
-
     def _create_initial(
             self, resource_group_name, account_name, live_event_name, live_output_name, parameters, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -308,7 +307,6 @@ class LiveOutputsOperations(object):
             long_running_send, get_long_running_output,
             get_long_running_status, long_running_operation_timeout)
     create.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}/liveOutputs/{liveOutputName}'}
-
 
     def _delete_initial(
             self, resource_group_name, account_name, live_event_name, live_output_name, custom_headers=None, raw=False, **operation_config):
