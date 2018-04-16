@@ -66,7 +66,7 @@ def load_arguments(self, _):
 
     for item in ['delete', 'list']:
         with self.argument_context('ad sp credential {}'.format(item)) as c:
-            c.argument('key_id', help='credential id')
+            c.argument('key_id', help='credential key id')
             c.argument('cert', action='store_true', help='a certificate based credential')
 
     with self.argument_context('ad') as c:
