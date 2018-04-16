@@ -1477,7 +1477,9 @@ class NetworkVNetScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vnet_ids_query')
     def test_network_vnet_ids_query(self, resource_group):
-        # This test is to ensure that --query works with --ids
+        import json
+
+        # This test ensures that --query works with --ids
         self.kwargs.update({
             'vnet1': 'vnet1',
             'vnet2': 'vnet2'
@@ -1489,6 +1491,16 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('@[0]', '{vnet1}'),
             self.check('@[1]', '{vnet2}')
         ])
+
+        # This test ensures you can pipe a list of IDs to --ids
+        self.kwargs['ids'] = self.cmd('network vnet list -g {rg} --query "[].id" -otsv').output
+        self.cmd('network vnet show --ids {ids}',
+                 checks=self.check('length(@)', 2))
+
+        # This test ensures you can pipe JSON output to --ids
+        self.kwargs['json'] = json.dumps(self.cmd('network vnet list -g {rg}').get_output_in_json())
+        self.cmd('network vnet show --ids \'{json}\'',
+                 checks=self.check('length(@)', 2))
 
 
 class NetworkVNetPeeringScenarioTest(ScenarioTest):

@@ -65,7 +65,7 @@ def _expand_file_prefixed_files(args):
             import os
             content = read_file_content(os.path.expanduser(path), allow_binary=True)
 
-        return content[0:-1] if content and content[-1] == '\n' else content
+        return content.rstrip(os.linesep)
 
     def _maybe_load_file(arg):
         ix = arg.find('@')
