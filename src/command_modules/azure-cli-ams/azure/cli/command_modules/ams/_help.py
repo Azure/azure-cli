@@ -244,12 +244,12 @@ helps['ams streaming endpoint'] = """
 
 helps['ams streaming endpoint start'] = """
     type: command
-    short-summary: Start an endpoint.
+    short-summary: Start a streaming endpoint.
 """
 
 helps['ams streaming endpoint stop'] = """
     type: command
-    short-summary: Stop an endpoint.
+    short-summary: Stop a streaming endpoint.
 """
 
 helps['ams streaming endpoint list'] = """
