@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from __future__ import print_function
+
 import sys
 import difflib
 
@@ -157,8 +158,9 @@ class AzCliCommandParser(CLICommandParser):
                     'verb': 'are' if len(candidates) > 1 else 'is',
                     'value': value
                 }
-                print("\nThe most similar command{s} to '{value}' {verb}:".format(**print_args))
-                print('\n'.join(['\t' + candidate for candidate in candidates]))
+                suggestion_msg = "\nThe most similar command{s} to '{value}' {verb}:\n".format(**print_args)
+                suggestion_msg += '\n'.join(['\t' + candidate for candidate in candidates])
+                print(suggestion_msg, file=sys.stderr)
 
             self.exit(2)
 
