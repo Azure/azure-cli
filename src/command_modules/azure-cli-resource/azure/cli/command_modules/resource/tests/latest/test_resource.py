@@ -9,7 +9,7 @@ import time
 import unittest
 
 from azure_devtools.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name
+from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, create_random_name, live_only
 from azure.cli.core.util import get_file_json
 
 
@@ -507,6 +507,8 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy definition list',
                  checks=self.check("length([?name=='{pn}'])", 0))
 
+    # remove and re-record once issue #6008 is fixed
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_policy')
     def test_resource_policyset(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))

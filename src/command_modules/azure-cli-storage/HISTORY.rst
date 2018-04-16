@@ -3,9 +3,14 @@
 Release History
 ===============
 
+2.0.32
+++++++
+* Allow destination sas-token to apply to source for blob copy if source sas and account key are unspecified.
+
 2.0.31
 ++++++
 * Better error message for malformed connection strings.
+* `sdist` is now compatible with wheel 0.31.0
 
 2.0.30
 ++++++

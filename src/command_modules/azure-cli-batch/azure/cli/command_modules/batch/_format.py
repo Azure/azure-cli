@@ -274,3 +274,19 @@ def list_pool_node_counts_table_format(result):
         table_row['LowPri Total'] = str(item['lowPriority']['total'])
         table_output.append(table_row)
     return table_output
+
+
+def list_node_agent_skus_table_format(result):
+    """Format account list node agent skus result as a table."""
+    table_output = []
+    for item in result:
+        for ref in item['verifiedImageReferences']:
+            table_row = OrderedDict()
+            table_row['OS Type'] = item['osType']
+            table_row['Node Agent Sku'] = item['id']
+            table_row['Publisher'] = ref['publisher']
+            table_row['Offer'] = ref['offer']
+            table_row['Sku'] = ref['sku']
+            table_row['Version'] = ref['version']
+            table_output.append(table_row)
+    return table_output

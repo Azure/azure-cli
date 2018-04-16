@@ -250,7 +250,8 @@ def _check_wincred(login_server):
     if platform.system() == 'Windows':
         import json
         from os.path import expanduser, isfile, join
-        config_path = join(expanduser('~'), '.docker', 'config.json')
+        docker_directory = join(expanduser('~'), '.docker')
+        config_path = join(docker_directory, 'config.json')
         logger.debug("Docker config file path %s", config_path)
         if isfile(config_path):
             with open(config_path) as input_file:
@@ -268,18 +269,23 @@ def _check_wincred(login_server):
                         with open(config_path, 'w') as output_file:
                             json.dump(content, output_file, indent=4)
                             output_file.close()
-                            return True
+                        return True
                     return False
                 except NoTTYException:
                     return False
             # Don't update config file or retry as this doesn't seem to be a wincred issue
             return False
         else:
+            import os
             content = {
                 "auths": {
                     login_server: {}
                 }
             }
+            try:
+                os.makedirs(docker_directory)
+            except OSError:
+                pass
             with open(config_path, 'w') as output_file:
                 json.dump(content, output_file, indent=4)
                 output_file.close()

@@ -176,6 +176,28 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
         self.cmd('network application-gateway list --resource-group {rg}', checks=self.check('length(@)', ag_count - 1))
 
 
+class NetworkAppGatewayAuthCertScenario(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ag_auth_cert')
+    def test_network_ag_auth_cert(self, resource_group):
+        self.kwargs.update({
+            'gateway': 'ag1',
+            'cert1': 'cert1',
+            'cert1_file': os.path.join(TEST_DIR, 'AuthCert.pfx'),
+            'cert2': 'cert2',
+            'cert2_file': os.path.join(TEST_DIR, 'AuthCert2.pfx'),
+            'settings': 'https_settings'
+        })
+        self.cmd('network application-gateway create -g {rg} -n {gateway} --no-wait')
+        self.cmd('network application-gateway wait -g {rg} -n {gateway} --exists')
+        self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert1} --cert-file "{cert1_file}" --no-wait')
+        self.cmd('network application-gateway auth-cert create -g {rg} --gateway-name {gateway} -n {cert2} --cert-file "{cert2_file}" --no-wait')
+        self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {gateway} -n {settings} --auth-certs {cert1} {cert2} --no-wait --port 443 --protocol https')
+        self.cmd('network application-gateway http-settings update -g {rg} --gateway-name {gateway} -n {settings} --auth-certs {cert2} {cert1} --no-wait')
+        self.cmd('network application-gateway show -g {rg} -n {gateway}',
+                 checks=self.check('length(backendHttpSettingsCollection[1].authenticationCertificates)', 2))
+
+
 class NetworkAppGatewayRedirectConfigScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_basic')
@@ -552,6 +574,50 @@ class NetworkAppGatewayWafConfigScenarioTest20170301(ScenarioTest):
         ])
 
 
+class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_ddos_protection')
+    def test_network_ddos_protection_plan(self, resource_group):
+
+        self.kwargs.update({
+            'vnet1': 'vnet1',
+            'vnet2': 'vnet2',
+            'ddos': 'ddos1'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet1}')
+        self.kwargs['vnet2_id'] = self.cmd('network vnet create -g {rg} -n {vnet2}').get_output_in_json()['newVNet']['id']
+        # can be attached through DDoS create
+        self.kwargs['ddos_id'] = self.cmd('network ddos-protection create -g {rg} -n {ddos} --vnets {vnet1} {vnet2_id} --tags foo=doo').get_output_in_json()['id']
+        self.cmd('network ddos-protection show -g {rg} -n {ddos}')
+
+        # can be detached through VNet update
+        self.cmd('network vnet update -g {rg} -n {vnet1} --ddos-protection-plan ""')
+        self.cmd('network vnet update -g {rg} -n {vnet2} --ddos-protection-plan ""')
+        self.cmd('network ddos-protection show -g {rg} -n {ddos}')
+
+        # can be attached through VNet update
+        self.cmd('network vnet update -g {rg} -n {vnet1} --ddos-protection-plan {ddos}')
+        self.cmd('network vnet update -g {rg} -n {vnet2} --ddos-protection-plan {ddos_id}')
+        self.cmd('network ddos-protection show -g {rg} -n {ddos}')
+
+        # can be detached through DDoS update
+        self.cmd('network ddos-protection update -g {rg} -n {ddos} --tags doo=foo --vnets ""')
+        self.cmd('network ddos-protection show -g {rg} -n {ddos}')
+
+        # can be attached through DDoS update
+        self.cmd('network ddos-protection update -g {rg} -n {ddos} --vnets {vnet2_id}')
+        self.cmd('network ddos-protection show -g {rg} -n {ddos}')
+
+        self.cmd('network ddos-protection list -g {rg}')
+        with self.assertRaises(Exception):
+            self.cmd('network ddos-protection delete -g {rg} -n {ddos}')
+
+        # remove all vnets and retry
+        self.cmd('network ddos-protection update -g {rg} -n {ddos} --vnets ""')
+        self.cmd('network ddos-protection delete -g {rg} -n {ddos}')
+
+
 class NetworkPublicIpScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_public_ip')
@@ -640,8 +706,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
             })
             self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type {peering} --peer-asn {asn} --vlan-id {vlan} --primary-peer-subnet {pri_prefix} --secondary-peer-subnet {sec_prefix}')
 
-        # create public and private peerings
-        _create_peering('AzurePublicPeering', 10000, 100, '100.0.0.0/30', '101.0.0.0/30')
+        # create private peerings
         _create_peering('AzurePrivatePeering', 10001, 101, '102.0.0.0/30', '103.0.0.0/30')
 
         self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3')
@@ -654,9 +719,9 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         self.cmd('network express-route peering delete -g {rg} --circuit-name {er} -n MicrosoftPeering')
 
         self.cmd('network express-route peering list --resource-group {rg} --circuit-name {er}',
-                 checks=self.check('length(@)', 2))
+                 checks=self.check('length(@)', 1))
 
-        self.cmd('network express-route peering update -g {rg} --circuit-name {er} -n AzurePublicPeering --set vlanId=200',
+        self.cmd('network express-route peering update -g {rg} --circuit-name {er} -n AzurePrivatePeering --set vlanId=200',
                  checks=self.check('vlanId', 200))
 
     def _test_express_route_auth(self):
@@ -1794,7 +1859,8 @@ class NetworkTrafficManagerScenarioTest(ScenarioTest):
         self.cmd('network traffic-manager profile delete -g {rg} -n {tm}')
 
 
-class NetworkWatcherScenarioTest(ScenarioTest):
+# convert to ScenarioTest and re-record when #6009 is fixed
+class NetworkWatcherScenarioTest(LiveScenarioTest):
     import mock
 
     def _mock_thread_count():

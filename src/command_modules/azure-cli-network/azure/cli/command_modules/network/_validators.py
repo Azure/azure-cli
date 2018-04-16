@@ -61,7 +61,7 @@ def get_vnet_validator(dest):
         ids = []
 
         if names_or_ids == [""] or not names_or_ids:
-            return
+            names_or_ids = []
 
         for val in names_or_ids:
             if not is_valid_resource_id(val):
@@ -75,6 +75,19 @@ def get_vnet_validator(dest):
         setattr(namespace, dest, ids)
 
     return _validate_vnet_name_or_id
+
+
+def validate_ddos_name_or_id(cmd, namespace):
+
+    if namespace.ddos_protection_plan:
+        from msrestazure.tools import is_valid_resource_id, resource_id
+        if not is_valid_resource_id(namespace.ddos_protection_plan):
+            namespace.ddos_protection_plan = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.Network', type='ddosProtectionPlans',
+                name=namespace.ddos_protection_plan
+            )
 
 
 # pylint: disable=inconsistent-return-statements
@@ -439,6 +452,11 @@ def process_ag_http_settings_create_namespace(cmd, namespace):  # pylint: disabl
     if namespace.probe and not is_valid_resource_id(namespace.probe):
         namespace.probe = _generate_ag_subproperty_id(
             cmd.cli_ctx, namespace, 'probes', namespace.probe)
+    if namespace.auth_certs:
+        def _validate_name_or_id(val):
+            return val if is_valid_resource_id(val) else _generate_ag_subproperty_id(
+                cmd.cli_ctx, namespace, 'authenticationCertificates', val)
+        namespace.auth_certs = [_validate_name_or_id(x) for x in namespace.auth_certs]
 
 
 def process_ag_rule_create_namespace(cmd, namespace):  # pylint: disable=unused-argument
@@ -666,6 +684,7 @@ def process_tm_endpoint_create_namespace(cmd, namespace):
 
 def process_vnet_create_namespace(cmd, namespace):
     get_default_location_from_resource_group(cmd, namespace)
+    validate_ddos_name_or_id(cmd, namespace)
     validate_tags(namespace)
 
     if namespace.subnet_prefix and not namespace.subnet_name:

@@ -905,6 +905,50 @@ helps['network asg update'] = """
 """
 # endregion
 
+# region DDoS Protection Plans
+helps['network ddos-protection'] = """
+    type: group
+    short-summary: Manage DDoS Protection Plans.
+"""
+
+helps['network ddos-protection create'] = """
+    type: command
+    short-summary: Create a DDoS protection plan.
+    parameters:
+        - name: --vnets
+          long-summary: >
+            This parameter can only be used if all the VNets are within the same subscription as
+            the DDoS protection plan. If this is not the case, set the protection plan on the VNet
+            directly using the `az network vnet update` command.
+"""
+
+helps['network ddos-protection delete'] = """
+    type: command
+    short-summary: Delete a DDoS protection plan.
+"""
+
+helps['network ddos-protection list'] = """
+    type: command
+    short-summary: List DDoS protection plans.
+"""
+
+helps['network ddos-protection show'] = """
+    type: command
+    short-summary: Show details of a DDoS protection plan.
+"""
+
+helps['network ddos-protection update'] = """
+    type: command
+    short-summary: Update a DDoS protection plan.
+    parameters:
+        - name: --vnets
+          long-summary: >
+            This parameter can only be used if all the VNets are within the same subscription as
+            the DDoS protection plan. If this is not the case, set the protection plan on the VNet
+            directly using the `az network vnet update` command.
+"""
+# endregion
+
 # region DNS
 helps['network dns'] = """
     type: group
@@ -2327,6 +2371,11 @@ helps['network local-gateway update'] = """
             az network local-gateway update -g MyResourceGroup -n MyLocalGateway \\
                 --local-address-prefixes 10.0.0.0/24 20.0.0.0/24 30.0.0.0/24
 """
+
+helps['network local-gateway wait'] = """
+    type: command
+    short-summary: Place the CLI in a waiting state until a condition of the local gateway is met.
+"""
 # endregion
 
 # region Network Interface (NIC)
@@ -2994,7 +3043,6 @@ helps['network traffic-manager endpoint create'] = """
     short-summary: Create a traffic manager endpoint.
     parameters:
         - name: --geo-mapping
-          short-summary: Space-separated list of country/region codes mapped to this endpoint when using the 'Geographic' routing method.
           populator-commands:
           - az network traffic-manager endpoint show-geographic-hierarchy
     examples:

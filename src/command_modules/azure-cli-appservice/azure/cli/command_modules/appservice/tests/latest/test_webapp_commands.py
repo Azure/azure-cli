@@ -10,6 +10,7 @@ import time
 import tempfile
 import requests
 
+from azure_devtools.scenario_tests import record_only
 from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
                                StorageAccountPreparer, JMESPathCheck)
 
@@ -655,6 +656,7 @@ class WebappBackupConfigScenarioTest(ScenarioTest):
         ]
         self.cmd('webapp config backup show -g {} --webapp-name {}'.format(resource_group, webapp_name), checks=checks)
 
+    @record_only()  # to workaround https://github.com/Azure/azure-cli/issues/5369
     @ResourceGroupPreparer()
     def test_webapp_backup_restore(self, resource_group):
         webapp_name = self.create_random_name(prefix='azurecli-webapp-backuptest', length=36)

@@ -79,14 +79,6 @@ def _construct_identity_info(identity_scope, identity_role, port, implicit_ident
     return info
 
 
-def _detect_os_type_for_diagnostics_ext(os_profile):
-    is_linux_os = bool(os_profile.linux_configuration)
-    is_windows_os = bool(os_profile.windows_configuration)
-    if not is_linux_os and not is_windows_os:
-        raise CLIError('Diagnostics extension can only be installed on Linux or Windows VM')
-    return is_linux_os
-
-
 # for injecting test seams to produce predicatable role assignment id for playback
 def _gen_guid():
     import uuid
@@ -170,9 +162,14 @@ def _grant_access(cmd, resource_group_name, name, duration_in_seconds, is_disk):
     return op.grant_access(resource_group_name, name, AccessLevel.read, duration_in_seconds)
 
 
-def _is_linux_vm(vm):
-    os_type = vm.storage_profile.os_disk.os_type.value
-    return os_type.lower() == 'linux'
+def _is_linux_os(vm):
+    os_type = vm.storage_profile.os_disk.os_type.value if vm.storage_profile.os_disk.os_type else None
+    if os_type:
+        return os_type.lower() == 'linux'
+    # the os_type could be None for VM scaleset, let us check out os configurations
+    if vm.os_profile.linux_configuration:
+        return bool(vm.os_profile.linux_configuration)
+    return False
 
 
 def _merge_secrets(secrets):
@@ -459,7 +456,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
                                 identity_scope=identity_scope)
 
     port = port or _MSI_PORT
-    ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if _is_linux_vm(vm) else 'Windows')
+    ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if _is_linux_os(vm) else 'Windows')
     logger.info("Provisioning extension: '%s'", ext_name)
     poller = set_extension(cmd, resource_group_name, vm_name,
                            publisher='Microsoft.ManagedIdentity',
@@ -503,7 +500,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               attach_data_disks=None, data_disk_sizes_gb=None, image_data_disks=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16', subnet=None, subnet_address_prefix='10.0.0.0/24',
               storage_profile=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None,
-              storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_type=None, nic_type=None,
+              storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_address_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
               identity_role='Contributor', identity_role_id=None, application_security_groups=None,
@@ -562,7 +559,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
             nic_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg))
             master_template.add_resource(build_nsg_resource(cmd, nsg, location, tags, nsg_rule_type))
 
-        if public_ip_type == 'new':
+        if public_ip_address_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(vm_name)
             nic_dependencies.append('Microsoft.Network/publicIpAddresses/{}'.format(
                 public_ip_address))
@@ -858,6 +855,10 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
 def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
     vm = get_vm(cmd, resource_group_name, vm_name)
+    if vm.hardware_profile.vm_size == size:
+        logger.warning("VM is already %s", size)
+        return None
+
     vm.hardware_profile.vm_size = size  # pylint: disable=no-member
     return set_vm(cmd, vm, no_wait)
 
@@ -1094,7 +1095,7 @@ def set_diagnostics_extension(
     client = _compute_client_factory(cmd.cli_ctx)
     vm = client.virtual_machines.get(resource_group_name, vm_name, 'instanceView')
     # pylint: disable=no-member
-    is_linux_os = _detect_os_type_for_diagnostics_ext(vm.os_profile)
+    is_linux_os = _is_linux_os(vm)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     if is_linux_os:  # check incompatible version
         exts = vm.instance_view.extensions or []
@@ -1474,7 +1475,7 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
             get_key_vault_base_url(cmd.cli_ctx, parse_resource_id(keyvault)['name']), certificate, '')
         certificate = cert_info.sid
 
-    if not _is_linux_vm(vm):
+    if not _is_linux_os(vm):
         certificate_store = certificate_store or 'My'
     elif certificate_store:
         raise CLIError('Usage error: --certificate-store is only applicable on Windows VM')
@@ -1643,7 +1644,7 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
 def set_user(cmd, resource_group_name, vm_name, username, password=None, ssh_key_value=None,
              no_wait=False):
     vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-    if _is_linux_vm(vm):
+    if _is_linux_os(vm):
         return _set_linux_user(cmd, vm, resource_group_name, username, password, ssh_key_value, no_wait)
     else:
         if ssh_key_value:
@@ -1653,7 +1654,7 @@ def set_user(cmd, resource_group_name, vm_name, username, password=None, ssh_key
 
 def delete_user(cmd, resource_group_name, vm_name, username, no_wait=False):
     vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-    if not _is_linux_vm(vm):
+    if not _is_linux_os(vm):
         raise CLIError('Deleting a user is not supported on Windows VM')
     if no_wait:
         return _update_linux_access_extension(cmd, vm, resource_group_name,
@@ -1665,7 +1666,7 @@ def delete_user(cmd, resource_group_name, vm_name, username, no_wait=False):
 
 def reset_linux_ssh(cmd, resource_group_name, vm_name, no_wait=False):
     vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-    if not _is_linux_vm(vm):
+    if not _is_linux_os(vm):
         raise CLIError('Resetting SSH is not supported in Windows VM')
     if no_wait:
         return _update_linux_access_extension(cmd, vm, resource_group_name,
@@ -1715,8 +1716,7 @@ def assign_vmss_identity(cmd, resource_group_name, vmss_name, assign_identity=No
                                   identity_scope=identity_scope)
 
     port = port or _MSI_PORT
-    ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if vmss.virtual_machine_profile.os_profile.linux_configuration
-                                                else 'Windows')
+    ext_name = 'ManagedIdentityExtensionFor' + ('Linux' if _is_linux_os(vmss.virtual_machine_profile) else 'Windows')
     logger.info("Provisioning extension: '%s'", ext_name)
     poller = set_vmss_extension(cmd, resource_group_name, vmss_name,
                                 publisher='Microsoft.ManagedIdentity',
@@ -1753,8 +1753,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 subnet=None, subnet_address_prefix=None,
                 os_offer=None, os_publisher=None, os_sku=None, os_version=None,
                 load_balancer_type=None, app_gateway_type=None, vnet_type=None,
-                public_ip_type=None, storage_profile=None,
-                single_placement_group=None, custom_data=None, secrets=None,
+                public_ip_address_type=None, storage_profile=None,
+                single_placement_group=None, custom_data=None, secrets=None, platform_fault_domain_count=None,
                 plan_name=None, plan_product=None, plan_publisher=None, plan_promotion_code=None, license_type=None,
                 assign_identity=None, identity_scope=None, identity_role='Contributor',
                 identity_role_id=None, zones=None, priority=None):
@@ -1832,16 +1832,12 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
 
     # Handle load balancer creation
     if load_balancer_type == 'new':
-        # Defaults SKU to 'Standard' for zonal scale set
-        if load_balancer_sku is None:
-            load_balancer_sku = 'Standard' if zones else 'Basic'
-
         vmss_dependencies.append('Microsoft.Network/loadBalancers/{}'.format(load_balancer))
 
         lb_dependencies = []
         if vnet_type == 'new':
             lb_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-        if public_ip_type == 'new':
+        if public_ip_address_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(load_balancer)
             lb_dependencies.append(
                 'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
@@ -1864,6 +1860,14 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         lb_resource['dependsOn'] = lb_dependencies
         master_template.add_resource(lb_resource)
 
+        # Per https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-overview#nsg
+        if load_balancer_sku and load_balancer_sku.lower() == 'standard' and nsg is None:
+            nsg_name = '{}NSG'.format(vmss_name)
+            master_template.add_resource(build_nsg_resource(
+                None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
+            nsg = "[resourceId('Microsoft.Network/networkSecurityGroups', '{}')]".format(nsg_name)
+            vmss_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg_name))
+
     # Or handle application gateway creation
     if app_gateway_type == 'new':
         vmss_dependencies.append('Microsoft.Network/applicationGateways/{}'.format(app_gateway))
@@ -1871,7 +1875,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
         ag_dependencies = []
         if vnet_type == 'new':
             ag_dependencies.append('Microsoft.Network/virtualNetworks/{}'.format(vnet_name))
-        if public_ip_type == 'new':
+        if public_ip_address_type == 'new':
             public_ip_address = public_ip_address or '{}PublicIP'.format(app_gateway)
             ag_dependencies.append(
                 'Microsoft.Network/publicIpAddresses/{}'.format(public_ip_address))
@@ -1939,14 +1943,6 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
-    if nsg is None and zones:
-        # Per https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-standard-overview#nsg
-        nsg_name = '{}NSG'.format(vmss_name)
-        master_template.add_resource(build_nsg_resource(
-            None, nsg_name, location, tags, 'rdp' if os_type.lower() == 'windows' else 'ssh'))
-        nsg = "[resourceId('Microsoft.Network/networkSecurityGroups', '{}')]".format(nsg_name)
-        vmss_dependencies.append('Microsoft.Network/networkSecurityGroups/{}'.format(nsg_name))
-
     vmss_resource = build_vmss_resource(cmd, vmss_name, naming_prefix, location, tags,
                                         not disable_overprovision, upgrade_policy_mode,
                                         vm_sku, instance_count,
@@ -1960,6 +1956,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                                         os_publisher, os_offer, os_sku, os_version,
                                         backend_address_pool_id, inbound_nat_pool_id, health_probe=health_probe,
                                         single_placement_group=single_placement_group,
+                                        platform_fault_domain_count=platform_fault_domain_count,
                                         custom_data=custom_data, secrets=secrets,
                                         license_type=license_type, zones=zones, priority=priority)
     vmss_resource['dependsOn'] = vmss_dependencies
@@ -2217,7 +2214,7 @@ def set_vmss_diagnostics_extension(
     client = _compute_client_factory(cmd.cli_ctx)
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
     # pylint: disable=no-member
-    is_linux_os = _detect_os_type_for_diagnostics_ext(vmss.virtual_machine_profile.os_profile)
+    is_linux_os = _is_linux_os(vmss.virtual_machine_profile)
     vm_extension_name = _LINUX_DIAG_EXT if is_linux_os else _WINDOWS_DIAG_EXT
     if is_linux_os and vmss.virtual_machine_profile.extension_profile:  # check incompatibles
         exts = vmss.virtual_machine_profile.extension_profile.extensions or []

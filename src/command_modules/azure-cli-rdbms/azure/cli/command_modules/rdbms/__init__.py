@@ -24,7 +24,7 @@ class RdbmsCommandsLoader(AzCommandsLoader):
             suppress_extension=ModExtensionSuppress(
                 __name__,
                 'rdbms',
-                '0.0.4',
+                '0.0.5',
                 reason='These commands are now in the CLI.',
                 recommend_remove=True))
 

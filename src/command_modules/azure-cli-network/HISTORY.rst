@@ -3,9 +3,19 @@
 Release History
 ===============
 
+2.0.29
+++++++
+* Minor fixes.
+
 2.0.28
 ++++++
 * `application-gateway create`: Fix issue where tags could not be set. [#5936](https://github.com/Azure/azure-cli/issues/5936)
+* `application-gateway http-settings create/update`: Add convenience argument `--auth-certs` to attach authentication certificates. [#4910](https://github.com/Azure/azure-cli/issues/4910)
+* `ddos-protection`: Added new commands to create DDoS protection plans .
+* `vnet create/update`: Added support for `--ddos-protection-plan` to associate a VNet to a DDoS protection plan.
+* `network route-table create/update`: Fix issue with `--disable-bgp-route-propagation` flag.
+* `network lb create/update`: Removed dummy arguments `--public-ip-address-type` and `--subnet-type`.
+* `sdist` is now compatible with wheel 0.31.0
 
 2.0.27
 ++++++

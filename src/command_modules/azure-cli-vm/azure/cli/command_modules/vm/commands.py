@@ -277,6 +277,7 @@ def load_command_table(self, _):
         g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
         g.command('list-skus', 'list_skus')
         g.custom_command('reimage', 'reimage_vmss', supports_no_wait=True, min_api='2017-03-30')
+        g.command('perform-maintenance', 'perform_maintenance', min_api='2017-12-01')
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_command('show', 'show_vmss', exception_handler=empty_on_404, table_transformer=get_vmss_table_output_transformer(self, False))
