@@ -14,23 +14,24 @@ from msrest.serialization import Model
 
 
 class Rectangle(Model):
-    """A class to represent a rectangle.
+    """Describes the properties of a rectangular window applied to the input media
+    before processing it.
 
-    :param left: Gets or sets number of pixels from the left-margin. This can
-     be absolute pixel value e.g 100 or relative to the size of the video e.g:
-     50%.
+    :param left: The number of pixels from the left-margin. This can be
+     absolute pixel value (e.g 100), or relative to the size of the video (For
+     example, 50%).
     :type left: str
-    :param top: Gets or sets number of pixels from the top-margin. This can be
-     absolute pixel value e.g 100 or relative to the size of the video e.g:
-     50%.
+    :param top: The number of pixels from the top-margin. This can be absolute
+     pixel value (e.g 100), or relative to the size of the video (For example,
+     50%).
     :type top: str
-    :param width: Gets or sets width of the region in pixels. This can be
-     absolute pixel value e.g 100 or relative to the size of the video e.g:
-     50%.
+    :param width: The width of the rectangular region in pixels. This can be
+     absolute pixel value (e.g 100), or relative to the size of the video (For
+     example, 50%).
     :type width: str
-    :param height: Gets or sets height of the region in pixels. This can be
-     absolute pixel value e.g 100 or relative to the size of the video e.g:
-     50%.
+    :param height: The height of the rectangular region in pixels. This can be
+     absolute pixel value (e.g 100), or relative to the size of the video (For
+     example, 50%).
     :type height: str
     """
 

@@ -14,34 +14,39 @@ from msrest.serialization import Model
 
 
 class Overlay(Model):
-    """Base type for all overlays.
+    """Base type for all overlays - image, audio or video.
 
     You probably want to use the sub-classes and not this class directly. Known
     sub-classes are: AudioOverlay, VideoOverlay
 
-    :param input_label: Gets or sets the label of the Input used for the
-     Overlay.   The Input must specify exactly one file to use.
+    :param input_label: The label of the job input which is to be used as an
+     overlay. The Input must specify exactly one file. You can specify an image
+     file in JPG or PNG formats, or an audio file (such as a WAV, MP3, WMA or
+     M4A file), or a video file. See https://aka.ms/mesformats for the complete
+     list of supported audio and video file formats.
     :type input_label: str
-    :param input_loop: Gets or sets a value indicating whether the overlay is
-     looped to match the duration of the input media.
-    :type input_loop: bool
-    :param start: Gets or sets the duration in the video at which the overlay
-     starts. This is relative to the clip start if one is specified in a job.
-     Default is from the beginning of the video.
+    :param start: The start position, with reference to the input video, at
+     which the overlay starts. The value should be in ISO 8601 format. For
+     example, PT05S to start the overlay at 5 seconds in to the input video. If
+     not specified the overlay starts from the beginning of the input video.
     :type start: timedelta
-    :param end: Gets or sets the duration in the video at which the overlay
-     ends.  This is relative to the clip start if specified in a job. Default
-     is till the end of the video if InputLoop is  true. else the duration of
-     the overlay.
+    :param end: The position in the input video at which the overlay ends. The
+     value should be in ISO 8601 duration format. For example, PT30S to end the
+     overlay at 30 seconds in to the input video. If not specified the overlay
+     will be applied until the end of the input video if inputLoop is true.
+     Else, if inputLoop is false, then overlay will last as long as the
+     duration of the overlay media.
     :type end: timedelta
-    :param fade_in_duration: Gets or sets the duration for how long the fade
-     in happens. Default is no fade in.
+    :param fade_in_duration: The duration over which the overlay fades in onto
+     the input video. The value should be in ISO 8601 duration format. If not
+     specified the default behavior is to have no fade in (same as PT0S).
     :type fade_in_duration: timedelta
-    :param fade_out_duration: Gets or sets the duration for how long the fade
-     out happens. Default is no fade out.
+    :param fade_out_duration: The duration over which the overlay fades out of
+     the input video. The value should be in ISO 8601 duration format. If not
+     specified the default behavior is to have no fade out (same as PT0S).
     :type fade_out_duration: timedelta
-    :param audio_gain_level: Gets or sets the gain level of audio in the
-     overlay. Defaults to a value of 1.0.
+    :param audio_gain_level: The gain level of audio in the overlay. The value
+     should be in the range [0, 1.0]. The default is 1.0.
     :type audio_gain_level: float
     :param odatatype: Constant filled by server.
     :type odatatype: str
@@ -53,7 +58,6 @@ class Overlay(Model):
 
     _attribute_map = {
         'input_label': {'key': 'inputLabel', 'type': 'str'},
-        'input_loop': {'key': 'inputLoop', 'type': 'bool'},
         'start': {'key': 'start', 'type': 'duration'},
         'end': {'key': 'end', 'type': 'duration'},
         'fade_in_duration': {'key': 'fadeInDuration', 'type': 'duration'},
@@ -66,10 +70,9 @@ class Overlay(Model):
         'odatatype': {'#Microsoft.Media.AudioOverlay': 'AudioOverlay', '#Microsoft.Media.VideoOverlay': 'VideoOverlay'}
     }
 
-    def __init__(self, input_label=None, input_loop=None, start=None, end=None, fade_in_duration=None, fade_out_duration=None, audio_gain_level=None):
+    def __init__(self, input_label=None, start=None, end=None, fade_in_duration=None, fade_out_duration=None, audio_gain_level=None):
         super(Overlay, self).__init__()
         self.input_label = input_label
-        self.input_loop = input_loop
         self.start = start
         self.end = end
         self.fade_in_duration = fade_in_duration

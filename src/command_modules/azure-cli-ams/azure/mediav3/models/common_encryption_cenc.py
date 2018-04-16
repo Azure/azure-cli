@@ -14,9 +14,7 @@ from msrest.serialization import Model
 
 
 class CommonEncryptionCenc(Model):
-    """Represents configuration specific to Dynamic Encryption using the scheme
-    defined in ISO/IEC 23001-7 (also known as MPEG Common Encryption) using the
-    'cenc' scheme.
+    """Class for envelope encryption scheme.
 
     :param enabled_protocols: Representing supported protocols
     :type enabled_protocols: ~encoding.models.EnabledProtocols
@@ -25,9 +23,8 @@ class CommonEncryptionCenc(Model):
     :param content_keys: Representing default content key for each encryption
      scheme and separate content keys for specific tracks
     :type content_keys: ~encoding.models.StreamingPolicyContentKeys
-    :param drm: Represents configuration specific to Dynamic Encryption using
-     the scheme defined in ISO/IEC 23001-7 (also known as MPEG Common
-     Encryption) using the 'cbcs' scheme.
+    :param drm: Configuration of DRMs for CommonEncryptionCenc encryption
+     scheme
     :type drm: ~encoding.models.CencDrmConfiguration
     """
 

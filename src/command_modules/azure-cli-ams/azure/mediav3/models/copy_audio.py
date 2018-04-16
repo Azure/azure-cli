@@ -14,9 +14,10 @@ from .codec import Codec
 
 
 class CopyAudio(Codec):
-    """An object to represent an audio copy codec.
+    """A codec flag, which tells the encoder to copy the input audio bitstream.
 
-    :param label: Gets or sets the codec label.
+    :param label: An optional label for the codec. The label can be used to
+     control muxing behavior.
     :type label: str
     :param odatatype: Constant filled by server.
     :type odatatype: str

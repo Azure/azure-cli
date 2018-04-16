@@ -14,19 +14,22 @@ from msrest.serialization import Model
 
 
 class TransformOutput(Model):
-    """Describes an Output from the Transform.
+    """Describes the properties of a TransformOutput, which are the rules to be
+    applied while generating the desired output.
 
-    :param on_error: Describes what to do if the output fails with the rest of
-     the other outputs. The default is stop the rest of the outputs. Possible
-     values include: 'StopProcessingJob', 'ContinueJob'
+    :param on_error: A Transform can define more than one outputs. This
+     property defines what the service should do when one output fails - either
+     continue to produce other outputs, or, stop the other outputs. The default
+     is stop. Possible values include: 'StopProcessingJob', 'ContinueJob'
     :type on_error: str or ~encoding.models.OnErrorType
     :param relative_priority: Sets the relative priority of the
-     TransformOutputs within a Transform. This gives a hint to the system that
-     one TransformOutput is higher priority than another in the same Transform.
-     The default is normal. Possible values include: 'Low', 'Normal', 'High'
+     TransformOutputs within a Transform. This sets the priority that the
+     service uses for processing TransformOutputs. The default priority is
+     Normal. Possible values include: 'Low', 'Normal', 'High'
     :type relative_priority: str or ~encoding.models.Priority
-    :param preset: Preset that describes the Media Processor operation that
-     will be used to generate the output.
+    :param preset: Preset that describes the operations that will be used to
+     modify, transcode, or extract insights from the source file to generate
+     the output.
     :type preset: ~encoding.models.Preset
     """
 

@@ -14,7 +14,10 @@ from .proxy_resource import ProxyResource
 
 
 class Transform(ProxyResource):
-    """A Media Transform that can be applied to an input by creating Jobs.
+    """A Transform encapsulates the rules or instructions for generating desired
+    outputs from input media, such as by transcoding or by extracting insights.
+    After the Transform is created, it can be applied to input media by
+    creating Jobs.
 
     Variables are only populated by the server, and will be ignored when
     sending a request.
@@ -25,14 +28,16 @@ class Transform(ProxyResource):
     :vartype name: str
     :ivar type: The type of the resource.
     :vartype type: str
-    :ivar created: The date and time when the Transform was created.
+    :ivar created: The UTC date and time when the Transform was created, in
+     'YYYY-MM-DDThh:mm:ssZ' format.
     :vartype created: datetime
-    :param description: Customer supplied description of the transform.
+    :param description: An optional verbose description of the Transform.
     :type description: str
-    :ivar last_modified: The date and time when the Transform was last
-     updated.
+    :ivar last_modified: The UTC date and time when the Transform was last
+     updated, in 'YYYY-MM-DDThh:mm:ssZ' format.
     :vartype last_modified: datetime
-    :param outputs: The outputs for the Transform.
+    :param outputs: An array of one or more TransformOutputs that the
+     Transform should generate.
     :type outputs: list[~encoding.models.TransformOutput]
     """
 

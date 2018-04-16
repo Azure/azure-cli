@@ -14,9 +14,11 @@ from .codec import Codec
 
 
 class CopyVideo(Codec):
-    """video copy codec.
+    """A codec flag, which tells the encoder to copy the input video bitstream
+    without re-encoding.
 
-    :param label: Gets or sets the codec label.
+    :param label: An optional label for the codec. The label can be used to
+     control muxing behavior.
     :type label: str
     :param odatatype: Constant filled by server.
     :type odatatype: str

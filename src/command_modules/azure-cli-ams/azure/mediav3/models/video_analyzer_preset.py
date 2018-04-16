@@ -14,15 +14,18 @@ from .audio_analyzer_preset import AudioAnalyzerPreset
 
 
 class VideoAnalyzerPreset(AudioAnalyzerPreset):
-    """A video analyzer preset that analyzes both audio and video.
+    """A video analyzer preset that extracts insights (rich metadata) from both
+    audio and video, and outputs a JSON format file.
 
     :param odatatype: Constant filled by server.
     :type odatatype: str
-    :param audio_language: Gets or sets the audio language for the video.
-     Typically in the format of "language code-country/region" (e.g: en-US)
+    :param audio_language: The language for the audio payload in the input
+     using the BCP-47 format of 'language tag-region' (e.g: 'en-US'). The list
+     of supported languages are, 'en-US', 'en-GB', 'es-ES', 'es-MX', 'fr-FR',
+     'it-IT', 'ja-JP', 'pt-BR', 'zh-CN'.
     :type audio_language: str
-    :param audio_insights_only: Gets or sets whether to get insights for audio
-     only.
+    :param audio_insights_only: Whether to only extract audio insights when
+     processing a video file.
     :type audio_insights_only: bool
     """
 

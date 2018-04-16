@@ -14,11 +14,19 @@ from .format import Format
 
 
 class ImageFormat(Format):
-    """Generates image file output.
+    """Describes the properties for an output image file.
 
-    :param filename_pattern: Gets or sets the pattern of the filename to use
-     excluding the extension. REVIEW: List "macros" that can be used and give
-     examples.
+    You probably want to use the sub-classes and not this class directly. Known
+    sub-classes are: JpgFormat, PngFormat
+
+    :param filename_pattern: The pattern of the file names for the generated
+     output files. The following macros are supported in the file name:
+     {Basename} - The base name of the input video {Extension} - The
+     appropriate extension for this format. {Label} - The label assigned to the
+     codec/layer. {Index} - A unique index for thumbnails. Only applicable to
+     thumbnails. {Bitrate} - The audio/video bitrate. Not applicable to
+     thumbnails. {Codec} - The type of the audio/video codec. Any unsubstituted
+     macros will be collapsed and removed from the filename.
     :type filename_pattern: str
     :param odatatype: Constant filled by server.
     :type odatatype: str
@@ -26,6 +34,10 @@ class ImageFormat(Format):
 
     _validation = {
         'odatatype': {'required': True},
+    }
+
+    _subtype_map = {
+        'odatatype': {'#Microsoft.Media.JpgFormat': 'JpgFormat', '#Microsoft.Media.PngFormat': 'PngFormat'}
     }
 
     def __init__(self, filename_pattern=None):

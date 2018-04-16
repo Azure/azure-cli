@@ -14,20 +14,22 @@ from .audio import Audio
 
 
 class AacAudio(Audio):
-    """An object to represent AAC audio encoding settings.
+    """Describes Advanced Audio Codec (AAC) audio encoding settings.
 
-    :param label: Gets or sets the codec label.
+    :param label: An optional label for the codec. The label can be used to
+     control muxing behavior.
     :type label: str
     :param odatatype: Constant filled by server.
     :type odatatype: str
-    :param channels: Gets or sets number of channels in the Audio.
+    :param channels: The number of channels in the audio.
     :type channels: int
-    :param sampling_rate: Gets or sets the sampling rate to use for encoding.
+    :param sampling_rate: The sampling rate to use for encoding in hertz.
     :type sampling_rate: int
-    :param bitrate: Gets or sets the bitrate of the encoded audio.
+    :param bitrate: The bitrate, in bits per second, of the output encoded
+     audio.
     :type bitrate: int
-    :param profile: Gets or sets the audio profile. Possible values include:
-     'AacLc', 'HeAacV1', 'HeAacV2'
+    :param profile: The encoding profile to be used when encoding audio with
+     AAC. Possible values include: 'AacLc', 'HeAacV1', 'HeAacV2'
     :type profile: str or ~encoding.models.AacAudioProfile
     """
 

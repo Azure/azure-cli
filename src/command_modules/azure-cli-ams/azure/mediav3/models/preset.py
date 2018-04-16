@@ -14,7 +14,8 @@ from msrest.serialization import Model
 
 
 class Preset(Model):
-    """Base type for all Media Processor Presets.
+    """Base type for all Presets, which define the recipe or instructions on how
+    the input media files should be processed.
 
     You probably want to use the sub-classes and not this class directly. Known
     sub-classes are: AudioAnalyzerPreset, BuiltInStandardEncoderPreset,

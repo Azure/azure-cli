@@ -14,9 +14,7 @@ from msrest.serialization import Model
 
 
 class EnvelopeEncryption(Model):
-    """Represents configuration specific to Dynamic Envelope Encryption.  This
-    form of encryption is also referred to as the AES-128 CBC Encryption System
-    in ISO/IEC 23009-4.
+    """Class for EnvelopeEncryption encryption scheme.
 
     :param enabled_protocols: Representing supported protocols
     :type enabled_protocols: ~encoding.models.EnabledProtocols
@@ -25,9 +23,9 @@ class EnvelopeEncryption(Model):
     :param content_keys: Representing default content key for each encryption
      scheme and separate content keys for specific tracks
     :type content_keys: ~encoding.models.StreamingPolicyContentKeys
-    :param custom_license_acquisition_url_template: The template for a
-     customer service to deliver keys to end users.  Not needed if using the
-     built in Key Delivery service.
+    :param custom_license_acquisition_url_template:
+     LicenseAcquistionUrlTemplate is used to point to user speicified service
+     to delivery content keys
     :type custom_license_acquisition_url_template: str
     """
 

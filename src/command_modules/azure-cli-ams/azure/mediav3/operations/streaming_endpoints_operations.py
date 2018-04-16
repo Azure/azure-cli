@@ -41,7 +41,9 @@ class StreamingEndpointsOperations(object):
 
     def list(
             self, resource_group_name, account_name, custom_headers=None, raw=False, **operation_config):
-        """Lists the StreamingEndpoints in the account.
+        """List StreamingEndpoints.
+
+        Lists the StreamingEndpoints in the account.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -111,7 +113,9 @@ class StreamingEndpointsOperations(object):
 
     def get(
             self, resource_group_name, account_name, streaming_endpoint_name, custom_headers=None, raw=False, **operation_config):
-        """Gets a StreamingEndpoint.
+        """Get StreamingEndpoint.
+
+        Gets a StreamingEndpoint.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -173,6 +177,7 @@ class StreamingEndpointsOperations(object):
         return deserialized
     get.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/streamingEndpoints/{streamingEndpointName}'}
 
+
     def _create_initial(
             self, resource_group_name, account_name, streaming_endpoint_name, parameters, auto_start=None, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -227,7 +232,9 @@ class StreamingEndpointsOperations(object):
 
     def create(
             self, resource_group_name, account_name, streaming_endpoint_name, parameters, auto_start=None, custom_headers=None, raw=False, **operation_config):
-        """Creates a StreamingEndpoint.
+        """Create StreamingEndpoint.
+
+        Creates a StreamingEndpoint.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -298,6 +305,7 @@ class StreamingEndpointsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     create.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/streamingEndpoints/{streamingEndpointName}'}
 
+
     def _update_initial(
             self, resource_group_name, account_name, streaming_endpoint_name, parameters, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -350,7 +358,9 @@ class StreamingEndpointsOperations(object):
 
     def update(
             self, resource_group_name, account_name, streaming_endpoint_name, parameters, custom_headers=None, raw=False, **operation_config):
-        """Updates a existing StreamingEndpoint.
+        """Update StreamingEndpoint.
+
+        Updates a existing StreamingEndpoint.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -418,6 +428,7 @@ class StreamingEndpointsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     update.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/streamingEndpoints/{streamingEndpointName}'}
 
+
     def _delete_initial(
             self, resource_group_name, account_name, streaming_endpoint_name, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -457,7 +468,9 @@ class StreamingEndpointsOperations(object):
 
     def delete(
             self, resource_group_name, account_name, streaming_endpoint_name, custom_headers=None, raw=False, **operation_config):
-        """Deletes a StreamingEndpoint.
+        """Delete StreamingEndpoint.
+
+        Deletes a StreamingEndpoint.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -517,6 +530,7 @@ class StreamingEndpointsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     delete.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/streamingEndpoints/{streamingEndpointName}'}
 
+
     def _start_initial(
             self, resource_group_name, account_name, streaming_endpoint_name, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -556,7 +570,9 @@ class StreamingEndpointsOperations(object):
 
     def start(
             self, resource_group_name, account_name, streaming_endpoint_name, custom_headers=None, raw=False, **operation_config):
-        """Starts an existing StreamingEndpoint.
+        """Start StreamingEndpoint.
+
+        Starts an existing StreamingEndpoint.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -616,6 +632,7 @@ class StreamingEndpointsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     start.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/streamingEndpoints/{streamingEndpointName}/start'}
 
+
     def _stop_initial(
             self, resource_group_name, account_name, streaming_endpoint_name, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -655,7 +672,9 @@ class StreamingEndpointsOperations(object):
 
     def stop(
             self, resource_group_name, account_name, streaming_endpoint_name, custom_headers=None, raw=False, **operation_config):
-        """Stops an existing StreamingEndpoint.
+        """Stop StreamingEndpoint.
+
+        Stops an existing StreamingEndpoint.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -715,6 +734,7 @@ class StreamingEndpointsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     stop.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/streamingEndpoints/{streamingEndpointName}/stop'}
 
+
     def _scale_initial(
             self, resource_group_name, account_name, streaming_endpoint_name, scale_unit=None, custom_headers=None, raw=False, **operation_config):
         parameters = models.StreamingEntityScaleUnit(scale_unit=scale_unit)
@@ -760,7 +780,9 @@ class StreamingEndpointsOperations(object):
 
     def scale(
             self, resource_group_name, account_name, streaming_endpoint_name, scale_unit=None, custom_headers=None, raw=False, **operation_config):
-        """Scales an existing StreamingEndpoint.
+        """Scale StreamingEndpoint.
+
+        Scales an existing StreamingEndpoint.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.

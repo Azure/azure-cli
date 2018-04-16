@@ -41,7 +41,9 @@ class LiveEventsOperations(object):
 
     def list(
             self, resource_group_name, account_name, custom_headers=None, raw=False, **operation_config):
-        """Lists the Live Events in the account.
+        """List Live Events.
+
+        Lists the Live Events in the account.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -110,7 +112,9 @@ class LiveEventsOperations(object):
 
     def get(
             self, resource_group_name, account_name, live_event_name, custom_headers=None, raw=False, **operation_config):
-        """Gets a Live Event.
+        """Get Live Event.
+
+        Gets a Live Event.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -172,6 +176,7 @@ class LiveEventsOperations(object):
         return deserialized
     get.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}'}
 
+
     def _create_initial(
             self, resource_group_name, account_name, live_event_name, parameters, auto_start=None, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -226,7 +231,9 @@ class LiveEventsOperations(object):
 
     def create(
             self, resource_group_name, account_name, live_event_name, parameters, auto_start=None, custom_headers=None, raw=False, **operation_config):
-        """Creates a Live Event.
+        """Create Live Event.
+
+        Creates a Live Event.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -296,6 +303,7 @@ class LiveEventsOperations(object):
             long_running_send, get_long_running_output,
             get_long_running_status, long_running_operation_timeout)
     create.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}'}
+
 
     def _update_initial(
             self, resource_group_name, account_name, live_event_name, parameters, custom_headers=None, raw=False, **operation_config):
@@ -417,6 +425,7 @@ class LiveEventsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     update.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}'}
 
+
     def _delete_initial(
             self, resource_group_name, account_name, live_event_name, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -456,7 +465,9 @@ class LiveEventsOperations(object):
 
     def delete(
             self, resource_group_name, account_name, live_event_name, custom_headers=None, raw=False, **operation_config):
-        """Deletes a Live Event.
+        """Delete Live Event.
+
+        Deletes a Live Event.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -516,6 +527,7 @@ class LiveEventsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     delete.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}'}
 
+
     def _start_initial(
             self, resource_group_name, account_name, live_event_name, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -555,7 +567,9 @@ class LiveEventsOperations(object):
 
     def start(
             self, resource_group_name, account_name, live_event_name, custom_headers=None, raw=False, **operation_config):
-        """Starts an existing Live Event.
+        """Start Live Event.
+
+        Starts an existing Live Event.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -615,6 +629,7 @@ class LiveEventsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     start.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}/start'}
 
+
     def _stop_initial(
             self, resource_group_name, account_name, live_event_name, remove_outputs_on_stop=None, custom_headers=None, raw=False, **operation_config):
         parameters = models.LiveEventActionInput(remove_outputs_on_stop=remove_outputs_on_stop)
@@ -660,7 +675,9 @@ class LiveEventsOperations(object):
 
     def stop(
             self, resource_group_name, account_name, live_event_name, remove_outputs_on_stop=None, custom_headers=None, raw=False, **operation_config):
-        """Stops an existing Live Event.
+        """Stop Live Event.
+
+        Stops an existing Live Event.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -724,6 +741,7 @@ class LiveEventsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     stop.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}/stop'}
 
+
     def _reset_initial(
             self, resource_group_name, account_name, live_event_name, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -763,7 +781,9 @@ class LiveEventsOperations(object):
 
     def reset(
             self, resource_group_name, account_name, live_event_name, custom_headers=None, raw=False, **operation_config):
-        """Resets an existing Live Event.
+        """Reset Live Event.
+
+        Resets an existing Live Event.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.

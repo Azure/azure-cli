@@ -17,7 +17,7 @@ class LiveEventInput(Model):
     """The Live Event input.
 
     :param streaming_protocol: The streaming protocol for the Live Event.
-     Possible values include: 'FragmentedMP4', 'RTMP', 'RTPMPEG2TS'
+     Possible values include: 'FragmentedMP4', 'RTMP'
     :type streaming_protocol: str or ~encoding.models.LiveEventInputProtocol
     :param key_frame_interval_duration: ISO 8601 timespan duration of the key
      frame interval duration.

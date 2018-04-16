@@ -14,38 +14,42 @@ from .video import Video
 
 
 class Image(Video):
-    """Base class for all Image codecs.
+    """Describes the basic properties for generating thumbnails from the input
+    video.
 
     You probably want to use the sub-classes and not this class directly. Known
-    sub-classes are: BmpImage, JpgImage, PngImage
+    sub-classes are: JpgImage, PngImage
 
-    :param label: Gets or sets the codec label.
+    :param label: An optional label for the codec. The label can be used to
+     control muxing behavior.
     :type label: str
     :param odatatype: Constant filled by server.
     :type odatatype: str
-    :param preserve_resolution_after_rotation: Gets or sets a value indicating
-     whether to disable resolution change rotation.
-    :type preserve_resolution_after_rotation: bool
-    :param key_frame_interval: Gets or sets the distance between two key
-     frames.
+    :param key_frame_interval: The distance between two key frames, thereby
+     defining a group of pictures (GOP). The value should be a non-zero integer
+     in the range [1, 30] seconds, specified in ISO 8601 format. The default is
+     2 seconds (PT2S).
     :type key_frame_interval: timedelta
-    :param stretch_mode: Gets or sets the Resolution Mode. Possible values
-     include: 'None', 'AutoSize', 'AutoFit'
+    :param stretch_mode: The resizing mode - how the input video will be
+     resized to fit the desired output resolution(s). Default is AutoSize.
+     Possible values include: 'None', 'AutoSize', 'AutoFit'
     :type stretch_mode: str or ~encoding.models.StretchMode
-    :param sync_mode: Gets or sets the Video Sync Mode. Possible values
-     include: 'Auto', 'Passthrough', 'Cfr', 'Vfr', 'Drop'
-    :type sync_mode: str or ~encoding.models.VideoSyncMode
-    :param start: Gets or sets the start position in the input from where to
-     generate the thumbnails. Can be either absolute duration (e.g: PT05S) or
-     relative value (e.g: 100%) Can also be a value like {Best} to select the
-     best thumbnail.
+    :param start: The position in the input video from where to start
+     generating thumbnails. The value can be in absolute timestamp (ISO 8601,
+     e.g: PT05S), or a frame count (For example, 10 for the 10th frame), or a
+     relative value (For example, 1%). Also supports a macro {Best}, which
+     tells the encoder to select the best thumbnail from the first few seconds
+     of the video.
     :type start: str
-    :param step: Gets or sets the step condition attribute for the thumbnails.
-     Can be either absolute duration (e.g: PT05S) or relative value (e.g: 10%)
+    :param step: The intervals at which thumbnails are generated. The value
+     can be in absolute timestamp (ISO 8601, e.g: PT05S for one image every 5
+     seconds), or a frame count (For example, 30 for every 30 frames), or a
+     relative value (For example, 1%).
     :type step: str
-    :param range: Gets or sets the Duration till which to generate the
-     thumbnails. Can be either absolute duration (e.g: PT05S) or relative value
-     (e.g: 100%)
+    :param range: The position in the input video at which to stop generating
+     thumbnails. The value can be in absolute timestamp (ISO 8601, e.g: PT5M30S
+     to stop at 5 minutes and 30 seconds), or a frame count (For example, 300
+     to stop at the 300th frame), or a relative value (For example, 100%).
     :type range: str
     """
 
@@ -56,21 +60,19 @@ class Image(Video):
     _attribute_map = {
         'label': {'key': 'label', 'type': 'str'},
         'odatatype': {'key': '@odata\\.type', 'type': 'str'},
-        'preserve_resolution_after_rotation': {'key': 'preserveResolutionAfterRotation', 'type': 'bool'},
         'key_frame_interval': {'key': 'keyFrameInterval', 'type': 'duration'},
         'stretch_mode': {'key': 'stretchMode', 'type': 'StretchMode'},
-        'sync_mode': {'key': 'syncMode', 'type': 'VideoSyncMode'},
         'start': {'key': 'start', 'type': 'str'},
         'step': {'key': 'step', 'type': 'str'},
         'range': {'key': 'range', 'type': 'str'},
     }
 
     _subtype_map = {
-        'odatatype': {'#Microsoft.Media.BmpImage': 'BmpImage', '#Microsoft.Media.JpgImage': 'JpgImage', '#Microsoft.Media.PngImage': 'PngImage'}
+        'odatatype': {'#Microsoft.Media.JpgImage': 'JpgImage', '#Microsoft.Media.PngImage': 'PngImage'}
     }
 
-    def __init__(self, label=None, preserve_resolution_after_rotation=None, key_frame_interval=None, stretch_mode=None, sync_mode=None, start=None, step=None, range=None):
-        super(Image, self).__init__(label=label, preserve_resolution_after_rotation=preserve_resolution_after_rotation, key_frame_interval=key_frame_interval, stretch_mode=stretch_mode, sync_mode=sync_mode)
+    def __init__(self, label=None, key_frame_interval=None, stretch_mode=None, start=None, step=None, range=None):
+        super(Image, self).__init__(label=label, key_frame_interval=key_frame_interval, stretch_mode=stretch_mode)
         self.start = start
         self.step = step
         self.range = range

@@ -14,19 +14,22 @@ from .multi_bitrate_format import MultiBitrateFormat
 
 
 class TransportStreamFormat(MultiBitrateFormat):
-    """ISO/IEC 13818-1, MPEG-2 Transport Stream output.
+    """Describes the properties for generating an MPEG-2 Transport Stream (ISO/IEC
+    13818-1) output video file(s).
 
-    :param filename_pattern: Gets or sets the pattern of the filename to use
-     excluding the extension. REVIEW: List "macros" that can be used and give
-     examples.
+    :param filename_pattern: The pattern of the file names for the generated
+     output files. The following macros are supported in the file name:
+     {Basename} - The base name of the input video {Extension} - The
+     appropriate extension for this format. {Label} - The label assigned to the
+     codec/layer. {Index} - A unique index for thumbnails. Only applicable to
+     thumbnails. {Bitrate} - The audio/video bitrate. Not applicable to
+     thumbnails. {Codec} - The type of the audio/video codec. Any unsubstituted
+     macros will be collapsed and removed from the filename.
     :type filename_pattern: str
     :param odatatype: Constant filled by server.
     :type odatatype: str
-    :param manifest_filename: Gets or sets the pattern of the manifest file
-     name to use excluding the extension. REVIEW: List "macros" that can be
-     used and give examples.
-    :type manifest_filename: str
-    :param output_files: Gets the list of output files.
+    :param output_files: The list of output files to produce.  Each entry in
+     the list is a set of audio and video layer labels to be muxed together .
     :type output_files: list[~encoding.models.OutputFile]
     """
 
@@ -34,6 +37,6 @@ class TransportStreamFormat(MultiBitrateFormat):
         'odatatype': {'required': True},
     }
 
-    def __init__(self, filename_pattern=None, manifest_filename=None, output_files=None):
-        super(TransportStreamFormat, self).__init__(filename_pattern=filename_pattern, manifest_filename=manifest_filename, output_files=output_files)
+    def __init__(self, filename_pattern=None, output_files=None):
+        super(TransportStreamFormat, self).__init__(filename_pattern=filename_pattern, output_files=output_files)
         self.odatatype = '#Microsoft.Media.TransportStreamFormat'

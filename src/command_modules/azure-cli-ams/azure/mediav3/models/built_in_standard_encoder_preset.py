@@ -14,14 +14,15 @@ from .preset import Preset
 
 
 class BuiltInStandardEncoderPreset(Preset):
-    """Preset to use Media Encoder Standard (MES) with a built in named preset.
+    """Describes a built-in preset for encoding the input video with the Standard
+    Encoder.
 
     :param odatatype: Constant filled by server.
     :type odatatype: str
-    :param preset_name: Gets or sets the built in preset to use. Possible
-     values include: 'AdaptiveStreaming', 'ContentAdaptiveMultipleBitrateMP4',
-     'AACGoodQualityAudio', 'H264MultipleBitrate1080p',
-     'H264MultipleBitrate720p'
+    :param preset_name: The built-in preset to be used for encoding videos.
+     Possible values include: 'AdaptiveStreaming', 'AACGoodQualityAudio',
+     'H264MultipleBitrate1080p', 'H264MultipleBitrate720p',
+     'H264MultipleBitrateSD'
     :type preset_name: str or ~encoding.models.EncoderNamedPreset
     """
 

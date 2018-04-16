@@ -16,15 +16,18 @@ from .job_input_clip import JobInputClip
 class JobInputAsset(JobInputClip):
     """Represents an Asset for input into a Job.
 
-    :param label: Customer provided label of the JobInput.
+    :param label: A label that is assigned to a JobInput, that is used to
+     satisfy a reference used in the Transform. For example, a Transform can be
+     authored so as to take an image file with the label 'xyz' and apply it as
+     an overlay onto the input video before it is encoded. When submitting a
+     Job, exactly one of the JobInputs should be the image file, and it should
+     have the label 'xyz'.
     :type label: str
     :param odatatype: Constant filled by server.
     :type odatatype: str
-    :param files: List of files.  Required for JobInputAzureBlob. It
-     optionally can be used for JobInputAsset to tell the service to only use
-     the files specified from the Asset.
+    :param files: List of files. Required for JobInputHttp.
     :type files: list[str]
-    :param asset_name: The name of input Asset.
+    :param asset_name: The name of the input Asset.
     :type asset_name: str
     """
 

@@ -203,9 +203,10 @@ class TransformsOperations(object):
         :type account_name: str
         :param transform_name: The Transform name.
         :type transform_name: str
-        :param outputs: The outputs for the Transform.
+        :param outputs: An array of one or more TransformOutputs that the
+         Transform should generate.
         :type outputs: list[~encoding.models.TransformOutput]
-        :param description: Customer supplied description of the transform.
+        :param description: An optional verbose description of the Transform.
         :type description: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the
@@ -339,9 +340,10 @@ class TransformsOperations(object):
         :type account_name: str
         :param transform_name: The Transform name.
         :type transform_name: str
-        :param outputs: The outputs for the Transform.
+        :param outputs: An array of one or more TransformOutputs that the
+         Transform should generate.
         :type outputs: list[~encoding.models.TransformOutput]
-        :param description: Customer supplied description of the transform.
+        :param description: An optional verbose description of the Transform.
         :type description: str
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the

@@ -14,16 +14,19 @@ from .layer import Layer
 
 
 class PngLayer(Layer):
-    """This represents a layer in the PngImage class.
+    """Describes the settings to produce a PNG image from the input video.
 
-    :param width: Gets or sets width of video in pixels for this layer.
+    :param width: The width of the output video for this layer. The value can
+     be absolute (in pixels) or relative (in percentage). For example 50% means
+     the output video has half as many pixels in width as the input.
     :type width: str
-    :param height: Gets or sets height of video in pixels for this layer.
+    :param height: The height of the output video for this layer. The value
+     can be absolute (in pixels) or relative (in percentage). For example 50%
+     means the output video has half as many pixels in height as the input.
     :type height: str
-    :param condition: Gets or sets the predicate to be evaluated before
-     encoding this layer.
-    :type condition: str
-    :param label: Gets or sets the label for this layer.
+    :param label: The alphanumeric label for this layer, which can be used in
+     multiplexing different video and audio layers, or in naming the output
+     file.
     :type label: str
     :param odatatype: Constant filled by server.
     :type odatatype: str
@@ -33,6 +36,6 @@ class PngLayer(Layer):
         'odatatype': {'required': True},
     }
 
-    def __init__(self, width=None, height=None, condition=None, label=None):
-        super(PngLayer, self).__init__(width=width, height=height, condition=condition, label=label)
+    def __init__(self, width=None, height=None, label=None):
+        super(PngLayer, self).__init__(width=width, height=height, label=label)
         self.odatatype = '#Microsoft.Media.PngLayer'

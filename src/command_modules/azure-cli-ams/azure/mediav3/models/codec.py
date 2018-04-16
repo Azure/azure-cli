@@ -14,12 +14,13 @@ from msrest.serialization import Model
 
 
 class Codec(Model):
-    """A base class for all the codecs.
+    """Describes the basic properties of all codecs.
 
     You probably want to use the sub-classes and not this class directly. Known
-    sub-classes are: Audio, CopyVideo, Video, ClosedCaption, CopyAudio
+    sub-classes are: Audio, CopyVideo, Video, CopyAudio
 
-    :param label: Gets or sets the codec label.
+    :param label: An optional label for the codec. The label can be used to
+     control muxing behavior.
     :type label: str
     :param odatatype: Constant filled by server.
     :type odatatype: str
@@ -35,7 +36,7 @@ class Codec(Model):
     }
 
     _subtype_map = {
-        'odatatype': {'#Microsoft.Media.Audio': 'Audio', '#Microsoft.Media.CopyVideo': 'CopyVideo', '#Microsoft.Media.Video': 'Video', '#Microsoft.Media.ClosedCaption': 'ClosedCaption', '#Microsoft.Media.CopyAudio': 'CopyAudio'}
+        'odatatype': {'#Microsoft.Media.Audio': 'Audio', '#Microsoft.Media.CopyVideo': 'CopyVideo', '#Microsoft.Media.Video': 'Video', '#Microsoft.Media.CopyAudio': 'CopyAudio'}
     }
 
     def __init__(self, label=None):

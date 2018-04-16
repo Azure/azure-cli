@@ -14,19 +14,25 @@ from msrest.serialization import Model
 
 
 class Layer(Model):
-    """Object to represent a video layer.
+    """The encoder can be configured to produce video and/or images (thumbnails)
+    at different resolutions, by specifying a layer for each desired
+    resolution. A layer represents the properties for the video or image at a
+    resolution.
 
     You probably want to use the sub-classes and not this class directly. Known
-    sub-classes are: BmpLayer, VideoLayer, JpgLayer, PngLayer
+    sub-classes are: VideoLayer, JpgLayer, PngLayer
 
-    :param width: Gets or sets width of video in pixels for this layer.
+    :param width: The width of the output video for this layer. The value can
+     be absolute (in pixels) or relative (in percentage). For example 50% means
+     the output video has half as many pixels in width as the input.
     :type width: str
-    :param height: Gets or sets height of video in pixels for this layer.
+    :param height: The height of the output video for this layer. The value
+     can be absolute (in pixels) or relative (in percentage). For example 50%
+     means the output video has half as many pixels in height as the input.
     :type height: str
-    :param condition: Gets or sets the predicate to be evaluated before
-     encoding this layer.
-    :type condition: str
-    :param label: Gets or sets the label for this layer.
+    :param label: The alphanumeric label for this layer, which can be used in
+     multiplexing different video and audio layers, or in naming the output
+     file.
     :type label: str
     :param odatatype: Constant filled by server.
     :type odatatype: str
@@ -39,19 +45,17 @@ class Layer(Model):
     _attribute_map = {
         'width': {'key': 'width', 'type': 'str'},
         'height': {'key': 'height', 'type': 'str'},
-        'condition': {'key': 'condition', 'type': 'str'},
         'label': {'key': 'label', 'type': 'str'},
         'odatatype': {'key': '@odata\\.type', 'type': 'str'},
     }
 
     _subtype_map = {
-        'odatatype': {'#Microsoft.Media.BmpLayer': 'BmpLayer', '#Microsoft.Media.VideoLayer': 'VideoLayer', '#Microsoft.Media.JpgLayer': 'JpgLayer', '#Microsoft.Media.PngLayer': 'PngLayer'}
+        'odatatype': {'#Microsoft.Media.VideoLayer': 'VideoLayer', '#Microsoft.Media.JpgLayer': 'JpgLayer', '#Microsoft.Media.PngLayer': 'PngLayer'}
     }
 
-    def __init__(self, width=None, height=None, condition=None, label=None):
+    def __init__(self, width=None, height=None, label=None):
         super(Layer, self).__init__()
         self.width = width
         self.height = height
-        self.condition = condition
         self.label = label
         self.odatatype = None

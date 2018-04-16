@@ -20,41 +20,31 @@ from .audio_overlay import AudioOverlay
 from .copy_video import CopyVideo
 from .video import Video
 from .image import Image
-from .bmp_image import BmpImage
-from .layer import Layer
-from .bmp_layer import BmpLayer
-from .closed_caption import ClosedCaption
 from .format import Format
-from .output_file import OutputFile
-from .multi_bitrate_format import MultiBitrateFormat
-from .cmaf_format import CmafFormat
+from .image_format import ImageFormat
+from .jpg_format import JpgFormat
+from .png_format import PngFormat
 from .copy_audio import CopyAudio
-from .dd_plus_audio import DDPlusAudio
 from .deinterlace import Deinterlace
 from .rectangle import Rectangle
-from .video_overlay import VideoOverlay
 from .filters import Filters
+from .layer import Layer
 from .video_layer import VideoLayer
 from .h264_layer import H264Layer
 from .h264_video import H264Video
-from .image_format import ImageFormat
 from .jpg_layer import JpgLayer
 from .jpg_image import JpgImage
+from .output_file import OutputFile
+from .multi_bitrate_format import MultiBitrateFormat
 from .mp4_format import Mp4Format
-from .multi_bitrate_mp4_format import MultiBitrateMp4Format
 from .png_layer import PngLayer
 from .png_image import PngImage
 from .built_in_standard_encoder_preset import BuiltInStandardEncoderPreset
-from .stream_selection import StreamSelection
 from .standard_encoder_preset import StandardEncoderPreset
 from .video_analyzer_preset import VideoAnalyzerPreset
-from .closed_caption_stream import ClosedCaptionStream
-from .video_stream import VideoStream
-from .audio_stream import AudioStream
-from .streaming_endpoint_optimized_format import StreamingEndpointOptimizedFormat
 from .transport_stream_format import TransportStreamFormat
+from .video_overlay import VideoOverlay
 from .transform_output import TransformOutput
-from .available_presets import AvailablePresets
 from .transform import Transform
 from .job_input import JobInput
 from .job_input_clip import JobInputClip
@@ -162,21 +152,13 @@ from .streaming_endpoint_paged import StreamingEndpointPaged
 from .azure_media_services_enums import (
     AacAudioProfile,
     StretchMode,
-    VideoSyncMode,
-    ClosedCaptionType,
-    ClosedCaptionFormat,
-    DDPlusACMode,
     DeinterlaceParity,
     DeinterlaceMode,
     Rotation,
-    LoudnessAdjustment,
-    Flip,
     H264VideoProfile,
     EntropyMode,
-    H264RateControlMode,
     H264Complexity,
     EncoderNamedPreset,
-    StreamSelectionMode,
     OnErrorType,
     Priority,
     JobErrorCode,
@@ -215,41 +197,31 @@ __all__ = [
     'CopyVideo',
     'Video',
     'Image',
-    'BmpImage',
-    'Layer',
-    'BmpLayer',
-    'ClosedCaption',
     'Format',
-    'OutputFile',
-    'MultiBitrateFormat',
-    'CmafFormat',
+    'ImageFormat',
+    'JpgFormat',
+    'PngFormat',
     'CopyAudio',
-    'DDPlusAudio',
     'Deinterlace',
     'Rectangle',
-    'VideoOverlay',
     'Filters',
+    'Layer',
     'VideoLayer',
     'H264Layer',
     'H264Video',
-    'ImageFormat',
     'JpgLayer',
     'JpgImage',
+    'OutputFile',
+    'MultiBitrateFormat',
     'Mp4Format',
-    'MultiBitrateMp4Format',
     'PngLayer',
     'PngImage',
     'BuiltInStandardEncoderPreset',
-    'StreamSelection',
     'StandardEncoderPreset',
     'VideoAnalyzerPreset',
-    'ClosedCaptionStream',
-    'VideoStream',
-    'AudioStream',
-    'StreamingEndpointOptimizedFormat',
     'TransportStreamFormat',
+    'VideoOverlay',
     'TransformOutput',
-    'AvailablePresets',
     'Transform',
     'JobInput',
     'JobInputClip',
@@ -356,21 +328,13 @@ __all__ = [
     'StreamingEndpointPaged',
     'AacAudioProfile',
     'StretchMode',
-    'VideoSyncMode',
-    'ClosedCaptionType',
-    'ClosedCaptionFormat',
-    'DDPlusACMode',
     'DeinterlaceParity',
     'DeinterlaceMode',
     'Rotation',
-    'LoudnessAdjustment',
-    'Flip',
     'H264VideoProfile',
     'EntropyMode',
-    'H264RateControlMode',
     'H264Complexity',
     'EncoderNamedPreset',
-    'StreamSelectionMode',
     'OnErrorType',
     'Priority',
     'JobErrorCode',

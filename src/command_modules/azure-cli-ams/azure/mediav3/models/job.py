@@ -14,7 +14,8 @@ from .proxy_resource import ProxyResource
 
 
 class Job(ProxyResource):
-    """A Job resource type.
+    """A Job resource type. The progress and state can be obtained by polling a
+    Job or subscribing to events using EventGrid.
 
     Variables are only populated by the server, and will be ignored when
     sending a request.
@@ -25,24 +26,25 @@ class Job(ProxyResource):
     :vartype name: str
     :ivar type: The type of the resource.
     :vartype type: str
-    :ivar created: The date and time when the Job was created.
+    :ivar created: The UTC date and time when the Job was created, in
+     'YYYY-MM-DDThh:mm:ssZ' format.
     :vartype created: datetime
     :ivar state: The current state of the job. Possible values include:
      'Canceled', 'Canceling', 'Error', 'Finished', 'Processing', 'Queued',
      'Scheduled'
     :vartype state: str or ~encoding.models.JobState
-    :param description: The customer supplied description of the Job.
+    :param description: Optional customer supplied description of the Job.
     :type description: str
     :param input: The inputs for the Job.
     :type input: ~encoding.models.JobInput
-    :ivar last_modified: The date and time when the Job was last updated.
+    :ivar last_modified: The UTC date and time when the Job was last updated,
+     in 'YYYY-MM-DDThh:mm:ssZ' format.
     :vartype last_modified: datetime
     :param outputs: The outputs for the Job.
     :type outputs: list[~encoding.models.JobOutput]
-    :param priority: Priority with which the job should be processed.  Higher
-     priority jobs are processed before lower priority jobs if there is
-     resource contention. If not set, the default is normal. Possible values
-     include: 'Low', 'Normal', 'High'
+    :param priority: Priority with which the job should be processed. Higher
+     priority jobs are processed before lower priority jobs. If not set, the
+     default is normal. Possible values include: 'Low', 'Normal', 'High'
     :type priority: str or ~encoding.models.Priority
     """
 

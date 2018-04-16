@@ -14,56 +14,33 @@ from msrest.serialization import Model
 
 
 class Filters(Model):
-    """A class to encapsulate all the filters for a source.
+    """Describes all the filtering operations, such as de-interlacing, rotation
+    etc. that are to be applied to the input media before encoding.
 
-    :param pad: Gets or sets a value indicating whether to pad the source to
-     align jagged-edge audio and video.
-    :type pad: bool
-    :param deinterlace: Gets or sets the default de-interlacing settings.
+    :param deinterlace: The de-interlacing settings.
     :type deinterlace: ~encoding.models.Deinterlace
-    :param rotation: Gets or sets the rotation if any to be applied to the
-     video. Possible values include: 'Auto', 'None', 'Rotate0', 'Rotate90',
-     'Rotate180', 'Rotate270'
+    :param rotation: The rotation, if any, to be applied to the input video,
+     before it is encoded. Default is Auto. Possible values include: 'Auto',
+     'None', 'Rotate0', 'Rotate90', 'Rotate180', 'Rotate270'
     :type rotation: str or ~encoding.models.Rotation
-    :param adjust_loudness: Gets or sets the loudness correction mode.
-     Possible values include: 'None', 'Auto', 'Manual'
-    :type adjust_loudness: str or ~encoding.models.LoudnessAdjustment
-    :param loudness_in_db: Gets or sets the Loudness specified in decibels
-     (Applicable for the case of AdjustLoudness.Manual
-    :type loudness_in_db: float
-    :param flip: Gets or sets whether the video needs to be flipped. Possible
-     values include: 'None', 'Horizontal', 'Vertical'
-    :type flip: str or ~encoding.models.Flip
-    :param crop: Gets or sets the co-ordinates of the video to be cropped.
+    :param crop: The parameters for the rectangular window with which to crop
+     the input video.
     :type crop: ~encoding.models.Rectangle
-    :param video_overlay: Gets or sets the details of the video overlay to
-     apply if any.
-    :type video_overlay: ~encoding.models.VideoOverlay
-    :param audio_overlay: Gets or sets the details of the audio overlay to
-     apply if any.
-    :type audio_overlay: ~encoding.models.AudioOverlay
+    :param overlays: The properties of overlays to be applied to the input
+     video. These could be audio, image or video overlays.
+    :type overlays: list[~encoding.models.Overlay]
     """
 
     _attribute_map = {
-        'pad': {'key': 'pad', 'type': 'bool'},
         'deinterlace': {'key': 'deinterlace', 'type': 'Deinterlace'},
         'rotation': {'key': 'rotation', 'type': 'Rotation'},
-        'adjust_loudness': {'key': 'adjustLoudness', 'type': 'LoudnessAdjustment'},
-        'loudness_in_db': {'key': 'loudnessInDB', 'type': 'float'},
-        'flip': {'key': 'flip', 'type': 'Flip'},
         'crop': {'key': 'crop', 'type': 'Rectangle'},
-        'video_overlay': {'key': 'videoOverlay', 'type': 'VideoOverlay'},
-        'audio_overlay': {'key': 'audioOverlay', 'type': 'AudioOverlay'},
+        'overlays': {'key': 'overlays', 'type': '[Overlay]'},
     }
 
-    def __init__(self, pad=None, deinterlace=None, rotation=None, adjust_loudness=None, loudness_in_db=None, flip=None, crop=None, video_overlay=None, audio_overlay=None):
+    def __init__(self, deinterlace=None, rotation=None, crop=None, overlays=None):
         super(Filters, self).__init__()
-        self.pad = pad
         self.deinterlace = deinterlace
         self.rotation = rotation
-        self.adjust_loudness = adjust_loudness
-        self.loudness_in_db = loudness_in_db
-        self.flip = flip
         self.crop = crop
-        self.video_overlay = video_overlay
-        self.audio_overlay = audio_overlay
+        self.overlays = overlays

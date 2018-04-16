@@ -35,8 +35,12 @@ class StreamingLocator(ProxyResource):
     :type end_time: datetime
     :param streaming_locator_id: StreamingLocatorId of Streaming Locator
     :type streaming_locator_id: str
-    :param streaming_policy_name: Streaming Policy name used by this Streaming
-     Locator
+    :param streaming_policy_name: Streaming policy name used by this streaming
+     locator. Either specify the name of streaming policy you created or use
+     one of the predefined streaming polices. The predefined streaming policies
+     available are: 'Predefined_DownloadOnly', 'Predefined_ClearStreamingOnly',
+     'Predefined_DownloadAndClearStreaming', 'Predefined_ClearKey',
+     'Predefined_SecureStreaming' and 'Predefined_SecureStreamingWithFairPlay'
     :type streaming_policy_name: str
     :param default_content_key_policy_name: Default ContentKeyPolicy used by
      this Streaming Locator

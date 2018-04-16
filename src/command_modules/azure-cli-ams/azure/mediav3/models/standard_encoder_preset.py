@@ -14,17 +14,18 @@ from .preset import Preset
 
 
 class StandardEncoderPreset(Preset):
-    """Preset for Media Encoder Standard.
+    """Describes all the settings to be used when encoding the input video with
+    the Standard Encoder.
 
     :param odatatype: Constant filled by server.
     :type odatatype: str
-    :param streams: Gets the Stream definitions for this source.
-    :type streams: list[~encoding.models.StreamSelection]
-    :param filters: Gets or sets the filters for the preset.
+    :param filters: One or more filtering operations that are applied to the
+     input media before encoding.
     :type filters: ~encoding.models.Filters
-    :param codecs: Gets the list of codecs to use.
+    :param codecs: The list of codecs to be used when encoding the input
+     video.
     :type codecs: list[~encoding.models.Codec]
-    :param formats: Gets the list of outputs.
+    :param formats: The list of outputs to be produced by the encoder.
     :type formats: list[~encoding.models.Format]
     """
 
@@ -34,15 +35,13 @@ class StandardEncoderPreset(Preset):
 
     _attribute_map = {
         'odatatype': {'key': '@odata\\.type', 'type': 'str'},
-        'streams': {'key': 'streams', 'type': '[StreamSelection]'},
         'filters': {'key': 'filters', 'type': 'Filters'},
         'codecs': {'key': 'codecs', 'type': '[Codec]'},
         'formats': {'key': 'formats', 'type': '[Format]'},
     }
 
-    def __init__(self, streams=None, filters=None, codecs=None, formats=None):
+    def __init__(self, filters=None, codecs=None, formats=None):
         super(StandardEncoderPreset, self).__init__()
-        self.streams = streams
         self.filters = filters
         self.codecs = codecs
         self.formats = formats

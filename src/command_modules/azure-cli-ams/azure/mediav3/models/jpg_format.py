@@ -10,18 +10,11 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
-from .format import Format
+from .image_format import ImageFormat
 
 
-class MultiBitrateFormat(Format):
-    """Describes the properties for producing a collection of GOP aligned
-    multi-bitrate files. The default behavior is to produce one output file for
-    each video layer which is muxed together with all the audios. The exact
-    output files produced can be controlled by specifying the outputFiles
-    collection.
-
-    You probably want to use the sub-classes and not this class directly. Known
-    sub-classes are: Mp4Format, TransportStreamFormat
+class JpgFormat(ImageFormat):
+    """Describes the settings for producing JPEG thumbnails.
 
     :param filename_pattern: The pattern of the file names for the generated
      output files. The following macros are supported in the file name:
@@ -34,26 +27,12 @@ class MultiBitrateFormat(Format):
     :type filename_pattern: str
     :param odatatype: Constant filled by server.
     :type odatatype: str
-    :param output_files: The list of output files to produce.  Each entry in
-     the list is a set of audio and video layer labels to be muxed together .
-    :type output_files: list[~encoding.models.OutputFile]
     """
 
     _validation = {
         'odatatype': {'required': True},
     }
 
-    _attribute_map = {
-        'filename_pattern': {'key': 'filenamePattern', 'type': 'str'},
-        'odatatype': {'key': '@odata\\.type', 'type': 'str'},
-        'output_files': {'key': 'outputFiles', 'type': '[OutputFile]'},
-    }
-
-    _subtype_map = {
-        'odatatype': {'#Microsoft.Media.Mp4Format': 'Mp4Format', '#Microsoft.Media.TransportStreamFormat': 'TransportStreamFormat'}
-    }
-
-    def __init__(self, filename_pattern=None, output_files=None):
-        super(MultiBitrateFormat, self).__init__(filename_pattern=filename_pattern)
-        self.output_files = output_files
-        self.odatatype = '#Microsoft.Media.MultiBitrateFormat'
+    def __init__(self, filename_pattern=None):
+        super(JpgFormat, self).__init__(filename_pattern=filename_pattern)
+        self.odatatype = '#Microsoft.Media.JpgFormat'

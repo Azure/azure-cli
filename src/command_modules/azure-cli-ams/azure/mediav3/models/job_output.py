@@ -14,7 +14,7 @@ from msrest.serialization import Model
 
 
 class JobOutput(Model):
-    """Base class for the output of a Job.
+    """Describes all the properties of a JobOutput.
 
     You probably want to use the sub-classes and not this class directly. Known
     sub-classes are: JobOutputAsset
@@ -22,14 +22,17 @@ class JobOutput(Model):
     Variables are only populated by the server, and will be ignored when
     sending a request.
 
-    :ivar error: If the JobOutput is in the error state, it contains the
+    :ivar error: If the JobOutput is in the Error state, it contains the
      details of the error.
     :vartype error: ~encoding.models.JobError
-    :ivar state: State of the JobOutput. Possible values include: 'Canceled',
-     'Canceling', 'Error', 'Finished', 'Processing', 'Queued', 'Scheduled'
+    :ivar state: Describes the state of the JobOutput. Possible values
+     include: 'Canceled', 'Canceling', 'Error', 'Finished', 'Processing',
+     'Queued', 'Scheduled'
     :vartype state: str or ~encoding.models.JobState
-    :ivar progress: If the JobOutput is in the processing state, it contains
-     the percentage of the job completed from 0 to 100 percent.
+    :ivar progress: If the JobOutput is in a Processing state, this contains
+     the job completion percentage.  The value is an estimate and not intended
+     to be used to predict job completion times. To determine if the JobOutput
+     is complete, use the State property.
     :vartype progress: int
     :param odatatype: Constant filled by server.
     :type odatatype: str

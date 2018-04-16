@@ -395,8 +395,9 @@ class AssetsOperations(object):
             self, resource_group_name, account_name, asset_name, permissions=None, expiry_time=None, custom_headers=None, raw=False, **operation_config):
         """List the Asset URLs.
 
-        Lists the Asset SAS URLs used for uploading and downloading Asset
-        content.
+        Lists storage container URLs with shared access signatures (SAS) for
+        uploading and downloading Asset content. The signatures are derived
+        from the storage account keys.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -408,7 +409,8 @@ class AssetsOperations(object):
         :param permissions: The permissions to set on the SAS URL. Possible
          values include: 'Read', 'ReadWrite', 'ReadWriteDelete'
         :type permissions: str or ~encoding.models.AssetContainerPermission
-        :param expiry_time: The SAS URL expiry time.
+        :param expiry_time: The SAS URL expiration time.  This must be less
+         than 24 hours from the current time.
         :type expiry_time: datetime
         :param dict custom_headers: headers that will be added to the request
         :param bool raw: returns the direct response alongside the

@@ -14,34 +14,33 @@ from .video import Video
 
 
 class H264Video(Video):
-    """An object to represent H264 video encoding.
+    """Describes all the properties for encoding a video with the H.264 codec.
 
-    :param label: Gets or sets the codec label.
+    :param label: An optional label for the codec. The label can be used to
+     control muxing behavior.
     :type label: str
     :param odatatype: Constant filled by server.
     :type odatatype: str
-    :param preserve_resolution_after_rotation: Gets or sets a value indicating
-     whether to disable resolution change rotation.
-    :type preserve_resolution_after_rotation: bool
-    :param key_frame_interval: Gets or sets the distance between two key
-     frames.
+    :param key_frame_interval: The distance between two key frames, thereby
+     defining a group of pictures (GOP). The value should be a non-zero integer
+     in the range [1, 30] seconds, specified in ISO 8601 format. The default is
+     2 seconds (PT2S).
     :type key_frame_interval: timedelta
-    :param stretch_mode: Gets or sets the Resolution Mode. Possible values
-     include: 'None', 'AutoSize', 'AutoFit'
+    :param stretch_mode: The resizing mode - how the input video will be
+     resized to fit the desired output resolution(s). Default is AutoSize.
+     Possible values include: 'None', 'AutoSize', 'AutoFit'
     :type stretch_mode: str or ~encoding.models.StretchMode
-    :param sync_mode: Gets or sets the Video Sync Mode. Possible values
-     include: 'Auto', 'Passthrough', 'Cfr', 'Vfr', 'Drop'
-    :type sync_mode: str or ~encoding.models.VideoSyncMode
-    :param scene_change_detection: Gets or sets a value indicating whether to
-     use scene change detection during encoding
+    :param scene_change_detection: Whether or not the encoder should insert
+     key frames at scene changes. If not specified, the default is false. This
+     flag should be set to true only when the encoder is being configured to
+     produce a single output video.
     :type scene_change_detection: bool
-    :param rate_control_mode: Gets or sets the video rate control mode.
-     Possible values include: 'ABR', 'CBR'
-    :type rate_control_mode: str or ~encoding.models.H264RateControlMode
-    :param complexity: Gets or sets the encoder complexity mode used for all
-     layers. Possible values include: 'Speed', 'Balanced', 'Quality'
+    :param complexity: Tells the encoder how to choose its encoding settings.
+     The default value is Balanced. Possible values include: 'Speed',
+     'Balanced', 'Quality'
     :type complexity: str or ~encoding.models.H264Complexity
-    :param layers: Gets the layers for the video.
+    :param layers: The collection of output H.264 layers to be produced by the
+     encoder.
     :type layers: list[~encoding.models.H264Layer]
     """
 
@@ -52,20 +51,16 @@ class H264Video(Video):
     _attribute_map = {
         'label': {'key': 'label', 'type': 'str'},
         'odatatype': {'key': '@odata\\.type', 'type': 'str'},
-        'preserve_resolution_after_rotation': {'key': 'preserveResolutionAfterRotation', 'type': 'bool'},
         'key_frame_interval': {'key': 'keyFrameInterval', 'type': 'duration'},
         'stretch_mode': {'key': 'stretchMode', 'type': 'StretchMode'},
-        'sync_mode': {'key': 'syncMode', 'type': 'VideoSyncMode'},
         'scene_change_detection': {'key': 'sceneChangeDetection', 'type': 'bool'},
-        'rate_control_mode': {'key': 'rateControlMode', 'type': 'H264RateControlMode'},
         'complexity': {'key': 'complexity', 'type': 'H264Complexity'},
         'layers': {'key': 'layers', 'type': '[H264Layer]'},
     }
 
-    def __init__(self, label=None, preserve_resolution_after_rotation=None, key_frame_interval=None, stretch_mode=None, sync_mode=None, scene_change_detection=None, rate_control_mode=None, complexity=None, layers=None):
-        super(H264Video, self).__init__(label=label, preserve_resolution_after_rotation=preserve_resolution_after_rotation, key_frame_interval=key_frame_interval, stretch_mode=stretch_mode, sync_mode=sync_mode)
+    def __init__(self, label=None, key_frame_interval=None, stretch_mode=None, scene_change_detection=None, complexity=None, layers=None):
+        super(H264Video, self).__init__(label=label, key_frame_interval=key_frame_interval, stretch_mode=stretch_mode)
         self.scene_change_detection = scene_change_detection
-        self.rate_control_mode = rate_control_mode
         self.complexity = complexity
         self.layers = layers
         self.odatatype = '#Microsoft.Media.H264Video'

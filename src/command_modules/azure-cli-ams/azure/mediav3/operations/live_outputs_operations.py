@@ -41,7 +41,9 @@ class LiveOutputsOperations(object):
 
     def list(
             self, resource_group_name, account_name, live_event_name, custom_headers=None, raw=False, **operation_config):
-        """Lists the Live Outputs in the Live Event.
+        """List Live Outputs.
+
+        Lists the Live Outputs in the Live Event.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -113,7 +115,9 @@ class LiveOutputsOperations(object):
 
     def get(
             self, resource_group_name, account_name, live_event_name, live_output_name, custom_headers=None, raw=False, **operation_config):
-        """Gets a Live Output.
+        """Get Live Output.
+
+        Gets a Live Output.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -178,6 +182,7 @@ class LiveOutputsOperations(object):
         return deserialized
     get.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}/liveOutputs/{liveOutputName}'}
 
+
     def _create_initial(
             self, resource_group_name, account_name, live_event_name, live_output_name, parameters, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -231,7 +236,9 @@ class LiveOutputsOperations(object):
 
     def create(
             self, resource_group_name, account_name, live_event_name, live_output_name, parameters, custom_headers=None, raw=False, **operation_config):
-        """Creates a Live Output.
+        """Create Live Output.
+
+        Creates a Live Output.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.
@@ -302,6 +309,7 @@ class LiveOutputsOperations(object):
             get_long_running_status, long_running_operation_timeout)
     create.metadata = {'url': '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Media/mediaservices/{accountName}/liveEvents/{liveEventName}/liveOutputs/{liveOutputName}'}
 
+
     def _delete_initial(
             self, resource_group_name, account_name, live_event_name, live_output_name, custom_headers=None, raw=False, **operation_config):
         # Construct URL
@@ -342,7 +350,9 @@ class LiveOutputsOperations(object):
 
     def delete(
             self, resource_group_name, account_name, live_event_name, live_output_name, custom_headers=None, raw=False, **operation_config):
-        """Deletes a Live Output.
+        """Delete Live Output.
+
+        Deletes a Live Output.
 
         :param resource_group_name: The name of the resource group within the
          Azure subscription.

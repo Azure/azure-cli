@@ -19,7 +19,7 @@ class JobError(Model):
     Variables are only populated by the server, and will be ignored when
     sending a request.
 
-    :ivar code: Code describing the error. Possible values include:
+    :ivar code: Error code describing the error. Possible values include:
      'ServiceError', 'ServiceTransientError', 'DownloadNotAccessible',
      'DownloadTransientError', 'UploadNotAccessible', 'UploadTransientError',
      'ConfigurationUnsupported', 'ContentMalformed', 'ContentUnsupported'
@@ -27,13 +27,12 @@ class JobError(Model):
     :ivar message: A human-readable language-dependent representation of the
      error.
     :vartype message: str
-    :ivar category: Category to help caller categorize the error. Possible
-     values include: 'Service', 'Download', 'Upload', 'Configuration',
-     'Content'
+    :ivar category: Helps with categorization of errors. Possible values
+     include: 'Service', 'Download', 'Upload', 'Configuration', 'Content'
     :vartype category: str or ~encoding.models.JobErrorCategory
-    :ivar retry: Indication that the job may be retried. If retry is
-     unsuccessful, please contact support. Possible values include:
-     'DoNotRetry', 'MayRetry'
+    :ivar retry: Indicates that it may be possible to retry the Job. If retry
+     is unsuccessful, please contact Azure support via Azure Portal. Possible
+     values include: 'DoNotRetry', 'MayRetry'
     :vartype retry: str or ~encoding.models.JobRetry
     :ivar details: An array of details about specific errors that led to this
      reported error.

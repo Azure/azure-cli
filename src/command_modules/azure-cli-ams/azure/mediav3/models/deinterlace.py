@@ -14,13 +14,13 @@ from msrest.serialization import Model
 
 
 class Deinterlace(Model):
-    """A class to define de-interlacing settings.
+    """Describes the de-interlacing settings.
 
-    :param parity: Gets or sets the parity to use. Possible values include:
-     'Auto', 'TopFieldFirst', 'BottomFieldFirst'
+    :param parity: The field parity for de-interlacing, defaults to Auto.
+     Possible values include: 'Auto', 'TopFieldFirst', 'BottomFieldFirst'
     :type parity: str or ~encoding.models.DeinterlaceParity
-    :param mode: Gets or sets the deinterlace Mode. Possible values include:
-     'Off', 'AutoPixelAdaptive'
+    :param mode: The deinterlacing mode. Defaults to AutoPixelAdaptive.
+     Possible values include: 'Off', 'AutoPixelAdaptive'
     :type mode: str or ~encoding.models.DeinterlaceMode
     """
 

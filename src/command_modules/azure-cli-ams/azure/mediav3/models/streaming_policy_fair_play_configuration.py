@@ -17,8 +17,8 @@ class StreamingPolicyFairPlayConfiguration(Model):
     """Class to specify configurations of FairPlay in Streaming Policy.
 
     :param custom_license_acquisition_url_template: The template for a
-     customer service to deliver keys to end users.  Not needed if using the
-     built in Key Delivery service.
+     customer service to deliver keys to end users.  Not needed when using
+     Azure Media Services for issuing keys.
     :type custom_license_acquisition_url_template: str
     :param allow_persistent_license: All license to be persistent or not
     :type allow_persistent_license: bool

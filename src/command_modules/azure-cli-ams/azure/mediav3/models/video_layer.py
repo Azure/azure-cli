@@ -14,37 +14,51 @@ from .layer import Layer
 
 
 class VideoLayer(Layer):
-    """A video layer.
+    """Describes the settings to be used when encoding the input video into a
+    desired output bitrate layer.
 
     You probably want to use the sub-classes and not this class directly. Known
     sub-classes are: H264Layer
 
-    :param width: Gets or sets width of video in pixels for this layer.
+    :param width: The width of the output video for this layer. The value can
+     be absolute (in pixels) or relative (in percentage). For example 50% means
+     the output video has half as many pixels in width as the input.
     :type width: str
-    :param height: Gets or sets height of video in pixels for this layer.
+    :param height: The height of the output video for this layer. The value
+     can be absolute (in pixels) or relative (in percentage). For example 50%
+     means the output video has half as many pixels in height as the input.
     :type height: str
-    :param condition: Gets or sets the predicate to be evaluated before
-     encoding this layer.
-    :type condition: str
-    :param label: Gets or sets the label for this layer.
+    :param label: The alphanumeric label for this layer, which can be used in
+     multiplexing different video and audio layers, or in naming the output
+     file.
     :type label: str
     :param odatatype: Constant filled by server.
     :type odatatype: str
-    :param bitrate: Gets or sets the layer bitrate.
+    :param bitrate: The average bitrate in bits per second at which to encode
+     the input video when generating this layer. This is a required field.
     :type bitrate: int
-    :param max_bitrate: Gets or sets the maximum rate the VBV buffer should be
-     assumed to refill at.
+    :param max_bitrate: The maximum bitrate (in bits per second), at which the
+     VBV buffer should be assumed to refill. If not specified, defaults to the
+     same value as bitrate.
     :type max_bitrate: int
-    :param b_frames: Gets or sets the number of B-frames to be used when
-     encoding this layer.
+    :param b_frames: The number of B-frames to be used when encoding this
+     layer.  If not specified, the encoder chooses an appropriate number based
+     on the video profile and level.
     :type b_frames: int
-    :param frame_rate: Gets or sets the frame rate for encoding this layer.
+    :param frame_rate: The frame rate (in frames per second) at which to
+     encode this layer. The value can be in the form of M/N where M and N are
+     integers (For example, 30000/1001), or in the form of a number (For
+     example, 30, or 29.97). The encoder enforces constraints on allowed frame
+     rates based on the profile and level. If it is not specified, the encoder
+     will use the same frame rate as the input video.
     :type frame_rate: str
-    :param slices: Gets or sets the number of slice to be used when encoding
-     this layer.
+    :param slices: The number of slices to be used when encoding this layer.
+     If not specified, default is zero, which means that encoder will use a
+     single slice for each frame.
     :type slices: int
-    :param adaptive_bframe: Gets or sets a value indicating whether adaptive
-     b-frames are used for this layer.
+    :param adaptive_bframe: Whether or not adaptive B-frames are to be used
+     when encoding this layer. If not specified, the encoder will turn it on
+     whenever the video profile permits its use.
     :type adaptive_bframe: bool
     """
 
@@ -55,7 +69,6 @@ class VideoLayer(Layer):
     _attribute_map = {
         'width': {'key': 'width', 'type': 'str'},
         'height': {'key': 'height', 'type': 'str'},
-        'condition': {'key': 'condition', 'type': 'str'},
         'label': {'key': 'label', 'type': 'str'},
         'odatatype': {'key': '@odata\\.type', 'type': 'str'},
         'bitrate': {'key': 'bitrate', 'type': 'int'},
@@ -70,8 +83,8 @@ class VideoLayer(Layer):
         'odatatype': {'#Microsoft.Media.H264Layer': 'H264Layer'}
     }
 
-    def __init__(self, width=None, height=None, condition=None, label=None, bitrate=None, max_bitrate=None, b_frames=None, frame_rate=None, slices=None, adaptive_bframe=None):
-        super(VideoLayer, self).__init__(width=width, height=height, condition=condition, label=label)
+    def __init__(self, width=None, height=None, label=None, bitrate=None, max_bitrate=None, b_frames=None, frame_rate=None, slices=None, adaptive_bframe=None):
+        super(VideoLayer, self).__init__(width=width, height=height, label=label)
         self.bitrate = bitrate
         self.max_bitrate = max_bitrate
         self.b_frames = b_frames

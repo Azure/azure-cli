@@ -14,19 +14,22 @@ from .job_input_clip import JobInputClip
 
 
 class JobInputHttp(JobInputClip):
-    """Represents http job input.
+    """Represents HTTPS job input.
 
-    :param label: Customer provided label of the JobInput.
+    :param label: A label that is assigned to a JobInput, that is used to
+     satisfy a reference used in the Transform. For example, a Transform can be
+     authored so as to take an image file with the label 'xyz' and apply it as
+     an overlay onto the input video before it is encoded. When submitting a
+     Job, exactly one of the JobInputs should be the image file, and it should
+     have the label 'xyz'.
     :type label: str
     :param odatatype: Constant filled by server.
     :type odatatype: str
-    :param files: List of files.  Required for JobInputAzureBlob. It
-     optionally can be used for JobInputAsset to tell the service to only use
-     the files specified from the Asset.
+    :param files: List of files. Required for JobInputHttp.
     :type files: list[str]
-    :param base_uri: Base uri for http job input. It will be concatenated with
-     provided file names.   If no base uri is given, then the provided file
-     list is assumed to be fully qualified uris.
+    :param base_uri: Base URI for HTTPS job input. It will be concatenated
+     with provided file names.   If no base uri is given, then the provided
+     file list is assumed to be fully qualified uris.
     :type base_uri: str
     """
 

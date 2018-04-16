@@ -14,27 +14,25 @@ from .codec import Codec
 
 
 class Video(Codec):
-    """Base class for all video codecs.
+    """Describes the basic properties for encoding the input video.
 
     You probably want to use the sub-classes and not this class directly. Known
     sub-classes are: Image, H264Video
 
-    :param label: Gets or sets the codec label.
+    :param label: An optional label for the codec. The label can be used to
+     control muxing behavior.
     :type label: str
     :param odatatype: Constant filled by server.
     :type odatatype: str
-    :param preserve_resolution_after_rotation: Gets or sets a value indicating
-     whether to disable resolution change rotation.
-    :type preserve_resolution_after_rotation: bool
-    :param key_frame_interval: Gets or sets the distance between two key
-     frames.
+    :param key_frame_interval: The distance between two key frames, thereby
+     defining a group of pictures (GOP). The value should be a non-zero integer
+     in the range [1, 30] seconds, specified in ISO 8601 format. The default is
+     2 seconds (PT2S).
     :type key_frame_interval: timedelta
-    :param stretch_mode: Gets or sets the Resolution Mode. Possible values
-     include: 'None', 'AutoSize', 'AutoFit'
+    :param stretch_mode: The resizing mode - how the input video will be
+     resized to fit the desired output resolution(s). Default is AutoSize.
+     Possible values include: 'None', 'AutoSize', 'AutoFit'
     :type stretch_mode: str or ~encoding.models.StretchMode
-    :param sync_mode: Gets or sets the Video Sync Mode. Possible values
-     include: 'Auto', 'Passthrough', 'Cfr', 'Vfr', 'Drop'
-    :type sync_mode: str or ~encoding.models.VideoSyncMode
     """
 
     _validation = {
@@ -44,20 +42,16 @@ class Video(Codec):
     _attribute_map = {
         'label': {'key': 'label', 'type': 'str'},
         'odatatype': {'key': '@odata\\.type', 'type': 'str'},
-        'preserve_resolution_after_rotation': {'key': 'preserveResolutionAfterRotation', 'type': 'bool'},
         'key_frame_interval': {'key': 'keyFrameInterval', 'type': 'duration'},
         'stretch_mode': {'key': 'stretchMode', 'type': 'StretchMode'},
-        'sync_mode': {'key': 'syncMode', 'type': 'VideoSyncMode'},
     }
 
     _subtype_map = {
         'odatatype': {'#Microsoft.Media.Image': 'Image', '#Microsoft.Media.H264Video': 'H264Video'}
     }
 
-    def __init__(self, label=None, preserve_resolution_after_rotation=None, key_frame_interval=None, stretch_mode=None, sync_mode=None):
+    def __init__(self, label=None, key_frame_interval=None, stretch_mode=None):
         super(Video, self).__init__(label=label)
-        self.preserve_resolution_after_rotation = preserve_resolution_after_rotation
         self.key_frame_interval = key_frame_interval
         self.stretch_mode = stretch_mode
-        self.sync_mode = sync_mode
         self.odatatype = '#Microsoft.Media.Video'

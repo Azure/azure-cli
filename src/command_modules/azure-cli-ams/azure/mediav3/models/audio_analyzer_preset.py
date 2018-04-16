@@ -14,15 +14,19 @@ from .preset import Preset
 
 
 class AudioAnalyzerPreset(Preset):
-    """An audio analyzer preset that analyzes and transcribes the audio.
+    """The Audio Analyzer preset applies a pre-defined set of AI-based analysis
+    operations, including speech transcription. Currently, the preset supports
+    processing of content with a single audio track.
 
     You probably want to use the sub-classes and not this class directly. Known
     sub-classes are: VideoAnalyzerPreset
 
     :param odatatype: Constant filled by server.
     :type odatatype: str
-    :param audio_language: Gets or sets the audio language for the video.
-     Typically in the format of "language code-country/region" (e.g: en-US)
+    :param audio_language: The language for the audio payload in the input
+     using the BCP-47 format of 'language tag-region' (e.g: 'en-US'). The list
+     of supported languages are, 'en-US', 'en-GB', 'es-ES', 'es-MX', 'fr-FR',
+     'it-IT', 'ja-JP', 'pt-BR', 'zh-CN'.
     :type audio_language: str
     """
 
