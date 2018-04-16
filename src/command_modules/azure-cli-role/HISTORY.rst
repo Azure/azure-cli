@@ -5,6 +5,7 @@ Release History
 
 2.0.23
 ++++++
+* Breaking Change: remove deprecated `az ad sp reset-credentials`
 * Minor fixes.
 
 2.0.22
