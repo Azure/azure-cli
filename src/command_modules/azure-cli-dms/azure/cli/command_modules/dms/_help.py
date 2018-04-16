@@ -57,7 +57,7 @@ helps['dms delete'] = """
 
 helps['dms list'] = """
     type: command
-    short-summary: List the DMS instances within your currently configured subscription (to set this use 'az account set'). If provided, only show the instances within a given resource group.
+    short-summary: List the DMS instances within your currently configured subscription (to set this use "az account set"). If provided, only show the instances within a given resource group.
     examples:
         - name: List all the instances in your subscription.
           text: >
@@ -74,7 +74,7 @@ helps['dms list-skus'] = """
 
 helps['dms show'] = """
     type: command
-    short-summary: Retrieve details for an instance of the Data Migration Service.
+    short-summary: Show the details for an instance of the Data Migration Service.
 """
 
 helps['dms start'] = """
@@ -118,9 +118,71 @@ helps['dms project create'] = """
           short-summary: >
             The type of service for the target database. The supported types are: SQLDB.
     examples:
-        - name: Create a Project for a DMS instance. Notice the second tag doesn't have a value.
+        - name: Create a Project for a DMS instance.
           text: >
-            az dms project create -g myresourcegroup --service-name mydms -l westus -n myproject --source-connection-json C:\CLI Files\sourceConnection.json --source-platform SQL --target-connection-json C:\CLI Files\targetConnection.json --target-platform SQLDB --database-list SourceDatabase1 SourceDatabase2 --tags Type=test CLI
+            az dms project create -l westus -n myproject -g myresourcegroup --service-name mydms --source-connection-json '{'dataSource': 'myserver', 'authentication': 'SqlAuthentication', 'encryptConnection': 'true', 'trustServerCertificate': 'true'}' --source-platform SQL --target-connection-json C:\CLI Files\targetConnection.json --target-platform SQLDB --tags tagName1=tagValue1 tagWithNoValue
+        - name: The format of the connection JSON object.
+          text: >
+            {
+                "dataSource": "server name[,port]",
+                "authentication": "SqlAuthentication|WindowsAuthentication",
+                "encryptConnection": true,      // highly recommended to leave as true
+                "trustServerCertificate": true  // highly recommended to leave as true
+            }
+"""
+
+helps['dms project delete'] = """
+    type: command
+    short-summary: Delete a Project.
+    parameters:
+        - name: --delete-running-tasks
+          type: bool
+          short-summary: >
+            Cancel any running tasks before deleting the Project.
+"""
+
+helps['dms project list'] = """
+    type: command
+    short-summary: List the Projects within an instance of DMS.
+"""
+
+helps['dms project show'] = """
+    type: command
+    short-summary: Show the details of a migration Project.
+"""
+
+helps['dms project update'] = """
+    type: command
+    short-summary: Update a migration Project.
+    parameters:
+        - name: --source-connection-json
+          type: string
+          short-summary: >
+            The connection information to the source server. This can be either a JSON-formatted string or the location to a file containing the JSON object. See example below for the format.
+        - name: --source-platform
+          type: string
+          short-summary: >
+            The type of server for the source database. The supported types are: SQL.
+        - name: --target-connection-json
+          type: string
+          short-summary: >
+            The connection information to the target server. This can be either a JSON-formatted string or the location to a file containing the JSON object. See example below for the format.
+        - name: --target-platform
+          type: string
+          short-summary: >
+            The type of service for the target database. The supported types are: SQLDB.
+    examples:
+        - name: Create a Project for a DMS instance.
+          text: >
+            az dms project create -l westus -n myproject -g myresourcegroup --service-name mydms --source-connection-json '{'dataSource': 'myserver', 'authentication': 'SqlAuthentication', 'encryptConnection': 'true', 'trustServerCertificate': 'true'}' --source-platform SQL --target-connection-json C:\CLI Files\targetConnection.json --target-platform SQLDB --tags tagName1=tagValue1 tagWithNoValue
+        - name: The format of the connection JSON object.
+          text: >
+            {
+                "dataSource": "server name[,port]",
+                "authentication": "SqlAuthentication|WindowsAuthentication",
+                "encryptConnection": true,      // highly recommended to leave as true
+                "trustServerCertificate": true  // highly recommended to leave as true
+            }
 """
 
 helps['dms project check-name'] = """
@@ -136,4 +198,95 @@ helps['dms project check-name'] = """
 helps['dms task'] = """
     type: group
     short-summary: Manage Tasks for a Data Migration Service instance's Project.
+"""
+
+helps['dms project task create'] = """
+    type: command
+    short-summary: Create and start a migration Task.
+    parameters:
+        - name: --database-options-json
+          type: string
+          short-summary: >
+            Database and table information. This can be either a JSON-formatted string or the location to a file containing the JSON object. See example below for the format.
+        - name: --source-connection-json
+          type: string
+          short-summary: >
+            The connection information to the source server. This can be either a JSON-formatted string or the location to a file containing the JSON object. See example below for the format.
+        - name: --target-connection-json
+          type: string
+          short-summary: >
+            The connection information to the target server. This can be either a JSON-formatted string or the location to a file containing the JSON object. See example below for the format.
+        - name: --enable-data-integrity-validation
+          type: bool
+          short-summary: >
+            Whether to perform a checksum based data integrity validation between source and target for the selected database and tables.
+        - name: --enable-query-analysis-validation
+          type: bool
+          short-summary: >
+            Whether to perform a quick and intelligent query analysis by retrieving queries from the source database and 
+            executing them in the target. The result will have execution statistics for executions in source and target databases 
+            for the extracted queries.
+        - name: --enable-schema-validation
+          type: bool
+          short-summary: >
+            Whether to compare the schema information between source and target.
+    examples:
+        - name: Create and start a Task which performs no validation checks.
+          text: >
+            az dms project task create --database-options-json C:\CLI Files\databaseOptions.json -n mytask --project-name myproject -g myresourcegroup --service-name mydms --source-connection-json '{'dataSource': 'myserver', 'authentication': 'SqlAuthentication', 'encryptConnection': 'true', 'trustServerCertificate': 'true'}' --target-connection-json C:\CLI Files\targetConnection.json
+        - name: Create and start a Task which performs all validation checks.
+          text: >
+            az dms project task create --database-options-json C:\CLI Files\databaseOptions.json -n mytask --project-name myproject -g myresourcegroup --service-name mydms --source-connection-json '{'dataSource': 'myserver', 'authentication': 'SqlAuthentication', 'encryptConnection': 'true', 'trustServerCertificate': 'true'}' --target-connection-json C:\CLI Files\targetConnection.json --enable-data-integrity-validation=True --enable-query-analysis-validation --enable-schema-validation
+        - name: The format of the database options JSON object.
+          text: >
+            [
+                {
+                    "name": "source database",
+                    "target_database_name": "target database",
+                    "make_source_db_read_only": false|true,
+                    "table_map": {
+                        "schema.SourceTableName1": "schema.TargetTableName1",
+                        "schema.SourceTableName2": "schema.TargetTableName2",
+                        ...n
+                    }
+                },
+                ...n
+            ]
+        - name: The format of the connection JSON object.
+          text: >
+            {
+                "userName": "user name",    // if this is missing or null, you will be prompted
+                "password": null,           // if this is missing or null (highly recommended) you will be prompted
+                "dataSource": "server name[,port]",
+                "authentication": "SqlAuthentication|WindowsAuthentication",
+                "encryptConnection": true,      // highly recommended to leave as true
+                "trustServerCertificate": true  // highly recommended to leave as true
+            }
+"""
+
+helps['dms project task delete'] = """
+    type: command
+    short-summary: Delete a Task.
+    parameters:
+        - name: --delete-running-tasks
+          type: bool
+          short-summary: >
+            If the Task is currently running, cancel the Task before deleting the Project.
+"""
+
+helps['dms project task list'] = """
+    type: command
+    short-summary: List the Tasks within a Project. Some tasks may have a status of Unknown, which indicates that an error occurred while querying the status of that task.
+    parameters:
+        - name: --task-type
+          type: string
+          short-summary: >
+            Filters the list by the type of task. For the list of possible types see "az dms check-status".
+    examples:
+        - name: List all Tasks within a Project.
+          text: >
+            az dms project task list --project-name myproject -g myresourcegroup --service-name mydms
+        - name: List only the SQL to SQL migration tasks within a Project.
+          text: >
+            az dms project task list --project-name myproject -g myresourcegroup --service-name mydms --task-type Migrate.SqlServer.SqlDb
 """

@@ -83,7 +83,6 @@ def create_or_update_project(cmd,
                              source_connection_json,
                              target_platform,
                              target_connection_json,
-                             database_list=None,
                              tags=None):
     if os.path.exists(source_connection_json):
         source_connection_json = get_file_json(source_connection_json)
@@ -93,6 +92,8 @@ def create_or_update_project(cmd,
         except:
             raise CLIError('Source Connection JSON: File was not found and input string could not be parsed as JSON')
     
+    source_connection_info = create_sql_connection_info(source_connection_json, False)
+    
     if os.path.exists(target_connection_json):
         target_connection_json = get_file_json(target_connection_json)
     else:
@@ -100,21 +101,14 @@ def create_or_update_project(cmd,
             target_connection_json = shell_safe_json_parse(target_connection_json)
         except:
             raise CLIError('Target Connection JSON: File was not found and input string could not be parsed as JSON')
-    
-    source_connection_info = create_sql_connection_info(source_connection_json, False)
-    target_connection_info = create_sql_connection_info(target_connection_json, False)
 
-    databases = []
-    if database_list is not None:
-        for d in database_list:
-            databases.append(DatabaseInfo(source_database_name=d))
+    target_connection_info = create_sql_connection_info(target_connection_json, False)
     
     parameters = Project(location=location,
                          source_platform=source_platform,
                          source_connection_info=source_connection_info,
                          target_platform=target_platform,
                          target_connection_info=target_connection_info,
-                         databases_info=databases,
                          tags=tags)
 
     return client.create_or_update(parameters=parameters,
@@ -146,18 +140,19 @@ def create_task(cmd,
     else:
         source_connection_json = shell_safe_json_parse(source_connection_json)
 
+    source_connection_info = create_sql_connection_info(source_connection_json, True)
+
     if os.path.exists(target_connection_json):
         target_connection_json = get_file_json(target_connection_json)
     else:
         target_connection_json = shell_safe_json_parse(target_connection_json)
 
+    target_connection_info = create_sql_connection_info(target_connection_json, True)
+
     if os.path.exists(database_options_json):
         database_options_json = get_file_json(database_options_json)
     else:
         database_options_json = shell_safe_json_parse(database_options_json)
-
-    source_connection_info = create_sql_connection_info(source_connection_json, True)
-    target_connection_info = create_sql_connection_info(target_connection_json, True)
 
     database_options = []
     for d in database_options_json:
