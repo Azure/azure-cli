@@ -3,9 +3,11 @@
 Release History
 ===============
 
-2.0.29
+2.1.0
 ++++++
-* Minor fixes.
+* BREAKING CHANGE: `express-route auth list`, `express-route peering list`, `nic ip-config list`
+                   `nsg rule list`, `route-filter rule list`, `route-table route list`,
+                   `traffic-manager endpoint list`: Removed the `--ids` parameter.
 
 2.0.28
 ++++++

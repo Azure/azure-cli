@@ -2,6 +2,10 @@
 
 Release History
 ===============
+0.1.32
+++++++
+* webapp: az webapp config set support for min_tls_version & https2.0
+
 0.1.31
 ++++++
 * (Breaking change): remove `assign-identity` which was tagged `deprecating` 2 releases ago
