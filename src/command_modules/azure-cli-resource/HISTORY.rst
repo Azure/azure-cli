@@ -2,6 +2,10 @@
 
 Release History
 ===============
+2.0.28
+++++++
+* Minor changes
+
 2.0.27
 ++++++
 * `policy definition create`: Add support for `--metadata`.

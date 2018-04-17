@@ -348,10 +348,8 @@ def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_grou
         raise CLIError('--client-secret must be specified when --service-principal is specified')
     # Validate if the RG exists
     groups = cf_resource_groups(cmd.cli_ctx)
-    if aci_resource_group is None:
-        aci_resource_group = resource_group_name
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
-    rgkaci = groups.get(aci_resource_group)
+    rgkaci = groups.get(aci_resource_group or resource_group_name)
     # Auto assign the location
     if location is None:
         location = rgkaci.location  # pylint:disable=no-member
@@ -367,13 +365,13 @@ def _k8s_install_or_upgrade_connector(helm_cmd, cmd, client, name, resource_grou
     # Check if we want the linux connector
     if os_type.lower() in ['linux', 'both']:
         _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
-                                               client_secret, subscription_id, tenant_id, rgkaci.name, location,
+                                               client_secret, subscription_id, tenant_id, aci_resource_group, location,
                                                node_prefix + '-linux', 'Linux')
 
     # Check if we want the windows connector
     if os_type.lower() in ['windows', 'both']:
         _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, connector_name, service_principal,
-                                               client_secret, subscription_id, tenant_id, rgkaci.name, location,
+                                               client_secret, subscription_id, tenant_id, aci_resource_group, location,
                                                node_prefix + '-win', 'Windows')
 
 
@@ -384,9 +382,8 @@ def _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, conne
     helm_release_name = connector_name.lower() + "-" + os_type.lower()
     logger.warning("Deploying the ACI connector for '%s' using Helm", os_type)
     try:
-        values = ('env.nodeName={},env.nodeTaint={},env.nodeOsType={},image.tag={},' +
-                  'env.aciResourceGroup={},env.aciRegion={}').format(
-                      node_name, node_taint, os_type, image_tag, aci_resource_group, aci_region)
+        values = 'env.nodeName={},env.nodeTaint={},env.nodeOsType={},image.tag={}'.format(
+            node_name, node_taint, os_type, image_tag)
 
         if service_principal:
             values += ",env.azureClientId=" + service_principal
@@ -396,6 +393,10 @@ def _helm_install_or_upgrade_aci_connector(helm_cmd, image_tag, url_chart, conne
             values += ",env.azureSubscriptionId=" + subscription_id
         if tenant_id:
             values += ",env.azureTenantId=" + tenant_id
+        if aci_resource_group:
+            values += ",env.aciResourceGroup=" + aci_resource_group
+        if aci_region:
+            values += ",env.aciRegion=" + aci_region
 
         if helm_cmd == "install":
             subprocess.call(["helm", "install", url_chart, "--name", helm_release_name, "--set", values])

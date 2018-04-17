@@ -8,6 +8,7 @@ from __future__ import print_function
 import datetime
 import json
 import logging as logs
+import os
 import sys
 import time
 from importlib import import_module
@@ -62,10 +63,9 @@ def _expand_file_prefixed_files(args):
         if path == '-':
             content = sys.stdin.read()
         else:
-            import os
             content = read_file_content(os.path.expanduser(path), allow_binary=True)
 
-        return content[0:-1] if content and content[-1] == '\n' else content
+        return content.rstrip(os.linesep)
 
     def _maybe_load_file(arg):
         ix = arg.find('@')
@@ -309,7 +309,6 @@ class AzCliCommandInvoker(CommandInvoker):
                 elif cmd.no_wait_param and getattr(expanded_arg, cmd.no_wait_param, False):
                     result = None
 
-                # TODO: Not sure how to make this actually work with the TRANSFORM event...
                 transform_op = cmd.command_kwargs.get('transform', None)
                 if transform_op:
                     result = transform_op(result)
@@ -322,7 +321,6 @@ class AzCliCommandInvoker(CommandInvoker):
                 result = todict(result)
                 event_data = {'result': result}
                 self.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
-                self.cli_ctx.raise_event(EVENT_INVOKER_FILTER_RESULT, event_data=event_data)
                 result = event_data['result']
                 results.append(result)
 
@@ -336,8 +334,11 @@ class AzCliCommandInvoker(CommandInvoker):
         if results and len(results) == 1:
             results = results[0]
 
+        event_data = {'result': results}
+        self.cli_ctx.raise_event(EVENT_INVOKER_FILTER_RESULT, event_data=event_data)
+
         return CommandResultItem(
-            results,
+            event_data['result'],
             table_transformer=self.commands_loader.command_table[parsed_args.command].table_transformer,
             is_query_active=self.data['query_active'])
 

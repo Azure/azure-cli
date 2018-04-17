@@ -72,11 +72,6 @@ helps['ad sp credential delete'] = """
     short-summary: delete a service principal's credential.
 """
 
-helps['ad sp reset-credentials'] = """
-    type: command
-    short-summary: (Deprecated, use "az ad sp credential reset")
-"""
-
 helps['ad sp credential reset'] = """
     type: command
     short-summary: Reset a service principal credential.
