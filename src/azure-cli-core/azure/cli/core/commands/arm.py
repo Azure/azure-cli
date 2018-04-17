@@ -186,6 +186,8 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                     try:
                         # support piping values from JSON. Does not require use of --query
                         json_vals = json.loads(val)
+                        if not isinstance(json_vals, list):
+                            json_vals = [json_vals]
                         for json_val in json_vals:
                             if 'id' in json_val:
                                 expanded_values += [json_val['id']]
