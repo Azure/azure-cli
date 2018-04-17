@@ -611,12 +611,12 @@ def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, stora
 def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         public_ip_per_vm, vm_domain_name, dns_servers, nsg, accelerated_networking,
-                        admin_username, authentication_type, storage_profile, os_disk_name,
+                        admin_username, authentication_type, storage_profile, os_disk_name, disk_info,
                         storage_sku, os_type, image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
-                        secrets=None, license_type=None, zones=None, priority=None, disk_info=None):
+                        secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -761,6 +761,11 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     if priority and cmd.supported_api_version(min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
         vmss_properties['virtualMachineProfile']['priority'] = priority
+
+    if eviction_policy and cmd.supported_api_version(min_api='2017-12-01',
+                                                     operation_group='virtual_machine_scale_sets'):
+        vmss_properties['virtualMachineProfile']['evictionPolicy'] = eviction_policy
+
 
     if platform_fault_domain_count is not None and cmd.supported_api_version(
             min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
