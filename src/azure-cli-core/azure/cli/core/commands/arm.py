@@ -178,8 +178,22 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                 (dest) fields will also be of type `IterateValue`
                 '''
                 from msrestazure.tools import parse_resource_id
+                import os
+                if isinstance(values, str):
+                    values = [values]
+                expanded_values = []
+                for val in values:
+                    try:
+                        # support piping values from JSON. Does not require use of --query
+                        json_vals = json.loads(val)
+                        for json_val in json_vals:
+                            if 'id' in json_val:
+                                expanded_values += [json_val['id']]
+                    except ValueError:
+                        # supports piping of --ids to the command when using TSV. Requires use of --query
+                        expanded_values = expanded_values + val.split(os.linesep)
                 try:
-                    for value in [values] if isinstance(values, str) else values:
+                    for value in expanded_values:
                         parts = parse_resource_id(value)
                         for arg in [arg for arg in arguments.values() if arg.type.settings.get('id_part')]:
                             self.set_argument_value(namespace, arg, parts)
@@ -188,6 +202,7 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
 
             @staticmethod
             def set_argument_value(namespace, arg, parts):
+
                 existing_values = getattr(namespace, arg.name, None)
                 if existing_values is None:
                     existing_values = IterateValue()
@@ -226,6 +241,7 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
             arg.required = False
 
         def required_values_validator(namespace):
+
             errors = [arg for arg in required_arguments
                       if getattr(namespace, arg.name, None) is None]
 
@@ -246,7 +262,6 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                                   "no other 'Resource Id' arguments should be specified.",
                              action=split_action(command.arguments),
                              nargs='+',
-                             type=ResourceId,
                              validator=required_values_validator,
                              arg_group=group_name)
 
