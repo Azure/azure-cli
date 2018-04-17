@@ -191,46 +191,23 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
         username=username,
         password=password)
 
-    use_password_stdin = False
-    try:
-        p = Popen(["docker", "login", "--help"], stdout=PIPE, stderr=PIPE)
-        stdout, _ = p.communicate()
-        if b'--password-stdin' in stdout:
-            use_password_stdin = True
-    except OSError:
-        raise CLIError(docker_not_installed)
-    except CalledProcessError:
-        raise CLIError(docker_not_available)
-
-    if use_password_stdin:
-        p = Popen(["docker", "login",
-                   "--username", username,
-                   "--password-stdin",
-                   login_server], stdin=PIPE, stderr=PIPE)
-        _, stderr = p.communicate(input=password.encode())
-    else:
-        p = Popen(["docker", "login",
-                   "--username", username,
-                   "--password", password,
-                   login_server], stderr=PIPE)
-        _, stderr = p.communicate()
+    p = Popen(["docker", "login",
+               "--username", username,
+               "--password", password,
+               login_server], stderr=PIPE)
+    _, stderr = p.communicate()
 
     if stderr:
         if b'error storing credentials' in stderr and b'stub received bad data' in stderr \
            and _check_wincred(login_server):
             # Retry once after disabling wincred
-            if use_password_stdin:
-                p = Popen(["docker", "login",
-                           "--username", username,
-                           "--password-stdin",
-                           login_server], stdin=PIPE)
-                p.communicate(input=password.encode())
-            else:
-                p = Popen(["docker", "login",
-                           "--username", username,
-                           "--password", password,
-                           login_server])
-                p.wait()
+            p = Popen(["docker", "login",
+                       "--username", username,
+                       "--password", password,
+                       login_server])
+            p.wait()
+        elif b'--password-stdin' in stderr:
+            pass
         else:
             import sys
             output = getattr(sys.stderr, 'buffer', sys.stderr)

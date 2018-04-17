@@ -5,6 +5,7 @@ Release History
 
 2.0.24
 ++++++
+* Improve acr login in non-standard consoles.
 * Improve repository commands error messages.
 * Update table columns and ordering.
 
