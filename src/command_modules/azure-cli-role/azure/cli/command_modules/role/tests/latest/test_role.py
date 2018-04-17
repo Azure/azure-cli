@@ -77,7 +77,7 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
                                   checks=self.check('name', '{sp}')).get_output_in_json()
                 self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
                 os.remove(result['fileWithCertAndPrivateKey'])
-                result = self.cmd('ad sp reset-credentials -n {sp} --create-cert',
+                result = self.cmd('ad sp credential reset -n {sp} --create-cert',
                                   checks=self.check('name', '{sp}')).get_output_in_json()
                 self.assertTrue(result['fileWithCertAndPrivateKey'].endswith('.pem'))
                 os.remove(result['fileWithCertAndPrivateKey'])
@@ -107,7 +107,7 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
                 self.cmd('ad sp create-for-rbac --scopes {scope}/resourceGroups/{rg} --create-cert --keyvault {kv} --cert {cert} -n {sp}')
                 cer1 = self.cmd('keyvault certificate show --vault-name {kv} -n {cert}').get_output_in_json()['cer']
-                self.cmd('ad sp reset-credentials -n {sp} --create-cert --keyvault {kv} --cert {cert}')
+                self.cmd('ad sp credential reset -n {sp} --create-cert --keyvault {kv} --cert {cert}')
                 cer2 = self.cmd('keyvault certificate show --vault-name {kv} -n {cert}').get_output_in_json()['cer']
                 self.assertTrue(cer1 != cer2)
         finally:
@@ -135,7 +135,7 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
             self.cmd('keyvault certificate create --vault-name {kv} -n {cert} -p "{policy}" --validity 24')
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
                 self.cmd('ad sp create-for-rbac -n {sp} --keyvault {kv} --cert {cert} --scopes {scope}/resourceGroups/{rg}')
-            self.cmd('ad sp reset-credentials -n {sp} --keyvault {kv} --cert {cert}')
+            self.cmd('ad sp credential reset -n {sp} --keyvault {kv} --cert {cert}')
         finally:
             self.cmd('ad app delete --id {sp}')
 
@@ -145,7 +145,7 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
             self.cmd('keyvault certificate create --vault-name {kv} -n {cert} -p "{policy}" --validity 6')
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
                 self.cmd('ad sp create-for-rbac --scopes {scope}/resourceGroups/{rg} --keyvault {kv} --cert {cert} -n {sp}')
-            self.cmd('ad sp reset-credentials -n {sp} --keyvault {kv} --cert {cert}')
+            self.cmd('ad sp credential reset -n {sp} --keyvault {kv} --cert {cert}')
         finally:
             self.cmd('ad app delete --id {sp}')
 
