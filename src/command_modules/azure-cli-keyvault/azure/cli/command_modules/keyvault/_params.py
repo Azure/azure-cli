@@ -22,8 +22,7 @@ from ._validators import (
     validate_key_type, validate_policy_permissions,
     validate_principal, validate_resource_group_name,
     validate_x509_certificate_chain,
-    secret_text_encoding_values, secret_binary_encoding_values, validate_subnet
-    )
+    secret_text_encoding_values, secret_binary_encoding_values, validate_subnet)
 
 
 # CUSTOM CHOICE LISTS
