@@ -400,6 +400,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         namespace, required, forbidden,
         description='storage profile: {}:'.format(_get_storage_profile_description(namespace.storage_profile)))
 
+    image_data_disks = None
     if namespace.storage_profile == StorageProfile.ManagedCustomImage:
         # extract additional information from a managed custom image
         res = parse_resource_id(namespace.image)
@@ -407,7 +408,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
         image_info = compute_client.images.get(res['resource_group'], res['name'])
         # pylint: disable=no-member
         namespace.os_type = image_info.storage_profile.os_disk.os_type.value
-        namespace.image_data_disks = image_info.storage_profile.data_disks
+        image_data_disks = image_info.storage_profile.data_disks
 
     elif namespace.storage_profile == StorageProfile.ManagedSpecializedOSDisk:
         # accept disk name or ID
@@ -425,7 +426,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
     from ._vm_utils import normalize_disk_info
     # accelnet and attach_data_disks are not exposed yet for VMSS, so use 'getattr' to avoid crash
     write_accelerator_settings = getattr(namespace, 'write_accelerator', None)
-    namespace.disk_info = normalize_disk_info(image_data_disks=namespace.image_data_disks,
+    namespace.disk_info = normalize_disk_info(image_data_disks=image_data_disks,
                                               data_disk_sizes_gb=namespace.data_disk_sizes_gb,
                                               attach_data_disks=getattr(namespace, 'attach_data_disks', []),
                                               storage_sku=namespace.storage_sku,
