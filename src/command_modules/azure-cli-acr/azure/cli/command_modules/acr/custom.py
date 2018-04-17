@@ -172,12 +172,19 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
     from subprocess import PIPE, Popen, CalledProcessError
     docker_not_installed = "Please verify if docker is installed."
     docker_not_available = "Please verify if docker daemon is running properly."
+    docker_command = "docker"
 
     try:
-        p = Popen(["docker", "ps"], stdout=PIPE, stderr=PIPE)
+        p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
         _, stderr = p.communicate()
     except OSError:
-        raise CLIError(docker_not_installed)
+        # docker is not discoverable in WSL so retry docker.exe once
+        try:
+            docker_command = "docker.exe"
+            p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
+            _, stderr = p.communicate()
+        except OSError:
+            raise CLIError(docker_not_installed)
     except CalledProcessError:
         raise CLIError(docker_not_available)
 
@@ -191,7 +198,7 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
         username=username,
         password=password)
 
-    p = Popen(["docker", "login",
+    p = Popen([docker_command, "login",
                "--username", username,
                "--password", password,
                login_server], stderr=PIPE)
@@ -201,7 +208,7 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
         if b'error storing credentials' in stderr and b'stub received bad data' in stderr \
            and _check_wincred(login_server):
             # Retry once after disabling wincred
-            p = Popen(["docker", "login",
+            p = Popen([docker_command, "login",
                        "--username", username,
                        "--password", password,
                        login_server])
