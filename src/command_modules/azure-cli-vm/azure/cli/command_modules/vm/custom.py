@@ -496,15 +496,14 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               private_ip_address=None, public_ip_address=None, public_ip_address_allocation='dynamic',
               public_ip_address_dns_name=None, public_ip_sku=None, os_disk_name=None, os_type=None,
               storage_account=None, os_caching=None, data_caching=None, storage_container_name=None, storage_sku=None,
-              use_unmanaged_disk=False, attach_os_disk=None, os_disk_size_gb=None,
-              attach_data_disks=None, data_disk_sizes_gb=None, image_data_disks=None,
+              use_unmanaged_disk=False, attach_os_disk=None, os_disk_size_gb=None, attach_data_disks=None,
+              data_disk_sizes_gb=None, image_data_disks=None, write_accelerator=None, disk_info=None,
               vnet_name=None, vnet_address_prefix='10.0.0.0/16', subnet=None, subnet_address_prefix='10.0.0.0/24',
               storage_profile=None, os_publisher=None, os_offer=None, os_sku=None, os_version=None,
               storage_account_type=None, vnet_type=None, nsg_type=None, public_ip_address_type=None, nic_type=None,
               validate=False, custom_data=None, secrets=None, plan_name=None, plan_product=None, plan_publisher=None,
               plan_promotion_code=None, license_type=None, assign_identity=None, identity_scope=None,
-              identity_role='Contributor', identity_role_id=None, application_security_groups=None,
-              zone=None):
+              identity_role='Contributor', identity_role_id=None, application_security_groups=None, zone=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -614,11 +613,13 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
     vm_resource = build_vm_resource(
-        cmd, vm_name, location, tags, size, storage_profile, nics, admin_username, availability_set,
-        admin_password, ssh_key_value, ssh_dest_key_path, image, os_disk_name,
-        os_type, os_caching, data_caching, storage_sku, os_publisher, os_offer, os_sku, os_version,
-        os_vhd_uri, attach_os_disk, os_disk_size_gb, attach_data_disks, data_disk_sizes_gb, image_data_disks,
-        custom_data, secrets, license_type, zone)
+        cmd=cmd, name=vm_name, location=location, tags=tags, size=size, storage_profile=storage_profile, nics=nics,
+        admin_username=admin_username, availability_set_id=availability_set, admin_password=admin_password,
+        ssh_key_value=ssh_key_value, ssh_key_path=ssh_dest_key_path, image_reference=image,
+        os_disk_name=os_disk_name, custom_image_os_type=os_type, storage_sku=storage_sku,
+        os_publisher=os_publisher, os_offer=os_offer, os_sku=os_sku, os_version=os_version, os_vhd_uri=os_vhd_uri,
+        attach_os_disk=attach_os_disk, os_disk_size_gb=os_disk_size_gb, custom_data=custom_data, secrets=secrets,
+        license_type=license_type, zone=zone, disk_info=disk_info)
     vm_resource['dependsOn'] = vm_dependencies
 
     if plan_name:
@@ -882,8 +883,10 @@ def show_vm(cmd, resource_group_name, vm_name, show_details=False):
         else get_vm(cmd, resource_group_name, vm_name)
 
 
-def update_vm(cmd, resource_group_name, vm_name, os_disk=None, no_wait=False, **kwargs):
+def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None,
+              write_accelerator=None, no_wait=False, **kwargs):
     from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id
+    from ._vm_utils import update_write_accelerator_settings, update_disk_caching
     vm = kwargs['parameters']
     if os_disk is not None:
         if is_valid_resource_id(os_disk):
@@ -895,8 +898,16 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, no_wait=False, **
             disk_name = os_disk
         vm.storage_profile.os_disk.managed_disk.id = disk_id
         vm.storage_profile.os_disk.name = disk_name
+
+    if write_accelerator is not None:
+        update_write_accelerator_settings(vm.storage_profile, write_accelerator)
+
+    if disk_caching is not None:
+        update_disk_caching(vm.storage_profile, disk_caching)
+
     return sdk_no_wait(no_wait, _compute_client_factory(cmd.cli_ctx).virtual_machines.create_or_update,
                        resource_group_name, vm_name, **kwargs)
+
 # endregion
 
 
@@ -1130,8 +1141,8 @@ def show_default_diagnostics_configuration(is_windows_os=False):
 
 
 # region VirtualMachines Disks (Managed)
-def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk,
-                             new=False, sku=None, size_gb=None, lun=None, caching=None):
+def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk, new=False, sku=None,
+                             size_gb=None, lun=None, caching=None, enable_write_accelerator=False):
     '''attach a managed disk'''
     from msrestazure.tools import parse_resource_id
     vm = get_vm(cmd, resource_group_name, vm_name)
@@ -1153,6 +1164,9 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk,
     else:
         params = ManagedDiskParameters(id=disk, storage_account_type=sku)
         data_disk = DataDisk(lun=lun, create_option=DiskCreateOption.attach, managed_disk=params, caching=caching)
+
+    if enable_write_accelerator:
+        data_disk.write_accelerator_enabled = enable_write_accelerator
 
     vm.storage_profile.data_disks.append(data_disk)
     set_vm(cmd, vm)
@@ -1748,7 +1762,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
                 os_caching=None, data_caching=None,
                 storage_container_name='vhds', storage_sku=None,
                 os_type=None, os_disk_name=None,
-                use_unmanaged_disk=False, data_disk_sizes_gb=None, image_data_disks=None,
+                use_unmanaged_disk=False, data_disk_sizes_gb=None, image_data_disks=None, disk_info=None,
                 vnet_name=None, vnet_address_prefix='10.0.0.0/16',
                 subnet=None, subnet_address_prefix=None,
                 os_offer=None, os_publisher=None, os_sku=None, os_version=None,
@@ -1943,22 +1957,20 @@ def create_vmss(cmd, vmss_name, resource_group_name, image,
     if secrets:
         secrets = _merge_secrets([validate_file_or_dict(secret) for secret in secrets])
 
-    vmss_resource = build_vmss_resource(cmd, vmss_name, naming_prefix, location, tags,
-                                        not disable_overprovision, upgrade_policy_mode,
-                                        vm_sku, instance_count,
-                                        ip_config_name, nic_name, subnet_id, public_ip_per_vm,
-                                        vm_domain_name, dns_servers, nsg, accelerated_networking,
-                                        admin_username, authentication_type, storage_profile,
-                                        os_disk_name, os_caching, data_caching,
-                                        storage_sku, data_disk_sizes_gb, image_data_disks,
-                                        os_type, image, admin_password,
-                                        ssh_key_value, ssh_dest_key_path,
-                                        os_publisher, os_offer, os_sku, os_version,
-                                        backend_address_pool_id, inbound_nat_pool_id, health_probe=health_probe,
-                                        single_placement_group=single_placement_group,
-                                        platform_fault_domain_count=platform_fault_domain_count,
-                                        custom_data=custom_data, secrets=secrets,
-                                        license_type=license_type, zones=zones, priority=priority)
+    vmss_resource = build_vmss_resource(
+        cmd=cmd, name=vmss_name, naming_prefix=naming_prefix, location=location, tags=tags,
+        overprovision=not disable_overprovision, upgrade_policy_mode=upgrade_policy_mode, vm_sku=vm_sku,
+        instance_count=instance_count, ip_config_name=ip_config_name, nic_name=nic_name, subnet_id=subnet_id,
+        public_ip_per_vm=public_ip_per_vm, vm_domain_name=vm_domain_name, dns_servers=dns_servers, nsg=nsg,
+        accelerated_networking=accelerated_networking, admin_username=admin_username,
+        authentication_type=authentication_type, storage_profile=storage_profile, os_disk_name=os_disk_name,
+        storage_sku=storage_sku, os_type=os_type, image=image, admin_password=admin_password,
+        ssh_key_value=ssh_key_value, ssh_key_path=ssh_dest_key_path, os_publisher=os_publisher, os_offer=os_offer,
+        os_sku=os_sku, os_version=os_version, backend_address_pool_id=backend_address_pool_id,
+        inbound_nat_pool_id=inbound_nat_pool_id, health_probe=health_probe,
+        single_placement_group=single_placement_group, platform_fault_domain_count=platform_fault_domain_count,
+        custom_data=custom_data, secrets=secrets, license_type=license_type, zones=zones, priority=priority,
+        disk_info=disk_info)
     vmss_resource['dependsOn'] = vmss_dependencies
 
     if plan_name:
