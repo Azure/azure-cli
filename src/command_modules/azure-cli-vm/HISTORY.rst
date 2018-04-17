@@ -4,6 +4,8 @@ Release History
 ===============
 2.0.31
 ++++++
+* BREAKING CHANGE: remove erroneous argument of `ids` from `vm extension list`,
+                   `vm secret list`, `vm unmanaged-disk list` and  `vmss nic list` 
 * vm: support write accelerator
 * vmss: expose `az vmss perform-maintenance`
 * `vm diagnostics set`: detect VM's OS type reliably
