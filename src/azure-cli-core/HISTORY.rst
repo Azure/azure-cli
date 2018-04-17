@@ -5,7 +5,7 @@ Release History
 
 2.0.32
 ++++++
-* Minor fixes
+* Added limited support for positional arguments.
 
 2.0.31
 ++++++

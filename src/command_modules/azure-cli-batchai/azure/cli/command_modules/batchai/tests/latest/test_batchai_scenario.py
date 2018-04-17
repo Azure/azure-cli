@@ -154,7 +154,6 @@ class BatchAIEndToEndScenariosTest(ScenarioTest):
                 resource_group, _data_file('auto_scale_cluster_with_azure_files.json')),
                 checks=[
                     JMESPathCheck('name', 'cluster'),
-                    JMESPathCheck('allocationState', 'steady'),
                     JMESPathCheck('location', LOCATION_FOR_SCENARIO_TESTS),
                     JMESPathCheck('scaleSettings.autoScale.minimumNodeCount', 0),
                     JMESPathCheck('scaleSettings.autoScale.maximumNodeCount', 1),

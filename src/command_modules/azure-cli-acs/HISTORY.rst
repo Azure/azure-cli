@@ -3,9 +3,14 @@
 Release History
 ===============
 
+2.0.33
+++++++
+* Minor fixes
+
 2.0.32
 ++++++
 * remind the user that `az aks` is a preview service
+* fix the permission issue in `aks install-connector` when --aci-resource-group is not specified
 
 2.0.31
 ++++++

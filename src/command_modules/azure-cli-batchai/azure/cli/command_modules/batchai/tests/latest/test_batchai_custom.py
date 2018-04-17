@@ -402,6 +402,44 @@ class TestBatchAICustom(unittest.TestCase):
         with self.assertRaisesRegexp(CLIError, 'Cannot find "account1" storage account'):
             _patch_mount_volumes(TestCli(), mount_volumes)
 
+    @patch('azure.cli.command_modules.batchai.custom._get_storage_management_client')
+    def test_batchai_patch_mount_volumes_with_credentials_no_account_given(
+            self, get_storage_client):
+        get_storage_client.return_value = _get_mock_storage_accounts_and_keys(
+            {})
+        # noinspection PyTypeChecker
+        mount_volumes = MountVolumes(
+            azure_file_shares=[
+                AzureFileShareReference(
+                    relative_mount_path='azfiles',
+                    account_name=None,
+                    azure_file_url='https://<AZURE_BATCHAI_STORAGE_ACCOUNT>.file.core.windows.net/share',
+                    credentials=None
+                )
+            ]
+        )
+        with self.assertRaisesRegexp(CLIError, 'Please configure Azure Storage account name'):
+            _patch_mount_volumes(TestCli(), mount_volumes)
+
+    @patch('azure.cli.command_modules.batchai.custom._get_storage_management_client')
+    def test_batchai_patch_mount_volumes_when_no_patching_required(
+            self, get_storage_client):
+        get_storage_client.return_value = _get_mock_storage_accounts_and_keys(
+            {})
+        # noinspection PyTypeChecker
+        mount_volumes = MountVolumes(
+            azure_file_shares=[
+                AzureFileShareReference(
+                    relative_mount_path='azfiles',
+                    account_name='account1',
+                    azure_file_url='https://account1.file.core.windows.net/share',
+                    credentials=AzureStorageCredentialsInfo(account_key='key')
+                )
+            ]
+        )
+        actual = _patch_mount_volumes(TestCli(), mount_volumes)
+        self.assertEquals(mount_volumes, actual)
+
     def test_batchai_patch_mount_volumes_no_azure_file_url(self):
         # noinspection PyTypeChecker
         mount_volumes = MountVolumes(

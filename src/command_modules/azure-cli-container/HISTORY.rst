@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.1.23
+++++++
+* Do not require --registry-server for `az container create` when a registry server is included in the image name.
+
 0.1.22
 ++++++
 * Add Git Repo volume mount parameters '--gitrepo-url' '--gitrepo-dir' '--gitrepo-revision' and '--gitrepo-mount-path'
