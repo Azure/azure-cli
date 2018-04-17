@@ -10,7 +10,7 @@ def validate_failover_policies(ns):
     fp_dict = []
     for item in ns.failover_policies:
         comps = item.split('=', 1)
-        fp_dict.append(FailoverPolicy(comps[0], int(comps[1])))
+        fp_dict.append(FailoverPolicy(location_name=comps[0], failover_priority=int(comps[1])))
     ns.failover_policies = fp_dict
 
 
@@ -40,6 +40,7 @@ def validate_capabilities(ns):
         for item in ns.capabilities:
             capabilties_list.append(Capability(name=item))
         ns.capabilities = capabilties_list
+
 
 def validate_virtual_network_rules(ns):
     """ Extracts multiple space-separated virtual network rules """
