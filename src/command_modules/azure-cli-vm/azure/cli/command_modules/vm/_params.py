@@ -194,11 +194,17 @@ def load_arguments(self, _):
         c.argument('vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), id_part='child_name_1', help='Name of the extension')
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part='name')
 
+    with self.argument_context('vm extension list') as c:
+        c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
+
     with self.argument_context('vm secret') as c:
         c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='Space-separated list of key vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
         c.argument('keyvault', help='Name or ID of the key vault.', validator=validate_keyvault)
         c.argument('certificate', help='key vault certificate name or its full secret URL')
         c.argument('certificate_store', help='Windows certificate store names. Default: My')
+
+    with self.argument_context('vm secret list') as c:
+        c.argument('vm_name', arg_type=existing_vm_name, id_part=None)
 
     with self.argument_context('vm image') as c:
         c.argument('publisher_name', options_list=['--publisher', '-p'])
@@ -247,6 +253,9 @@ def load_arguments(self, _):
     for scope in ['vm unmanaged-disk attach', 'vm unmanaged-disk detach']:
         with self.argument_context(scope) as c:
             c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part=None)
+
+    with self.argument_context('vm unmanaged-disk list') as c:
+        c.argument('vm_name', arg_type=existing_vm_name, id_part=None)
 
     with self.argument_context('vm user') as c:
         c.argument('username', options_list=['--username', '-u'], help='The user name')
@@ -332,6 +341,9 @@ def load_arguments(self, _):
         c.argument('virtual_machine_scale_set_name', options_list=['--vmss-name'], help='Scale set name.', completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'), id_part='name')
         c.argument('virtualmachine_index', options_list=['--instance-id'], id_part='child_name_1')
         c.argument('network_interface_name', options_list=['--name', '-n'], metavar='NIC_NAME', help='The network interface (NIC).', completer=get_resource_name_completion_list('Microsoft.Network/networkInterfaces'), id_part='child_name_2')
+
+    with self.argument_context('vmss nic list') as c:
+        c.argument('virtual_machine_scale_set_name', arg_type=vmss_name_type, options_list=['--vmss-name'], id_part=None)
     # endregion
 
     # region VM & VMSS Shared
