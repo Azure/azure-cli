@@ -129,7 +129,7 @@ def load_command_table(self, _):
         g.keyvault_command('list-deleted', 'get_deleted_storage_accounts')
         g.keyvault_command('show', 'get_storage_account')
         g.keyvault_command('show-deleted', 'get_deleted_storage_account')
-        g.keyvault_command('delete', 'delete_storage_account')
+        g.keyvault_command('remove', 'delete_storage_account')
         g.keyvault_command('purge', 'purge_deleted_storage_account')
         g.keyvault_command('recover', 'recover_deleted_storage_account')
         g.keyvault_custom('backup',

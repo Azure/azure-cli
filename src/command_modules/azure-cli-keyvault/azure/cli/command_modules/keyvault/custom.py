@@ -433,7 +433,7 @@ def set_policy(cmd, client, resource_group_name, vault_name,
                                        properties=vault.properties))
 
 
-def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None):  # pylint: disable=unused-argument
+def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
     """ Add a network rule to the network ACLs for a Key Vault. """
     from azure.mgmt.keyvault.models import VirtualNetworkRule, IPRule, VaultCreateOrUpdateParameters
 
@@ -457,7 +457,7 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
                                        properties=vault.properties))
 
 
-def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None):  # pylint: disable=unused-argument
+def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None, vnet_name=None):  # pylint: disable=unused-argument
     """ Removes a network rule from the network ACLs for a Key Vault. """
     from azure.mgmt.keyvault.models import VaultCreateOrUpdateParameters
 
@@ -943,6 +943,6 @@ def backup_storage_account(client, vault_base_url, storage_account_name, file_pa
 def restore_storage_account(client, vault_base_url, file_path):
     with open(file_path, 'rb') as file_in:
         data = file_in.read()
-    return client.restore_storage_account(vault_base_url, data)
+        return client.restore_storage_account(vault_base_url, data)
 
 # endregion

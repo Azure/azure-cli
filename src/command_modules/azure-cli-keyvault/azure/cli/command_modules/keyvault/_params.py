@@ -22,7 +22,8 @@ from ._validators import (
     validate_key_type, validate_policy_permissions,
     validate_principal, validate_resource_group_name,
     validate_x509_certificate_chain,
-    secret_text_encoding_values, secret_binary_encoding_values)
+    secret_text_encoding_values, secret_binary_encoding_values,
+    )
 
 
 # CUSTOM CHOICE LISTS
@@ -55,7 +56,7 @@ def load_arguments(self, _):
         c.argument('enabled_for_disk_encryption', arg_type=get_three_state_flag(), help='Allow Disk Encryption to retrieve secrets from the vault and unwrap keys.')
         c.argument('enabled_for_template_deployment', arg_type=get_three_state_flag(), help='Allow Resource Manager to retrieve secrets from the vault.')
         c.argument('enable_soft_delete', arg_type=get_three_state_flag(), help='Enable vault deletion recovery for the vault, and all contained entities')
-        c.argument('enable_purge_protection', arg_type=get_three_state_flag(), help='Disable manual purging of deleted vault, and all contained entities')
+        c.argument('enable_purge_protection', arg_type=get_three_state_flag(), help='Prevents manual purging of deleted vault, and all contained entities')
 
     with self.argument_context('keyvault', arg_group='Network Rule') as c:
         c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions), nargs='+', help='Bypass traffic for space-separated uses.')
@@ -82,7 +83,8 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault network-rule') as c:
         c.argument('ip_address', help='IPv4 address or CIDR range.')
-        c.argument('subnet', help='Full resource id of a vnet subnet')
+        c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
+        c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
     # endregion
 
     # region Shared
