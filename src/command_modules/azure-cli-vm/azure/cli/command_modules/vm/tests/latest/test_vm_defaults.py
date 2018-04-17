@@ -326,7 +326,7 @@ class TestVMImageDefaults(unittest.TestCase):
         _validate_vm_create_storage_profile(cmd, ns, False)
 
         self.assertEqual(ns.os_type, 'someOS')
-        self.assertEqual(ns.image_data_disks, ['does not matter'])
+        self.assertTrue(0 in ns.disk_info)
 
 
 class TestBigVMSSDefaults(unittest.TestCase):
