@@ -15,7 +15,7 @@ from ._exception_handler import ams_exception_handler
 def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-statements
     def get_sdk(operation, client_factory):
         return CliCommandType(
-            operations_tmpl='azure.mediav3.operations#{}Operations.'.format(operation) + '{}',
+            operations_tmpl='azure.mgmt.media.operations#{}Operations.'.format(operation) + '{}',
             client_factory=client_factory,
             exception_handler=ams_exception_handler
         )

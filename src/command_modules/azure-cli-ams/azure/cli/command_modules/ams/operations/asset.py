@@ -7,7 +7,7 @@ from knack.util import CLIError
 
 
 def create_asset(client, account_name, resource_group_name, asset_name, alternate_id=None, description=None):
-    from azure.mediav3.models import Asset
+    from azure.mgmt.media.models import Asset
 
     asset = Asset(alternate_id=alternate_id, description=description)
 

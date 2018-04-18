@@ -9,7 +9,7 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 from azure.cli.core.commands.parameters import (get_location_type, get_enum_type, tags_type, get_three_state_flag)
 from azure.cli.command_modules.ams._completers import get_role_definition_name_completion_list
 
-from azure.mediav3.models import (EncoderNamedPreset, Priority, AssetContainerPermission)
+from azure.mgmt.media.models import (EncoderNamedPreset, Priority, AssetContainerPermission)
 
 from ._validators import validate_storage_account_id, datetime_format
 

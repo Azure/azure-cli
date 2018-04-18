@@ -33,6 +33,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
+    'azure-mgmt-media'
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:
@@ -55,10 +56,7 @@ setup(
         'azure.cli',
         'azure.cli.command_modules',
         'azure.cli.command_modules.ams',
-        'azure.cli.command_modules.ams.operations',
-        'azure.mediav3',
-        'azure.mediav3.models',
-        'azure.mediav3.operations'
+        'azure.cli.command_modules.ams.operations'
     ],
     install_requires=DEPENDENCIES,
     cmdclass=cmdclass

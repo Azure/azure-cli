@@ -9,7 +9,7 @@ from knack.util import CLIError
 def create_job(client, resource_group_name, account_name, transform_name, job_name,
                output_asset_names, input_asset_name=None,
                description=None, priority=None, files=None, base_uri=None):
-    from azure.mediav3.models import (Job, JobInputAsset, JobInputHttp, JobOutputAsset)
+    from azure.mgmt.media.models import (Job, JobInputAsset, JobInputHttp, JobOutputAsset)
 
     if input_asset_name:
         job_input = JobInputAsset(asset_name=input_asset_name, files=files)

@@ -368,8 +368,8 @@ class AmsTests(ScenarioTest):
 
         self.kwargs.update({
             'streamingLocatorName': streamingLocatorName,
-            'startTime': '2018-03-29T10:00',
-            'endTime': '2018-03-29T12:00'
+            'startTime': '2018-03-29T10:00:00',
+            'endTime': '2018-03-29T12:00:00'
         })
 
         self.cmd('az ams streaming locator create -n {streamingLocatorName} -a {amsname} -g {rg} --streaming-policy-name {streamingPolicyName} --asset-name {assetName} --start-time {startTime} --end-time {endTime}', checks=[

@@ -67,7 +67,7 @@ def update_transform(instance, description=None, preset_names=None):
 
 
 def get_transform_output(preset):
-    from azure.mediav3.models import (TransformOutput, BuiltInStandardEncoderPreset)
+    from azure.mgmt.media.models import (TransformOutput, BuiltInStandardEncoderPreset)
     transform_preset = BuiltInStandardEncoderPreset(preset_name=preset)
     transform_output = TransformOutput(preset=transform_preset)
     return transform_output
