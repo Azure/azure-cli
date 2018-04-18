@@ -59,8 +59,12 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
         :param profile: A dict operation group name to API version.
         :type profile: dict[str, str]
         """
-        self.default_api_version = default_api_version
         self.profile = profile if profile is not None else {}
+        self.profile[None] = default_api_version
+
+    @property
+    def default_api_version(self):
+        return self.profile[None]
 
 
 AZURE_API_PROFILES = {
