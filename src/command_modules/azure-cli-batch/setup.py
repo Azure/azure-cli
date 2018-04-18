@@ -36,7 +36,7 @@ DEPENDENCIES = [
     'azure-batch==4.1.1',
     'azure-batch-extensions>=1.1,<1.2',
     'azure-mgmt-batch==4.1.0',
-    'azure-mgmt-keyvault==0.40.0',
+    'azure-mgmt-keyvault==1.0.0b1',
     'azure-cli-core'
 ]
 

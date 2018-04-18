@@ -107,9 +107,9 @@ def get_attribute_validator(name, attribute_class, create=False):
         ns_dict = ns.__dict__
         enabled = not ns_dict.pop('disabled') if create else ns_dict.pop('enabled')
         attributes = attribute_class(
-            enabled,
-            ns_dict.pop('not_before', None),
-            ns_dict.pop('expires', None))
+            enabled=enabled,
+            not_before=ns_dict.pop('not_before', None),
+            expires=ns_dict.pop('expires', None))
         setattr(ns, '{}_attributes'.format(name), attributes)
 
     return validator
@@ -142,12 +142,13 @@ def validate_policy_permissions(ns):
     key_perms = ns.key_permissions
     secret_perms = ns.secret_permissions
     cert_perms = ns.certificate_permissions
+    storage_perms = ns.storage_permissions
 
-    if not any([key_perms, secret_perms, cert_perms]):
+    if not any([key_perms, secret_perms, cert_perms, storage_perms]):
         raise argparse.ArgumentError(
             None,
             'specify at least one: --key-permissions, --secret-permissions, '
-            '--certificate-permissions')
+            '--certificate-permissions --storage-permissions')
 
 
 def validate_principal(ns):
@@ -213,3 +214,26 @@ def get_vault_base_url_type(cli_ctx):
         return 'https://{}{}'.format(name, suffix)
 
     return vault_base_url_type
+
+
+def validate_subnet(cmd, namespace):
+    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    subnet = namespace.subnet
+    subnet_is_id = is_valid_resource_id(subnet)
+    vnet = namespace.vnet_name
+
+    if (subnet_is_id and not vnet) or (not subnet and not vnet):
+        return
+    elif subnet and not subnet_is_id and vnet:
+        namespace.subnet = resource_id(
+            subscription=get_subscription_id(cmd.cli_ctx),
+            resource_group=namespace.resource_group_name,
+            namespace='Microsoft.Network',
+            type='virtualNetworks',
+            name=vnet,
+            child_type_1='subnets',
+            child_name_1=subnet)
+    else:
+        raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')

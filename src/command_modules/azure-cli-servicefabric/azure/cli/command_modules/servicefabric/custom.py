@@ -1125,7 +1125,7 @@ def _create_certificate(cli_ctx,
             vault_name = _get_vault_name(resource_group_name, vault_name)
             logger.info("Creating key vault")
             vault = _create_keyvault(
-                cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True)
+                cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
             vault_uri = vault.properties.vault_uri
             certificate_name = _get_certificate_name(resource_group_name)
             logger.info("Import certificate")
@@ -1145,7 +1145,7 @@ def _create_certificate(cli_ctx,
 
             logger.info("Creating key vault")
             vault = _create_keyvault(
-                cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True)
+                cli_ctx, vault_resource_group_name, vault_name, location, enabled_for_deployment=True).result()
             logger.info("Wait for key vault ready")
             time.sleep(20)
             vault_uri = vault.properties.vault_uri
