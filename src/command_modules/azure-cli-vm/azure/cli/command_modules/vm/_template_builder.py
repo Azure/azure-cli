@@ -371,7 +371,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals
             profile['osDisk']['diskSizeGb'] = os_disk_size_gb
         if disk_info['os'].get('writeAcceleratorEnabled') is not None:
             profile['osDisk']['writeAcceleratorEnabled'] = disk_info['os']['writeAcceleratorEnabled']
-        profile['dataDisks'] = [v for k, v in disk_info.items() if k != 'os']
+        data_disks = [v for k, v in disk_info.items() if k != 'os']
+        if data_disks:
+            profile['dataDisks'] = data_disks
         return profile
 
     vm_properties = {
@@ -685,8 +687,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         storage_properties['imageReference'] = {
             'id': image
         }
-
-    storage_properties['dataDisks'] = [v for k, v in disk_info.items() if k != 'os']
+    data_disks = [v for k, v in disk_info.items() if k != 'os']
+    if data_disks:
+        storage_properties['dataDisks'] = data_disks
 
     # Build OS Profile
     os_profile = {
