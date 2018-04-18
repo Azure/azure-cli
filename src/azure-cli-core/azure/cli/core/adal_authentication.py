@@ -17,8 +17,8 @@ class AdalAuthentication(Authentication):  # pylint: disable=too-few-public-meth
     def __init__(self, token_retriever):
         self._token_retriever = token_retriever
 
-    def signed_session(self):
-        session = super(AdalAuthentication, self).signed_session()
+    def signed_session(self, session=None):
+        session = session or super(AdalAuthentication, self).signed_session()
 
         try:
             scheme, token, _ = self._token_retriever()
