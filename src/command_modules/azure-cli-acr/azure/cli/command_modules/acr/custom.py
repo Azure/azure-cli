@@ -169,27 +169,8 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
     if in_cloud_console():
         raise CLIError('This command requires running the docker daemon, which is not supported in Azure Cloud Shell.')
 
-    from subprocess import PIPE, Popen, CalledProcessError
-    docker_not_installed = "Please verify if docker is installed."
-    docker_not_available = "Please verify if docker daemon is running properly."
-    docker_command = "docker"
-
-    try:
-        p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
-        _, stderr = p.communicate()
-    except OSError:
-        # docker is not discoverable in WSL so retry docker.exe once
-        try:
-            docker_command = "docker.exe"
-            p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
-            _, stderr = p.communicate()
-        except OSError:
-            raise CLIError(docker_not_installed)
-    except CalledProcessError:
-        raise CLIError(docker_not_available)
-
-    if stderr:
-        raise CLIError(stderr.decode())
+    from subprocess import PIPE, Popen
+    docker_command = _get_docker_command()
 
     login_server, username, password = get_login_credentials(
         cli_ctx=cmd.cli_ctx,
@@ -227,6 +208,34 @@ def acr_show_usage(cmd, client, registry_name, resource_group_name=None):
                                                        resource_group_name,
                                                        "Usage is only supported for managed registries.")
     return client.list_usages(resource_group_name, registry_name)
+
+
+def _get_docker_command():
+    docker_not_installed = "Please verify if docker is installed."
+    docker_not_available = "Please verify if docker daemon is running properly."
+    docker_command = 'docker'
+
+    from subprocess import PIPE, Popen, CalledProcessError
+    try:
+        p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
+        _, stderr = p.communicate()
+    except OSError:
+        # docker is not discoverable in WSL so retry docker.exe once
+        try:
+            docker_command = 'docker.exe'
+            p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
+            _, stderr = p.communicate()
+        except OSError:
+            raise CLIError(docker_not_installed)
+        except CalledProcessError:
+            raise CLIError(docker_not_available)
+    except CalledProcessError:
+        raise CLIError(docker_not_available)
+
+    if stderr:
+        raise CLIError(stderr.decode())
+
+    return docker_command
 
 
 def _check_wincred(login_server):
