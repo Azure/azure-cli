@@ -33,14 +33,26 @@ vm_extension_info = {
 }
 
 
+def _find_existing_ade(vm, use_instance_view=False, ade_ext_info=None):
+    if not ade_ext_info:
+        ade_ext_info = vm_extension_info['Linux'] if _is_linux_os(vm) else vm_extension_info['Windows']
+    if use_instance_view:
+        exts = vm.instance_view.extensions or []
+        r = next((e for e in exts if e.type and e.type.lower().startswith(ade_ext_info['publisher'].lower()) and
+                  e.name.lower() == ade_ext_info['name'].lower()), None)
+    else:
+        exts = vm.resources or []
+        r = next((e for e in exts if (e.publisher.lower() == ade_ext_info['publisher'].lower() and
+                                      e.virtual_machine_extension_type.lower() == ade_ext_info['name'].lower())), None)
+    return r
+
+
 # return (has_new_ade, has_old_ade)
 def _detect_ade_status(vm):
     if vm.storage_profile.os_disk.encryption_settings:
         return False, True
     ade_ext_info = vm_extension_info['Linux'] if _is_linux_os(vm) else vm_extension_info['Windows']
-    exts = vm.resources or []
-    ade = next((e for e in exts if (e.publisher.lower() == ade_ext_info['publisher'].lower() and
-                                    e.virtual_machine_extension_type.lower() == ade_ext_info['name'].lower())), None)
+    ade = _find_existing_ade(vm, ade_ext_info=ade_ext_info)
     if ade is None:
         return False, False
     elif ade.type_handler_version.split('.')[0] == ade_ext_info['legacy_version'].split('.')[0]:
@@ -190,10 +202,9 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
             compute_client.virtual_machines.start(resource_group_name, vm_name).result()
 
     if is_linux and volume_type != _DATA_VOLUME_TYPE:
-        # TODO: expose a 'wait' command to do the monitor and handle the reboot
+        old_ade_msg = "If you see 'VMRestartPending', please restart the VM, and the encryption will finish shortly"
         logger.warning("The encryption request was accepted. Please use 'show' command to monitor "
-                       "the progress. If you see 'VMRestartPending', please restart the VM, and "
-                       "the encryption will finish shortly")
+                       "the progress. %s", "" if use_new_ade else old_ade_msg)
 
 
 def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False):
@@ -268,16 +279,21 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
         set_vm(cmd, vm)
 
 
-def _show_new_vm_encryption_status_thru_new_ade(instance_view):
+def _show_vm_encryption_status_thru_new_ade(vm_instance_view):
+    ade = _find_existing_ade(vm_instance_view, use_instance_view=True)
     disk_infos = []
-    for div in instance_view.disks or []:
+    for div in vm_instance_view.instance_view.disks or []:
         disk_infos.append({
             'name': div.name,
             'encryptionSettings': div.encryption_settings,
-            'statuses': [x for x in (div.statuses or []) if (x.code or '').startswith('EncryptionState')]
+            'statuses': [x for x in (div.statuses or []) if (x.code or '').startswith('EncryptionState')],
         })
 
-    return disk_infos
+    return {
+        'status': ade.statuses if ade else None,
+        'substatus': ade.substatuses if ade else None,
+        'disks': disk_infos
+    }
 
 
 def show_vm_encryption_status(cmd, resource_group_name, vm_name):
@@ -295,7 +311,7 @@ def show_vm_encryption_status(cmd, resource_group_name, vm_name):
         logger.warning('Azure Disk Encryption is not enabled')
         return None
     if has_new_ade:
-        return _show_new_vm_encryption_status_thru_new_ade(vm.instance_view)
+        return _show_vm_encryption_status_thru_new_ade(vm)
     is_linux = _is_linux_os(vm)
 
     # pylint: disable=no-member
@@ -366,51 +382,42 @@ def _check_encrypt_is_supported(image_reference, volume_type):
     # custom image?
     if not offer or not publisher or not sku:
         return (True, None)
-
+    publisher, sku, offer = publisher.lower(), sku.lower(), offer.lower()
     supported = [
         {
             'offer': 'RHEL',
             'publisher': 'RedHat',
-            'sku': '7.2'
-        },
-        {
-            'offer': 'RHEL',
-            'publisher': 'RedHat',
-            'sku': '7.3'
+            'sku': ['6.7', '6.8', '7.2', '7.3', '7.4']
         },
         {
             'offer': 'CentOS',
             'publisher': 'OpenLogic',
-            'sku': '7.2n'
+            'sku': ['6.8', '7.2n', '7.3']
         },
         {
             'offer': 'Ubuntu',
             'publisher': 'Canonical',
-            'sku': '14.04'
-        },
-        {
-            'offer': 'Ubuntu',
-            'publisher': 'Canonical',
-            'sku': '16.04'
+            'sku': ['14.04', '16.04']
         }]
 
     if volume_type.upper() == _DATA_VOLUME_TYPE:
         supported.append({
             'offer': 'CentOS',
             'publisher': 'OpenLogic',
-            'sku': '7.2'
-        },)
-
+            'sku': ['6.5', '6.6', '6.7', '6.8', '7.0', '7.1']
+        })
+        supported.append({
+            'offer': 'SLES',
+            'publisher': 'SUSE',
+            'sku': None
+        })
     for image in supported:
-        if (image['publisher'].lower() == publisher.lower() and
-                sku.lower().startswith(image['sku'].lower()) and
-                offer.lower().startswith(image['offer'].lower())):
+        if (image['publisher'].lower() == publisher and
+                (not image['sku'] or any(sku.startswith(x) for x in image['sku'])) and
+                offer.startswith(image['offer'].lower())):
             return (True, None)
 
-    sku_list = ['{} {}'.format(a['offer'], a['sku']) for a in supported]
-
-    message = "Encryption might fail as current VM uses a distro not in the known list, which are '{}'".format(sku_list)
-    return (False, message)
+    return (False, "The distro is not in CLI's known supported list. Use https://aka.ms/adelinux to cross check")
 
 
 def _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, force):
