@@ -759,9 +759,9 @@ class VMAvailSetScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 0))
 
 
-# once https://github.com/Azure/azure-cli/issues/4127 is fixed, switch back to a regular ScenarioTest
-class VMAvailSetLiveScenarioTest(LiveScenarioTest):
+class VMAvailSetLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_availset_live')
+    @AllowLargeResponse(size_kb=2048)
     def test_vm_availset_convert(self, resource_group):
 
         self.kwargs.update({
@@ -2421,9 +2421,8 @@ class VMSSDiskEncryptionTest(ScenarioTest):
         ])
 
 
-# convert to ScenarioTest and re-record when issue #6006 is fixed
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
-class VMSSRollingUpgrade(LiveScenarioTest):
+class VMSSRollingUpgrade(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_rolling_update')
     def test_vmss_rolling_upgrade(self, resource_group):
@@ -2486,7 +2485,7 @@ class VMSSPriorityTesting(ScenarioTest):
 
 
 # convert to ScenarioTest and re-record when issue #6006 is fixed
-class VMLBIntegrationTesting(LiveScenarioTest):
+class VMLBIntegrationTesting(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_lb_integration')
     def test_vm_lb_integration(self, resource_group):
