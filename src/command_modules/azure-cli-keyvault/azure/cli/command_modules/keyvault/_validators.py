@@ -237,3 +237,22 @@ def validate_subnet(cmd, namespace):
             child_name_1=subnet)
     else:
         raise CLIError('incorrect usage: [--subnet ID | --subnet NAME --vnet-name NAME]')
+
+
+def validate_vault_id(entity_type):
+
+    def _validate(ns):
+        from azure.keyvault.custom.key_vault_id import KeyVaultIdentifier
+        name = getattr(ns, entity_type + '_name', None)
+        vault = getattr(ns, 'vault_base_url', None)
+        identifier = getattr(ns, 'identifier', None)
+
+        if identifier:
+            ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
+            setattr(ns, entity_type + '_name', ident.name)
+            setattr(ns, 'vault_base_url', ident.vault)
+            setattr(ns, entity_type + '_version', ident.version)
+        elif not (name and vault):
+            raise CLIError('incorrect usage: --id ID | --vault-name VAULT --name NAME [--version VERSION]')
+
+    return _validate
