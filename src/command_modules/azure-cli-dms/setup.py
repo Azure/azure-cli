@@ -45,7 +45,7 @@ with open('HISTORY.rst', 'r', encoding='utf-8') as f:
 setup(
     name='azure-cli-dms',
     version=VERSION,
-    description='Microsoft Azure Command-Line Tools for the Data Migration Service Command Module',
+    description='Microsoft Azure Command-Line Tools for the Data Migration Service (DMS) Command Module',
     long_description=README + '\n\n' + HISTORY,
     license='MIT',
     author='Microsoft Corporation',
