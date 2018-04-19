@@ -259,7 +259,7 @@ def load_arguments(self, _):
         c.argument('google_client_id', arg_group='Google', help='Application ID to integrate Google Sign-in into your web app')
         c.argument('google_client_secret', arg_group='Google', help='Google Application client secret')
         c.argument('google_oauth_scopes', nargs='+', help="One or more Google authentication scopes (space-delimited).", arg_group='Google')
-        c.argument('microsoft_account_client_id', arg_group='Microsoft', help="AAD V2 Application ID to integrate Microsoft account Sign-in into your web app,")
+        c.argument('microsoft_account_client_id', arg_group='Microsoft', help="AAD V2 Application ID to integrate Microsoft account Sign-in into your web app")
         c.argument('microsoft_account_client_secret', arg_group='Microsoft', help='AAD V2 Application client secret')
         c.argument('microsoft_account_oauth_scopes', nargs='+', help="One or more Microsoft authentification scopes (space-delimited).", arg_group='Microsoft')
 
