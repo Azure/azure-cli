@@ -387,7 +387,7 @@ helps['appservice plan'] = """
 
 helps['appservice list-locations'] = """
     type: command
-    short-summary: list regions where a plan sku is available
+    short-summary: List regions where a plan sku is available.
 """
 
 helps['appservice plan update'] = """
