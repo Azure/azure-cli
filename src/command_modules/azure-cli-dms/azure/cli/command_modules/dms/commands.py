@@ -4,7 +4,11 @@
 # --------------------------------------------------------------------------------------------
 
 
-from azure.cli.command_modules.dms._client_factory import dms_client_factory, dms_cf_services, dms_cf_skus, dms_cf_projects, dms_cf_tasks
+from azure.cli.command_modules.dms._client_factory import (dms_client_factory,
+                                                           dms_cf_services,
+                                                           dms_cf_skus,
+                                                           dms_cf_projects,
+                                                           dms_cf_tasks)
 
 from azure.cli.core.commands import CliCommandType
 
@@ -36,7 +40,7 @@ def load_command_table(self, _):
         client_factory=dms_client_factory,
         exception_handler=dms_api_exception_handler
     )
-    
+
     dms_tasks_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.datamigration.operations.tasks_operations#TasksOperations.{}',
         client_factory=dms_client_factory,
