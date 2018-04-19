@@ -2477,11 +2477,20 @@ class VMSSPriorityTesting(ScenarioTest):
     def test_vmss_create_with_low_priority(self, resource_group, resource_group_location):
         self.kwargs.update({
             'priority': 'Low',
-            'vmss': 'vmss123'
+            'vmss': 'vmss1',
+            'vmss2': 'vmss2'
         })
         self.cmd('vmss create -g {rg} -n {vmss} --admin-username clitester --admin-password PasswordPassword1! --image debian --priority {priority}')
-        self.cmd('vmss show -g {rg} -n {vmss}',
-                 checks=self.check('virtualMachineProfile.priority', '{priority}'))
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.priority', '{priority}'),
+            self.check('virtualMachineProfile.evictionPolicy', 'Deallocate')
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username clitester --admin-password PasswordPassword1! --image centos --priority {priority} --eviction-policy delete')
+        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('virtualMachineProfile.priority', '{priority}'),
+            self.check('virtualMachineProfile.evictionPolicy', 'Delete')
+        ])
 
 
 # convert to ScenarioTest and re-record when issue #6006 is fixed

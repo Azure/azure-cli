@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.31
 ++++++
+* vmss: support eviction policy
 * BREAKING CHANGE: remove erroneous argument of `ids` from `vm extension list`,
                    `vm secret list`, `vm unmanaged-disk list` and  `vmss nic list` 
 * vm: support write accelerator

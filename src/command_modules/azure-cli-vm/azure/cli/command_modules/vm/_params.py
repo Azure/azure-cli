@@ -280,6 +280,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vmss create') as c:
         VMPriorityTypes = self.get_models('VirtualMachinePriorityTypes', resource_type=ResourceType.MGMT_COMPUTE)
+        VirtualMachineEvictionPolicyTypes = self.get_models('VirtualMachineEvictionPolicyTypes', resource_type=ResourceType.MGMT_COMPUTE)
         c.argument('name', name_arg_type)
         c.argument('nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
         c.argument('single_placement_group', arg_type=get_three_state_flag(), help="Enable replicate using fault domains within the same cluster. Default to 'false' for any zonals, or with 100+ instances"
@@ -294,6 +295,8 @@ def load_arguments(self, _):
         c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
         c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default=None),
                    help="(PREVIEW)Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
+        c.argument('eviction_policy', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VirtualMachineEvictionPolicyTypes, default=None),
+                   help="(PREVIEW) the eviction policy for virtual machines in a low priority scale set.")
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
         LoadBalancerSkuName = self.get_models('LoadBalancerSkuName', resource_type=ResourceType.MGMT_NETWORK)
