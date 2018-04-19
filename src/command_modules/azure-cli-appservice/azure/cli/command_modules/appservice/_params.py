@@ -143,7 +143,7 @@ def load_arguments(self, _):
             c.argument('role', help="Role name or id the managed identity will be assigned")
 
         with self.argument_context(scope + ' deployment source config-zip') as c:
-            c.argument('src', help='a zip file path for deploy')
+            c.argument('src', help='a zip file path for deployment')
 
         with self.argument_context(scope + ' config appsettings list') as c:
             c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
