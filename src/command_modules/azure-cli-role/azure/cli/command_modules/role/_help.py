@@ -72,11 +72,6 @@ helps['ad sp credential delete'] = """
     short-summary: delete a service principal's credential.
 """
 
-helps['ad sp reset-credentials'] = """
-    type: command
-    short-summary: (Deprecated, use "az ad sp credential reset")
-"""
-
 helps['ad sp credential reset'] = """
     type: command
     short-summary: Reset a service principal credential.
@@ -117,13 +112,13 @@ helps['ad sp show'] = """
     type: command
     short-summary: Get the details of a service principal.
 """
+helps['ad app'] = """
+    type: group
+    short-summary: Manage applications with AAD Graph.
+"""
 helps['ad app delete'] = """
     type: command
     short-summary: Delete an application.
-"""
-helps['ad app create'] = """
-    type: command
-    short-summary: Create an application.
 """
 helps['ad app list'] = """
     type: command
@@ -136,6 +131,20 @@ helps['ad app show'] = """
 helps['ad app update'] = """
     type: command
     short-summary: Update an application.
+    examples:
+        - name: update a native application with delegated permission of "access the AAD directory as the signed-in user"
+          text: |
+                az ad app update --id e042ec79-34cd-498f-9d9f-123456781234 --required-resource-accesses @manifest.json
+                ("manifest.json" contains the following content)
+                [{
+                    "resourceAppId": "00000002-0000-0000-c000-000000000000",
+                    "resourceAccess": [
+                        {
+                            "id": "a42657d6-7f20-40e3-b6f0-cee03008a62a",
+                            "type": "Scope"
+                        }
+                   ]
+                }]
 """
 helps['ad user list'] = """
     type: command
@@ -261,9 +270,9 @@ helps['ad app create'] = """
     type: command
     short-summary: Create a web application, web API or native application
     examples:
-        - name: Create a native application with delegated permission of "access the AAD directory as the signed-in user
+        - name: Create a native application with delegated permission of "access the AAD directory as the signed-in user"
           text: |
-                az ad app create --display-name my-native --native-app --requiredResourceAccess @manifest.json
+                az ad app create --display-name my-native --native-app --required-resource-accesses @manifest.json
                 ("manifest.json" contains the following content)
                 [{
                     "resourceAppId": "00000002-0000-0000-c000-000000000000",

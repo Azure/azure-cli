@@ -155,6 +155,11 @@ helps['batch job-schedule'] = """
     short-summary: Manage Batch job schedules.
 """
 
+helps['batch node service-logs'] = """
+    type: group
+    short-summary: Manage the service log files of a Batch compute node.
+"""
+
 helps['batch node user'] = """
     type: group
     short-summary: Manage the user accounts of a Batch compute node.
@@ -219,6 +224,11 @@ helps['batch pool all-statistics show'] = """
 helps['batch pool usage-metrics'] = """
     type: group
     short-summary: View usage metrics of Batch pools.
+"""
+
+helps['batch pool node-counts'] = """
+    type: group
+    short-summary: Get node counts for Batch pools.
 """
 
 helps['batch pool node-agent-skus'] = """

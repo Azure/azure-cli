@@ -36,10 +36,8 @@ class CompletionTest(unittest.TestCase):
     def init_completer(self):
         with mock.patch.object(Configuration, 'get_help_files', lambda _: 'help_dump_test.json'):
             with mock.patch.object(Configuration, 'get_config_dir', lambda _: TEST_DIR):
-                print(TEST_DIR)
                 shell_ctx = AzInteractiveShell(TestCli(), None)
                 self.completer = shell_ctx.completer
-                print(self.completer.command_tree.children)
 
     def test_command_completion(self):
         # tests some azure commands
@@ -74,6 +72,12 @@ class CompletionTest(unittest.TestCase):
         gen = self.completer.get_completions(doc, None)
         completions = set(['vm', 'vmss'])
         self.verify_completions(gen, completions, -2)
+
+        # test unrecognized command does not complete
+        doc = Document(u'vm group ')
+        gen = self.completer.get_completions(doc, None)
+        completions = set()
+        self.verify_completions(gen, completions, 0)
 
     def test_param_completion(self):
         # tests some azure params

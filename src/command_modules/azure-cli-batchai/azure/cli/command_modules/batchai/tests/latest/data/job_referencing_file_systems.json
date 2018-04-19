@@ -1,0 +1,25 @@
+{
+    "location": "eastus",
+    "properties":
+    {
+        "containerSettings": {
+            "imageSourceRegistry": {
+                "image": "ubuntu"
+            }
+        },
+        "stdOutErrPathPrefix": "$AZ_BATCHAI_JOB_MOUNT_ROOT/afs",
+        "outputDirectories": [
+            {
+                "id": "OUTPUT",
+                "pathPrefix": "$AZ_BATCHAI_JOB_MOUNT_ROOT/bfs",
+                "pathSuffix": "output",
+                "type": "custom"
+            }
+        ],
+        "nodeCount": 1,
+        "toolType": "custom",
+        "customToolkitSettings": {
+            "commandLine": "echo hi | tee $AZ_BATCHAI_OUTPUT_OUTPUT/result.txt"
+        }
+    }
+}

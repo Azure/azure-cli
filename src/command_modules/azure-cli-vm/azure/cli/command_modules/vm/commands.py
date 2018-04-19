@@ -19,7 +19,7 @@ from azure.cli.command_modules.vm._format import (
 from azure.cli.command_modules.vm._validators import (
     process_vm_create_namespace, process_vmss_create_namespace, process_image_create_namespace,
     process_disk_or_snapshot_create_namespace, process_disk_encryption_namespace, process_assign_identity_namespace,
-    process_vm_secret_namespace, process_msi_namespace, process_remove_identity_namespace)
+    process_msi_namespace, process_remove_identity_namespace, process_vm_secret_format)
 
 from azure.cli.core.commands import DeploymentOutputLongRunningOperation, CliCommandType
 from azure.cli.core.commands.arm import deployment_validate_table_format
@@ -159,11 +159,6 @@ def load_command_table(self, _):
         g.generic_update_command('update', custom_func_name='update_snapshot', setter_arg_name='snapshot')
 
     with self.command_group('vm', compute_vm_sdk) as g:
-
-        g.custom_command('assign-identity', 'assign_vm_identity', validator=process_assign_identity_namespace,
-                         deprecate_info='az vm identity assign')
-        g.custom_command('remove-identity', 'remove_vm_identity', validator=process_remove_identity_namespace, min_api='2017-12-01',
-                         deprecate_info='az vm identity remove')
         g.custom_command('identity assign', 'assign_vm_identity', validator=process_assign_identity_namespace)
         g.custom_command('identity remove', 'remove_vm_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
         g.custom_command('identity show', 'show_vm_identity')
@@ -173,7 +168,6 @@ def load_command_table(self, _):
         g.command('convert', 'convert_to_managed_disks', min_api='2016-04-30-preview')
         g.command('deallocate', 'deallocate', supports_no_wait=True)
         g.command('delete', 'delete', confirmation=True, supports_no_wait=True)
-        g.custom_command('format-secret', 'get_vm_format_secret', deprecate_info='az vm secret format')
         g.command('generalize', 'generalize', supports_no_wait=True)
         g.custom_command('get-instance-view', 'get_instance_view', table_transformer='{Name:name, ResourceGroup:resourceGroup, Location:location, ProvisioningState:provisioningState, PowerState:instanceView.statuses[1].displayStatus}')
         g.custom_command('list', 'list_vm', table_transformer=transform_vm_list)
@@ -253,10 +247,10 @@ def load_command_table(self, _):
         g.command('show', 'get')
 
     with self.command_group('vm secret', compute_vm_sdk) as g:
-        g.custom_command('format', 'get_vm_format_secret')
-        g.custom_command('add', 'add_vm_secret', validator=process_vm_secret_namespace)
+        g.custom_command('format', 'get_vm_format_secret', validator=process_vm_secret_format)
+        g.custom_command('add', 'add_vm_secret')
         g.custom_command('list', 'list_vm_secrets')
-        g.custom_command('remove', 'remove_vm_secret', validator=process_vm_secret_namespace)
+        g.custom_command('remove', 'remove_vm_secret')
 
     with self.command_group('vm unmanaged-disk', compute_vm_sdk) as g:
         g.custom_command('attach', 'attach_unmanaged_data_disk')
@@ -269,9 +263,6 @@ def load_command_table(self, _):
         g.custom_command('reset-ssh', 'reset_linux_ssh')
 
     with self.command_group('vmss', compute_vmss_sdk, operation_group='virtual_machine_scale_sets') as g:
-        g.custom_command('assign-identity', 'assign_vmss_identity', validator=process_assign_identity_namespace, deprecate_info='az vmss identity assign')
-        g.custom_command('remove-identity', 'remove_vmss_identity', validator=process_remove_identity_namespace, min_api='2017-12-01',
-                         deprecate_info='az vmss identity remove')
         g.custom_command('identity assign', 'assign_vmss_identity', validator=process_assign_identity_namespace)
         g.custom_command('identity remove', 'remove_vmss_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
         g.custom_command('identity show', 'show_vmss_identity')
@@ -286,6 +277,7 @@ def load_command_table(self, _):
         g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
         g.command('list-skus', 'list_skus')
         g.custom_command('reimage', 'reimage_vmss', supports_no_wait=True, min_api='2017-03-30')
+        g.command('perform-maintenance', 'perform_maintenance', min_api='2017-12-01')
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_command('show', 'show_vmss', exception_handler=empty_on_404, table_transformer=get_vmss_table_output_transformer(self, False))

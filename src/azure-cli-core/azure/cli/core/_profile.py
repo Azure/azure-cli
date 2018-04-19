@@ -227,30 +227,36 @@ class Profile(object):
 
     def find_subscriptions_in_vm_with_msi(self, identity_id=None):
         import jwt
-        from .msi_imds_authentication import MSIImdsAuthentication
+        from requests import HTTPError
+        from msrestazure.azure_active_directory import MSIAuthentication
         from msrestazure.tools import is_valid_resource_id
         resource = self.cli_ctx.cloud.endpoints.active_directory_resource_id
-        msi_creds = MSIImdsAuthentication()
+        msi_creds = MSIAuthentication()
 
         token_entry = None
         if identity_id:
             if is_valid_resource_id(identity_id):
-                msi_creds = MSIImdsAuthentication(resource=resource, msi_res_id=identity_id)
+                msi_creds = MSIAuthentication(resource=resource, msi_res_id=identity_id)
                 identity_type = MsiAccountTypes.user_assigned_resource_id
             else:
-                msi_creds = MSIImdsAuthentication(resource=resource, client_id=identity_id)
+                msi_creds = MSIAuthentication(resource=resource, client_id=identity_id)
                 try:
-                    token_entry = msi_creds.get_token()
+                    msi_creds.set_token()
+                    token_entry = msi_creds.token
                     identity_type = MsiAccountTypes.user_assigned_client_id
-                except ValueError:
-                    identity_type = MsiAccountTypes.user_assigned_object_id
-                    msi_creds = MSIImdsAuthentication(resource=resource, object_id=identity_id)
+                except HTTPError as ex:
+                    if ex.response.reason == 'Bad Request' and ex.response.status == 400:
+                        identity_type = MsiAccountTypes.user_assigned_object_id
+                        msi_creds = MSIAuthentication(resource=resource, object_id=identity_id)
+                    else:
+                        raise
         else:
             identity_type = MsiAccountTypes.system_assigned
-            msi_creds = MSIImdsAuthentication(resource=resource)
+            msi_creds = MSIAuthentication(resource=resource)
 
         if not token_entry:
-            token_entry = msi_creds.get_token()
+            msi_creds.set_token()
+            token_entry = msi_creds.token
         token = token_entry['access_token']
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, verify=False, algorithms=['RS256'])
@@ -272,6 +278,7 @@ class Profile(object):
 
     def find_subscriptions_in_cloud_console(self):
         import jwt
+
         _, token, _ = self._get_token_from_cloud_shell(self.cli_ctx.cloud.endpoints.active_directory_resource_id)
         logger.info('MSI: token was retrieved. Now trying to initialize local accounts...')
         decode = jwt.decode(token, verify=False, algorithms=['RS256'])
@@ -290,13 +297,10 @@ class Profile(object):
         return deepcopy(consolidated)
 
     def _get_token_from_cloud_shell(self, resource):  # pylint: disable=no-self-use
-        import requests
-        request_uri = _get_cloud_console_token_endpoint()
-        payload = {
-            'resource': resource
-        }
-        result = requests.get(request_uri, params=payload, headers={'Metadata': 'true'})
-        token_entry = json.loads(result.content.decode())
+        from msrestazure.azure_active_directory import MSIAuthentication
+        auth = MSIAuthentication(resource=resource)
+        auth.set_token()
+        token_entry = auth.token
         return (token_entry['token_type'], token_entry['access_token'], token_entry)
 
     def _set_subscriptions(self, new_subscriptions, merge=True, secondary_key_name=None):
@@ -347,7 +351,7 @@ class Profile(object):
     @staticmethod
     def _pick_working_subscription(subscriptions):
         from azure.mgmt.resource.subscriptions.models import SubscriptionState
-        s = next((x for x in subscriptions if x['state'] == SubscriptionState.enabled.value), None)
+        s = next((x for x in subscriptions if x.get(_STATE) == SubscriptionState.enabled.value), None)
         return s or subscriptions[0]
 
     def set_active_subscription(self, subscription):  # take id or name
@@ -479,7 +483,8 @@ class Profile(object):
         identity_type, identity_id = Profile._try_parse_msi_account_name(account[_SUBSCRIPTION_NAME])
         if identity_type:
             msi_creds = MsiAccountTypes.msi_auth_factory(identity_type, identity_id, resource)
-            token_entry = msi_creds.get_token()
+            msi_creds.set_token()
+            token_entry = msi_creds.token
             creds = (token_entry['token_type'], token_entry['access_token'], token_entry)
         elif in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             creds = self._get_token_from_cloud_shell(resource)
@@ -609,15 +614,15 @@ class MsiAccountTypes(object):
 
     @staticmethod
     def msi_auth_factory(cli_account_name, identity, resource):
-        from .msi_imds_authentication import MSIImdsAuthentication
+        from msrestazure.azure_active_directory import MSIAuthentication
         if cli_account_name == MsiAccountTypes.system_assigned:
-            return MSIImdsAuthentication(resource=resource)
+            return MSIAuthentication(resource=resource)
         elif cli_account_name == MsiAccountTypes.user_assigned_client_id:
-            return MSIImdsAuthentication(resource=resource, client_id=identity)
+            return MSIAuthentication(resource=resource, client_id=identity)
         elif cli_account_name == MsiAccountTypes.user_assigned_object_id:
-            return MSIImdsAuthentication(resource=resource, object_id=identity)
+            return MSIAuthentication(resource=resource, object_id=identity)
         elif cli_account_name == MsiAccountTypes.user_assigned_resource_id:
-            return MSIImdsAuthentication(resource=resource, msi_res_id=identity)
+            return MSIAuthentication(resource=resource, msi_res_id=identity)
         else:
             raise ValueError("unrecognized msi account name '{}'".format(cli_account_name))
 
@@ -653,6 +658,8 @@ class SubscriptionFinder(object):
         else:  # when refresh account, we will leverage local cached tokens
             token_entry = context.acquire_token(resource, username, _CLIENT_ID)
 
+        if not token_entry:
+            return []
         self.user_id = token_entry[_TOKEN_ENTRY_USER_ID]
 
         if tenant is None:

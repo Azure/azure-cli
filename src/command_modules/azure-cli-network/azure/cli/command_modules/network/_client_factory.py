@@ -28,6 +28,10 @@ def cf_connection_monitor(cli_ctx, _):
     return network_client_factory(cli_ctx).connection_monitors
 
 
+def cf_ddos_protection_plans(cli_ctx, _):
+    return network_client_factory(cli_ctx).ddos_protection_plans
+
+
 def cf_endpoint_services(cli_ctx, _):
     return network_client_factory(cli_ctx).available_endpoint_services
 
