@@ -114,6 +114,7 @@ def load_arguments(self, _):
         with self.argument_context(scope + ' config appsettings') as c:
             c.argument('settings', nargs='+', help="space-separated app settings in a format of <name>=<value>")
             c.argument('setting_names', nargs='+', help="space-separated app setting names")
+
         with self.argument_context(scope + ' config hostname') as c:
             c.argument('hostname', completer=get_hostname_completion_list, help="hostname assigned to the site, such as custom domains", id_part='child_name_1')
         with self.argument_context(scope + ' deployment user') as c:
@@ -143,7 +144,16 @@ def load_arguments(self, _):
 
         with self.argument_context(scope + ' deployment source config-zip') as c:
             c.argument('src', help='a zip file path for deploy')
-             
+
+        with self.argument_context(scope + ' config appsettings list') as c:
+            c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
+        with self.argument_context(scope + ' config hostname list') as c:
+            c.argument('webapp_name', arg_type=webapp_name_arg_type, id_part=None, options_list='--webapp-name')
+
+    with self.argument_context('webapp config connection-string list') as c:
+        c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
+
     with self.argument_context('webapp config hostname') as c:
         c.argument('webapp_name', help="webapp name. You can configure the default using 'az configure --defaults web=<name>'", configured_default='web',
                    completer=get_resource_name_completion_list('Microsoft.Web/sites'), id_part='name')
