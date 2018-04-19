@@ -2,6 +2,11 @@
 
 Release History
 ===============
+
+2.0.23
+++++++
+* Fix typo in `az account get-access-token` short summary.
+
 2.0.22
 ++++++
 * account list: handle accounts which come from CLI 1.0/ASM mode
