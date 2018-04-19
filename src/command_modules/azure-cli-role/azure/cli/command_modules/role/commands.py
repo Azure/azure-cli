@@ -91,7 +91,6 @@ def load_command_table(self, _):
     # RBAC related
     with self.command_group('ad sp') as g:
         g.custom_command('create-for-rbac', 'create_service_principal_for_rbac')
-        g.custom_command('reset-credentials', 'reset_service_principal_credential', deprecate_info='ad sp credential reset')
         g.custom_command('credential reset', 'reset_service_principal_credential')
         g.custom_command('credential list', 'list_service_principal_credentials')
         g.custom_command('credential delete', 'delete_service_principal_credential')

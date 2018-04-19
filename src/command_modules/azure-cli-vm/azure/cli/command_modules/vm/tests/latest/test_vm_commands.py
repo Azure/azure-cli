@@ -585,6 +585,33 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         ])
 
 
+class VMWriteAcceleratorScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_vm_write_accel', location='westus2')
+    def test_vm_write_accelerator_e2e(self, resource_group, resource_group_location):
+        self.kwargs.update({
+            'vm': 'vm1'
+        })
+        self.cmd('vm create -g {rg} -n {vm} --write-accelerator 0=true --data-disk-sizes-gb 1 --image centos --size Standard_M64ms')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('storageProfile.osDisk.writeAcceleratorEnabled', None),
+            self.check('storageProfile.dataDisks[0].writeAcceleratorEnabled', True),
+            self.check('storageProfile.dataDisks[1].writeAcceleratorEnabled', None)
+        ])
+        self.cmd('vm update -g {rg} -n {vm} --write-accelerator true --disk-caching readonly')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('storageProfile.osDisk.writeAcceleratorEnabled', True),
+            self.check('storageProfile.dataDisks[0].writeAcceleratorEnabled', True),
+        ])
+        self.cmd('vm disk attach -g {rg} --vm-name {vm} --disk d1 --enable-write-accelerator --new --size-gb 1')
+        self.cmd('vm update -g {rg} -n {vm} --write-accelerator 1=false os=false')
+        self.cmd('vm show -g {rg} -n {vm}', checks=[
+            self.check('storageProfile.osDisk.writeAcceleratorEnabled', False),
+            self.check('storageProfile.dataDisks[0].writeAcceleratorEnabled', True),
+            self.check('storageProfile.dataDisks[1].writeAcceleratorEnabled', False)
+        ])
+
+
 class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
 
     def _check_vm_power_state(self, expected_power_state):
@@ -732,9 +759,9 @@ class VMAvailSetScenarioTest(ScenarioTest):
                  checks=self.check('length(@)', 0))
 
 
-# once https://github.com/Azure/azure-cli/issues/4127 is fixed, switch back to a regular ScenarioTest
-class VMAvailSetLiveScenarioTest(LiveScenarioTest):
+class VMAvailSetLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_availset_live')
+    @AllowLargeResponse(size_kb=2048)
     def test_vm_availset_convert(self, resource_group):
 
         self.kwargs.update({
@@ -2394,9 +2421,8 @@ class VMSSDiskEncryptionTest(ScenarioTest):
         ])
 
 
-# convert to ScenarioTest and re-record when issue #6006 is fixed
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
-class VMSSRollingUpgrade(LiveScenarioTest):
+class VMSSRollingUpgrade(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_rolling_update')
     def test_vmss_rolling_upgrade(self, resource_group):
@@ -2451,15 +2477,24 @@ class VMSSPriorityTesting(ScenarioTest):
     def test_vmss_create_with_low_priority(self, resource_group, resource_group_location):
         self.kwargs.update({
             'priority': 'Low',
-            'vmss': 'vmss123'
+            'vmss': 'vmss1',
+            'vmss2': 'vmss2'
         })
         self.cmd('vmss create -g {rg} -n {vmss} --admin-username clitester --admin-password PasswordPassword1! --image debian --priority {priority}')
-        self.cmd('vmss show -g {rg} -n {vmss}',
-                 checks=self.check('virtualMachineProfile.priority', '{priority}'))
+        self.cmd('vmss show -g {rg} -n {vmss}', checks=[
+            self.check('virtualMachineProfile.priority', '{priority}'),
+            self.check('virtualMachineProfile.evictionPolicy', 'Deallocate')
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss2} --admin-username clitester --admin-password PasswordPassword1! --image centos --priority {priority} --eviction-policy delete')
+        self.cmd('vmss show -g {rg} -n {vmss2}', checks=[
+            self.check('virtualMachineProfile.priority', '{priority}'),
+            self.check('virtualMachineProfile.evictionPolicy', 'Delete')
+        ])
 
 
 # convert to ScenarioTest and re-record when issue #6006 is fixed
-class VMLBIntegrationTesting(LiveScenarioTest):
+class VMLBIntegrationTesting(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_lb_integration')
     def test_vm_lb_integration(self, resource_group):
