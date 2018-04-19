@@ -179,7 +179,6 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_webapp')
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('list-consumption-locations', 'list_consumption_locations')
-        g.custom_command('assign-identity', 'assign_identity', deprecate_info='identity assign')
         g.custom_command('identity assign', 'assign_identity')
         g.custom_command('identity show', 'show_identity')
 
