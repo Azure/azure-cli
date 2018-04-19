@@ -766,7 +766,6 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                                                      operation_group='virtual_machine_scale_sets'):
         vmss_properties['virtualMachineProfile']['evictionPolicy'] = eviction_policy
 
-
     if platform_fault_domain_count is not None and cmd.supported_api_version(
             min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
         vmss_properties['platformFaultDomainCount'] = platform_fault_domain_count
