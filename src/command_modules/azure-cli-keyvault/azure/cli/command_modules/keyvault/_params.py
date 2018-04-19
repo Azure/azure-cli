@@ -22,7 +22,7 @@ from ._validators import (
     validate_key_type, validate_policy_permissions,
     validate_principal, validate_resource_group_name,
     validate_x509_certificate_chain,
-    secret_text_encoding_values, secret_binary_encoding_values, validate_subnet)
+    secret_text_encoding_values, secret_binary_encoding_values, validate_subnet, validate_vault_id)
 
 
 # CUSTOM CHOICE LISTS
@@ -87,16 +87,30 @@ def load_arguments(self, _):
     # endregion
 
     # region Shared
-    for item in ['key', 'secret', 'certificate', 'storage']:
-        with self.argument_context('keyvault ' + item) as c:
-            c.argument(item.replace('-', '_') + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item), id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
+    for item in ['key', 'secret', 'certificate']:
+        with self.argument_context('keyvault ' + item, arg_group='Id') as c:
+            c.argument(item + '_name', options_list=['--name', '-n'], help='Name of the {}.'.format(item), id_part='child_name_1', completer=get_keyvault_name_completion_list(item))
             c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
+            c.argument(item + '_version', options_list=['--version', '-v'],help='The {} version. If omitted, uses the latest version.'.format(item), default='', required=False,completer=get_keyvault_version_completion_list(item))
+
+        for cmd in ['backup', 'delete', 'download', 'set-attributes', 'show']:
+            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
+                c.extra('id', help='Id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id(item))
+                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item), required=False)
+                c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
+                c.argument(item + '_version', required=False)
+
+        for cmd in ['purge', 'recover', 'show-deleted']:
+            with self.argument_context('keyvault {} {}'.format(item, cmd), arg_group='Id') as c:
+                c.extra('id', help='Id of the {}.  If specified all other \'Id\' arguments should be omitted.'.format(item), validator=validate_vault_id('deleted' + item))
+                c.argument(item + '_name', help='Name of the {}. Required if --id is not specified.'.format(item), required=False)
+                c.argument('vault_base_url', help='Name of the key vault. Required if --id is not specified.', required=False)
+                c.argument(item + '_version', required=False)
     # endregion
 
     # region keys
     with self.argument_context('keyvault key') as c:
         c.argument('key_ops', arg_type=get_enum_type(JsonWebKeyOperation), options_list=['--ops'], nargs='*', help='Space-separated list of permitted JSON web key operations.')
-        c.argument('key_version', options_list=['--version', '-v'], help='The key version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('key'))
 
     for scope in ['keyvault key create', 'keyvault key import']:
         with self.argument_context(scope) as c:
@@ -122,9 +136,6 @@ def load_arguments(self, _):
     # endregion
 
     # region KeyVault Secret
-    with self.argument_context('keyvault secret') as c:
-        c.argument('secret_version', options_list=['--version', '-v'], help='The secret version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('secret'))
-
     with self.argument_context('keyvault secret set') as c:
         c.argument('content_type', options_list=['--description'], help='Description of the secret contents (e.g. password, connection string, etc)')
         c.attributes_argument('secret', SecretAttributes, create=True)
@@ -146,6 +157,7 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault storage') as c:
         c.argument('storage_account_name', options_list=['--name', '-n'], help='Name to identify the storage account in the vault.', id_part='child_name_1', completer=get_keyvault_name_completion_list('storage_account'))
+        c.argument('vault_base_url', vault_name_type, type=get_vault_base_url_type(self.cli_ctx), id_part=None)
 
     with self.argument_context('keyvault storage add') as c:
         c.attributes_argument('storage_account', StorageAccountAttributes, create=True)
@@ -160,7 +172,6 @@ def load_arguments(self, _):
 
     # KeyVault Certificate
     with self.argument_context('keyvault certificate') as c:
-        c.argument('certificate_version', options_list=['--version', '-v'], help='The certificate version. If omitted, uses the latest version.', default='', required=False, completer=get_keyvault_version_completion_list('certificate'))
         c.argument('validity', type=int, help='Number of months the certificate is valid for. Overrides the value specified with --policy/-p')
 
     # TODO: Remove workaround when https://github.com/Azure/azure-rest-api-specs/issues/1153 is fixed
