@@ -12,13 +12,17 @@ try:
 except ImportError:
     import mock
 
+from knack.util import CLIError
+
 from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.vm._validators import (_validate_vm_vmss_create_vnet,
                                                       _validate_vmss_create_subnet,
                                                       _validate_vm_create_storage_account,
                                                       _validate_vm_vmss_create_auth,
-                                                      _validate_vm_create_storage_profile)
+                                                      _validate_vm_create_storage_profile,
+                                                      _validate_vmss_single_placement_group,
+                                                      _validate_vmss_create_load_balancer_or_app_gateway)
 
 
 def _get_test_cmd():
@@ -33,7 +37,7 @@ def _get_test_cmd():
     return cmd
 
 
-def _mock_resource_client(cli_ctx, client_type):
+def _mock_resource_client(cli_ctx, client_type, **kwargs):
     client = mock.MagicMock()
     if client_type is ResourceType.MGMT_NETWORK:
         def _mock_list(rg):
@@ -88,7 +92,7 @@ def _mock_resource_client(cli_ctx, client_type):
     return client
 
 
-def _mock_network_client_with_existing_subnet(*_):
+def _mock_network_client_with_existing_subnet(*_, **kwargs):
     client = mock.MagicMock()
 
     def _mock_list(rg):
@@ -153,6 +157,7 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         ns.subnet = None
         ns.vnet_name = None
         ns.vnet_type = None
+        ns.disable_overprovision = None
         return ns
 
     @mock.patch('azure.cli.core.commands.client_factory.get_mgmt_service_client', _mock_network_client_with_existing_subnet)
@@ -178,19 +183,34 @@ class TestVMSSCreateDefaultVnet(unittest.TestCase):
         _validate_vm_vmss_create_vnet(_get_test_cmd(), ns, for_scale_set=True)
         self.assertEqual(ns.vnet_type, 'new')
 
-    def test_new_subnet_size_for_big_vmss(self):
-        ns = argparse.Namespace()
+    def test_new_subnet_size_for_big_vmss_with_over_provision(self):
+        ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.vnet_type = 'new'
         ns.vnet_address_prefix = '10.0.0.0/16'
         ns.subnet_address_prefix = None
         ns.app_gateway_type = 'new'
         ns.app_gateway_subnet_address_prefix = '10.0.1.0/22'
         ns.instance_count = 1000
+        # with over-provision, we has subnet size bigger than the capacity
+        _validate_vmss_create_subnet(ns)
+        self.assertEqual('10.0.0.0/21', ns.subnet_address_prefix)
+
+    def test_new_subnet_size_for_big_vmss_without_over_provision(self):
+        ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
+        ns.vnet_type = 'new'
+        ns.vnet_address_prefix = '10.0.0.0/16'
+        ns.subnet_address_prefix = None
+        ns.app_gateway_type = 'new'
+        ns.app_gateway_subnet_address_prefix = '10.0.1.0/22'
+        ns.instance_count = 1000
+        ns.disable_overprovision = True
+
+        # w/o over-provision, we set subnet size just based on the capacity
         _validate_vmss_create_subnet(ns)
         self.assertEqual('10.0.0.0/22', ns.subnet_address_prefix)
 
     def test_new_subnet_size_for_small_vmss(self):
-        ns = argparse.Namespace()
+        ns = TestVMSSCreateDefaultVnet._set_ns('rg1', 'eastus')
         ns.vnet_type = 'new'
         ns.vnet_address_prefix = '10.0.0.0/16'
         ns.subnet_address_prefix = None
@@ -301,11 +321,89 @@ class TestVMImageDefaults(unittest.TestCase):
         ns.admin_username = 'admin123'
         ns.admin_password = 'verySecret!'
         ns.storage_sku = 'Premium_LRS'
+        ns.os_caching, ns.data_caching = None, None
         ns.os_type, ns.attach_os_disk, ns.storage_account, ns.storage_container_name, ns.use_unmanaged_disk = None, None, None, None, False
         _validate_vm_create_storage_profile(cmd, ns, False)
 
         self.assertEqual(ns.os_type, 'someOS')
         self.assertEqual(ns.image_data_disks, ['does not matter'])
+
+
+class TestBigVMSSDefaults(unittest.TestCase):
+    @classmethod
+    def _set_up_ns(cls, ns):
+        ns.single_placement_group, ns.zones, ns.platform_fault_domain_count, ns.instance_count = None, None, None, 2
+
+    def test_vmss_disable_single_placement_group(self):
+        # default is enable single-placement-group
+        ns = argparse.Namespace()
+        self._set_up_ns(ns)
+        _validate_vmss_single_placement_group(ns)
+        self.assertEqual(ns.single_placement_group, None)
+
+        # disable on any zonal scale-set
+        ns = argparse.Namespace()
+        self._set_up_ns(ns)
+        ns.zones = ['1']
+        _validate_vmss_single_placement_group(ns)
+        self.assertEqual(ns.single_placement_group, False)
+
+        # disable on any big scale-set
+        ns = argparse.Namespace()
+        self._set_up_ns(ns)
+        ns.instance_count = 101
+        _validate_vmss_single_placement_group(ns)
+        self.assertEqual(ns.single_placement_group, False)
+
+        # disable on zonal + fd count
+        ns = argparse.Namespace()
+        self._set_up_ns(ns)
+        ns.platform_fault_domain_count = 1
+        ns.zones = ['1']
+        _validate_vmss_single_placement_group(ns)
+        self.assertEqual(ns.single_placement_group, False)
+
+        # error on conflicts
+        # can't enable it with zonal scale-set
+        ns = argparse.Namespace()
+        self._set_up_ns(ns)
+        ns.zones = ['1']
+        ns.single_placement_group = True
+        self.assertRaises(CLIError, _validate_vmss_single_placement_group, ns)
+
+        # can't enable it with big scale-set
+        ns = argparse.Namespace()
+        self._set_up_ns(ns)
+        ns.instance_count = 101
+        ns.single_placement_group = True
+        self.assertRaises(CLIError, _validate_vmss_single_placement_group, ns)
+
+    def test_vmss_default_std_lb(self):
+        cmd = mock.MagicMock()
+        lb_sku_mock = mock.MagicMock()
+        lb_sku_mock.standard.value = 'Standard'
+        lb_sku_mock.basic.value = 'Basic'
+        cmd.get_models.return_value = lb_sku_mock
+
+        # default to standard when single-placement-group is off
+        ns = argparse.Namespace()
+        ns.load_balancer, ns.application_gateway = None, None
+        ns.app_gateway_subnet_address_prefix, ns.application_gateway = None, None
+        ns.app_gateway_sku, ns.app_gateway_capacity = None, None
+        ns.load_balancer_sku = None
+        ns.single_placement_group = False
+        _validate_vmss_create_load_balancer_or_app_gateway(cmd, ns)
+        self.assertEqual(ns.load_balancer_sku, 'Standard')
+
+        # error on conflicts
+        ns = argparse.Namespace()
+        ns.load_balancer, ns.application_gateway = None, None
+        ns.app_gateway_subnet_address_prefix, ns.application_gateway = None, None
+        ns.app_gateway_sku, ns.app_gateway_capacity = None, None
+        ns.load_balancer_sku = 'Basic'
+        ns.single_placement_group = False
+        ns.zones = '1'
+        self.assertRaises(CLIError, _validate_vmss_create_load_balancer_or_app_gateway, cmd, ns)
 
 
 if __name__ == '__main__':

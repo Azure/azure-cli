@@ -140,6 +140,11 @@ helps['backup protection'] = """
             short-summary: Manage protection of your items, enable protection or disable it, or take on-demand backups.
             """
 
+helps['backup protection check-vm'] = """
+            type: command
+            short-summary: Find out whether the virtual machine is protected or not. If protected, it returns the recovery services vault ID, otherwise it returns empty.
+            """
+
 helps['backup protection enable-for-vm'] = """
             type: command
             short-summary: Start protecting a previously unprotected Azure VM as per the specified policy to a Recovery services vault.

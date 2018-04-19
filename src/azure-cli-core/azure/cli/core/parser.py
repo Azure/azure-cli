@@ -13,7 +13,8 @@ from knack.parser import CLICommandParser
 from knack.util import CLIError
 
 import azure.cli.core.telemetry as telemetry
-
+from azure.cli.core.extension import get_extension
+from azure.cli.core.commands.events import EVENT_INVOKER_ON_TAB_COMPLETION
 
 logger = get_logger(__name__)
 
@@ -25,10 +26,22 @@ class IncorrectUsageError(CLIError):
     pass
 
 
-def enable_autocomplete(parser):
-    argcomplete.autocomplete = argcomplete.CompletionFinder()
-    argcomplete.autocomplete(parser, validator=lambda c, p: c.lower().startswith(p.lower()),
-                             default_completer=lambda _: ())
+class AzCompletionFinder(argcomplete.CompletionFinder):
+
+    def _get_completions(self, comp_words, cword_prefix, cword_prequote, last_wordbreak_pos):
+        external_completions = []
+        self._parser.cli_ctx.raise_event(EVENT_INVOKER_ON_TAB_COMPLETION,
+                                         external_completions=external_completions,
+                                         parser=self._parser,
+                                         comp_words=comp_words,
+                                         cword_prefix=cword_prefix,
+                                         cword_prequote=cword_prequote,
+                                         last_wordbreak_pos=last_wordbreak_pos)
+
+        return external_completions + super(AzCompletionFinder, self)._get_completions(comp_words,
+                                                                                       cword_prefix,
+                                                                                       cword_prequote,
+                                                                                       last_wordbreak_pos)
 
 
 class AzCliCommandParser(CLICommandParser):
@@ -109,11 +122,24 @@ class AzCliCommandParser(CLICommandParser):
         self.exit(2)
 
     def format_help(self):
+        extension_version = None
+        try:
+            if self.command_source:
+                extension_version = get_extension(self.command_source.extension_name).version
+        except Exception:  # pylint: disable=broad-except
+            pass
+
         telemetry.set_command_details(
             command=self.prog[3:],
-            extension_name=self.command_source.extension_name if self.command_source else None)
+            extension_name=self.command_source.extension_name if self.command_source else None,
+            extension_version=extension_version)
         telemetry.set_success(summary='show help')
         super(AzCliCommandParser, self).format_help()
+
+    def enable_autocomplete(self):
+        argcomplete.autocomplete = AzCompletionFinder()
+        argcomplete.autocomplete(self, validator=lambda c, p: c.lower().startswith(p.lower()),
+                                 default_completer=lambda _: ())
 
     def _check_value(self, action, value):
         # Override to customize the error message when a argument is not among the available choices

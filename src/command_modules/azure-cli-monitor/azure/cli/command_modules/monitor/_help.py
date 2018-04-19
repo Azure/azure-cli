@@ -135,7 +135,7 @@ helps['monitor metrics list'] = """
     parameters:
         - name: --aggregation
           type: string
-          short-summary: The list of aggregation types (space separated) to retrieve.
+          short-summary: The list of aggregation types (space-separated) to retrieve.
         - name: --interval
           type: string
           short-summary: The interval of the metric query. In ISO 8601 duration format, eg "PT1M"
@@ -157,7 +157,7 @@ helps['monitor metrics list'] = """
           short-summary: Returns the metadata values instead of metric data
         - name: --dimension
           type: string
-          short-summary: The list of dimensions (space separated) the metrics are queried into.
+          short-summary: The list of dimensions (space-separated) the metrics are queried into.
     examples:
         - name: List a VM's CPU usage for the past hour
           text: >
@@ -201,10 +201,37 @@ helps['monitor log-profiles'] = """
             type: group
             short-summary: Manage log profiles.
             """
+helps['monitor log-profiles create'] = """
+            type: command
+            short-summary: Create a log profile.
+            parameters:
+                - name: --name -n
+                  short-summary: The name of the log profile.
+                - name: --location -l
+                  short-summary:
+                - name: --locations
+                  short-summary: Space-separated list of regions for which Activity Log events should be stored.
+                - name: --categories
+                  short-summary: Space-separated categories of the logs. These categories are created as is convenient
+                                 to the user. Some values are Write, Delete, and/or Action.
+                - name: --storage-account-id
+                  short-summary: The resource id of the storage account to which you would like to send the Activity
+                                 Log.
+                - name: --service-bus-rule-id
+                  short-summary: The service bus rule ID of the service bus namespace in which you would like to have
+                                 Event Hubs created for streaming the Activity Log. The rule ID is of the format
+                                 '{service bus resource ID}/authorizationrules/{key name}'.
+                - name: --days
+                  short-summary: The number of days for the retention in days. A value of 0 will retain the events
+                                 indefinitely
+                - name: --enabled
+                  short-summary: Whether the retention policy is enabled.
+            """
 helps['monitor log-profiles update'] = """
             type: command
             short-summary: Update a log profile.
             """
+
 helps['monitor diagnostic-settings'] = """
             type: group
             short-summary: Manage service diagnostic settings.
@@ -242,9 +269,231 @@ helps['monitor diagnostic-settings update'] = """
             type: command
             short-summary: Update diagnostic settings.
             """
+
+helps['monitor autoscale'] = """
+    type: group
+    short-summary: Manage autoscale settings.
+    long-summary: >
+        For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+"""
+
+helps['monitor autoscale show'] = """
+    type: command
+    short-summary: Show autoscale setting details.
+"""
+
+helps['monitor autoscale create'] = """
+    type: command
+    short-summary: Create new autoscale settings.
+    long-summary: >
+        For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    parameters:
+        - name: --action -a
+          short-summary: Add an action to fire when a scaling event occurs.
+          long-summary: |
+            Usage:   --action TYPE KEY [ARG ...]
+            Email:   --action email bob@contoso.com ann@contoso.com
+            Webhook: --action webhook https://www.contoso.com/alert apiKey=value
+            Webhook: --action webhook https://www.contoso.com/alert?apiKey=value
+            Multiple actions can be specified by using more than one `--action` argument.
+    examples:
+        - name: Create autoscale settings to scale between 2 and 5 instances (3 as default). Email the administrator when scaling occurs.
+          text: |
+              az monitor autoscale create -g {myrg} --resource {resource-id} --min-count 2 --max-count 5 \\
+                --count 3 --email-administrator
+
+              az monitor autoscale rule create -g {myrg} --autoscale-name {resource-name} --scale out 1 \\
+                --condition "Percentage CPU > 75 avg 5m"
+
+              az monitor autoscale rule create -g {myrg} --autoscale-name {resource-name} --scale in 1 \\
+                --condition "Percentage CPU < 25 avg 5m"
+        - name: Create autoscale settings for exactly 4 instances.
+          text: >
+              az monitor autoscale create -g {myrg} --resource {resource-id} --count 4
+"""
+
+helps['monitor autoscale update'] = """
+    type: command
+    short-summary: Update autoscale settings.
+    long-summary: >
+        For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    parameters:
+        - name: --add-action -a
+          short-summary: Add an action to fire when a scaling event occurs.
+          long-summary: |
+            Usage:   --add-action TYPE KEY [ARG ...]
+            Email:   --add-action email bob@contoso.com ann@contoso.com
+            Webhook: --add-action webhook https://www.contoso.com/alert apiKey=value
+            Webhook: --add-action webhook https://www.contoso.com/alert?apiKey=value
+            Multiple actions can be specified by using more than one `--add-action` argument.
+        - name: --remove-action -r
+          short-summary: Remove one or more actions.
+          long-summary: |
+            Usage:   --remove-action TYPE KEY [KEY ...]
+            Email:   --remove-action email bob@contoso.com ann@contoso.com
+            Webhook: --remove-action webhook https://contoso.com/alert https://alerts.contoso.com
+    examples:
+        - name: Update autoscale settings to use a fixed 3 instances by default.
+          text: |
+              az monitor autoscale update -g {myrg} -n {autoscale-name} --count 3
+        - name: Update autoscale settings to remove an email notification.
+          text: |
+              az monitor autoscale update -g {myrg} -n {autoscale-name} \\
+                --remove-action email bob@contoso.com
+"""
+
+helps['monitor autoscale profile'] = """
+    type: group
+    short-summary: Manage autoscaling profiles.
+    long-summary: >
+        For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+"""
+
+helps['monitor autoscale profile create'] = """
+    type: command
+    short-summary: Create a fixed or recurring autoscale profile.
+    long-summary: >
+        For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    parameters:
+        - name: --timezone
+          short-summary: Timezone name.
+          populator-commands:
+            - az monitor autoscale profile list-timezones
+        - name: --recurrence -r
+          short-summary: When the profile recurs. If omitted, a fixed (non-recurring) profile is created.
+          long-summary: |
+                Usage:     --recurrence {week} [ARG ARG ...]
+                Weekly:    --recurrence week Sat Sun
+        - name: --start
+          short-summary: When the autoscale profile begins. Format depends on the type of profile.
+          long-summary: |
+                Fixed:  --start yyyy-mm-dd [hh:mm:ss]
+                Weekly: [--start hh:mm]
+        - name: --end
+          short-summary: When the autoscale profile ends. Format depends on the type of profile.
+          long-summary: |
+                Fixed:  --end yyyy-mm-dd [hh:mm:ss]
+                Weekly: [--end hh:mm]
+    examples:
+        - name: Create a fixed date profile, inheriting the default scaling rules but changing the capacity.
+          text: |
+              az monitor autoscale create -g {myrg} --resource {resource-id} --min-count 2 --count 3 \\
+                --max-count 5
+
+              az monitor autoscale rule create -g {myrg} --autoscale-name {name} --scale out 1 \\
+                --condition "Percentage CPU > 75 avg 5m"
+
+              az monitor autoscale rule create -g {myrg} --autoscale-name {name} --scale in 1 \\
+                --condition "Percentage CPU < 25 avg 5m"
+
+              az monitor autoscale profile create -g {myrg} --autoscale-name {name} -n Christmas \\
+                --copy-rules default --min-count 3 --count 6 --max-count 10 --start 2018-12-24 \\
+                --end 2018-12-26 --timezone "Pacific Standard Time"
+        - name: Create a recurring weekend profile, inheriting the default scaling rules but changing the capacity.
+          text: |
+              az monitor autoscale create -g {myrg} --resource {resource-id} --min-count 2 --count 3 \\
+                --max-count 5
+
+              az monitor autoscale rule create -g {myrg} --autoscale-name {name} --scale out 1 \\
+                --condition "Percentage CPU > 75 avg 5m"
+
+              az monitor autoscale rule create -g {myrg} --autoscale-name {name} --scale in 1 \\
+                --condition "Percentage CPU < 25 avg 5m"
+
+              az monitor autoscale profile create -g {myrg} --autoscale-name {name} -n weeekend \\
+                --copy-rules default --min-count 1 --count 2 --max-count 2 \\
+                --recurrence week sat sun --timezone "Pacific Standard Time"
+"""
+
+helps['monitor autoscale profile delete'] = """
+    type: command
+    short-summary: Delete an autoscale profile.
+"""
+
+helps['monitor autoscale profile list'] = """
+    type: command
+    short-summary: List autoscale profiles.
+"""
+
+helps['monitor autoscale profile list-timezones'] = """
+    type: command
+    short-summary: Look up time zone information.
+"""
+
+helps['monitor autoscale profile show'] = """
+    type: command
+    short-summary: Show details of an autoscale profile.
+"""
+
+helps['monitor autoscale rule'] = """
+    type: group
+    short-summary: Manage autoscale scaling rules.
+    long-summary: >
+        For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+"""
+
+helps['monitor autoscale rule create'] = """
+    type: command
+    short-summary: Add a new autoscale rule.
+    long-summary: >
+        For more information on autoscaling, visit: https://docs.microsoft.com/en-us/azure/monitoring-and-diagnostics/monitoring-understanding-autoscale-settings
+    parameters:
+        - name: --condition
+          short-summary: The condition which triggers the scaling action.
+          long-summary: >
+            The form of a condition is "METRIC {==,!=,>,>=,<,<=} THRESHOLD {avg,min,max,total,count} PERIOD".
+            Values for METRIC and appropriate THRESHOLD values can be obtained from the `az monitor metric` command.
+            Format of PERIOD is "##h##m##s".
+        - name: --scale
+          short-summary: The direction and amount to scale.
+          long-summary: |
+                Usage:          --scale {to,in,out} VAL[%]
+                Fixed Count:    --scale to 5
+                In by Count:    --scale in 2
+                Out by Percent: --scale out 10%
+        - name: --timegrain
+          short-summary: >
+            The way metrics are polled across instances.
+          long-summary: >
+            The form of the timegrain is {avg,min,max,sum} VALUE. Values can be obtained from the `az monitor metric` command.
+            Format of VALUE is "##h##m##s".
+    examples:
+        - name: Scale to 5 instances when the CPU Percentage across instances is greater than 75 averaged over 10 minutes.
+          text: |
+              az monitor autoscale rule create -g {myrg} --autoscale-name {myvmss} \\
+                --scale to 5 --condition "Percentage CPU > 75 avg 10m"
+        - name: Scale up 2 instances when the CPU Percentage across instances is greater than 75 averaged over 5 minutes.
+          text: |
+              az monitor autoscale rule create -g {myrg} --autoscale-name {myvmss} \\
+                --scale out 2 --condition "Percentage CPU > 75 avg 5m"
+        - name: Scale down 50% when the CPU Percentage across instances is less than 25 averaged over 15 minutes.
+          text: |
+              az monitor autoscale rule create -g {myrg} --autoscale-name {myvmss} \\
+                --scale in 50% --condition "Percentage CPU < 25 avg 15m"
+"""
+
+
+helps['monitor autoscale rule list'] = """
+    type: command
+    short-summary: List autoscale rules for a profile.
+"""
+
+
+helps['monitor autoscale rule copy'] = """
+    type: command
+    short-summary: Copy autoscale rules from one profile to another.
+"""
+
+
+helps['monitor autoscale rule delete'] = """
+    type: command
+    short-summary: Remove autoscale rules from a profile.
+"""
+
+
 helps['monitor autoscale-settings'] = """
             type: group
-            short-summary: Manage autoscale settings.
+            short-summary: (DEPRECATED) Manage autoscale settings.
             """
 helps['monitor autoscale-settings update'] = """
             type: command
@@ -308,7 +557,7 @@ helps['monitor action-group update'] = """
             Webhook: --add-action https://www.contoso.com/alert
             Multiple actions can be specified by using more than one `--add-action` argument.
         - name: --remove-action -r
-          short-summary: Remove receivers from the action group. Accept space separated list of receiver names.
+          short-summary: Remove receivers from the action group. Accept space-separated list of receiver names.
 """
 
 helps['monitor activity-log alert'] = """
@@ -350,11 +599,11 @@ helps['monitor activity-log alert create'] = """
             'resourceProvider', 'status', 'subStatus', 'resourceType', or anything beginning with 'properties.'.
         - name: --action-group -a
           short-summary: >
-            Add an action group. Accepts space separated action group identifiers. The identifier can be the action group's name
+            Add an action group. Accepts space-separated action group identifiers. The identifier can be the action group's name
             or its resource ID.
         - name: --webhook-properties -w
           short-summary: >
-            Space separated webhook properties in 'key[=value]' format. These properties are associated with the action groups
+            Space-separated webhook properties in 'key[=value]' format. These properties are associated with the action groups
             added in this command.
           long-summary: >
             For any webhook receiver in these action group, this data is appended to the webhook payload. To attach different webhook
@@ -416,7 +665,7 @@ helps['monitor activity-log alert action-group add'] = """
           short-summary: Remove all the existing action groups before add new conditions.
         - name: --webhook-properties -w
           short-summary: >
-            Space separated webhook properties in 'key[=value]' format. These properties will be associated with
+            Space-separated webhook properties in 'key[=value]' format. These properties will be associated with
             the action groups added in this command.
           long-summary: >
             For any webhook receiver in these action group, these data are appended to the webhook payload.

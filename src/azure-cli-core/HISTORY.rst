@@ -2,6 +2,32 @@
 
 Release History
 ===============
+
+2.0.31
+++++++
+* Allow other sources to add additional tab completion choices via event hook
+* `sdist` is now compatible with wheel 0.31.0
+
+2.0.30
+++++++
+* Show message for extensions marked as preview on -h.
+
+2.0.29
+++++++
+* Support Autorest 3.0 based SDKs
+* Support mechanism for a command module to suppress the loading of particular extensions.
+
+2.0.28
+++++++
+* Fix issue that required extension to use `client_arg_name` keyword argument. This is no longer necessary.
+* Allow extensions to send telemetry with custom instrumentation key
+* Enable HTTP logging with --debug
+
+2.0.27
+++++++
+* auth: key on both subscription id and name on msi login
+* Add events module in core for EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
+
 2.0.26
 ++++++
 * Support raw token retrival in MSI context

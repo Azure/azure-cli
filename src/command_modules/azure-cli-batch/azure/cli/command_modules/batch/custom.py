@@ -20,11 +20,12 @@ from azure.mgmt.batch.operations import (ApplicationPackageOperations)
 from azure.batch.models import (CertificateAddParameter, PoolStopResizeOptions, PoolResizeParameter,
                                 PoolResizeOptions, JobListOptions, JobListFromJobScheduleOptions,
                                 TaskAddParameter, TaskConstraints, PoolUpdatePropertiesParameter,
-                                StartTask)
+                                StartTask, AffinityInformation)
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import get_sdk, ResourceType
 from azure.cli.core._profile import Profile
+from azure.cli.core.util import sdk_no_wait
 
 logger = get_logger(__name__)
 MAX_TASKS_PER_REQUEST = 100
@@ -61,10 +62,8 @@ def create_account(client,
         parameters.key_vault_reference = {'id': keyvault, 'url': keyvault_url}
         parameters.pool_allocation_mode = 'UserSubscription'
 
-    return client.create(resource_group_name=resource_group_name,
-                         account_name=account_name,
-                         parameters=parameters,
-                         raw=no_wait)
+    return sdk_no_wait(no_wait, client.create, resource_group_name=resource_group_name,
+                       account_name=account_name, parameters=parameters)
 
 
 @transfer_doc(AutoStorageBaseProperties)
@@ -279,10 +278,10 @@ def list_job(client, job_schedule_id=None, filter=None,  # pylint: disable=redef
     return list(client.list(job_list_options=option2))
 
 
-@transfer_doc(TaskAddParameter, TaskConstraints)
+@transfer_doc(TaskAddParameter, TaskConstraints, AffinityInformation)
 def create_task(client,
                 job_id, json_file=None, task_id=None, command_line=None, resource_files=None,
-                environment_settings=None, affinity_info=None, max_wall_clock_time=None,
+                environment_settings=None, affinity_id=None, max_wall_clock_time=None,
                 retention_time=None, max_task_retry_count=None,
                 application_package_references=None):
     task = None
@@ -306,7 +305,7 @@ def create_task(client,
         task = TaskAddParameter(task_id, command_line,
                                 resource_files=resource_files,
                                 environment_settings=environment_settings,
-                                affinity_info=affinity_info,
+                                affinity_info=AffinityInformation(affinity_id) if affinity_id else None,
                                 application_package_references=application_package_references)
         if max_wall_clock_time is not None or retention_time is not None \
                 or max_task_retry_count is not None:

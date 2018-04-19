@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 # pylint: disable=line-too-long
+import argparse
+
 from azure.cli.core.commands.parameters import (
     resource_group_name_type,
     get_location_type,
@@ -44,10 +46,14 @@ def load_arguments(self, _):
         c.argument('admin_enabled', help='Indicates whether the admin user is enabled', choices=['true', 'false'])
 
     with self.argument_context('acr repository delete') as c:
-        c.argument('manifest', nargs='?', required=False, const='', default=None, help='The sha256 based digest of manifest to delete')
+        c.argument('manifest', nargs='?', required=False, const='', default=None, help=argparse.SUPPRESS)
         c.argument('yes', options_list=['--yes', '-y'], action='store_true', help='Do not prompt for confirmation')
-        c.argument('repository', help='The name of the repository to delete.')
-        c.argument('tag', help='The name of tag to delete')
+        c.argument('repository', help="The name of the repository to delete")
+        c.argument('tag', help=argparse.SUPPRESS)
+        c.argument('image', help="The name of the image to delete. May include a tag in the format 'name:tag' or digest in the format 'name@digest'.")
+
+    with self.argument_context('acr repository untag') as c:
+        c.argument('image', help="The name of the image to untag. May include a tag in the format 'name:tag'.")
 
     with self.argument_context('acr repository show-manifests') as c:
         c.argument('repository', help='The repository to obtain manifests from.')
@@ -67,8 +73,8 @@ def load_arguments(self, _):
         c.argument('registry_name', options_list=['--registry', '-r'], help='The name of the container registry. You can configure the default registry name using `az configure --defaults acr=<registry name>`', completer=get_resource_name_completion_list(REGISTRY_RESOURCE_TYPE), configured_default='acr')
         c.argument('webhook_name', options_list=['--name', '-n'], help='The name of the webhook', completer=get_resource_name_completion_list(WEBHOOK_RESOURCE_TYPE))
         c.argument('uri', help='The service URI for the webhook to post notifications.')
-        c.argument('headers', nargs='+', help="Space separated custom headers in 'key[=value]' format that will be added to the webhook notifications. Use {} to clear existing headers.".format(quotes), validator=validate_headers)
-        c.argument('actions', nargs='+', help='Space separated list of actions that trigger the webhook to post notifications.', choices=['push', 'delete'])
+        c.argument('headers', nargs='+', help="Space-separated custom headers in 'key[=value]' format that will be added to the webhook notifications. Use {} to clear existing headers.".format(quotes), validator=validate_headers)
+        c.argument('actions', nargs='+', help='Space-separated list of actions that trigger the webhook to post notifications.', choices=['push', 'delete'])
         c.argument('status', help='Indicates whether the webhook is enabled.', choices=['enabled', 'disabled'])
         c.argument('scope', help="The scope of repositories where the event can be triggered. For example, 'foo:*' means events for all tags under repository 'foo'. 'foo:bar' means events for 'foo:bar' only. 'foo' is equivalent to 'foo:latest'. Empty means events for all repositories.")
 

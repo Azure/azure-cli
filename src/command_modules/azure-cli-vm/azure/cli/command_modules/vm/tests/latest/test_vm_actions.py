@@ -17,9 +17,10 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       process_disk_or_snapshot_create_namespace,
                                                       _validate_vmss_create_subnet,
                                                       _get_next_subnet_addr_suffix,
-                                                      _validate_vm_vmss_msi)
+                                                      _validate_vm_vmss_msi,
+                                                      _process_disk_caching_value)
 from azure.cli.testsdk import TestCli
-
+from azure.mgmt.compute.models import CachingTypes
 from knack.util import CLIError
 
 
@@ -241,8 +242,9 @@ class TestActions(unittest.TestCase):
         np_mock.instance_count = 1000
         np_mock.app_gateway_type = 'new'
         np_mock.app_gateway_subnet_address_prefix = None
+        np_mock.disable_overprovision = None
         _validate_vmss_create_subnet(np_mock)
-        self.assertEqual(np_mock.app_gateway_subnet_address_prefix, '10.0.4.0/24')
+        self.assertEqual(np_mock.app_gateway_subnet_address_prefix, '10.0.8.0/24')
 
     @mock.patch('azure.cli.command_modules.vm._validators._resolve_role_id', autospec=True)
     @mock.patch('azure.cli.core.commands.client_factory.get_subscription_id', autospec=True)
@@ -310,6 +312,33 @@ class TestActions(unittest.TestCase):
         _validate_vm_vmss_msi(cmd, np_mock, from_set_command=True)
         self.assertEqual(np_mock.identity_role_id, 'foo-role-id')
         mock_resolve_role_id.assert_called_with(cmd.cli_ctx, 'reader', 'foo-scope')
+
+    def test_process_disk_caching_value(self):
+        cmd = mock.MagicMock()
+        cmd.get_models.return_value = CachingTypes
+
+        r = _process_disk_caching_value(cmd, None, is_os_disk=True)
+        self.assertEqual(r, CachingTypes.read_write.value)
+
+        r = _process_disk_caching_value(cmd, None, is_os_disk=False)
+        self.assertIsNone(r)
+
+        r = _process_disk_caching_value(cmd, ['0=None'], is_os_disk=False)
+        self.assertEqual(r, ['0=None'])
+
+        r = _process_disk_caching_value(cmd, ['0=None', '1=ReadOnly'], is_os_disk=False)
+        self.assertEqual(r, ['0=None', '1=ReadOnly'])
+
+        r = _process_disk_caching_value(cmd, ['0=none', '1=readOnly'], is_os_disk=False)
+        self.assertEqual(r, ['0=none', '1=readOnly'])
+
+        with self.assertRaises(CLIError) as err:
+            _process_disk_caching_value(cmd, ['0=None', '1=foo'], is_os_disk=False)
+        self.assertTrue("usage error: please use data disk caching value from None|ReadOnly|ReadWrite" in str(err.exception))
+
+        with self.assertRaises(CLIError) as err:
+            _process_disk_caching_value(cmd, ['0=None', 'hhh=foo'], is_os_disk=False)
+        self.assertTrue("usage error: LUN used in --data-disk-caching must be an integer" in str(err.exception))
 
 
 if __name__ == '__main__':

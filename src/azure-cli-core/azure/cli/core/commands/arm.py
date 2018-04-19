@@ -18,7 +18,7 @@ from azure.cli.core import AzCommandsLoader, EXCLUDED_PARAMS
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import shell_safe_json_parse
+from azure.cli.core.util import shell_safe_json_parse, augment_no_wait_handler_args
 from azure.cli.core.profiles import ResourceType
 
 logger = get_logger(__name__)
@@ -242,7 +242,7 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                              '--ids',
                              metavar='RESOURCE_ID',
                              dest=argparse.SUPPRESS,
-                             help="One or more resource IDs (space delimited). If provided, "
+                             help="One or more resource IDs (space-delimited). If provided, "
                                   "no other 'Resource Id' arguments should be specified.",
                              action=split_action(command.arguments),
                              nargs='+',
@@ -357,6 +357,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
         return [(k, v) for k, v in arguments.items()]
 
     def _extract_handler_and_args(args, commmand_kwargs, op):
+        from azure.cli.core.commands.client_factory import resolve_client_arg_name
         factory = _get_client_factory(name, commmand_kwargs)
         client = None
         if factory:
@@ -365,7 +366,7 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
             except TypeError:
                 client = factory(context.cli_ctx, None)
 
-        client_arg_name = 'client' if op.startswith(('azure.cli', 'azext')) else 'self'
+        client_arg_name = resolve_client_arg_name(op, kwargs)
         op_handler = context.get_op_handler(op)
         exclude = list(set(EXCLUDED_PARAMS) - set(['self', 'client']))
         raw_args = dict(extract_args_from_signature(op_handler, excluded_params=exclude))
@@ -427,13 +428,27 @@ def _cli_generic_update_command(context, name, getter_op, setter_op, setter_arg_
 
         # Done... update the instance!
         setterargs[setter_arg_name] = parent if child_collection_prop_name else instance
-        no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
-        if no_wait_param:
-            setterargs[no_wait_param] = args[no_wait_param]
+
+        # Handle no-wait
+        supports_no_wait = cmd.command_kwargs.get('supports_no_wait', None)
+        if supports_no_wait:
+            no_wait_enabled = args.get('no_wait', False)
+            augment_no_wait_handler_args(no_wait_enabled,
+                                         setter,
+                                         setterargs)
+        else:
+            no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+            if no_wait_param:
+                setterargs[no_wait_param] = args[no_wait_param]
+
         result = setter(**setterargs)
 
-        if no_wait_param and setterargs.get(no_wait_param, None):
+        if supports_no_wait and no_wait_enabled:
             return None
+        else:
+            no_wait_param = cmd.command_kwargs.get('no_wait_param', None)
+            if no_wait_param and setterargs.get(no_wait_param, None):
+                return None
 
         if _is_poller(result):
             result = LongRunningOperation(cmd.cli_ctx, 'Starting {}'.format(cmd.name))(result)
@@ -508,6 +523,7 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         return provisioning_state
 
     def handler(args):
+        from azure.cli.core.commands.client_factory import resolve_client_arg_name
         from msrest.exceptions import ClientException
         import time
 
@@ -516,8 +532,7 @@ def _cli_generic_wait_command(context, name, getter_op, **kwargs):
         operations_tmpl = _get_operations_tmpl(cmd)
         getter_args = dict(extract_args_from_signature(context.get_op_handler(getter_op),
                                                        excluded_params=EXCLUDED_PARAMS))
-
-        client_arg_name = 'client' if operations_tmpl.startswith(('azure.cli', 'azext')) else 'self'
+        client_arg_name = resolve_client_arg_name(operations_tmpl, kwargs)
         try:
             client = factory(context.cli_ctx) if factory else None
         except TypeError:
@@ -837,7 +852,7 @@ def _find_property(instance, path):
 def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
     import time
     from azure.mgmt.authorization import AuthorizationManagementClient
-    from azure.mgmt.authorization.models import RoleAssignmentProperties
+    from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
     from msrestazure.azure_exceptions import CloudError
 
     # get
@@ -850,14 +865,15 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
 
         identity_role_id = resolve_role_id(cli_ctx, identity_role, identity_scope)
         assignments_client = get_mgmt_service_client(cli_ctx, AuthorizationManagementClient).role_assignments
-        properties = RoleAssignmentProperties(identity_role_id, principal_id)
+        parameters = RoleAssignmentCreateParameters(role_definition_id=identity_role_id, principal_id=principal_id)
 
         logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
         retry_times = 36
-        assignment_id = _gen_guid()
+        assignment_name = _gen_guid()
         for l in range(0, retry_times):
             try:
-                assignments_client.create(identity_scope, assignment_id, properties)
+                assignments_client.create(scope=identity_scope, role_assignment_name=assignment_name,
+                                          parameters=parameters)
                 break
             except CloudError as ex:
                 if 'role assignment already exists' in ex.message:

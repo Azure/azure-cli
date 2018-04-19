@@ -10,6 +10,8 @@ from azure.cli.core.util import b64encode
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 
+from azure.cli.command_modules.vm._vm_utils import get_target_network_api
+
 
 # pylint: disable=too-few-public-methods
 class StorageProfile(Enum):
@@ -80,7 +82,7 @@ def build_public_ip_resource(cmd, name, location, tags, address_allocation, dns_
         public_ip_properties['dnsSettings'] = {'domainNameLabel': dns_name}
 
     public_ip = {
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_NETWORK),
+        'apiVersion': get_target_network_api(cmd.cli_ctx),
         'type': 'Microsoft.Network/publicIPAddresses',
         'name': name,
         'location': location,
@@ -206,11 +208,9 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None,
     return vnet
 
 
-def build_msi_role_assignment(cmd, vm_vmss_name, vm_vmss_resource_id, role_definition_id,
+def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition_id,
                               role_assignment_guid, identity_scope, is_vm=True):
     from msrestazure.tools import parse_resource_id
-    from azure.mgmt.authorization import AuthorizationManagementClient
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     result = parse_resource_id(identity_scope)
     if result.get('type'):  # is a resource id?
         name = '{}/Microsoft.Authorization/{}'.format(result['name'], role_assignment_guid)
@@ -221,11 +221,10 @@ def build_msi_role_assignment(cmd, vm_vmss_name, vm_vmss_resource_id, role_defin
 
     # pylint: disable=line-too-long
     msi_rp_api_version = '2015-08-31-PREVIEW'
-    authorization_api_version = get_mgmt_service_client(cmd.cli_ctx, AuthorizationManagementClient).api_version
     return {
         'name': name,
         'type': assignment_type,
-        'apiVersion': authorization_api_version,
+        'apiVersion': '2015-07-01',  # the minimum api-version to create the assignment
         'dependsOn': [
             'Microsoft.Compute/{}/{}'.format('virtualMachines' if is_vm else 'virtualMachineScaleSets', vm_vmss_name)
         ],
@@ -405,13 +404,27 @@ def build_vm_resource(  # pylint: disable=too-many-locals
 def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                       data_caching, storage_sku, attach_data_disks=None):
     lun = 0
+
+    # handle 2 kinds of values
+    # 1 "--data-disk-caching <value>": all disks will be applied
+    # 2 "--data-disk-caching 1=<value> 2=<value>": apply based on lun, the rest will use server side default
+    default_caching, individual_disk_cachings = None, {}
+    if data_caching:
+        if len(data_caching) == 1 and '=' not in data_caching[0]:
+            default_caching = data_caching[0]
+        else:
+            for x in data_caching:
+                temp, caching = x.split('=', 1)
+                temp = int(temp)
+                individual_disk_cachings[temp] = caching
+
     if image_data_disks:
         profile['dataDisks'] = profile.get('dataDisks') or []
         for image_data_disk in image_data_disks or []:
             profile['dataDisks'].append({
                 'lun': image_data_disk.lun,
                 'createOption': "fromImage",
-                'caching': data_caching,
+                'caching': default_caching or individual_disk_cachings.get(image_data_disk.lun),
                 'managedDisk': {'storageAccountType': storage_sku}
             })
             lun = lun + 1
@@ -424,7 +437,7 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
                 'lun': lun,
                 'createOption': "empty",
                 'diskSizeGB': int(size),
-                'caching': data_caching,
+                'caching': default_caching or individual_disk_cachings.get(lun),
                 'managedDisk': {'storageAccountType': storage_sku}
             })
             lun = lun + 1
@@ -436,7 +449,7 @@ def _build_data_disks(profile, data_disk_sizes_gb, image_data_disks,
             disk_entry = {
                 'lun': lun,
                 'createOption': 'attach',
-                'caching': data_caching,
+                'caching': default_caching or individual_disk_cachings.get(lun),
             }
             if is_valid_resource_id(d):
                 disk_entry['managedDisk'] = {'id': d}
@@ -604,7 +617,7 @@ def build_load_balancer_resource(cmd, name, location, tags, backend_pool_name, n
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_NETWORK),
+        'apiVersion': get_target_network_api(cmd.cli_ctx),
         'dependsOn': [],
         'properties': lb_properties
     }
@@ -659,8 +672,8 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
                         image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
-                        single_placement_group=None, custom_data=None, secrets=None, license_type=None,
-                        zones=None, priority=None):
+                        single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
+                        secrets=None, license_type=None, zones=None, priority=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -761,8 +774,6 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
     if secrets:
         os_profile['secrets'] = secrets
 
-    if single_placement_group is None:  # this should never happen, but just in case
-        raise ValueError('single_placement_group was not set by validators')
     # Build VMSS
     nic_config = {
         'name': nic_name,
@@ -807,6 +818,10 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     if priority and cmd.supported_api_version(min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
         vmss_properties['virtualMachineProfile']['priority'] = priority
+
+    if platform_fault_domain_count is not None and cmd.supported_api_version(
+            min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
+        vmss_properties['platformFaultDomainCount'] = platform_fault_domain_count
 
     vmss = {
         'type': 'Microsoft.Compute/virtualMachineScaleSets',

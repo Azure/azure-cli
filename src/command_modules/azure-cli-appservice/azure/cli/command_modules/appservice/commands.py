@@ -76,7 +76,8 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('browse', 'view_in_browser')
         g.custom_command('list-runtimes', 'list_runtimes')
-        g.custom_command('assign-identity', 'assign_identity')
+        g.custom_command('identity assign', 'assign_identity')
+        g.custom_command('identity show', 'show_identity')
         g.generic_update_command('update', custom_func_name='update_webapp', setter_arg_name='site_envelope')
 
     with self.command_group('webapp traffic-routing') as g:
@@ -178,7 +179,9 @@ def load_command_table(self, _):
         g.custom_command('start', 'start_webapp')
         g.custom_command('restart', 'restart_webapp')
         g.custom_command('list-consumption-locations', 'list_consumption_locations')
-        g.custom_command('assign-identity', 'assign_identity')
+        g.custom_command('assign-identity', 'assign_identity', deprecate_info='identity assign')
+        g.custom_command('identity assign', 'assign_identity')
+        g.custom_command('identity show', 'show_identity')
 
     with self.command_group('functionapp config appsettings') as g:
         g.custom_command('list', 'get_app_settings', exception_handler=empty_on_404)

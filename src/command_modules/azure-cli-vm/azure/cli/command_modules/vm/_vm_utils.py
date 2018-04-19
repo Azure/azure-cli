@@ -15,6 +15,18 @@ logger = get_logger(__name__)
 MSI_LOCAL_ID = '[system]'
 
 
+def get_target_network_api(cli_ctx):
+    """ Since most compute calls don't need advanced network functionality, we can target a supported, but not
+        necessarily latest, network API version is order to avoid having to re-record every test that uses VM create
+        (which there are a lot) whenever NRP bumps their API version (which is often)!
+    """
+    from azure.cli.core.profiles import get_api_version, ResourceType
+    version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
+    if cli_ctx.cloud.profile == 'latest':
+        version = '2018-01-01'
+    return version
+
+
 def read_content_if_is_file(string_or_file):
     content = string_or_file
     if os.path.exists(string_or_file):
@@ -95,3 +107,16 @@ def create_keyvault_data_plane_client(cli_ctx):
 def get_key_vault_base_url(cli_ctx, vault_name):
     suffix = cli_ctx.cloud.suffixes.keyvault_dns
     return 'https://{}{}'.format(vault_name, suffix)
+
+
+def list_sku_info(cli_ctx, location=None):
+    from ._client_factory import _compute_client_factory
+
+    def _match_location(l, locations):
+        return next((x for x in locations if x.lower() == l.lower()), None)
+
+    client = _compute_client_factory(cli_ctx)
+    result = client.resource_skus.list()
+    if location:
+        result = [r for r in result if _match_location(location, r.locations)]
+    return result

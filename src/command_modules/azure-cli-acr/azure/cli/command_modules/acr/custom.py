@@ -59,6 +59,9 @@ def acr_create(cmd,
     admin_user_enabled = admin_enabled == 'true'
 
     if sku == SkuName.classic.value:
+        logger.warning(
+            "Due to the planned deprecation of the Classic registry SKU, we recommend using "
+            "Basic, Standard, or Premium for all new registries. See https://aka.ms/acr/skus for details.")
         if storage_account_name is None:
             storage_account_name = random_storage_account_name(cmd.cli_ctx, registry_name)
             logger.warning(
@@ -104,17 +107,7 @@ def acr_create(cmd,
                 deployment_name)
         )
 
-    registry = client.get(resource_group_name, registry_name)
-    logger.warning('\nCreate a new service principal and assign access:')
-    logger.warning(
-        '  az ad sp create-for-rbac --scopes %s --role Owner --password <password>',
-        registry.id)  # pylint: disable=no-member
-    logger.warning('\nUse an existing service principal and assign access:')
-    logger.warning(
-        '  az role assignment create --scope %s --role Owner --assignee <app-id>',
-        registry.id)  # pylint: disable=no-member
-
-    return registry
+    return client.get(resource_group_name, registry_name)
 
 
 def acr_delete(cmd, client, registry_name, resource_group_name=None):
@@ -257,7 +250,8 @@ def _check_wincred(login_server):
     if platform.system() == 'Windows':
         import json
         from os.path import expanduser, isfile, join
-        config_path = join(expanduser('~'), '.docker', 'config.json')
+        docker_directory = join(expanduser('~'), '.docker')
+        config_path = join(docker_directory, 'config.json')
         logger.debug("Docker config file path %s", config_path)
         if isfile(config_path):
             with open(config_path) as input_file:
@@ -275,18 +269,23 @@ def _check_wincred(login_server):
                         with open(config_path, 'w') as output_file:
                             json.dump(content, output_file, indent=4)
                             output_file.close()
-                            return True
+                        return True
                     return False
                 except NoTTYException:
                     return False
             # Don't update config file or retry as this doesn't seem to be a wincred issue
             return False
         else:
+            import os
             content = {
                 "auths": {
                     login_server: {}
                 }
             }
+            try:
+                os.makedirs(docker_directory)
+            except OSError:
+                pass
             with open(config_path, 'w') as output_file:
                 json.dump(content, output_file, indent=4)
                 output_file.close()

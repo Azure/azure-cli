@@ -7,15 +7,13 @@ import unittest
 import six
 import os
 import json
-from azclishell.util import parse_quotes
-from azclishell.gather_commands import GatherCommands
+import mock
+from azure.cli.command_modules.interactive.azclishell.util import parse_quotes
+from azure.cli.command_modules.interactive.azclishell.gather_commands import GatherCommands
 
 
 def pass_gather(*_):
     pass
-
-
-GatherCommands._gather_from_files = pass_gather
 
 
 # pylint: disable=too-few-public-methods
@@ -24,11 +22,12 @@ class MockValues(object):
         self.result = None
 
 
+@mock.patch.object(GatherCommands, '_gather_from_files', pass_gather)
 class QueryInjection(unittest.TestCase):
     """ tests using the query gesture for the interactive mode """
     def __init__(self, *args, **kwargs):
         super(QueryInjection, self).__init__(*args, **kwargs)
-        from azclishell.app import AzInteractiveShell
+        from azure.cli.command_modules.interactive.azclishell.app import AzInteractiveShell
         from azure.cli.testsdk import TestCli
         self.stream = six.StringIO()
         self.shell = AzInteractiveShell(TestCli(), output_custom=self.stream)

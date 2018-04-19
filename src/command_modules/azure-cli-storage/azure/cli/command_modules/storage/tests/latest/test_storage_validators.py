@@ -117,7 +117,8 @@ class TestStorageValidators(unittest.TestCase):
     def test_services_type(self):
         input = "ttfqbqtf"
         actual = str(services_type(self.loader)(input))
-        if supported_api_version(self.cli, ResourceType.DATA_STORAGE, max_api='2016-05-31'):
+        if supported_api_version(self.cli, ResourceType.DATA_STORAGE, max_api='2016-05-31') or \
+           supported_api_version(self.cli, ResourceType.DATA_STORAGE, min_api='2017-07-29'):
             expected = "bqtf"
         else:
             expected = "bqf"
@@ -182,10 +183,6 @@ class TestEncryptionValidators(unittest.TestCase):
 
     def test_validate_encryption_source(self):
         from azure.cli.command_modules.storage._validators import validate_encryption_source
-
-        with self.assertRaises(ValueError):
-            validate_encryption_source(MockCmd(self.cli),
-                                       Namespace(encryption_key_source='Notanoption', _cmd=MockCmd(self.cli)))
 
         with self.assertRaises(ValueError):
             validate_encryption_source(MockCmd(self.cli),

@@ -18,7 +18,7 @@ except ImportError:
 
 from msrestazure.azure_exceptions import CloudError
 
-from azure.cli.core.util import CLIError, get_file_json, b64_to_hex
+from azure.cli.core.util import CLIError, get_file_json, b64_to_hex, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
 from azure.graphrbac import GraphRbacManagementClient
 from azure.keyvault import KeyVaultClient, KeyVaultAuthentication
@@ -819,7 +819,7 @@ def add_cluster_node_type(cmd,
 
     public_address_name = 'LBIP-{}-{}{}'.format(
         cluster_name.lower(), node_type.lower(), index)
-    dns_lable = '{}-{}{}'.format(cluster_name.lower(),
+    dns_label = '{}-{}{}'.format(cluster_name.lower(),
                                  node_type.lower(), index)
     lb_name = 'LB-{}-{}{}'.format(cluster_name.lower(),
                                   node_type.lower(), index)
@@ -827,7 +827,7 @@ def add_cluster_node_type(cmd,
                                                                  public_address_name,
                                                                  PublicIPAddress(public_ip_allocation_method='Dynamic',
                                                                                  location=location,
-                                                                                 dns_settings=PublicIPAddressDnsSettings(dns_lable)))
+                                                                                 dns_settings=PublicIPAddressDnsSettings(domain_name_label=dns_label)))
 
     publicIp = LongRunningOperation(cli_ctx)(poller)
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -951,9 +951,9 @@ def add_cluster_node_type(cmd,
         storage_client = storage_client_factory(cli_ctx)
         LongRunningOperation(cli_ctx)(storage_client.storage_accounts.create(resource_group_name,
                                                                              storage_name,
-                                                                             StorageAccountCreateParameters(Sku(SkuName.standard_lrs),
-                                                                                                            'storage',
-                                                                                                            location)))
+                                                                             StorageAccountCreateParameters(sku=Sku(name=SkuName.standard_lrs),
+                                                                                                            kind='storage',
+                                                                                                            location=location)))
 
         acc_prop = storage_client.storage_accounts.get_properties(
             resource_group_name, storage_name)
@@ -1302,9 +1302,10 @@ def _deploy_arm_template_core(cli_ctx,
         template=template, template_link=None, parameters=parameters, mode=mode)
     client = resource_client_factory(cli_ctx)
     if validate_only:
-        return client.deployments.validate(resource_group_name, deployment_name, properties, raw=no_wait)
+        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name, properties)
 
-    deploy_poll = client.deployments.create_or_update(resource_group_name, deployment_name, properties, raw=no_wait)
+    deploy_poll = sdk_no_wait(no_wait, client.deployments.create_or_update, resource_group_name,
+                              deployment_name, properties)
     result = LongRunningOperation(cli_ctx)(deploy_poll)
     return result
 

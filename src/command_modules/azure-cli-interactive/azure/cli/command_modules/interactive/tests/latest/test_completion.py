@@ -3,255 +3,142 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import unittest
-import six
+import mock
 
-import azclishell.command_tree as tree
-from azclishell.az_completer import AzCompleter
+from azure.cli.testsdk import TestCli
+from azure.cli.command_modules.interactive.azclishell.configuration import Configuration
+from azure.cli.command_modules.interactive.azclishell.app import AzInteractiveShell
+
 from prompt_toolkit.document import Document
-from prompt_toolkit.completion import Completion
 
 
-def _build_completer(commands, global_params):
-    from azure.cli.testsdk import TestCli
-    from azclishell.app import AzInteractiveShell
-    shell_ctx = AzInteractiveShell(TestCli(), None)
-    return AzCompleter(shell_ctx, commands, global_params)
-
-
-class _Commands():
-    """ mock model for testing completer """
-    def __init__(self, descrip=None, completable=None, command_param=None,
-                 completable_param=None, command_tree=None, param_descript=None,
-                 command_example=None, same_param_doubles=None):
-        self.descrip = descrip
-        self.completable = completable
-        com_par = {}
-        for com in self.descrip.keys():
-            com_par[com] = ''
-        self.command_param = command_param or com_par
-        self.completable_param = completable_param
-
-        self.command_tree = command_tree
-        self.param_descript = param_descript
-        self.command_example = command_example
-        self.same_param_doubles = same_param_doubles
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class CompletionTest(unittest.TestCase):
     """ tests the completion generator """
-    def init1(self):
-        """ a variation of initializing """
-        com_tree1 = tree.generate_tree("command can")
-        com_tree2 = tree.generate_tree("create")
-        com_tree3 = tree.CommandHead()
-        com_tree3.add_child(com_tree2)
-        com_tree3.add_child(com_tree1)
-        command_description = {
-            "create": '',
-            "command can": ''
-        }
-        commands = _Commands(
-            command_tree=com_tree3,
-            descrip=command_description
-        )
-        self.completer = _build_completer(commands, global_params=False)
+    def verify_completions(self, generated_completions, expected_completions, start_position,
+                           all_completions_expected=True, unexpected_completions=None):
+        for completion in generated_completions:
+            if all_completions_expected:
+                self.assertIn(completion.text, expected_completions)
+                expected_completions.remove(completion.text)
+            else:
+                expected_completions.discard(completion.text)
+            if unexpected_completions:
+                self.assertNotIn(completion.text, unexpected_completions)
 
-    def init2(self):
-        """ a variation of initializing """
-        com_tree1 = tree.generate_tree("command can")
-        com_tree2 = tree.generate_tree("create")
-        com_tree3 = tree.CommandHead()
-        com_tree3.add_child(com_tree2)
-        com_tree3.add_child(com_tree1)
-        command_param = {
-            "create": ["-funtime"],
-        }
-        completable_param = [
-            "-helloworld",
-            "-funtime"
-        ]
-        param_descript = {
-            "create -funtime": "There is no work life balance, it's just your life"
-        }
-        command_description = {
-            "create": '',
-            "command can": ''
-        }
-        commands = _Commands(
-            command_tree=com_tree3,
-            command_param=command_param,
-            completable_param=completable_param,
-            param_descript=param_descript,
-            descrip=command_description
-        )
-        self.completer = _build_completer(commands, global_params=False)
+            self.assertEqual(completion.start_position, start_position)
+        self.assertFalse(expected_completions)
 
-    def init3(self):
-        """ a variation of initializing """
-        com_tree1 = tree.generate_tree("command can")
-        com_tree2 = tree.generate_tree("create")
-        com_tree3 = tree.CommandHead()
-        com_tree3.add_child(com_tree2)
-        com_tree3.add_child(com_tree1)
-        command_param = {
-            "create": ["--funtimes", "-f", '--fun', "--helloworld"],
-        }
-        completable_param = [
-            "--helloworld",
-            "--funtimes",
-            "-f",
-            '--fun'
-        ]
-        param_descript = {
-            "create -f": "There is no work life balance, it's just your life",
-            "create --funtimes": "There is no work life balance, it's just your life",
-            "create --fun": "There is no work life balance, it's just your life"
-        }
-        same_param_doubles = {
-            "create": [set(["-f", "--funtimes", '--fun']), set(['--unhap', '-u'])]
-        }
-        command_description = {
-            "create": '',
-            "command can": ''
-        }
-        commands = _Commands(
-            command_tree=com_tree3,
-            command_param=command_param,
-            completable_param=completable_param,
-            param_descript=param_descript,
-            same_param_doubles=same_param_doubles,
-            descrip=command_description
-        )
-        self.completer = _build_completer(commands, global_params=False)
-
-    def init4(self):
-        """ a variation of initializing """
-        com_tree1 = tree.generate_tree("createmore can")
-        com_tree2 = tree.generate_tree("create")
-        com_tree3 = tree.CommandHead()
-        com_tree3.add_child(com_tree2)
-        com_tree3.add_child(com_tree1)
-        command_param = {
-            "create": ["--funtimes", "-f", "--helloworld"],
-        }
-        completable_param = [
-            "--helloworld",
-            "--funtimes",
-            "-f"
-        ]
-        param_descript = {
-            "create -f": "There is no work life balance, it's just your life",
-            "create --funtimes": "There is no work life balance, it's just your life"
-        }
-        same_param_doubles = {
-            "create": [set(["-f", "--funtimes", '--fun'])]
-        }
-        command_description = {
-            "create": '',
-            "createmore can": ''
-        }
-        commands = _Commands(
-            command_tree=com_tree3,
-            command_param=command_param,
-            completable_param=completable_param,
-            param_descript=param_descript,
-            same_param_doubles=same_param_doubles,
-            descrip=command_description
-        )
-        self.completer = _build_completer(commands, global_params=False)
+    def init_completer(self):
+        with mock.patch.object(Configuration, 'get_help_files', lambda _: 'help_dump_test.json'):
+            with mock.patch.object(Configuration, 'get_config_dir', lambda _: TEST_DIR):
+                shell_ctx = AzInteractiveShell(TestCli(), None)
+                self.completer = shell_ctx.completer
 
     def test_command_completion(self):
-        # tests general command completion
-        self.init1()
+        # tests some azure commands
+        self.init_completer()
 
-        doc = Document(u'')
+        # initial completions
+        doc = Document(u' ')
         gen = self.completer.get_completions(doc, None)
-        self.assertEqual(six.next(gen), Completion("command"))
-        self.assertEqual(six.next(gen), Completion("create"))
+        completions = set(['exit', 'quit', 'storage', 'vm', 'vmss'])
+        self.verify_completions(gen, completions, 0)
 
-        doc = Document(u'c')
+        # start command
+        doc = Document(u's')
         gen = self.completer.get_completions(doc, None)
-        self.assertEqual(six.next(gen), Completion("command", -1))
-        self.assertEqual(six.next(gen), Completion("create", -1))
+        completions = set(['storage'])
+        self.verify_completions(gen, completions, -1)
 
-        doc = Document(u'cr')
+        # test spaces
+        doc = Document(u'  storage    a')
         gen = self.completer.get_completions(doc, None)
-        self.assertEqual(six.next(gen), Completion("create", -2))
+        completions = set(['account'])
+        self.verify_completions(gen, completions, -1)
 
-        doc = Document(u'command ')
+        # completer traverses command-tree
+        doc = Document(u'storage account ')
         gen = self.completer.get_completions(doc, None)
-        self.assertEqual(six.next(gen), Completion("can"))
+        completions = set(['create', 'check-name'])
+        self.verify_completions(gen, completions, 0)
 
-        doc = Document(u'create ')
+        # test completed command still shows completion
+        doc = Document(u'vm')
         gen = self.completer.get_completions(doc, None)
-        with self.assertRaises(StopIteration):
-            six.next(gen)
+        completions = set(['vm', 'vmss'])
+        self.verify_completions(gen, completions, -2)
+
+        # test unrecognized command does not complete
+        doc = Document(u'vm group ')
+        gen = self.completer.get_completions(doc, None)
+        completions = set()
+        self.verify_completions(gen, completions, 0)
 
     def test_param_completion(self):
-        # tests param completion
-        self.init2()
-        doc = Document(u'create -')
-        gen = self.completer.get_completions(doc, None)
-        self.assertEqual(six.next(gen), Completion(
-            "-funtime", -1, display_meta="There is no work life balance, it's just your life"))
+        # tests some azure params
+        self.init_completer()
 
-        doc = Document(u'command can -')
+        # 'az -h'
+        doc = Document(u'-')
         gen = self.completer.get_completions(doc, None)
-        with self.assertRaises(StopIteration):
-            six.next(gen)
+        completions = set(['-h'])
+        self.verify_completions(gen, completions, -1)
 
-    def test_param_double(self):
-        # tests not generating doubles for parameters
-        self.init3()
-        doc = Document(u'create -f --')
+        # 'az --help'
+        doc = Document(u'--')
         gen = self.completer.get_completions(doc, None)
-        self.assertEqual(six.next(gen), Completion(
-            "--helloworld", -2))
+        completions = set(['--help'])
+        self.verify_completions(gen, completions, -2)
 
-        doc = Document(u'create -f -')
+        # 'az storage account -h'
+        doc = Document(u'storage account -')
         gen = self.completer.get_completions(doc, None)
-        with self.assertRaises(StopIteration):
-            six.next(gen)
+        completions = set(['-h'])
+        self.verify_completions(gen, completions, -1)
 
-        doc = Document(u'create --fun -')
+        # test just completed command, first param completions
+        doc = Document(u'storage account create ')
         gen = self.completer.get_completions(doc, None)
-        with self.assertRaises(StopIteration):
-            six.next(gen)
+        expected = set(['--name', '--resource-group', '--access-tier', '--sku', '--tags'])
+        not_expected = set(['-n', '-h', '-g'])
+        self.verify_completions(gen, expected, 0, all_completions_expected=False, unexpected_completions=not_expected)
 
-        doc = Document(u'create --funtimes -')
+        # test single dash aliased params
+        doc = Document(u'storage account create -')
         gen = self.completer.get_completions(doc, None)
-        with self.assertRaises(StopIteration):
-            six.next(gen)
+        completions = set(['-h', '-o', '-g', '-l', '-n'])
+        self.verify_completions(gen, completions, -1)
 
-    def test_second_completion(self):
-        self.init3()
-        doc = Document(u'crea ')
+        # test params that are substrings of one another
+        doc = Document(u'vmss create --subnet')
         gen = self.completer.get_completions(doc, None)
-        with self.assertRaises(StopIteration):
-            six.next(gen)
+        completions = set(['--subnet', '--subnet-address-prefix'])
+        self.verify_completions(gen, completions, -8)
 
-        doc = Document(u'create --fun ')
+        # test duplicated parameters
+        expected = set()
+        doc = Document(u'vmss create --name Bob --n')
         gen = self.completer.get_completions(doc, None)
-        with self.assertRaises(StopIteration):
-            six.next(gen)
+        not_expected = set(['--name'])
+        self.verify_completions(gen, expected, -3, all_completions_expected=False, unexpected_completions=not_expected)
 
-        doc = Document(u'command d ')
+        # test duplicated parameter alias
+        doc = Document(u'vmss create --name Bob -n')
         gen = self.completer.get_completions(doc, None)
-        with self.assertRaises(StopIteration):
-            six.next(gen)
+        not_expected = set(['-n'])
+        self.verify_completions(gen, expected, -2, all_completions_expected=False, unexpected_completions=not_expected)
 
-        doc = Document(u'create --funtimes "life" --hello')
+        # test displayed help
+        doc = Document(u'vm create -g')
         gen = self.completer.get_completions(doc, None)
-        self.assertEqual(six.next(gen), Completion(
-            "--helloworld", -7))
-
-    def test_substring_completion(self):
-        self.init4()
-        doc = Document(u'create')
-        gen = self.completer.get_completions(doc, None)
-        self.assertEqual(six.next(gen), Completion(
-            "createmore", -6))
+        completion = next(gen)
+        self.assertEqual(completion.text, '-g')
+        self.assertIn('Name of resource group', completion._display_meta)
 
 
 if __name__ == '__main__':

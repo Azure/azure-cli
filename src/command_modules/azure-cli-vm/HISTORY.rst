@@ -2,6 +2,43 @@
 
 Release History
 ===============
+2.0.30
+++++++
+* `vmss create`: support to configure platform fault domain count
+* `vmss create`: default to Standard LB for zonal, large or single-placement-group disabled scale-set
+* BREAKING CHANGE: `vm assign-identity`, `vm remove-identity`: Deprecated commands have been removed.
+* BREAKING CHANGE: `vm format-secret`: Deprecated command has been removed.
+* `vm create`: support configure Public-IP sku
+* `vm create`: support configure Public-IP SKU
+* `vm secret format`: Added extra validation. Added `--keyvault` and `--resource-group` to support scenarios
+                      where the command is unable to resolve the vault ID. [#5718](https://github.com/Azure/azure-cli/issues/5718)
+* `vm/vmss create`: emit out a better error if resource group's location has no zone support
+* `sdist` is now compatible with wheel 0.31.0
+
+2.0.29
+++++++
+* `vmss create`: warn on upcoming breaking changes on default balancer for scaleset with 100+ instances
+* vm snapshot/image: support zone resilient
+* vmss: report better encryption status through disk instance view
+* BC: `az vm extension delete` no longer returns output as expected for a `delete` command.
+
+2.0.28
+++++++
+* vm/vmss create: support to attach unmanaged data disks and configure their caching modes 
+* vm/vmss: author managed identity commands `identity assign/remove/show`, and deprecate `assign-identity/remove-identity`
+* vmss create: default priority to None
+* Support Autorest 3.0 based SDKs
+
+2.0.27
+++++++
+* vmss instance update: support attach/detach disks on an individual instance
+* Support Autorest 3.0 based SDKs
+
+2.0.26
+++++++
+* vm encryption: avoid the crash when vm encryption setting might not be fully initialized
+* msi: output principal id on enabling system assigned identity
+* vm boot-diagnostic: fix the broken get log command
 
 2.0.25
 ++++++
@@ -42,7 +79,7 @@ Release History
 2.0.18
 ++++++
 * `vmss create`: fix a bug that blocks using Basic tier of VM sizes
-* `vm/vmss create`: expose `plan` arguments for using custom images with billing informations 
+* `vm/vmss create`: expose `plan` arguments for using custom images with billing informations
 * vm : support `vm secret add/remove/list`
 * vm : `vm format-secret` is copied to `vm secret format`. The old one will be removed in future
 * Minor fixes.
@@ -75,14 +112,14 @@ Release History
 * msi: use the same extension naming as portal does
 * msi: remove the useless `subscription` from the `vm/vmss create` commands output
 * `vm/vmss create`: fix a bug that the storage sku is not applied on data disks coming with an image
-* `vm format-secret`: Fix issue where `--secrets` would not accept newline separated IDs.
+* `vm format-secret`: Fix issue where `--secrets` would not accept newline-separated IDs.
 
 2.0.13 (2017-08-28)
 +++++++++++++++++++
 * `vmss get-instance-view`: Fix issue where extra, erroneous information was displayed when using `--instance-id *`
 * `vmss create`: Added support for `--lb-sku`
 * `vm/vmss create`: remove human names from the admin name blacklist
-* `vm/vmss create`: fix issue where the command would throw an error if unable to extract plan information from an image. 
+* `vm/vmss create`: fix issue where the command would throw an error if unable to extract plan information from an image.
 * `vmss create`: fix a crash when create a scaleset with an internal LB
 * `vm availability-set create`: Fix issue where --no-wait argument did not work.
 
@@ -116,7 +153,7 @@ Release History
 
 2.0.9 (2017-06-21)
 ++++++++++++++++++
-* vm/vmss: lower thread number used for 'vm image list --all' to avoid exceeding the OS opened file limits  
+* vm/vmss: lower thread number used for 'vm image list --all' to avoid exceeding the OS opened file limits
 * diagnostics: Fix a typo in default Linux Diagnostic extension config
 * vmss create: fix failure when running with --use-unmanaged-disk
 

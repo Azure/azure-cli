@@ -12,16 +12,17 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import (
-    get_location_type, get_resource_name_completion_list, tags_type,
+    get_location_type, get_resource_name_completion_list, tags_type, get_three_state_flag,
     file_type, get_enum_type, zone_type, zones_type)
 from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
     get_urn_aliases_completion_list, get_vm_size_completion_list, get_vm_run_command_completion_list)
 from azure.cli.command_modules.vm._validators import (
-    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk, validate_asg_names_or_ids)
+    validate_nsg_name, validate_vm_nics, validate_vm_nic, validate_vm_disk,
+    validate_vmss_disk, validate_asg_names_or_ids, validate_keyvault)
 
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements, too-many-branches
 def load_arguments(self, _):
     from azure.mgmt.compute.models import CachingTypes, UpgradeMode
     from azure.mgmt.storage.models import SkuName
@@ -81,10 +82,13 @@ def load_arguments(self, _):
     # endregion
 
     # region Snapshots
-    with self.argument_context('snapshot') as c:
+    with self.argument_context('snapshot', resource_type=ResourceType.MGMT_COMPUTE, operation_group='snapshots') as c:
         c.argument('snapshot_name', existing_snapshot_name, id_part='name', completer=get_resource_name_completion_list('Microsoft.Compute/snapshots'))
         c.argument('name', arg_type=name_arg_type)
-        c.argument('sku', arg_type=disk_sku)
+        if self.supported_api_version(min_api='2018-04-01', operation_group='snapshots'):
+            c.argument('sku', arg_type=get_enum_type(['Premium_LRS', 'Standard_LRS', 'Standard_ZRS']))
+        else:
+            c.argument('sku', arg_type=disk_sku)
     # endregion
 
     # region Images
@@ -96,7 +100,9 @@ def load_arguments(self, _):
         # here we collpase all difference image sources to under 2 common arguments --os-disk-source --data-disk-sources
         c.argument('name', arg_type=name_arg_type, help='new image name')
         c.argument('source', help='OS disk source from the same region, including a virtual machine ID or name, OS disk blob URI, managed OS disk ID or name, or OS snapshot ID or name')
-        c.argument('data_disk_sources', nargs='+', help='Space separated list of data disk sources, including unmanaged blob URI, managed disk ID or name, or snapshot ID or name')
+        c.argument('data_disk_sources', nargs='+', help='Space-separated list of data disk sources, including unmanaged blob URI, managed disk ID or name, or snapshot ID or name')
+        c.argument('zone_resilient', min_api='2017-12-01', arg_type=get_three_state_flag(), help='Specifies whether an image is zone resilient or not. '
+                   'Default is false. Zone resilient images can be created only in regions that provide Zone Redundant Storage')
         c.ignore('source_virtual_machine', 'os_blob_uri', 'os_disk', 'os_snapshot', 'data_blob_uris', 'data_disks', 'data_snapshots')
     # endregion
 
@@ -126,7 +132,7 @@ def load_arguments(self, _):
         c.argument('caching', help='Disk caching policy', arg_type=get_enum_type(CachingTypes))
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
-        c.argument('application_security_groups', min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space separated list of existing application security groups to associate with the VM.', arg_group='Network')
+        c.argument('application_security_groups', min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network')
 
     with self.argument_context('vm capture') as c:
         c.argument('overwrite', action='store_true')
@@ -143,7 +149,7 @@ def load_arguments(self, _):
         c.argument('availability_set', help='Name or ID of an existing availability set to add the VM to. None by default.')
         c.argument('nsg', help='The name to use when creating a new Network Security Group (default) or referencing an existing one. Can also reference an existing NSG by ID or specify "" for none.', arg_group='Network')
         c.argument('nsg_rule', help='NSG rule to create when creating a new NSG. Defaults to open ports for allowing RDP on Windows and allowing SSH on Linux.', arg_group='Network', arg_type=get_enum_type(['RDP', 'SSH']))
-        c.argument('application_security_groups', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
+        c.argument('application_security_groups', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-09-01', nargs='+', options_list=['--asgs'], help='Space-separated list of existing application security groups to associate with the VM.', arg_group='Network', validator=validate_asg_names_or_ids)
 
     with self.argument_context('vm open-port') as c:
         c.argument('vm_name', name_arg_type, help='The name of the virtual machine to open inbound traffic on.')
@@ -180,12 +186,11 @@ def load_arguments(self, _):
         c.argument('vm_extension_name', name_arg_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachines/extensions'), id_part='child_name_1')
         c.argument('vm_name', arg_type=existing_vm_name, options_list=['--vm-name'], id_part='name')
 
-    for scope in ['vm format-secret', 'vm secret']:
-        with self.argument_context(scope) as c:
-            c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='Space separated list of key vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
-            c.argument('keyvault', help='Name or ID of the key vault.')
-            c.argument('certificate', help='key vault certificate name or its full secret URL')
-            c.argument('certificate_store', help='Windows certificate store names. Default: My')
+    with self.argument_context('vm secret') as c:
+        c.argument('secrets', multi_ids_type, options_list=['--secrets', '-s'], help='Space-separated list of key vault secret URIs. Perhaps, produced by \'az keyvault secret list-versions --vault-name vaultname -n cert1 --query "[?attributes.enabled].id" -o tsv\'')
+        c.argument('keyvault', help='Name or ID of the key vault.', validator=validate_keyvault)
+        c.argument('certificate', help='key vault certificate name or its full secret URL')
+        c.argument('certificate_store', help='Windows certificate store names. Default: My')
 
     with self.argument_context('vm image') as c:
         c.argument('publisher_name', options_list=['--publisher', '-p'])
@@ -214,7 +219,7 @@ def load_arguments(self, _):
         c.argument('command_id', completer=get_vm_run_command_completion_list, help="The run command ID")
 
     with self.argument_context('vm run-command invoke') as c:
-        c.argument('parameters', nargs='+', help="space separated parameters in the format of '[name=]value'")
+        c.argument('parameters', nargs='+', help="space-separated parameters in the format of '[name=]value'")
         c.argument('scripts', nargs='+', help="script lines separated by whites spaces. Use @{file} to load from a file")
 
     with self.argument_context('vm unmanaged-disk') as c:
@@ -245,7 +250,7 @@ def load_arguments(self, _):
     with self.argument_context('vmss') as c:
         c.argument('zones', zones_type, min_api='2017-03-30')
         c.argument('instance_id', id_part='child_name_1')
-        c.argument('instance_ids', multi_ids_type, help='Space separated list of IDs (ex: 1 2 3 ...) or * for all instances. If not provided, the action will be applied on the scaleset itself')
+        c.argument('instance_ids', multi_ids_type, help='Space-separated list of IDs (ex: 1 2 3 ...) or * for all instances. If not provided, the action will be applied on the scaleset itself')
         c.argument('tags', tags_type)
         c.argument('caching', help='Disk caching policy', arg_type=get_enum_type(CachingTypes))
         for dest in scaleset_name_aliases:
@@ -260,7 +265,9 @@ def load_arguments(self, _):
         VMPriorityTypes = self.get_models('VirtualMachinePriorityTypes', resource_type=ResourceType.MGMT_COMPUTE)
         c.argument('name', name_arg_type)
         c.argument('nat_backend_port', default=None, help='Backend port to open with NAT rules.  Defaults to 22 on Linux and 3389 on Windows.')
-        c.argument('single_placement_group', default=None, help="Enable single placement group. This flag will default to True if instance count <=100, and default to False for instance count >100.", arg_type=get_enum_type(['true', 'false']))
+        c.argument('single_placement_group', arg_type=get_three_state_flag(), help="Enable replicate using fault domains within the same cluster. Default to 'false' for any zonals, or with 100+ instances"
+                   " See https://docs.microsoft.com/en-us/azure/virtual-machine-scale-sets/virtual-machine-scale-sets-placement-groups for details")
+        c.argument('platform_fault_domain_count', type=int, help='Fault Domain count for each placement group in the availability zone', min_api='2017-12-01')
         c.argument('vmss_name', name_arg_type, id_part=None, help='Name of the virtual machine scale set.')
         c.argument('instance_count', help='Number of VMs in the scale set.', type=int)
         c.argument('disable_overprovision', help='Overprovision option (see https://azure.microsoft.com/en-us/documentation/articles/virtual-machine-scale-sets-overview/ for details).', action='store_true')
@@ -268,7 +275,7 @@ def load_arguments(self, _):
         c.argument('health_probe', help='(Preview) probe name from the existing load balancer, mainly used for rolling upgrade')
         c.argument('vm_sku', help='Size of VMs in the scale set.  See https://azure.microsoft.com/en-us/pricing/details/virtual-machines/ for size info.')
         c.argument('nsg', help='Name or ID of an existing Network Security Group.', arg_group='Network')
-        c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default='Regular'),
+        c.argument('priority', resource_type=ResourceType.MGMT_COMPUTE, min_api='2017-12-01', arg_type=get_enum_type(VMPriorityTypes, default=None),
                    help="(PREVIEW)Priority. Use 'Low' to run short-lived workloads in a cost-effective way")
 
     with self.argument_context('vmss create', arg_group='Network Balancer') as c:
@@ -280,18 +287,19 @@ def load_arguments(self, _):
         c.argument('backend_pool_name', help='Name to use for the backend pool when creating a new load balancer or application gateway.')
         c.argument('backend_port', help='When creating a new load balancer, backend port to open with NAT rules (Defaults to 22 on Linux and 3389 on Windows). When creating an application gateway, the backend port to use for the backend HTTP settings.', type=int)
         c.argument('load_balancer', help='Name to use when creating a new load balancer (default) or referencing an existing one. Can also reference an existing load balancer by ID or specify "" for none.', options_list=['--load-balancer', '--lb'])
-        c.argument('load_balancer_sku', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-08-01', help="SKU when creating a new Load Balancer. Default to 'Basic' for any non-zonal scaleset and 'Standard' otherwise", options_list=['--lb-sku'], arg_type=get_enum_type(LoadBalancerSkuName))
+        c.argument('load_balancer_sku', resource_type=ResourceType.MGMT_NETWORK, min_api='2017-08-01', options_list=['--lb-sku'], arg_type=get_enum_type(LoadBalancerSkuName),
+                   help="Sku of the Load Balancer to create. Default to 'Standard' when single placement group is turned off; otherwise, default to 'Basic'")
         c.argument('nat_pool_name', help='Name to use for the NAT pool when creating a new load balancer.', options_list=['--lb-nat-pool-name', '--nat-pool-name'])
 
     with self.argument_context('vmss create', min_api='2017-03-30', arg_group='Network') as c:
         c.argument('public_ip_per_vm', action='store_true', help="Each VM instance will have a public ip. For security, you can use '--nsg' to apply appropriate rules")
         c.argument('vm_domain_name', help="domain name of VM instances, once configured, the FQDN is 'vm<vm-index>.<vm-domain-name>.<..rest..>'")
-        c.argument('dns_servers', nargs='+', help="space separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6")
+        c.argument('dns_servers', nargs='+', help="space-separated IP addresses of DNS servers, e.g. 10.0.0.5 10.0.0.6")
         c.argument('accelerated_networking', action='store_true', help="enable accelerated networking")
 
     for scope in ['vmss update-instances', 'vmss delete-instances']:
         with self.argument_context(scope) as c:
-            c.argument('instance_ids', multi_ids_type, help='Space separated list of IDs (ex: 1 2 3 ...) or * for all instances.')
+            c.argument('instance_ids', multi_ids_type, help='Space-separated list of IDs (ex: 1 2 3 ...) or * for all instances.')
 
     with self.argument_context('vmss diagnostics') as c:
         c.argument('vmss_name', id_part=None, help='Scale set name')
@@ -300,6 +308,9 @@ def load_arguments(self, _):
         c.argument('lun', type=int, help='0-based logical unit number (LUN). Max value depends on the Virtual Machine instance size.')
         c.argument('size_gb', options_list=['--size-gb', '-z'], help='size in GB.')
         c.argument('vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
+        c.argument('disk', validator=validate_vmss_disk, help='existing disk name or ID to attach or detach from VM instances',
+                   min_api='2017-12-01', completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
+        c.argument('instance_id', help='Scale set VM instance id', min_api='2017-12-01')
 
     with self.argument_context('vmss encryption') as c:
         c.argument('vmss_name', vmss_name_type, completer=get_resource_name_completion_list('Microsoft.Compute/virtualMachineScaleSets'))
@@ -319,16 +330,21 @@ def load_arguments(self, _):
         with self.argument_context(scope) as c:
             c.argument('no_auto_upgrade', action='store_true', help='by doing this, extension system will not pick the highest minor version for the specified version number, and will not auto update to the latest build/revision number on any scale set updates in future.')
 
-    for scope in ['vm assign-identity', 'vmss assign-identity']:
+    for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             c.argument('assign_identity', options_list=['--identities'], nargs='*', help="the identities to assign")
             c.argument('port', type=int, help="The port to fetch AAD token. Default: 50342")
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 
-    for scope in ['vm remove-identity', 'vmss remove-identity']:
+    for scope in ['vm identity remove', 'vmss identity remove']:
         with self.argument_context(scope) as c:
-            c.argument('identities', nargs='+', help="space separated user assigned identities to remove")
+            c.argument('identities', nargs='+', help="space-separated user assigned identities to remove")
+            c.argument('vm_name', existing_vm_name)
+            c.argument('vmss_name', vmss_name_type)
+
+    for scope in ['vm identity show', 'vmss identity show']:
+        with self.argument_context(scope) as c:
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 
@@ -343,7 +359,7 @@ def load_arguments(self, _):
             c.argument('custom_data', help='Custom init script file or text (cloud-init, cloud-config, etc..)', completer=FilesCompleter(), type=file_type)
             c.argument('secrets', multi_ids_type, help='One or many Key Vault secrets as JSON strings or files via `@<file path>` containing `[{ "sourceVault": { "id": "value" }, "vaultCertificates": [{ "certificateUrl": "value", "certificateStore": "cert store name (only on windows)"}] }]`', type=file_type, completer=FilesCompleter())
             c.argument('license_type', help="license type if the Windows image or disk used was licensed on-premises", arg_type=get_enum_type(['Windows_Server', 'Windows_Client']))
-            c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities with space separated. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
+            c.argument('assign_identity', nargs='*', arg_group='Managed Service Identity', help="accept system or user assigned identities separated by spaces. Use '[system]' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples")
 
         with self.argument_context(scope, arg_group='Authentication') as c:
             c.argument('generate_ssh_keys', action='store_true', help='Generate SSH public and private key files if missing. The keys will be stored in the ~/.ssh directory')
@@ -361,10 +377,11 @@ def load_arguments(self, _):
             c.argument('storage_container_name', help="Only applicable when used with `--use-unmanaged-disk`. Name of the storage container for the VM OS disk. Default: vhds")
             c.ignore('os_publisher', 'os_offer', 'os_sku', 'os_version', 'storage_profile')
             c.argument('use_unmanaged_disk', action='store_true', help='Do not use managed disk to persist VM')
-            c.argument('data_disk_sizes_gb', nargs='+', type=int, help='space separated empty managed data disk sizes in GB to create')
-            c.ignore('image_data_disks', 'storage_account_type', 'public_ip_type', 'nsg_type', 'nic_type', 'vnet_type', 'load_balancer_type', 'app_gateway_type')
-            c.argument('os_caching', options_list=['--storage-caching', '--os-disk-caching'], help='Storage caching type for the VM OS disk.', arg_type=get_enum_type([CachingTypes.read_only.value, CachingTypes.read_write.value], default='ReadWrite'))
-            c.argument('data_caching', options_list=['--data-disk-caching'], help='Storage caching type for the VM data disk(s).', arg_type=get_enum_type(CachingTypes))
+            c.argument('data_disk_sizes_gb', nargs='+', type=int, help='space-separated empty managed data disk sizes in GB to create')
+            c.ignore('image_data_disks', 'storage_account_type', 'public_ip_address_type', 'nsg_type', 'nic_type', 'vnet_type', 'load_balancer_type', 'app_gateway_type')
+            c.argument('os_caching', options_list=['--storage-caching', '--os-disk-caching'], help='Storage caching type for the VM OS disk. Default: ReadWrite', arg_type=get_enum_type(CachingTypes))
+            c.argument('data_caching', options_list=['--data-disk-caching'], nargs='+',
+                       help="storage caching type for data disk(s), including 'None', 'ReadOnly', 'ReadWrite', etc. Use a singular value to apply on all disks, or use '<lun>=<vaule1> <lun>=<value2>' to configure individual disk")
 
         with self.argument_context(scope, arg_group='Network') as c:
             c.argument('vnet_name', help='Name of the virtual network when creating a new one or referencing an existing one.')
@@ -374,8 +391,11 @@ def load_arguments(self, _):
             c.argument('nics', nargs='+', help='Names or IDs of existing NICs to attach to the VM. The first NIC will be designated as primary. If omitted, a new NIC will be created. If an existing NIC is specified, do not specify subnet, VNet, public IP or NSG.')
             c.argument('private_ip_address', help='Static private IP address (e.g. 10.0.0.5).')
             c.argument('public_ip_address', help='Name of the public IP address when creating one (default) or referencing an existing one. Can also reference an existing public IP by ID or specify "" for None.')
-            c.argument('public_ip_address_allocation', help=None, arg_type=get_enum_type(['dynamic', 'static']))
+            c.argument('public_ip_address_allocation', help=None, default=None, arg_type=get_enum_type(['dynamic', 'static']))
             c.argument('public_ip_address_dns_name', help='Globally unique DNS name for a newly created public IP.')
+            if self.supported_api_version(min_api='2017-08-01', resource_type=ResourceType.MGMT_NETWORK):
+                PublicIPAddressSkuName = self.get_models('PublicIPAddressSkuName', resource_type=ResourceType.MGMT_NETWORK)
+                c.argument('public_ip_sku', help='Sku', default=None, arg_type=get_enum_type(PublicIPAddressSkuName))
 
         with self.argument_context(scope, arg_group='Marketplace Image Plan') as c:
             c.argument('plan_name', help='plan name')
@@ -383,7 +403,7 @@ def load_arguments(self, _):
             c.argument('plan_publisher', help='plan publisher')
             c.argument('plan_promotion_code', help='plan promotion code')
 
-    for scope in ['vm create', 'vmss create', 'vm assign-identity', 'vmss assign-identity']:
+    for scope in ['vm create', 'vmss create', 'vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             arg_group = 'Managed Service Identity' if scope.split()[-1] == 'create' else None
             c.argument('identity_scope', options_list=['--scope'], arg_group=arg_group, help="Scope that the system assigned identity can access")

@@ -33,7 +33,7 @@ Azure CLI translates user inputs into Azure Python SDK calls which communicate w
 
 ### Recording tests for the first time
 
-After the test is executed, a recording file will be generated at `recording/<api_profile_name>/<test_name>.yaml`. The recording file will be created no matter the test pass or not. The behavior makes it easy for you to find issues when a test fails. To re-record the test, you can either delete the existing recording and re-run the test, or simply re-run the test using the `--live` flag (ex: `run_tests --module example --live`.
+After the test is executed, a recording file will be generated at `recording/<api_profile_name>/<test_name>.yaml`. The recording file will be created no matter the test pass or not. The behavior makes it easy for you to find issues when a test fails. To re-record the test, you can either delete the existing recording and re-run the test, or simply re-run the test using the `--live` flag (ex: `azdev test example_test --live`.
 
 It is a good practice to add recording file to the local git cache, which makes it easy to diff the different versions of recording to detect issues or changes.
 
@@ -43,7 +43,7 @@ If the replay passes, you can commit the tests as well as recordings and submit 
 
 ### Running tests live
 
-When a recording file is missing, the test framework will execute the test in live mode. You can also force tests to run live either by setting the environment variable `AZURE_TEST_RUN_LIVE` or by using the `--live` flag with the `run_tests` script. 
+When a recording file is missing, the test framework will execute the test in live mode. You can also force tests to run live either by setting the environment variable `AZURE_TEST_RUN_LIVE` or by using the `--live` flag with the `azdev test` command. 
 
 Also, you can author tests which are for live test only by deriving the test class from `LiveScenarioTest`. Since these tests will not be run as part of the CI, you lose much of the automatic regression protection by doing this. However, for certain tests that cannot be re-recorded, cannot be replayed, or fail due to service issues, this is a viable approach.
 
@@ -153,9 +153,9 @@ class StorageAccountTests(ScenarioTest):
           'loc': group_location
         })
         self.cmd('az group show -n {rg}', checks=[
-            JMESPathCheck('name', '{rg}'),
-            JMESPathCheck('location', '{loc}'),
-            JMESPathCheck('properties.provisioningState', 'Succeeded')
+            self.check('name', '{rg}'),
+            self.check('location', '{loc}'),
+            self.check('properties.provisioningState', 'Succeeded')
         ])
 ```
 Notes:
@@ -179,10 +179,10 @@ class StorageAccountTests(ScenarioTest):
         })
         self.cmd('az storage account create -n {name} -g {rg} --sku {sku} -l {loc}')
         self.cmd('az storage account show -n {name} -g {rg}', checks=[
-            JMESPathCheck('name', '{name}'),
-            JMESPathCheck('location', '{loc}'),
-            JMESPathCheck('sku.name', '{sku}'),
-            JMESPathCheck('kind', '{kind}')
+            self.check('name', '{name}'),
+            self.check('location', '{loc}'),
+            self.check('sku.name', '{sku}'),
+            self.check('kind', '{kind}')
         ])
 ```
 Note:

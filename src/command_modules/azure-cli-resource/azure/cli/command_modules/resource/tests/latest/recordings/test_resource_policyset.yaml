@@ -1,38 +1,39 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"location": "westus", "tags": {"product": "azurecli", "cause": "automation",
+      "date": "2018-04-04T20:08:41Z"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [group create]
       Connection: [keep-alive]
-      Content-Length: ['50']
+      Content-Length: ['110']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001","name":"cli_test_policy000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001","name":"cli_test_policy000001","location":"westus","tags":{"product":"azurecli","cause":"automation","date":"2018-04-04T20:08:41Z"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:36:42 GMT']
+      date: ['Wed, 04 Apr 2018 20:08:43 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1182']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
-    body: 'b''{"properties": {"parameters": {"allowedLocations": {"type": "array",
-      "metadata": {"description": "The list of locations that can be specified when
-      deploying resources", "displayName": "Allowed locations", "strongType": "location"}}},
-      "description": "desc_for_test_policy_123", "displayName": "test_policy000003",
+    body: 'b''{"properties": {"displayName": "test_policy000003", "description": "desc_for_test_policy_123",
       "policyRule": {"if": {"not": {"field": "location", "in": "[parameters(\''allowedLocations\'')]"}},
-      "then": {"effect": "deny"}}}}'''
+      "then": {"effect": "deny"}}, "parameters": {"allowedLocations": {"type": "array",
+      "metadata": {"description": "The list of locations that can be specified when
+      deploying resources", "strongType": "location", "displayName": "Allowed locations"}}}}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -40,30 +41,32 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['440']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002?api-version=2016-12-01
   response:
     body: {string: '{"properties":{"displayName":"test_policy000003","policyType":"Custom","description":"desc_for_test_policy_123","parameters":{"allowedLocations":{"type":"Array","metadata":{"description":"The
-        list of locations that can be specified when deploying resources","displayName":"Allowed
-        locations","strongType":"location"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
+        list of locations that can be specified when deploying resources","strongType":"location","displayName":"Allowed
+        locations"}}},"policyRule":{"if":{"not":{"field":"location","in":"[parameters(''allowedLocations'')]"}},"then":{"effect":"deny"}}},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","type":"Microsoft.Authorization/policyDefinitions","name":"azure-cli-test-policy000002"}'}
     headers:
       cache-control: [no-cache]
       content-length: ['670']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:36:43 GMT']
+      date: ['Wed, 04 Apr 2018 20:08:44 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
     status: {code: 201, message: Created}
 - request:
-    body: 'b''b\''{"properties": {"description": "desc_for_test_policyset_123", "displayName":
-      "test_policyset000005", "policyDefinitions": [{"parameters": {"allowedLocations":
-      {"value": ["australiaeast", "eastus", "japaneast", "westus"]}}, "policyDefinitionId":
-      "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002"}]}}\'''''
+    body: 'b''b\''{"properties": {"displayName": "test_policyset000005", "description":
+      "desc_for_test_policyset_123", "policyDefinitions": [{"policyDefinitionId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002",
+      "parameters": {"allowedLocations": {"value": ["australiaeast", "eastus", "japaneast",
+      "westus"]}}}]}}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -71,22 +74,23 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['385']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004?api-version=2017-06-01-preview
   response:
-    body: {string: '{"properties":{"displayName":"test_policyset000005","policyType":"Custom","description":"desc_for_test_policyset_123","policyDefinitions":[{"policyDefinitionReferenceId":"9595430299875542066","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset000004"}'}
+    body: {string: '{"properties":{"displayName":"test_policyset000005","policyType":"Custom","description":"desc_for_test_policyset_123","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"15612970053689442542","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset000004"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['684']
+      content-length: ['701']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:36:44 GMT']
+      date: ['Wed, 04 Apr 2018 20:08:45 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1186']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -96,54 +100,57 @@ interactions:
       CommandName: [policy set-definition update]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004?api-version=2017-06-01-preview
   response:
-    body: {string: '{"properties":{"displayName":"test_policyset000005","policyType":"Custom","description":"desc_for_test_policyset_123","policyDefinitions":[{"policyDefinitionReferenceId":"9595430299875542066","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset000004"}'}
+    body: {string: '{"properties":{"displayName":"test_policyset000005","policyType":"Custom","description":"desc_for_test_policyset_123","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"15612970053689442542","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset000004"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['684']
+      content-length: ['701']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:36:45 GMT']
+      date: ['Wed, 04 Apr 2018 20:08:45 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''{"properties": {"description": "desc_for_test_policyset_123_new",
-      "displayName": "test_policyset000005", "policyDefinitions": [{"parameters":
-      {"allowedLocations": {"value": ["australiaeast", "eastus", "japaneast", "westus"]}},
-      "policyDefinitionId": "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002"}]}}\'''''
+    body: 'b''b\''{"properties": {"displayName": "test_policyset000005", "description":
+      "desc_for_test_policyset_123_new", "parameters": {}, "policyDefinitions": [{"policyDefinitionId":
+      "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002",
+      "parameters": {"allowedLocations": {"value": ["australiaeast", "eastus", "japaneast",
+      "westus"]}}}]}}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [policy set-definition update]
       Connection: [keep-alive]
-      Content-Length: ['389']
+      Content-Length: ['407']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004?api-version=2017-06-01-preview
   response:
-    body: {string: '{"properties":{"displayName":"test_policyset000005","policyType":"Custom","description":"desc_for_test_policyset_123_new","policyDefinitions":[{"policyDefinitionReferenceId":"9595430299875542066","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset000004"}'}
+    body: {string: '{"properties":{"displayName":"test_policyset000005","policyType":"Custom","description":"desc_for_test_policyset_123_new","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"15612970053689442542","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset000004"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['688']
+      content-length: ['705']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:36:45 GMT']
+      date: ['Wed, 04 Apr 2018 20:08:46 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
-      x-ms-ratelimit-remaining-subscription-writes: ['1195']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -153,8 +160,8 @@ interactions:
       CommandName: [policy set-definition list]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions?api-version=2017-06-01-preview
@@ -163,17 +170,19 @@ interactions:
         in Azure Security Center","policyType":"BuiltIn","description":"Monitor all
         the available security recommendations in Azure Security Center. This is the
         default policy for Azure Security Center.","metadata":{"category":"Security
-        Center"},"parameters":{},"policyDefinitions":[{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/a8bef009-a5c9-4d0f-90d7-6018734e8a16"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/af8051bf-258b-44e2-a2bf-165330459f9d"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/86b3d65f-7626-441e-b690-81a8b71cff60"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/655cb504-bcee-4362-bd4c-402e6aa38759"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/b0f33259-77d7-4c9e-aac6-3aabcfae693c"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/47a6b606-51aa-4496-8bb7-64b11cf66adc"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/44452482-524f-4bf4-b852-0bff7cc4a3ed"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/e1e5fd5d-3e4c-4ce1-8661-7d1873ae6b15"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/af6cd1bd-1635-48cb-bde7-5b15693900b9"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/0961003e-5a0a-4549-abde-af6a37f2724d"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/760a85ff-6162-42b3-8d70-698e268f648c"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/201ea587-7c90-41c3-910f-c280ae01cfd6"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/9daedab3-fb2d-461e-b861-71790eead4f6"}]},"id":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","type":"Microsoft.Authorization/policySetDefinitions","name":"1f3afdf9-d0c9-4c3d-847f-89da613e70a8"},{"properties":{"displayName":"test_policysetg4oo5k","policyType":"Custom","description":"desc_for_test_policyset_123","policyDefinitions":[{"policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyt7cuhddjz","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset6swdjz","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset6swdjz"},{"properties":{"displayName":"test_policysetijenn5","policyType":"Custom","description":"desc_for_test_policyset_123","policyDefinitions":[{"policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyguhpc2m5m","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policysetbqzoyh","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policysetbqzoyh"},{"properties":{"displayName":"test_policysetn4khsk","policyType":"Custom","description":"desc_for_test_policy_123_new","policyDefinitions":[{"policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydbeyd5nrs","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyseti3kq7w","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyseti3kq7w"},{"properties":{"displayName":"test_policysetq4w3gf","policyType":"Custom","description":"desc_for_test_policyset_123","policyDefinitions":[{"policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyy4snzm2ry","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policysetowg6ad","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policysetowg6ad"},{"properties":{"displayName":"test_policyset000005","policyType":"Custom","description":"desc_for_test_policyset_123_new","policyDefinitions":[{"policyDefinitionReferenceId":"9595430299875542066","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset000004"}]}'}
+        Center"},"parameters":{},"policyDefinitions":[{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/a8bef009-a5c9-4d0f-90d7-6018734e8a16"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/af8051bf-258b-44e2-a2bf-165330459f9d"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/86b3d65f-7626-441e-b690-81a8b71cff60"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/655cb504-bcee-4362-bd4c-402e6aa38759"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/b0f33259-77d7-4c9e-aac6-3aabcfae693c"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/47a6b606-51aa-4496-8bb7-64b11cf66adc"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/44452482-524f-4bf4-b852-0bff7cc4a3ed"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/e1e5fd5d-3e4c-4ce1-8661-7d1873ae6b15"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/af6cd1bd-1635-48cb-bde7-5b15693900b9"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/0961003e-5a0a-4549-abde-af6a37f2724d"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/760a85ff-6162-42b3-8d70-698e268f648c"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/201ea587-7c90-41c3-910f-c280ae01cfd6"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/9daedab3-fb2d-461e-b861-71790eead4f6"}]},"id":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","type":"Microsoft.Authorization/policySetDefinitions","name":"1f3afdf9-d0c9-4c3d-847f-89da613e70a8"},{"properties":{"displayName":"test_policysethhhdki","policyType":"Custom","description":"desc_for_test_policyset_123_new","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"9078705511180652275","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policybxi2jws3c","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset3uzvqa","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset3uzvqa"},{"properties":{"displayName":"test_policyset5ixhkr","policyType":"Custom","description":"desc_for_test_policyset_123_new","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"7811622926198208416","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy5shhmcbv7","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset73gvnm","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset73gvnm"},{"properties":{"displayName":"test_policysetfhfi4w","policyType":"Custom","description":"desc_for_test_policyset_123_new","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"9031305419511134526","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyqtgiaewow","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset7jfhbq","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset7jfhbq"},{"properties":{"displayName":"test_policysethkijfh","policyType":"Custom","description":"desc_for_test_policyset_123_new","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"5307951366439704809","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyewugnihqy","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policysetn5p2sy","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policysetn5p2sy"},{"properties":{"displayName":"test_policysetbgzmqj","policyType":"Custom","description":"desc_for_test_policyset_123_new","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"3536485473383447205","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyxhs56xbg3","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policysetpzsti3","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policysetpzsti3"},{"properties":{"displayName":"test_policysethfsbmo","policyType":"Custom","description":"desc_for_test_policyset_123_new","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"3651833159362414725","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyzfcbb7qp3","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policysetqznpkw","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policysetqznpkw"},{"properties":{"displayName":"test_policyset000005","policyType":"Custom","description":"desc_for_test_policyset_123_new","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"15612970053689442542","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset000004"},{"properties":{"displayName":"test_policysete4eqqf","policyType":"Custom","description":"desc_for_test_policyset_123_new","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"12843495398150588993","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyln74jds3a","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policysetx4zev3","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policysetx4zev3"},{"properties":{"displayName":"test_policysetaarhsr","policyType":"Custom","description":"desc_for_test_policyset_123_new","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"17999434129956168623","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policypxqctyws3","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policysety537wj","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policysety537wj"},{"properties":{"policyType":"Custom","description":"Testing
+        thing","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"9031305419511134526","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyqtgiaewow","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/test-policy1","type":"Microsoft.Authorization/policySetDefinitions","name":"test-policy1"}]}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['5265']
+      content-length: ['9005']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:36:46 GMT']
+      date: ['Wed, 04 Apr 2018 20:08:46 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -183,23 +192,24 @@ interactions:
       CommandName: [policy set-definition show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004?api-version=2017-06-01-preview
   response:
-    body: {string: '{"properties":{"displayName":"test_policyset000005","policyType":"Custom","description":"desc_for_test_policyset_123_new","policyDefinitions":[{"policyDefinitionReferenceId":"9595430299875542066","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset000004"}'}
+    body: {string: '{"properties":{"displayName":"test_policyset000005","policyType":"Custom","description":"desc_for_test_policyset_123_new","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"15612970053689442542","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset000004"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['688']
+      content-length: ['705']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:36:46 GMT']
+      date: ['Wed, 04 Apr 2018 20:08:46 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
     body: null
@@ -209,28 +219,30 @@ interactions:
       CommandName: [policy assignment create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004?api-version=2017-06-01-preview
   response:
-    body: {string: '{"properties":{"displayName":"test_policyset000005","policyType":"Custom","description":"desc_for_test_policyset_123_new","policyDefinitions":[{"policyDefinitionReferenceId":"9595430299875542066","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset000004"}'}
+    body: {string: '{"properties":{"displayName":"test_policyset000005","policyType":"Custom","description":"desc_for_test_policyset_123_new","parameters":{},"policyDefinitions":[{"policyDefinitionReferenceId":"15612970053689442542","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset000004"}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['688']
+      content-length: ['705']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:36:46 GMT']
+      date: ['Wed, 04 Apr 2018 20:08:47 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       vary: ['Accept-Encoding,Accept-Encoding']
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''b\\\''{"sku": {"tier": "Free", "name": "A0"}, "properties": {"policyDefinitionId":
+    body: 'b''b\''b\\\''{"properties": {"displayName": "test_assignment000007", "policyDefinitionId":
       "/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004",
-      "displayName": "test_assignment000007", "scope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001"}}\\\''\'''''
+      "scope": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001"},
+      "sku": {"name": "A0", "tier": "Free"}}\\\''\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -238,135 +250,28 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['412']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.31]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000006?api-version=2017-06-01-preview
   response:
-    body: {string: '{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"test_assignment000007","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000006","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000006"}'}
+    body: {string: '{"error":{"code":"InvalidPolicySku","message":"The policy assignment
+        ''<null>'' is invalid because it references a policy set definition (''/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004'')
+        and has missing or unsupported Sku: ''{\"name\":\"A0\",\"tier\":\"Free\"}''.
+        To assign a policy set definition, use one of the following SKUs which support
+        this feature: ''[{\"name\":\"A1\",\"tier\":\"Standard\"}]''."}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['745']
+      content-length: ['492']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:36:47 GMT']
+      date: ['Wed, 04 Apr 2018 20:08:47 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1187']
-    status: {code: 201, message: Created}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [policy assignment delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000006?api-version=2017-06-01-preview
-  response:
-    body: {string: '{"sku":{"name":"A0","tier":"Free"},"properties":{"displayName":"test_assignment000007","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","scope":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_policy000001/providers/Microsoft.Authorization/policyAssignments/azurecli-test-policy-assignment000006","type":"Microsoft.Authorization/policyAssignments","name":"azurecli-test-policy-assignment000006"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['745']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:36:48 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-ms-ratelimit-remaining-subscription-writes: ['1174']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [policy assignment list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyAssignments?api-version=2017-06-01-preview
-  response:
-    body: {string: '{"value":[]}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['12']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:36:49 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [policy set-definition delete]
-      Connection: [keep-alive]
-      Content-Length: ['0']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004?api-version=2017-06-01-preview
-  response:
-    body: {string: '{"properties":{"displayName":"test_policyset000005","policyType":"Custom","description":"desc_for_test_policyset_123_new","policyDefinitions":[{"policyDefinitionReferenceId":"9595430299875542066","policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policy000002","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset000004","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset000004"}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['688']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:36:49 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-      x-ms-ratelimit-remaining-subscription-writes: ['1175']
-    status: {code: 200, message: OK}
-- request:
-    body: null
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [policy set-definition list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 policyclient/1.2.1 Azure-SDK-For-Python AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions?api-version=2017-06-01-preview
-  response:
-    body: {string: '{"value":[{"properties":{"displayName":"[Preview]: Enable Monitoring
-        in Azure Security Center","policyType":"BuiltIn","description":"Monitor all
-        the available security recommendations in Azure Security Center. This is the
-        default policy for Azure Security Center.","metadata":{"category":"Security
-        Center"},"parameters":{},"policyDefinitions":[{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/a8bef009-a5c9-4d0f-90d7-6018734e8a16"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/af8051bf-258b-44e2-a2bf-165330459f9d"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/86b3d65f-7626-441e-b690-81a8b71cff60"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/655cb504-bcee-4362-bd4c-402e6aa38759"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/b0f33259-77d7-4c9e-aac6-3aabcfae693c"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/47a6b606-51aa-4496-8bb7-64b11cf66adc"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/44452482-524f-4bf4-b852-0bff7cc4a3ed"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/e1e5fd5d-3e4c-4ce1-8661-7d1873ae6b15"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/af6cd1bd-1635-48cb-bde7-5b15693900b9"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/0961003e-5a0a-4549-abde-af6a37f2724d"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/760a85ff-6162-42b3-8d70-698e268f648c"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/201ea587-7c90-41c3-910f-c280ae01cfd6"},{"policyDefinitionId":"/providers/Microsoft.Authorization/policyDefinitions/9daedab3-fb2d-461e-b861-71790eead4f6"}]},"id":"/providers/Microsoft.Authorization/policySetDefinitions/1f3afdf9-d0c9-4c3d-847f-89da613e70a8","type":"Microsoft.Authorization/policySetDefinitions","name":"1f3afdf9-d0c9-4c3d-847f-89da613e70a8"},{"properties":{"displayName":"test_policysetg4oo5k","policyType":"Custom","description":"desc_for_test_policyset_123","policyDefinitions":[{"policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyt7cuhddjz","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyset6swdjz","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyset6swdjz"},{"properties":{"displayName":"test_policysetijenn5","policyType":"Custom","description":"desc_for_test_policyset_123","policyDefinitions":[{"policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyguhpc2m5m","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policysetbqzoyh","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policysetbqzoyh"},{"properties":{"displayName":"test_policysetn4khsk","policyType":"Custom","description":"desc_for_test_policy_123_new","policyDefinitions":[{"policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policydbeyd5nrs","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policyseti3kq7w","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policyseti3kq7w"},{"properties":{"displayName":"test_policysetq4w3gf","policyType":"Custom","description":"desc_for_test_policyset_123","policyDefinitions":[{"policyDefinitionId":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/azure-cli-test-policyy4snzm2ry","parameters":{"allowedLocations":{"value":["australiaeast","eastus","japaneast","westus"]}}}]},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policySetDefinitions/azure-cli-test-policysetowg6ad","type":"Microsoft.Authorization/policySetDefinitions","name":"azure-cli-test-policysetowg6ad"}]}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['4576']
-      content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:37:00 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: ['Accept-Encoding,Accept-Encoding']
-    status: {code: 200, message: OK}
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+    status: {code: 400, message: Bad Request}
 - request:
     body: null
     headers:
@@ -376,9 +281,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.6.1 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.25 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.31]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_policy000001?api-version=2017-05-10
@@ -387,11 +292,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Dec 2017 04:37:01 GMT']
+      date: ['Wed, 04 Apr 2018 20:08:49 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUE9MSUNZS1JCVDVFSEhXNlFGUFdOM0dJWFJPWUdGUFlFVXwyNjdBRjlERTREQzk2NThFLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTEk6NUZURVNUOjVGUE9MSUNZMldFNlZIMkRPQ1M3QkZTRlk3N01VWEEyM0ZISHxENzk3ODRGNDBDNzYwNUIzLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 version: 1

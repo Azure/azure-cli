@@ -23,13 +23,13 @@ def add_helps(command_group, server_type):
                 examples:
                     - name: Create a {0} server with only required paramaters in North Europe.
                       text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password
-                    - name: Create a {0} server with a Standard performance tier and 100 compute units in North Europe.
+                    - name: Create a {0} server with a Standard performance tier and 2 vcore in North Europe.
                       text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
-                            --performance-tier Standard --compute-units 100
+                            --sku-name GP_Gen4_2
                     - name: Create a {0} server with all paramaters set.
                       text: az {1} server create -l northeurope -g testgroup -n testsvr -u username -p password \\
-                            --performance-tier Basic --compute-units 100 --ssl-enforcement Disabled \\
-                            --storage-size 51200 --tags "key=value" --version <server_version>
+                            --sku-name B_Gen4_2 --ssl-enforcement Disabled \\
+                            --storage-size 51200 --tags "key=value" --version {{server-version}}
                 """.format(server_type, command_group)
     helps['{} server restore'.format(command_group)] = """
                 type: command
@@ -43,12 +43,24 @@ def add_helps(command_group, server_type):
                             -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2" \\
                             --restore-point-in-time "2017-06-15T13:10:00Z"
                 """.format(command_group, server_type)
+    helps['{} server georestore'.format(command_group)] = """
+                type: command
+                short-summary: Georestore a server from backup.
+                examples:
+                    - name: Georestore 'testsvr' as 'testsvrnew' where 'testsvrnew' is in same resource group as 'testsvr'.
+                      text: az {0} server georestore -g testgroup -n testsvrnew --source-server testsvr -l westus2
+                    - name: Georestore 'testsvr2' to 'testsvrnew', where 'testsvrnew' is in the different resource group as the original server.
+                      text: |
+                        az {0} server georestore -g testgroup -n testsvrnew \\
+                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2"
+                            -l westus2 --sku-name GP_Gen5_2
+                """.format(command_group, server_type)
     helps['{} server update'.format(command_group)] = """
                 type: command
                 short-summary: Update a server.
                 examples:
-                    - name: Update a server's compute-units to 100.
-                      text: az {0} server update -g testgroup -n testsvrnew --compute-units 100
+                    - name: Update a server's vcore to 2.
+                      text: az {0} server update -g testgroup -n testsvrnew --vcore 2
                     - name: Update a server's tags.
                       text: az {0} server update -g testgroup -n testsvrnew --tags "k1=v1" "k2=v2"
                 """.format(command_group)
@@ -110,9 +122,9 @@ def add_helps(command_group, server_type):
                 short-summary: Update the configuration of a server.
                 examples:
                     - name: Set a new configuration value.
-                      text: az {0} server configuration set -g testgroup -s testsvr -n <config_name> --value <config_value>
+                      text: az {0} server configuration set -g testgroup -s testsvr -n {{config_name}} --value {{config_value}}
                     - name: Set a configuration value to its default.
-                      text: az {0} server configuration set -g testgroup -s testsvr -n <config_name>
+                      text: az {0} server configuration set -g testgroup -s testsvr -n {{config_name}}
                 """.format(command_group)
     helps['{} server configuration show'.format(command_group)] = """
                 type: command
@@ -148,27 +160,36 @@ def add_helps(command_group, server_type):
                 type: group
                 short-summary: Manage {0} databases on a server.
                 """.format(server_type)
-    # helps['{} db create'.format(command_group)] = """
-    #             type: command
-    #             short-summary: Create a {0} database.
-    #             examples:
-    #                 - name: Create database 'testdb' in the server 'testsvr' with the default parameters.
-    #                   text: az {1} db create -g testgroup -s testsvr -n testdb
-    #                 - name: Create database 'testdb' in server 'testsvr' with a given character set and collation rules.
-    #                   text: az {1} db create -g testgroup -s testsvr -n testdb --charset <valid_charset> --collation <valid_collation>
-    #             """.format(server_type, command_group)
-    # helps['{} db delete'.format(command_group)] = """
-    #             type: command
-    #             short-summary: Delete a database.
-    #             """
-    # helps['{} db show'.format(command_group)] = """
-    #             type: command
-    #             short-summary: Show the details of a database.
-    #             """
+    helps['{} db create'.format(command_group)] = """
+                type: command
+                short-summary: Create a {0} database.
+                examples:
+                    - name: Create database 'testdb' in the server 'testsvr' with the default parameters.
+                      text: az {1} db create -g testgroup -s testsvr -n testdb
+                    - name: Create database 'testdb' in server 'testsvr' with a given character set and collation rules.
+                      text: az {1} db create -g testgroup -s testsvr -n testdb --charset {{valid_charset}} --collation {{valid_collation}}
+                """.format(server_type, command_group)
+    helps['{} db delete'.format(command_group)] = """
+                type: command
+                short-summary: Delete a database.
+                examples:
+                    - name: Delete database 'testdb' in the server 'testsvr'.
+                      text: az {0} db delete -g testgroup -s testsvr -n testdb
+                """.format(command_group)
+    helps['{} db show'.format(command_group)] = """
+                type: command
+                short-summary: Show the details of a database.
+                examples:
+                    - name: Show database 'testdb' in the server 'testsvr'.
+                      text: az {0} db show -g testgroup -s testsvr -n testdb
+                """.format(command_group)
     helps['{} db list'.format(command_group)] = """
                 type: command
                 short-summary: List the databases for a server.
-                """
+                examples:
+                    - name: List databases in the server 'testsvr'.
+                      text: az {0} db list -g testgroup -s testsvr
+                """.format(command_group)
 
 
 add_helps("mysql", "MySQL")

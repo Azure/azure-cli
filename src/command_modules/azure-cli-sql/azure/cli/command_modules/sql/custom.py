@@ -14,7 +14,7 @@ from azure.cli.core._profile import Profile
 from azure.cli.core.commands.client_factory import (
     get_mgmt_service_client,
     get_subscription_id)
-from azure.cli.core.util import CLIError
+from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.mgmt.sql.models.server_key import ServerKey
 from azure.mgmt.sql.models.encryption_protector import EncryptionProtector
 from azure.mgmt.sql.models.resource_identity import ResourceIdentity
@@ -52,10 +52,10 @@ def _get_server_location(cli_ctx, server_name, resource_group_name):
 
 _DEFAULT_SERVER_VERSION = "12.0"
 
-
 ###############################################
 #                sql db                       #
 ###############################################
+
 
 # pylint: disable=too-few-public-methods
 class ClientType(Enum):
@@ -198,7 +198,7 @@ def _db_dw_create(
         cli_ctx,
         client,
         db_id,
-        raw,
+        no_wait,
         kwargs):
 
     # Determine server location
@@ -208,12 +208,11 @@ def _db_dw_create(
         resource_group_name=db_id.resource_group_name)
 
     # Create
-    return client.create_or_update(
-        server_name=db_id.server_name,
-        resource_group_name=db_id.resource_group_name,
-        database_name=db_id.database_name,
-        raw=raw,
-        parameters=kwargs)
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       server_name=db_id.server_name,
+                       resource_group_name=db_id.resource_group_name,
+                       database_name=db_id.database_name,
+                       parameters=kwargs)
 
 
 # Creates a database. Wrapper function which uses the server location so that the user doesn't
@@ -224,12 +223,12 @@ def db_create(
         database_name,
         server_name,
         resource_group_name,
-        raw=False,
+        no_wait=False,
         **kwargs):
 
     # Verify edition
     edition = kwargs.get('edition')  # kwags['edition'] throws KeyError if not in dictionary
-    if edition and edition.lower() == DatabaseEdition.data_warehouse.value.lower():
+    if edition and edition.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be created with the command'
                        ' `az sql dw create`.')
 
@@ -237,7 +236,7 @@ def db_create(
         cmd.cli_ctx,
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
-        raw,
+        no_wait,
         kwargs)
 
 
@@ -247,7 +246,7 @@ def _db_create_special(
         client,
         source_db,
         dest_db,
-        raw,
+        no_wait,
         kwargs):
 
     # Determine server location
@@ -260,12 +259,11 @@ def _db_create_special(
     kwargs['source_database_id'] = source_db.id()
 
     # Create
-    return client.create_or_update(
-        server_name=dest_db.server_name,
-        resource_group_name=dest_db.resource_group_name,
-        database_name=dest_db.database_name,
-        raw=raw,
-        parameters=kwargs)
+    return sdk_no_wait(no_wait, client.create_or_update,
+                       server_name=dest_db.server_name,
+                       resource_group_name=dest_db.resource_group_name,
+                       database_name=dest_db.database_name,
+                       parameters=kwargs)
 
 
 # Copies a database. Wrapper function to make create mode more convenient.
@@ -278,7 +276,7 @@ def db_copy(
         dest_name,
         dest_server_name=None,
         dest_resource_group_name=None,
-        raw=False,
+        no_wait=False,
         **kwargs):
 
     # Determine optional values
@@ -293,7 +291,7 @@ def db_copy(
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, dest_name, dest_server_name, dest_resource_group_name),
-        raw,
+        no_wait,
         kwargs)
 
 
@@ -307,7 +305,7 @@ def db_create_replica(
         # Replica must have the same database name as the source db
         partner_server_name,
         partner_resource_group_name=None,
-        raw=False,
+        no_wait=False,
         **kwargs):
 
     # Determine optional values
@@ -322,8 +320,34 @@ def db_create_replica(
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         DatabaseIdentity(cmd.cli_ctx, database_name, partner_server_name, partner_resource_group_name),
-        raw,
+        no_wait,
         kwargs)
+
+
+# Renames a database.
+def db_rename(
+        cmd,
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        new_name):
+
+    client.rename(
+        resource_group_name,
+        server_name,
+        database_name,
+        id=DatabaseIdentity(
+            cmd.cli_ctx,
+            new_name,
+            server_name,
+            resource_group_name
+        ).id())
+
+    return client.get(
+        resource_group_name,
+        server_name,
+        new_name)
 
 
 # Creates a database from a database point in time backup or deleted database backup.
@@ -337,7 +361,7 @@ def db_restore(
         dest_name,
         restore_point_in_time=None,
         source_database_deletion_date=None,
-        raw=False,
+        no_wait=False,
         **kwargs):
 
     if not (restore_point_in_time or source_database_deletion_date):
@@ -356,7 +380,7 @@ def db_restore(
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         # Cross-server restore is not supported. So dest server/group must be the same as source.
         DatabaseIdentity(cmd.cli_ctx, dest_name, server_name, resource_group_name),
-        raw,
+        no_wait,
         kwargs)
 
 
@@ -532,7 +556,7 @@ def pad_sas_key(
         storage_key):
     # Import/Export API requires that "?" precede SAS key as an argument.
     # Add ? prefix if it wasn't included.
-    if storage_key_type.lower() == StorageKeyType.shared_access_key.value.lower():
+    if storage_key_type.lower() == StorageKeyType.shared_access_key.value.lower():  # pylint: disable=no-member
         if storage_key[0] != '?':
             storage_key = '?' + storage_key
     return storage_key
@@ -562,10 +586,11 @@ def db_update(
         instance,
         elastic_pool_name=None,
         max_size_bytes=None,
-        requested_service_objective_name=None):
+        requested_service_objective_name=None,
+        zone_redundant=None):
 
     # Verify edition
-    if instance.edition.lower() == DatabaseEdition.data_warehouse.value.lower():
+    if instance.edition.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
         raise CLIError('Azure SQL Data Warehouse can be updated with the command'
                        ' `az sql dw update`.')
 
@@ -602,6 +627,8 @@ def db_update(
 
     # Set other properties
     instance.max_size_bytes = max_size_bytes or instance.max_size_bytes
+
+    instance.zone_redundant = zone_redundant
 
     return instance
 
@@ -747,7 +774,7 @@ def db_audit_policy_update(
     # Apply state
     if state:
         instance.state = BlobAuditingPolicyState[state.lower()]
-    enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()
+    enabled = instance.state.value.lower() == BlobAuditingPolicyState.enabled.value.lower()  # pylint: disable=no-member
 
     # Set storage-related properties
     _db_security_policy_update(
@@ -785,7 +812,7 @@ def db_threat_detection_policy_update(
     # Apply state
     if state:
         instance.state = SecurityAlertPolicyState[state.lower()]
-    enabled = instance.state.value.lower() == SecurityAlertPolicyState.enabled.value.lower()
+    enabled = instance.state.value.lower() == SecurityAlertPolicyState.enabled.value.lower()  # pylint: disable=no-member
 
     # Set storage-related properties
     _db_security_policy_update(
@@ -826,7 +853,7 @@ def dw_create(
         database_name,
         server_name,
         resource_group_name,
-        raw=False,
+        no_wait=False,
         **kwargs):
 
     # Set edition
@@ -837,7 +864,7 @@ def dw_create(
         cmd.cli_ctx,
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
-        raw,
+        no_wait,
         kwargs)
 
 
@@ -907,13 +934,15 @@ def elastic_pool_update(
         database_dtu_max=None,
         database_dtu_min=None,
         dtu=None,
-        storage_mb=None):
+        storage_mb=None,
+        zone_redundant=None):
 
     # Apply params to instance
     instance.database_dtu_max = database_dtu_max or instance.database_dtu_max
     instance.database_dtu_min = database_dtu_min or instance.database_dtu_min
     instance.dtu = dtu or instance.dtu
     instance.storage_mb = storage_mb or instance.storage_mb
+    instance.zone_redundant = zone_redundant
 
     return instance
 
@@ -1187,6 +1216,35 @@ def _get_server_key_name_from_uri(uri):
     version = uri.split('/')[-1]
     return '{}_{}_{}'.format(vault, key, version)
 
+
+#####
+#           sql server dns-alias
+#####
+
+
+def server_dns_alias_set(
+        cmd,
+        client,
+        resource_group_name,
+        server_name,
+        dns_alias_name,
+        original_server_name,
+        original_subscription_id=None,
+        original_resource_group_name=None):
+
+    # Build the old alias id
+    old_alias_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/dnsAliases/{}".format(
+        quote(original_subscription_id or get_subscription_id(cmd.cli_ctx)),
+        quote(original_resource_group_name or resource_group_name),
+        quote(original_server_name),
+        quote(dns_alias_name))
+
+    return client.acquire(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        dns_alias_name=dns_alias_name,
+        old_server_dns_alias_id=old_alias_id
+    )
 
 #####
 #           sql server encryption-protector
