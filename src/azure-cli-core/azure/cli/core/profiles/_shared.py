@@ -59,14 +59,18 @@ class SDKProfile(object):  # pylint: disable=too-few-public-methods
         :param profile: A dict operation group name to API version.
         :type profile: dict[str, str]
         """
-        self.default_api_version = default_api_version
         self.profile = profile if profile is not None else {}
+        self.profile[None] = default_api_version
+
+    @property
+    def default_api_version(self):
+        return self.profile[None]
 
 
 AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: '2017-10-01',
-        ResourceType.MGMT_NETWORK: '2018-01-01',
+        ResourceType.MGMT_NETWORK: '2018-02-01',
         ResourceType.MGMT_COMPUTE: SDKProfile('2017-12-01', {
             'resource_skus': '2017-09-01',
             'disks': '2018-04-01',

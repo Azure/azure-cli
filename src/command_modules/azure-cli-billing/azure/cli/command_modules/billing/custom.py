@@ -6,8 +6,7 @@
 
 def cli_billing_list_invoices(client, generate_url=False):
     """List all available invoices of the subscription"""
-    invoices = client.list(expand='downloadUrl' if generate_url else None)
-    return list(invoices)
+    return client.list(expand='downloadUrl' if generate_url else None)
 
 
 def cli_billing_get_invoice(client, name=None):
@@ -15,8 +14,3 @@ def cli_billing_get_invoice(client, name=None):
     if name:
         return client.get(name)
     return client.get_latest()
-
-
-def cli_billing_list_periods(client):
-    """List all available billing periods of the subscription"""
-    return list(client.list())

@@ -43,6 +43,18 @@ def add_helps(command_group, server_type):
                             -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2" \\
                             --restore-point-in-time "2017-06-15T13:10:00Z"
                 """.format(command_group, server_type)
+    helps['{} server georestore'.format(command_group)] = """
+                type: command
+                short-summary: Georestore a server from backup.
+                examples:
+                    - name: Georestore 'testsvr' as 'testsvrnew' where 'testsvrnew' is in same resource group as 'testsvr'.
+                      text: az {0} server georestore -g testgroup -n testsvrnew --source-server testsvr -l westus2
+                    - name: Georestore 'testsvr2' to 'testsvrnew', where 'testsvrnew' is in the different resource group as the original server.
+                      text: |
+                        az {0} server georestore -g testgroup -n testsvrnew \\
+                            -s "/subscriptions/${{SubID}}/resourceGroups/${{ResourceGroup}}/providers/Microsoft.DBfor{1}/servers/testsvr2"
+                            -l westus2 --sku-name GP_Gen5_2
+                """.format(command_group, server_type)
     helps['{} server update'.format(command_group)] = """
                 type: command
                 short-summary: Update a server.

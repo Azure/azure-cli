@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.0.12
+++++++
+
+* `sdist` is now compatible with wheel 0.31.0
+
 0.0.11
 ++++++
 * Support Autorest 3.0 based SDKs

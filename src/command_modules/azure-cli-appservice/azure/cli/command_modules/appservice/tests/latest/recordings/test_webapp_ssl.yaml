@@ -1,30 +1,32 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"location": "westus", "tags": {"product": "azurecli", "date": "2018-03-23T21:08:19Z",
+      "cause": "automation"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [group create]
       Connection: [keep-alive]
-      Content-Length: ['50']
+      Content-Length: ['110']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","date":"2018-03-23T21:08:19Z","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:36:42 GMT']
+      date: ['Fri, 23 Mar 2018 21:08:21 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1189']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 201, message: Created}
 - request:
     body: null
@@ -34,27 +36,28 @@ interactions:
       CommandName: [appservice plan create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"use":"az-test"},"properties":{"provisioningState":"Succeeded"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","location":"westus","tags":{"product":"azurecli","date":"2018-03-23T21:08:19Z","cause":"automation"},"properties":{"provisioningState":"Succeeded"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['328']
+      content-length: ['384']
       content-type: [application/json; charset=utf-8]
-      date: ['Tue, 19 Dec 2017 04:36:43 GMT']
+      date: ['Fri, 23 Mar 2018 21:08:21 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       vary: [Accept-Encoding]
+      x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''{"sku": {"capacity": 1, "tier": "BASIC", "name": "B1"}, "location":
-      "westus", "properties": {"perSiteScaling": false, "name": "ssl-test-plan000002"}}'''
+    body: 'b''{"location": "westus", "sku": {"name": "B1", "capacity": 1, "tier":
+      "BASIC"}, "properties": {"name": "ssl-test-plan000002", "perSiteScaling": false}}'''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
@@ -62,21 +65,20 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['154']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","name":"ssl-test-plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
         US","properties":{"serverFarmId":0,"name":"ssl-test-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-077_10127","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-095_2393","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1379']
+      content-length: ['1378']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:36:57 GMT']
+      date: ['Fri, 23 Mar 2018 21:08:54 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -84,7 +86,8 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1185']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -95,21 +98,20 @@ interactions:
       CommandName: [webapp create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002?api-version=2016-09-01
   response:
     body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","name":"ssl-test-plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"West
         US","properties":{"serverFarmId":0,"name":"ssl-test-plan000002","workerSize":"Default","workerSizeId":0,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"Default","currentWorkerSizeId":0,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-WestUSwebspace","subscription":"0b1f6471-1bf0-4dda-aec3-cb9272f09590","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":3,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Shared","siteMode":null,"geoRegion":"West
-        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-077_10127","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
+        US","perSiteScaling":false,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"mdmId":"waws-prod-bay-095_2393","targetWorkerCount":0,"targetWorkerSizeId":0,"provisioningState":"Succeeded"},"sku":{"name":"B1","tier":"Basic","size":"B1","family":"B","capacity":1}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1379']
+      content-length: ['1378']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:36:58 GMT']
+      date: ['Fri, 23 Mar 2018 21:08:55 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -117,35 +119,36 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: 'b''b\''{"location": "West US", "properties": {"serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002",
-      "scmSiteAlsoStopped": false, "reserved": false, "siteConfig": {"netFrameworkVersion":
-      "v4.6", "localMySqlEnabled": false, "appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION",
-      "value": "6.9.1"}]}}}\'''''
+    body: 'b''b\''{"location": "West US", "properties": {"scmSiteAlsoStopped": false,
+      "siteConfig": {"http20Enabled": true, "localMySqlEnabled": false, "netFrameworkVersion":
+      "v4.6", "appSettings": [{"name": "WEBSITE_NODE_DEFAULT_VERSION", "value": "6.9.1"}]},
+      "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002",
+      "reserved": false}}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [webapp create]
       Connection: [keep-alive]
-      Content-Length: ['462']
+      Content-Length: ['485']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-ssl-test123?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003?api-version=2016-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-ssl-test123","name":"webapp-ssl-test123","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"webapp-ssl-test123","state":"Running","hostNames":["webapp-ssl-test123.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-077.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-ssl-test123","repositorySiteName":"webapp-ssl-test123","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-ssl-test123.azurewebsites.net","webapp-ssl-test123.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-ssl-test123.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-ssl-test123.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","reserved":false,"lastModifiedTimeUtc":"2017-12-19T04:37:00.3033333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-ssl-test123","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"138.91.247.220,138.91.246.230,138.91.246.197,138.91.241.182","possibleOutboundIpAddresses":"138.91.247.220,138.91.246.230,138.91.246.197,138.91.241.182","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-077","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-ssl-test123.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003","name":"web-ssl-test000003","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"web-ssl-test000003","state":"Running","hostNames":["web-ssl-test000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-095.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-ssl-test000003","repositorySiteName":"web-ssl-test000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-ssl-test000003.azurewebsites.net","web-ssl-test000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-ssl-test000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-ssl-test000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","reserved":false,"lastModifiedTimeUtc":"2018-03-23T21:08:56.59","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-ssl-test000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148","possibleOutboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148,13.64.75.221,13.64.78.152","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-095","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-ssl-test000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3019']
+      content-length: ['3110']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:37:01 GMT']
-      etag: ['"1D3788302D97E55"']
+      date: ['Fri, 23 Mar 2018 21:09:24 GMT']
+      etag: ['"1D3C2EB2834E015"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -153,7 +156,8 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1180']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1197']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -165,34 +169,34 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['2']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-ssl-test123/publishxml?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003/publishxml?api-version=2016-08-01
   response:
-    body: {string: '<publishData><publishProfile profileName="webapp-ssl-test123 -
-        Web Deploy" publishMethod="MSDeploy" publishUrl="webapp-ssl-test123.scm.azurewebsites.net:443"
-        msdeploySite="webapp-ssl-test123" userName="$webapp-ssl-test123" userPWD="bve0GjviK7kfA6campr9WQ5R1Qlo9YStG0BRK3PWkPGqdLjC9vDmohBt3HWm"
-        destinationAppUrl="http://webapp-ssl-test123.azurewebsites.net" SQLServerDBConnectionString=""
+    body: {string: '<publishData><publishProfile profileName="web-ssl-test000003 -
+        Web Deploy" publishMethod="MSDeploy" publishUrl="web-ssl-test000003.scm.azurewebsites.net:443"
+        msdeploySite="web-ssl-test000003" userName="$web-ssl-test000003" userPWD="26stbhv9R6jfnTAx7JXpZXlpQefRsywzoBBLXzs2FR5srpEtiwlwh6Bx5Akj"
+        destinationAppUrl="http://web-ssl-test000003.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
-        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="webapp-ssl-test123
-        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-077.ftp.azurewebsites.windows.net/site/wwwroot"
-        ftpPassiveMode="True" userName="webapp-ssl-test123\$webapp-ssl-test123" userPWD="bve0GjviK7kfA6campr9WQ5R1Qlo9YStG0BRK3PWkPGqdLjC9vDmohBt3HWm"
-        destinationAppUrl="http://webapp-ssl-test123.azurewebsites.net" SQLServerDBConnectionString=""
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="web-ssl-test000003
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-095.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="web-ssl-test000003\$web-ssl-test000003" userPWD="26stbhv9R6jfnTAx7JXpZXlpQefRsywzoBBLXzs2FR5srpEtiwlwh6Bx5Akj"
+        destinationAppUrl="http://web-ssl-test000003.azurewebsites.net" SQLServerDBConnectionString=""
         mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
         webSystem="WebSites"><databases /></publishProfile></publishData>'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1096']
+      content-length: ['1114']
       content-type: [application/xml]
-      date: ['Tue, 19 Dec 2017 04:37:03 GMT']
+      date: ['Fri, 23 Mar 2018 21:09:24 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
@@ -204,21 +208,20 @@ interactions:
       CommandName: [webapp config ssl upload]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-ssl-test123?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003?api-version=2016-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-ssl-test123","name":"webapp-ssl-test123","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"webapp-ssl-test123","state":"Running","hostNames":["webapp-ssl-test123.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-077.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-ssl-test123","repositorySiteName":"webapp-ssl-test123","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-ssl-test123.azurewebsites.net","webapp-ssl-test123.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-ssl-test123.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-ssl-test123.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","reserved":false,"lastModifiedTimeUtc":"2017-12-19T04:37:00.7733333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-ssl-test123","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"138.91.247.220,138.91.246.230,138.91.246.197,138.91.241.182","possibleOutboundIpAddresses":"138.91.247.220,138.91.246.230,138.91.246.197,138.91.241.182","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-077","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-ssl-test123.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003","name":"web-ssl-test000003","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"web-ssl-test000003","state":"Running","hostNames":["web-ssl-test000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-095.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-ssl-test000003","repositorySiteName":"web-ssl-test000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-ssl-test000003.azurewebsites.net","web-ssl-test000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-ssl-test000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-ssl-test000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","reserved":false,"lastModifiedTimeUtc":"2018-03-23T21:08:57.1533333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-ssl-test000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148","possibleOutboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148,13.64.75.221,13.64.78.152","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-095","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-ssl-test000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3019']
+      content-length: ['3115']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:37:03 GMT']
-      etag: ['"1D3788302D97E55"']
+      date: ['Fri, 23 Mar 2018 21:09:25 GMT']
+      etag: ['"1D3C2EB2834E015"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -226,33 +229,34 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "West US", "properties": {"password": "test", "pfxBlob": "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"}}'
+    body: 'b''b\''{"location": "West US", "properties": {"pfxBlob": "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",
+      "password": "test", "serverFarmId": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002"}}\'''''
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [webapp config ssl upload]
       Connection: [keep-alive]
-      Content-Length: ['3430']
+      Content-Length: ['3849']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates/DB2BA6898D0B330A93E7F69FF505C61EF39921B6__West%20US_clitest.rg000001?api-version=2016-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates/9E9735C45C792B03B3FFCCA614852B32EE71AD6B__West%20US_clitest.rg000001?api-version=2016-03-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates/DB2BA6898D0B330A93E7F69FF505C61EF39921B6__West
-        US_clitest.rg000001","name":"DB2BA6898D0B330A93E7F69FF505C61EF39921B6__West
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates/9E9735C45C792B03B3FFCCA614852B32EE71AD6B__West
+        US_clitest.rg000001","name":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B__West
         US_clitest.rg000001","type":"Microsoft.Web/certificates","location":"West
-        US","properties":{"friendlyName":"","subjectName":"webapp-ssl-test123.azurewebsites.net","hostNames":["webapp-ssl-test123.azurewebsites.net"],"pfxBlob":null,"siteName":null,"selfLink":null,"issuer":"webapp-ssl-test123.azurewebsites.net","issueDate":"2017-02-08T23:14:36+00:00","expirationDate":"2018-02-08T23:14:36+00:00","password":null,"thumbprint":"DB2BA6898D0B330A93E7F69FF505C61EF39921B6","valid":null,"toDelete":null,"cerBlob":null,"publicKeyHash":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"keyVaultSecretStatus":"Initialized","webSpace":"clitest.rg000001-WestUSwebspace","serverFarmId":null,"tags":null}}'}
+        US","properties":{"friendlyName":"","subjectName":"*.azurewebsites.net","hostNames":["*.azurewebsites.net"],"pfxBlob":null,"siteName":null,"selfLink":null,"issuer":"*.azurewebsites.net","issueDate":"2018-01-01T07:00:00+00:00","expirationDate":"2118-12-31T07:00:00+00:00","password":null,"thumbprint":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B","valid":null,"toDelete":null,"cerBlob":null,"publicKeyHash":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"keyVaultSecretStatus":"Initialized","webSpace":"clitest.rg000001-WestUSwebspace","serverFarmId":null,"tags":null}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1194']
+      content-length: ['1143']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:37:05 GMT']
+      date: ['Fri, 23 Mar 2018 21:09:30 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -262,7 +266,8 @@ interactions:
       warning: ['199 Some of the uploaded certificates are either self-signed or expired.,199
           Some of the uploaded certificates cannot be validated to a trusted CA']
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1193']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -273,21 +278,20 @@ interactions:
       CommandName: [webapp config ssl bind]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-ssl-test123?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003?api-version=2016-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-ssl-test123","name":"webapp-ssl-test123","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"webapp-ssl-test123","state":"Running","hostNames":["webapp-ssl-test123.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-077.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-ssl-test123","repositorySiteName":"webapp-ssl-test123","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-ssl-test123.azurewebsites.net","webapp-ssl-test123.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-ssl-test123.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-ssl-test123.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","reserved":false,"lastModifiedTimeUtc":"2017-12-19T04:37:00.7733333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-ssl-test123","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"138.91.247.220,138.91.246.230,138.91.246.197,138.91.241.182","possibleOutboundIpAddresses":"138.91.247.220,138.91.246.230,138.91.246.197,138.91.241.182","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-077","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-ssl-test123.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003","name":"web-ssl-test000003","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"web-ssl-test000003","state":"Running","hostNames":["web-ssl-test000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-095.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-ssl-test000003","repositorySiteName":"web-ssl-test000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-ssl-test000003.azurewebsites.net","web-ssl-test000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-ssl-test000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-ssl-test000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","reserved":false,"lastModifiedTimeUtc":"2018-03-23T21:08:57.1533333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-ssl-test000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148","possibleOutboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148,13.64.75.221,13.64.78.152","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-095","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-ssl-test000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3019']
+      content-length: ['3115']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:37:06 GMT']
-      etag: ['"1D3788302D97E55"']
+      date: ['Fri, 23 Mar 2018 21:09:31 GMT']
+      etag: ['"1D3C2EB2834E015"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -295,6 +299,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -305,22 +310,21 @@ interactions:
       CommandName: [webapp config ssl bind]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates?api-version=2016-03-01
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates/DB2BA6898D0B330A93E7F69FF505C61EF39921B6__West
-        US_clitest.rg000001","name":"DB2BA6898D0B330A93E7F69FF505C61EF39921B6__West
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates/9E9735C45C792B03B3FFCCA614852B32EE71AD6B__West
+        US_clitest.rg000001","name":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B__West
         US_clitest.rg000001","type":"Microsoft.Web/certificates","location":"West
-        US","properties":{"friendlyName":"","subjectName":"webapp-ssl-test123.azurewebsites.net","hostNames":["webapp-ssl-test123.azurewebsites.net"],"pfxBlob":null,"siteName":null,"selfLink":null,"issuer":"webapp-ssl-test123.azurewebsites.net","issueDate":"2017-02-08T23:14:36+00:00","expirationDate":"2018-02-08T23:14:36+00:00","password":null,"thumbprint":"DB2BA6898D0B330A93E7F69FF505C61EF39921B6","valid":null,"toDelete":null,"cerBlob":null,"publicKeyHash":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"keyVaultSecretStatus":"Initialized","webSpace":"clitest.rg000001-WestUSwebspace","serverFarmId":null,"tags":null}}],"nextLink":null,"id":null}'}
+        US","properties":{"friendlyName":"","subjectName":"*.azurewebsites.net","hostNames":["*.azurewebsites.net"],"pfxBlob":null,"siteName":null,"selfLink":null,"issuer":"*.azurewebsites.net","issueDate":"2018-01-01T07:00:00+00:00","expirationDate":"2118-12-31T07:00:00+00:00","password":null,"thumbprint":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B","valid":null,"toDelete":null,"cerBlob":null,"publicKeyHash":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"keyVaultSecretStatus":"Initialized","webSpace":"clitest.rg000001-WestUSwebspace","serverFarmId":null,"tags":null}}],"nextLink":null,"id":null}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1232']
+      content-length: ['1181']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:37:07 GMT']
+      date: ['Fri, 23 Mar 2018 21:09:32 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -328,35 +332,273 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: '{"location": "West US", "properties": {"scmSiteAlsoStopped": false, "hostNameSslStates":
-      [{"toUpdate": true, "name": "webapp-ssl-test123.azurewebsites.net", "sslState":
-      "SniEnabled", "thumbprint": "DB2BA6898D0B330A93E7F69FF505C61EF39921B6"}], "reserved":
-      false}}'
+    body: null
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [webapp config ssl bind]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003/hostNameBindings?api-version=2016-08-01
+  response:
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003/hostNameBindings/web-ssl-test000003.azurewebsites.net","name":"web-ssl-test000003/web-ssl-test000003.azurewebsites.net","type":"Microsoft.Web/sites/hostNameBindings","location":"West
+        US","properties":{"siteName":"web-ssl-test000003","domainId":null,"hostNameType":"Verified"}}],"nextLink":null,"id":null}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['523']
+      content-type: [application/json]
+      date: ['Fri, 23 Mar 2018 21:09:32 GMT']
+      etag: ['"1D3C2EB2834E015"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: 'b''{"location": "West US", "properties": {"hostNameSslStates": [{"thumbprint":
+      "9E9735C45C792B03B3FFCCA614852B32EE71AD6B", "toUpdate": true, "sslState": "SniEnabled",
+      "name": "web-ssl-test000003.azurewebsites.net"}], "scmSiteAlsoStopped": false,
+      "reserved": false}}'''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config ssl bind]
+      Connection: [keep-alive]
+      Content-Length: ['264']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003","name":"web-ssl-test000003","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"web-ssl-test000003","state":"Running","hostNames":["web-ssl-test000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-095.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-ssl-test000003","repositorySiteName":"web-ssl-test000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-ssl-test000003.azurewebsites.net","web-ssl-test000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-ssl-test000003.azurewebsites.net","sslState":"SniEnabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B","toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-ssl-test000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","reserved":false,"lastModifiedTimeUtc":"2018-03-23T21:09:32.65","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-ssl-test000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148","possibleOutboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148,13.64.75.221,13.64.78.152","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-095","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-ssl-test000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3150']
+      content-type: [application/json]
+      date: ['Fri, 23 Mar 2018 21:09:35 GMT']
+      etag: ['"1D3C2EB3D5D3CA0"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config ssl bind]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003","name":"web-ssl-test000003","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"web-ssl-test000003","state":"Running","hostNames":["web-ssl-test000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-095.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-ssl-test000003","repositorySiteName":"web-ssl-test000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-ssl-test000003.azurewebsites.net","web-ssl-test000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-ssl-test000003.azurewebsites.net","sslState":"SniEnabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B","toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-ssl-test000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","reserved":false,"lastModifiedTimeUtc":"2018-03-23T21:09:32.65","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-ssl-test000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148","possibleOutboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148,13.64.75.221,13.64.78.152","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-095","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-ssl-test000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3150']
+      content-type: [application/json]
+      date: ['Fri, 23 Mar 2018 21:09:35 GMT']
+      etag: ['"1D3C2EB3D5D3CA0"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: '{}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config ssl bind]
+      Connection: [keep-alive]
+      Content-Length: ['2']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
+      accept-language: [en-US]
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003/publishxml?api-version=2016-08-01
+  response:
+    body: {string: '<publishData><publishProfile profileName="web-ssl-test000003 -
+        Web Deploy" publishMethod="MSDeploy" publishUrl="web-ssl-test000003.scm.azurewebsites.net:443"
+        msdeploySite="web-ssl-test000003" userName="$web-ssl-test000003" userPWD="26stbhv9R6jfnTAx7JXpZXlpQefRsywzoBBLXzs2FR5srpEtiwlwh6Bx5Akj"
+        destinationAppUrl="http://web-ssl-test000003.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="web-ssl-test000003
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-095.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="web-ssl-test000003\$web-ssl-test000003" userPWD="26stbhv9R6jfnTAx7JXpZXlpQefRsywzoBBLXzs2FR5srpEtiwlwh6Bx5Akj"
+        destinationAppUrl="http://web-ssl-test000003.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile></publishData>'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1114']
+      content-type: [application/xml]
+      date: ['Fri, 23 Mar 2018 21:09:35 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config ssl unbind]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003?api-version=2016-08-01
+  response:
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003","name":"web-ssl-test000003","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"web-ssl-test000003","state":"Running","hostNames":["web-ssl-test000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-095.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-ssl-test000003","repositorySiteName":"web-ssl-test000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-ssl-test000003.azurewebsites.net","web-ssl-test000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-ssl-test000003.azurewebsites.net","sslState":"SniEnabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B","toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-ssl-test000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","reserved":false,"lastModifiedTimeUtc":"2018-03-23T21:09:32.65","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-ssl-test000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148","possibleOutboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148,13.64.75.221,13.64.78.152","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-095","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-ssl-test000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['3150']
+      content-type: [application/json]
+      date: ['Fri, 23 Mar 2018 21:09:36 GMT']
+      etag: ['"1D3C2EB3D5D3CA0"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config ssl unbind]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates?api-version=2016-03-01
+  response:
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates/9E9735C45C792B03B3FFCCA614852B32EE71AD6B__West
+        US_clitest.rg000001","name":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B__West
+        US_clitest.rg000001","type":"Microsoft.Web/certificates","location":"West
+        US","properties":{"friendlyName":"","subjectName":"*.azurewebsites.net","hostNames":["*.azurewebsites.net"],"pfxBlob":null,"siteName":null,"selfLink":null,"issuer":"*.azurewebsites.net","issueDate":"2018-01-01T07:00:00+00:00","expirationDate":"2118-12-31T07:00:00+00:00","password":null,"thumbprint":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B","valid":null,"toDelete":null,"cerBlob":null,"publicKeyHash":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"keyVaultSecretStatus":"Initialized","webSpace":"clitest.rg000001-WestUSwebspace","serverFarmId":null,"tags":null}}],"nextLink":null,"id":null}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['1181']
+      content-type: [application/json]
+      date: ['Fri, 23 Mar 2018 21:09:37 GMT']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: null
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config ssl unbind]
+      Connection: [keep-alive]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
+      accept-language: [en-US]
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003/hostNameBindings?api-version=2016-08-01
+  response:
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003/hostNameBindings/web-ssl-test000003.azurewebsites.net","name":"web-ssl-test000003/web-ssl-test000003.azurewebsites.net","type":"Microsoft.Web/sites/hostNameBindings","location":"West
+        US","properties":{"siteName":"web-ssl-test000003","domainId":null,"hostNameType":"Verified","sslState":"SniEnabled","thumbprint":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B"}}],"nextLink":null,"id":null}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['603']
+      content-type: [application/json]
+      date: ['Fri, 23 Mar 2018 21:09:38 GMT']
+      etag: ['"1D3C2EB3D5D3CA0"']
+      expires: ['-1']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/10.0]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      transfer-encoding: [chunked]
+      vary: [Accept-Encoding]
+      x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
+      x-powered-by: [ASP.NET]
+    status: {code: 200, message: OK}
+- request:
+    body: 'b''{"location": "West US", "properties": {"hostNameSslStates": [{"thumbprint":
+      "9E9735C45C792B03B3FFCCA614852B32EE71AD6B", "toUpdate": true, "sslState": "Disabled",
+      "name": "web-ssl-test000003.azurewebsites.net"}], "scmSiteAlsoStopped": false,
+      "reserved": false}}'''
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [webapp config ssl unbind]
       Connection: [keep-alive]
       Content-Length: ['262']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-ssl-test123?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003?api-version=2016-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-ssl-test123","name":"webapp-ssl-test123","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"webapp-ssl-test123","state":"Running","hostNames":["webapp-ssl-test123.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-077.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-ssl-test123","repositorySiteName":"webapp-ssl-test123","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-ssl-test123.azurewebsites.net","webapp-ssl-test123.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-ssl-test123.azurewebsites.net","sslState":"SniEnabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":"DB2BA6898D0B330A93E7F69FF505C61EF39921B6","toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-ssl-test123.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","reserved":false,"lastModifiedTimeUtc":"2017-12-19T04:37:08.1166667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-ssl-test123","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"138.91.247.220,138.91.246.230,138.91.246.197,138.91.241.182","possibleOutboundIpAddresses":"138.91.247.220,138.91.246.230,138.91.246.197,138.91.241.182","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-077","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-ssl-test123.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003","name":"web-ssl-test000003","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"web-ssl-test000003","state":"Running","hostNames":["web-ssl-test000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-095.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-ssl-test000003","repositorySiteName":"web-ssl-test000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-ssl-test000003.azurewebsites.net","web-ssl-test000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-ssl-test000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-ssl-test000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","reserved":false,"lastModifiedTimeUtc":"2018-03-23T21:09:38.2133333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-ssl-test000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148","possibleOutboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148,13.64.75.221,13.64.78.152","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-095","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-ssl-test000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3059']
+      content-length: ['3115']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:37:08 GMT']
-      etag: ['"1D378830739FF4B"']
+      date: ['Fri, 23 Mar 2018 21:09:40 GMT']
+      etag: ['"1D3C2EB40AE2255"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -364,7 +606,8 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1183']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -375,21 +618,20 @@ interactions:
       CommandName: [webapp config ssl unbind]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-ssl-test123?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003?api-version=2016-08-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-ssl-test123","name":"webapp-ssl-test123","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"webapp-ssl-test123","state":"Running","hostNames":["webapp-ssl-test123.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-077.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-ssl-test123","repositorySiteName":"webapp-ssl-test123","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-ssl-test123.azurewebsites.net","webapp-ssl-test123.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-ssl-test123.azurewebsites.net","sslState":"SniEnabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":"DB2BA6898D0B330A93E7F69FF505C61EF39921B6","toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-ssl-test123.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","reserved":false,"lastModifiedTimeUtc":"2017-12-19T04:37:08.1166667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-ssl-test123","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"138.91.247.220,138.91.246.230,138.91.246.197,138.91.241.182","possibleOutboundIpAddresses":"138.91.247.220,138.91.246.230,138.91.246.197,138.91.241.182","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-077","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-ssl-test123.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003","name":"web-ssl-test000003","type":"Microsoft.Web/sites","kind":"app","location":"West
+        US","properties":{"name":"web-ssl-test000003","state":"Running","hostNames":["web-ssl-test000003.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-095.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/web-ssl-test000003","repositorySiteName":"web-ssl-test000003","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["web-ssl-test000003.azurewebsites.net","web-ssl-test000003.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[{"name":"LinuxFxVersion","value":""}],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"web-ssl-test000003.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"web-ssl-test000003.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","reserved":false,"lastModifiedTimeUtc":"2018-03-23T21:09:38.2133333","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"web-ssl-test000003","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148","possibleOutboundIpAddresses":"13.93.158.16,52.160.98.75,13.64.78.195,13.64.73.242,13.64.72.148,13.64.75.221,13.64.78.152","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-095","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"web-ssl-test000003.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['3059']
+      content-length: ['3115']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:37:09 GMT']
-      etag: ['"1D378830739FF4B"']
+      date: ['Fri, 23 Mar 2018 21:09:40 GMT']
+      etag: ['"1D3C2EB40AE2255"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -397,76 +639,47 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
-    body: null
+    body: '{}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       CommandName: [webapp config ssl unbind]
       Connection: [keep-alive]
+      Content-Length: ['2']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates?api-version=2016-03-01
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003/publishxml?api-version=2016-08-01
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates/DB2BA6898D0B330A93E7F69FF505C61EF39921B6__West
-        US_clitest.rg000001","name":"DB2BA6898D0B330A93E7F69FF505C61EF39921B6__West
-        US_clitest.rg000001","type":"Microsoft.Web/certificates","location":"West
-        US","properties":{"friendlyName":"","subjectName":"webapp-ssl-test123.azurewebsites.net","hostNames":["webapp-ssl-test123.azurewebsites.net"],"pfxBlob":null,"siteName":null,"selfLink":null,"issuer":"webapp-ssl-test123.azurewebsites.net","issueDate":"2017-02-08T23:14:36+00:00","expirationDate":"2018-02-08T23:14:36+00:00","password":null,"thumbprint":"DB2BA6898D0B330A93E7F69FF505C61EF39921B6","valid":null,"toDelete":null,"cerBlob":null,"publicKeyHash":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"keyVaultSecretStatus":"Initialized","webSpace":"clitest.rg000001-WestUSwebspace","serverFarmId":null,"tags":null}}],"nextLink":null,"id":null}'}
+    body: {string: '<publishData><publishProfile profileName="web-ssl-test000003 -
+        Web Deploy" publishMethod="MSDeploy" publishUrl="web-ssl-test000003.scm.azurewebsites.net:443"
+        msdeploySite="web-ssl-test000003" userName="$web-ssl-test000003" userPWD="26stbhv9R6jfnTAx7JXpZXlpQefRsywzoBBLXzs2FR5srpEtiwlwh6Bx5Akj"
+        destinationAppUrl="http://web-ssl-test000003.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile><publishProfile profileName="web-ssl-test000003
+        - FTP" publishMethod="FTP" publishUrl="ftp://waws-prod-bay-095.ftp.azurewebsites.windows.net/site/wwwroot"
+        ftpPassiveMode="True" userName="web-ssl-test000003\$web-ssl-test000003" userPWD="26stbhv9R6jfnTAx7JXpZXlpQefRsywzoBBLXzs2FR5srpEtiwlwh6Bx5Akj"
+        destinationAppUrl="http://web-ssl-test000003.azurewebsites.net" SQLServerDBConnectionString=""
+        mySQLDBConnectionString="" hostingProviderForumLink="" controlPanelLink="http://windows.azure.com"
+        webSystem="WebSites"><databases /></publishProfile></publishData>'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1232']
-      content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:37:12 GMT']
+      content-length: ['1114']
+      content-type: [application/xml]
+      date: ['Fri, 23 Mar 2018 21:09:41 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
-- request:
-    body: '{"location": "West US", "properties": {"scmSiteAlsoStopped": false, "hostNameSslStates":
-      [{"toUpdate": true, "name": "webapp-ssl-test123.azurewebsites.net", "sslState":
-      "Disabled", "thumbprint": "DB2BA6898D0B330A93E7F69FF505C61EF39921B6"}], "reserved":
-      false}}'
-    headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [webapp config ssl unbind]
-      Connection: [keep-alive]
-      Content-Length: ['260']
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
-      accept-language: [en-US]
-    method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-ssl-test123?api-version=2016-08-01
-  response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-ssl-test123","name":"webapp-ssl-test123","type":"Microsoft.Web/sites","kind":"app","location":"West
-        US","properties":{"name":"webapp-ssl-test123","state":"Running","hostNames":["webapp-ssl-test123.azurewebsites.net"],"webSpace":"clitest.rg000001-WestUSwebspace","selfLink":"https://waws-prod-bay-077.api.azurewebsites.windows.net:454/subscriptions/00000000-0000-0000-0000-000000000000/webspaces/clitest.rg000001-WestUSwebspace/sites/webapp-ssl-test123","repositorySiteName":"webapp-ssl-test123","owner":null,"usageState":"Normal","enabled":true,"adminEnabled":true,"enabledHostNames":["webapp-ssl-test123.azurewebsites.net","webapp-ssl-test123.scm.azurewebsites.net"],"siteProperties":{"metadata":null,"properties":[],"appSettings":null},"availabilityState":"Normal","sslCertificates":null,"csrs":[],"cers":null,"siteMode":null,"hostNameSslStates":[{"name":"webapp-ssl-test123.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Standard"},{"name":"webapp-ssl-test123.scm.azurewebsites.net","sslState":"Disabled","ipBasedSslResult":null,"virtualIP":null,"thumbprint":null,"toUpdate":null,"toUpdateIpBasedSsl":null,"ipBasedSslState":"NotConfigured","hostType":"Repository"}],"computeMode":null,"serverFarm":null,"serverFarmId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/ssl-test-plan000002","reserved":false,"lastModifiedTimeUtc":"2017-12-19T04:37:15.6466667","storageRecoveryDefaultState":"Running","contentAvailabilityState":"Normal","runtimeAvailabilityState":"Normal","siteConfig":null,"deploymentId":"webapp-ssl-test123","trafficManagerHostNames":null,"sku":"Basic","scmSiteAlsoStopped":false,"targetSwapSlot":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"clientAffinityEnabled":true,"clientCertEnabled":false,"hostNamesDisabled":false,"domainVerificationIdentifiers":null,"kind":"app","outboundIpAddresses":"138.91.247.220,138.91.246.230,138.91.246.197,138.91.241.182","possibleOutboundIpAddresses":"138.91.247.220,138.91.246.230,138.91.246.197,138.91.241.182","containerSize":0,"dailyMemoryTimeQuota":0,"suspendedTill":null,"siteDisabledReason":0,"functionExecutionUnitsCache":null,"maxNumberOfWorkers":null,"homeStamp":"waws-prod-bay-077","cloningInfo":null,"snapshotInfo":null,"hostingEnvironmentId":null,"tags":null,"resourceGroup":"clitest.rg000001","defaultHostName":"webapp-ssl-test123.azurewebsites.net","slotSwapStatus":null,"httpsOnly":false}}'}
-    headers:
-      cache-control: [no-cache]
-      content-length: ['3019']
-      content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:37:15 GMT']
-      etag: ['"1D378830BB6FBEB"']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/10.0]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1188']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-resource-requests: ['11999']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -477,22 +690,21 @@ interactions:
       CommandName: [webapp config ssl delete]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates?api-version=2016-03-01
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates/DB2BA6898D0B330A93E7F69FF505C61EF39921B6__West
-        US_clitest.rg000001","name":"DB2BA6898D0B330A93E7F69FF505C61EF39921B6__West
+    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates/9E9735C45C792B03B3FFCCA614852B32EE71AD6B__West
+        US_clitest.rg000001","name":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B__West
         US_clitest.rg000001","type":"Microsoft.Web/certificates","location":"West
-        US","properties":{"friendlyName":"","subjectName":"webapp-ssl-test123.azurewebsites.net","hostNames":["webapp-ssl-test123.azurewebsites.net"],"pfxBlob":null,"siteName":null,"selfLink":null,"issuer":"webapp-ssl-test123.azurewebsites.net","issueDate":"2017-02-08T23:14:36+00:00","expirationDate":"2018-02-08T23:14:36+00:00","password":null,"thumbprint":"DB2BA6898D0B330A93E7F69FF505C61EF39921B6","valid":null,"toDelete":null,"cerBlob":null,"publicKeyHash":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"keyVaultSecretStatus":"Initialized","webSpace":"clitest.rg000001-WestUSwebspace","serverFarmId":null,"tags":null}}],"nextLink":null,"id":null}'}
+        US","properties":{"friendlyName":"","subjectName":"*.azurewebsites.net","hostNames":["*.azurewebsites.net"],"pfxBlob":null,"siteName":null,"selfLink":null,"issuer":"*.azurewebsites.net","issueDate":"2018-01-01T07:00:00+00:00","expirationDate":"2118-12-31T07:00:00+00:00","password":null,"thumbprint":"9E9735C45C792B03B3FFCCA614852B32EE71AD6B","valid":null,"toDelete":null,"cerBlob":null,"publicKeyHash":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"keyVaultSecretStatus":"Initialized","webSpace":"clitest.rg000001-WestUSwebspace","serverFarmId":null,"tags":null}}],"nextLink":null,"id":null}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['1232']
+      content-length: ['1181']
       content-type: [application/json]
-      date: ['Tue, 19 Dec 2017 04:37:17 GMT']
+      date: ['Fri, 23 Mar 2018 21:09:42 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
@@ -500,6 +712,7 @@ interactions:
       transfer-encoding: [chunked]
       vary: [Accept-Encoding]
       x-aspnet-version: [4.0.30319]
+      x-content-type-options: [nosniff]
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -511,24 +724,24 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates/DB2BA6898D0B330A93E7F69FF505C61EF39921B6__West%20US_clitest.rg000001?api-version=2016-03-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/certificates/9E9735C45C792B03B3FFCCA614852B32EE71AD6B__West%20US_clitest.rg000001?api-version=2016-03-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Dec 2017 04:37:18 GMT']
+      date: ['Fri, 23 Mar 2018 21:09:43 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1178']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -540,25 +753,25 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 websitemanagementclient/0.34.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 azure-mgmt-web/0.35.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: DELETE
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/webapp-ssl-test123?api-version=2016-08-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/sites/web-ssl-test000003?api-version=2016-08-01
   response:
     body: {string: ''}
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Dec 2017 04:37:23 GMT']
-      etag: ['"1D378830BB6FBEB"']
+      date: ['Fri, 23 Mar 2018 21:09:48 GMT']
+      etag: ['"1D3C2EB40AE2255"']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-IIS/10.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-writes: ['1178']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
       x-powered-by: [ASP.NET]
     status: {code: 200, message: OK}
 - request:
@@ -570,9 +783,9 @@ interactions:
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.22
-          msrest_azure/0.4.19 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.24]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.27
+          msrest_azure/0.4.23 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -581,11 +794,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Tue, 19 Dec 2017 04:37:24 GMT']
+      date: ['Fri, 23 Mar 2018 21:09:48 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkc1VDRVM1ZDMkJQRlNHTUc3MkpJNkRKTUxKNkRSTk1CNjZXRnw4MzY2QjZGOTVGQUFCOThFLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdXQUtDNUdDVTM3VTRNMlNEWlNTWEpVWlhXNFMyQTZRSldYS3wwQ0E4RTg4NUUxNjQ3MDAxLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
-      x-ms-ratelimit-remaining-subscription-writes: ['1150']
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 version: 1

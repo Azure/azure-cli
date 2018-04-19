@@ -287,6 +287,16 @@ helps['sql elastic-pool update'] = """
         - name: Update elastic pool with zone redundancy explicitly disabled
           text: az sql elastic-pool update -g mygroup -s myserver -n mypool -z false
     """
+helps['sql elastic-pool op'] = """
+    type: group
+    short-summary: Manage operations on an elastic pool.
+    """
+helps['sql elastic-pool op cancel'] = """
+    type: command
+    examples:
+        - name: Cancel an operation.
+          text: az sql elastic-pool op cancel -g mygroup -s myserver -ep myelasticpool -n d2896db1-2ba8-4c84-bac1-387c430cce40
+    """
 helps['sql server'] = """
     type: group
     short-summary: Manage SQL servers.

@@ -20,7 +20,8 @@ from azure.cli.command_modules.network._client_factory import (
     cf_virtual_network_gateways, cf_traffic_manager_mgmt_endpoints,
     cf_traffic_manager_mgmt_profiles, cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
     cf_tm_geographic, cf_security_rules, cf_subnets, cf_usages, cf_service_community,
-    cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups, cf_connection_monitor)
+    cf_public_ip_addresses, cf_endpoint_services, cf_application_security_groups, cf_connection_monitor,
+    cf_ddos_protection_plans)
 from azure.cli.command_modules.network._util import (
     list_network_resource_property, get_network_resource_property_entry, delete_network_resource_property_entry)
 from azure.cli.command_modules.network._format import (
@@ -63,6 +64,11 @@ def load_command_table(self, _):
     network_asg_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.network.operations.application_security_groups_operations#ApplicationSecurityGroupsOperations.{}',
         client_factory=cf_application_security_groups
+    )
+
+    network_ddos_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.network.operations.ddos_protection_plans_operations#DdosProtectionPlansOperations.{}',
+        client_factory=cf_ddos_protection_plans
     )
 
     network_dns_zone_sdk = CliCommandType(
@@ -298,6 +304,16 @@ def load_command_table(self, _):
         g.command('list', 'list_all')
         g.command('delete', 'delete')
         g.generic_update_command('update', custom_func_name='update_asg')
+
+    # endregion
+
+    # region DdosProtectionPlans
+    with self.command_group('network ddos-protection', network_ddos_sdk, min_api='2018-02-01') as g:
+        g.custom_command('create', 'create_ddos_plan')
+        g.command('delete', 'delete')
+        g.custom_command('list', 'list_ddos_plans')
+        g.command('show', 'get')
+        g.generic_update_command('update', custom_func_name='update_ddos_plan')
 
     # endregion
 

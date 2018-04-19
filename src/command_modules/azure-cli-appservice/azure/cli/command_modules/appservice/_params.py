@@ -136,7 +136,7 @@ def load_arguments(self, _):
             c.argument('slot_swap', arg_group='VSTS CD Provider', help='Name of the slot to be used for deployment and later promote to production. If slot is not available, it will be created. Default: Not configured')
             c.argument('repository_type', help='repository type', arg_type=get_enum_type(['git', 'mercurial', 'vsts', 'github', 'externalgit', 'localgit']))
             c.argument('git_token', help='Git access token required for auto sync')
-        with self.argument_context(scope + ' assign-identity') as c:
+        with self.argument_context(scope + ' identity') as c:
             c.argument('disable_msi', action='store_true', help='disable the identity')
             c.argument('scope', help="The scope the managed identity has access to")
             c.argument('role', help="Role name or id the managed identity will be assigned")
@@ -202,6 +202,8 @@ def load_arguments(self, _):
         c.argument('java_version', help="The version used to run your web app if using Java, e.g., '1.7' for Java 7, '1.8' for Java 8")
         c.argument('java_container', help="The java container, e.g., Tomcat, Jetty")
         c.argument('java_container_version', help="The version of the java container, e.g., '8.0.23' for Tomcat")
+        c.argument('min_tls_version', help="The minimum version of TLS required for SSL requests, e.g., '1.0', '1.1', '1.2'")
+        c.argument('http20_enabled', help="configures a web site to allow clients to connect over http2.0.", arg_type=get_three_state_flag(return_label=True))
         c.argument('app_command_line', options_list=['--startup-file'], help="The startup file for linux hosted web apps, e.g. 'process.json' for Node.js web")
 
     with self.argument_context('webapp config backup') as c:

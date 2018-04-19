@@ -597,6 +597,18 @@ def load_arguments(self, _):
         c.argument('dtu', help='TThe total shared DTU for the elastic eool.')
         c.argument('storage_mb', help='Storage limit for the elastic pool in MB.')
 
+    #####
+    #           sql elastic-pool op
+    #####
+    with self.argument_context('sql elastic-pool op') as c:
+        c.argument('elastic_pool_name',
+                   options_list=['--elastic-pool'],
+                   help='Name of the Azure SQL Elastic Pool.')
+
+        c.argument('operation_id',
+                   options_list=['--name', '-n'],
+                   help='The unique name of the operation to cancel.')
+
     ###############################################
     #                sql server                   #
     ###############################################

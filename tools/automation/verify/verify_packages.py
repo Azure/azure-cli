@@ -5,6 +5,7 @@
 
 """Verify the command modules by install them using PIP"""
 
+import sys
 import os.path
 import subprocess
 import imp
@@ -92,4 +93,5 @@ def run_verifications(args):
     for each in glob.glob(os.path.join(args.build_folder, '*.whl')):
         suite.addTest(PackageVerifyTests('test_azure_cli_module_wheel', wheel_path=each))
     runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(suite)
+    result = runner.run(suite)
+    sys.exit(not result.wasSuccessful())
