@@ -34,7 +34,7 @@ from azure.cli.core.commands import LongRunningOperation
 from .vsts_cd_provider import VstsContinuousDeliveryProvider
 from ._params import AUTH_TYPES
 from ._client_factory import web_client_factory, ex_handler_factory
-from ._appservice_utils import _generic_site_operation, _random_str_generator
+from ._appservice_utils import _generic_site_operation
 
 
 logger = get_logger(__name__)
@@ -1521,8 +1521,8 @@ class _StackRuntimeHelper(object):
 
 
 def create_function(cmd, resource_group_name, name, storage_account, is_linux,
-                    plan=None, consumption_plan_location=None, runtime=None, zip_url=None,
-                    function_app_mode=None, deployment_source_url=None, deployment_source_branch='master',
+                    plan=None, consumption_plan_location=None, runtime=None,
+                    deployment_source_url=None, deployment_source_branch='master',
                     deployment_local_git=None, deployment_container_image_name=None):
     # pylint: disable=too-many-statements
     if deployment_source_url and deployment_local_git:
@@ -1560,31 +1560,17 @@ def create_function(cmd, resource_group_name, name, storage_account, is_linux,
         site_config.app_settings.append(NameValuePair('FUNCTIONS_EXTENSION_VERSION', 'beta'))
         if consumption_plan_location:
             site_config.app_settings.append(NameValuePair('FUNCTIONS_WORKER_RUNTIME', runtime))
-            # TODO: currently supported for linux only, update when windows support is included
-            if function_app_mode == 'dev':
-                site_config.app_settings.append(NameValuePair('WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
-                                                              con_string))
-                site_config.app_settings.append(NameValuePair('WEBSITE_CONTENTSHARE',
-                                                              'name'.join(_random_str_generator(3))))
-            else:  # prod is the default value
-                if zip_url is None:
-                    logger.warning('''No zip_url provided. All requests to the function app will result in
-                                   non-success HTTP responses until content is published via local development
-                                   tools or directly mapped to the WEBSITE_USE_ZIP app setting. Please refer to
-                                   documentation to learn more: <link>.''')  # TODO: Add link here to documentation
-                else:
-                    site_config.app_settings.append(NameValuePair('WEBSITE_USE_ZIP', zip_url))
         else:
             site_config.app_settings.append(NameValuePair('MACHINEKEY_DecryptionKey',
                                                           str(hexlify(urandom(32)).decode()).upper()))
-        if deployment_container_image_name:
-            site_config.app_settings.append(NameValuePair('DOCKER_CUSTOM_IMAGE_NAME',
-                                                          deployment_container_image_name))
-            site_config.app_settings.append(NameValuePair('FUNCTION_APP_EDIT_MODE', 'readOnly'))
-            site_config.app_settings.append(NameValuePair('WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'false'))
-        else:
-            site_config.app_settings.append(NameValuePair('WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'true'))
-            site_config.linux_fx_version = 'DOCKER|appsvc/azure-functions-runtime'
+            if deployment_container_image_name:
+                site_config.app_settings.append(NameValuePair('DOCKER_CUSTOM_IMAGE_NAME',
+                                                              deployment_container_image_name))
+                site_config.app_settings.append(NameValuePair('FUNCTION_APP_EDIT_MODE', 'readOnly'))
+                site_config.app_settings.append(NameValuePair('WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'false'))
+            else:
+                site_config.app_settings.append(NameValuePair('WEBSITES_ENABLE_APP_SERVICE_STORAGE', 'true'))
+                site_config.linux_fx_version = 'DOCKER|appsvc/azure-functions-runtime'
     else:
         functionapp_def.kind = 'functionapp'
         site_config.app_settings.append(NameValuePair('FUNCTIONS_EXTENSION_VERSION', '~1'))
@@ -1604,8 +1590,13 @@ def create_function(cmd, resource_group_name, name, storage_account, is_linux,
     poller = client.web_apps.create_or_update(resource_group_name, name, functionapp_def)
     functionapp = LongRunningOperation(cmd.cli_ctx)(poller)
 
-    _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
-                             deployment_source_branch, deployment_local_git)
+    # TODO: Add link here
+    if(consumption_plan_location and is_linux):
+        logger.warning('''Your function app has been created but is not active until content is published using
+                       Azure Portal or the Functions Core Tools. Please refer to documentation to learn more.''')
+    else:
+        _set_remote_or_local_git(cmd, functionapp, resource_group_name, name, deployment_source_url,
+                                 deployment_source_branch, deployment_local_git)
 
     return functionapp
 

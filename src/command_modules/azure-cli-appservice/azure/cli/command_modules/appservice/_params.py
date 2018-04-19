@@ -267,10 +267,7 @@ def load_arguments(self, _):
         c.argument('consumption_plan_location', options_list=['--consumption-plan-location', '-c'],
                    help="Geographic location where Function App will be hosted. Use 'functionapp list-consumption-locations' to view available locations.")
         c.argument('is_linux', action='store_true', required=False, help='host webapp on Linux worker')
-        c.argument('zip_url', help='Url string to zip location The content from this location is deployed to the function app')
         c.argument('runtime', help='The function runtime stack. Currently supported for Linux apps only', arg_type=get_enum_type(['dotnet', 'node', 'python', 'java']))
-        c.argument('function_app_mode', help='The supported mode function app to be created. Currently supported for linux cosumption plan apps only', arg_type=get_enum_type(['prod', 'dev']),
-                   configured_default='prod')
     # For commands with shared impl between webapp and functionapp and has output, we apply type validation to avoid confusions
     with self.argument_context('functionapp show') as c:
         c.argument('name', arg_type=name_arg_type)

@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import string
 from ._client_factory import web_client_factory
 
 
@@ -20,8 +19,3 @@ def _generic_site_operation(cli_ctx, resource_group_name, name, operation_name, 
     return (operation(resource_group_name, name, slot)
             if extra_parameter is None else operation(resource_group_name,
                                                       name, extra_parameter, slot))
-
-
-def _random_str_generator(size=6, chars=string.ascii_uppercase + string.digits):
-    import random
-    return ''.join(random.choice(chars) for x in range(size))
