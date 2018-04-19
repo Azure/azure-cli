@@ -245,10 +245,10 @@ def validate_vault_id(entity_type):
         from azure.keyvault.custom.key_vault_id import KeyVaultIdentifier
         name = getattr(ns, entity_type + '_name', None)
         vault = getattr(ns, 'vault_base_url', None)
-        id=getattr(ns, 'id', None)
+        identifier = getattr(ns, 'identifier', None)
 
-        if id:
-            ident = KeyVaultIdentifier(uri=id, collection=entity_type + 's')
+        if identifier:
+            ident = KeyVaultIdentifier(uri=identifier, collection=entity_type + 's')
             setattr(ns, entity_type + '_name', ident.name)
             setattr(ns, 'vault_base_url', ident.vault)
             setattr(ns, entity_type + '_version', ident.version)
