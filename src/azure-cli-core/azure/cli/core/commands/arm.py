@@ -186,6 +186,8 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                     try:
                         # support piping values from JSON. Does not require use of --query
                         json_vals = json.loads(val)
+                        if not isinstance(json_vals, list):
+                            json_vals = [json_vals]
                         for json_val in json_vals:
                             if 'id' in json_val:
                                 expanded_values += [json_val['id']]
@@ -206,7 +208,7 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                 existing_values = getattr(namespace, arg.name, None)
                 if existing_values is None:
                     existing_values = IterateValue()
-                    existing_values.append(parts[arg.type.settings['id_part']])
+                    existing_values.append(parts.get(arg.type.settings['id_part'], None))
                 else:
                     if isinstance(existing_values, str):
                         if not getattr(arg.type, 'configured_default_applied', None):
@@ -215,7 +217,7 @@ def add_id_parameters(_, **kwargs):  # pylint: disable=unused-argument
                                 arg.name, existing_values, parts[arg.type.settings['id_part']]
                             )
                         existing_values = IterateValue()
-                    existing_values.append(parts[arg.type.settings['id_part']])
+                    existing_values.append(parts.get(arg.type.settings['id_part']))
                 setattr(namespace, arg.name, existing_values)
 
         return SplitAction
