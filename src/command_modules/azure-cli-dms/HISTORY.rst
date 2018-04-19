@@ -3,7 +3,7 @@
 Release History
 ===============
 
-0.1.0b11 (TODO)
+0.0.1
 +++++++++++++++++++++
 
-* Preview release.
+* Initial release. Adds support for the SQL to Azure SQL migration scenario.
