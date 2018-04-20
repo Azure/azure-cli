@@ -68,7 +68,7 @@ DEPENDENCIES = [
     'requests',
     'six',
     'tabulate>=0.7.7,<=0.8.2',
-    'wheel',
+    'wheel==0.30.0',
 ]
 
 if sys.version_info < (3, 4):
