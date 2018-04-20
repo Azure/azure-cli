@@ -1,0 +1,15 @@
+---
+# exclusions for the vm module
+
+webapp auth update:
+    parameters:
+        action:
+            rule_exclusions:
+            - missing_parameter_help_rule
+        enabled:
+            rule_exclusions:
+            - missing_parameter_help_rule
+webapp deployment slot list:
+    rule_exclusions:
+        - no_ids_for_list_commands_rule
+...
