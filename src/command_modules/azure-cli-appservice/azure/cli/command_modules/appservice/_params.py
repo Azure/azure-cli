@@ -243,6 +243,7 @@ def load_arguments(self, _):
         c.argument('enabled', arg_type=get_three_state_flag(return_label=True))
         c.argument('token_store_enabled', options_list=['--token-store'], arg_type=get_three_state_flag(return_label=True), help='use App Service Token Store')
         c.argument('action', arg_type=get_enum_type(AUTH_TYPES))
+        c.argument('runtime_version', help='Runtime version of the Authentication/Authorization feature in use for the current app')
         c.argument('token_refresh_extension_hours', type=float, help="Hours, must be formattable into a float")
         c.argument('allowed_external_redirect_urls', nargs='+', help="One or more urls (space-delimited).")
         c.argument('client_id', options_list=['--aad-client-id'], arg_group='Azure Active Directory', help='Application ID to integrate AAD organization account Sign-in into your web app')
