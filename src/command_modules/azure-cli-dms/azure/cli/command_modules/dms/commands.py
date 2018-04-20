@@ -21,6 +21,7 @@ def dms_api_exception_handler(ex):
         raise CLIError(ex)
     raise ex
 
+
 def load_command_table(self, _):
 
     dms_sdk = CliCommandType(

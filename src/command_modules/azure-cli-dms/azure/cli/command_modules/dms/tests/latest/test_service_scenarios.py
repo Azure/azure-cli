@@ -3,9 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+
 import json
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, JMESPathCheck, JMESPathCheckGreaterThan
+
 
 class DmsServiceTests(ScenarioTest):
     service_random_name_prefix = 'dmsclitest'
@@ -131,7 +133,7 @@ class DmsServiceTests(ScenarioTest):
         database_options2 = "[ { 'name': 'SourceDatabase2', 'target_database_name': 'TargetDatabase2', 'make_source_db_read_only': False, 'table_map': { 'dbo.TestTableSource1': 'dbo.TestTableTarget1', 'dbo.TestTableSource2': 'dbo.TestTableTarget2' } } ]"
         source_connection_info = "{ 'userName': 'testuser', 'password': 'testpassword', 'dataSource': 'notarealsourceserver', 'authentication': 'SqlAuthentication', 'encryptConnection': True, 'trustServerCertificate': True }"
         target_connection_info = "{ 'userName': 'testuser', 'password': 'testpassword', 'dataSource': 'notarealtargetserver', 'authentication': 'SqlAuthentication', 'encryptConnection': True, 'trustServerCertificate': True }"
-        
+
         self.kwargs.update({
             'lname': self.location_name,
             'skuname': self.sku_name,

@@ -18,12 +18,10 @@ def load_arguments(self, _):
         c.argument('group_name', resource_group_name_type)
         c.argument('tags', tags_type, help='A space-delimited list of tags in "tag1[=value1]" format.')
 
-
     with self.argument_context('dms project') as c:
         c.argument('service_name', options_list=['--service-name'])
         c.argument('project_name', name_arg_type, help='The name of the Project.')
         c.argument('tags', tags_type, help='A space-delimited list of tags in "tag1[=value1]" format.')
-
 
     with self.argument_context('dms project task') as c:
         c.argument('service_name', options_list=['--service-name'])

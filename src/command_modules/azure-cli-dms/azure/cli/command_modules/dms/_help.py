@@ -192,8 +192,8 @@ helps['dms project task create'] = r"""
         - name: --enable-query-analysis-validation
           type: bool
           short-summary: >
-            Whether to perform a quick and intelligent query analysis by retrieving queries from the source database and 
-            executing them in the target. The result will have execution statistics for executions in source and target databases 
+            Whether to perform a quick and intelligent query analysis by retrieving queries from the source database and
+            executing them in the target. The result will have execution statistics for executions in source and target databases
             for the extracted queries.
         - name: --enable-schema-validation
           type: bool
