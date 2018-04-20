@@ -13,6 +13,7 @@ Release History
   without specifying a query.
 * Display command suggestions on error if users have typo in their commands
 * More friendly error when users type `az ''`
+* Support custom resource types for command modules and extensions
 
 2.0.31
 ++++++
