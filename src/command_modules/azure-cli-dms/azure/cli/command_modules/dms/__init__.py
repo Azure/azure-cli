@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 
-#pylint: disable=unused-import
+# pylint: disable=unused-import
 import azure.cli.command_modules.dms._help
 
 from azure.cli.core import AzCommandsLoader
@@ -29,5 +29,6 @@ class DmsCommandsLoader(AzCommandsLoader):
     def load_arguments(self, command):
         from azure.cli.command_modules.dms._params import load_arguments
         load_arguments(self, command)
+
 
 COMMAND_LOADER_CLS = DmsCommandsLoader

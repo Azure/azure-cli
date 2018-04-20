@@ -25,6 +25,7 @@ def check_service_name_availability(client, service_name, location):
                                           name=service_name,
                                           type='services')
 
+
 def create_service(client,
                    service_name,
                    resource_group_name,
@@ -44,6 +45,7 @@ def create_service(client,
                        group_name=resource_group_name,
                        service_name=service_name)
 
+
 def delete_service(client, service_name, resource_group_name, delete_running_tasks=None, no_wait=False):
     return sdk_no_wait(no_wait,
                        client.delete,
@@ -51,16 +53,19 @@ def delete_service(client, service_name, resource_group_name, delete_running_tas
                        service_name=service_name,
                        delete_running_tasks=delete_running_tasks)
 
+
 def list_services(client, resource_group_name=None):
     list_func = client.list_by_resource_group(group_name=resource_group_name) \
         if resource_group_name else client.list()
     return list_func
+
 
 def start_service(client, service_name, resource_group_name, no_wait=False):
     return sdk_no_wait(no_wait,
                        client.start,
                        group_name=resource_group_name,
                        service_name=service_name)
+
 
 def stop_service(client, service_name, resource_group_name, no_wait=False):
     return sdk_no_wait(no_wait,
@@ -70,6 +75,7 @@ def stop_service(client, service_name, resource_group_name, no_wait=False):
 
 # endregion
 
+
 # region Project
 
 def check_project_name_availability(client, resource_group_name, service_name, project_name):
@@ -77,6 +83,7 @@ def check_project_name_availability(client, resource_group_name, service_name, p
                                                    service_name=service_name,
                                                    name=project_name,
                                                    type='projects')
+
 
 def create_or_update_project(client,
                              project_name,
@@ -102,6 +109,7 @@ def create_or_update_project(client,
 
 # endregion
 
+
 # region Task
 
 def check_task_name_availability(client, resource_group_name, service_name, project_name, task_name):
@@ -113,6 +121,7 @@ def check_task_name_availability(client, resource_group_name, service_name, proj
                                                    service_name=service_name + '/projects/' + project_name,
                                                    name=task_name,
                                                    type='tasks')
+
 
 def create_task(client,
                 resource_group_name,
@@ -169,6 +178,7 @@ def create_task(client,
                                    task_name=task_name,
                                    properties=migration_properties)
 
+
 def list_tasks(client, resource_group_name, service_name, project_name, task_type=None):
     return list(client.tasks.list(group_name=resource_group_name,
                                   service_name=service_name,
@@ -176,6 +186,7 @@ def list_tasks(client, resource_group_name, service_name, project_name, task_typ
                                   task_type=task_type))
 
 # endregion
+
 
 # region Helper Methods
 

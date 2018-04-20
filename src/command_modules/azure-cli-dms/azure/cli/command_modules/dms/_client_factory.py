@@ -9,14 +9,18 @@ def dms_client_factory(cli_ctx, *_):
     from azure.mgmt.datamigration import DataMigrationServiceClient
     return get_mgmt_service_client(cli_ctx, DataMigrationServiceClient)
 
+
 def dms_cf_services(cli_ctx, *_):
     return dms_client_factory(cli_ctx).services
+
 
 def dms_cf_skus(cli_ctx, *_):
     return dms_client_factory(cli_ctx).resource_skus
 
+
 def dms_cf_projects(cli_ctx, *_):
     return dms_client_factory(cli_ctx).projects
+
 
 def dms_cf_tasks(cli_ctx, *_):
     return dms_client_factory(cli_ctx).tasks
