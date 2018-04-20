@@ -2059,24 +2059,11 @@ class MSIScenarioTest(ScenarioTest):
         self.cmd('vm create -g {rg} -n {vm1} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!', checks=[
             self.check('identity.scope', None),
             self.check('identity.role', None),
-            self.check('identity.port', 50342)
-        ])
-        # the extension should still get provisioned
-        self.cmd('vm extension list -g {rg} --vm-name {vm1}', checks=[
-            self.check('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
-            self.check('[0].settings.port', 50342)
         ])
 
         # create a vmss with identity but w/o a role assignment (--scope "")
         self.cmd('vmss create -g {rg} -n {vmss1} --image debian --assign-identity --admin-username admin123 --admin-password PasswordPassword1!', checks=[
             self.check('vmss.identity.scope', None),
-            self.check('vmss.identity.port', 50342)
-        ])
-
-        # the extension should still get provisioned
-        self.cmd('vmss extension list -g {rg} --vmss-name {vmss1}', checks=[
-            self.check('[0].type', 'ManagedIdentityExtensionForLinux'),
-            self.check('[0].settings.port', 50342)
         ])
 
         # create a vm w/o identity
@@ -2084,23 +2071,11 @@ class MSIScenarioTest(ScenarioTest):
         # assign identity but w/o a role assignment
         self.cmd('vm identity assign -g {rg} -n {vm2}', checks=[
             self.check('scope', None),
-            self.check('port', 50342)
-        ])
-        # the extension should still get provisioned
-        self.cmd('vm extension list -g {rg} --vm-name {vm2}', checks=[
-            self.check('[0].virtualMachineExtensionType', 'ManagedIdentityExtensionForLinux'),
-            self.check('[0].settings.port', 50342)
         ])
 
         self.cmd('vmss create -g {rg} -n {vmss2} --image debian --admin-username admin123 --admin-password PasswordPassword1!')
         self.cmd('vmss identity assign -g {rg} -n {vmss2}', checks=[
             self.check('scope', None),
-            self.check('port', 50342)
-        ])
-
-        self.cmd('vmss extension list -g {rg} --vmss-name {vmss2}', checks=[
-            self.check('[0].type', 'ManagedIdentityExtensionForLinux'),
-            self.check('[0].settings.port', 50342)
         ])
 
     @ResourceGroupPreparer(random_name_length=20, location='westcentralus')
