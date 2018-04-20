@@ -430,7 +430,7 @@ class Profile(object):
     @staticmethod
     def _try_parse_msi_account_name(account):
         subscription_name, user = account[_SUBSCRIPTION_NAME], account[_USER_ENTITY].get(_USER_NAME)
-        if _USER_NAME in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
+        if user in [_SYSTEM_ASSIGNED_IDENTITY, _USER_ASSIGNED_IDENTITY]:
             parts = subscription_name.split('-', 1)
             if parts[0] in MsiAccountTypes.valid_msi_account_types():
                 return parts[0], (None if len(parts) <= 1 else parts[1])
