@@ -224,6 +224,13 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         self.cmd('keyvault key import --vault-name {kv} -n import-key-plain --pem-file "{key_plain_file}" -p software')
         self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password} -p hsm')
 
+        # create ec keys
+        self.cmd('keyvault key create --vault-name {kv} -n eckey1 --kty EC',
+                 checks=self.check('key.kty', 'EC'))
+        self.cmd('keyvault key create --vault-name {kv} -n eckey1 --curve P-256',
+                 checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-256')])
+        self.cmd('keyvault key delete --vault-name {kv} -n eckey1')
+
 
 class KeyVaultSecretScenarioTest(ScenarioTest):
 

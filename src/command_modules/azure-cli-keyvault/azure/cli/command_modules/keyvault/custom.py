@@ -523,12 +523,20 @@ def delete_policy(cmd, client, resource_group_name, vault_name, object_id=None, 
 
 
 # region KeyVault Key
-def create_key(client, vault_base_url, key_name, destination, key_size=None, key_ops=None,
-               disabled=False, expires=None, not_before=None, tags=None):
+def create_key(client, vault_base_url, key_name, protection=None,  # pylint: disable=unused-argument
+               key_size=None, key_ops=None, disabled=False, expires=None,
+               not_before=None, tags=None, kty=None, curve=None):
     from azure.keyvault.models import KeyAttributes
     key_attrs = KeyAttributes(enabled=not disabled, not_before=not_before, expires=expires)
-    return client.create_key(
-        vault_base_url, key_name, destination, key_size, key_ops, key_attrs, tags)
+
+    return client.create_key(vault_base_url=vault_base_url,
+                             key_name=key_name,
+                             kty=kty,
+                             key_size=key_size,
+                             key_ops=key_ops,
+                             key_attributes=key_attrs,
+                             tags=tags,
+                             curve=curve)
 
 
 def backup_key(client, file_path, vault_base_url=None,
@@ -544,7 +552,7 @@ def restore_key(client, vault_base_url, file_path):
     return client.restore_key(vault_base_url, data)
 
 
-def import_key(client, vault_base_url, key_name, destination=None, key_ops=None, disabled=False, expires=None,
+def import_key(client, vault_base_url, key_name, protection=None, key_ops=None, disabled=False, expires=None,
                not_before=None, tags=None, pem_file=None, pem_password=None, byok_file=None):
     """ Import a private key. Supports importing base64 encoded private keys from PEM files.
         Supports importing BYOK keys into HSM for premium KeyVaults. """
@@ -619,7 +627,7 @@ def import_key(client, vault_base_url, key_name, destination=None, key_ops=None,
         key_obj.t = byok_data
 
     return client.import_key(
-        vault_base_url, key_name, key_obj, destination == 'hsm', key_attrs, tags)
+        vault_base_url, key_name, key_obj, protection == 'hsm', key_attrs, tags)
 # endregion
 
 
