@@ -65,6 +65,7 @@ _TENANT_LEVEL_ACCOUNT_NAME = 'N/A(tenant level account)'
 _SYSTEM_ASSIGNED_IDENTITY = 'systemAssignedIdentity'
 _USER_ASSIGNED_IDENTITY = 'userAssignedIdentity'
 
+
 def _authentication_context_factory(cli_ctx, tenant, cache):
     import re
     import adal
@@ -269,7 +270,7 @@ class Profile(object):
         if not subscriptions:
             raise CLIError('No access was configured for the VM, hence no subscriptions were found')
         base_name = ('{}-{}'.format(identity_type, identity_id) if identity_id else identity_type)
-        user =  _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
+        user = _USER_ASSIGNED_IDENTITY if identity_id else _SYSTEM_ASSIGNED_IDENTITY
 
         consolidated = self._normalize_properties(user, subscriptions, is_service_principal=True)
         for s in consolidated:

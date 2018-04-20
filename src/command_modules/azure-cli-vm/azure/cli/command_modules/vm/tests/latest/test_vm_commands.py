@@ -1986,44 +1986,24 @@ class MSIScenarioTest(ScenarioTest):
             self.cmd('vmss create -g {rg} -n {vmss1} --image debian --instance-count 1 --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --scope {scope}', checks=[
                 self.check('vmss.identity.role', 'Contributor'),
                 self.check('vmss.identity.scope', '/subscriptions/{sub}/resourceGroups/{rg}'),
-                self.check('vmss.identity.port', 50342)
-            ])
-
-            self.cmd('vmss extension list -g {rg} --vmss-name {vmss1}', checks=[
-                self.check('[0].type', 'ManagedIdentityExtensionForLinux'),
-                self.check('[0].publisher', 'Microsoft.ManagedIdentity'),
-                self.check('[0].settings.port', 50342)
             ])
 
             # create a windows vm with reader role on the linux vm
             result = self.cmd('vmss create -g {rg} -n {vmss2} --image Win2016Datacenter --instance-count 1 --assign-identity --scope {vmss1_id} --role reader --admin-username admin123 --admin-password PasswordPassword1!', checks=[
                 self.check('vmss.identity.role', 'reader'),
                 self.check('vmss.identity.scope', '{vmss1_id}'),
-                self.check('vmss.identity.port', 50342)
             ]).get_output_in_json()
             uuid.UUID(result['vmss']['identity']['systemAssignedIdentity'])
-
-            self.cmd('vmss extension list -g {rg} --vmss-name {vmss2}', checks=[
-                self.check('[0].type', 'ManagedIdentityExtensionForWindows'),
-                self.check('[0].publisher', 'Microsoft.ManagedIdentity'),
-                self.check('[0].settings.port', 50342)
-            ])
 
             # create a linux vm w/o identity and later enable it
             result = self.cmd('vmss create -g {rg} -n {vmss3} --image debian --instance-count 1 --admin-username admin123 --admin-password PasswordPassword1!').get_output_in_json()['vmss']
             self.assertIsNone(result.get('identity'))
 
-            result = self.cmd('vmss identity assign -g {rg} -n {vmss3} --scope "{vmss1_id}" --role reader --port 50343', checks=[
+            result = self.cmd('vmss identity assign -g {rg} -n {vmss3} --scope "{vmss1_id}" --role reader', checks=[
                 self.check('role', 'reader'),
                 self.check('scope', '{vmss1_id}'),
-                self.check('port', 50343)
             ]).get_output_in_json()
             uuid.UUID(result['systemAssignedIdentity'])
-
-            self.cmd('vmss extension list -g {rg} --vmss-name {vmss3}', checks=[
-                self.check('[0].type', 'ManagedIdentityExtensionForLinux'),
-                self.check('[0].settings.port', 50343)
-            ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_msi_no_scope')
     def test_msi_no_scope(self, resource_group):
