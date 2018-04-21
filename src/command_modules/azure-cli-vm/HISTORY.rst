@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.31
 ++++++
+* BREAKING CHANGE: do not use VM 'ManagedIdentityExtension' for MSI support
 * vmss: support eviction policy
 * BREAKING CHANGE: remove erroneous argument of `ids` from `vm extension list`,
                    `vm secret list`, `vm unmanaged-disk list` and  `vmss nic list` 
