@@ -2,6 +2,9 @@
 
 Release History
 ===============
+2.0.24
+++++++
+* BREAKING CHANGE: remove --msi-port/--identity-port as they are no longer used
 
 2.0.23
 ++++++
