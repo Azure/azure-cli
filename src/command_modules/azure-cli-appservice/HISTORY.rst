@@ -4,6 +4,7 @@ Release History
 ===============
 0.1.32
 ++++++
+* webapp: remove `--runtime-version` from `az webapp auth update` as it's not very public ready
 * webapp: az webapp config set support for min_tls_version & https2.0
 
 0.1.31
