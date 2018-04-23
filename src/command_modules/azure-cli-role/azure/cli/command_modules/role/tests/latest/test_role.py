@@ -12,7 +12,7 @@ import datetime
 import mock
 import unittest
 
-from azure_devtools.scenario_tests import AllowLargeResponse
+from azure_devtools.scenario_tests import AllowLargeResponse, record_only
 
 from azure.cli.testsdk import ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, KeyVaultPreparer
 
@@ -86,7 +86,7 @@ class RbacSPCertScenarioTest(RoleScenarioTest):
                      checks=self.is_empty())
 
 
-class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
+class RbacSPKeyVaultScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sp_with_kv_new_cert')
     @KeyVaultPreparer()
     def test_create_for_rbac_with_new_kv_cert(self, resource_group, key_vault):
@@ -101,7 +101,8 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
             'cert': 'cert1',
             'kv': key_vault
         })
-        time.sleep(5)
+
+        time.sleep(5)  # to avoid 504(too many requests) on a newly created vault
 
         try:
             with mock.patch('azure.cli.command_modules.role.custom._gen_guid', side_effect=self.create_guid):
@@ -127,7 +128,7 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
             'cert': 'cert1',
             'kv': key_vault
         })
-        time.sleep(5)
+        time.sleep(5)  # to avoid 504(too many requests) on a newly created vault
 
         # test with valid length cert
         try:
@@ -152,6 +153,7 @@ class RbacSPKeyVaultScenarioTest(LiveScenarioTest):
 
 class RoleCreateScenarioTest(RoleScenarioTest):
 
+    @record_only()  # workaround https://github.com/Azure/azure-cli/issues/3187
     @AllowLargeResponse()
     def test_role_create_scenario(self):
         subscription_id = self.get_subscription_id()
