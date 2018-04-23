@@ -222,16 +222,9 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
     # 1. be nice, figure out the default volume type and also verify VM will not be busted
     if is_linux:
         if volume_type:
-            if not force:
-                if volume_type == _DATA_VOLUME_TYPE:
-                    status = show_vm_encryption_status(cmd, resource_group_name, vm_name)
-                    if status['osDisk'] == _STATUS_ENCRYPTED:
-                        raise CLIError("Linux VM's OS disk is encrypted. Disabling encryption on data "
-                                       "disk can render the VM unbootable. Use '--force' "
-                                       "to ingore the warning")
-                else:
-                    raise CLIError("Only Data disks can have encryption disabled in a Linux VM. "
-                                   "Use '--force' to ingore the warning")
+            if not force and volume_type != _DATA_VOLUME_TYPE:
+                raise CLIError("Only Data disks can have encryption disabled in a Linux VM. "
+                               "Use '--force' to ingore the warning")
         else:
             volume_type = _DATA_VOLUME_TYPE
     elif volume_type is None:
