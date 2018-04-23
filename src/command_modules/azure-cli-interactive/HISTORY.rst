@@ -6,7 +6,8 @@ Release History
 0.3.20
 ++++++
 * Allow interactive completers to function with positional arguments.
-* More user-friendly output when users type '\'
+* More user-friendly output when users type '\'.
+* Fix completions for parameters with no help.
 
 0.3.19
 ++++++
