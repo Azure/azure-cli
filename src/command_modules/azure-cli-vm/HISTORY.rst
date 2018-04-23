@@ -4,6 +4,11 @@ Release History
 ===============
 2.0.31
 ++++++
+* BREAKING CHANGE: do not use VM 'ManagedIdentityExtension' for MSI support
+* vmss: support eviction policy
+* BREAKING CHANGE: remove erroneous argument of `ids` from `vm extension list`,
+                   `vm secret list`, `vm unmanaged-disk list` and  `vmss nic list` 
+* vm: support write accelerator
 * vmss: expose `az vmss perform-maintenance`
 * `vm diagnostics set`: detect VM's OS type reliably
 * `vm resize`: check if the requested size is different than currently set and update only on change

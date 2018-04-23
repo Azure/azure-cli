@@ -3,6 +3,11 @@
 Release History
 ===============
 
+0.1.20
+++++++
+
+* Minor fixes to compat with msrest 0.4.28
+
 0.1.19
 ++++++
 

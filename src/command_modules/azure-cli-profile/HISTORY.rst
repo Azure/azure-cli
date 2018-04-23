@@ -2,6 +2,14 @@
 
 Release History
 ===============
+2.0.24
+++++++
+* BREAKING CHANGE: remove --msi-port/--identity-port as they are no longer used
+
+2.0.23
+++++++
+* Fix typo in `az account get-access-token` short summary.
+
 2.0.22
 ++++++
 * account list: handle accounts which come from CLI 1.0/ASM mode

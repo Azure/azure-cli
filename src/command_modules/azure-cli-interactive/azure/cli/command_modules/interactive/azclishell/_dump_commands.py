@@ -103,7 +103,8 @@ class FreshTable(object):
                         'help': cmd.arguments[key].type.settings.get('help') or ''
                     }
                     # the key is the first alias option
-                    parameter_metadata[cmd.arguments[key].options_list[0]] = options
+                    if cmd.arguments[key].options_list:
+                        parameter_metadata[cmd.arguments[key].options_list[0]] = options
 
                 cmd_table_data[command_name] = {
                     'parameters': parameter_metadata,

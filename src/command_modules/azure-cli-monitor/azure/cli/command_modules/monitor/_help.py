@@ -58,8 +58,6 @@ helps['monitor alert update'] = """
     type: command
     short-summary: Update a metric-based alert rule.
     parameters:
-        - name: --target
-          short-summary: ID of the resource to target for the alert rule.
         - name: --description
           short-summary: Description of the rule.
         - name: --condition

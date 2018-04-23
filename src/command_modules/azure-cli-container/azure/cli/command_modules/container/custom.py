@@ -26,7 +26,7 @@ except ImportError:
     pass
 import websocket
 from knack.log import get_logger
-from knack.prompting import prompt_pass, NoTTYException
+from knack.prompting import prompt_pass, prompt, NoTTYException
 from knack.util import CLIError
 from azure.mgmt.containerinstance.models import (AzureFileVolume, Container, ContainerGroup, ContainerGroupNetworkProtocol,
                                                  ContainerPort, ImageRegistryCredential, IpAddress, Port, ResourceRequests,
@@ -36,7 +36,7 @@ from ._client_factory import cf_container_groups, cf_container_logs, cf_start_co
 
 logger = get_logger(__name__)
 WINDOWS_NAME = 'Windows'
-ACR_SERVER_SUFFIX = '.azurecr.io/'
+SERVER_DELIMITER = '.'
 AZURE_FILE_VOLUME_NAME = 'azurefile'
 SECRETS_VOLUME_NAME = 'secrets'
 GITREPO_VOLUME_NAME = 'gitrepo'
@@ -171,7 +171,13 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
         image_registry_credentials = [ImageRegistryCredential(server=registry_login_server,
                                                               username=registry_username,
                                                               password=registry_password)]
-    elif ACR_SERVER_SUFFIX in image:
+    elif SERVER_DELIMITER in image.split("/")[0]:
+        if not registry_username:
+            try:
+                registry_username = prompt(msg='Image registry username: ')
+            except NoTTYException:
+                raise CLIError('Please specify --registry-username in order to use Azure Container Registry.')
+
         if not registry_password:
             try:
                 registry_password = prompt_pass(msg='Image registry password: ')
@@ -179,13 +185,12 @@ def _create_image_registry_credentials(registry_login_server, registry_username,
                 raise CLIError('Please specify --registry-password in order to use Azure Container Registry.')
 
         acr_server = image.split("/")[0] if image.split("/") else None
-        acr_username = image.split(ACR_SERVER_SUFFIX)[0] if image.split(ACR_SERVER_SUFFIX) else None
-        if acr_server and acr_username:
+        if acr_server:
             image_registry_credentials = [ImageRegistryCredential(server=acr_server,
-                                                                  username=acr_username,
+                                                                  username=registry_username,
                                                                   password=registry_password)]
         else:
-            raise CLIError('Failed to parse ACR server or username from image name; please explicitly specify --registry-server and --registry-username.')
+            raise CLIError('Failed to parse ACR server from image name; please explicitly specify --registry-server.')
 
     return image_registry_credentials
 

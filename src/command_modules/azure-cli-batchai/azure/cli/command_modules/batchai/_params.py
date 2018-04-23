@@ -56,7 +56,7 @@ def load_arguments(self, _):
         c.argument('target', options_list=['--target', '-t'], help='Number of nodes which should be allocated immediately after cluster creation. If the cluster is in auto-scale mode, BatchAI can change the number of nodes later based on number of running and queued jobs.')
         c.argument('min_nodes', options_list=['--min'], help='Min nodes count for the auto-scale cluster.', type=int)
         c.argument('max_nodes', options_list=['--max'], help='Max nodes count for the auto-scale cluster.', type=int)
-        c.argument('vm_priority', arg_type=get_enum_type(['dedicated', 'lowpriority']), options_list=['--vm-priority, -p'], help="VM priority. If lowpriority selected the node can get preempted while the job is running.")
+        c.argument('vm_priority', arg_type=get_enum_type(['dedicated', 'lowpriority']), options_list=['--vm-priority'], help="VM priority. If lowpriority selected the node can get preempted while the job is running.")
 
     with self.argument_context('batchai cluster create', arg_group='File Server Mount') as c:
         c.argument('nfs_name', options_list=['--nfs-name', '--nfs'], help='Name of a file server to mount on each cluster node. If you need to mount more than one file server, configure them in a configuration file and use --config option.')

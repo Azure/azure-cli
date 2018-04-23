@@ -756,7 +756,7 @@ class NetworkExpressRouteScenarioTest(ScenarioTest):
         ])
 
         # Premium SKU required to create MicrosoftPeering settings
-        self.cmd('network express-route create -g {rg} -n {er} --bandwidth 50 --provider "Microsoft ER Test" --peering-location Area51 --sku-tier Premium --tags foo=doo')
+        self.cmd('network express-route create -g {rg} -n {er} --bandwidth 50 --provider "Ibiza Test Provider" --peering-location Area51 --sku-tier Premium --tags foo=doo')
         self.cmd('network express-route list', checks=[
             self.check('type(@)', 'array'),
             self.check("length([?type == '{rt}']) == length(@)", True)
@@ -804,7 +804,7 @@ class NetworkExpressRouteIPv6PeeringScenarioTest(ScenarioTest):
         self.kwargs['er'] = 'circuit1'
 
         # Premium SKU required to create MicrosoftPeering settings
-        self.cmd('network express-route create -g {rg} -n {er} --bandwidth 50 --provider "Microsoft ER Test" --peering-location Area51 --sku-tier Premium')
+        self.cmd('network express-route create -g {rg} -n {er} --bandwidth 50 --provider "Ibiza Test Provider" --peering-location Area51 --sku-tier Premium')
         self.cmd('network express-route peering create -g {rg} --circuit-name {er} --peering-type MicrosoftPeering --peer-asn 10002 --vlan-id 103 --primary-peer-subnet 104.0.0.0/30 --secondary-peer-subnet 105.0.0.0/30 --advertised-public-prefixes 104.0.0.0/30 --customer-asn 10000 --routing-registry-name level3')
         self.cmd('network express-route peering update -g {rg} --circuit-name {er} -n MicrosoftPeering --ip-version ipv6 --primary-peer-subnet 2001:db00::/126 --secondary-peer-subnet 2002:db00::/126 --advertised-public-prefixes 2001:db00::/126 --customer-asn 100001 --routing-registry-name level3')
         self.cmd('network express-route peering show -g {rg} --circuit-name {er} -n MicrosoftPeering', checks=[
@@ -1474,6 +1474,33 @@ class NetworkVNetScenarioTest(ScenarioTest):
                  checks=self.check("length([?name == '{vnet}'])", 1))
         self.cmd('network vnet delete --resource-group {rg} --name {vnet}')
         self.cmd('network vnet list --resource-group {rg}', checks=self.is_empty())
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vnet_ids_query')
+    def test_network_vnet_ids_query(self, resource_group):
+        import json
+
+        # This test ensures that --query works with --ids
+        self.kwargs.update({
+            'vnet1': 'vnet1',
+            'vnet2': 'vnet2'
+        })
+        self.kwargs['id1'] = self.cmd('network vnet create -g {rg} -n {vnet1}').get_output_in_json()['newVNet']['id']
+        self.kwargs['id2'] = self.cmd('network vnet create -g {rg} -n {vnet2}').get_output_in_json()['newVNet']['id']
+        self.cmd('network vnet show --ids {id1} {id2} --query "[].name"', checks=[
+            self.check('length(@)', 2),
+            self.check('@[0]', '{vnet1}'),
+            self.check('@[1]', '{vnet2}')
+        ])
+
+        # This test ensures you can pipe a list of IDs to --ids
+        self.kwargs['ids'] = self.cmd('network vnet list -g {rg} --query "[].id" -otsv').output
+        self.cmd('network vnet show --ids {ids}',
+                 checks=self.check('length(@)', 2))
+
+        # This test ensures you can pipe JSON output to --ids
+        self.kwargs['json'] = json.dumps(self.cmd('network vnet list -g {rg}').get_output_in_json())
+        self.cmd('network vnet show --ids \'{json}\'',
+                 checks=self.check('length(@)', 2))
 
 
 class NetworkVNetPeeringScenarioTest(ScenarioTest):
