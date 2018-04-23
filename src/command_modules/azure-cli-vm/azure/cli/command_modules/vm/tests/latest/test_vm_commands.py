@@ -2338,6 +2338,7 @@ class VMDiskEncryptionTest(ScenarioTest):
             'vmss': 'vmss1'
         })
         self.cmd('keyvault create -g {rg} -n {vault} --enabled-for-disk-encryption "true"')
+        time.sleep(60)  # to avoid 504(too many requests) on a newly created vault
         self.cmd('vmss create -g {rg} -n {vmss} --image win2016datacenter --instance-count 1 --admin-username clitester1 --admin-password Test123456789!')
         self.cmd('vmss encryption enable -g {rg} -n {vmss} --disk-encryption-keyvault {vault}')
         self.cmd('vmss update-instances -g {rg} -n {vmss}  --instance-ids "*"')
@@ -2361,6 +2362,7 @@ class VMDiskEncryptionTest(ScenarioTest):
             'vm': 'vm1'
         })
         self.cmd('keyvault create -g {rg} -n {vault} --enabled-for-disk-encryption "true"')
+        time.sleep(60)  # to avoid 504(too many requests) on a newly created vault
         self.cmd('vm create -g {rg} -n {vm} --image win2012datacenter --admin-username clitester1 --admin-password Test123456789!')
         self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault}')
         self.cmd('vm encryption show -g {rg} -n {vm}', checks=[self.check('disks[0].statuses[0].code', 'EncryptionState/encrypted')])
