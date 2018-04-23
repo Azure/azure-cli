@@ -476,7 +476,7 @@ def db_list_capabilities(
         for e in editions:
             e.supported_service_level_objectives = [
                 slo for slo in e.supported_service_level_objectives
-                if slo.performance_level.limit == dtu and
+                if slo.performance_level.value == int(dtu) and
                 slo.performance_level.unit == PerformanceLevelUnit.dtu.value]
 
     # Filter by vcores
@@ -484,7 +484,7 @@ def db_list_capabilities(
         for e in editions:
             e.supported_service_level_objectives = [
                 slo for slo in e.supported_service_level_objectives
-                if slo.performance_level.limit == vcores and
+                if slo.performance_level.value == int(vcores) and
                 slo.performance_level.unit == PerformanceLevelUnit.vcores.value]
 
     # Remove editions with no service objectives (due to filters)
@@ -1020,7 +1020,7 @@ def elastic_pool_list_capabilities(
         for e in editions:
             e.supported_elastic_pool_performance_levels = [
                 pl for pl in e.supported_elastic_pool_performance_levels
-                if pl.performance_level.limit == dtu and
+                if pl.performance_level.value == int(dtu) and
                 pl.performance_level.unit == PerformanceLevelUnit.dtu.value]
 
     # Filter by vcores
@@ -1028,7 +1028,7 @@ def elastic_pool_list_capabilities(
         for e in editions:
             e.supported_elastic_pool_performance_levels = [
                 pl for pl in e.supported_elastic_pool_performance_levels
-                if pl.performance_level.limit == vcores and
+                if pl.performance_level.value == int(vcores) and
                 pl.performance_level.unit == PerformanceLevelUnit.vcores.value]
 
     # Remove editions with no service objectives (due to filters)

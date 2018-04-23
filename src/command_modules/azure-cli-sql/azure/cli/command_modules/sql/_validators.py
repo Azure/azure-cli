@@ -62,6 +62,8 @@ def _validate_db_sku(cmd, namespace):
 
 def _validate_elastic_pool_id(cmd, namespace):
 
+    print(dir(namespace))
+
     # If elastic_pool_id is specified but it is not a valid resource id,
     # then assume that user specified elastic pool name which we need to
     # convert to elastic pool id.
