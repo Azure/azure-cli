@@ -503,7 +503,7 @@ class AzInteractiveShell(object):
             telemetry.track_query_gesture()
         elif not args:
             continue_flag = True
-        elif  args[0] == '--version' or args[0] == '-v':
+        elif args[0] == '--version' or args[0] == '-v':
             try:
                 continue_flag = True
                 self.cli_ctx.show_version()
