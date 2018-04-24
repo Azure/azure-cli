@@ -14,7 +14,7 @@ from ._util import (
     get_sql_capabilities_operations
 )
 
-# Important note: if cmd validator exists, then individual param validators will not b
+# Important note: if cmd validator exists, then individual param validators will not be
 # executed. See C:\git\azure-cli\env\lib\site-packages\knack\invocation.py `def _validation`
 
 
