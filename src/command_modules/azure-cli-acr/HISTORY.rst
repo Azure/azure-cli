@@ -5,6 +5,7 @@ Release History
 
 2.0.24
 ++++++
+* Improve resource not found error messages.
 * Improve resource creation performance and error handling.
 * Improve acr login in non-standard consoles and WSL.
 * Improve repository commands error messages.
