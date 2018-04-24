@@ -128,14 +128,19 @@ def validate_key_import_source(ns):
 
 
 def validate_key_type(ns):
-    if ns.destination:
-        dest_to_type_map = {
-            'software': 'RSA',
-            'hsm': 'RSA-HSM'
-        }
-        ns.destination = dest_to_type_map[ns.destination]
-        if ns.destination == 'RSA' and hasattr(ns, 'byok_file') and ns.byok_file:
+    crv = getattr(ns, 'curve', None)
+    kty = getattr(ns, 'kty', None) or ('EC' if crv else 'RSA')
+    protection = getattr(ns, 'protection', None)
+
+    if protection == 'hsm':
+        kty = kty if kty.endswith('-HSM') else kty + '-HSM'
+    elif protection == 'software':
+        if getattr(ns, 'byok_file', None):
             raise CLIError('BYOK keys are hardware protected. Omit --protection')
+        if kty.endswith('-HSM'):
+            raise CLIError('The key type {} is invalid for software protected keys. Omit --protection')
+
+    setattr(ns, 'kty', kty)
 
 
 def validate_policy_permissions(ns):

@@ -34,7 +34,7 @@ certificate_format_values = ['PEM', 'DER']
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements, line-too-long
 def load_arguments(self, _):
     from azure.keyvault.models import JsonWebKeyOperation
-    from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes
+    from azure.keyvault.models import KeyAttributes, SecretAttributes, CertificateAttributes, StorageAccountAttributes, JsonWebKeyType, JsonWebKeyCurveName
     from azure.mgmt.keyvault.models.key_vault_management_client_enums import (
         SkuName, KeyPermissions, SecretPermissions, CertificatePermissions, StoragePermissions, NetworkRuleBypassOptions, NetworkRuleAction)
 
@@ -114,11 +114,15 @@ def load_arguments(self, _):
 
     for scope in ['keyvault key create', 'keyvault key import']:
         with self.argument_context(scope) as c:
-            c.argument('destination', arg_type=get_enum_type(['software', 'hsm']), options_list=['--protection', '-p'], help='Specifies the type of key protection.', validator=validate_key_type)
+            c.argument('protection', arg_type=get_enum_type(['software', 'hsm']), options_list=['--protection', '-p'], help='Specifies the type of key protection.')
             c.argument('disabled', arg_type=get_three_state_flag(), help='Create key in disabled state.')
             c.argument('key_size', options_list=['--size'], type=int)
             c.argument('expires', default=None, help='Expiration UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
             c.argument('not_before', default=None, help='Key not usable before the provided UTC datetime  (Y-m-d\'T\'H:M:S\'Z\').', type=datetime_type)
+
+    with self.argument_context('keyvault key create') as c:
+        c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type)
+        c.argument('curve', arg_type=get_enum_type(JsonWebKeyCurveName))
 
     with self.argument_context('keyvault key import', arg_group='Key Source') as c:
         c.argument('pem_file', type=file_type, help='PEM file containing the key to be imported.', completer=FilesCompleter(), validator=validate_key_import_source)

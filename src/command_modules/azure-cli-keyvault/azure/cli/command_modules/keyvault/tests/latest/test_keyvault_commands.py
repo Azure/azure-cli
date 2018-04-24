@@ -30,34 +30,11 @@ def _asn1_to_iso8601(asn1_date):
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
-def _create_keyvault(test, kwargs, retry_wait=30, max_retries=10, additional_args=None):
+def _create_keyvault(test, kwargs, additional_args=None):
 
     # need premium KeyVault to store keys in HSM
     kwargs['add'] = additional_args or ''
-    vault = test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
-
-    retries = 0
-    while True:
-        try:
-            # if you can connect to the keyvault, proceed with test
-            time.sleep(10)
-            test.cmd('keyvault key list --vault-name {kv}')
-            return vault
-        except CLIError as ex:
-            # because it can take time for the DNS registration to propagate, periodically retry
-            # until we can connect to the keyvault. During the wait, you should try to manually
-            # flush the DNS cache in a separate terminal. Since this is OS dependent, we cannot
-            # reliably do this programmatically.
-            if 'Max retries exceeded attempting to connect to vault' in str(
-                    ex) and retries < max_retries:
-                retries += 1
-                print('\tWaiting for DNS changes to propagate. Please try manually flushing your')
-                print('\tDNS cache. (ex: \'ipconfig /flushdns\' on Windows)')
-                print(
-                    '\t\tRetrying ({}/{}) in {} seconds\n'.format(retries, max_retries, retry_wait))
-                time.sleep(retry_wait)
-            else:
-                raise ex
+    test.cmd('keyvault create -g {rg} -n {kv} -l {loc} --sku premium {add}')
 
 
 class DateTimeParseTest(unittest.TestCase):
@@ -223,6 +200,24 @@ class KeyVaultKeyScenarioTest(ScenarioTest):
         })
         self.cmd('keyvault key import --vault-name {kv} -n import-key-plain --pem-file "{key_plain_file}" -p software')
         self.cmd('keyvault key import --vault-name {kv} -n import-key-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password} -p hsm')
+
+        # create ec keys
+        self.cmd('keyvault key create --vault-name {kv} -n eckey1 --kty EC',
+                 checks=self.check('key.kty', 'EC'))
+        self.cmd('keyvault key create --vault-name {kv} -n eckey1 --curve P-256',
+                 checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-256')])
+        self.cmd('keyvault key delete --vault-name {kv} -n eckey1')
+
+        # import ec PEM
+        self.kwargs.update({
+            'key_enc_file': os.path.join(TEST_DIR, 'ec521pw.pem'),
+            'key_enc_password': 'pass1234',
+            'key_plain_file': os.path.join(TEST_DIR, 'ec256.pem')
+        })
+        self.cmd('keyvault key import --vault-name {kv} -n import-eckey-plain --pem-file "{key_plain_file}" -p software',
+                 checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-256')])
+        self.cmd('keyvault key import --vault-name {kv} -n import-eckey-encrypted --pem-file "{key_enc_file}" --pem-password {key_enc_password}',
+                 checks=[self.check('key.kty', 'EC'), self.check('key.crv', 'P-521')])
 
 
 class KeyVaultSecretScenarioTest(ScenarioTest):
