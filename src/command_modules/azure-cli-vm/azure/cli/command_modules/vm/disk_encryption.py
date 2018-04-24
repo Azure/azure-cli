@@ -224,7 +224,7 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
         if volume_type:
             if not force and volume_type != _DATA_VOLUME_TYPE:
                 raise CLIError("Only Data disks can have encryption disabled in a Linux VM. "
-                               "Use '--force' to ingore the warning")
+                               "Use '--force' to ignore the warning")
         else:
             volume_type = _DATA_VOLUME_TYPE
     elif volume_type is None:
