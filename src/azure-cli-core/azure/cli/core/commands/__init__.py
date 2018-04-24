@@ -359,7 +359,7 @@ class AzCliCommandInvoker(CommandInvoker):
         nouns = []
         command_names = self.commands_loader.command_table.keys()
         for arg in args:
-            if arg[0] != '-':
+            if arg and arg[0] != '-':
                 nouns.append(arg)
             else:
                 break
