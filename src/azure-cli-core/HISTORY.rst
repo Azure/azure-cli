@@ -5,6 +5,7 @@ Release History
 
 2.0.32
 ++++++
+* auth: fix a unhandled exception when retrieve secrets from a service principal account with cert
 * auth: improve the logic of detecting msi based account
 * Added limited support for positional arguments.
 * Fix issue where `--query` could not be used with `--ids`. [#5591](https://github.com/Azure/azure-cli/issues/5591)

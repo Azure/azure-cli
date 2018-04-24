@@ -813,7 +813,7 @@ class CredsCache(object):
         if not matched:
             raise CLIError("No matched service principal found")
         cred = matched[0]
-        return cred[_ACCESS_TOKEN]
+        return cred.get(_ACCESS_TOKEN, None)
 
     @property
     def adal_token_cache(self):
