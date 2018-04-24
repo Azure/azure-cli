@@ -43,12 +43,5 @@ def validate_reservation_summary(namespace):
 
 
 def validate_budget_parameters(namespace):
-    """lowercase the time grain for comparison"""
-    budgetcategory = namespace.category.lower()
-    if budgetcategory != 'cost' and budgetcategory != 'usage':
-        raise CLIError("usage error: --category must be set to either cost or usage")
-    time_grain = namespace.time_grain.lower().strip()
-    if time_grain != 'annually' and time_grain != 'quarterly' and time_grain != 'monthly':
-        raise CLIError("usage error: --time_grain can be 'Annually', 'Quarterly', or 'Monthly'.")
     if namespace.amount < 0:
         raise CLIError("usage error: --amount must be greater than 0")
