@@ -67,11 +67,14 @@ def update_transform(instance, description=None, preset_names=None):
 
 
 def get_transform_output(preset):
-    from azure.mgmt.media.models import (TransformOutput, BuiltInStandardEncoderPreset, VideoAnalyzerPreset)
+    from azure.mgmt.media.models import (TransformOutput, BuiltInStandardEncoderPreset, VideoAnalyzerPreset, AudioAnalyzerPreset)
     from azure.cli.command_modules.ams._completers import (get_stand_alone_presets, is_audio_analyzer)
 
     if preset in get_stand_alone_presets():
-        transform_preset = VideoAnalyzerPreset(audio_insights_only=is_audio_analyzer(preset_name=preset))
+        if is_audio_analyzer(preset_name=preset):
+            transform_preset = AudioAnalyzerPreset()
+        else:
+            transform_preset = VideoAnalyzerPreset()
     else:
         transform_preset = BuiltInStandardEncoderPreset(preset_name=preset)
 
