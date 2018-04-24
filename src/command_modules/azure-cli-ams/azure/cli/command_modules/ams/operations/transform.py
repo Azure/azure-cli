@@ -5,6 +5,8 @@
 
 from knack.util import CLIError
 
+# pylint: disable=line-too-long
+
 
 def create_transform(client, account_name, resource_group_name,
                      transform_name, preset_names, description=None):
