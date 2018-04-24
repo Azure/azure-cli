@@ -252,3 +252,14 @@ def sdk_no_wait(no_wait, func, *args, **kwargs):
     if no_wait:
         kwargs.update({'raw': True, 'polling': False})
     return func(*args, **kwargs)
+
+
+def prune_empty_additional_properties(o):
+    from msrest.serialization import Model
+    if isinstance(o, Model):
+        if (getattr(o, 'additional_properties', None) is not None) and not o.additional_properties:
+            del o.additional_properties
+
+        property_values = [v for v in vars(o).values() if isinstance(v, Model)]
+        for v in property_values:
+            prune_empty_additional_properties(v)
