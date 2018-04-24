@@ -8,6 +8,11 @@ import sys
 import struct
 import platform
 
+from knack.log import get_logger
+
+
+logger = get_logger(__name__)
+
 
 def get_window_dim():
     """ gets the dimensions depending on python version and os"""
@@ -58,7 +63,8 @@ def parse_quotes(cmd, quotes=True, string=True):
     try:
         args = shlex.split(cmd) if quotes else cmd.split()
     except ValueError:
-        args = cmd.split()
+        logger.error('No escaped character is found.')
+        return []
 
     return [str(arg) for arg in args] if string else args
 

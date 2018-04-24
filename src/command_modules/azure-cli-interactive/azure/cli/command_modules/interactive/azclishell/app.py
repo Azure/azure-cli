@@ -501,8 +501,9 @@ class AzInteractiveShell(object):
         elif SELECT_SYMBOL['query'] in cmd_stripped and self.last and self.last.result:
             continue_flag = self.handle_jmespath_query(args)
             telemetry.track_query_gesture()
-
-        elif args[0] == '--version' or args[0] == '-v':
+        elif not args:
+            continue_flag = True
+        elif  args[0] == '--version' or args[0] == '-v':
             try:
                 continue_flag = True
                 self.cli_ctx.show_version()
