@@ -1,0 +1,34 @@
+interactions:
+- request:
+    body: '{"properties": {"category": "cost", "amount": 100.0, "timeGrain": "monthly",
+      "timePeriod": {"startDate": "2018-02-01T00:00:00.000Z", "endDate": "2018-10-01T00:00:00.000Z"}}}'
+    headers:
+      Accept: [application/json]
+      Accept-Encoding: ['gzip, deflate']
+      CommandName: [consumption budget create]
+      Connection: [keep-alive]
+      Content-Length: ['173']
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.6.4 (Windows-10-10.0.16299-SP0) requests/2.18.4 msrest/0.4.26
+          msrest_azure/0.4.21 azure-mgmt-consumption/2.0.0 Azure-SDK-For-Python AZURECLI/2.0.28]
+      accept-language: [en-US]
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Consumption/budgets/costbudget?api-version=2018-01-31
+  response:
+    body: {string: '{"id":"subscriptions/0f88eb23-845d-48b9-b363-efd011b05586/providers/Microsoft.Consumption/budgets/costbudget","name":"costbudget","type":"Microsoft.Consumption/budgets","eTag":"\"1d3ab6019183d09\"","properties":{"timePeriod":{"startDate":"2018-02-01T00:00:00Z","endDate":"2018-10-01T00:00:00Z"},"timeGrain":"Monthly","amount":100.0,"currentSpend":null,"category":"Cost","notifications":{},"filters":{"resourceGroups":[],"resources":[],"meters":[]}}}'}
+    headers:
+      cache-control: [no-cache]
+      content-length: ['449']
+      content-type: [application/json; charset=utf-8]
+      date: ['Wed, 21 Feb 2018 22:05:32 GMT']
+      expires: ['-1']
+      location: ['https://consumption.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Consumption/budgets/costbudget?api-version=2018-01-31']
+      pragma: [no-cache]
+      server: [Microsoft-IIS/8.5]
+      session-id: [5215920e-8606-48f6-b900-5b2a5d59794a]
+      strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
+      x-ms-ratelimit-remaining-subscription-writes: ['1199']
+      x-powered-by: [ASP.NET]
+    status: {code: 201, message: Created}
+version: 1
