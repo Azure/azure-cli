@@ -986,7 +986,8 @@ def list_policy_assignment(cmd, disable_scope_strict_match=None, resource_group_
     return result
 
 
-def create_policy_definition(cmd, name, rules=None, params=None, display_name=None, description=None, mode=None):
+def create_policy_definition(cmd, name, rules=None, params=None, display_name=None, description=None, mode=None,
+                             metadata=None):
     rules = _load_file_string_or_uri(rules, 'rules')
     params = _load_file_string_or_uri(params, 'params', False)
 
@@ -996,6 +997,8 @@ def create_policy_definition(cmd, name, rules=None, params=None, display_name=No
                                   display_name=display_name)
     if cmd.supported_api_version(min_api='2016-12-01'):
         parameters.mode = mode
+    if cmd.supported_api_version(min_api='2017-06-01-preview'):
+        parameters.metadata = metadata
     return policy_client.policy_definitions.create_or_update(name, parameters)
 
 
@@ -1020,30 +1023,32 @@ def get_policy_setdefinition(cmd, policy_set_definition_name):
     return _get_custom_or_builtin_policy(cmd, policy_client, policy_set_definition_name, True)
 
 
-def update_policy_definition(cmd, policy_definition_name, rules=None, params=None,
-                             display_name=None, description=None):
+def update_policy_definition(instance, cmd, policy_definition_name, rules=None, params=None,
+                             display_name=None, description=None, metadata=None):
     if rules:
         if os.path.exists(rules):
             rules = get_file_json(rules)
         else:
             rules = shell_safe_json_parse(rules)
+        instance.policy_rule = rules
 
     if params:
         if os.path.exists(params):
             params = get_file_json(params)
         else:
             params = shell_safe_json_parse(params)
+        instance.parameters = params
 
-    policy_client = _resource_policy_client_factory(cmd.cli_ctx)
-    definition = _get_custom_or_builtin_policy(cmd, policy_client, policy_definition_name)
-    # pylint: disable=line-too-long,no-member
-    PolicyDefinition = cmd.get_models('PolicyDefinition')
-    parameters = PolicyDefinition(
-        policy_rule=rules if rules is not None else definition.policy_rule,
-        description=description if description is not None else definition.description,
-        display_name=display_name if display_name is not None else definition.display_name,
-        parameters=params if params is not None else definition.parameters)
-    return policy_client.policy_definitions.create_or_update(policy_definition_name, parameters)
+    if display_name is not None:
+        instance.display_name = display_name
+
+    if description is not None:
+        instance.description = description
+
+    if metadata:
+        instance.metadata = metadata
+
+    return instance
 
 
 def update_policy_setdefinition(cmd, policy_set_definition_name, definitions=None, params=None,

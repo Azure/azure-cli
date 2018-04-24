@@ -209,7 +209,7 @@ def load_command_table(self, _):
         g.command('delete', 'delete')
         g.command('list', 'list')
         g.custom_command('show', 'get_policy_definition', exception_handler=empty_on_404)
-        g.custom_command('update', 'update_policy_definition')
+        g.generic_update_command('update', custom_func_name='update_policy_definition', custom_func_type=resource_custom)
 
     with self.command_group('policy set-definition', resource_policy_set_definitions_sdk, resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as g:
         g.custom_command('create', 'create_policy_setdefinition')

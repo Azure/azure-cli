@@ -4,9 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import json
 
 from six.moves.urllib.parse import urlsplit  # pylint: disable=import-error
+from azure.cli.core.util import get_file_json
 
 
 # TYPES VALIDATORS
@@ -170,8 +170,7 @@ def validate_json_file(namespace):
     """Validate the give json file existing"""
     if namespace.json_file:
         try:
-            with open(namespace.json_file) as file_handle:
-                json.load(file_handle)
+            get_file_json(namespace.json_file)
         except EnvironmentError:
             raise ValueError("Cannot access JSON request file: " + namespace.json_file)
         except ValueError as err:

@@ -83,7 +83,7 @@ class FreshTable(object):
 
         main_loader.load_command_table(None)
         main_loader.load_arguments(None)
-        add_id_parameters(main_loader.command_table)
+        add_id_parameters(None, cmd_tbl=main_loader.command_table)
         cmd_table = main_loader.command_table
 
         cmd_table_data = {}
@@ -103,7 +103,8 @@ class FreshTable(object):
                         'help': cmd.arguments[key].type.settings.get('help') or ''
                     }
                     # the key is the first alias option
-                    parameter_metadata[cmd.arguments[key].options_list[0]] = options
+                    if cmd.arguments[key].options_list:
+                        parameter_metadata[cmd.arguments[key].options_list[0]] = options
 
                 cmd_table_data[command_name] = {
                     'parameters': parameter_metadata,
@@ -140,7 +141,6 @@ def load_help_files(data):
             continue
 
         short_summary = help_entry.get('short-summary')
-        short_summary = short_summary() if callable(short_summary) else short_summary
         if short_summary and help_type == 'command':
             data[command_name]['help'] = short_summary
         else:

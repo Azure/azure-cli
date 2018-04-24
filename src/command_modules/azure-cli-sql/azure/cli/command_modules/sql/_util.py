@@ -60,6 +60,10 @@ def get_sql_elastic_pools_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).elastic_pools
 
 
+def get_sql_elastic_pool_operations_operations(cli_ctx, _):
+    return get_sql_management_client(cli_ctx).elastic_pool_operations
+
+
 def get_sql_encryption_protectors_operations(cli_ctx, _):
     return get_sql_management_client(cli_ctx).encryption_protectors
 

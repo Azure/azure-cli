@@ -2,6 +2,29 @@
 
 Release History
 ===============
+2.0.31
+++++++
+* BREAKING CHANGE: do not use VM 'ManagedIdentityExtension' for MSI support
+* vmss: support eviction policy
+* BREAKING CHANGE: remove erroneous argument of `ids` from `vm extension list`,
+                   `vm secret list`, `vm unmanaged-disk list` and  `vmss nic list` 
+* vm: support write accelerator
+* vmss: expose `az vmss perform-maintenance`
+* `vm diagnostics set`: detect VM's OS type reliably
+* `vm resize`: check if the requested size is different than currently set and update only on change
+
+2.0.30
+++++++
+* `vmss create`: support to configure platform fault domain count
+* `vmss create`: default to Standard LB for zonal, large or single-placement-group disabled scale-set
+* BREAKING CHANGE: `vm assign-identity`, `vm remove-identity`: Deprecated commands have been removed.
+* BREAKING CHANGE: `vm format-secret`: Deprecated command has been removed.
+* `vm create`: support configure Public-IP sku
+* `vm create`: support configure Public-IP SKU
+* `vm secret format`: Added extra validation. Added `--keyvault` and `--resource-group` to support scenarios
+                      where the command is unable to resolve the vault ID. [#5718](https://github.com/Azure/azure-cli/issues/5718)
+* `vm/vmss create`: emit out a better error if resource group's location has no zone support
+* `sdist` is now compatible with wheel 0.31.0
 
 2.0.29
 ++++++

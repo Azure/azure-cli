@@ -56,6 +56,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
         plan_info = client.app_service_plans.get(parse_result['resource_group'], parse_result['name'])
     else:
         plan_info = client.app_service_plans.get(resource_group_name, plan)
+    if not plan_info:
+        raise CLIError("The plan '{}' doesn't exist".format(plan))
     is_linux = plan_info.reserved
     node_default_version = "6.9.1"
     location = plan_info.location
@@ -209,6 +211,8 @@ def show_webapp(cmd, resource_group_name, name, slot=None, app_instance=None):
     webapp = app_instance
     if not app_instance:  # when the routine is invoked as a help method, not through commands
         webapp = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
+    if not webapp:
+        raise CLIError("'{}' app doesn't exist".format(name))
     _rename_server_farm_props(webapp)
     _fill_ftp_publishing_url(cmd, webapp, resource_group_name, name, slot)
     return webapp
@@ -268,7 +272,7 @@ def get_auth_settings(cmd, resource_group_name, name, slot=None):
 
 def update_auth_settings(cmd, resource_group_name, name, enabled=None, action=None,  # pylint: disable=unused-argument
                          client_id=None, token_store_enabled=None,  # pylint: disable=unused-argument
-                         runtime_version=None, token_refresh_extension_hours=None,  # pylint: disable=unused-argument
+                         token_refresh_extension_hours=None,  # pylint: disable=unused-argument
                          allowed_external_redirect_urls=None, client_secret=None,  # pylint: disable=unused-argument
                          allowed_audiences=None, issuer=None, facebook_app_id=None,  # pylint: disable=unused-argument
                          facebook_app_secret=None, facebook_oauth_scopes=None,  # pylint: disable=unused-argument
@@ -404,6 +408,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
                         remote_debugging_enabled=None, web_sockets_enabled=None,  # pylint: disable=unused-argument
                         always_on=None, auto_heal_enabled=None,  # pylint: disable=unused-argument
                         use32_bit_worker_process=None,  # pylint: disable=unused-argument
+                        min_tls_version=None,  # pylint: disable=unused-argument
+                        http20_enabled=None,  # pylint: disable=unused-argument
                         app_command_line=None):  # pylint: disable=unused-argument
     configs = get_site_configs(cmd, resource_group_name, name, slot)
     if linux_fx_version:
@@ -415,7 +421,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None,
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
-                  'auto_heal_enabled', 'use32_bit_worker_process']
+                  'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled']
     # note: getargvalues is used already in azure.cli.core.commands.
     # and no simple functional replacement for this deprecating method for 3.5
     args, _, _, values = inspect.getargvalues(frame)  # pylint: disable=deprecated-method
@@ -1520,6 +1526,7 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
                     consumption_plan_location=None, deployment_source_url=None,
                     deployment_source_branch='master', deployment_local_git=None,
                     deployment_container_image_name=None):
+    # pylint: disable=too-many-statements
     if deployment_source_url and deployment_local_git:
         raise CLIError('usage error: --deployment-source-url <url> | --deployment-local-git')
     if bool(plan) == bool(consumption_plan_location):
@@ -1540,6 +1547,8 @@ def create_function(cmd, resource_group_name, name, storage_account, plan=None,
         if is_valid_resource_id(plan):
             plan = parse_resource_id(plan)['name']
         plan_info = client.app_service_plans.get(resource_group_name, plan)
+        if not plan_info:
+            raise CLIError("The plan '{}' doesn't exist".format(plan))
         location = plan_info.location
         is_linux = plan_info.reserved
         if is_linux:
@@ -1617,7 +1626,7 @@ def _validate_and_get_connection_string(cli_ctx, resource_group_name, storage_ac
 
     for e in ['blob', 'queue', 'table']:
         if not getattr(endpoints, e, None):
-            error_message = "Storage account '{}' has no '{}' endpoint. It must have table, queue, and blob endpoints all enabled".format(e, storage_account)   # pylint: disable=line-too-long
+            error_message = "Storage account '{}' has no '{}' endpoint. It must have table, queue, and blob endpoints all enabled".format(storage_account, e)   # pylint: disable=line-too-long
     if sku not in allowed_storage_types:
         error_message += 'Storage type {} is not allowed'.format(sku)
 

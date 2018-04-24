@@ -9,7 +9,7 @@ from azure.cli.testsdk import ScenarioTest, JMESPathCheck, ResourceGroupPreparer
 
 @live_only()
 class ResourceDeleteTests(ScenarioTest):
-    @ResourceGroupPreparer(name_prefix='cli_test_delete_dependent_resources', location='eastus')
+    @ResourceGroupPreparer(name_prefix='cli_test_delete_dependent_resources', location='southcentralus')
     def test_delete_dependent_resources(self, resource_group):
         vm_name = self.create_random_name('cli-test-vm', 30)
         tag_name = self.create_random_name('cli-test-tag', 20)
@@ -23,9 +23,7 @@ class ResourceDeleteTests(ScenarioTest):
         rsrc_list = self.cmd('resource list --tag {} --query [].id'.format(tag_name)).get_output_in_json()
 
         self.cmd('resource delete --ids {}'.format(' '.join(rsrc_list)))
-
-        self.cmd('resource list --tag {}'.format(tag_name), checks=[
-            JMESPathCheck('length([])', 0)])
+        self.cmd('resource list --tag {}'.format(tag_name), checks=[JMESPathCheck('length([])', 0)])
 
 
 if __name__ == '__main__':

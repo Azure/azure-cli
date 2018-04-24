@@ -72,16 +72,6 @@ helps['functionapp identity assign'] = helps['webapp identity assign'].replace('
 
 helps['functionapp identity show'] = helps['webapp identity show'].replace('webapp', 'functionapp')
 
-helps['webapp assign-identity'] = """
-    type: command
-    short-summary: (Deprecated, please use 'az webapp identity assign')
-"""
-
-helps['functionapp assign-identity'] = """
-    type: command
-    short-summary: (Deprecated, please use 'az functionapp identity assign')
-"""
-
 helps['webapp config'] = """
 type: group
 short-summary: Configure a web app.
@@ -395,6 +385,11 @@ helps['appservice plan'] = """
     short-summary: Manage app service plans.
 """
 
+helps['appservice list-locations'] = """
+    type: command
+    short-summary: List regions where a plan sku is available.
+"""
+
 helps['appservice plan update'] = """
     type: command
     short-summary: Update an app service plan.
@@ -695,6 +690,11 @@ helps['functionapp config ssl upload'] = """
 helps['functionapp deployment'] = """
     type: group
     short-summary: Manage function app deployments.
+"""
+
+helps['functionapp deployment list-publishing-profiles'] = """
+    type: command
+    short-summary: Get the details for available function app deployment profiles.
 """
 
 helps['functionapp deployment source'] = """

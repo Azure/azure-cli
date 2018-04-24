@@ -58,8 +58,6 @@ helps['monitor alert update'] = """
     type: command
     short-summary: Update a metric-based alert rule.
     parameters:
-        - name: --target
-          short-summary: ID of the resource to target for the alert rule.
         - name: --description
           short-summary: Description of the rule.
         - name: --condition
@@ -235,6 +233,10 @@ helps['monitor log-profiles update'] = """
 helps['monitor diagnostic-settings'] = """
             type: group
             short-summary: Manage service diagnostic settings.
+            """
+helps['monitor diagnostic-settings categories'] = """
+            type: group
+            short-summary: Retrieve service diagnostic settings categories.
             """
 helps['monitor diagnostic-settings create'] = """
             type: command

@@ -169,20 +169,8 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
     if in_cloud_console():
         raise CLIError('This command requires running the docker daemon, which is not supported in Azure Cloud Shell.')
 
-    from subprocess import PIPE, Popen, CalledProcessError
-    docker_not_installed = "Please verify if docker is installed."
-    docker_not_available = "Please verify if docker daemon is running properly."
-
-    try:
-        p = Popen(["docker", "ps"], stdout=PIPE, stderr=PIPE)
-        _, stderr = p.communicate()
-    except OSError:
-        raise CLIError(docker_not_installed)
-    except CalledProcessError:
-        raise CLIError(docker_not_available)
-
-    if stderr:
-        raise CLIError(stderr.decode())
+    from subprocess import PIPE, Popen
+    docker_command = _get_docker_command()
 
     login_server, username, password = get_login_credentials(
         cli_ctx=cmd.cli_ctx,
@@ -191,46 +179,23 @@ def acr_login(cmd, registry_name, resource_group_name=None, username=None, passw
         username=username,
         password=password)
 
-    use_password_stdin = False
-    try:
-        p = Popen(["docker", "login", "--help"], stdout=PIPE, stderr=PIPE)
-        stdout, _ = p.communicate()
-        if b'--password-stdin' in stdout:
-            use_password_stdin = True
-    except OSError:
-        raise CLIError(docker_not_installed)
-    except CalledProcessError:
-        raise CLIError(docker_not_available)
-
-    if use_password_stdin:
-        p = Popen(["docker", "login",
-                   "--username", username,
-                   "--password-stdin",
-                   login_server], stdin=PIPE, stderr=PIPE)
-        _, stderr = p.communicate(input=password.encode())
-    else:
-        p = Popen(["docker", "login",
-                   "--username", username,
-                   "--password", password,
-                   login_server], stderr=PIPE)
-        _, stderr = p.communicate()
+    p = Popen([docker_command, "login",
+               "--username", username,
+               "--password", password,
+               login_server], stderr=PIPE)
+    _, stderr = p.communicate()
 
     if stderr:
         if b'error storing credentials' in stderr and b'stub received bad data' in stderr \
            and _check_wincred(login_server):
             # Retry once after disabling wincred
-            if use_password_stdin:
-                p = Popen(["docker", "login",
-                           "--username", username,
-                           "--password-stdin",
-                           login_server], stdin=PIPE)
-                p.communicate(input=password.encode())
-            else:
-                p = Popen(["docker", "login",
-                           "--username", username,
-                           "--password", password,
-                           login_server])
-                p.wait()
+            p = Popen([docker_command, "login",
+                       "--username", username,
+                       "--password", password,
+                       login_server])
+            p.wait()
+        elif b'--password-stdin' in stderr:
+            pass
         else:
             import sys
             output = getattr(sys.stderr, 'buffer', sys.stderr)
@@ -245,12 +210,41 @@ def acr_show_usage(cmd, client, registry_name, resource_group_name=None):
     return client.list_usages(resource_group_name, registry_name)
 
 
+def _get_docker_command():
+    docker_not_installed = "Please verify if docker is installed."
+    docker_not_available = "Please verify if docker daemon is running properly."
+    docker_command = 'docker'
+
+    from subprocess import PIPE, Popen, CalledProcessError
+    try:
+        p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
+        _, stderr = p.communicate()
+    except OSError:
+        # docker is not discoverable in WSL so retry docker.exe once
+        try:
+            docker_command = 'docker.exe'
+            p = Popen([docker_command, "ps"], stdout=PIPE, stderr=PIPE)
+            _, stderr = p.communicate()
+        except OSError:
+            raise CLIError(docker_not_installed)
+        except CalledProcessError:
+            raise CLIError(docker_not_available)
+    except CalledProcessError:
+        raise CLIError(docker_not_available)
+
+    if stderr:
+        raise CLIError(stderr.decode())
+
+    return docker_command
+
+
 def _check_wincred(login_server):
     import platform
     if platform.system() == 'Windows':
         import json
         from os.path import expanduser, isfile, join
-        config_path = join(expanduser('~'), '.docker', 'config.json')
+        docker_directory = join(expanduser('~'), '.docker')
+        config_path = join(docker_directory, 'config.json')
         logger.debug("Docker config file path %s", config_path)
         if isfile(config_path):
             with open(config_path) as input_file:
@@ -268,18 +262,23 @@ def _check_wincred(login_server):
                         with open(config_path, 'w') as output_file:
                             json.dump(content, output_file, indent=4)
                             output_file.close()
-                            return True
+                        return True
                     return False
                 except NoTTYException:
                     return False
             # Don't update config file or retry as this doesn't seem to be a wincred issue
             return False
         else:
+            import os
             content = {
                 "auths": {
                     login_server: {}
                 }
             }
+            try:
+                os.makedirs(docker_directory)
+            except OSError:
+                pass
             with open(config_path, 'w') as output_file:
                 json.dump(content, output_file, indent=4)
                 output_file.close()

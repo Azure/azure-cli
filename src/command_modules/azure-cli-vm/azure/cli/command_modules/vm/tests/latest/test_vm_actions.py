@@ -17,8 +17,8 @@ from azure.cli.command_modules.vm._validators import (validate_ssh_key,
                                                       process_disk_or_snapshot_create_namespace,
                                                       _validate_vmss_create_subnet,
                                                       _get_next_subnet_addr_suffix,
-                                                      _validate_vm_vmss_msi,
-                                                      _process_disk_caching_value)
+                                                      _validate_vm_vmss_msi)
+from azure.cli.command_modules.vm._vm_utils import normalize_disk_info
 from azure.cli.testsdk import TestCli
 from azure.mgmt.compute.models import CachingTypes
 from knack.util import CLIError
@@ -313,32 +313,61 @@ class TestActions(unittest.TestCase):
         self.assertEqual(np_mock.identity_role_id, 'foo-role-id')
         mock_resolve_role_id.assert_called_with(cmd.cli_ctx, 'reader', 'foo-scope')
 
-    def test_process_disk_caching_value(self):
+    def test_normalize_disk_info(self):
         cmd = mock.MagicMock()
         cmd.get_models.return_value = CachingTypes
 
-        r = _process_disk_caching_value(cmd, None, is_os_disk=True)
-        self.assertEqual(r, CachingTypes.read_write.value)
+        # verify caching configuring
 
-        r = _process_disk_caching_value(cmd, None, is_os_disk=False)
-        self.assertIsNone(r)
+        r = normalize_disk_info()
+        self.assertEqual(r['os']['caching'], CachingTypes.read_write.value)
 
-        r = _process_disk_caching_value(cmd, ['0=None'], is_os_disk=False)
-        self.assertEqual(r, ['0=None'])
+        r = normalize_disk_info(data_disk_cachings=['0=None'], data_disk_sizes_gb=[1, 2])
+        self.assertEqual(r[0]['caching'], 'None')
+        self.assertEqual(r[0]['diskSizeGB'], 1)
+        self.assertEqual(r[1]['diskSizeGB'], 2)
+        self.assertEqual(r['os']['caching'], CachingTypes.read_write.value)
 
-        r = _process_disk_caching_value(cmd, ['0=None', '1=ReadOnly'], is_os_disk=False)
-        self.assertEqual(r, ['0=None', '1=ReadOnly'])
+        r = normalize_disk_info(data_disk_cachings=['None'], os_disk_caching='ReadOnly', data_disk_sizes_gb=[1, 2])
+        self.assertEqual(r[0]['caching'], 'None')
+        self.assertEqual(r[1]['caching'], 'None')
+        self.assertEqual(r['os']['caching'], 'ReadOnly')
 
-        r = _process_disk_caching_value(cmd, ['0=none', '1=readOnly'], is_os_disk=False)
-        self.assertEqual(r, ['0=none', '1=readOnly'])
+        r = normalize_disk_info(data_disk_cachings=['0=None', '1=ReadOnly'], data_disk_sizes_gb=[1, 2])
+        self.assertEqual(r[0]['caching'], 'None')
+        self.assertEqual(r[1]['caching'], 'ReadOnly')
+        self.assertEqual(r['os']['caching'], CachingTypes.read_write.value)
 
+        # CLI will not tweak any casing from the values
+        r = normalize_disk_info(data_disk_cachings=['0=none', '1=readonly'], data_disk_sizes_gb=[1, 2])
+        self.assertEqual(r[0]['caching'], 'none')
+        self.assertEqual(r[1]['caching'], 'readonly')
+
+        # error on configuring non-existing disks
         with self.assertRaises(CLIError) as err:
-            _process_disk_caching_value(cmd, ['0=None', '1=foo'], is_os_disk=False)
-        self.assertTrue("usage error: please use data disk caching value from None|ReadOnly|ReadWrite" in str(err.exception))
+            normalize_disk_info(data_disk_cachings=['0=None', '1=foo'])
+        self.assertTrue("data disk with lun of '0' doesn't exist" in str(err.exception))
 
+        # verify write accelerator configuring; also, when it is enabled, caching will be set to None
+
+        r = normalize_disk_info(write_accelerator_settings=['true'])
+        self.assertEqual(r['os']['caching'], CachingTypes.none.value)
+
+        r = normalize_disk_info(data_disk_sizes_gb=[1, 2], write_accelerator_settings=['true'])
+        self.assertEqual(r['os']['writeAcceleratorEnabled'], True)
+        self.assertEqual(r[0]['writeAcceleratorEnabled'], True)
+        self.assertEqual(r[1]['writeAcceleratorEnabled'], True)
+
+        r = normalize_disk_info(data_disk_sizes_gb=[1, 2], write_accelerator_settings=['0=true'])
+        self.assertEqual(r['os'].get('writeAcceleratorEnabled'), None)
+        self.assertEqual(r['os']['caching'], CachingTypes.read_write.value)
+        self.assertEqual(r[0]['writeAcceleratorEnabled'], True)
+        self.assertEqual(r[1].get('writeAcceleratorEnabled'), None)
+
+        # error on configuring non-existing disks
         with self.assertRaises(CLIError) as err:
-            _process_disk_caching_value(cmd, ['0=None', 'hhh=foo'], is_os_disk=False)
-        self.assertTrue("usage error: LUN used in --data-disk-caching must be an integer" in str(err.exception))
+            normalize_disk_info(write_accelerator_settings=['0=true'])
+        self.assertTrue("data disk with lun of '0' doesn't exist" in str(err.exception))
 
 
 if __name__ == '__main__':

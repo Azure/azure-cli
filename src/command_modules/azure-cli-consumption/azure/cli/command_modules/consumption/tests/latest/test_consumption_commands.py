@@ -72,9 +72,25 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         else:
             self.assertIsNone(pricesheet['pricesheets'][0]['meterDetails'])
 
+    def _validate_marketplace(self, marketplace, billing_period_id=None):
+        self.assertIsNotNone(marketplace)
+        self.assertTrue(marketplace['id'])
+        self.assertTrue(marketplace['name'])
+        self.assertIsNotNone(marketplace['type'])
+        self.assertIsNotNone(marketplace['instanceName'])
+        self.assertIsNotNone(marketplace['instanceId'])
+        self.assertIsNotNone(marketplace['currency'])
+        self.assertIsNotNone(marketplace['pretaxCost'])
+        self.assertIsNotNone(marketplace['isEstimated'])
+        self.assertIsNotNone(marketplace['orderNumber'])
+        if billing_period_id:
+            self.assertTrue(billing_period_id in marketplace['billingPeriodId'])
+        else:
+            self.assertIsNotNone(marketplace['billingPeriodId'])
+
     @AllowLargeResponse()
     def test_consumption_pricesheet_billing_period(self):
-        pricesheet = self.cmd('consumption pricesheet show -p 20171001').get_output_in_json()
+        pricesheet = self.cmd('consumption pricesheet show --billing-period-name 20171001').get_output_in_json()
         self.assertTrue(pricesheet)
         self._validate_pricesheet(pricesheet, False)
 
@@ -132,31 +148,47 @@ class AzureConsumptionServiceScenarioTest(ScenarioTest):
         self.assertTrue(all(usage_date_check(usage_date) for usage_date in usages_list))
 
     def test_list_reservations_summaries_monthly(self):
-        reservations_summaries_monthly_list = self.cmd('consumption reservations summaries list -g ''monthly'' -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b').get_output_in_json()
+        reservations_summaries_monthly_list = self.cmd('consumption reservation summary list --grain "monthly" --reservation-order-id ca69259e-bd4f-45c3-bf28-3f353f9cce9b').get_output_in_json()
         self.assertTrue(reservations_summaries_monthly_list)
         self._validate_reservation_summaries(reservations_summaries_monthly_list[0])
 
     def test_list_reservations_summaries_monthly_with_reservationid(self):
-        reservations_summaries_monthly_withreservationid_list = self.cmd('consumption reservations summaries list -g ''monthly'' -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -i f37f4b70-52ba-4344-a8bd-28abfd21d640').get_output_in_json()
+        reservations_summaries_monthly_withreservationid_list = self.cmd('consumption reservation summary list --grain "monthly" --reservation-order-id ca69259e-bd4f-45c3-bf28-3f353f9cce9b --reservation-id f37f4b70-52ba-4344-a8bd-28abfd21d640').get_output_in_json()
         self.assertTrue(reservations_summaries_monthly_withreservationid_list)
         self._validate_reservation_summaries(reservations_summaries_monthly_withreservationid_list[0])
 
     def test_list_reservations_summaries_daily(self):
-        reservations_summaries_daily_list = self.cmd('consumption reservations summaries list -g ''daily'' -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
+        reservations_summaries_daily_list = self.cmd('consumption reservation summary list --grain "daily" --reservation-order-id ca69259e-bd4f-45c3-bf28-3f353f9cce9b -s "2017-12-01" -e "2017-12-07"').get_output_in_json()
         self.assertTrue(reservations_summaries_daily_list)
         self._validate_reservation_summaries(reservations_summaries_daily_list[0])
 
     def test_list_reservations_summaries_daily_with_reservationid(self):
-        reservations_summaries_daily_withreservationid_list = self.cmd('consumption reservations summaries list -g ''daily'' -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -i f37f4b70-52ba-4344-a8bd-28abfd21d640 -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
+        reservations_summaries_daily_withreservationid_list = self.cmd('consumption reservation summary list --grain "daily" --reservation-order-id ca69259e-bd4f-45c3-bf28-3f353f9cce9b --reservation-id f37f4b70-52ba-4344-a8bd-28abfd21d640 -s "2017-12-01" -e "2017-12-07"').get_output_in_json()
         self.assertTrue(reservations_summaries_daily_withreservationid_list)
         self._validate_reservation_summaries(reservations_summaries_daily_withreservationid_list[0])
 
     def test_list_reservations_details(self):
-        reservations_details_list = self.cmd('consumption reservations details list -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
+        reservations_details_list = self.cmd('consumption reservation detail list --reservation-order-id ca69259e-bd4f-45c3-bf28-3f353f9cce9b -s "2017-12-01" -e "2017-12-07"').get_output_in_json()
         self.assertTrue(reservations_details_list)
         self._validate_reservation_details(reservations_details_list[0])
 
     def test_list_reservations_details_with_reservationid(self):
-        reservations_details_list = self.cmd('consumption reservations details list -r ca69259e-bd4f-45c3-bf28-3f353f9cce9b -i f37f4b70-52ba-4344-a8bd-28abfd21d640 -s ''2017-12-01'' -e ''2017-12-07''').get_output_in_json()
+        reservations_details_list = self.cmd('consumption reservation detail list --reservation-order-id ca69259e-bd4f-45c3-bf28-3f353f9cce9b --reservation-id f37f4b70-52ba-4344-a8bd-28abfd21d640 -s "2017-12-01" -e "2017-12-07"').get_output_in_json()
         self.assertTrue(reservations_details_list)
         self._validate_reservation_details(reservations_details_list[0])
+
+    def test_consumption_marketplace_list(self):
+        marketplace_list = self.cmd('consumption marketplace list').get_output_in_json()
+        self.assertTrue(marketplace_list)
+        all(self._validate_marketplace(marketplace_item) for marketplace_item in marketplace_list)
+
+    def test_consumption_marketplace_list_billing_period_filter(self):
+        marketplace_list = self.cmd('consumption marketplace list --billing-period-name 201804-1 --top 1').get_output_in_json()
+        self.assertTrue(marketplace_list)
+        self.assertTrue(len(marketplace_list) == 1)
+        all(self._validate_marketplace(marketplace_item) for marketplace_item in marketplace_list)
+
+    def test_consumption_marketplace_list_billing_period(self):
+        marketplace_list = self.cmd('consumption marketplace list --billing-period-name 201804-1').get_output_in_json()
+        self.assertTrue(marketplace_list)
+        all(self._validate_marketplace(marketplace_item, '201804-1') for marketplace_item in marketplace_list)

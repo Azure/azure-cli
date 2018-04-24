@@ -3,6 +3,15 @@
 Release History
 ===============
 
+0.1.6
++++++
+* Minor fixes.
+
+0.1.5
++++++
+* Minor fixes.
+* `sdist` is now compatible with wheel 0.31.0
+
 0.1.4
 +++++
 * `metrics list`: Added support for `--top`, `--orderby` and `--namespace`. [Closes #5785](https://github.com/Azure/azure-cli/issues/5785)

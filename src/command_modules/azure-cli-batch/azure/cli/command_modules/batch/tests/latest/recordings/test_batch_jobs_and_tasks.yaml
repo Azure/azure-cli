@@ -1,16 +1,16 @@
 interactions:
 - request:
-    body: '{"location": "westus", "tags": {"use": "az-test"}}'
+    body: '{"tags": {"use": "az-test"}, "location": "westus"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [group create]
       Connection: [keep-alive]
       Content-Length: ['50']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -20,10 +20,11 @@ interactions:
       cache-control: [no-cache]
       content-length: ['328']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Nov 2017 18:03:40 GMT']
+      date: ['Mon, 26 Mar 2018 21:27:08 GMT']
       expires: ['-1']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-writes: ['1199']
     status: {code: 201, message: Created}
 - request:
@@ -31,13 +32,12 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [batch account create]
       Connection: [keep-alive]
       Content-Length: ['26']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchmanagementclient/4.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002?api-version=2017-05-01
@@ -46,9 +46,9 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 30 Nov 2017 18:03:42 GMT']
+      date: ['Mon, 26 Mar 2018 21:27:11 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/operationResults/7cad76aa-01e6-422e-a1e1-5db5101962f9?api-version=2017-05-01']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/operationResults/8cbaf0f1-edee-4f11-b10b-55bacc2ede04?api-version=2017-05-01']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -60,25 +60,24 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [batch account create]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchmanagementclient/4.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/operationResults/7cad76aa-01e6-422e-a1e1-5db5101962f9?api-version=2017-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/operationResults/8cbaf0f1-edee-4f11-b10b-55bacc2ede04?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002","name":"clibatch000002","type":"Microsoft.Batch/batchAccounts","location":"canadaeast","properties":{"accountEndpoint":"clibatch000002.canadaeast.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":100,"lowPriorityCoreQuota":100,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002","name":"clibatch000002","type":"Microsoft.Batch/batchAccounts","location":"canadaeast","properties":{"accountEndpoint":"clibatch000002.canadaeast.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['569']
+      content-length: ['567']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Nov 2017 18:03:58 GMT']
-      etag: ['"0x8D5381CBAD001B0"']
+      date: ['Mon, 26 Mar 2018 21:27:27 GMT']
+      etag: ['"0x8D593605FE3C1EC"']
       expires: ['-1']
-      last-modified: ['Thu, 30 Nov 2017 18:03:58 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:27:27 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -91,23 +90,22 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [batch account keys list]
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchmanagementclient/4.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002/listKeys?api-version=2017-05-01
   response:
-    body: {string: '{"accountName":"clibatch000002","primary":"HVIOx3Cpfsz+oewNTYtrc0nYH/MQdwIzGEMvs2yUIgg3nXBseCCS/71JivHmuTgPr9gN0GrsfChLD49rJ7cppg==","secondary":"kBhVcDq9/3tqpCul9sxrD+HjEB7pa6mjxcy3zXll0zz96G/r36WIw6CJbf8/9J7/qjzDtlRo7v8Ts16sLTbGlA=="}'}
+    body: {string: '{"accountName":"clibatch000002","primary":"3WQZ6dF5BB+RiRtNdBoS2S9iHVk5w67iKkQzp6J3RVH/ZXkw0f6qbRpzVDHJD2uvT52nhmVT60dtOV2TFet9VQ==","secondary":"nXoDBV2/2OFCzq/B8ft+XZKubcwtTEXUOVUR+Rb8l5LEmh9kcmwo8THIMin3XTIp7f2Jm1nbd/JiMVekadi6AA=="}'}
     headers:
       cache-control: [no-cache]
       content-length: ['246']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Nov 2017 18:03:59 GMT']
+      date: ['Mon, 26 Mar 2018 21:27:29 GMT']
       expires: ['-1']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
@@ -122,25 +120,24 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [batch account show]
       Connection: [keep-alive]
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchmanagementclient/4.1.0 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchmanagementclient/4.1.0 Azure-SDK-For-Python AZURECLI/2.0.30]
       accept-language: [en-US]
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002?api-version=2017-05-01
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002","name":"clibatch000002","type":"Microsoft.Batch/batchAccounts","location":"canadaeast","properties":{"accountEndpoint":"clibatch000002.canadaeast.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":100,"lowPriorityCoreQuota":100,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"poolAllocationMode":"batchservice"}}'}
+    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Batch/batchAccounts/clibatch000002","name":"clibatch000002","type":"Microsoft.Batch/batchAccounts","location":"canadaeast","properties":{"accountEndpoint":"clibatch000002.canadaeast.batch.azure.com","provisioningState":"Succeeded","dedicatedCoreQuota":20,"lowPriorityCoreQuota":20,"poolQuota":20,"activeJobAndJobScheduleQuota":20,"poolAllocationMode":"batchservice"}}'}
     headers:
       cache-control: [no-cache]
-      content-length: ['569']
+      content-length: ['567']
       content-type: [application/json; charset=utf-8]
-      date: ['Thu, 30 Nov 2017 18:03:59 GMT']
-      etag: ['"0x8D5381CB1B2A1DB"']
+      date: ['Mon, 26 Mar 2018 21:27:32 GMT']
+      etag: ['"0x8D59360563A3186"']
       expires: ['-1']
-      last-modified: ['Thu, 30 Nov 2017 18:03:43 GMT']
+      last-modified: ['Mon, 26 Mar 2018 21:27:11 GMT']
       pragma: [no-cache]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
@@ -149,64 +146,62 @@ interactions:
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"id": "xplatJobForTaskTests", "vmSize": "small", "cloudServiceConfiguration":
-      {"osFamily": "4"}}'
+    body: '{"cloudServiceConfiguration": {"osFamily": "4"}, "vmSize": "small", "id":
+      "xplatJobForTaskTests"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['97']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 18:04:01 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.canadaeast.batch.azure.com/pools?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.canadaeast.batch.azure.com/pools?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchrcg2briwcahjacdy.canadaeast.batch.azure.com/pools/xplatJobForTaskTests']
+      dataserviceid: ['https://clibatchfe3qp2a2otq46z2v.canadaeast.batch.azure.com/pools/xplatJobForTaskTests']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 18:04:01 GMT']
-      etag: ['0x8D5381CBC6FE928']
-      last-modified: ['Thu, 30 Nov 2017 18:04:01 GMT']
+      date: ['Mon, 26 Mar 2018 21:27:33 GMT']
+      etag: ['0x8D5936063823956']
+      last-modified: ['Mon, 26 Mar 2018 21:27:33 GMT']
       location: ['https://clibatch000002.canadaeast.batch.azure.com/pools/xplatJobForTaskTests']
-      request-id: [135d5107-b471-49fb-a4f2-7d4d33485d01]
+      request-id: [5013149e-2907-4c59-bd73-6ef69eb44a98]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
     status: {code: 201, message: Created}
 - request:
-    body: '{"id": "cli-test-job-1", "constraints": {"maxTaskRetryCount": 5}, "jobManagerTask":
-      {"id": "JobManager", "commandLine": "cmd /c set AZ_BATCH_TASK_ID", "environmentSettings":
-      [{"name": "CLI_TEST_VAR", "value": "CLI_TEST_VAR_VALUE"}]}, "poolInfo": {"poolId":
-      "xplatJobForTaskTests"}, "metadata": [{"name": "test", "value": "value"}]}'
+    body: '{"constraints": {"maxTaskRetryCount": 5}, "metadata": [{"name": "test",
+      "value": "value"}], "id": "cli-test-job-1", "jobManagerTask": {"commandLine":
+      "cmd /c set AZ_BATCH_TASK_ID", "id": "JobManager", "environmentSettings": [{"name":
+      "CLI_TEST_VAR", "value": "CLI_TEST_VAR_VALUE"}]}, "poolInfo": {"poolId": "xplatJobForTaskTests"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['331']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 18:04:01 GMT']
       return-client-request-id: ['false']
     method: POST
-    uri: https://clibatch000002.canadaeast.batch.azure.com/jobs?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.canadaeast.batch.azure.com/jobs?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchrcg2briwcahjacdy.canadaeast.batch.azure.com/jobs/job-1']
+      dataserviceid: ['https://clibatchfe3qp2a2otq46z2v.canadaeast.batch.azure.com/jobs/job-1']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 18:04:02 GMT']
-      etag: ['0x8D5381CBCF1A2A9']
-      last-modified: ['Thu, 30 Nov 2017 18:04:02 GMT']
+      date: ['Mon, 26 Mar 2018 21:27:37 GMT']
+      etag: ['0x8D5936065A270ED']
+      last-modified: ['Mon, 26 Mar 2018 21:27:37 GMT']
       location: ['https://clibatch000002.canadaeast.batch.azure.com/jobs/job-1']
-      request-id: [df6b89dd-6f4f-48a8-b5ec-137e4ea922b0]
+      request-id: [17662303-470a-463f-a118-b671435ee7c4]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -218,20 +213,19 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 18:04:02 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.canadaeast.batch.azure.com/$metadata#jobs/@Element\"\
         ,\"id\":\"cli-test-job-1\",\"url\":\"https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1\"\
-        ,\"eTag\":\"0x8D5381CBCF1A2A9\",\"lastModified\":\"2017-11-30T18:04:02.2985385Z\"\
-        ,\"creationTime\":\"2017-11-30T18:04:02.2635389Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-11-30T18:04:02.2985385Z\",\"priority\":0,\"usesTaskDependencies\"\
+        ,\"eTag\":\"0x8D5936065A270ED\",\"lastModified\":\"2018-03-26T21:27:37.4081261Z\"\
+        ,\"creationTime\":\"2018-03-26T21:27:37.3631242Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2018-03-26T21:27:37.4081261Z\",\"priority\":0,\"usesTaskDependencies\"\
         :false,\"constraints\":{\r\n    \"maxWallClockTime\":\"P10675199DT2H48M5.4775807S\"\
         ,\"maxTaskRetryCount\":5\r\n  },\"jobManagerTask\":{\r\n    \"id\":\"JobManager\"\
         ,\"commandLine\":\"cmd /c set AZ_BATCH_TASK_ID\",\"environmentSettings\":[\r\
@@ -243,46 +237,45 @@ interactions:
         :true,\"killJobOnCompletion\":true\r\n  },\"poolInfo\":{\r\n    \"poolId\"\
         :\"xplatJobForTaskTests\"\r\n  },\"metadata\":[\r\n    {\r\n      \"name\"\
         :\"test\",\"value\":\"value\"\r\n    }\r\n  ],\"executionInfo\":{\r\n    \"\
-        startTime\":\"2017-11-30T18:04:02.2985385Z\",\"poolId\":\"xplatJobForTaskTests\"\
+        startTime\":\"2018-03-26T21:27:37.4081261Z\",\"poolId\":\"xplatJobForTaskTests\"\
         \r\n  },\"onAllTasksComplete\":\"noaction\",\"onTaskFailure\":\"noaction\"\
         \r\n}"}
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 18:04:02 GMT']
-      etag: ['0x8D5381CBCF1A2A9']
-      last-modified: ['Thu, 30 Nov 2017 18:04:02 GMT']
-      request-id: [36515ad4-ed5c-4e59-8619-ce5ab76580bd]
+      date: ['Mon, 26 Mar 2018 21:27:38 GMT']
+      etag: ['0x8D5936065A270ED']
+      last-modified: ['Mon, 26 Mar 2018 21:27:37 GMT']
+      request-id: [7956b052-4106-40a9-9954-adbfe9ed147d]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"onAllTasksComplete": "terminateJob", "constraints": {"maxWallClockTime":
-      "P3Y6M4DT12H30M5S"}}'
+    body: '{"constraints": {"maxWallClockTime": "P3Y6M4DT12H30M5S"}, "onAllTasksComplete":
+      "terminatejob"}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['95']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 18:04:02 GMT']
       return-client-request-id: ['false']
     method: PATCH
-    uri: https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchrcg2briwcahjacdy.canadaeast.batch.azure.com/jobs/cli-test-job-1']
+      dataserviceid: ['https://clibatchfe3qp2a2otq46z2v.canadaeast.batch.azure.com/jobs/cli-test-job-1']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 18:04:03 GMT']
-      etag: ['0x8D5381CBD8C6BC7']
-      last-modified: ['Thu, 30 Nov 2017 18:04:03 GMT']
-      request-id: [7b2ab8ec-dd4f-4b48-ac3b-e81f4917ddf7]
+      date: ['Mon, 26 Mar 2018 21:27:40 GMT']
+      etag: ['0x8D5936067C12B47']
+      last-modified: ['Mon, 26 Mar 2018 21:27:40 GMT']
+      request-id: [342d13c2-f567-478d-8f7e-85a720c31277]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -294,20 +287,19 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 18:04:03 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.canadaeast.batch.azure.com/$metadata#jobs/@Element\"\
         ,\"id\":\"cli-test-job-1\",\"url\":\"https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1\"\
-        ,\"eTag\":\"0x8D5381CBD8C6BC7\",\"lastModified\":\"2017-11-30T18:04:03.3129415Z\"\
-        ,\"creationTime\":\"2017-11-30T18:04:02.2635389Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-11-30T18:04:02.2985385Z\",\"priority\":0,\"usesTaskDependencies\"\
+        ,\"eTag\":\"0x8D5936067C12B47\",\"lastModified\":\"2018-03-26T21:27:40.9649479Z\"\
+        ,\"creationTime\":\"2018-03-26T21:27:37.3631242Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2018-03-26T21:27:37.4081261Z\",\"priority\":0,\"usesTaskDependencies\"\
         :false,\"constraints\":{\r\n    \"maxWallClockTime\":\"P1279DT12H30M5S\",\"\
         maxTaskRetryCount\":0\r\n  },\"jobManagerTask\":{\r\n    \"id\":\"JobManager\"\
         ,\"commandLine\":\"cmd /c set AZ_BATCH_TASK_ID\",\"environmentSettings\":[\r\
@@ -319,80 +311,76 @@ interactions:
         :true,\"killJobOnCompletion\":true\r\n  },\"poolInfo\":{\r\n    \"poolId\"\
         :\"xplatJobForTaskTests\"\r\n  },\"metadata\":[\r\n    {\r\n      \"name\"\
         :\"test\",\"value\":\"value\"\r\n    }\r\n  ],\"executionInfo\":{\r\n    \"\
-        startTime\":\"2017-11-30T18:04:02.2985385Z\",\"poolId\":\"xplatJobForTaskTests\"\
+        startTime\":\"2018-03-26T21:27:37.4081261Z\",\"poolId\":\"xplatJobForTaskTests\"\
         \r\n  },\"onAllTasksComplete\":\"terminatejob\",\"onTaskFailure\":\"noaction\"\
         \r\n}"}
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 18:04:03 GMT']
-      etag: ['0x8D5381CBD8C6BC7']
-      last-modified: ['Thu, 30 Nov 2017 18:04:03 GMT']
-      request-id: [befb2994-6aaf-49f3-b657-e3ce2bed1f2c]
+      date: ['Mon, 26 Mar 2018 21:27:42 GMT']
+      etag: ['0x8D5936067C12B47']
+      last-modified: ['Mon, 26 Mar 2018 21:27:40 GMT']
+      request-id: [3661547a-5631-44e0-bb57-55b6e91a983d]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
       x-content-type-options: [nosniff]
     status: {code: 200, message: OK}
 - request:
-    body: '{"poolInfo": {"poolId": "xplatJobForTaskTests"}, "onAllTasksComplete":
-      "terminateJob"}'
+    body: '{"onAllTasksComplete": "terminatejob", "poolInfo": {"poolId": "xplatJobForTaskTests"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['86']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      If-Unmodified-Since: ['Thu, 30 Nov 2017 10:04:01 GMT']
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      If-Unmodified-Since: ['Mon, 26 Mar 2018 14:27:33 GMT']
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 18:04:03 GMT']
       return-client-request-id: ['false']
     method: PUT
-    uri: https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.canadaeast.batch.azure.com/$metadata#Microsoft.Azure.Batch.Protocol.Entities.Container.errors/@Element\"\
         ,\"code\":\"ConditionNotMet\",\"message\":{\r\n    \"lang\":\"en-US\",\"value\"\
         :\"The condition specified using HTTP conditional header(s) is not met.\\\
-        nRequestId:ccf99047-f19e-4d88-a202-b697fb1eb6bf\\nTime:2017-11-30T18:04:04.0994473Z\"\
+        nRequestId:8121ffb2-60c6-486f-8e46-fc7da56dd405\\nTime:2018-03-26T21:27:44.5632056Z\"\
         \r\n  }\r\n}"}
     headers:
       content-length: ['386']
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 18:04:03 GMT']
-      request-id: [ccf99047-f19e-4d88-a202-b697fb1eb6bf]
+      date: ['Mon, 26 Mar 2018 21:27:44 GMT']
+      request-id: [8121ffb2-60c6-486f-8e46-fc7da56dd405]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       x-content-type-options: [nosniff]
     status: {code: 412, message: The condition specified using HTTP conditional header(s)
         is not met.}
 - request:
-    body: '{"poolInfo": {"poolId": "xplatJobForTaskTests"}, "onAllTasksComplete":
-      "terminateJob"}'
+    body: '{"onAllTasksComplete": "terminatejob", "poolInfo": {"poolId": "xplatJobForTaskTests"}}'
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
       Content-Length: ['86']
       Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 18:04:04 GMT']
       return-client-request-id: ['false']
     method: PUT
-    uri: https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: ''}
     headers:
-      dataserviceid: ['https://clibatchrcg2briwcahjacdy.canadaeast.batch.azure.com/jobs/cli-test-job-1']
+      dataserviceid: ['https://clibatchfe3qp2a2otq46z2v.canadaeast.batch.azure.com/jobs/cli-test-job-1']
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 18:04:04 GMT']
-      etag: ['0x8D5381CBE5F8BCB']
-      last-modified: ['Thu, 30 Nov 2017 18:04:04 GMT']
-      request-id: [b2acc3e0-223c-40d7-aba3-c964e5770950]
+      date: ['Mon, 26 Mar 2018 21:27:45 GMT']
+      etag: ['0x8D593606AD5481C']
+      last-modified: ['Mon, 26 Mar 2018 21:27:46 GMT']
+      request-id: [0e6565f3-b7cc-4a2f-b3eb-70efdd788963]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -404,20 +392,19 @@ interactions:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
       Connection: [keep-alive]
-      Content-Type: [application/json; odata=minimalmetadata; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 batchserviceclient/4.0.0 Azure-SDK-For-Python]
+      Content-Type: [application/json; charset=utf-8]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 batchserviceclient/4.1.1 Azure-SDK-For-Python]
       accept-language: [en-US]
-      ocp-date: ['Thu, 30 Nov 2017 18:04:04 GMT']
       return-client-request-id: ['false']
     method: GET
-    uri: https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1?api-version=2017-09-01.6.0&timeout=30
+    uri: https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1?timeout=30&api-version=2018-03-01.6.1
   response:
     body: {string: "{\r\n  \"odata.metadata\":\"https://clibatch000002.canadaeast.batch.azure.com/$metadata#jobs/@Element\"\
         ,\"id\":\"cli-test-job-1\",\"url\":\"https://clibatch000002.canadaeast.batch.azure.com/jobs/cli-test-job-1\"\
-        ,\"eTag\":\"0x8D5381CBE5F8BCB\",\"lastModified\":\"2017-11-30T18:04:04.6965707Z\"\
-        ,\"creationTime\":\"2017-11-30T18:04:02.2635389Z\",\"state\":\"active\",\"\
-        stateTransitionTime\":\"2017-11-30T18:04:02.2985385Z\",\"priority\":0,\"usesTaskDependencies\"\
+        ,\"eTag\":\"0x8D593606AD5481C\",\"lastModified\":\"2018-03-26T21:27:46.1299228Z\"\
+        ,\"creationTime\":\"2018-03-26T21:27:37.3631242Z\",\"state\":\"active\",\"\
+        stateTransitionTime\":\"2018-03-26T21:27:37.4081261Z\",\"priority\":0,\"usesTaskDependencies\"\
         :false,\"constraints\":{\r\n    \"maxWallClockTime\":\"P10675199DT2H48M5.4775807S\"\
         ,\"maxTaskRetryCount\":0\r\n  },\"jobManagerTask\":{\r\n    \"id\":\"JobManager\"\
         ,\"commandLine\":\"cmd /c set AZ_BATCH_TASK_ID\",\"environmentSettings\":[\r\
@@ -428,16 +415,16 @@ interactions:
         :\"nonadmin\"\r\n      }\r\n    },\"runExclusive\":true,\"allowLowPriorityNode\"\
         :true,\"killJobOnCompletion\":true\r\n  },\"poolInfo\":{\r\n    \"poolId\"\
         :\"xplatJobForTaskTests\"\r\n  },\"executionInfo\":{\r\n    \"startTime\"\
-        :\"2017-11-30T18:04:02.2985385Z\",\"poolId\":\"xplatJobForTaskTests\"\r\n\
+        :\"2018-03-26T21:27:37.4081261Z\",\"poolId\":\"xplatJobForTaskTests\"\r\n\
         \  },\"onAllTasksComplete\":\"terminatejob\",\"onTaskFailure\":\"noaction\"\
         \r\n}"}
     headers:
       content-type: [application/json;odata=minimalmetadata]
       dataserviceversion: ['3.0']
-      date: ['Thu, 30 Nov 2017 18:04:04 GMT']
-      etag: ['0x8D5381CBE5F8BCB']
-      last-modified: ['Thu, 30 Nov 2017 18:04:04 GMT']
-      request-id: [34be6798-a76c-4fb5-b840-55908054a764]
+      date: ['Mon, 26 Mar 2018 21:27:47 GMT']
+      etag: ['0x8D593606AD5481C']
+      last-modified: ['Mon, 26 Mar 2018 21:27:46 GMT']
+      request-id: [b88ccb99-eabe-4c77-94f6-aa09d3a24a69]
       server: [Microsoft-HTTPAPI/2.0]
       strict-transport-security: [max-age=31536000; includeSubDomains]
       transfer-encoding: [chunked]
@@ -448,13 +435,13 @@ interactions:
     headers:
       Accept: [application/json]
       Accept-Encoding: ['gzip, deflate']
-      CommandName: [unknown]
+      CommandName: [group delete]
       Connection: [keep-alive]
       Content-Length: ['0']
       Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.3 (Darwin-16.7.0-x86_64-i386-64bit) requests/2.18.4
-          msrest/0.4.19 msrest_azure/0.4.17 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
-          AZURECLI/2.0.22]
+      User-Agent: [python/3.5.3 (Windows-10-10.0.15063-SP0) requests/2.18.4 msrest/0.4.25
+          msrest_azure/0.4.20 resourcemanagementclient/1.2.1 Azure-SDK-For-Python
+          AZURECLI/2.0.30]
       accept-language: [en-US]
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2017-05-10
@@ -463,11 +450,12 @@ interactions:
     headers:
       cache-control: [no-cache]
       content-length: ['0']
-      date: ['Thu, 30 Nov 2017 18:04:04 GMT']
+      date: ['Mon, 26 Mar 2018 21:27:48 GMT']
       expires: ['-1']
-      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdCQldXTE5OUk82TkhDRkhBWFZDVExNN0pMSlc3VFE3VE5FNXxFOTIyNDJBMjA0NEUwRkIxLVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
+      location: ['https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/operationresults/eyJqb2JJZCI6IlJFU09VUkNFR1JPVVBERUxFVElPTkpPQi1DTElURVNUOjJFUkdNTzI2M1RZVktIQldTQkNRRkRUNVlQVldLTTdDSUI0QlJPQXwwM0RGQjU0OURENDEyNDBELVdFU1RVUyIsImpvYkxvY2F0aW9uIjoid2VzdHVzIn0?api-version=2017-05-10']
       pragma: [no-cache]
       strict-transport-security: [max-age=31536000; includeSubDomains]
+      x-content-type-options: [nosniff]
       x-ms-ratelimit-remaining-subscription-writes: ['1198']
     status: {code: 202, message: Accepted}
 version: 1

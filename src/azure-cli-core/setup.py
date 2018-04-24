@@ -15,7 +15,7 @@ except ImportError:
     logger.warn("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.0.30"
+VERSION = "2.0.32"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -58,7 +58,7 @@ DEPENDENCIES = [
     'jmespath',
     'knack==0.3.2',
     'msrest>=0.4.4',
-    'msrestazure>=0.4.7',
+    'msrestazure>=0.4.25',
     'paramiko',
     'pip',
     'pygments',
@@ -67,8 +67,8 @@ DEPENDENCIES = [
     'pyyaml',
     'requests',
     'six',
-    'tabulate==0.7.7',
-    'wheel',
+    'tabulate>=0.7.7,<=0.8.2',
+    'wheel==0.30.0',
 ]
 
 if sys.version_info < (3, 4):
