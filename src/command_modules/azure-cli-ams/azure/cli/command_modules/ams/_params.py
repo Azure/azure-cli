@@ -84,9 +84,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
 
     with self.argument_context('ams asset get-sas-urls') as c:
         c.argument('permissions', arg_type=get_enum_type(AssetContainerPermission),
-                   nargs='+',
                    help='The permissions to set on the SAS URL.')
-        c.argument('expiry_time', expiry_arg_type, help="Specifies the UTC datetime (Y-m-d'T'H:M'Z') at which the SAS becomes invalid.")
+        c.argument('expiry_time', expiry_arg_type, help="Specifies the UTC datetime (Y-m-d'T'H:M:S'Z') at which the SAS becomes invalid.")
 
     with self.argument_context('ams job') as c:
         c.argument('account_name', account_name_arg_type)
@@ -129,9 +128,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('streaming_policy_name',
                    help='The name of the streaming policy used by the streaming locator.')
         c.argument('start_time', type=datetime_format,
-                   help="Start time (Y-m-d'T'H:M'Z') of the streaming locator.")
+                   help="Start time (Y-m-d'T'H:M:S'Z') of the streaming locator.")
         c.argument('end_time', type=datetime_format,
-                   help="End time (Y-m-d'T'H:M'Z') of the streaming locator.")
+                   help="End time (Y-m-d'T'H:M:S'Z') of the streaming locator.")
 
     with self.argument_context('ams streaming locator list') as c:
         c.argument('account_name', id_part=None)
