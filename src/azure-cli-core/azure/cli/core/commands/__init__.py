@@ -318,7 +318,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 elif _is_paged(result):
                     result = list(result)
 
-                result = todict(result)
+                result = todict(result, preprocessor=self._remove_empty_addtional_properties)
                 event_data = {'result': result}
                 self.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
                 result = event_data['result']
@@ -341,6 +341,14 @@ class AzCliCommandInvoker(CommandInvoker):
             event_data['result'],
             table_transformer=self.commands_loader.command_table[parsed_args.command].table_transformer,
             is_query_active=self.data['query_active'])
+
+    @classmethod
+    def _remove_empty_addtional_properties(cls, o):
+        from msrest.serialization import Model
+        if isinstance(o, Model) and getattr(o, 'additional_properties', None) is not None:
+            if not o.additional_properties:
+                del o.additional_properties
+        return o
 
     def _build_kwargs(self, func, ns):  # pylint: disable=no-self-use
         from azure.cli.core.util import get_arg_list
