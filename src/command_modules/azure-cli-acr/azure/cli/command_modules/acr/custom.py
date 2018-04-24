@@ -9,6 +9,7 @@ from knack.log import get_logger
 from azure.cli.core.commands import LongRunningOperation
 
 from azure.mgmt.containerregistry.v2017_10_01.models import (
+    Registry,
     RegistryUpdateParameters,
     StorageAccountProperties,
     SkuName,
@@ -19,7 +20,6 @@ from ._constants import MANAGED_REGISTRY_SKU
 from ._utils import (
     arm_deploy_template_new_storage,
     arm_deploy_template_existing_storage,
-    arm_deploy_template_managed_storage,
     random_storage_account_name,
     get_registry_by_name,
     validate_managed_registry,
@@ -91,23 +91,14 @@ def acr_create(cmd,
                     admin_user_enabled,
                     deployment_name)
             )
+        return client.get(resource_group_name, registry_name)
     else:
         if storage_account_name:
             logger.warning(
                 "The registry '%s' in '%s' SKU is a managed registry. The specified storage account will be ignored.",
                 registry_name, sku)
-        LongRunningOperation(cmd.cli_ctx)(
-            arm_deploy_template_managed_storage(
-                cmd.cli_ctx,
-                resource_group_name,
-                registry_name,
-                location,
-                sku,
-                admin_user_enabled,
-                deployment_name)
-        )
-
-    return client.get(resource_group_name, registry_name)
+        registry = Registry(location=location, sku=Sku(name=sku), admin_user_enabled=admin_user_enabled)
+        return client.create(resource_group_name, registry_name, registry)
 
 
 def acr_delete(cmd, client, registry_name, resource_group_name=None):
