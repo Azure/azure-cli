@@ -137,8 +137,7 @@ class GatherCommands(object):
 
             command_params = data[command].get('parameters', {})
             for param in command_params:
-                if command_params[param]['help'] and \
-                   '==SUPPRESS==' not in command_params[param]['help']:
+                if '==SUPPRESS==' not in command_params[param]['help']:
                     param_aliases = set()
 
                     for par in command_params[param]['name']:
