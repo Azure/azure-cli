@@ -447,21 +447,25 @@ class TestProfile(unittest.TestCase):
         # setup
         storage_mock = {'subscriptions': None}
         profile = Profile(cli_ctx=cli, storage=storage_mock, use_global_creds_cache=False, async_persist=False)
+        test_subscription_id = '12345678-1bf0-4dda-aec3-cb9272f09590'
+        test_tenant_id = '12345678-38d6-4fb2-bad9-b7b93a3e1234'
+        test_subscription = SubscriptionStub('/subscriptions/{}'.format(test_subscription_id),
+                                             'MSI-DEV-INC', self.state1, '12345678-38d6-4fb2-bad9-b7b93a3e1234')
         consolidated = profile._normalize_properties(self.user1,
-                                                     [self.subscription1],
+                                                     [test_subscription],
                                                      False)
         profile._set_subscriptions(consolidated)
         # action
         cred, subscription_id, _ = profile.get_login_credentials()
 
         # verify
-        self.assertEqual(subscription_id, '1')
+        self.assertEqual(subscription_id, test_subscription_id)
 
         # verify the cred._tokenRetriever is a working lambda
         token_type, token = cred._token_retriever()
         self.assertEqual(token, self.raw_token1)
         self.assertEqual(some_token_type, token_type)
-        mock_get_token.assert_called_once_with(mock.ANY, self.user1, self.tenant_id,
+        mock_get_token.assert_called_once_with(mock.ANY, self.user1, test_tenant_id,
                                                'https://management.core.windows.net/')
         self.assertEqual(mock_get_token.call_count, 1)
 

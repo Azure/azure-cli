@@ -237,24 +237,6 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
     }
 
 
-def build_vm_msi_extension(cmd, vm_name, location, role_assignment_guid, port, is_linux, extension_version):
-    ext_type_name = 'ManagedIdentityExtensionFor' + ('Linux' if is_linux else 'Windows')
-    return {
-        'type': 'Microsoft.Compute/virtualMachines/extensions',
-        'name': vm_name + '/' + ext_type_name,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_extensions'),
-        'location': location,
-        'dependsOn': [role_assignment_guid or 'Microsoft.Compute/virtualMachines/' + vm_name],
-        'properties': {
-            'publisher': "Microsoft.ManagedIdentity",
-            'type': ext_type_name,
-            'typeHandlerVersion': extension_version,
-            'autoUpgradeMinorVersion': True,
-            'settings': {'port': port}
-        }
-    }
-
-
 def build_vm_resource(  # pylint: disable=too-many-locals
         cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,

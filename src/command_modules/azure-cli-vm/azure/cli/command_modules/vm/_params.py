@@ -356,7 +356,6 @@ def load_arguments(self, _):
     for scope in ['vm identity assign', 'vmss identity assign']:
         with self.argument_context(scope) as c:
             c.argument('assign_identity', options_list=['--identities'], nargs='*', help="the identities to assign")
-            c.argument('port', type=int, help="The port to fetch AAD token. Default: 50342")
             c.argument('vm_name', existing_vm_name)
             c.argument('vmss_name', vmss_name_type)
 

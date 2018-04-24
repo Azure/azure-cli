@@ -1816,7 +1816,7 @@ class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
 
         # create vault and acl server identity
         vault_name = self.create_random_name(resource_prefix, 24)
-        self.cmd('keyvault create -g {} -n {}'
+        self.cmd('keyvault create -g {} -n {} --enable-soft-delete true'
                  .format(resource_group, vault_name))
         self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
                  .format(resource_group, vault_name, server_identity))

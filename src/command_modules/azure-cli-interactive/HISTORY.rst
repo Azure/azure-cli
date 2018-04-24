@@ -3,6 +3,10 @@
 Release History
 ===============
 
+0.3.20
+++++++
+* Allow interactive completers to function with positional arguments.
+
 0.3.19
 ++++++
 * Stops completions upon unrecognized commands.
