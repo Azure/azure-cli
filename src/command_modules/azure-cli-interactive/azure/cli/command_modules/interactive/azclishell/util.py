@@ -55,17 +55,12 @@ def parse_quotes(cmd, quotes=True, string=True):
     """ parses quotes """
     import shlex
 
-    if quotes:
-        args = shlex.split(cmd)
-    else:
+    try:
+        args = shlex.split(cmd) if quotes else cmd.split()
+    except ValueError:
         args = cmd.split()
 
-    if string:
-        str_args = []
-        for arg in args:
-            str_args.append(str(arg))
-        return str_args
-    return args
+    return [str(arg) for arg in args] if string else args
 
 
 def get_os_clear_screen_word():
