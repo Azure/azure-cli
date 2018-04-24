@@ -6,9 +6,9 @@ The Azure Python CLI projects sources are located on GitHub (https://github.com/
 -    Create pull requests against the https://github.com/azure/azure-cli repository to get your code changes merged into the project repository.
 
 ## Preparing your machine
-1. Install Python 3.5.x from http://python.org. Please note that the version of Python that comes preinstalled on OSX is 2.7.
+1. Install Python 3.5.x or higher from http://python.org. Please note that the version of Python that comes preinstalled on OSX is 2.7.
 2. Clone your repository and check out the [`dev`](https://github.com/Azure/azure-cli/tree/dev) branch.
-3. Create a new virtual environment “env” for Python 3.5 in the root of your clone. You can do this by running:
+3. Create a new virtual environment “env” for Python in the root of your clone. You can do this by running:
 
   #### Windows
   ```BatchFile
