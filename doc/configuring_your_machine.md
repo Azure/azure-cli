@@ -88,12 +88,16 @@ The repo has a `launch.json` file that will launch the version of Python that is
   az
   ```
 
-## Running Tests and Style Check
+## Running Tests and Checking Code Style
 #### Command line
-  Running the `dev_setup.py` file installed the test and style check scripts into the `tools` directory under your
-  `<clone root>` directory and added them into the current virtualenv.
+  Running the `dev_setup.py` file will install `azdev`, a CLI that performs useful tasks for Azure CLI developers such as executing  CLI tests, CLI linter, and style checking.
 
 ##### Windows/OSX/Ubuntu:
+
+  For a list of available `azdev` commands:
+  ```
+  azdev --help
+  ```
 
   To run the CLI tests:
   ```
@@ -109,7 +113,7 @@ The repo has a `launch.json` file that will launch the version of Python that is
   ```
 
 #### Visual Studio Code
-  Click on the Debug icon in the Activity Bar on the side of Visual Studio Code, and select `Azure CLI Tests` from the drop down menu. Press the play icon to start executing the tests. To add custom arguments to the test command, press the gear icon beside the drop down menu and modify the `args` field in `launch.json`. Make sure that any modification of `launch.json` is not included in your pull requests.
+  Click on the Debug icon in the Activity Bar on the side of Visual Studio Code, and select `Azdev Scripts` from the drop down menu. To execute `azdev` commands via Visual Studio Code, you will need to press the gear icon beside the drop down menu and modify the `args` field in `launch.json`. Make sure that any modification of `launch.json` is not included in your pull requests.
 
 #### Visual Studio
   Select `Test > Windows > Test Explorer` and click `Run All` in the Test Explorer pane.
