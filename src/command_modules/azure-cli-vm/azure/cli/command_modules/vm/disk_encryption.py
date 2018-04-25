@@ -48,7 +48,6 @@ def _find_existing_ade(vm, use_instance_view=False, ade_ext_info=None):
     return r
 
 
-# return (has_new_ade, has_old_ade)
 def _detect_ade_status(vm):
     if vm.storage_profile.os_disk.encryption_settings:
         return False, True
@@ -173,7 +172,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
     if not use_new_ade:
         if not (extension_result.instance_view.statuses and
                 extension_result.instance_view.statuses[0].message):
-            raise CLIError('Could not found url pointing to the secret for disk encryption')
+            raise CLIError('Could not find url pointing to the secret for disk encryption')
 
         # 3. update VM's storage profile with the secrets
         status_url = extension_result.instance_view.statuses[0].message
