@@ -57,8 +57,9 @@ def cli_cosmosdb_create(cmd, client,
     """Create a new Azure Cosmos DB database account."""
     consistency_policy = None
     if default_consistency_level is not None:
-        consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix,
-                                               max_interval)
+        consistency_policy = ConsistencyPolicy(default_consistency_level=default_consistency_level,
+                                               max_staleness_prefix=max_staleness_prefix,
+                                               max_interval_in_seconds=max_interval)
 
     from azure.mgmt.resource import ResourceManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -156,8 +157,9 @@ def cli_cosmosdb_update(client,
 
     consistency_policy = None
     if update_consistency_policy:
-        consistency_policy = ConsistencyPolicy(default_consistency_level, max_staleness_prefix,
-                                               max_interval)
+        consistency_policy = ConsistencyPolicy(default_consistency_level=default_consistency_level,
+                                               max_staleness_prefix=max_staleness_prefix,
+                                               max_interval_in_seconds=max_interval)
     else:
         consistency_policy = existing.consistency_policy
 
