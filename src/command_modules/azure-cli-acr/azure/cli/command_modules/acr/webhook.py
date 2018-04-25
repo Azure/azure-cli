@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from azure.cli.core.util import CLIError
+
 from azure.mgmt.containerregistry.v2017_10_01.models import (
     WebhookCreateParameters,
     WebhookUpdateParameters
@@ -37,20 +39,25 @@ def acr_webhook_create(cmd,
                        tags=None):
     registry, resource_group_name = validate_managed_registry(
         cmd.cli_ctx, registry_name, resource_group_name, WEBHOOKS_NOT_SUPPORTED)
-    return client.create(
-        resource_group_name,
-        registry_name,
-        webhook_name,
-        WebhookCreateParameters(
-            location=location or registry.location,
-            service_uri=uri,
-            actions=actions,
-            custom_headers=headers,
-            status=status,
-            scope=scope,
-            tags=tags
+
+    from msrest.exceptions import ValidationError
+    try:
+        return client.create(
+            resource_group_name,
+            registry_name,
+            webhook_name,
+            WebhookCreateParameters(
+                location=location or registry.location,
+                service_uri=uri,
+                actions=actions,
+                custom_headers=headers,
+                status=status,
+                scope=scope,
+                tags=tags
+            )
         )
-    )
+    except ValidationError as e:
+        raise CLIError(e)
 
 
 def acr_webhook_delete(cmd,
