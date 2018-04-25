@@ -197,7 +197,6 @@ class AzCliCommandInvoker(CommandInvoker):
                                   EVENT_INVOKER_FILTER_RESULT)
         from knack.util import CommandResultItem, todict
         from azure.cli.core.commands.events import EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE
-        from azure.cli.core.util import prune_empty_additional_properties
 
         # TODO: Can't simply be invoked as an event because args are transformed
         args = _pre_command_table_create(self.cli_ctx, args)
@@ -319,8 +318,11 @@ class AzCliCommandInvoker(CommandInvoker):
                 elif _is_paged(result):
                     result = list(result)
 
-                prune_empty_additional_properties(result)
-                result = todict(result)
+                def prune_empty_additional_props(obj, property_name, value):
+                    from msrest.serialization import Model
+                    return not isinstance(obj, Model) or property_name != 'additional_properties' or value
+
+                result = todict(result, prune_empty_additional_props)
                 event_data = {'result': result}
                 self.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
                 result = event_data['result']
