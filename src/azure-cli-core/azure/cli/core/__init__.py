@@ -452,8 +452,7 @@ class AzCommandsLoader(CLICommandsLoader):  # pylint: disable=too-many-instance-
         from azure.cli.core.profiles import AZURE_API_PROFILES
         from azure.cli.core.profiles._shared import get_versioned_sdk_path
 
-        resource_types_in_profile = AZURE_API_PROFILES[self.cli_ctx.cloud.profile].keys()
-        for rt in resource_types_in_profile:
+        for rt in AZURE_API_PROFILES[self.cli_ctx.cloud.profile]:
             if operation.startswith(rt.import_prefix + ".operations."):
                 subs = operation[len(rt.import_prefix + ".operations."):]
                 operation_group = subs[:subs.index('_operations')]
