@@ -13,6 +13,7 @@ from azure.cli.command_modules.vm.custom import set_vm, _compute_client_factory,
 from azure.cli.command_modules.vm._vm_utils import get_key_vault_base_url, create_keyvault_data_plane_client
 
 _DATA_VOLUME_TYPE = 'DATA'
+_ALL_VOLUME_TYPE = 'ALL'
 _STATUS_ENCRYPTED = 'Encrypted'
 
 logger = get_logger(__name__)
@@ -91,7 +92,9 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         raise CLIError('Please provide either --aad-client-cert-thumbprint or --aad-client-secret')
 
     if volume_type is None:
-        if vm.storage_profile.data_disks:
+        if not is_linux:
+            volume_type = _ALL_VOLUME_TYPE
+        elif vm.storage_profile.data_disks:
             raise CLIError('VM has data disks, please supply --volume-type')
         else:
             volume_type = 'OS'
@@ -228,8 +231,7 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
         else:
             volume_type = _DATA_VOLUME_TYPE
     elif volume_type is None:
-        if vm.storage_profile.data_disks:
-            raise CLIError("VM has data disks, please specify --volume-type")
+        volume_type = _ALL_VOLUME_TYPE
 
     extension = vm_extension_info['Linux' if is_linux else 'Windows']
     # sequence_version should be incremented since encryptions occurred before
@@ -415,8 +417,8 @@ def _check_encrypt_is_supported(image_reference, volume_type):
 
 def _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, force):
     if is_linux:
-        volume_type = volume_type or 'DATA'
-        if volume_type != 'DATA':
+        volume_type = volume_type or _DATA_VOLUME_TYPE
+        if volume_type != _DATA_VOLUME_TYPE:
             msg = 'OS disk encyrption is not yet supported for Linux VM scale sets'
             if force:
                 logger.warning(msg)
@@ -424,7 +426,7 @@ def _handles_default_volume_type_for_vmss_encryption(is_linux, volume_type, forc
                 from knack.util import CLIError
                 raise CLIError(msg)
     else:
-        volume_type = volume_type or 'ALL'
+        volume_type = volume_type or _ALL_VOLUME_TYPE
     return volume_type
 
 
