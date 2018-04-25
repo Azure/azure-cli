@@ -81,7 +81,6 @@ class TestActions(unittest.TestCase):
         self.assertFalse(src_snapshot)
         self.assertFalse(src_blob_uri)
 
-
     def test_source_storage_account_err_case(self):
         np = mock.MagicMock()
         cmd = mock.MagicMock()
