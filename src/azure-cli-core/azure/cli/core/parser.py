@@ -118,9 +118,13 @@ class AzCliCommandParser(CLICommandParser):
 
     def error(self, message):
         telemetry.set_user_fault('parse error: {}'.format(message))
-        args = {'prog': self.prog, 'message': message}
-        logger.error('%(prog)s: error: %(message)s', args)
-        self.print_usage(sys.stderr)
+        if message.endswith('_subcommand'):
+            error_msg = "{prog}: Missing a subcommand. See '{prog} --help'.".format(prog=self.prog)
+            logger.error(error_msg)
+        else:
+            args = {'prog': self.prog, 'message': message}
+            logger.error('%(prog)s: error: %(message)s', args)
+            self.print_usage(sys.stderr)
         self.exit(2)
 
     def format_help(self):
@@ -147,8 +151,14 @@ class AzCliCommandParser(CLICommandParser):
         # Override to customize the error message when a argument is not among the available choices
         # converted value must be one of the choices (if specified)
         if action.choices is not None and value not in action.choices:
-            error_msg = "{prog}: '{value}' is not an {prog} command. See '{prog} --help'.".format(prog=self.prog,
-                                                                                                  value=value)
+            is_command = action.dest in ['_command_package', '_subcommand']
+            if is_command:
+                error_msg = "{prog}: '{value}' is not an {prog} command. See '{prog} --help'.".format(prog=self.prog,
+                                                                                                      value=value)
+            else:
+                error_msg = "{prog}: '{value}' is not a valid enum of {param}. See '{prog} --help'."
+                error_msg = error_msg.format(prog=self.prog, value=value, param=action.option_strings[0])
+
             telemetry.set_user_fault(error_msg)
             logger.error(error_msg)
             candidates = difflib.get_close_matches(value, action.choices, cutoff=0.8)
@@ -156,9 +166,10 @@ class AzCliCommandParser(CLICommandParser):
                 print_args = {
                     's': 's' if len(candidates) > 1 else '',
                     'verb': 'are' if len(candidates) > 1 else 'is',
-                    'value': value
+                    'value': value,
+                    'dest': 'command' if is_command else 'enum'
                 }
-                suggestion_msg = "\nThe most similar command{s} to '{value}' {verb}:\n".format(**print_args)
+                suggestion_msg = "\nThe most similar {dest}{s} to '{value}' {verb}:\n".format(**print_args)
                 suggestion_msg += '\n'.join(['\t' + candidate for candidate in candidates])
                 print(suggestion_msg, file=sys.stderr)
 
