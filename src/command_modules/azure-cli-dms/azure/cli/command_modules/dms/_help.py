@@ -136,24 +136,6 @@ helps['dms project show'] = """
     short-summary: Show the details of a migration Project.
 """
 
-helps['dms project update'] = """
-    type: command
-    short-summary: Update a migration Project.
-    parameters:
-        - name: --source-platform
-          type: string
-          short-summary: >
-            The type of server for the source database. The supported types are: SQL.
-        - name: --target-platform
-          type: string
-          short-summary: >
-            The type of service for the target database. The supported types are: SQLDB.
-    examples:
-        - name: Update a Project for a DMS instance.
-          text: >
-            az dms project update -l westus -n myproject -g myresourcegroup --service-name mydms --source-platform SQL --target-platform SQLDB --tags tagName1=tagValue1 tagWithNoValue
-"""
-
 helps['dms project check-name'] = """
     type: command
     short-summary: Check if a given Project name is available within a given instance of DMS as well as the name's validity.

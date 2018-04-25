@@ -67,7 +67,6 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.command('list', 'list')
         g.command('show', 'get')
-        g.custom_command('update', 'create_or_update_project')
 
     with self.command_group('dms project', dms_sdk, client_factory=dms_cf_services) as g:
         g.custom_command('check-name', 'check_project_name_availability')
