@@ -1210,6 +1210,23 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    def test_credscache_retrieve_sp_secret_with_cert(self, mock_read_file):
+        cli = TestCli()
+        test_sp = {
+            "servicePrincipalId": "myapp",
+            "servicePrincipalTenant": "mytenant",
+            "certificateFile": 'junkcert.pem'
+        }
+        mock_read_file.return_value = [test_sp]
+
+        # action
+        creds_cache = CredsCache(cli, async_persist=False)
+        creds_cache.load_adal_token_cache()
+
+        # assert
+        self.assertEqual(creds_cache.retrieve_secret_of_service_principal(test_sp['servicePrincipalId']), None)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
     @mock.patch('os.open', autospec=True)
     def test_credscache_add_new_sp_creds(self, _, mock_open_for_write, mock_read_file):
@@ -1256,6 +1273,30 @@ class TestProfile(unittest.TestCase):
 
         # assert
         self.assertEqual(creds_cache._service_principal_creds, [test_sp])
+        self.assertFalse(mock_open_for_write.called)
+
+    @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
+    @mock.patch('os.fdopen', autospec=True)
+    @mock.patch('os.open', autospec=True)
+    def test_credscache_add_preexisting_sp_new_secret(self, _, mock_open_for_write, mock_read_file):
+        cli = TestCli()
+        test_sp = {
+            "servicePrincipalId": "myapp",
+            "servicePrincipalTenant": "mytenant",
+            "accessToken": "Secret"
+        }
+        mock_open_for_write.return_value = FileHandleStub()
+        mock_read_file.return_value = [test_sp]
+        creds_cache = CredsCache(cli, async_persist=False)
+
+        new_creds = test_sp.copy()
+        new_creds['accessToken'] = 'Secret2'
+        # action
+        creds_cache.save_service_principal_cred(new_creds)
+
+        # assert
+        self.assertEqual(creds_cache._service_principal_creds, [new_creds])
+        self.assertTrue(mock_open_for_write.called)
 
     @mock.patch('azure.cli.core._profile._load_tokens_from_file', autospec=True)
     @mock.patch('os.fdopen', autospec=True)
