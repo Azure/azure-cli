@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.24
 ++++++
+* `disk create`: fix a bug that source detection is not accurate
 * BREAKING CHANGE: remove --msi-port/--identity-port as they are no longer used
 
 2.0.23

@@ -1145,10 +1145,15 @@ def process_image_create_namespace(cmd, namespace):
 
 def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     from msrestazure.azure_exceptions import CloudError
+    try:
+        from urllib.parse import urlparse
+    except ImportError:
+        from urlparse import urlparse  # pylint: disable=import-error
+
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
-    if source.lower().endswith('.vhd'):
+    if urlparse(source).scheme:  # must be a blob uri (':' isn't allowed in a resource name)
         source_blob_uri = source
     elif '/disks/' in source.lower():
         source_disk = source
