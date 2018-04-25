@@ -12,7 +12,7 @@ from azure.cli.core import __version__ as core_version
 import azure.cli.core._debug as _debug
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
-from azure.cli.core.profiles import ResourceType, get_api_version, get_sdk
+from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
 
 logger = get_logger(__name__)
 UA_AGENT = "AZURECLI/{}".format(core_version)
@@ -46,7 +46,7 @@ def resolve_client_arg_name(operation, kwargs):
 def get_mgmt_service_client(cli_ctx, client_or_resource_type, subscription_id=None, api_version=None,
                             **kwargs):
     sdk_profile = None
-    if isinstance(client_or_resource_type, ResourceType):
+    if isinstance(client_or_resource_type, (ResourceType, CustomResourceType)):
         # Get the versioned client
         client_type = get_client_class(client_or_resource_type)
         api_version = api_version or get_api_version(cli_ctx, client_or_resource_type, as_sdk_profile=True)
