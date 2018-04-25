@@ -62,8 +62,6 @@ def _validate_db_sku(cmd, namespace):
 
 def _validate_elastic_pool_id(cmd, namespace):
 
-    print(dir(namespace))
-
     # If elastic_pool_id is specified but it is not a valid resource id,
     # then assume that user specified elastic pool name which we need to
     # convert to elastic pool id.
@@ -87,9 +85,10 @@ def _validate_db_edition(cmd, namespace):  # pylint: disable=unused-argument
 
 def validate_create_db(cmd, namespace):
 
-    _validate_elastic_pool_id(cmd, namespace)
-    _validate_sku(cmd, namespace)
-    _validate_db_edition(cmd, namespace)
+    pass
+    # _validate_elastic_pool_id(cmd, namespace)
+    # _validate_db_sku(cmd, namespace)
+    # _validate_db_edition(cmd, namespace)
 
 
 ###############################################
@@ -97,7 +96,7 @@ def validate_create_db(cmd, namespace):
 ###############################################
 
 
-def _validate_db_sku(cmd, namespace):
+def _validate_elastic_pool_sku(cmd, namespace):
 
     # Convert sku string to sku object
     if namespace.sku:
@@ -136,7 +135,7 @@ def _validate_db_sku(cmd, namespace):
 
 def validate_create_elastic_pool(cmd, namespace):
 
-    _validate_sku(cmd, namespace)
+    _validate_elastic_pool_sku(cmd, namespace)
 
 
 ###############################################

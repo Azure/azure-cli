@@ -72,9 +72,9 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations.databases_operations#DatabasesOperations.{}',
         client_factory=get_sql_databases_operations)
     with self.command_group('sql db', database_operations, client_factory=get_sql_databases_operations) as g:
-        g.custom_command('create', 'db_create', supports_no_wait=True, validator=validate_create_db)
-        g.custom_command('copy', 'db_copy', supports_no_wait=True, validator=validate_create_db)
-        g.custom_command('restore', 'db_restore', supports_no_wait=True, validator=validate_create_db)
+        g.custom_command('create', 'db_create', supports_no_wait=True)
+        g.custom_command('copy', 'db_copy', supports_no_wait=True)
+        g.custom_command('restore', 'db_restore', supports_no_wait=True)
         g.custom_command('rename', 'db_rename')
         g.command('show', 'get')
         g.custom_command('list', 'db_list')
@@ -84,7 +84,7 @@ def load_command_table(self, _):
         g.custom_command('export', 'db_export')
 
     with self.command_group('sql db replica', database_operations, client_factory=get_sql_databases_operations) as g:
-        g.custom_command('create', 'db_create_replica', supports_no_wait=True, validator=validate_create_db)
+        g.custom_command('create', 'db_create_replica', supports_no_wait=True)
 
     with self.command_group('sql dw', database_operations, client_factory=get_sql_databases_operations) as g:
         g.custom_command('create', 'dw_create', supports_no_wait=True)
@@ -157,7 +157,7 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.sql.operations.elastic_pools_operations#ElasticPoolsOperations.{}',
         client_factory=get_sql_elastic_pools_operations)
     with self.command_group('sql elastic-pool', elastic_pools_ops, client_factory=get_sql_elastic_pools_operations) as g:
-        g.custom_command('create', 'elastic_pool_create', validator=validate_create_elastic_pool)
+        g.custom_command('create', 'elastic_pool_create')
         g.command('delete', 'delete')
         g.command('show', 'get')
         g.command('list', 'list_by_server')

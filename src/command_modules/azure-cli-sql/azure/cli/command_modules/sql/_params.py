@@ -16,7 +16,8 @@ from azure.mgmt.sql.models import (
     ImportExtensionRequest,
     ExportRequest,
     Server,
-    ServerAzureADAdministrator
+    ServerAzureADAdministrator,
+    Sku
 )
 from azure.mgmt.sql.models.sql_management_client_enums import (
     AuthenticationType,
@@ -132,26 +133,29 @@ def _configure_db_create_params(
     # Include all Database params as a starting point. We will filter from there.
     arg_ctx.expand('parameters', Database)
 
-    # sku & tier parameters are processed in validate_sku function
+    # Include Sku params
+    arg_ctx.expand('sku', Sku)
     sku_arg_group = 'Performance Level'
-    arg_ctx.extra('sku',
-                  options_list=['--sku', '--service-objective'],
-                  arg_group=sku_arg_group,
-                  required=False,
-                  help='The name of the sku for the new database.')
-    arg_ctx.extra('tier',
-                  options_list=['--tier', '--edition'],
-                  arg_group=sku_arg_group,
-                  help='The edition for the new database.')
-    arg_ctx.extra('capacity',
-                  options_list=['--capacity'],
-                  arg_group=sku_arg_group,
-                  help='The number of DTUs or vcores (depending on the edition) for the new database.')
+    arg_ctx.argument('name',
+                     options_list=['--service-objective'],
+                     arg_group=sku_arg_group,
+                     required=False,
+                     help='The service objective or sku name for the new database.')
+    arg_ctx.argument('tier',
+                     options_list=['--tier', '--edition', '-e'],
+                     arg_group=sku_arg_group,
+                     help='The edition for the new database.')
+    arg_ctx.argument('capacity',
+                     options_list=['--vcore', '-c'],
+                     arg_group=sku_arg_group,
+                     help='The number of DTUs or vcores (depending on the edition) for the new database.')
+    arg_ctx.argument('family',
+                     options_list=['--family', '-f'],
+                     arg_group=sku_arg_group,
+                     help='The compute generation for the new database. Allowed values include: Gen4, Gen5.')
 
-    # elastic_pool_id is processed in validate_create_db
     arg_ctx.argument('elastic_pool_id',
                      options_list=['--elastic-pool'],
-                     arg_group=sku_arg_group,
                      help='The name or resource id of the elastic pool to create the database in.')
 
     # The following params are always ignored because their values are filled in by wrapper
@@ -230,7 +234,8 @@ def load_arguments(self, _):
 
         c.argument('license_type', arg_type=get_enum_type(DatabaseLicenseType))
 
-        c.argument('read_scale', arg_type=get_enum_type(DatabaseReadScale))
+        c.argument('read_scale',
+                   arg_type=get_three_state_flag(DatabaseReadScale.enabled.value, DatabaseReadScale.disabled.value))
 
         c.argument('zone_redundant',
                    options_list=['--zone-redundant', '-z'],

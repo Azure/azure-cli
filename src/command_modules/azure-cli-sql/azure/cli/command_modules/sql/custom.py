@@ -202,6 +202,24 @@ class DatabaseIdentity(object):  # pylint: disable=too-few-public-methods
             quote(self.database_name))
 
 
+# Maps from DB sku tiers to sku names
+def _get_db_sku_name(tier):
+    # Vcore-based tiers have abbreviated sku names. Other tiers
+    # have same sku name as tier name.
+    #
+    # Tier name        | Sku name
+    # ---------------- | --------
+    # GeneralPurpose   | GP
+    # BusinessCritical | BC
+    # Basic            | Basic
+    # Standard         | Standard
+    # Premium          | Premium
+    return {
+        'GeneralPurpose': 'GP',
+        'BusinessCritical': 'BC'
+    }.get(tier, tier)  # 2nd arg is value to return if key not found in dictionary
+
+
 # Creates a database or datawarehouse. Wrapper function which uses the server location so that
 # the user doesn't need to specify location.
 def _db_dw_create(
@@ -216,6 +234,12 @@ def _db_dw_create(
         cli_ctx,
         server_name=db_id.server_name,
         resource_group_name=db_id.resource_group_name)
+
+    # If sku tier is specified but sku name is not specified, fill in sku name
+    if 'sku' in kwargs:
+        sku = kwargs['sku']
+        if sku.tier and not sku.name:
+            sku.name = _get_db_sku_name(sku.tier)
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
@@ -932,6 +956,24 @@ def dw_update(
 ###############################################
 
 
+# Maps from elastic pool sku tiers to sku names
+def _get_elastic_pool_sku_name(tier):
+    # Vcore-based tiers have abbreviated sku names. Other tiers
+    # have same sku name as tier name.
+    #
+    # Tier name        | Sku name
+    # ---------------- | --------
+    # GeneralPurpose   | GP
+    # BusinessCritical | BC
+    # Basic            | BasicPool
+    # Standard         | StandardPool
+    # Premium          | PremiumPool
+    return {
+        'GeneralPurpose': 'GP',
+        'BusinessCritical': 'BC'
+    }.get(tier, tier + 'Pool')  # 2nd arg is value to return if key not found in dictionary
+
+
 # Creates an elastic pool. Wrapper function which uses the server location so that the user doesn't
 # need to specify location.
 def elastic_pool_create(
@@ -947,6 +989,12 @@ def elastic_pool_create(
         cmd.cli_ctx,
         server_name=server_name,
         resource_group_name=resource_group_name)
+
+    # If sku tier is specified but sku name is not specified, fill in sku name
+    if 'sku' in kwargs:
+        sku = kwargs['sku']
+        if sku.tier and not sku.name:
+            sku.name = _get_elastic_pool_sku_name(sku.tier)
 
     # Create
     return client.create_or_update(
