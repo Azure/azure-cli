@@ -63,7 +63,7 @@ DEPENDENCIES = [
     'pip',
     'pygments',
     'PyJWT',
-    'pyopenssl>=16.2',  # https://github.com/pyca/pyopenssl/issues/568
+    'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
     'pyyaml',
     'requests',
     'six',
