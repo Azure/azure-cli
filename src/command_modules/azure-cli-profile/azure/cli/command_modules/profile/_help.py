@@ -70,7 +70,7 @@ helps['account show'] = """
 
 helps['account get-access-token'] = """
     type: command
-    short-summary: Get a token for utlilities to access Azure.
+    short-summary: Get a token for utilities to access Azure.
     long-summary: >
         The token will be valid for at least 5 minutes with the maximum at 60 minutes.
         If the subscription argument isn't specified, the current account is used.

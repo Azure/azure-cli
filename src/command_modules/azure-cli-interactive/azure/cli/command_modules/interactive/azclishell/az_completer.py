@@ -45,7 +45,7 @@ class AzCompleter(Completer):
         self.started = False
 
         # dictionary of command to descriptions
-        self.command_description = None
+        self.command_description = {}
         # a list of all the possible parameters
         self.completable_param = None
         # the command tree

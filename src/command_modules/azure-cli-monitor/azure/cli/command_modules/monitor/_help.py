@@ -58,8 +58,6 @@ helps['monitor alert update'] = """
     type: command
     short-summary: Update a metric-based alert rule.
     parameters:
-        - name: --target
-          short-summary: ID of the resource to target for the alert rule.
         - name: --description
           short-summary: Description of the rule.
         - name: --condition
@@ -207,8 +205,6 @@ helps['monitor log-profiles create'] = """
             parameters:
                 - name: --name -n
                   short-summary: The name of the log profile.
-                - name: --location -l
-                  short-summary:
                 - name: --locations
                   short-summary: Space-separated list of regions for which Activity Log events should be stored.
                 - name: --categories

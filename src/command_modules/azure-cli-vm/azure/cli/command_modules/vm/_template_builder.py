@@ -237,24 +237,6 @@ def build_msi_role_assignment(vm_vmss_name, vm_vmss_resource_id, role_definition
     }
 
 
-def build_vm_msi_extension(cmd, vm_name, location, role_assignment_guid, port, is_linux, extension_version):
-    ext_type_name = 'ManagedIdentityExtensionFor' + ('Linux' if is_linux else 'Windows')
-    return {
-        'type': 'Microsoft.Compute/virtualMachines/extensions',
-        'name': vm_name + '/' + ext_type_name,
-        'apiVersion': cmd.get_api_version(ResourceType.MGMT_COMPUTE, operation_group='virtual_machine_extensions'),
-        'location': location,
-        'dependsOn': [role_assignment_guid or 'Microsoft.Compute/virtualMachines/' + vm_name],
-        'properties': {
-            'publisher': "Microsoft.ManagedIdentity",
-            'type': ext_type_name,
-            'typeHandlerVersion': extension_version,
-            'autoUpgradeMinorVersion': True,
-            'settings': {'port': port}
-        }
-    }
-
-
 def build_vm_resource(  # pylint: disable=too-many-locals
         cmd, name, location, tags, size, storage_profile, nics, admin_username,
         availability_set_id=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
@@ -371,7 +353,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals
             profile['osDisk']['diskSizeGb'] = os_disk_size_gb
         if disk_info['os'].get('writeAcceleratorEnabled') is not None:
             profile['osDisk']['writeAcceleratorEnabled'] = disk_info['os']['writeAcceleratorEnabled']
-        profile['dataDisks'] = [v for k, v in disk_info.items() if k != 'os']
+        data_disks = [v for k, v in disk_info.items() if k != 'os']
+        if data_disks:
+            profile['dataDisks'] = data_disks
         return profile
 
     vm_properties = {
@@ -609,12 +593,12 @@ def build_vmss_storage_account_pool_resource(_, loop_name, location, tags, stora
 def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision, upgrade_policy_mode,
                         vm_sku, instance_count, ip_config_name, nic_name, subnet_id,
                         public_ip_per_vm, vm_domain_name, dns_servers, nsg, accelerated_networking,
-                        admin_username, authentication_type, storage_profile, os_disk_name,
+                        admin_username, authentication_type, storage_profile, os_disk_name, disk_info,
                         storage_sku, os_type, image=None, admin_password=None, ssh_key_value=None, ssh_key_path=None,
                         os_publisher=None, os_offer=None, os_sku=None, os_version=None,
                         backend_address_pool_id=None, inbound_nat_pool_id=None, health_probe=None,
                         single_placement_group=None, platform_fault_domain_count=None, custom_data=None,
-                        secrets=None, license_type=None, zones=None, priority=None, disk_info=None):
+                        secrets=None, license_type=None, zones=None, priority=None, eviction_policy=None):
 
     # Build IP configuration
     ip_configuration = {
@@ -685,8 +669,9 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
         storage_properties['imageReference'] = {
             'id': image
         }
-
-    storage_properties['dataDisks'] = [v for k, v in disk_info.items() if k != 'os']
+    data_disks = [v for k, v in disk_info.items() if k != 'os']
+    if data_disks:
+        storage_properties['dataDisks'] = data_disks
 
     # Build OS Profile
     os_profile = {
@@ -758,6 +743,10 @@ def build_vmss_resource(cmd, name, naming_prefix, location, tags, overprovision,
 
     if priority and cmd.supported_api_version(min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):
         vmss_properties['virtualMachineProfile']['priority'] = priority
+
+    if eviction_policy and cmd.supported_api_version(min_api='2017-12-01',
+                                                     operation_group='virtual_machine_scale_sets'):
+        vmss_properties['virtualMachineProfile']['evictionPolicy'] = eviction_policy
 
     if platform_fault_domain_count is not None and cmd.supported_api_version(
             min_api='2017-12-01', operation_group='virtual_machine_scale_sets'):

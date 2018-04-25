@@ -385,6 +385,11 @@ helps['appservice plan'] = """
     short-summary: Manage app service plans.
 """
 
+helps['appservice list-locations'] = """
+    type: command
+    short-summary: List regions where a plan sku is available.
+"""
+
 helps['appservice plan update'] = """
     type: command
     short-summary: Update an app service plan.
@@ -685,6 +690,11 @@ helps['functionapp config ssl upload'] = """
 helps['functionapp deployment'] = """
     type: group
     short-summary: Manage function app deployments.
+"""
+
+helps['functionapp deployment list-publishing-profiles'] = """
+    type: command
+    short-summary: Get the details for available function app deployment profiles.
 """
 
 helps['functionapp deployment source'] = """
