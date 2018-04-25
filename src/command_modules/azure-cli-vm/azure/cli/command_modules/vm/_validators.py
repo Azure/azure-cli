@@ -1153,7 +1153,7 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
-    if urlparse(source).scheme:  # must be a blob uri (':' isn't allowed in a resource name)
+    if urlparse(source).scheme:  # an exiting scheme means a blob uri, as ':' isn't allowed in a disk name
         source_blob_uri = source
     elif '/disks/' in source.lower():
         source_disk = source
