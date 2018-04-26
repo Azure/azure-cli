@@ -435,6 +435,27 @@ def validate_entity(namespace):
     namespace.entity = values
 
 
+def validate_marker(namespace):
+    """ Converts a list of key value pairs into a dictionary. Ensures that required
+    nextrowkey and nextpartitionkey are included. """
+    marker = dict(x.split('=', 1) for x in namespace.marker)
+    expected_keys = {'nextrowkey', 'nextpartitionkey'}
+
+    for key in marker:
+        new_key = key.lower()
+        if new_key in expected_keys:
+            expected_keys.remove(key.lower())
+            val = marker[key]
+            del marker[key]
+            marker[new_key] = val
+    if expected_keys:
+        import argparse
+        raise argparse.ArgumentError(
+            None, 'incorrect usage: marker requires: {}'.format(' '.join(expected_keys)))
+
+    namespace.marker = marker
+
+
 def get_file_path_validator(default_file_param=None):
     """ Creates a namespace validator that splits out 'path' into 'directory_name' and 'file_name'.
     Allows another path-type parameter to be named which can supply a default filename. """
