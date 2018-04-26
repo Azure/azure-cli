@@ -198,15 +198,11 @@ def _parse_image_argument(cmd, namespace):
     from msrestazure.azure_exceptions import CloudError
     import re
 
-    # 1 - easy check for URI
-    if _is_vhd_blob_uri(cmd.cli_ctx, namespace.image):
-        return 'uri'
-
-    # 2 - check if a fully-qualified ID (assumes it is an image ID)
+    # 1 - check if a fully-qualified ID (assumes it is an image ID)
     if is_valid_resource_id(namespace.image):
         return 'image_id'
 
-    # 3 - attempt to match an URN pattern
+    # 2 - attempt to match an URN pattern
     urn_match = re.match('([^:]*):([^:]*):([^:]*):([^:]*)', namespace.image)
     if urn_match:
         namespace.os_publisher = urn_match.group(1)
@@ -222,6 +218,10 @@ def _parse_image_argument(cmd, namespace):
                 namespace.plan_publisher = image_plan.publisher
 
         return 'urn'
+
+    # unmanaged vhd based images?
+    if _is_vhd_blob_uri(namespace.image):
+        return 'uri'
 
     # 4 - attempt to match an URN alias (most likely)
     from azure.cli.command_modules.vm._actions import load_images_from_aliases_doc
@@ -1148,7 +1148,7 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
-    if _is_vhd_blob_uri(cli_ctx, source):
+    if _is_vhd_blob_uri(source):
         source_blob_uri = source
     elif '/disks/' in source.lower():
         source_disk = source
@@ -1167,14 +1167,14 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     return (source_blob_uri, source_disk, source_snapshot)
 
 
-def _is_vhd_blob_uri(cli_ctx, source):
+def _is_vhd_blob_uri(source):
     try:
         from urllib.parse import urlparse
     except ImportError:
         from urlparse import urlparse  # pylint: disable=import-error
 
-    r = urlparse(source)
-    return bool(r.scheme) and (cli_ctx.cloud.suffixes.storage_endpoint in r.netloc)
+    # ':' is not allowed for image, disk, or snapshot names, so an existing scheme should be reliable
+    return bool(urlparse(source).scheme)
 
 
 def process_disk_encryption_namespace(cmd, namespace):

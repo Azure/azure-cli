@@ -76,7 +76,7 @@ class TestActions(unittest.TestCase):
         self.assertEqual(src_blob_uri, test_data)
 
         test_data = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/JAVACSMRG6017/providers/Microsoft.Compute/disks/ex.vhd'
-        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(TestCli(), 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(None, 'tg1', test_data)
         self.assertEqual(src_disk, test_data)
         self.assertFalse(src_snapshot)
         self.assertFalse(src_blob_uri)
@@ -218,7 +218,6 @@ class TestActions(unittest.TestCase):
         np = mock.MagicMock()
         np.image = 'https://foo.blob.core.windows.net/vhds/1'
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
         # action & assert
         self.assertEqual(_parse_image_argument(cmd, np), 'uri')
 
@@ -226,7 +225,6 @@ class TestActions(unittest.TestCase):
         np = mock.MagicMock()
         np.image = '/subscriptions/123/resourceGroups/foo/providers/Microsoft.Compute/images/nixos-imag.vhd'
         cmd = mock.MagicMock()
-        cmd.cli_ctx = TestCli()
 
         # action & assert
         self.assertEqual(_parse_image_argument(cmd, np), 'image_id')
