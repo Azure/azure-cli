@@ -110,10 +110,6 @@ class DmsServiceTests(ScenarioTest):
                        JMESPathCheck("length([?name == '{}'])".format(project_name1), 1)]
         self.cmd('az dms project list -g {rg} --service-name {sname}', list_checks)
 
-        update_checks = [JMESPathCheck('tags.area', 'cli'),
-                         JMESPathCheck('tags.env', 'test')]
-        self.cmd('az dms project update -g {rg} --service-name {sname} -l {lname} -n {pname2} --source-platform SQL --target-platform SQLDB --tags area=cli env=test', checks=update_checks)
-
         self.cmd('az dms project check-name -g {rg} --service-name {sname} -n {pname2}', checks=self.name_exists_checks)
 
         self.cmd('az dms project delete -g {rg} --service-name {sname} -n {pname2} -y')
