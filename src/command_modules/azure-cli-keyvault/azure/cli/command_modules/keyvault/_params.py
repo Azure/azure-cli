@@ -58,7 +58,7 @@ def load_arguments(self, _):
         c.argument('enable_purge_protection', arg_type=get_three_state_flag(), help='Prevents manual purging of deleted vault, and all contained entities')
 
     with self.argument_context('keyvault', arg_group='Network Rule') as c:
-        c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions), nargs='+', help='Bypass traffic for space-separated uses.')
+        c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions), help='Bypass traffic for space-separated uses.')
         c.argument('default_action', arg_type=get_enum_type(NetworkRuleAction), help='Default action to apply when no rule matches.')
 
     with self.argument_context('keyvault create') as c:
