@@ -1417,7 +1417,8 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
-def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_name='default'): # pylint: disable=line-too-long
+
+def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_name='default'):  # pylint: disable=line-too-long
     """
     Use Azure Dev Connect with a managed Kubernetes cluster.
 
@@ -1490,7 +1491,8 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
         except subprocess.CalledProcessError as err:
             raise CLIError('{} creation failure: {}.'.format(vsce_tool, err))
 
-def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name, prompt=False): # pylint: disable=line-too-long
+
+def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name, prompt=False):  # pylint: disable=line-too-long
     """
     Remove Azure Dev Connect from a managed Kubernetes cluster.
 
@@ -1520,9 +1522,11 @@ def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name, prompt
     except subprocess.CalledProcessError as err:
         raise CLIError('{} deletion failure: {}.'.format(vsce_tool, err))
 
+
 def _ensure_dev_connected_installed(vsce_cli):
     from subprocess import PIPE, Popen
     Popen([vsce_cli], stdout=PIPE, stderr=PIPE)
+
 
 def _ensure_aks_service_principal(cli_ctx,
                                   service_principal=None,
