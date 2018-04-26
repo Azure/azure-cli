@@ -214,6 +214,20 @@ class TestActions(unittest.TestCase):
                                        "Configuring plan settings will be skipped", 'publisher1:offer1:sku1:1.0.0',
                                        'image not found')
 
+    def test_parse_unmanaged_image_argument(self):
+        np = mock.MagicMock()
+        np.image = 'https://foo.blob.core.windows.net/vhds/1'
+
+        # action & assert
+        self.assertEqual(_parse_image_argument(None, np), 'uri')
+
+    def test_parse_managed_image_argument(self):
+        np = mock.MagicMock()
+        np.image = '/subscriptions/123/resourceGroups/foo/providers/Microsoft.Compute/images/nixos-imag.vhd'
+
+        # action & assert
+        self.assertEqual(_parse_image_argument(None, np), 'image_id')
+
     def test_get_next_subnet_addr_suffix(self):
         result = _get_next_subnet_addr_suffix('10.0.0.0/16', '10.0.0.0/24', 24)
         self.assertEqual(result, '10.0.1.0/24')

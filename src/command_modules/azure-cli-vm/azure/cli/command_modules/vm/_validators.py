@@ -199,7 +199,7 @@ def _parse_image_argument(cmd, namespace):
     import re
 
     # 1 - easy check for URI
-    if namespace.image.lower().endswith('.vhd'):
+    if _is_vhd_blob_uri(namespace.image):
         return 'uri'
 
     # 2 - check if a fully-qualified ID (assumes it is an image ID)
@@ -1145,15 +1145,10 @@ def process_image_create_namespace(cmd, namespace):
 
 def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     from msrestazure.azure_exceptions import CloudError
-    try:
-        from urllib.parse import urlparse
-    except ImportError:
-        from urlparse import urlparse  # pylint: disable=import-error
-
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
-    if urlparse(source).scheme:  # an exiting scheme means a blob uri, as ':' isn't allowed in a disk name
+    if _is_vhd_blob_uri(source):
         source_blob_uri = source
     elif '/disks/' in source.lower():
         source_disk = source
@@ -1170,6 +1165,17 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
             source_disk = info.id
 
     return (source_blob_uri, source_disk, source_snapshot)
+
+
+def _is_vhd_blob_uri(source):
+    try:
+        from urllib.parse import urlparse
+    except ImportError:
+        from urlparse import urlparse  # pylint: disable=import-error
+
+    # an exiting scheme should be sufficient to head to a blob uri,
+    # as ':' isn't allowed in the name for disk, snapshot, image
+    return bool(urlparse(source).scheme)
 
 
 def process_disk_encryption_namespace(cmd, namespace):
