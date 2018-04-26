@@ -30,7 +30,7 @@ CLASSIFIERS = [
 
 DEPENDENCIES = [
     'azure-cli-core',
-    'azure-mgmt-sql==0.8.6',
+    'azure-mgmt-sql==0.9.0',
     'azure-mgmt-storage==1.5.0',
     'six'
 ]

@@ -146,7 +146,7 @@ def _configure_db_create_params(
                      arg_group=sku_arg_group,
                      help='The edition for the new database.')
     arg_ctx.argument('capacity',
-                     options_list=['--vcore', '-c'],
+                     options_list=['--capacity', '-c'],
                      arg_group=sku_arg_group,
                      help='The number of DTUs or vcores (depending on the edition) for the new database.')
     arg_ctx.argument('family',
@@ -234,8 +234,10 @@ def load_arguments(self, _):
 
         c.argument('license_type', arg_type=get_enum_type(DatabaseLicenseType))
 
-        c.argument('read_scale',
-                   arg_type=get_three_state_flag(DatabaseReadScale.enabled.value, DatabaseReadScale.disabled.value))
+        # Needs testing
+        c.ignore('read_scale')
+        #c.argument('read_scale',
+        #           arg_type=get_three_state_flag(DatabaseReadScale.enabled.value, DatabaseReadScale.disabled.value, return_label=True))
 
         c.argument('zone_redundant',
                    options_list=['--zone-redundant', '-z'],

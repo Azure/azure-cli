@@ -56,6 +56,13 @@ def _get_server_location(cli_ctx, server_name, resource_group_name):
         resource_group_name=resource_group_name).location
 
 
+# If kwargs['sku'] has all none/empty properties, delete it so that
+# we don't get "sku.name is null" error
+def _delete_sku_if_empty(kwargs):
+    if 'sku' in kwargs and not any(val for key, val in kwargs['sku'].__dict__.items()):
+        del kwargs['sku']
+
+
 _DEFAULT_SERVER_VERSION = "12.0"
 
 ###############################################
@@ -234,6 +241,9 @@ def _db_dw_create(
         cli_ctx,
         server_name=db_id.server_name,
         resource_group_name=db_id.resource_group_name)
+
+    # If all sku properties are none/empty, delete sku
+    _delete_sku_if_empty(kwargs)
 
     # If sku tier is specified but sku name is not specified, fill in sku name
     if 'sku' in kwargs:
@@ -989,6 +999,9 @@ def elastic_pool_create(
         cmd.cli_ctx,
         server_name=server_name,
         resource_group_name=resource_group_name)
+
+    # If all sku properties are none/empty, delete sku
+    _delete_sku_if_empty(kwargs)
 
     # If sku tier is specified but sku name is not specified, fill in sku name
     if 'sku' in kwargs:
