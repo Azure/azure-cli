@@ -31,9 +31,16 @@ def _arm_get_resource_by_name(cli_ctx, resource_name, resource_type):
     elements = [item for item in result if item.name.lower() == resource_name.lower()]
 
     if not elements:
-        raise CLIError(
-            "No resource with type '{}' can be found with name '{}'.".format(
-                resource_type, resource_name))
+        from azure.cli.core._profile import Profile
+        profile = Profile(cli_ctx=cli_ctx)
+        message = "The resource with name '{}' and type '{}' could not be found".format(
+            resource_name, resource_type)
+        try:
+            subscription = profile.get_subscription()
+            raise CLIError("{} in subscription '{} ({})'.".format(message, subscription['name'], subscription['id']))
+        except (KeyError, TypeError):
+            raise CLIError("{} in the current subscription.".format(message))
+
     elif len(elements) == 1:
         return elements[0]
     else:
