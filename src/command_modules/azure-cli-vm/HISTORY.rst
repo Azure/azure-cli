@@ -4,6 +4,7 @@ Release History
 ===============
 2.0.31
 ++++++
+* vm: support disk encryption w/o user provided service principals 
 * BREAKING CHANGE: do not use VM 'ManagedIdentityExtension' for MSI support
 * vmss: support eviction policy
 * BREAKING CHANGE: remove erroneous argument of `ids` from `vm extension list`,
