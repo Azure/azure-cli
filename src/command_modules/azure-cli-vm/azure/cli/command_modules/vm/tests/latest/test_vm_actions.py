@@ -217,16 +217,19 @@ class TestActions(unittest.TestCase):
     def test_parse_unmanaged_image_argument(self):
         np = mock.MagicMock()
         np.image = 'https://foo.blob.core.windows.net/vhds/1'
-
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
         # action & assert
-        self.assertEqual(_parse_image_argument(None, np), 'uri')
+        self.assertEqual(_parse_image_argument(cmd, np), 'uri')
 
     def test_parse_managed_image_argument(self):
         np = mock.MagicMock()
         np.image = '/subscriptions/123/resourceGroups/foo/providers/Microsoft.Compute/images/nixos-imag.vhd'
+        cmd = mock.MagicMock()
+        cmd.cli_ctx = TestCli()
 
         # action & assert
-        self.assertEqual(_parse_image_argument(None, np), 'image_id')
+        self.assertEqual(_parse_image_argument(cmd, np), 'image_id')
 
     def test_get_next_subnet_addr_suffix(self):
         result = _get_next_subnet_addr_suffix('10.0.0.0/16', '10.0.0.0/24', 24)

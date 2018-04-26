@@ -199,7 +199,7 @@ def _parse_image_argument(cmd, namespace):
     import re
 
     # 1 - easy check for URI
-    if _is_vhd_blob_uri(namespace.image):
+    if _is_vhd_blob_uri(cmd.cli_ctx, namespace.image):
         return 'uri'
 
     # 2 - check if a fully-qualified ID (assumes it is an image ID)
@@ -1148,7 +1148,7 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
-    if _is_vhd_blob_uri(source):
+    if _is_vhd_blob_uri(cli_ctx, source):
         source_blob_uri = source
     elif '/disks/' in source.lower():
         source_disk = source
@@ -1167,15 +1167,14 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     return (source_blob_uri, source_disk, source_snapshot)
 
 
-def _is_vhd_blob_uri(source):
+def _is_vhd_blob_uri(cli_ctx, source):
     try:
         from urllib.parse import urlparse
     except ImportError:
         from urlparse import urlparse  # pylint: disable=import-error
 
-    # an exiting scheme should be sufficient to head to a blob uri,
-    # as ':' isn't allowed in the name for disk, snapshot, image
-    return bool(urlparse(source).scheme)
+    r = urlparse(source)
+    return bool(r.scheme) and (cli_ctx.cloud.suffixes.storage_endpoint in r.netloc)
 
 
 def process_disk_encryption_namespace(cmd, namespace):
