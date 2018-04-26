@@ -54,6 +54,12 @@ server_param_type = CLIArgumentType(
     options_list=['--server', '-s'],
     help='Name of the Azure SQL server.')
 
+
+available_param_type = CLIArgumentType(
+    options_list=['--available', '-a'],
+    help='If specified, show only results that are available in the specified region.')
+
+
 #####
 #        SizeWithUnitConverter - consider moving to common code (azure.cli.core.commands.parameters)
 #####
@@ -135,28 +141,36 @@ def _configure_db_create_params(
 
     # Include Sku params
     arg_ctx.expand('sku', Sku)
+    arg_ctx.ignore('size')
+
     sku_arg_group = 'Performance Level'
     arg_ctx.argument('name',
                      options_list=['--service-objective'],
                      arg_group=sku_arg_group,
                      required=False,
-                     help='The service objective or sku name for the new database.')
-    arg_ctx.argument('tier',
-                     options_list=['--tier', '--edition', '-e'],
-                     arg_group=sku_arg_group,
-                     help='The edition for the new database.')
-    arg_ctx.argument('capacity',
-                     options_list=['--capacity', '-c'],
-                     arg_group=sku_arg_group,
-                     help='The number of DTUs or vcores (depending on the edition) for the new database.')
-    arg_ctx.argument('family',
-                     options_list=['--family', '-f'],
-                     arg_group=sku_arg_group,
-                     help='The compute generation for the new database. Allowed values include: Gen4, Gen5.')
+                     help='The service objective for the new database. For example: Basic, S0, P1, '
+                     'GP_Gen4_1, BC_Gen5_2.')
 
     arg_ctx.argument('elastic_pool_id',
+                     arg_group=sku_arg_group,
                      options_list=['--elastic-pool'],
                      help='The name or resource id of the elastic pool to create the database in.')
+
+    sku_component_arg_group = 'Performance Level (components)'
+    arg_ctx.argument('tier',
+                     options_list=['--tier', '--edition', '-e'],
+                     arg_group=sku_component_arg_group,
+                     help='The edition component of the sku. Allowed values include: Basic, Standard, '
+                     'Premium, GeneralPurpose, BusinessCritical.')
+    arg_ctx.argument('capacity',
+                     options_list=['--capacity', '-c'],
+                     arg_group=sku_component_arg_group,
+                     help='The capacity component of the sku in integer number of DTUs or vcores.')
+    arg_ctx.argument('family',
+                     options_list=['--family', '-f'],
+                     arg_group=sku_component_arg_group,
+                     help='The compute generation component of the sku (for vcore skus only). '
+                     'Allowed values include: Gen4, Gen5.')
 
     # The following params are always ignored because their values are filled in by wrapper
     # functions in custom.py
@@ -305,6 +319,8 @@ def load_arguments(self, _):
                    help='List of additional details to include in output.',
                    nargs='+',
                    arg_type=get_enum_type(DatabaseCapabilitiesAdditionalDetails))
+
+        c.argument('available', arg_type=available_param_type)
 
         search_arg_group = 'Search'
 
@@ -624,6 +640,8 @@ def load_arguments(self, _):
                    help='List of additional details to include in output.',
                    nargs='+',
                    arg_type=get_enum_type(ElasticPoolCapabilitiesAdditionalDetails))
+
+        c.argument('available', arg_type=available_param_type)
 
         search_arg_group = 'Search'
 

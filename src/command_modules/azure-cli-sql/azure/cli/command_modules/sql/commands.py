@@ -5,6 +5,12 @@
 
 from azure.cli.core.commands import CliCommandType
 
+from ._format import (
+    db_list_table_format,
+    db_show_table_format,
+    db_edition_list_table_format
+)
+
 from ._util import (
     get_sql_server_azure_ad_administrators_operations,
     get_sql_capabilities_operations,
@@ -46,7 +52,7 @@ def load_command_table(self, _):
         client_factory=get_sql_capabilities_operations)
 
     with self.command_group('sql db', capabilities_operations, client_factory=get_sql_capabilities_operations) as g:
-        g.custom_command('list-editions', 'db_list_capabilities')
+        g.custom_command('list-editions', 'db_list_capabilities', table_transformer=db_edition_list_table_format)
 
     with self.command_group('sql elastic-pool', capabilities_operations, client_factory=get_sql_capabilities_operations) as g:
         g.custom_command('list-editions', 'elastic_pool_list_capabilities')
@@ -76,8 +82,8 @@ def load_command_table(self, _):
         g.custom_command('copy', 'db_copy', supports_no_wait=True)
         g.custom_command('restore', 'db_restore', supports_no_wait=True)
         g.custom_command('rename', 'db_rename')
-        g.command('show', 'get')
-        g.custom_command('list', 'db_list')
+        g.command('show', 'get', table_transformer=db_show_table_format)
+        g.custom_command('list', 'db_list', table_transformer=db_list_table_format)
         g.command('delete', 'delete', confirmation=True)
         g.generic_update_command('update', custom_func_name='db_update', supports_no_wait=True)
         g.custom_command('import', 'db_import')

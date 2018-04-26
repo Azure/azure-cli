@@ -17,10 +17,14 @@ helps['sql db'] = """
 helps['sql db copy'] = """
     type: command
     short-summary: Create a copy of a database.
+    long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
+                  The copy destination database must have the same edition as the source database, but you can change the edition
+                  after the copy has completed.
     """
 helps['sql db create'] = """
     type: command
     short-summary: Create a database.
+    long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
     examples:
         - name: Create database with zone redundancy enabled
           text: az sql db create -g mygroup -s myserver -n mydb -z
@@ -128,6 +132,8 @@ helps['sql db replica'] = """
 helps['sql db replica create'] = """
     type: command
     short-summary: Create a database as a readable secondary replica of an existing database.
+    long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
+                  The secondary database must have the same edition as the primary database.
     """
 helps['sql db replica set-primary'] = """
     type: command
@@ -184,6 +190,7 @@ helps['sql db import'] = """
 helps['sql db restore'] = """
     type: command
     short-summary: Create a new database by restoring from a backup.
+    long-summary: A full list of performance level options can be seen by executing `az sql db list-editions -a -o table -l LOCATION`.
     """
 helps['sql db threat-policy'] = """
     type: group

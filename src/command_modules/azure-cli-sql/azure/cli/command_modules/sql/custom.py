@@ -24,6 +24,7 @@ from azure.mgmt.sql.models import (
 from azure.mgmt.sql.models.sql_management_client_enums import (
     BlobAuditingPolicyState,
     CapabilityGroup,
+    CapabilityStatus,
     CreateMode,
     DatabaseEdition,
     IdentityType,
@@ -56,11 +57,23 @@ def _get_server_location(cli_ctx, server_name, resource_group_name):
         resource_group_name=resource_group_name).location
 
 
+def _any_sku_values_specified(sku):
+    return any(val for key, val in sku.__dict__.items())
+
+
 # If kwargs['sku'] has all none/empty properties, delete it so that
 # we don't get "sku.name is null" error
 def _delete_sku_if_empty(kwargs):
-    if 'sku' in kwargs and not any(val for key, val in kwargs['sku'].__dict__.items()):
+    if not _any_sku_values_specified(kwargs['sku']):
         del kwargs['sku']
+
+
+def is_available(status):
+    return status != CapabilityStatus.visible and status != CapabilityStatus.visible.value
+
+
+def _filter_available(capabilities):
+    return [c for c in capabilities if is_available(c.status)]
 
 
 _DEFAULT_SERVER_VERSION = "12.0"
@@ -232,30 +245,36 @@ def _get_db_sku_name(tier):
 def _db_dw_create(
         cli_ctx,
         client,
-        db_id,
+        source_db,
+        dest_db,
         no_wait,
         kwargs):
 
     # Determine server location
     kwargs['location'] = _get_server_location(
         cli_ctx,
-        server_name=db_id.server_name,
-        resource_group_name=db_id.resource_group_name)
+        server_name=dest_db.server_name,
+        resource_group_name=dest_db.resource_group_name)
+
+    # Set create mode properties
+    if source_db:
+        kwargs['source_database_id'] = source_db.id()
 
     # If all sku properties are none/empty, delete sku
     _delete_sku_if_empty(kwargs)
 
-    # If sku tier is specified but sku name is not specified, fill in sku name
+    # If sku is specified, name must not be None.
     if 'sku' in kwargs:
         sku = kwargs['sku']
         if sku.tier and not sku.name:
+            # Fill in sku name based on sku tier
             sku.name = _get_db_sku_name(sku.tier)
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
-                       server_name=db_id.server_name,
-                       resource_group_name=db_id.resource_group_name,
-                       database_name=db_id.database_name,
+                       server_name=dest_db.server_name,
+                       resource_group_name=dest_db.resource_group_name,
+                       database_name=dest_db.database_name,
                        parameters=kwargs)
 
 
@@ -273,35 +292,22 @@ def db_create(
     return _db_dw_create(
         cmd.cli_ctx,
         client,
+        None,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         no_wait,
         kwargs)
 
 
-# Common code for special db create modes.
-def _db_create_special(
-        cli_ctx,
+def _use_source_db_tier(
         client,
-        source_db,
-        dest_db,
-        no_wait,
+        database_name,
+        server_name,
+        resource_group_name,
         kwargs):
 
-    # Determine server location
-    kwargs['location'] = _get_server_location(
-        cli_ctx,
-        server_name=dest_db.server_name,
-        resource_group_name=dest_db.resource_group_name)
-
-    # Set create mode properties
-    kwargs['source_database_id'] = source_db.id()
-
-    # Create
-    return sdk_no_wait(no_wait, client.create_or_update,
-                       server_name=dest_db.server_name,
-                       resource_group_name=dest_db.resource_group_name,
-                       database_name=dest_db.database_name,
-                       parameters=kwargs)
+    if _any_sku_values_specified(kwargs['sku']):
+        source = client.get(resource_group_name, server_name, database_name)
+        kwargs['sku'].tier = source.sku.tier
 
 
 # Copies a database. Wrapper function to make create mode more convenient.
@@ -324,7 +330,17 @@ def db_copy(
     # Set create mode
     kwargs['create_mode'] = 'Copy'
 
-    return _db_create_special(
+    # Some sku properties may be filled in from the command line. However
+    # the sku tier must be the same as the source tier, so it is grabbed
+    # from the source db instead of from command line.
+    _use_source_db_tier(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        kwargs)
+
+    return _db_dw_create(
         cmd.cli_ctx,
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
@@ -352,8 +368,18 @@ def db_create_replica(
     # Set create mode
     kwargs['create_mode'] = CreateMode.secondary.value
 
+    # Some sku properties may be filled in from the command line. However
+    # the sku tier must be the same as the source tier, so it is grabbed
+    # from the source db instead of from command line.
+    _use_source_db_tier(
+        client,
+        database_name,
+        server_name,
+        resource_group_name,
+        kwargs)
+
     # Replica must have the same database name as the source db
-    return _db_create_special(
+    return _db_dw_create(
         cmd.cli_ctx,
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
@@ -412,7 +438,7 @@ def db_restore(
     kwargs['source_database_deletion_date'] = source_database_deletion_date
     kwargs['create_mode'] = 'Restore' if is_deleted else 'PointInTimeRestore'
 
-    return _db_create_special(
+    return _db_dw_create(
         cmd.cli_ctx,
         client,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
@@ -474,7 +500,8 @@ def db_list_capabilities(
         sku=None,
         dtu=None,
         vcores=None,
-        show_details=None):
+        show_details=None,
+        available=False):
 
     # Fixup parameters
     if not show_details:
@@ -520,6 +547,14 @@ def db_list_capabilities(
                 slo for slo in e.supported_service_level_objectives
                 if slo.performance_level.value == int(vcores) and
                 slo.performance_level.unit == PerformanceLevelUnit.vcores.value]
+
+    # Filter by availability
+    if available:
+        editions = _filter_available(editions)
+        for e in editions:
+            e.supported_service_level_objectives = _filter_available(e.supported_service_level_objectives)
+            for slo in e.supported_service_level_objectives:
+                slo.supported_max_sizes = _filter_available(slo.supported_max_sizes)
 
     # Remove editions with no service objectives (due to filters)
     editions = [e for e in editions if e.supported_service_level_objectives]
@@ -919,12 +954,13 @@ def dw_create(
         **kwargs):
 
     # Set edition
-    kwargs['edition'] = DatabaseEdition.data_warehouse.value
+    kwargs['sku']['tier'] = DatabaseEdition.data_warehouse.value
 
     # Create
     return _db_dw_create(
         cmd.cli_ctx,
         client,
+        None,
         DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
         no_wait,
         kwargs)
@@ -1003,10 +1039,11 @@ def elastic_pool_create(
     # If all sku properties are none/empty, delete sku
     _delete_sku_if_empty(kwargs)
 
-    # If sku tier is specified but sku name is not specified, fill in sku name
+    # If sku is specified, name must not be None.
     if 'sku' in kwargs:
         sku = kwargs['sku']
         if sku.tier and not sku.name:
+            # Fill in sku name based on sku tier
             sku.name = _get_elastic_pool_sku_name(sku.tier)
 
     # Create
@@ -1050,7 +1087,8 @@ def elastic_pool_list_capabilities(
         sku=None,
         dtu=None,
         vcores=None,
-        show_details=None):
+        show_details=None,
+        available=False):
 
     # Fixup parameters
     if not show_details:
@@ -1091,6 +1129,14 @@ def elastic_pool_list_capabilities(
                 pl for pl in e.supported_elastic_pool_performance_levels
                 if pl.performance_level.value == int(vcores) and
                 pl.performance_level.unit == PerformanceLevelUnit.vcores.value]
+
+    # Filter by availability
+    if available:
+        editions = _filter_available(editions)
+        for e in editions:
+            e.supported_elastic_pool_performance_levels = _filter_available(e.supported_elastic_pool_performance_levels)
+            for slo in e.supported_service_level_objectives:
+                slo.supported_max_sizes = _filter_available(slo.supported_max_sizes)
 
     # Remove editions with no service objectives (due to filters)
     editions = [e for e in editions if e.supported_elastic_pool_performance_levels]
