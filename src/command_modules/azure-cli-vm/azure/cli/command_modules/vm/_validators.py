@@ -6,6 +6,10 @@
 # pylint:disable=too-many-lines
 
 import os
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse  # pylint: disable=import-error
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -219,8 +223,8 @@ def _parse_image_argument(cmd, namespace):
 
         return 'urn'
 
-    # unmanaged vhd based images?
-    if _is_vhd_blob_uri(namespace.image):
+    # 3 - unmanaged vhd based images?
+    if urlparse(namespace.image).scheme:
         return 'uri'
 
     # 4 - attempt to match an URN alias (most likely)
@@ -1148,7 +1152,7 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
     source_blob_uri = None
     source_disk = None
     source_snapshot = None
-    if _is_vhd_blob_uri(source):
+    if urlparse(source).scheme:  # a uri?
         source_blob_uri = source
     elif '/disks/' in source.lower():
         source_disk = source
@@ -1165,16 +1169,6 @@ def _figure_out_storage_source(cli_ctx, resource_group_name, source):
             source_disk = info.id
 
     return (source_blob_uri, source_disk, source_snapshot)
-
-
-def _is_vhd_blob_uri(source):
-    try:
-        from urllib.parse import urlparse
-    except ImportError:
-        from urlparse import urlparse  # pylint: disable=import-error
-
-    # ':' is not allowed for image, disk, or snapshot names, so an existing scheme should be reliable
-    return bool(urlparse(source).scheme)
 
 
 def process_disk_encryption_namespace(cmd, namespace):
