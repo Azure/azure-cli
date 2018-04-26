@@ -91,6 +91,19 @@ class KeyVaultMgmtScenarioTest(ScenarioTest):
             self.check('name', '{kv}'),
             self.check('properties.sku.name', 'premium'),
         ])
+        # test updating updating other properties
+        self.cmd('keyvault update -g {rg} -n {kv} --enable-soft-delete --enable-purge-protection '
+                 '--enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment '
+                 '--bypass None --default-action Deny', checks=[
+            self.check('name', '{kv}'),
+            self.check('properties.enableSoftDelete', True),
+            self.check('properties.enablePurgeProtection', True),
+            self.check('properties.enabledForDeployment', True),
+            self.check('properties.enabledForDiskEncryption', True),
+            self.check('properties.enabledForTemplateDeployment', True),
+            self.check('properties.networkAcls.bypass', 'None'),
+            self.check('properties.networkAcls.defaultAction', 'Deny'),
+        ])
         # test policy set/delete
         self.cmd('keyvault set-policy -g {rg} -n {kv} --object-id {policy_id} --certificate-permissions get list',
                  checks=self.check('length(properties.accessPolicies[0].permissions.certificates)', 2))
