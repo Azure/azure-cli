@@ -76,7 +76,7 @@ class TestActions(unittest.TestCase):
         self.assertEqual(src_blob_uri, test_data)
 
         test_data = '/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/JAVACSMRG6017/providers/Microsoft.Compute/disks/ex.vhd'
-        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(TestCli(), 'tg1', test_data)
+        src_blob_uri, src_disk, src_snapshot = _figure_out_storage_source(None, 'tg1', test_data)
         self.assertEqual(src_disk, test_data)
         self.assertFalse(src_snapshot)
         self.assertFalse(src_blob_uri)
@@ -213,6 +213,21 @@ class TestActions(unittest.TestCase):
         logger_mock.assert_called_with("Querying the image of '%s' failed for an error '%s'. "
                                        "Configuring plan settings will be skipped", 'publisher1:offer1:sku1:1.0.0',
                                        'image not found')
+
+    def test_parse_unmanaged_image_argument(self):
+        np = mock.MagicMock()
+        np.image = 'https://foo.blob.core.windows.net/vhds/1'
+        cmd = mock.MagicMock()
+        # action & assert
+        self.assertEqual(_parse_image_argument(cmd, np), 'uri')
+
+    def test_parse_managed_image_argument(self):
+        np = mock.MagicMock()
+        np.image = '/subscriptions/123/resourceGroups/foo/providers/Microsoft.Compute/images/nixos-imag.vhd'
+        cmd = mock.MagicMock()
+
+        # action & assert
+        self.assertEqual(_parse_image_argument(cmd, np), 'image_id')
 
     def test_get_next_subnet_addr_suffix(self):
         result = _get_next_subnet_addr_suffix('10.0.0.0/16', '10.0.0.0/24', 24)
