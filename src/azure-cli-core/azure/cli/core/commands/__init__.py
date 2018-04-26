@@ -318,11 +318,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 elif _is_paged(result):
                     result = list(result)
 
-                def prune_empty_additional_props(obj, property_name, value):
-                    from msrest.serialization import Model
-                    return not isinstance(obj, Model) or property_name != 'additional_properties' or value
-
-                result = todict(result, prune_empty_additional_props)
+                result = todict(result, self.remove_additional_prop_layer)
                 event_data = {'result': result}
                 self.cli_ctx.raise_event(EVENT_INVOKER_TRANSFORM_RESULT, event_data=event_data)
                 result = event_data['result']
@@ -357,6 +353,14 @@ class AzCliCommandInvoker(CommandInvoker):
         if 'ns' in arg_list:
             kwargs['ns'] = ns
         return kwargs
+
+    @classmethod
+    def remove_additional_prop_layer(cls, obj, converted_dic):
+        from msrest.serialization import Model
+        if isinstance(obj, Model):
+            if 'additionalProperties' in converted_dic:
+                converted_dic.update(converted_dic.pop('additionalProperties'))
+        return converted_dic
 
     def _rudimentary_get_command(self, args):  # pylint: disable=no-self-use
         """ Rudimentary parsing to get the command """
