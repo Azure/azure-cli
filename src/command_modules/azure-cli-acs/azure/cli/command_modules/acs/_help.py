@@ -384,6 +384,37 @@ helps['aks upgrade-connector'] = """
               --connector-name aci-connector --chart-url <CustomURL> --image-tag <VirtualKubeletImageTag>
 """
 
+helps['aks use-dev-connect'] = """
+    type: command
+    short-summary: (PREVIEW) Use Azure Dev Connect with a managed Kubernetes cluster.
+    long-summary: "If needed, a Dev Connect service will be created and connected to the target cluster, and Dev Connect commands will be installed on this machine."
+    parameters:
+        - name: --cluster-name -n
+          type: string
+          short-summary: Name of the target AKS cluster.
+        - name: --resource-group -g
+          type: string
+          short-summary: Name of the target AKS cluster's resource group.
+        - name: --space -s
+          type: string
+          short-summary: The isolated space in the cluster to develop in.
+"""
+
+helps['aks remove-dev-connect'] = """
+    type: command
+    short-summary: (PREVIEW) Remove Azure Dev Connect from a managed Kubernetes cluster.
+    parameters:
+        - name: --cluster-name -n
+          type: string
+          short-summary: Name of the target AKS cluster.
+        - name: --resource-group -g
+          type: string
+          short-summary: Name of the target AKS cluster's resource group.
+        - name: --yes -y
+          type: bool
+          short-summary: Do not prompt for confirmation.
+"""
+
 helps['aks wait'] = """
     type: command
     short-summary: (PREVIEW) Wait for a managed Kubernetes cluster to reach a desired state.

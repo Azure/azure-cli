@@ -1417,6 +1417,112 @@ def aks_upgrade(cmd, client, resource_group_name, name, kubernetes_version, no_w
 
     return sdk_no_wait(no_wait, client.create_or_update, resource_group_name, name, instance)
 
+def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_name='default'): # pylint: disable=line-too-long
+    """
+    Use Azure Dev Connect with a managed Kubernetes cluster.
+
+    :param cluster_name: Name of the target AKS cluster.
+    :type cluster_name: String
+    :param resource_group_name: Name of the target AKS cluster's resource group.
+    :type resource_group_name: String
+    :param space_name: The isolated space in the cluster to develop in.
+    :type space_name: String
+    """
+
+    vsce_tool = 'Visual Studio Connected Development Services'
+    vsce_cli = 'vsce'
+    install_vsce = False
+    system = platform.system()
+    if system == 'Linux':
+        # Linux
+        raise CLIError('Linux is not supported yet.')
+    elif system == 'Windows':
+        # Windows
+        # Dev Connect Install Path (WinX)
+        vsce_cli = "C:\\Program Files\\Microsoft SDKs\\Azure\\Visual Studio Connected Environment CLI\\vsce.exe"
+        setup_file = 'vsce-winx-setup.exe'
+        setup_url = "https://aka.ms/get-vsce-windows-dev"
+        setup_args = [setup_file]
+    elif system == 'Darwin':
+        # OSX
+        setup_file = 'vsce-osx-setup.sh'
+        setup_url = "https://mindarodev.blob.core.windows.net/vscesetup/LKS/vsce-osx-setup.sh"
+        setup_args = ['bash', setup_file]
+
+    try:
+        _ensure_dev_connected_installed(vsce_cli)
+    except OSError:
+        install_vsce = True
+
+    if install_vsce:
+        # Install VSCE
+        logger.info('Installing Dev Connect commands...')
+        import urllib.request
+        urllib.request.urlretrieve(setup_url, setup_file)
+        try:
+            subprocess.call(
+                setup_args, universal_newlines=True, stdin=None, stdout=None, stderr=None, shell=False)
+            os.remove(setup_file)
+        except subprocess.CalledProcessError as err:
+            raise CLIError('Could not install {}: {}'.format(vsce_tool, err))
+        except PermissionError:
+            raise CLIError('Installing {} tooling needs permissions.'.format(vsce_tool))
+
+    try:
+        _ensure_dev_connected_installed(vsce_cli)
+    except OSError:
+        raise CLIError("{} not installed properly. Use 'az aks use-dev-connect' commands for connected development.".format(vsce_tool))
+
+    create_dev = False
+    try:
+        from subprocess import PIPE
+        retCode = subprocess.call([vsce_cli, 'env', 'select', '-n', cluster_name, '-g', resource_group_name], stderr=PIPE)
+        if retCode == 1:
+            create_dev = True
+    except subprocess.CalledProcessError as err:
+        create_dev = True
+
+    if create_dev:
+        try:
+            subprocess.call(
+                [vsce_cli, 'env', 'create', '--aks-name', cluster_name, '--aks-resource-group', resource_group_name],
+                universal_newlines=True)
+        except subprocess.CalledProcessError as err:
+            raise CLIError('{} creation failure: {}.'.format(vsce_tool, err))
+
+def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name, prompt=False): # pylint: disable=line-too-long
+    """
+    Remove Azure Dev Connect from a managed Kubernetes cluster.
+
+    :param cluster_name: Name of the target AKS cluster.
+    :type cluster_name: String
+    :param resource_group_name: Name of the target AKS cluster's resource group.
+    :type resource_group_name: String
+    :param prompt: Do not prompt for confirmation.
+    :type prompt: bool
+    """
+
+    vsce_tool = 'Visual Studio Connected Development Services'
+    vsce_cli = 'vsce'
+
+    try:
+        _ensure_dev_connected_installed(vsce_cli)
+    except OSError:
+        raise CLIError("{} not detected, please verify if it is installed. Use 'az aks use-dev-connect' commands for connected development.".format(vsce_tool))
+
+    remove_command_arguments = [vsce_cli, 'env', 'rm', '--name', cluster_name, '--resource-group', resource_group_name]
+
+    if prompt:
+        remove_command_arguments.append('-f')
+    try:
+        subprocess.call(
+            remove_command_arguments, universal_newlines=True)
+    except subprocess.CalledProcessError as err:
+        raise CLIError('{} deletion failure: {}.'.format(vsce_tool, err))
+
+def _ensure_dev_connected_installed(vsce_cli):
+    from subprocess import PIPE, Popen
+    Popen([vsce_cli], stdout=PIPE, stderr=PIPE)
 
 def _ensure_aks_service_principal(cli_ctx,
                                   service_principal=None,

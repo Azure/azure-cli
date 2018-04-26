@@ -196,6 +196,17 @@ def load_arguments(self, _):
         c.argument('location')
         c.argument('os_type', get_enum_type(aci_connector_os_type))
         c.argument('service_principal')
+    
+    with self.argument_context('aks use-dev-connect') as c:
+        c.argument('cluster_name', options_list=['--cluster-name', '-n'])
+        c.argument('resource_group_name', options_list=['--resource-group', '-g'])
+        c.argument('space_name', options_list=['--space', '-s'])
+
+    with self.argument_context('aks remove-dev-connect') as c:
+        c.argument('cluster_name', options_list=['--cluster-name', '-n'])
+        c.argument('resource_group_name', options_list=['--resource-group', '-g'])
+        c.argument('prompt', options_list=['--yes', '-y'], action='store_true',
+                   help='If true, it does not prompt for confirmation.')
 
 
 def _get_default_install_location(exe_name):
