@@ -1442,12 +1442,12 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
         # Dev Connect Install Path (WinX)
         vsce_cli = "C:\\Program Files\\Microsoft SDKs\\Azure\\Visual Studio Connected Environment CLI\\vsce.exe"
         setup_file = 'vsce-winx-setup.exe'
-        setup_url = "https://aka.ms/get-vsce-windows-dev"
+        setup_url = "https://aka.ms/get-vsce-windows-az"
         setup_args = [setup_file]
     elif system == 'Darwin':
         # OSX
         setup_file = 'vsce-osx-setup.sh'
-        setup_url = "https://mindarodev.blob.core.windows.net/vscesetup/LKS/vsce-osx-setup.sh"
+        setup_url = "https://aka.ms/get-vsce-osx-az"
         setup_args = ['bash', setup_file]
 
     try:
@@ -1468,16 +1468,18 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
             raise CLIError('Could not install {}: {}'.format(vsce_tool, err))
         except PermissionError:
             raise CLIError('Installing {} tooling needs permissions.'.format(vsce_tool))
-
-    try:
-        _ensure_dev_connected_installed(vsce_cli)
-    except OSError:
-        raise CLIError("{} not installed properly. Use 'az aks use-dev-connect' commands for connected development.".format(vsce_tool))
+        try:
+            _ensure_dev_connected_installed(vsce_cli)
+        except OSError:
+            raise CLIError("{} not installed properly. Use 'az aks use-dev-connect' commands for \
+            connected development.".format(vsce_tool))
 
     create_dev = False
     try:
         from subprocess import PIPE
-        retCode = subprocess.call([vsce_cli, 'env', 'select', '-n', cluster_name, '-g', resource_group_name], stderr=PIPE)
+        retCode = subprocess.call(
+            [vsce_cli, 'env', 'select', '-n', cluster_name, '-g', resource_group_name],
+            stderr=PIPE)
         if retCode == 1:
             create_dev = True
     except subprocess.CalledProcessError as err:
@@ -1486,7 +1488,8 @@ def aks_use_devconnect(cmd, client, cluster_name, resource_group_name, space_nam
     if create_dev:
         try:
             subprocess.call(
-                [vsce_cli, 'env', 'create', '--aks-name', cluster_name, '--aks-resource-group', resource_group_name],
+                [vsce_cli, 'env', 'create', '--aks-name', cluster_name, '--aks-resource-group', 
+                resource_group_name], 
                 universal_newlines=True)
         except subprocess.CalledProcessError as err:
             raise CLIError('{} creation failure: {}.'.format(vsce_tool, err))
@@ -1510,9 +1513,12 @@ def aks_remove_devconnect(cmd, client, cluster_name, resource_group_name, prompt
     try:
         _ensure_dev_connected_installed(vsce_cli)
     except OSError:
-        raise CLIError("{} not detected, please verify if it is installed. Use 'az aks use-dev-connect' commands for connected development.".format(vsce_tool))
+        raise CLIError("{} not detected, please verify if it is installed. Use 'az aks use-dev-connect' \
+        commands for connected development.".format(vsce_tool))
 
-    remove_command_arguments = [vsce_cli, 'env', 'rm', '--name', cluster_name, '--resource-group', resource_group_name]
+    remove_command_arguments = [vsce_cli, 'env', 'rm', '--name', 
+                                cluster_name, '--resource-group', 
+                                resource_group_name]
 
     if prompt:
         remove_command_arguments.append('-f')
