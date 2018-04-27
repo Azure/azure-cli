@@ -419,7 +419,9 @@ def show_vmss_identity(cmd, resource_group_name, vm_name):
 
 def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, identity_role='Contributor',
                        identity_role_id=None, identity_scope=None):
-    VirtualMachineIdentity, ResourceIdentityType = cmd.get_models('VirtualMachineIdentity', 'ResourceIdentityType')
+    VirtualMachineIdentity, ResourceIdentityType, VirtualMachineUpdate = cmd.get_models('VirtualMachineIdentity',
+                                                                                        'ResourceIdentityType',
+                                                                                        'VirtualMachineUpdate')
     from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
     client = _compute_client_factory(cmd.cli_ctx)
     _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
@@ -427,7 +429,10 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
     def getter():
         return client.virtual_machines.get(resource_group_name, vm_name)
 
-    def setter(vm):
+    def setter(vm, external_identities=external_identities):
+        vm_patch = None
+        if cmd.supported_api_version(min_api='2017-12-01'):
+            vm_patch = VirtualMachineUpdate()
         if vm.identity and vm.identity.identity_ids:
             for i in vm.identity.identity_ids:
                 external_identities.append(i)
@@ -446,12 +451,19 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
 
         vm.identity = VirtualMachineIdentity(type=identity_types)
         if external_identities:
+            temp = set(external_identities)
+            external_identities.clear()
+            external_identities.extend(temp)
             vm.identity.identity_ids = external_identities
-        return set_vm(cmd, vm)
+        
+        if vm_patch:
+            vm_patch.identity = vm.identity
+            return patch_vm(cmd, resource_group_name, vm_name, vm_patch)
+        else:
+            return set_vm(cmd, vm)
 
     vm = assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id,
                                 identity_scope=identity_scope)
-
     return _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id, external_identities)
 
 
@@ -861,6 +873,12 @@ def set_vm(cmd, instance, lro_operation=None, no_wait=False):
     if lro_operation:
         return lro_operation(poller)
 
+    return LongRunningOperation(cmd.cli_ctx)(poller)
+
+
+def patch_vm(cmd, resource_group_name, vm_name, vm):
+    client = _compute_client_factory(cmd.cli_ctx)
+    poller = client.virtual_machines.update(resource_group_name, vm_name, vm)
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
