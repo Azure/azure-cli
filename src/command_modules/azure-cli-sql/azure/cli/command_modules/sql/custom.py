@@ -688,8 +688,9 @@ def db_update(
         instance,
         elastic_pool_id=None,
         max_size_bytes=None,
-        sku=None,
-        zone_redundant=None):
+        service_objective=None,
+        zone_redundant=None,
+        capacity=None):
 
     # Verify edition
     if instance.sku.tier.lower() == DatabaseEdition.data_warehouse.value.lower():  # pylint: disable=no-member
@@ -701,8 +702,8 @@ def db_update(
     # they are inconsistent (i.e. service objective is not 'ElasticPool'), then the service
     # actually ignores the value of service objective name (!!). We are trying to protect the CLI
     # user from this unintuitive behavior.
-    if (elastic_pool_id and sku and
-            sku != ServiceObjectiveName.elastic_pool.value):
+    if (elastic_pool_id and service_objective and
+            service_objective != ServiceObjectiveName.elastic_pool.value):
         raise CLIError('If elastic pool is specified, service objective must be'
                        ' unspecified or equal \'{}\'.'.format(
                            ServiceObjectiveName.elastic_pool.value))
@@ -715,9 +716,17 @@ def db_update(
     instance.elastic_pool_id = elastic_pool_id
 
     # Set sku. The service will choose correct edition based on sku name and elastic pool.
-    if sku:
-        instance.sku = Sku(sku)
+    if service_objective:
+        instance.sku = Sku(name=service_objective)
     else:
+        instance.sku = None
+
+    # Set capacity
+    if capacity:
+        instance.sku.capacity = capacity
+
+    # TODO Temporary workaround for elastic pool sku issue
+    if instance.elastic_pool_id:
         instance.sku = None
 
     # Set other properties

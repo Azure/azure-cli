@@ -38,7 +38,7 @@ def _db_table_format(result):
         ('family', result['sku']['family'] or ' '),
         ('capacity', result['sku']['capacity'] or ' '),
         ('maxSizeBytes', result['maxSizeBytes']),
-        ('elasticPool', result['elasticPoolId'].split('/')[-1:] if result['elasticPoolId'] else ' '),
+        ('elasticPool', result['elasticPoolId'].split('/')[-1] if result['elasticPoolId'] else ' '),
     ])
 
 

@@ -60,7 +60,7 @@ def _validate_db_sku(cmd, namespace):
             raise CLIError('If --capacity is specfied, --sku and/or --tier are required')
 
 
-def _validate_elastic_pool_id(cmd, namespace):
+def validate_elastic_pool_id(cmd, namespace):
 
     # If elastic_pool_id is specified but it is not a valid resource id,
     # then assume that user specified elastic pool name which we need to

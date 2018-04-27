@@ -45,6 +45,10 @@ from .custom import (
     ElasticPoolCapabilitiesAdditionalDetails
 )
 
+from ._validators import (
+    validate_elastic_pool_id
+)
+
 #####
 #           Reusable param type definitions
 #####
@@ -65,7 +69,8 @@ tier_param_type = CLIArgumentType(
 
 
 capacity_param_type = CLIArgumentType(
-    options_list=['--capacity', '-c'])
+    options_list=['--capacity', '-c'],
+    help='The capacity component of the sku in integer number of DTUs or vcores.')
 
 
 family_param_type = CLIArgumentType(
@@ -166,7 +171,8 @@ def _configure_db_create_params(
     arg_ctx.argument('elastic_pool_id',
                      arg_group=sku_arg_group,
                      options_list=['--elastic-pool'],
-                     help='The name or resource id of the elastic pool to create the database in.')
+                     help='The name or resource id of the elastic pool to create the database in.',
+                     validator=validate_elastic_pool_id)
 
     sku_component_arg_group = 'Performance Level (components)'
     arg_ctx.argument('tier',
@@ -176,8 +182,7 @@ def _configure_db_create_params(
                      'Premium, GeneralPurpose, BusinessCritical.')
     arg_ctx.argument('capacity',
                      arg_type=capacity_param_type,
-                     arg_group=sku_component_arg_group,
-                     help='The capacity component of the sku in integer number of DTUs or vcores.')
+                     arg_group=sku_component_arg_group)
     arg_ctx.argument('family',
                      arg_type=family_param_type,
                      arg_group=sku_component_arg_group,
@@ -357,14 +362,20 @@ def load_arguments(self, _):
                    help='Number of vcores to search for. If unspecified, all vcore sizes are shown.')
 
     with self.argument_context('sql db update') as c:
-        c.argument('sku',
-                   options_list=['--sku', '--service-objective'],
+        c.argument('service_objective',
                    help='The name of the new service objective. If this is a standalone db service'
                    ' objective and the db is currently in an elastic pool, then the db is removed from'
                    ' the pool.')
+        # c.argument('tier',
+        #            arg_type=tier_param_type)
+        # c.argument('family',
+        #            arg_type=family_param_type)
+        c.argument('capacity',
+                   arg_type=capacity_param_type)
         c.argument('elastic_pool_id',
                    options_list=['--elastic-pool'],
-                   help='The name or resource id of the elastic pool to move the database into.')
+                   help='The name or resource id of the elastic pool to move the database into.',
+                   validator=validate_elastic_pool_id)
         c.argument('max_size_bytes', help='The new maximum size of the database expressed in bytes.')
 
     with self.argument_context('sql db export') as c:
@@ -632,8 +643,7 @@ def load_arguments(self, _):
         c.argument('capacity',
                    arg_type=capacity_param_type,
                    options_list=['--capacity', '-c', '--dtu'],
-                   arg_group=sku_arg_group,
-                   help='The capacity component of the sku in integer number of DTUs or vcores.')
+                   arg_group=sku_arg_group)
         c.argument('family',
                    arg_type=family_param_type,
                    arg_group=sku_arg_group,
@@ -681,8 +691,14 @@ def load_arguments(self, _):
     with self.argument_context('sql elastic-pool update') as c:
         c.argument('database_dtu_max', help='The maximum DTU any one database can consume.')
         c.argument('database_dtu_min', help='The minimum DTU all databases are guaranteed.')
-        c.argument('dtu', help='TThe total shared DTU for the elastic eool.')
+        c.argument('dtu', help='TThe total shared DTU for the elastic pool.')
         c.argument('storage_mb', help='Storage limit for the elastic pool in MB.')
+        # c.argument('tier',
+        #            arg_type=tier_param_type)
+        # c.argument('family',
+        #            arg_type=family_param_type)
+        c.argument('capacity',
+                   arg_type=capacity_param_type)
 
     #####
     #           sql elastic-pool op
