@@ -23,7 +23,7 @@ def load_arguments(self, _):
         c.argument('key_type', arg_type=get_enum_type(RedisKeyType))
         c.argument('shard_id', type=int)
         c.argument('sku', help='Type of Redis cache.', arg_type=get_enum_type(SkuName))
-        c.argument('vm_size', help='Size of Redis cache to deploy. Example : values for C family (C0, C1, C2, C3, C4, C5, C6). For P family (P1, P2, P3, P4)')
+        c.argument('vm_size', help='Size of Redis cache to deploy. Example: values for C family (C0, C1, C2, C3, C4, C5, C6). For P family (P1, P2, P3, P4)')
         c.argument('enable_non_ssl_port', action='store_true')
         c.argument('shard_count', type=int)
         c.argument('tags', tags_type)
