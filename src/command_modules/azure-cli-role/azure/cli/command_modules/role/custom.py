@@ -603,11 +603,12 @@ def create_application(client, display_name, homepage=None, identifier_uris=None
     return result
 
 
+
 def update_application(client, identifier, display_name=None, homepage=None,
                        identifier_uris=None, password=None, reply_urls=None, key_value=None,
                        key_type=None, key_usage=None, start_date=None, end_date=None, available_to_other_tenants=None,
-                       oauth2_allow_implicit_flow=None, required_resource_accesses=None):
-    object_id = _resolve_application(client, identifier)
+                       oauth2_allow_implicit_flow=None, required_resource_accesses=None, **kwargs):
+    object_id = kwargs['parameters'].object_id
 
     password_creds, key_creds, required_accesses = None, None, None
     if any([key_value, key_type, key_usage, start_date, end_date]):
@@ -626,7 +627,7 @@ def update_application(client, identifier, display_name=None, homepage=None,
                                                   available_to_other_tenants=available_to_other_tenants,
                                                   required_resource_access=required_accesses,
                                                   oauth2_allow_implicit_flow=oauth2_allow_implicit_flow)
-    return client.patch(object_id, app_patch_param)
+    return client.patch(object_id, app_patch_param, **kwargs)
 
 
 def _build_application_accesses(required_resource_accesses):

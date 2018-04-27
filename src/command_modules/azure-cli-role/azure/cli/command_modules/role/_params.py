@@ -31,8 +31,8 @@ def load_arguments(self, _):
         c.argument('available_to_other_tenants', help='the application can be used from any Azure AD tenants', arg_type=get_three_state_flag())
         c.argument('key_value', help='the value for the key credentials associated with the application')
         # TODO: Update these with **enum_choice_list(...) when SDK supports proper enums
-        c.argument('key_type', help='the type of the key credentials associated with the application', arg_type=get_enum_type(['AsymmetricX509Cert', 'Password', 'Symmetric'], default='AsymmetricX509Cert'))
-        c.argument('key_usage', help='the usage of the key credentials associated with the application.', arg_type=get_enum_type(['Sign', 'Verify'], default='Verify'))
+        c.argument('key_type', help='the type of the key credentials associated with the application', arg_type=get_enum_type(['AsymmetricX509Cert', 'Password', 'Symmetric'], default=None))
+        c.argument('key_usage', help='the usage of the key credentials associated with the application.', arg_type=get_enum_type(['Sign', 'Verify'], default=None))
         c.argument('password', help="app password, aka 'client secret'")
         c.argument('oauth2_allow_implicit_flow', arg_type=get_three_state_flag(), help='whether to allow implicit grant flow for OAuth2')
         c.argument('required_resource_accesses', type=validate_file_or_dict,
