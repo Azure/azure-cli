@@ -8,7 +8,10 @@ from azure.cli.core.commands import CliCommandType
 from ._format import (
     db_list_table_format,
     db_show_table_format,
-    db_edition_list_table_format
+    db_edition_list_table_format,
+    elastic_pool_list_table_format,
+    elastic_pool_show_table_format,
+    elastic_pool_edition_list_table_format
 )
 
 from ._util import (
@@ -55,7 +58,7 @@ def load_command_table(self, _):
         g.custom_command('list-editions', 'db_list_capabilities', table_transformer=db_edition_list_table_format)
 
     with self.command_group('sql elastic-pool', capabilities_operations, client_factory=get_sql_capabilities_operations) as g:
-        g.custom_command('list-editions', 'elastic_pool_list_capabilities')
+        g.custom_command('list-editions', 'elastic_pool_list_capabilities', table_transformer=elastic_pool_edition_list_table_format)
 
     ###############################################
     #                sql list-usages              #
@@ -165,12 +168,12 @@ def load_command_table(self, _):
     with self.command_group('sql elastic-pool', elastic_pools_ops, client_factory=get_sql_elastic_pools_operations) as g:
         g.custom_command('create', 'elastic_pool_create')
         g.command('delete', 'delete')
-        g.command('show', 'get')
-        g.command('list', 'list_by_server')
+        g.command('show', 'get', table_transformer=elastic_pool_show_table_format)
+        g.command('list', 'list_by_server', table_transformer=elastic_pool_list_table_format)
         g.generic_update_command('update', custom_func_name='elastic_pool_update')
 
     with self.command_group('sql elastic-pool', database_operations) as g:
-        g.command('list-dbs', 'list_by_elastic_pool')
+        g.command('list-dbs', 'list_by_elastic_pool', table_transformer=db_list_table_format)
 
     elastic_pool_operations_operations = CliCommandType(
         operations_tmpl='azure.mgmt.sql.operations.elastic_pool_operations#ElasticPoolOperations.{}',

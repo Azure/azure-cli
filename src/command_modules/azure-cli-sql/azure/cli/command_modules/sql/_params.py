@@ -60,6 +60,18 @@ available_param_type = CLIArgumentType(
     help='If specified, show only results that are available in the specified region.')
 
 
+tier_param_type = CLIArgumentType(
+    options_list=['--tier', '--edition', '-e'])
+
+
+capacity_param_type = CLIArgumentType(
+    options_list=['--capacity', '-c'])
+
+
+family_param_type = CLIArgumentType(
+    options_list=['--family', '-f'])
+
+
 #####
 #        SizeWithUnitConverter - consider moving to common code (azure.cli.core.commands.parameters)
 #####
@@ -158,16 +170,16 @@ def _configure_db_create_params(
 
     sku_component_arg_group = 'Performance Level (components)'
     arg_ctx.argument('tier',
-                     options_list=['--tier', '--edition', '-e'],
+                     arg_type=tier_param_type,
                      arg_group=sku_component_arg_group,
                      help='The edition component of the sku. Allowed values include: Basic, Standard, '
                      'Premium, GeneralPurpose, BusinessCritical.')
     arg_ctx.argument('capacity',
-                     options_list=['--capacity', '-c'],
+                     arg_type=capacity_param_type,
                      arg_group=sku_component_arg_group,
                      help='The capacity component of the sku in integer number of DTUs or vcores.')
     arg_ctx.argument('family',
-                     options_list=['--family', '-f'],
+                     arg_type=family_param_type,
                      arg_group=sku_component_arg_group,
                      help='The compute generation component of the sku (for vcore skus only). '
                      'Allowed values include: Gen4, Gen5.')
@@ -328,7 +340,7 @@ def load_arguments(self, _):
         # will be no way to query for new editions/service objectives that are made available after
         # this version of CLI is released.
         c.argument('edition',
-                   options_list=['--edition', '--tier'],
+                   arg_type=tier_param_type,
                    arg_group=search_arg_group,
                    help='Edition to search for. If unspecified, all editions are shown.')
         c.argument('service_objective',
@@ -587,22 +599,22 @@ def load_arguments(self, _):
                    id_part='child_name_1')
 
         # --db-dtu-max and --db-dtu-min were the original param names, which is consistent with the
-        # underlying REST API.
+        # 2014-04-01 REST API.
         # --db-max-dtu and --db-min-dtu are aliases which are consistent with the `sql elastic-pool
         # list-editions --show-details db-max-dtu db-min-dtu` parameter values. These are more
         # consistent with other az sql commands, but the original can't be removed due to
         # compatibility.
-        c.argument('database_dtu_max', options_list=['--db-dtu-max', '--db-max-dtu'])
-        c.argument('database_dtu_min', options_list=['--db-dtu-min', '--db-min-dtu'])
+        c.argument('max_capacity', options_list=['--db-dtu-max', '--db-max-dtu', '--db-max-capacity'])
+        c.argument('min_capacity', options_list=['--db-dtu-min', '--db-min-dtu', '--db-min-capacity'])
 
         # --storage was the original param name, which is consistent with the underlying REST API.
         # --max-size is an alias which is consistent with the `sql elastic-pool list-editions
         # --show-details max-size` parameter value and also matches `sql db --max-size` parameter name.
-        c.argument('storage_mb',
+        c.argument('max_size_bytes',
                    options_list=['--storage', '--max-size'],
-                   type=SizeWithUnitConverter('MB', result_type=int),
+                   type=SizeWithUnitConverter('B', result_type=int),
                    help='The max storage size of the elastic pool. If no unit is specified, defaults'
-                   ' to megabytes (MB).')
+                   ' to bytes (B).')
 
         c.argument('license_type', arg_type=get_enum_type(ElasticPoolLicenseType))
 
@@ -611,26 +623,33 @@ def load_arguments(self, _):
                    help='Specifies whether to enable zone redundancy for the elastic pool.',
                    arg_type=get_three_state_flag())
 
+        sku_arg_group = 'Performance Level'
+        c.argument('tier',
+                   arg_type=tier_param_type,
+                   arg_group=sku_arg_group,
+                   help='The edition component of the sku. Allowed values include: Basic, Standard, '
+                   'Premium, GeneralPurpose, BusinessCritical.')
+        c.argument('capacity',
+                   arg_type=capacity_param_type,
+                   options_list=['--capacity', '-c', '--dtu'],
+                   arg_group=sku_arg_group,
+                   help='The capacity component of the sku in integer number of DTUs or vcores.')
+        c.argument('family',
+                   arg_type=family_param_type,
+                   arg_group=sku_arg_group,
+                   help='The compute generation component of the sku (for vcore skus only). '
+                   'Allowed values include: Gen4, Gen5.')
+
     with self.argument_context('sql elastic-pool create') as c:
         c.expand('parameters', ElasticPool)
         c.expand('per_database_settings', ElasticPoolPerDatabaseSettings)
+        c.expand('sku', Sku)
+        c.ignore('size')
+        c.ignore('name')
+
         # We have a wrapper function that determines server location so user doesn't need to specify
         # it as param.
         c.ignore('location')
-
-        # sku & tier parameters are processed in validate_sku function
-        sku_arg_group = 'Performance Level'
-        c.extra('sku',
-                arg_group=sku_arg_group,
-                help='The name of the sku for the new elastic pool.')
-        c.extra('tier',
-                options_list=['--tier', '--edition'],
-                arg_group=sku_arg_group,
-                help='The edition for the new elastic pool.')
-        c.extra('capacity',
-                options_list=['--capacity', '--dtu'],
-                arg_group=sku_arg_group,
-                help='The number of DTUs or vcores (depending on the edition) for the new elastic pool.')
 
     with self.argument_context('sql elastic-pool list-editions') as c:
         # Note that `ElasticPoolCapabilitiesAdditionalDetails` intentionally match param names to
