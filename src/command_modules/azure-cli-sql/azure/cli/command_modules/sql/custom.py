@@ -39,6 +39,7 @@ from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
 
 from ._util import (
+    get_sql_capabilities_operations,
     get_sql_servers_operations
 )
 
@@ -66,6 +67,10 @@ def _any_sku_values_specified(sku):
 def _delete_sku_if_empty(kwargs):
     if not _any_sku_values_specified(kwargs['sku']):
         del kwargs['sku']
+
+
+def _get_default_capability(capabilities):
+    return next((c for c in capabilities if c.status == CapabilityStatus.default), None) or next(c for c in capabilities)
 
 
 def is_available(status):
@@ -262,6 +267,56 @@ def _db_dw_create(
 
     # If all sku properties are none/empty, delete sku
     _delete_sku_if_empty(kwargs)
+
+    # Ensure that sku name is not None.
+    # If sku name is not specified, find the sku in capabilities (because sku name is not allowed to be None).
+    sku = kwargs['sku']
+    if not _any_sku_values_specified(sku):
+        # User did not request any properties of sku, so just wipe it out
+        del kwargs['sku']
+    elif not kwargs['sku'].name:
+        # Some properties of sku are specified, but not name. Use the requested properties to find a matching
+        # capability and copy the sku from there.
+
+        # Get default server version capability
+        capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
+        capabilities = capabilities_client.list_by_location(kwargs['location'], CapabilityGroup.supported_editions)
+        server_version_capability = _get_default_capability(capabilities.supported_server_versions)
+
+        if sku.tier:
+            # Find requested edition capability
+            try:
+                edition_capability = next(e for e in server_version_capability.supported_editions
+                                        if e.name == sku.tier)
+            except StopIteration:
+                candiate_tiers = [e.name for e in server_version_capability.supported_editions]
+                raise CLIError('Could not find tier ''{}''. Supported tiers are: {}'.format(
+                    sku.tier, candiate_tiers
+                ))
+        else:
+            # Find default edition capability
+            edition_capability = _get_default_capability(server_version_capability.supported_editions)
+
+        if sku.capacity:
+            # Find requested service objective based on capacity & family.
+            # Note that for non-vcore editions, family is None.
+            try:
+                service_objective_capability = next(slo for slo in edition_capability.supported_service_level_objectives
+                                                    if slo.sku.family == sku.family and int(slo.sku.capacity) == int(sku.capacity))
+            except StopIteration:
+                candidate_slos = [(slo.sku.family, slo.sku.capacity) for slo in edition_capability.supported_service_level_objectives]
+                raise CLIError('Could not find sku in tier ''{}'' with family ''{}'', capacity ''{}''. Supported skus for ''{}'' are: {}'.format(
+                            sku.tier, sku.family, sku.capacity, sku.tier, candidate_slos
+                ))
+        elif sku.family:
+            # Error - cannot find based on family alone.
+            raise CLIError('If --family is specified, --capacity must also be specified.')
+        else:
+            # Find default service objective
+            service_objective_capability = _get_default_capability(edition_capability.supported_service_level_objectives)
+
+        # Copy sku object from capability
+        kwargs['sku'] = service_objective_capability.sku
 
     # If sku is specified, name must not be None.
     if 'sku' in kwargs:
@@ -511,8 +566,7 @@ def db_list_capabilities(
     capabilities = client.list_by_location(location, CapabilityGroup.supported_editions)
 
     # Get subtree related to databases
-    editions = next(sv for sv in capabilities.supported_server_versions
-                    if sv.name == _DEFAULT_SERVER_VERSION).supported_editions
+    editions = _get_default_capability(capabilities.supported_server_versions).supported_editions
 
     # Filter by edition
     if edition:
@@ -690,6 +744,8 @@ def db_update(
         max_size_bytes=None,
         service_objective=None,
         zone_redundant=None,
+        tier=None,
+        family=None,
         capacity=None):
 
     # Verify edition
@@ -718,8 +774,24 @@ def db_update(
     # Set sku. The service will choose correct edition based on sku name and elastic pool.
     if service_objective:
         instance.sku = Sku(name=service_objective)
-    else:
-        instance.sku = None
+
+    # Set tier
+    if tier:
+        if not service_objective:
+            # Wipe out sku name so that it does not conflict with new tier
+            instance.sku.name = None
+        instance.sku.tier = tier
+
+    # Set family
+    if family:
+        if not service_objective:
+            # Wipe out sku name so that it does not conflict with new family
+            instance.sku.name = None
+        instance.sku.family = family
+
+    # If sku name was wiped out by any of the above, then fill in sku name based on sku tier
+    if not instance.sku.name:
+        instance.sku.name = _get_db_sku_name(sku.tier)
 
     # Set capacity
     if capacity:
@@ -1109,8 +1181,7 @@ def elastic_pool_list_capabilities(
     capabilities = client.list_by_location(location, CapabilityGroup.supported_elastic_pool_editions)
 
     # Get subtree related to elastic pools
-    editions = next(sv for sv in capabilities.supported_server_versions
-                    if sv.name == _DEFAULT_SERVER_VERSION).supported_elastic_pool_editions
+    editions = _get_default_capability(capabilities.supported_server_versions).supported_elastic_pool_editions
 
     # Filter by edition
     if edition:

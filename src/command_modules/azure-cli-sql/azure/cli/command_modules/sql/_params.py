@@ -366,10 +366,10 @@ def load_arguments(self, _):
                    help='The name of the new service objective. If this is a standalone db service'
                    ' objective and the db is currently in an elastic pool, then the db is removed from'
                    ' the pool.')
-        # c.argument('tier',
-        #            arg_type=tier_param_type)
-        # c.argument('family',
-        #            arg_type=family_param_type)
+        c.argument('tier',
+                   arg_type=tier_param_type)
+        c.argument('family',
+                   arg_type=family_param_type)
         c.argument('capacity',
                    arg_type=capacity_param_type)
         c.argument('elastic_pool_id',
