@@ -682,11 +682,17 @@ def set_properties(instance, expression):
             throw_and_show_options(instance, name, key.split('.'))
         else:
             # must be a property name
+            origin_name = name
             name = make_snake_case(name)
-            if not hasattr(instance, name):
-                logger.warning(
-                    "Property '%s' not found on %s. Update may be ignored.", name, parent_name)
-            setattr(instance, name, value)
+            if hasattr(instance, name):
+                setattr(instance, name, value)
+            else:
+                if origin_name in getattr(instance, 'additional_properties', {}):
+                    instance.additional_properties[origin_name] = value
+                    instance.enable_additional_properties_sending()   # TODO: yugangw ensure it is set everywhere
+                else:
+                    logger.warning(
+                        "Property '%s' not found on %s. Update may be ignored.", name, parent_name)
     except IndexError:
         raise CLIError('index {} doesn\'t exist on {}'.format(index_value, name))
     except (AttributeError, KeyError, TypeError):
@@ -824,6 +830,7 @@ def _update_instance(instance, part, path):
 
         if index and '=' in index.group(1):
             key, value = index.group(1).split('=', 1)
+            origin_key = key
             try:
                 value = shell_safe_json_parse(value)
             except:  # pylint: disable=bare-except
@@ -843,6 +850,8 @@ def _update_instance(instance, part, path):
                 raise CLIError("non-unique key '{}' found multiple matches on {}. Key must be unique."
                                .format(key, path[-2]))
             else:
+                if hasattr(instance, 'additional_properties') and origin_key in instance.additional_properties:
+                    return instance.additional_properties[origin_key]
                 raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(value, key, path[-2]))
 
         if index:
@@ -855,7 +864,10 @@ def _update_instance(instance, part, path):
         if isinstance(instance, dict):
             return instance[part]
 
-        return getattr(instance, make_snake_case(part))
+        r = getattr(instance, make_snake_case(part), None)
+        if not r and hasattr(instance, 'additional_properties'):
+            r = instance.additional_properties[part]
+        return r
     except (AttributeError, KeyError):
         throw_and_show_options(instance, part, path)
 
