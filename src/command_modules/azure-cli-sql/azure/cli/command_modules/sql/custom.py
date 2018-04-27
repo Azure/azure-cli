@@ -1,4 +1,4 @@
-# --------------------------------------------------------------------------------------------
+supported_service_level_objectives# --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
@@ -38,10 +38,14 @@ from azure.mgmt.sql.models.sql_management_client_enums import (
 from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.storage import StorageManagementClient
 
+from knack.log import get_logger
+
 from ._util import (
     get_sql_capabilities_operations,
     get_sql_servers_operations
 )
+
+logger = get_logger(__name__)
 
 ###############################################
 #                Common funcs                 #
@@ -79,6 +83,54 @@ def is_available(status):
 
 def _filter_available(capabilities):
     return [c for c in capabilities if is_available(c.status)]
+
+
+def _find_edition_capability(
+        sku,
+        supported_editions):
+
+    if sku.tier:
+        # Find requested edition capability
+        try:
+            return next(e for e in supported_editions if e.name == sku.tier)
+        except StopIteration:
+            candiate_tiers = [e.name for e in supported_editions]
+            raise CLIError('Could not find tier ''{}''. Supported tiers are: {}'.format(
+                sku.tier, candiate_tiers
+            ))
+    else:
+        # Find default edition capability
+        return _get_default_capability(supported_editions)
+
+
+def _find_service_objective_capability(
+        sku,
+        supported_service_level_objectives):
+
+    if sku.capacity:
+    # Find requested service objective based on capacity & family.
+    # Note that for non-vcore editions, family is None.
+    try:
+        return next(
+                slo for slo in supported_service_level_objectives
+                if slo.sku.family == sku.family
+                    and int(slo.sku.capacity) == int(sku.capacity))
+    except StopIteration:
+        raise CLIError(
+            "Could not find sku in tier '{tier}' with family '{family}', capacity {capacity}."
+            " Supported skus for '{tier}' are: {skus}".format(
+                tier = sku.tier,
+                family = sku.family,
+                capacity = sku.capacity,
+                skus = [(slo.sku.family, slo.sku.capacity)
+                        for slo in supported_service_level_objectives]
+            ))
+    elif sku.family:
+        # Error - cannot find based on family alone.
+        raise CLIError('If --family is specified, --capacity must also be specified.')
+    else:
+        # Find default service objective
+        return _get_default_capability(edition_capability.supported_service_level_objectives)
 
 
 _DEFAULT_SERVER_VERSION = "12.0"
@@ -245,6 +297,22 @@ def _get_db_sku_name(tier):
     }.get(tier, tier)  # 2nd arg is value to return if key not found in dictionary
 
 
+def _find_db_sku_from_capabilities(cli_ctx, sku):
+    # Get default server version capability
+    capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
+    capabilities = capabilities_client.list_by_location(kwargs['location'], CapabilityGroup.supported_editions)
+    server_version_capability = _get_default_capability(capabilities.supported_server_versions)
+
+    # Find edition capability, based on requested sku properties
+    edition_capability = _find_edition_capability(sku, server_version_capability.supported_editions
+
+    # Find service objective capability, based on requested sku properties
+    service_objective_capability = _find_service_objective_capability(sku, edition_capability.supported_service_level_objectives)
+
+    # Copy sku object from capability
+    return service_objective_capability.sku
+
+
 # Creates a database or datawarehouse. Wrapper function which uses the server location so that
 # the user doesn't need to specify location.
 def _db_dw_create(
@@ -271,59 +339,18 @@ def _db_dw_create(
     # Ensure that sku name is not None.
     # If sku name is not specified, find the sku in capabilities (because sku name is not allowed to be None).
     sku = kwargs['sku']
+    logger.debug('_db_dw_create input sku: %s', sku)
+
     if not _any_sku_values_specified(sku):
         # User did not request any properties of sku, so just wipe it out
         del kwargs['sku']
+        logger.debug('_db_dw_create removed empty sku')
+
     elif not kwargs['sku'].name:
-        # Some properties of sku are specified, but not name. Use the requested properties to find a matching
-        # capability and copy the sku from there.
-
-        # Get default server version capability
-        capabilities_client = get_sql_capabilities_operations(cli_ctx, None)
-        capabilities = capabilities_client.list_by_location(kwargs['location'], CapabilityGroup.supported_editions)
-        server_version_capability = _get_default_capability(capabilities.supported_server_versions)
-
-        if sku.tier:
-            # Find requested edition capability
-            try:
-                edition_capability = next(e for e in server_version_capability.supported_editions
-                                        if e.name == sku.tier)
-            except StopIteration:
-                candiate_tiers = [e.name for e in server_version_capability.supported_editions]
-                raise CLIError('Could not find tier ''{}''. Supported tiers are: {}'.format(
-                    sku.tier, candiate_tiers
-                ))
-        else:
-            # Find default edition capability
-            edition_capability = _get_default_capability(server_version_capability.supported_editions)
-
-        if sku.capacity:
-            # Find requested service objective based on capacity & family.
-            # Note that for non-vcore editions, family is None.
-            try:
-                service_objective_capability = next(slo for slo in edition_capability.supported_service_level_objectives
-                                                    if slo.sku.family == sku.family and int(slo.sku.capacity) == int(sku.capacity))
-            except StopIteration:
-                candidate_slos = [(slo.sku.family, slo.sku.capacity) for slo in edition_capability.supported_service_level_objectives]
-                raise CLIError('Could not find sku in tier ''{}'' with family ''{}'', capacity ''{}''. Supported skus for ''{}'' are: {}'.format(
-                            sku.tier, sku.family, sku.capacity, sku.tier, candidate_slos
-                ))
-        elif sku.family:
-            # Error - cannot find based on family alone.
-            raise CLIError('If --family is specified, --capacity must also be specified.')
-        else:
-            # Find default service objective
-            service_objective_capability = _get_default_capability(edition_capability.supported_service_level_objectives)
-
-        # Copy sku object from capability
-        kwargs['sku'] = service_objective_capability.sku
-
-    # If sku is specified, name must not be None.
-    if 'sku' in kwargs:
-        sku = kwargs['sku']
-        if sku.tier and not sku.name:
-            # Fill in sku name based on sku tier
-            sku.name = _get_db_sku_name(sku.tier)
+        # Some properties of sku are specified, but not name. Use the requested properties
+        # to find a matching capability and copy the sku from there.
+        kwargs['sku'] = _find_db_sku_from_capabilities(cli_ctx, sku)
+        logger.debug('_db_dw_create copied sku from capability: %s', kwargs['sku'])
 
     # Create
     return sdk_no_wait(no_wait, client.create_or_update,
