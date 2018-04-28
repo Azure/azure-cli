@@ -49,51 +49,6 @@ from ._validators import (
     validate_elastic_pool_id
 )
 
-#####
-#           Reusable param type definitions
-#####
-
-
-sku_arg_group = 'Performance Level'
-
-sku_component_arg_group = 'Performance Level (components)'
-
-
-server_param_type = CLIArgumentType(
-    options_list=['--server', '-s'],
-    help='Name of the Azure SQL server.')
-
-
-available_param_type = CLIArgumentType(
-    options_list=['--available', '-a'],
-    help='If specified, show only results that are available in the specified region.')
-
-
-tier_param_type = CLIArgumentType(
-    arg_group=sku_component_arg_group,
-    options_list=['--tier', '--edition', '-e'])
-
-
-capacity_param_type = CLIArgumentType(
-    arg_group=sku_component_arg_group,
-    options_list=['--capacity', '-c'])
-
-
-capacity_or_dtu_param_type = CLIArgumentType(
-    arg_group=sku_component_arg_group,
-    options_list=['--capacity', '-c', '--dtu'])
-
-
-family_param_type = CLIArgumentType(
-    arg_group=sku_component_arg_group,
-    options_list=['--family', '-f'])
-
-
-elastic_pool_id_type = CLIArgumentType(
-    arg_group=sku_arg_group,
-    options_list=['--elastic-pool'],
-    validator=validate_elastic_pool_id)
-
 
 #####
 #        SizeWithUnitConverter - consider moving to common code (azure.cli.core.commands.parameters)
@@ -127,6 +82,55 @@ class SizeWithUnitConverter(object):  # pylint: disable=too-few-public-methods
         return 'Size (in {}) - valid units are {}.'.format(
             self.unit,
             ', '.join(sorted(self.unit_map, key=self.unit_map.__getitem__)))
+
+
+#####
+#           Reusable param type definitions
+#####
+
+
+sku_arg_group = 'Performance Level'
+
+sku_component_arg_group = 'Performance Level (components)'
+
+server_param_type = CLIArgumentType(
+    options_list=['--server', '-s'],
+    help='Name of the Azure SQL server.')
+
+available_param_type = CLIArgumentType(
+    options_list=['--available', '-a'],
+    help='If specified, show only results that are available in the specified region.')
+
+tier_param_type = CLIArgumentType(
+    arg_group=sku_component_arg_group,
+    options_list=['--tier', '--edition', '-e'])
+
+capacity_param_type = CLIArgumentType(
+    arg_group=sku_component_arg_group,
+    options_list=['--capacity', '-c'])
+
+capacity_or_dtu_param_type = CLIArgumentType(
+    arg_group=sku_component_arg_group,
+    options_list=['--capacity', '-c', '--dtu'])
+
+family_param_type = CLIArgumentType(
+    arg_group=sku_component_arg_group,
+    options_list=['--family', '-f'])
+
+elastic_pool_id_param_type = CLIArgumentType(
+    arg_group=sku_arg_group,
+    options_list=['--elastic-pool'],
+    validator=validate_elastic_pool_id)
+
+max_size_bytes_param_type = CLIArgumentType(
+    options_list=['--max-size'],
+    type=SizeWithUnitConverter('B', result_type=int),
+    help='The max storage size. If no unit is specified, defaults to bytes (B).')
+
+zone_redundant_param_type = CLIArgumentType(
+    options_list=['--zone-redundant', '-z'],
+    help='Specifies whether to enable zone redundancy',
+    arg_type=get_three_state_flag())
 
 
 ###############################################
@@ -186,7 +190,7 @@ def _configure_db_create_params(
                      'GP_Gen4_1, BC_Gen5_2.')
 
     arg_ctx.argument('elastic_pool_id',
-                     arg_type=elastic_pool_id_type,
+                     arg_type=elastic_pool_id_param_type,
                      help='The name or resource id of the elastic pool to create the database in.')
 
     # The following params are always ignored because their values are filled in by wrapper
@@ -249,9 +253,7 @@ def load_arguments(self, _):
                    # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
                    id_part='child_name_1')
 
-        c.argument('max_size_bytes', options_list=['--max-size'],
-                   type=SizeWithUnitConverter('B', result_type=int),
-                   help='The max storage size of the database. If no unit is specified, defaults to bytes (B).')
+        c.argument('max_size_bytes', arg_type=max_size_bytes_param_type)
 
         creation_arg_group = 'Creation'
 
@@ -267,10 +269,7 @@ def load_arguments(self, _):
         #c.argument('read_scale',
         #           arg_type=get_three_state_flag(DatabaseReadScale.enabled.value, DatabaseReadScale.disabled.value, return_label=True))
 
-        c.argument('zone_redundant',
-                   options_list=['--zone-redundant', '-z'],
-                   help='Specifies whether to enable zone redundancy for the database.',
-                   arg_type=get_three_state_flag())
+        c.argument('zone_redundant', arg_type=zone_redundant_param_type)
 
         c.argument('tier',
                    arg_type=tier_param_type,
@@ -381,7 +380,7 @@ def load_arguments(self, _):
                    ' the pool.')
 
         c.argument('elastic_pool_id',
-                   arg_type=elastic_pool_id_type,
+                   arg_type=elastic_pool_id_param_type,
                    help='The name or resource id of the elastic pool to move the database into.',
                    validator=validate_elastic_pool_id)
 
@@ -578,10 +577,7 @@ def load_arguments(self, _):
                    # Allow --ids command line argument. id_part=child_name_1 is 2nd name in uri
                    id_part='child_name_1')
 
-        c.argument('max_size_bytes', options_list=['--max-size'],
-                   type=SizeWithUnitConverter('B', result_type=int),
-                   help='The max storage size of the data warehouse. If no unit is specified, defaults'
-                   ' to bytes (B).')
+        c.argument('max_size_bytes', arg_type=max_size_bytes_param_type)
 
         c.argument('sku',
                    help='The sku of the data warehouse.')
@@ -631,17 +627,12 @@ def load_arguments(self, _):
         # --max-size is an alias which is consistent with the `sql elastic-pool list-editions
         # --show-details max-size` parameter value and also matches `sql db --max-size` parameter name.
         c.argument('max_size_bytes',
-                   options_list=['--max-size', '--storage'],
-                   type=SizeWithUnitConverter('B', result_type=int),
-                   help='The max storage size of the elastic pool. If no unit is specified, defaults'
-                   ' to bytes (B).')
+                   arg_type=max_size_bytes_param_type,
+                   options_list=['--max-size', '--storage'])
 
         c.argument('license_type', arg_type=get_enum_type(ElasticPoolLicenseType))
 
-        c.argument('zone_redundant',
-                   options_list=['--zone-redundant', '-z'],
-                   help='Specifies whether to enable zone redundancy for the elastic pool.',
-                   arg_type=get_three_state_flag())
+        c.argument('zone_redundant', arg_type=zone_redundant_param_type)
 
         c.argument('tier',
                    arg_type=tier_param_type,
@@ -685,7 +676,7 @@ def load_arguments(self, _):
         # will be no way to query for new editions that are made available after
         # this version of CLI is released.
         c.argument('edition',
-                   options_list=['--tier', '--edition'],
+                   arg_type=tier_param_type,
                    arg_group=search_arg_group,
                    help='Edition to search for. If unspecified, all editions are shown.')
         c.argument('dtu',
